@@ -4,7 +4,7 @@
              xsi:schemaLocation="http://java.sun.com/xml/ns/persistence http://java.sun.com/xml/ns/persistence/persistence_2_0.xsd"
              version="2.0">
    <persistence-unit name="TopicIndex" transaction-type="JTA">
-      <jta-data-source>java:/TopicIndexDatasource</jta-data-source>
+      <jta-data-source>java:jboss/datasources/MysqlDS</jta-data-source>
       <properties>
 	        <property name="hibernate.dialect" value="org.hibernate.dialect.MySQL5InnoDBDialect"/>
 	        <property name="hibernate.hbm2ddl.auto" value="update"/>
@@ -21,7 +21,7 @@
 	        <property name="hibernate.search.default.indexBase" value="/var/lucene/indexes"/> 
 	        
 	        <!-- Envers Settings -->
-			<property name="org.hibernate.envers.audit_strategy" value="com.redhat.topicindex.envers.ValidityAuditStrategy" />
+			<property name="org.hibernate.envers.audit_strategy" value="org.hibernate.envers.strategy.ValidityAuditStrategy" />
       </properties>
    </persistence-unit>
 </persistence>
