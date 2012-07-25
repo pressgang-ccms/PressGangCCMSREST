@@ -5,7 +5,7 @@ import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
 import javax.ws.rs.core.Response;
 
-/** A test REST interface. */
+/** A test REST interface */
 @Path("/message")
 public class REST
 {
