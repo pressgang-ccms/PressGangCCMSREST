@@ -9,12 +9,12 @@
 		<param-name>resteasy.scan</param-name>
 		<param-value>true</param-value>
 	</context-param>
-	
-	<context-param>
-		<param-name>resteasy.servlet.mapping.prefix</param-name>
-		<param-value>/rest</param-value>
-	</context-param>
-	
+
+	<!-- This setting needs to match the url-pattern below if the REST server 
+		is not going to respond to requests at the root level -->
+	<!-- <context-param> <param-name>resteasy.servlet.mapping.prefix</param-name> 
+		<param-value>/rest</param-value> </context-param> -->
+
 	<servlet>
 		<servlet-name>resteasy-servlet</servlet-name>
 		<servlet-class>
@@ -24,7 +24,8 @@
 
 	<servlet-mapping>
 		<servlet-name>resteasy-servlet</servlet-name>
-		<url-pattern>/rest/*</url-pattern>
+		<!-- <url-pattern>/rest/*</url-pattern> -->
+		<url-pattern>/*</url-pattern>
 	</servlet-mapping>
 
 </web-app>
