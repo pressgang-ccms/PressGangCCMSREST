@@ -1,4 +1,4 @@
-package org.jboss.pressgangccms.restserver;
+package org.jboss.pressgangccms.restserver.factories;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -9,6 +9,7 @@ import org.jboss.pressgangccms.rest.v1.collections.RESTTopicSourceUrlCollectionV
 import org.jboss.pressgangccms.rest.v1.entities.RESTTopicSourceUrlV1;
 import org.jboss.pressgangccms.rest.v1.entities.base.RESTBaseEntityV1;
 import org.jboss.pressgangccms.rest.v1.expansion.ExpandDataTrunk;
+import org.jboss.pressgangccms.restserver.BaseRESTv1;
 import org.jboss.pressgangccms.restserver.entities.TopicSourceUrl;
 
 
@@ -48,6 +49,7 @@ class TopicSourceUrlV1Factory extends RESTDataObjectFactory<RESTTopicSourceUrlV1
 	}
 
 	@Override
+	public
 	void syncDBEntityWithRESTEntity(final EntityManager entityManager, final TopicSourceUrl entity, final RESTTopicSourceUrlV1 dataObject)
 	{
 		if (dataObject.hasParameterSet(RESTTopicSourceUrlV1.TITLE_NAME))

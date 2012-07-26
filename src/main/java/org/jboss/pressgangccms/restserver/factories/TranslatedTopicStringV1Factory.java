@@ -1,4 +1,4 @@
-package org.jboss.pressgangccms.restserver;
+package org.jboss.pressgangccms.restserver.factories;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -10,11 +10,12 @@ import org.jboss.pressgangccms.rest.v1.entities.RESTTranslatedTopicStringV1;
 import org.jboss.pressgangccms.rest.v1.entities.base.RESTBaseEntityV1;
 import org.jboss.pressgangccms.rest.v1.exceptions.InvalidParameterException;
 import org.jboss.pressgangccms.rest.v1.expansion.ExpandDataTrunk;
+import org.jboss.pressgangccms.restserver.BaseRESTv1;
 import org.jboss.pressgangccms.restserver.entities.TranslatedTopicString;
 
-class TranslatedTopicStringV1Factory extends RESTDataObjectFactory<RESTTranslatedTopicStringV1, TranslatedTopicString, RESTTranslatedTopicStringCollectionV1>
+public class TranslatedTopicStringV1Factory extends RESTDataObjectFactory<RESTTranslatedTopicStringV1, TranslatedTopicString, RESTTranslatedTopicStringCollectionV1>
 {
-	TranslatedTopicStringV1Factory()
+	public TranslatedTopicStringV1Factory()
 	{
 		super(TranslatedTopicString.class);
 	}
@@ -58,6 +59,7 @@ class TranslatedTopicStringV1Factory extends RESTDataObjectFactory<RESTTranslate
 	}
 
 	@Override
+	public
 	void syncDBEntityWithRESTEntity(final EntityManager entityManager, final TranslatedTopicString entity, final RESTTranslatedTopicStringV1 dataObject)
 	{
 		if (dataObject.hasParameterSet(RESTTranslatedTopicStringV1.ORIGINALSTRING_NAME))

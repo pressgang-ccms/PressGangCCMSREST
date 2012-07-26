@@ -1,4 +1,4 @@
-package org.jboss.pressgangccms.restserver;
+package org.jboss.pressgangccms.restserver.factories;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -11,14 +11,15 @@ import org.jboss.pressgangccms.rest.v1.entities.RESTRoleV1;
 import org.jboss.pressgangccms.rest.v1.entities.RESTUserV1;
 import org.jboss.pressgangccms.rest.v1.entities.base.RESTBaseEntityV1;
 import org.jboss.pressgangccms.rest.v1.expansion.ExpandDataTrunk;
+import org.jboss.pressgangccms.restserver.BaseRESTv1;
 import org.jboss.pressgangccms.restserver.entities.Role;
 import org.jboss.pressgangccms.restserver.entities.RoleToRoleRelationship;
 import org.jboss.pressgangccms.restserver.entities.User;
 import org.jboss.resteasy.spi.BadRequestException;
 
-class RoleV1Factory extends RESTDataObjectFactory<RESTRoleV1, Role, RESTRoleCollectionV1>
+public class RoleV1Factory extends RESTDataObjectFactory<RESTRoleV1, Role, RESTRoleCollectionV1>
 {
-	RoleV1Factory()
+	public RoleV1Factory()
 	{
 		super(Role.class);
 	}
@@ -58,6 +59,7 @@ class RoleV1Factory extends RESTDataObjectFactory<RESTRoleV1, Role, RESTRoleColl
 	}
 
 	@Override
+	public
 	void syncDBEntityWithRESTEntity(final EntityManager entityManager, final Role entity, final RESTRoleV1 dataObject)
 	{
 		if (dataObject.hasParameterSet(RESTUserV1.DESCRIPTION_NAME))

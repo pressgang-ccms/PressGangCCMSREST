@@ -1,6 +1,6 @@
 package org.jboss.pressgangccms.restserver;
 
-enum DatabaseOperation
+public enum DatabaseOperation
 {
 	CREATE,
 	UPDATE,

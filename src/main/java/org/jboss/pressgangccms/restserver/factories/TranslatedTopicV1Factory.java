@@ -1,4 +1,4 @@
-package org.jboss.pressgangccms.restserver;
+package org.jboss.pressgangccms.restserver.factories;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -19,6 +19,7 @@ import org.jboss.pressgangccms.rest.v1.entities.RESTTranslatedTopicV1;
 import org.jboss.pressgangccms.rest.v1.entities.base.RESTBaseEntityV1;
 import org.jboss.pressgangccms.rest.v1.exceptions.InvalidParameterException;
 import org.jboss.pressgangccms.rest.v1.expansion.ExpandDataTrunk;
+import org.jboss.pressgangccms.restserver.BaseRESTv1;
 import org.jboss.pressgangccms.restserver.entities.Tag;
 import org.jboss.pressgangccms.restserver.entities.TopicSourceUrl;
 import org.jboss.pressgangccms.restserver.entities.TopicToPropertyTag;
@@ -27,9 +28,9 @@ import org.jboss.pressgangccms.restserver.entities.TranslatedTopicData;
 import org.jboss.pressgangccms.restserver.entities.TranslatedTopicString;
 import org.jboss.pressgangccms.utils.common.DocBookUtilities;
 
-class TranslatedTopicV1Factory extends RESTDataObjectFactory<RESTTranslatedTopicV1, TranslatedTopicData, RESTTranslatedTopicCollectionV1>
+public class TranslatedTopicV1Factory extends RESTDataObjectFactory<RESTTranslatedTopicV1, TranslatedTopicData, RESTTranslatedTopicCollectionV1>
 {
-	TranslatedTopicV1Factory()
+	public TranslatedTopicV1Factory()
 	{
 		super(TranslatedTopicData.class);
 	}
@@ -122,6 +123,7 @@ class TranslatedTopicV1Factory extends RESTDataObjectFactory<RESTTranslatedTopic
 	}
 
 	@Override
+	public
 	void syncDBEntityWithRESTEntity(EntityManager entityManager, TranslatedTopicData entity, RESTTranslatedTopicV1 dataObject) throws InvalidParameterException
 	{
 		/*

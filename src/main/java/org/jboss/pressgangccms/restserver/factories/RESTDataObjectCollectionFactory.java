@@ -1,4 +1,4 @@
-package org.jboss.pressgangccms.restserver;
+package org.jboss.pressgangccms.restserver.factories;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -21,14 +21,14 @@ import org.jboss.resteasy.spi.BadRequestException;
  * @param <U> The type of database entity to work with
  * @param <V> The type of REST collection to work with
  */
-class RESTDataObjectCollectionFactory<T extends RESTBaseEntityV1<T, V>, U extends AuditedEntity<U>, V extends BaseRestCollectionV1<T, V>>
+public class RESTDataObjectCollectionFactory<T extends RESTBaseEntityV1<T, V>, U extends AuditedEntity<U>, V extends BaseRestCollectionV1<T, V>>
 {
 	V create(final Class<V> clazz, final RESTDataObjectFactory<T, U, V> dataObjectFactory, final List<U> entities, final String expandName, final String dataType, final EntityManager entityManager)
 	{
 		return create(clazz, dataObjectFactory, entities, expandName, dataType, "", null, entityManager);
 	}
 
-	V create(final Class<V> clazz, final RESTDataObjectFactory<T, U, V> dataObjectFactory, final List<U> entities, final String expandName, final String dataType, final String expand, final String baseUrl, final EntityManager entityManager)
+	public V create(final Class<V> clazz, final RESTDataObjectFactory<T, U, V> dataObjectFactory, final List<U> entities, final String expandName, final String dataType, final String expand, final String baseUrl, final EntityManager entityManager)
 	{
 		if (expand != null && !expand.isEmpty())
 		{
@@ -53,7 +53,7 @@ class RESTDataObjectCollectionFactory<T extends RESTBaseEntityV1<T, V>, U extend
 		}
 	}
 
-	V create(final Class<V> clazz, final RESTDataObjectFactory<T, U, V> dataObjectFactory, final List<U> entities, final String expandName, final String dataType, final ExpandDataTrunk parentExpand, final String baseUrl, final EntityManager entityManager)
+	public V create(final Class<V> clazz, final RESTDataObjectFactory<T, U, V> dataObjectFactory, final List<U> entities, final String expandName, final String dataType, final ExpandDataTrunk parentExpand, final String baseUrl, final EntityManager entityManager)
 	{
 		return create(clazz, dataObjectFactory, entities, null, null, null, expandName, dataType, parentExpand, baseUrl, true, entityManager);
 	}
@@ -73,7 +73,7 @@ class RESTDataObjectCollectionFactory<T extends RESTBaseEntityV1<T, V>, U extend
 		return create(clazz, dataObjectFactory, null, parent, revision, revisions, expandName, dataType, parentExpand, baseUrl, true, entityManager);
 	}
 
-	V create(final Class<V> clazz, final RESTDataObjectFactory<T, U, V> dataObjectFactory, final List<U> entities, final String expandName, final String dataType, final ExpandDataTrunk parentExpand, final String baseUrl, final boolean expandParentReferences, final EntityManager entityManager)
+	public V create(final Class<V> clazz, final RESTDataObjectFactory<T, U, V> dataObjectFactory, final List<U> entities, final String expandName, final String dataType, final ExpandDataTrunk parentExpand, final String baseUrl, final boolean expandParentReferences, final EntityManager entityManager)
 	{
 		return create(clazz, dataObjectFactory, entities, null, null, null, expandName, dataType, parentExpand, baseUrl, expandParentReferences, entityManager);
 	}

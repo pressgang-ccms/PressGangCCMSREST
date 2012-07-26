@@ -1,4 +1,4 @@
-package org.jboss.pressgangccms.restserver;
+package org.jboss.pressgangccms.restserver.factories;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -47,6 +47,7 @@ class TagPropertyTagV1Factory extends RESTDataObjectFactory<RESTPropertyTagV1, T
 	}
 
 	@Override
+	public
 	void syncDBEntityWithRESTEntity(final EntityManager entityManager, final TagToPropertyTag entity, final RESTPropertyTagV1 dataObject)
 	{
 		if (dataObject.hasParameterSet(RESTPropertyTagV1.VALUE_NAME))

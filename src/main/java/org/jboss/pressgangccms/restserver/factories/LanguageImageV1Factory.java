@@ -1,4 +1,4 @@
-package org.jboss.pressgangccms.restserver;
+package org.jboss.pressgangccms.restserver.factories;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -10,6 +10,7 @@ import org.jboss.pressgangccms.rest.v1.entities.RESTLanguageImageV1;
 import org.jboss.pressgangccms.rest.v1.entities.base.RESTBaseEntityV1;
 import org.jboss.pressgangccms.rest.v1.exceptions.InvalidParameterException;
 import org.jboss.pressgangccms.rest.v1.expansion.ExpandDataTrunk;
+import org.jboss.pressgangccms.restserver.BaseRESTv1;
 import org.jboss.pressgangccms.restserver.entities.LanguageImage;
 
 public class LanguageImageV1Factory extends RESTDataObjectFactory<RESTLanguageImageV1, LanguageImage, RESTLanguageImageCollectionV1>
@@ -74,6 +75,7 @@ public class LanguageImageV1Factory extends RESTDataObjectFactory<RESTLanguageIm
 	}
 
 	@Override
+	public
 	void syncDBEntityWithRESTEntity(final EntityManager entityManager, final LanguageImage entity, final RESTLanguageImageV1 dataObject)
 	{
 		if (dataObject.hasParameterSet(RESTLanguageImageV1.LOCALE_NAME))

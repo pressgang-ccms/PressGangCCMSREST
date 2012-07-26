@@ -1,4 +1,4 @@
-package org.jboss.pressgangccms.restserver;
+package org.jboss.pressgangccms.restserver.factories;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -11,13 +11,14 @@ import org.jboss.pressgangccms.rest.v1.entities.RESTCategoryV1;
 import org.jboss.pressgangccms.rest.v1.entities.RESTTagV1;
 import org.jboss.pressgangccms.rest.v1.entities.base.RESTBaseEntityV1;
 import org.jboss.pressgangccms.rest.v1.expansion.ExpandDataTrunk;
+import org.jboss.pressgangccms.restserver.BaseRESTv1;
 import org.jboss.pressgangccms.restserver.entities.Category;
 import org.jboss.pressgangccms.restserver.entities.Tag;
 import org.jboss.resteasy.spi.BadRequestException;
 
-class CategoryV1Factory extends RESTDataObjectFactory<RESTCategoryV1, Category, RESTCategoryCollectionV1>
+public class CategoryV1Factory extends RESTDataObjectFactory<RESTCategoryV1, Category, RESTCategoryCollectionV1>
 {
-	CategoryV1Factory()
+	public CategoryV1Factory()
 	{
 		super(Category.class);
 	}
@@ -55,6 +56,7 @@ class CategoryV1Factory extends RESTDataObjectFactory<RESTCategoryV1, Category, 
 	}
 
 	@Override
+	public
 	void syncDBEntityWithRESTEntity(final EntityManager entityManager, final Category entity, final RESTCategoryV1 dataObject)
 	{
 		if (dataObject.hasParameterSet(RESTCategoryV1.DESCRIPTION_NAME))

@@ -1,4 +1,4 @@
-package org.jboss.pressgangccms.restserver;
+package org.jboss.pressgangccms.restserver.factories;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -12,12 +12,13 @@ import org.jboss.pressgangccms.rest.v1.entities.RESTLanguageImageV1;
 import org.jboss.pressgangccms.rest.v1.entities.base.RESTBaseEntityV1;
 import org.jboss.pressgangccms.rest.v1.exceptions.InvalidParameterException;
 import org.jboss.pressgangccms.rest.v1.expansion.ExpandDataTrunk;
+import org.jboss.pressgangccms.restserver.BaseRESTv1;
 import org.jboss.pressgangccms.restserver.entities.ImageFile;
 import org.jboss.pressgangccms.restserver.entities.LanguageImage;
 
-class ImageV1Factory extends RESTDataObjectFactory<RESTImageV1, ImageFile, RESTImageCollectionV1>
+public class ImageV1Factory extends RESTDataObjectFactory<RESTImageV1, ImageFile, RESTImageCollectionV1>
 {
-	ImageV1Factory()
+	public ImageV1Factory()
 	{
 		super(ImageFile.class);
 	}
@@ -68,6 +69,7 @@ class ImageV1Factory extends RESTDataObjectFactory<RESTImageV1, ImageFile, RESTI
 	}
 
 	@Override
+	public
 	void syncDBEntityWithRESTEntity(final EntityManager entityManager, final ImageFile entity, final RESTImageV1 dataObject) throws InvalidParameterException
 	{
 		if (dataObject.hasParameterSet(RESTImageV1.DESCRIPTION_NAME))

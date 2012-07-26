@@ -1,4 +1,4 @@
-package org.jboss.pressgangccms.restserver;
+package org.jboss.pressgangccms.restserver.factories;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -20,6 +20,7 @@ import org.jboss.pressgangccms.rest.v1.entities.RESTTranslatedTopicV1;
 import org.jboss.pressgangccms.rest.v1.entities.base.RESTBaseEntityV1;
 import org.jboss.pressgangccms.rest.v1.exceptions.InvalidParameterException;
 import org.jboss.pressgangccms.rest.v1.expansion.ExpandDataTrunk;
+import org.jboss.pressgangccms.restserver.BaseRESTv1;
 import org.jboss.pressgangccms.restserver.entities.BugzillaBug;
 import org.jboss.pressgangccms.restserver.entities.PropertyTag;
 import org.jboss.pressgangccms.restserver.entities.Tag;
@@ -28,9 +29,9 @@ import org.jboss.pressgangccms.restserver.entities.TopicSourceUrl;
 import org.jboss.pressgangccms.restserver.entities.TranslatedTopicData;
 import org.jboss.pressgangccms.restserver.entities.TopicToPropertyTag;
 
-class TopicV1Factory extends RESTDataObjectFactory<RESTTopicV1, Topic, RESTTopicCollectionV1>
+public class TopicV1Factory extends RESTDataObjectFactory<RESTTopicV1, Topic, RESTTopicCollectionV1>
 {
-	TopicV1Factory()
+	public TopicV1Factory()
 	{
 		super(Topic.class);
 	}
@@ -87,6 +88,7 @@ class TopicV1Factory extends RESTDataObjectFactory<RESTTopicV1, Topic, RESTTopic
 	}
 
 	@Override
+	public
 	void syncDBEntityWithRESTEntity(final EntityManager entityManager, final Topic entity, final RESTTopicV1 dataObject) throws InvalidParameterException
 	{
 		/* sync the basic properties */

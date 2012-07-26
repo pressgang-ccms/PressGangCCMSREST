@@ -1,4 +1,4 @@
-package org.jboss.pressgangccms.restserver;
+package org.jboss.pressgangccms.restserver.factories;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -9,11 +9,12 @@ import org.jboss.pressgangccms.rest.v1.collections.RESTPropertyTagCollectionV1;
 import org.jboss.pressgangccms.rest.v1.entities.RESTPropertyTagV1;
 import org.jboss.pressgangccms.rest.v1.entities.base.RESTBaseEntityV1;
 import org.jboss.pressgangccms.rest.v1.expansion.ExpandDataTrunk;
+import org.jboss.pressgangccms.restserver.BaseRESTv1;
 import org.jboss.pressgangccms.restserver.entities.PropertyTag;
 
-class PropertyTagV1Factory extends RESTDataObjectFactory<RESTPropertyTagV1, PropertyTag, RESTPropertyTagCollectionV1>
+public class PropertyTagV1Factory extends RESTDataObjectFactory<RESTPropertyTagV1, PropertyTag, RESTPropertyTagCollectionV1>
 {
-	PropertyTagV1Factory()
+	public PropertyTagV1Factory()
 	{
 		super(PropertyTag.class);
 	}
@@ -47,6 +48,7 @@ class PropertyTagV1Factory extends RESTDataObjectFactory<RESTPropertyTagV1, Prop
 	}
 
 	@Override
+	public
 	void syncDBEntityWithRESTEntity(final EntityManager entityManager, final PropertyTag entity, final RESTPropertyTagV1 dataObject)
 	{
 		if (dataObject.hasParameterSet(RESTPropertyTagV1.DESCRIPTION_NAME))

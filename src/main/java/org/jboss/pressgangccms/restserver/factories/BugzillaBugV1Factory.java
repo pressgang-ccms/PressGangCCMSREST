@@ -1,4 +1,4 @@
-package org.jboss.pressgangccms.restserver;
+package org.jboss.pressgangccms.restserver.factories;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -9,6 +9,7 @@ import org.jboss.pressgangccms.rest.v1.collections.RESTBugzillaBugCollectionV1;
 import org.jboss.pressgangccms.rest.v1.entities.RESTBugzillaBugV1;
 import org.jboss.pressgangccms.rest.v1.entities.base.RESTBaseEntityV1;
 import org.jboss.pressgangccms.rest.v1.expansion.ExpandDataTrunk;
+import org.jboss.pressgangccms.restserver.BaseRESTv1;
 import org.jboss.pressgangccms.restserver.entities.BugzillaBug;
 
 
@@ -42,6 +43,7 @@ class BugzillaBugV1Factory extends RESTDataObjectFactory<RESTBugzillaBugV1, Bugz
 	}
 
 	@Override
+	public
 	void syncDBEntityWithRESTEntity(final EntityManager entityManager, final BugzillaBug entity, final RESTBugzillaBugV1 dataObject)
 	{
 		if (dataObject.hasParameterSet(RESTBugzillaBugV1.BUG_ID))

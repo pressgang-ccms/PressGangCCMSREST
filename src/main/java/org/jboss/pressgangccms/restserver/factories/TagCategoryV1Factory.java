@@ -1,4 +1,4 @@
-package org.jboss.pressgangccms.restserver;
+package org.jboss.pressgangccms.restserver.factories;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -50,6 +50,7 @@ public class TagCategoryV1Factory extends RESTDataObjectFactory<RESTCategoryV1, 
 	}
 
 	@Override
+	public
 	void syncDBEntityWithRESTEntity(final EntityManager entityManager, final TagToCategory entity, final RESTCategoryV1 dataObject)
 	{
 		if (dataObject.hasParameterSet(RESTCategoryV1.SORT_NAME))

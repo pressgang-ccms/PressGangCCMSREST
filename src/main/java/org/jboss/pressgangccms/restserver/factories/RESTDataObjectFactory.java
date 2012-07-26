@@ -1,4 +1,4 @@
-package org.jboss.pressgangccms.restserver;
+package org.jboss.pressgangccms.restserver.factories;
 
 import javax.naming.InitialContext;
 import javax.persistence.EntityManager;
@@ -23,7 +23,7 @@ import org.jboss.resteasy.spi.InternalServerErrorException;
  * @param <U> The database object type
  * @param <V> The REST object collection type
  */
-abstract class RESTDataObjectFactory<T extends RESTBaseEntityV1<T, V>, U, V extends BaseRestCollectionV1<T, V>>
+public abstract class RESTDataObjectFactory<T extends RESTBaseEntityV1<T, V>, U, V extends BaseRestCollectionV1<T, V>>
 {
 	final Class<U> databaseClass;
 
@@ -45,7 +45,7 @@ abstract class RESTDataObjectFactory<T extends RESTBaseEntityV1<T, V>, U, V exte
 	 *            ExpandDataTrunk
 	 * @return A new REST entity populated with the values in a database entity
 	 */
-	T createRESTEntityFromDBEntity(final U entity, final String baseUrl, final String dataType, final String expand) throws InvalidParameterException
+	public T createRESTEntityFromDBEntity(final U entity, final String baseUrl, final String dataType, final String expand) throws InvalidParameterException
 	{
 		return this.createRESTEntityFromDBEntity(entity, baseUrl, dataType, expand, null);
 	}
@@ -85,7 +85,7 @@ abstract class RESTDataObjectFactory<T extends RESTBaseEntityV1<T, V>, U, V exte
 	 * 			  If the entity is a revision
 	 * @return A new REST entity populated with the values in a database entity
 	 */
-	T createRESTEntityFromDBEntity(final U entity, final String baseUrl, final String dataType, final String expand, final Number revision, final EntityManager entityManager) throws InvalidParameterException
+	public T createRESTEntityFromDBEntity(final U entity, final String baseUrl, final String dataType, final String expand, final Number revision, final EntityManager entityManager) throws InvalidParameterException
 	{
 		if (expand != null && !expand.isEmpty())
 		{
@@ -216,7 +216,7 @@ abstract class RESTDataObjectFactory<T extends RESTBaseEntityV1<T, V>, U, V exte
 	 * @param dataObject
 	 *            The REST entity
 	 */
-	abstract void syncDBEntityWithRESTEntity(final EntityManager entityManager, final U entity, final T dataObject) throws InvalidParameterException;
+	public abstract void syncDBEntityWithRESTEntity(final EntityManager entityManager, final U entity, final T dataObject) throws InvalidParameterException;
 
 	/**
 	 * Creates, populates and returns a new database entity from a REST entity
@@ -227,7 +227,7 @@ abstract class RESTDataObjectFactory<T extends RESTBaseEntityV1<T, V>, U, V exte
 	 * @return A new database entity with the values supplied from the
 	 *         dataObject
 	 */
-	U createDBEntityFromRESTEntity(final EntityManager entityManager, final T dataObject) throws InvalidParameterException
+	public U createDBEntityFromRESTEntity(final EntityManager entityManager, final T dataObject) throws InvalidParameterException
 	{
 		try
 		{

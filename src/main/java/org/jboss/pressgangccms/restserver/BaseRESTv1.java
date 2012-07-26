@@ -40,6 +40,8 @@ import org.jboss.pressgangccms.rest.v1.expansion.ExpandDataTrunk;
 import org.jboss.pressgangccms.restserver.constants.Constants;
 import org.jboss.pressgangccms.restserver.entities.Filter;
 import org.jboss.pressgangccms.restserver.entities.base.AuditedEntity;
+import org.jboss.pressgangccms.restserver.factories.RESTDataObjectCollectionFactory;
+import org.jboss.pressgangccms.restserver.factories.RESTDataObjectFactory;
 import org.jboss.pressgangccms.restserver.filter.FilterQueryBuilder;
 import org.jboss.pressgangccms.restserver.utils.EntityUtilities;
 import org.jboss.pressgangccms.restserver.utils.SkynetExceptionUtilities;

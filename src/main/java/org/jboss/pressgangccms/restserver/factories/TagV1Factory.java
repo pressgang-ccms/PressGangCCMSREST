@@ -1,4 +1,4 @@
-package org.jboss.pressgangccms.restserver;
+package org.jboss.pressgangccms.restserver.factories;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -15,6 +15,7 @@ import org.jboss.pressgangccms.rest.v1.entities.RESTPropertyTagV1;
 import org.jboss.pressgangccms.rest.v1.entities.RESTTagV1;
 import org.jboss.pressgangccms.rest.v1.entities.base.RESTBaseEntityV1;
 import org.jboss.pressgangccms.rest.v1.expansion.ExpandDataTrunk;
+import org.jboss.pressgangccms.restserver.BaseRESTv1;
 import org.jboss.pressgangccms.restserver.entities.Category;
 import org.jboss.pressgangccms.restserver.entities.Project;
 import org.jboss.pressgangccms.restserver.entities.PropertyTag;
@@ -24,9 +25,9 @@ import org.jboss.pressgangccms.restserver.entities.TagToPropertyTag;
 import org.jboss.pressgangccms.utils.common.CollectionUtilities;
 import org.jboss.resteasy.spi.BadRequestException;
 
-class TagV1Factory extends RESTDataObjectFactory<RESTTagV1, Tag, RESTTagCollectionV1>
+public class TagV1Factory extends RESTDataObjectFactory<RESTTagV1, Tag, RESTTagCollectionV1>
 {
-	TagV1Factory()
+	public TagV1Factory()
 	{
 		super(Tag.class);
 	}
@@ -73,6 +74,7 @@ class TagV1Factory extends RESTDataObjectFactory<RESTTagV1, Tag, RESTTagCollecti
 	}
 
 	@Override
+	public
 	void syncDBEntityWithRESTEntity(final EntityManager entityManager, final Tag entity, final RESTTagV1 dataObject)
 	{
 		if (dataObject.hasParameterSet(RESTTagV1.DESCRIPTION_NAME))

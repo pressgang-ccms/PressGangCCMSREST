@@ -1,4 +1,4 @@
-package org.jboss.pressgangccms.restserver;
+package org.jboss.pressgangccms.restserver.factories;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -9,11 +9,12 @@ import org.jboss.pressgangccms.rest.v1.collections.RESTBlobConstantCollectionV1;
 import org.jboss.pressgangccms.rest.v1.entities.RESTBlobConstantV1;
 import org.jboss.pressgangccms.rest.v1.entities.base.RESTBaseEntityV1;
 import org.jboss.pressgangccms.rest.v1.expansion.ExpandDataTrunk;
+import org.jboss.pressgangccms.restserver.BaseRESTv1;
 import org.jboss.pressgangccms.restserver.entities.BlobConstants;
 
-class BlobConstantV1Factory extends RESTDataObjectFactory<RESTBlobConstantV1, BlobConstants, RESTBlobConstantCollectionV1>
+public class BlobConstantV1Factory extends RESTDataObjectFactory<RESTBlobConstantV1, BlobConstants, RESTBlobConstantCollectionV1>
 {
-	BlobConstantV1Factory()
+	public BlobConstantV1Factory()
 	{
 		super(BlobConstants.class);
 	}
@@ -46,6 +47,7 @@ class BlobConstantV1Factory extends RESTDataObjectFactory<RESTBlobConstantV1, Bl
 	}
 
 	@Override
+	public
 	void syncDBEntityWithRESTEntity(final EntityManager entityManager, final BlobConstants entity, final RESTBlobConstantV1 dataObject)
 	{
 		if (dataObject.hasParameterSet(RESTBlobConstantV1.NAME_NAME))
