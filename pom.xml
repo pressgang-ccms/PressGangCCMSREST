@@ -98,6 +98,11 @@
 			<artifactId>joda-time</artifactId>
 			<version>2.1</version>
 		</dependency>
+		<dependency>
+			<groupId>com.redhat.contentspec</groupId>
+			<artifactId>csprocessor</artifactId>
+			<version>0.0.2-SNAPSHOT</version>
+		</dependency>
 	</dependencies>
 	<profiles>
 		<profile>
