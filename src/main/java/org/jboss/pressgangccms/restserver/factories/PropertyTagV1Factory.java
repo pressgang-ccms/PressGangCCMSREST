@@ -11,6 +11,8 @@ import org.jboss.pressgangccms.rest.v1.entities.base.RESTBaseEntityV1;
 import org.jboss.pressgangccms.rest.v1.expansion.ExpandDataTrunk;
 import org.jboss.pressgangccms.restserver.BaseRESTv1;
 import org.jboss.pressgangccms.restserver.entities.PropertyTag;
+import org.jboss.pressgangccms.restserver.factories.base.RESTDataObjectCollectionFactory;
+import org.jboss.pressgangccms.restserver.factories.base.RESTDataObjectFactory;
 
 public class PropertyTagV1Factory extends RESTDataObjectFactory<RESTPropertyTagV1, PropertyTag, RESTPropertyTagCollectionV1>
 {
@@ -20,7 +22,7 @@ public class PropertyTagV1Factory extends RESTDataObjectFactory<RESTPropertyTagV
 	}
 	
 	@Override
-	RESTPropertyTagV1 createRESTEntityFromDBEntity(final PropertyTag entity, final String baseUrl, final String dataType, final ExpandDataTrunk expand, final Number revision, final boolean expandParentReferences, final EntityManager entityManager)
+	public RESTPropertyTagV1 createRESTEntityFromDBEntity(final PropertyTag entity, final String baseUrl, final String dataType, final ExpandDataTrunk expand, final Number revision, final boolean expandParentReferences, final EntityManager entityManager)
 	{
 		assert entity != null : "Parameter topic can not be null";
 		assert baseUrl != null : "Parameter baseUrl can not be null";

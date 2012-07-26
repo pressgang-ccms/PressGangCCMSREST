@@ -12,6 +12,8 @@ import org.jboss.pressgangccms.rest.v1.exceptions.InvalidParameterException;
 import org.jboss.pressgangccms.rest.v1.expansion.ExpandDataTrunk;
 import org.jboss.pressgangccms.restserver.BaseRESTv1;
 import org.jboss.pressgangccms.restserver.entities.TranslatedTopicString;
+import org.jboss.pressgangccms.restserver.factories.base.RESTDataObjectCollectionFactory;
+import org.jboss.pressgangccms.restserver.factories.base.RESTDataObjectFactory;
 
 public class TranslatedTopicStringV1Factory extends RESTDataObjectFactory<RESTTranslatedTopicStringV1, TranslatedTopicString, RESTTranslatedTopicStringCollectionV1>
 {
@@ -21,7 +23,7 @@ public class TranslatedTopicStringV1Factory extends RESTDataObjectFactory<RESTTr
 	}
 
 	@Override
-	RESTTranslatedTopicStringV1 createRESTEntityFromDBEntity(final TranslatedTopicString entity, final String baseUrl, final String dataType, final ExpandDataTrunk expand, final Number revision, final boolean expandParentReferences, final EntityManager entityManager) throws InvalidParameterException
+	public RESTTranslatedTopicStringV1 createRESTEntityFromDBEntity(final TranslatedTopicString entity, final String baseUrl, final String dataType, final ExpandDataTrunk expand, final Number revision, final boolean expandParentReferences, final EntityManager entityManager) throws InvalidParameterException
 	{
 		assert entity != null : "Parameter topic can not be null";
 		assert baseUrl != null : "Parameter baseUrl can not be null";

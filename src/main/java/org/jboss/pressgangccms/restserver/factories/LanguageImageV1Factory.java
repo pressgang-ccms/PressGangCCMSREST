@@ -12,6 +12,8 @@ import org.jboss.pressgangccms.rest.v1.exceptions.InvalidParameterException;
 import org.jboss.pressgangccms.rest.v1.expansion.ExpandDataTrunk;
 import org.jboss.pressgangccms.restserver.BaseRESTv1;
 import org.jboss.pressgangccms.restserver.entities.LanguageImage;
+import org.jboss.pressgangccms.restserver.factories.base.RESTDataObjectCollectionFactory;
+import org.jboss.pressgangccms.restserver.factories.base.RESTDataObjectFactory;
 
 public class LanguageImageV1Factory extends RESTDataObjectFactory<RESTLanguageImageV1, LanguageImage, RESTLanguageImageCollectionV1>
 {
@@ -21,7 +23,7 @@ public class LanguageImageV1Factory extends RESTDataObjectFactory<RESTLanguageIm
 	}
 	
 	@Override
-	RESTLanguageImageV1 createRESTEntityFromDBEntity(final LanguageImage entity, final String baseUrl, final String dataType, final ExpandDataTrunk expand, final Number revision, final boolean expandParentReferences, final EntityManager entityManager) throws InvalidParameterException
+	public RESTLanguageImageV1 createRESTEntityFromDBEntity(final LanguageImage entity, final String baseUrl, final String dataType, final ExpandDataTrunk expand, final Number revision, final boolean expandParentReferences, final EntityManager entityManager) throws InvalidParameterException
 	{
 		assert entity != null : "Parameter topic can not be null";
 		assert baseUrl != null : "Parameter baseUrl can not be null";

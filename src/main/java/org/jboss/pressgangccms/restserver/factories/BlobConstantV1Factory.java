@@ -11,6 +11,8 @@ import org.jboss.pressgangccms.rest.v1.entities.base.RESTBaseEntityV1;
 import org.jboss.pressgangccms.rest.v1.expansion.ExpandDataTrunk;
 import org.jboss.pressgangccms.restserver.BaseRESTv1;
 import org.jboss.pressgangccms.restserver.entities.BlobConstants;
+import org.jboss.pressgangccms.restserver.factories.base.RESTDataObjectCollectionFactory;
+import org.jboss.pressgangccms.restserver.factories.base.RESTDataObjectFactory;
 
 public class BlobConstantV1Factory extends RESTDataObjectFactory<RESTBlobConstantV1, BlobConstants, RESTBlobConstantCollectionV1>
 {
@@ -20,7 +22,7 @@ public class BlobConstantV1Factory extends RESTDataObjectFactory<RESTBlobConstan
 	}
 	
 	@Override
-	RESTBlobConstantV1 createRESTEntityFromDBEntity(final BlobConstants entity, final String baseUrl, final String dataType, final ExpandDataTrunk expand, final Number revision, final boolean expandParentReferences, final EntityManager entityManager)
+	public RESTBlobConstantV1 createRESTEntityFromDBEntity(final BlobConstants entity, final String baseUrl, final String dataType, final ExpandDataTrunk expand, final Number revision, final boolean expandParentReferences, final EntityManager entityManager)
 	{
 		assert entity != null : "Parameter topic can not be null";
 		assert baseUrl != null : "Parameter baseUrl can not be null";

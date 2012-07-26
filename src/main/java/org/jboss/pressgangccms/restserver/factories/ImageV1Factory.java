@@ -15,6 +15,8 @@ import org.jboss.pressgangccms.rest.v1.expansion.ExpandDataTrunk;
 import org.jboss.pressgangccms.restserver.BaseRESTv1;
 import org.jboss.pressgangccms.restserver.entities.ImageFile;
 import org.jboss.pressgangccms.restserver.entities.LanguageImage;
+import org.jboss.pressgangccms.restserver.factories.base.RESTDataObjectCollectionFactory;
+import org.jboss.pressgangccms.restserver.factories.base.RESTDataObjectFactory;
 
 public class ImageV1Factory extends RESTDataObjectFactory<RESTImageV1, ImageFile, RESTImageCollectionV1>
 {
@@ -24,7 +26,7 @@ public class ImageV1Factory extends RESTDataObjectFactory<RESTImageV1, ImageFile
 	}
 	
 	@Override
-	RESTImageV1 createRESTEntityFromDBEntity(final ImageFile entity, final String baseUrl, final String dataType, final ExpandDataTrunk expand, final Number revision, final boolean expandParentReferences, final EntityManager entityManager)
+	public RESTImageV1 createRESTEntityFromDBEntity(final ImageFile entity, final String baseUrl, final String dataType, final ExpandDataTrunk expand, final Number revision, final boolean expandParentReferences, final EntityManager entityManager)
 	{
 		assert entity != null : "Parameter topic can not be null";
 		assert baseUrl != null : "Parameter baseUrl can not be null";

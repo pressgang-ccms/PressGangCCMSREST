@@ -11,6 +11,7 @@ import org.jboss.pressgangccms.rest.v1.entities.base.RESTBaseEntityV1;
 import org.jboss.pressgangccms.rest.v1.expansion.ExpandDataTrunk;
 import org.jboss.pressgangccms.restserver.BaseRESTv1;
 import org.jboss.pressgangccms.restserver.entities.BugzillaBug;
+import org.jboss.pressgangccms.restserver.factories.base.RESTDataObjectFactory;
 
 
 class BugzillaBugV1Factory extends RESTDataObjectFactory<RESTBugzillaBugV1, BugzillaBug, RESTBugzillaBugCollectionV1>
@@ -21,7 +22,7 @@ class BugzillaBugV1Factory extends RESTDataObjectFactory<RESTBugzillaBugV1, Bugz
 	}
 	
 	@Override
-	RESTBugzillaBugV1 createRESTEntityFromDBEntity(final BugzillaBug entity, final String baseUrl, String dataType, final ExpandDataTrunk expand, final Number revision, final boolean expandParentReferences, final EntityManager entityManager)
+	public RESTBugzillaBugV1 createRESTEntityFromDBEntity(final BugzillaBug entity, final String baseUrl, String dataType, final ExpandDataTrunk expand, final Number revision, final boolean expandParentReferences, final EntityManager entityManager)
 	{
 		assert entity != null : "Parameter entity can not be null";
 		assert baseUrl != null : "Parameter baseUrl can not be null";

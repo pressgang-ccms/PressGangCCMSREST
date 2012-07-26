@@ -10,6 +10,8 @@ import org.jboss.pressgangccms.rest.v1.entities.RESTCategoryV1;
 import org.jboss.pressgangccms.rest.v1.entities.base.RESTBaseEntityV1;
 import org.jboss.pressgangccms.rest.v1.expansion.ExpandDataTrunk;
 import org.jboss.pressgangccms.restserver.entities.TagToCategory;
+import org.jboss.pressgangccms.restserver.factories.base.RESTDataObjectCollectionFactory;
+import org.jboss.pressgangccms.restserver.factories.base.RESTDataObjectFactory;
 
 /**
  * This factory is used when creating a collection of Categories for a Tag. It
@@ -23,7 +25,7 @@ public class TagCategoryV1Factory extends RESTDataObjectFactory<RESTCategoryV1, 
 	}
 
 	@Override
-	RESTCategoryV1 createRESTEntityFromDBEntity(final TagToCategory entity, final String baseUrl, String dataType, final ExpandDataTrunk expand, final Number revision, final boolean expandParentReferences, final EntityManager entityManager)
+	public RESTCategoryV1 createRESTEntityFromDBEntity(final TagToCategory entity, final String baseUrl, String dataType, final ExpandDataTrunk expand, final Number revision, final boolean expandParentReferences, final EntityManager entityManager)
 	{
 		assert entity != null : "Parameter topic can not be null";
 		assert baseUrl != null : "Parameter baseUrl can not be null";

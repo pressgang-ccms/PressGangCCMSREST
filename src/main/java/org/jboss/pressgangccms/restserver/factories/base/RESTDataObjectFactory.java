@@ -1,4 +1,4 @@
-package org.jboss.pressgangccms.restserver.factories;
+package org.jboss.pressgangccms.restserver.factories.base;
 
 import javax.naming.InitialContext;
 import javax.persistence.EntityManager;
@@ -27,7 +27,7 @@ public abstract class RESTDataObjectFactory<T extends RESTBaseEntityV1<T, V>, U,
 {
 	final Class<U> databaseClass;
 
-	RESTDataObjectFactory(final Class<U> databaseClass)
+	public RESTDataObjectFactory(final Class<U> databaseClass)
 	{
 		this.databaseClass = databaseClass;
 	}
@@ -65,7 +65,7 @@ public abstract class RESTDataObjectFactory<T extends RESTBaseEntityV1<T, V>, U,
 	 * 			  If the entity is a revision
 	 * @return A new REST entity populated with the values in a database entity
 	 */
-	T createRESTEntityFromDBEntity(final U entity, final String baseUrl, final String dataType, final String expand, final Number revision) throws InvalidParameterException
+	public T createRESTEntityFromDBEntity(final U entity, final String baseUrl, final String dataType, final String expand, final Number revision) throws InvalidParameterException
 	{
 		return this.createRESTEntityFromDBEntity(entity, baseUrl, dataType, expand, revision, null);
 	}
@@ -121,7 +121,7 @@ public abstract class RESTDataObjectFactory<T extends RESTBaseEntityV1<T, V>, U,
 	 *            ExpandDataTrunk
 	 * @return A new REST entity populated with the values in a database entity
 	 */
-	T createRESTEntityFromDBPK(final Object primaryKey, final String baseUrl, final String dataType, final String expand, final Number revision) throws InvalidParameterException
+	public T createRESTEntityFromDBPK(final Object primaryKey, final String baseUrl, final String dataType, final String expand, final Number revision) throws InvalidParameterException
 	{
 		TransactionManager transactionManager = null;
 		EntityManager entityManager = null;
@@ -181,7 +181,7 @@ public abstract class RESTDataObjectFactory<T extends RESTBaseEntityV1<T, V>, U,
 	/**
 	 * @return A new REST entity populated with the values in a database entity
 	 */
-	T createRESTEntityFromDBEntity(final U entity, final String baseUrl, final String dataType, final ExpandDataTrunk expand) throws InvalidParameterException
+	public T createRESTEntityFromDBEntity(final U entity, final String baseUrl, final String dataType, final ExpandDataTrunk expand) throws InvalidParameterException
 	{
 		return createRESTEntityFromDBEntity(entity, baseUrl, dataType, expand, null, true);
 	}
@@ -189,7 +189,7 @@ public abstract class RESTDataObjectFactory<T extends RESTBaseEntityV1<T, V>, U,
 	/**
 	 * @return A new REST entity populated with the values in a database entity
 	 */
-	T createRESTEntityFromDBEntity(final U entity, final String baseUrl, final String dataType, final ExpandDataTrunk expand, final Number revision) throws InvalidParameterException
+	public T createRESTEntityFromDBEntity(final U entity, final String baseUrl, final String dataType, final ExpandDataTrunk expand, final Number revision) throws InvalidParameterException
 	{
 		return createRESTEntityFromDBEntity(entity, baseUrl, dataType, expand, revision, true);
 	}
@@ -197,7 +197,7 @@ public abstract class RESTDataObjectFactory<T extends RESTBaseEntityV1<T, V>, U,
 	/**
 	 * @return A new REST entity populated with the values in a database entity
 	 */
-	T createRESTEntityFromDBEntity(final U entity, final String baseUrl, final String dataType, final ExpandDataTrunk expand, final Number revision, final boolean expandParentReferences) throws InvalidParameterException
+	public T createRESTEntityFromDBEntity(final U entity, final String baseUrl, final String dataType, final ExpandDataTrunk expand, final Number revision, final boolean expandParentReferences) throws InvalidParameterException
 	{
 		return createRESTEntityFromDBEntity(entity, baseUrl, dataType, expand, revision, expandParentReferences, null);
 	}
@@ -205,7 +205,7 @@ public abstract class RESTDataObjectFactory<T extends RESTBaseEntityV1<T, V>, U,
 	/**
 	 * @return A new REST entity populated with the values in a database entity
 	 */
-	abstract T createRESTEntityFromDBEntity(final U entity, final String baseUrl, final String dataType, final ExpandDataTrunk expand, final Number revision, final boolean expandParentReferences, final EntityManager entityManager) throws InvalidParameterException;
+	public abstract T createRESTEntityFromDBEntity(final U entity, final String baseUrl, final String dataType, final ExpandDataTrunk expand, final Number revision, final boolean expandParentReferences, final EntityManager entityManager) throws InvalidParameterException;
 
 	/**
 	 * Populates the values of a database entity from a REST entity

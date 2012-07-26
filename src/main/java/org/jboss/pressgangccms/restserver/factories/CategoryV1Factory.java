@@ -14,6 +14,8 @@ import org.jboss.pressgangccms.rest.v1.expansion.ExpandDataTrunk;
 import org.jboss.pressgangccms.restserver.BaseRESTv1;
 import org.jboss.pressgangccms.restserver.entities.Category;
 import org.jboss.pressgangccms.restserver.entities.Tag;
+import org.jboss.pressgangccms.restserver.factories.base.RESTDataObjectCollectionFactory;
+import org.jboss.pressgangccms.restserver.factories.base.RESTDataObjectFactory;
 import org.jboss.resteasy.spi.BadRequestException;
 
 public class CategoryV1Factory extends RESTDataObjectFactory<RESTCategoryV1, Category, RESTCategoryCollectionV1>
@@ -24,7 +26,7 @@ public class CategoryV1Factory extends RESTDataObjectFactory<RESTCategoryV1, Cat
 	}
 
 	@Override
-	RESTCategoryV1 createRESTEntityFromDBEntity(final Category entity, final String baseUrl, final String dataType, final ExpandDataTrunk expand, final Number revision, final boolean expandParentReferences, final EntityManager entityManager)
+	public RESTCategoryV1 createRESTEntityFromDBEntity(final Category entity, final String baseUrl, final String dataType, final ExpandDataTrunk expand, final Number revision, final boolean expandParentReferences, final EntityManager entityManager)
 	{
 		assert entity != null : "Parameter topic can not be null";
 		assert baseUrl != null : "Parameter baseUrl can not be null";

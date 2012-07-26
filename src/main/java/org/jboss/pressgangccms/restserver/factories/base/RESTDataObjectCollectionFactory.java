@@ -1,4 +1,4 @@
-package org.jboss.pressgangccms.restserver.factories;
+package org.jboss.pressgangccms.restserver.factories.base;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -58,17 +58,17 @@ public class RESTDataObjectCollectionFactory<T extends RESTBaseEntityV1<T, V>, U
 		return create(clazz, dataObjectFactory, entities, null, null, null, expandName, dataType, parentExpand, baseUrl, true, entityManager);
 	}
 	
-	V create(final Class<V> clazz, final RESTDataObjectFactory<T, U, V> dataObjectFactory, final List<U> entities, final String expandName, final String dataType, final ExpandDataTrunk parentExpand, final String baseUrl, final Number revision, final EntityManager entityManager)
+	public V create(final Class<V> clazz, final RESTDataObjectFactory<T, U, V> dataObjectFactory, final List<U> entities, final String expandName, final String dataType, final ExpandDataTrunk parentExpand, final String baseUrl, final Number revision, final EntityManager entityManager)
 	{
 		return create(clazz, dataObjectFactory, entities, null, revision, null, expandName, dataType, parentExpand, baseUrl, true, entityManager);
 	}
 
-	V create(final Class<V> clazz, final RESTDataObjectFactory<T, U, V> dataObjectFactory, final U parent, final List<Number> revisions, final String expandName, final String dataType, final ExpandDataTrunk parentExpand, final String baseUrl, final EntityManager entityManager)
+	public V create(final Class<V> clazz, final RESTDataObjectFactory<T, U, V> dataObjectFactory, final U parent, final List<Number> revisions, final String expandName, final String dataType, final ExpandDataTrunk parentExpand, final String baseUrl, final EntityManager entityManager)
 	{
 		return create(clazz, dataObjectFactory, null, parent, null, revisions, expandName, dataType, parentExpand, baseUrl, true, entityManager);
 	}
 	
-	V create(final Class<V> clazz, final RESTDataObjectFactory<T, U, V> dataObjectFactory, final U parent, final List<Number> revisions, final String expandName, final String dataType, final ExpandDataTrunk parentExpand, final String baseUrl, final Number revision, final EntityManager entityManager)
+	public V create(final Class<V> clazz, final RESTDataObjectFactory<T, U, V> dataObjectFactory, final U parent, final List<Number> revisions, final String expandName, final String dataType, final ExpandDataTrunk parentExpand, final String baseUrl, final Number revision, final EntityManager entityManager)
 	{
 		return create(clazz, dataObjectFactory, null, parent, revision, revisions, expandName, dataType, parentExpand, baseUrl, true, entityManager);
 	}
@@ -78,7 +78,7 @@ public class RESTDataObjectCollectionFactory<T extends RESTBaseEntityV1<T, V>, U
 		return create(clazz, dataObjectFactory, entities, null, null, null, expandName, dataType, parentExpand, baseUrl, expandParentReferences, entityManager);
 	}
 	
-	V create(final Class<V> clazz, final RESTDataObjectFactory<T, U, V> dataObjectFactory, final List<U> entities, final String expandName, final String dataType, final ExpandDataTrunk parentExpand, final String baseUrl, final Number revision, final boolean expandParentReferences, final EntityManager entityManager)
+	public V create(final Class<V> clazz, final RESTDataObjectFactory<T, U, V> dataObjectFactory, final List<U> entities, final String expandName, final String dataType, final ExpandDataTrunk parentExpand, final String baseUrl, final Number revision, final boolean expandParentReferences, final EntityManager entityManager)
 	{
 		return create(clazz, dataObjectFactory, entities, null, revision, null, expandName, dataType, parentExpand, baseUrl, expandParentReferences, entityManager);
 	}
@@ -105,7 +105,7 @@ public class RESTDataObjectCollectionFactory<T extends RESTBaseEntityV1<T, V>, U
 	 *            The base of the url that was used to access this collection
 	 * @return a REST collection from a collection of database entities.
 	 */
-	V create(final Class<V> clazz, final RESTDataObjectFactory<T, U, V> dataObjectFactory, final List<U> entities, final U parent, final Number parentRevision, final List<Number> revisions, final String expandName, final String dataType, final ExpandDataTrunk parentExpand, final String baseUrl, final boolean expandParentReferences,
+	public V create(final Class<V> clazz, final RESTDataObjectFactory<T, U, V> dataObjectFactory, final List<U> entities, final U parent, final Number parentRevision, final List<Number> revisions, final String expandName, final String dataType, final ExpandDataTrunk parentExpand, final String baseUrl, final boolean expandParentReferences,
 			final EntityManager entityManager)
 	{
 		V retValue = null;

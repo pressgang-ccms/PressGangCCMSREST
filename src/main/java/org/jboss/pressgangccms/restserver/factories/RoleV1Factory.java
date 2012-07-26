@@ -15,6 +15,8 @@ import org.jboss.pressgangccms.restserver.BaseRESTv1;
 import org.jboss.pressgangccms.restserver.entities.Role;
 import org.jboss.pressgangccms.restserver.entities.RoleToRoleRelationship;
 import org.jboss.pressgangccms.restserver.entities.User;
+import org.jboss.pressgangccms.restserver.factories.base.RESTDataObjectCollectionFactory;
+import org.jboss.pressgangccms.restserver.factories.base.RESTDataObjectFactory;
 import org.jboss.resteasy.spi.BadRequestException;
 
 public class RoleV1Factory extends RESTDataObjectFactory<RESTRoleV1, Role, RESTRoleCollectionV1>
@@ -25,7 +27,7 @@ public class RoleV1Factory extends RESTDataObjectFactory<RESTRoleV1, Role, RESTR
 	}
 
 	@Override
-	RESTRoleV1 createRESTEntityFromDBEntity(final Role entity, final String baseUrl, final String dataType, final ExpandDataTrunk expand, final Number revision, final boolean expandParentReferences, final EntityManager entityManager)
+	public RESTRoleV1 createRESTEntityFromDBEntity(final Role entity, final String baseUrl, final String dataType, final ExpandDataTrunk expand, final Number revision, final boolean expandParentReferences, final EntityManager entityManager)
 	{
 		assert entity != null : "Parameter topic can not be null";
 		assert baseUrl != null : "Parameter baseUrl can not be null";
