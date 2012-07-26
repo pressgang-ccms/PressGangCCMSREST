@@ -20,6 +20,9 @@
         <dependent-module archiveName="pressgang-ccms-rest-1.0-SNAPSHOT.jar" deploy-path="/WEB-INF/lib" handle="module:/resource/PressGangCCMSRESTv1Common/PressGangCCMSRESTv1Common">
             <dependency-type>uses</dependency-type>
         </dependent-module>
+        <dependent-module archiveName="j2bugzilla-extended-1.1-SNAPSHOT.jar" deploy-path="/WEB-INF/lib" handle="module:/resource/j2bugzilla-extended/j2bugzilla-extended">
+            <dependency-type>uses</dependency-type>
+        </dependent-module>
         <property name="context-root" value="devrest"/>
         <property name="java-output-path" value="/devrest/target/classes"/>
     </wb-module>
