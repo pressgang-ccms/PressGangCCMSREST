@@ -58,13 +58,16 @@ import org.hibernate.annotations.Cache;
 import org.hibernate.annotations.CacheConcurrencyStrategy;
 import org.hibernate.envers.Audited;
 import org.hibernate.envers.NotAudited;
+import org.hibernate.search.annotations.Analyze;
 import org.hibernate.search.annotations.Field;
 import org.hibernate.search.annotations.Index;
 import org.hibernate.search.annotations.Indexed;
 import org.hibernate.search.annotations.Store;
+import org.jboss.pressgangccms.docbook.messaging.TopicRendererType;
 import org.jboss.pressgangccms.restserver.constants.Constants;
 import org.jboss.pressgangccms.restserver.entities.base.ParentToPropertyTag;
 import org.jboss.pressgangccms.restserver.entities.base.ToPropertyTag;
+import org.jboss.pressgangccms.restserver.renderer.TopicQueueRenderer;
 import org.jboss.pressgangccms.restserver.sort.CategoryNameComparator;
 import org.jboss.pressgangccms.restserver.sort.TagIDComparator;
 import org.jboss.pressgangccms.restserver.sort.TagNameComparator;
@@ -75,6 +78,7 @@ import org.jboss.pressgangccms.restserver.sort.TopicToTopicMainTopicIDSort;
 import org.jboss.pressgangccms.restserver.sort.TopicToTopicRelatedTopicIDSort;
 import org.jboss.pressgangccms.restserver.utils.SkynetExceptionUtilities;
 import org.jboss.pressgangccms.utils.common.CollectionUtilities;
+import org.jboss.pressgangccms.utils.common.DocBookUtilities;
 import org.jboss.pressgangccms.utils.common.ExceptionUtilities;
 import org.jboss.pressgangccms.utils.common.StringUtilities;
 import org.jboss.pressgangccms.utils.common.XMLUtilities;
@@ -88,7 +92,6 @@ import com.j2bugzilla.base.BugzillaConnector;
 import com.j2bugzilla.rpc.BugSearch;
 import com.j2bugzilla.rpc.GetBug;
 import com.j2bugzilla.rpc.LogIn;
-
 
 @Entity
 @Audited
@@ -731,7 +734,7 @@ public class Topic extends ParentToPropertyTag<Topic> implements java.io.Seriali
 	 * extraction uses Jericho - http://jericho.htmlparser.net/
 	 */
 	@Transient
-	@Field(name = "TopicSearchText", index = Index.TOKENIZED, store = Store.YES)
+	@Field(name = "TopicSearchText", index = Index.YES, analyze=Analyze.YES, store = Store.YES)
 	public String getTopicSearchText()
 	{
 		if (this.topicXML == null)
@@ -1191,7 +1194,7 @@ public class Topic extends ParentToPropertyTag<Topic> implements java.io.Seriali
 		}
 		if (doc != null)
 		{
-			DocbookUtils.setSectionTitle(this.topicTitle, doc);
+			DocBookUtilities.setSectionTitle(this.topicTitle, doc);
 
 			// this.topicXML = XMLUtilities.convertDocumentToString(doc);
 

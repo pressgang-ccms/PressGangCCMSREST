@@ -10,28 +10,12 @@ import javax.persistence.EntityManagerFactory;
 import javax.transaction.TransactionManager;
 
 import org.jboss.pressgangccms.restserver.entities.SkynetException;
-import org.jboss.seam.Component;
-
 
 public class SkynetExceptionUtilities
 {
 	public static void handleException(final Exception ex, final boolean isExpected, final String explaination)
 	{
 		handleException(ex, isExpected, explaination, null);
-	}
-	
-	public static void handleSeamException(final Exception ex, final boolean isExpected, final String explaination)
-	{
-		final Credentials credentials = (Credentials) Component.getInstance("org.jboss.seam.security.credentials");
-		final String username = credentials != null ? credentials.getUsername() : null;
-		handleException(ex, isExpected, explaination, username);
-	}
-	
-	public static void handleSeamPreconditionFailedException(final IllegalArgumentException ex)
-	{
-		final Credentials credentials = (Credentials) Component.getInstance("org.jboss.seam.security.credentials");
-		final String username = credentials != null ? credentials.getUsername() : null;
-		handleException(ex, false, Constants.PRECONDITION_CHECK_FAILED_MESSAGE, username);
 	}
 	
 	/**

@@ -22,8 +22,11 @@ import javax.validation.constraints.NotNull;
 import org.hibernate.annotations.Cache;
 import org.hibernate.annotations.CacheConcurrencyStrategy;
 import org.hibernate.envers.Audited;
+import org.jboss.pressgangccms.docbook.messaging.TopicRendererType;
 import org.jboss.pressgangccms.restserver.entities.base.AuditedEntity;
+import org.jboss.pressgangccms.restserver.renderer.TopicQueueRenderer;
 import org.jboss.pressgangccms.restserver.utils.SkynetExceptionUtilities;
+import org.jboss.pressgangccms.utils.concurrency.WorkQueue;
 
 @Audited
 @Entity
