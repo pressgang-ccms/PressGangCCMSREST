@@ -11,6 +11,14 @@
 		<maven.compiler.source>1.6</maven.compiler.source>
 		<maven.compiler.target>1.6</maven.compiler.target>
 	</properties>
+
+	<repositories>
+		<repository>
+			<id>Zanata</id>
+			<url>http://repository-zanata.forge.cloudbees.com/release/</url>
+		</repository>
+	</repositories>
+
 	<dependencies>
 		<dependency>
 			<groupId>org.jboss.spec</groupId>
@@ -102,6 +110,16 @@
 			<groupId>com.redhat.contentspec</groupId>
 			<artifactId>csprocessor</artifactId>
 			<version>0.0.2-SNAPSHOT</version>
+		</dependency>
+		<dependency>
+			<groupId>org.zanata</groupId>
+			<artifactId>zanata-common-api</artifactId>
+			<version>1.5.0</version>
+		</dependency>
+		<dependency>
+			<groupId>org.jboss.pressgangccms</groupId>
+			<artifactId>pressgang-ccms-zanata</artifactId>
+			<version>1.0-SNAPSHOT</version>
 		</dependency>
 	</dependencies>
 	<profiles>
