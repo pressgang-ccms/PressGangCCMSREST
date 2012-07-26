@@ -5,6 +5,12 @@ import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import org.jboss.pressgangccms.restserver.constants.Constants;
+import org.jboss.pressgangccms.restserver.entities.Topic;
+import org.jboss.pressgangccms.restserver.utils.EntityUtilities;
+import org.jboss.pressgangccms.restserver.utils.SkynetExceptionUtilities;
+import org.jboss.pressgangccms.utils.common.CollectionUtilities;
+import org.jboss.pressgangccms.utils.constants.CommonConstants;
 import org.joda.time.DateTime;
 import org.joda.time.format.ISODateTimeFormat;
 

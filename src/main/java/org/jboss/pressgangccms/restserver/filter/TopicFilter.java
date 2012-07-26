@@ -6,13 +6,18 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import com.redhat.topicindex.utils.SkynetExceptionUtilities;
-import com.redhat.topicindex.entity.Filter;
-import com.redhat.topicindex.entity.FilterField;
-import com.redhat.topicindex.entity.Topic;
-import com.redhat.topicindex.utils.Constants;
-import com.redhat.topicindex.utils.EntityUtilities;
-import com.redhat.topicindex.utils.structures.field.*;
+import org.jboss.pressgangccms.restserver.constants.Constants;
+import org.jboss.pressgangccms.restserver.entities.Filter;
+import org.jboss.pressgangccms.restserver.entities.FilterField;
+import org.jboss.pressgangccms.restserver.entities.Topic;
+import org.jboss.pressgangccms.restserver.structures.field.UIFieldBooleanData;
+import org.jboss.pressgangccms.restserver.structures.field.UIFieldDataBase;
+import org.jboss.pressgangccms.restserver.structures.field.UIFieldDateTimeData;
+import org.jboss.pressgangccms.restserver.structures.field.UIFieldIntegerData;
+import org.jboss.pressgangccms.restserver.structures.field.UIFieldStringData;
+import org.jboss.pressgangccms.restserver.structures.field.UIFieldStringListData;
+import org.jboss.pressgangccms.restserver.utils.EntityUtilities;
+import org.jboss.pressgangccms.restserver.utils.SkynetExceptionUtilities;
 
 /**
  * This class represents the options used by the objects that extend the
