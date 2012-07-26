@@ -33,7 +33,10 @@ import org.hibernate.envers.query.AuditQuery;
 import org.jboss.pressgangccms.restserver.constants.Constants;
 import org.jboss.pressgangccms.restserver.entities.base.AuditedEntity;
 import org.jboss.pressgangccms.restserver.utils.SkynetExceptionUtilities;
+import org.jboss.pressgangccms.restserver.zanata.ZanataPullTopicThread;
+import org.jboss.pressgangccms.restserver.zanata.ZanataPushTopicThread;
 import org.jboss.pressgangccms.utils.common.CollectionUtilities;
+import org.jboss.pressgangccms.utils.structures.Pair;
 
 
 /**
