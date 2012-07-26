@@ -18,16 +18,16 @@ import static javax.persistence.GenerationType.IDENTITY;
 
 import javax.persistence.Id;
 import javax.persistence.Table;
+import javax.validation.constraints.NotNull;
+import javax.validation.constraints.Size;
 
 import org.hibernate.annotations.BatchSize;
 import org.hibernate.annotations.Cache;
 import org.hibernate.annotations.CacheConcurrencyStrategy;
 import org.hibernate.envers.Audited;
-import org.hibernate.validator.Length;
-import org.hibernate.validator.NotNull;
+import org.jboss.pressgangccms.restserver.constants.Constants;
+import org.jboss.pressgangccms.restserver.entities.base.AuditedEntity;
 
-import com.redhat.topicindex.entity.base.AuditedEntity;
-import com.redhat.topicindex.utils.Constants;
 
 @Entity
 @Audited
@@ -64,7 +64,7 @@ public class PropertyTagCategory extends AuditedEntity<PropertyTagCategory> impl
 
 	@Column(name = "PropertyTagCategoryName", nullable = false, length = 512)
 	@NotNull
-	@Length(max = 512)
+	@Size(max = 512)
 	public String getPropertyTagCategoryName()
 	{
 		return propertyTagCategoryName;
@@ -76,7 +76,7 @@ public class PropertyTagCategory extends AuditedEntity<PropertyTagCategory> impl
 	}
 
 	@Column(name = "PropertyTagCategoryDescription", columnDefinition = "TEXT")
-	@Length(max = 65535)
+	@Size(max = 65535)
 	public String getPropertyTagCategoryDescription()
 	{
 		return propertyTagCategoryDescription;

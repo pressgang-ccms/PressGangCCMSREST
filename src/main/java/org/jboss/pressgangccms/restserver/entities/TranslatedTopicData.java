@@ -34,21 +34,18 @@ import javax.persistence.UniqueConstraint;
 
 import javax.transaction.Transaction;
 import javax.transaction.TransactionManager;
+import javax.validation.constraints.NotNull;
+import javax.validation.constraints.Size;
 
 import org.hibernate.annotations.BatchSize;
 import org.hibernate.annotations.Cache;
 import org.hibernate.annotations.CacheConcurrencyStrategy;
 import org.hibernate.envers.Audited;
-import org.hibernate.validator.Length;
-import org.hibernate.validator.NotNull;
-import com.redhat.ecs.commonthread.WorkQueue;
-import com.redhat.ecs.commonutils.CollectionUtilities;
-import com.redhat.ecs.constants.CommonConstants;
-import com.redhat.topicindex.entity.base.AuditedEntity;
-import com.redhat.topicindex.utils.Constants;
-import com.redhat.topicindex.utils.SkynetExceptionUtilities;
-import com.redhat.topicindex.utils.topicrenderer.TopicQueueRenderer;
-import com.redhat.topicindex.messaging.TopicRendererType;
+import org.jboss.pressgangccms.restserver.constants.Constants;
+import org.jboss.pressgangccms.restserver.entities.base.AuditedEntity;
+import org.jboss.pressgangccms.restserver.utils.SkynetExceptionUtilities;
+import org.jboss.pressgangccms.utils.concurrency.WorkQueue;
+import org.jboss.pressgangccms.utils.constants.CommonConstants;
 
 @Entity
 @Audited
@@ -126,7 +123,7 @@ public class TranslatedTopicData extends AuditedEntity<TranslatedTopicData> impl
 
 	// @Column(name = "TranslatedXML", length = 65535)
 	@Column(name = "TranslatedXML", columnDefinition = "MEDIUMTEXT")
-	@Length(max = 16777215)
+	@Size(max = 16777215)
 	public String getTranslatedXml()
 	{
 		return translatedXml;
@@ -138,7 +135,7 @@ public class TranslatedTopicData extends AuditedEntity<TranslatedTopicData> impl
 	}
 
 	@Column(name = "TranslatedXMLErrors", columnDefinition = "TEXT")
-	@Length(max = 65535)
+	@Size(max = 65535)
 	public String getTranslatedXmlErrors()
 	{
 		return translatedXmlErrors;
@@ -151,7 +148,7 @@ public class TranslatedTopicData extends AuditedEntity<TranslatedTopicData> impl
 
 	// @Column(name = "TranslatedXMLRendered", length = 65535)
 	@Column(name = "TranslatedXMLRendered", columnDefinition = "MEDIUMTEXT")
-	@Length(max = 16777215)
+	@Size(max = 16777215)
 	public String getTranslatedXmlRendered()
 	{
 		return translatedXmlRendered;
@@ -164,7 +161,7 @@ public class TranslatedTopicData extends AuditedEntity<TranslatedTopicData> impl
 
 	@Column(name = "TranslationLocale", nullable = false, length = 45)
 	@NotNull
-	@Length(max = 45)
+	@Size(max = 45)
 	public String getTranslationLocale()
 	{
 		return translationLocale;

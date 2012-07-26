@@ -29,15 +29,11 @@ import org.hibernate.envers.AuditReaderFactory;
 import org.hibernate.envers.Audited;
 import org.hibernate.envers.query.AuditEntity;
 import org.hibernate.envers.query.AuditQuery;
-import org.jboss.seam.Component;
+import org.jboss.pressgangccms.restserver.constants.Constants;
+import org.jboss.pressgangccms.restserver.entities.base.AuditedEntity;
+import org.jboss.pressgangccms.restserver.utils.SkynetExceptionUtilities;
+import org.jboss.pressgangccms.utils.common.CollectionUtilities;
 
-import com.redhat.ecs.commonstructures.Pair;
-import com.redhat.ecs.commonutils.CollectionUtilities;
-import com.redhat.topicindex.entity.base.AuditedEntity;
-import com.redhat.topicindex.utils.Constants;
-import com.redhat.topicindex.utils.SkynetExceptionUtilities;
-import com.redhat.topicindex.zanata.ZanataPullTopicThread;
-import com.redhat.topicindex.zanata.ZanataPushTopicThread;
 
 /**
  * A TranslatedTopic represents a particular revision of a topic. This revision

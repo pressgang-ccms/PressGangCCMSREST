@@ -47,6 +47,8 @@ import javax.persistence.criteria.Predicate;
 import javax.persistence.criteria.Root;
 import javax.transaction.Transaction;
 import javax.transaction.TransactionManager;
+import javax.validation.constraints.NotNull;
+import javax.validation.constraints.Size;
 
 import net.htmlparser.jericho.Source;
 
@@ -59,8 +61,24 @@ import org.hibernate.search.annotations.Field;
 import org.hibernate.search.annotations.Index;
 import org.hibernate.search.annotations.Indexed;
 import org.hibernate.search.annotations.Store;
-import org.hibernate.validator.Length;
-import org.hibernate.validator.NotNull;
+import org.jboss.pressgangccms.restserver.constants.Constants;
+import org.jboss.pressgangccms.restserver.entities.base.ParentToPropertyTag;
+import org.jboss.pressgangccms.restserver.entities.base.ToPropertyTag;
+import org.jboss.pressgangccms.restserver.sort.CategoryNameComparator;
+import org.jboss.pressgangccms.restserver.sort.TagIDComparator;
+import org.jboss.pressgangccms.restserver.sort.TagNameComparator;
+import org.jboss.pressgangccms.restserver.sort.TagToCategorySortingComparator;
+import org.jboss.pressgangccms.restserver.sort.TopicToTagTagIDSort;
+import org.jboss.pressgangccms.restserver.sort.TopicToTopicMainTopicIDSort;
+import org.jboss.pressgangccms.restserver.sort.TopicToTopicRelatedTopicIDSort;
+import org.jboss.pressgangccms.restserver.utils.SkynetExceptionUtilities;
+import org.jboss.pressgangccms.utils.common.CollectionUtilities;
+import org.jboss.pressgangccms.utils.common.ExceptionUtilities;
+import org.jboss.pressgangccms.utils.common.StringUtilities;
+import org.jboss.pressgangccms.utils.common.XMLUtilities;
+import org.jboss.pressgangccms.utils.concurrency.WorkQueue;
+import org.jboss.pressgangccms.utils.constants.CommonConstants;
+import org.jboss.pressgangccms.utils.structures.NameIDSortMap;
 import org.jboss.seam.Component;
 import org.w3c.dom.Document;
 import org.w3c.dom.Node;
@@ -69,28 +87,7 @@ import com.j2bugzilla.base.BugzillaConnector;
 import com.j2bugzilla.rpc.BugSearch;
 import com.j2bugzilla.rpc.GetBug;
 import com.j2bugzilla.rpc.LogIn;
-import com.redhat.ecs.commonstructures.NameIDSortMap;
-import com.redhat.ecs.commonthread.WorkQueue;
-import com.redhat.ecs.commonutils.CollectionUtilities;
-import com.redhat.ecs.commonutils.ExceptionUtilities;
-import com.redhat.ecs.commonutils.StringUtilities;
-import com.redhat.topicindex.utils.SkynetExceptionUtilities;
-import com.redhat.ecs.commonutils.XMLUtilities;
-import com.redhat.ecs.constants.CommonConstants;
-import com.redhat.ecs.services.docbookcompiling.DocbookUtils;
-import com.redhat.topicindex.entity.base.ParentToPropertyTag;
-import com.redhat.topicindex.entity.base.ToPropertyTag;
-import com.redhat.topicindex.sort.CategoryNameComparator;
-import com.redhat.topicindex.sort.TagIDComparator;
-import com.redhat.topicindex.sort.TagNameComparator;
-import com.redhat.topicindex.sort.TagToCategorySortingComparator;
-import com.redhat.topicindex.sort.TopicIDComparator;
-import com.redhat.topicindex.sort.TopicToTagTagIDSort;
-import com.redhat.topicindex.sort.TopicToTopicMainTopicIDSort;
-import com.redhat.topicindex.sort.TopicToTopicRelatedTopicIDSort;
-import com.redhat.topicindex.utils.Constants;
-import com.redhat.topicindex.utils.topicrenderer.TopicQueueRenderer;
-import com.redhat.topicindex.messaging.TopicRendererType;
+
 
 @Entity
 @Audited
@@ -720,7 +717,7 @@ public class Topic extends ParentToPropertyTag<Topic> implements java.io.Seriali
 
 	@Column(name = "TopicLocale", length = 45)
 	@NotNull
-	@Length(max = 512)
+	@Size(max = 512)
 	public String getTopicLocale()
 	{
 		return this.topicLocale == null ? CommonConstants.DEFAULT_LOCALE : this.topicLocale;
@@ -763,7 +760,7 @@ public class Topic extends ParentToPropertyTag<Topic> implements java.io.Seriali
 	}
 
 	@Column(name = "TopicText", columnDefinition = "TEXT")
-	@Length(max = 65535)
+	@Size(max = 65535)
 	public String getTopicText()
 	{
 		return this.topicText;
@@ -778,7 +775,7 @@ public class Topic extends ParentToPropertyTag<Topic> implements java.io.Seriali
 	}
 
 	@Column(name = "TopicTitle", length = 512)
-	@Length(max = 512)
+	@Size(max = 512)
 	public String getTopicTitle()
 	{
 		return this.topicTitle;
@@ -801,7 +798,7 @@ public class Topic extends ParentToPropertyTag<Topic> implements java.io.Seriali
 	}
 
 	@Column(name = "TopicXML", columnDefinition = "MEDIUMTEXT")
-	@Length(max = 16777215)
+	@Size(max = 16777215)
 	public String getTopicXML()
 	{
 		return this.topicXML;

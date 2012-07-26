@@ -20,18 +20,18 @@ import static javax.persistence.GenerationType.IDENTITY;
 import javax.persistence.Id;
 import javax.persistence.OneToMany;
 import javax.persistence.Table;
+import javax.validation.constraints.NotNull;
+import javax.validation.constraints.Size;
 
 import org.hibernate.annotations.BatchSize;
 import org.hibernate.annotations.Cache;
 import org.hibernate.annotations.CacheConcurrencyStrategy;
 import org.hibernate.envers.Audited;
-import org.hibernate.validator.Length;
-import org.hibernate.validator.NotNull;
+import org.jboss.pressgangccms.restserver.constants.Constants;
+import org.jboss.pressgangccms.restserver.entities.base.AuditedEntity;
+import org.jboss.pressgangccms.restserver.sort.TagIDComparator;
+import org.jboss.pressgangccms.utils.structures.NameIDSortMap;
 
-import com.redhat.ecs.commonstructures.NameIDSortMap;
-import com.redhat.topicindex.entity.base.AuditedEntity;
-import com.redhat.topicindex.sort.TagIDComparator;
-import com.redhat.topicindex.utils.Constants;
 
 @Audited
 @Entity
@@ -81,7 +81,7 @@ public class Project extends AuditedEntity<Project> implements java.io.Serializa
 
 	@Column(name = "ProjectName", nullable = false, length = 512)
 	@NotNull
-	@Length(max = 512)
+	@Size(max = 512)
 	public String getProjectName()
 	{
 		return this.projectName;
@@ -94,7 +94,7 @@ public class Project extends AuditedEntity<Project> implements java.io.Serializa
 
 	// @Column(name = "ProjectDescription", length = 65535)
 	@Column(name = "ProjectDescription", columnDefinition = "TEXT")
-	@Length(max = 65535)
+	@Size(max = 65535)
 	public String getProjectDescription()
 	{
 		return this.projectDescription;

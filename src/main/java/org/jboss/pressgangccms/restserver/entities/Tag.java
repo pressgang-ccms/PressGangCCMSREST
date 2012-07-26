@@ -31,6 +31,8 @@ import javax.persistence.Id;
 import javax.persistence.ManyToMany;
 import javax.persistence.Table;
 import javax.persistence.Transient;
+import javax.validation.constraints.NotNull;
+import javax.validation.constraints.Size;
 
 import org.hibernate.annotations.BatchSize;
 import org.hibernate.annotations.Cache;
@@ -38,17 +40,14 @@ import org.hibernate.annotations.CacheConcurrencyStrategy;
 import org.hibernate.envers.AuditReader;
 import org.hibernate.envers.AuditReaderFactory;
 import org.hibernate.envers.Audited;
-import org.hibernate.validator.Length;
-import org.hibernate.validator.NotNull;
-import org.jboss.seam.Component;
+import org.jboss.pressgangccms.restserver.constants.Constants;
+import org.jboss.pressgangccms.restserver.entities.base.ParentToPropertyTag;
+import org.jboss.pressgangccms.restserver.entities.base.ToPropertyTag;
+import org.jboss.pressgangccms.restserver.sort.CategoryIDComparator;
+import org.jboss.pressgangccms.restserver.sort.ProjectIDComparator;
+import org.jboss.pressgangccms.restserver.sort.TagIDComparator;
+import org.jboss.pressgangccms.utils.common.CollectionUtilities;
 
-import com.redhat.ecs.commonutils.CollectionUtilities;
-import com.redhat.topicindex.entity.base.ParentToPropertyTag;
-import com.redhat.topicindex.entity.base.ToPropertyTag;
-import com.redhat.topicindex.sort.CategoryIDComparator;
-import com.redhat.topicindex.sort.ProjectIDComparator;
-import com.redhat.topicindex.sort.TagIDComparator;
-import com.redhat.topicindex.utils.Constants;
 
 @Entity
 @Audited
@@ -164,7 +163,7 @@ public class Tag extends ParentToPropertyTag<Tag> implements java.io.Serializabl
 
 	@Column(name = "TagName", nullable = false, length = 512)
 	@NotNull
-	@Length(max = 512)
+	@Size(max = 512)
 	public String getTagName()
 	{
 		return this.tagName;
@@ -177,7 +176,7 @@ public class Tag extends ParentToPropertyTag<Tag> implements java.io.Serializabl
 
 	// @Column(name = "TagDescription", length = 65535)
 	@Column(name = "TagDescription", columnDefinition = "TEXT")
-	@Length(max = 65535)
+	@Size(max = 65535)
 	public String getTagDescription()
 	{
 		return this.tagDescription;

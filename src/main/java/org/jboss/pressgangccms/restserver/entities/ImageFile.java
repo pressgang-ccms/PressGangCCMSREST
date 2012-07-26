@@ -18,17 +18,18 @@ import javax.persistence.Id;
 import javax.persistence.OneToMany;
 import javax.persistence.Table;
 import javax.persistence.Transient;
+import javax.validation.constraints.Size;
 
 import org.hibernate.annotations.BatchSize;
 import org.hibernate.annotations.Cache;
 import org.hibernate.annotations.CacheConcurrencyStrategy;
 import org.hibernate.envers.Audited;
-import org.hibernate.validator.Length;
-import com.redhat.ecs.commonutils.CollectionUtilities;
-import com.redhat.ecs.commonutils.FileUtilities;
-import com.redhat.topicindex.entity.base.AuditedEntity;
-import com.redhat.topicindex.exceptions.CustomConstraintViolationException;
-import com.redhat.topicindex.utils.Constants;
+import org.jboss.pressgangccms.restserver.constants.Constants;
+import org.jboss.pressgangccms.restserver.entities.base.AuditedEntity;
+import org.jboss.pressgangccms.restserver.exceptions.CustomConstraintViolationException;
+import org.jboss.pressgangccms.utils.common.CollectionUtilities;
+import org.jboss.pressgangccms.utils.common.FileUtilities;
+
 
 @Entity
 @Audited
@@ -75,7 +76,7 @@ public class ImageFile extends AuditedEntity<ImageFile> implements java.io.Seria
 
 	// @Column(name = "Description", length = 65535)
 	@Column(name = "Description", columnDefinition = "TEXT")
-	@Length(max = 65535)
+	@Size(max = 65535)
 	public String getDescription()
 	{
 		return this.description;

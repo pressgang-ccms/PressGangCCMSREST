@@ -9,15 +9,15 @@ import javax.persistence.UniqueConstraint;
 
 import javax.persistence.Id;
 import javax.persistence.Table;
+import javax.validation.constraints.NotNull;
+import javax.validation.constraints.Size;
+
 import static javax.persistence.GenerationType.IDENTITY;
 
 import org.hibernate.annotations.Cache;
 import org.hibernate.annotations.CacheConcurrencyStrategy;
 import org.hibernate.envers.Audited;
-import org.hibernate.validator.Length;
-import org.hibernate.validator.NotNull;
-
-import com.redhat.topicindex.entity.base.AuditedEntity;
+import org.jboss.pressgangccms.restserver.entities.base.AuditedEntity;
 
 @Entity
 @Audited
@@ -54,7 +54,7 @@ public class RelationshipTag extends AuditedEntity<RelationshipTag> implements j
 
 	@Column(name = "RelationshipTagName", nullable = false, length = 512)
 	@NotNull
-	@Length(max = 512)
+	@Size(max = 512)
 	public String getRelationshipTagName()
 	{
 		return this.relationshipTagName;
@@ -67,7 +67,7 @@ public class RelationshipTag extends AuditedEntity<RelationshipTag> implements j
 
 	// @Column(name = "RelationshipTagDescription", length = 65535)
 	@Column(name = "RelationshipTagDescription", columnDefinition = "TEXT")
-	@Length(max = 65535)
+	@Size(max = 65535)
 	public String getRelationshipTagDescription()
 	{
 		return this.relationshipTagDescription;

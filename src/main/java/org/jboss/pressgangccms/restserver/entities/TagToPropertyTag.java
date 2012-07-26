@@ -12,6 +12,8 @@ import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.Table;
 import javax.persistence.Transient;
+import javax.validation.constraints.NotNull;
+import javax.validation.constraints.Size;
 
 import org.hibernate.annotations.Cache;
 import org.hibernate.annotations.CacheConcurrencyStrategy;
@@ -21,11 +23,9 @@ import org.hibernate.envers.Audited;
 import org.hibernate.envers.query.AuditEntity;
 import org.hibernate.envers.query.AuditQuery;
 import org.hibernate.envers.query.AuditQueryCreator;
-import org.hibernate.validator.Length;
-import org.hibernate.validator.NotNull;
+import org.jboss.pressgangccms.restserver.entities.base.ToPropertyTag;
+import org.jboss.pressgangccms.restserver.utils.SkynetExceptionUtilities;
 
-import com.redhat.topicindex.entity.base.ToPropertyTag;
-import com.redhat.topicindex.utils.SkynetExceptionUtilities;
 
 @Audited
 @Entity
@@ -88,7 +88,7 @@ public class TagToPropertyTag extends ToPropertyTag<TagToPropertyTag>
 
 	@Override
 	@Column(name = "Value", columnDefinition = "TEXT")
-	@Length(max = 65535)
+	@Size(max = 65535)
 	public String getValue()
 	{
 		return value;

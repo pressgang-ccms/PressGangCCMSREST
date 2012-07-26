@@ -25,18 +25,17 @@ import javax.persistence.Table;
 import javax.persistence.Transient;
 import javax.persistence.UniqueConstraint;
 import javax.swing.ImageIcon;
+import javax.validation.constraints.NotNull;
+import javax.validation.constraints.Size;
 
 import org.apache.commons.codec.binary.Base64;
 import org.hibernate.annotations.Cache;
 import org.hibernate.annotations.CacheConcurrencyStrategy;
 import org.hibernate.envers.Audited;
-import org.hibernate.validator.Length;
-import org.hibernate.validator.NotNull;
-
-import com.redhat.topicindex.entity.base.AuditedEntity;
-import com.redhat.topicindex.exceptions.CustomConstraintViolationException;
-import com.redhat.topicindex.utils.SkynetExceptionUtilities;
-import com.redhat.topicindex.utils.SVGIcon;
+import org.jboss.pressgangccms.restserver.entities.base.AuditedEntity;
+import org.jboss.pressgangccms.restserver.exceptions.CustomConstraintViolationException;
+import org.jboss.pressgangccms.restserver.utils.SVGIcon;
+import org.jboss.pressgangccms.restserver.utils.SkynetExceptionUtilities;
 
 @Entity
 @Audited
@@ -90,7 +89,7 @@ public class LanguageImage extends AuditedEntity<LanguageImage> implements java.
 	}
 
 	@Column(name = "OriginalFileName", length = 2048)
-	@Length(max = 512)
+	@Size(max = 512)
 	public String getOriginalFileName()
 	{
 		return this.originalFileName;

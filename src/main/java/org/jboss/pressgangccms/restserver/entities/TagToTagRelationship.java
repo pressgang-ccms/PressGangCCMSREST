@@ -13,15 +13,14 @@ import javax.persistence.Id;
 import javax.persistence.OneToMany;
 import javax.persistence.Table;
 import javax.persistence.Transient;
+import javax.validation.constraints.Size;
 
 import org.hibernate.annotations.BatchSize;
 import org.hibernate.annotations.Cache;
 import org.hibernate.annotations.CacheConcurrencyStrategy;
 import org.hibernate.envers.Audited;
-import org.hibernate.validator.Length;
-
-import com.redhat.topicindex.entity.base.AuditedEntity;
-import com.redhat.topicindex.utils.Constants;
+import org.jboss.pressgangccms.restserver.constants.Constants;
+import org.jboss.pressgangccms.restserver.entities.base.AuditedEntity;
 
 @Audited
 @Entity
@@ -69,7 +68,7 @@ public class TagToTagRelationship extends AuditedEntity<TagToTagRelationship> im
 
 	//@Column(name = "TagToTagRelationshipDescription", length = 65535)
 	@Column(name = "TagToTagRelationshipDescription", columnDefinition="TEXT")
-	@Length(max = 65535)
+	@Size(max = 65535)
 	public String getTagToTagRelationshipDescription() 
 	{
 		return this.tagToTagRelationshipDescription;

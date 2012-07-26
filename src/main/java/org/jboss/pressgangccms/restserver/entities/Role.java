@@ -21,16 +21,15 @@ import javax.persistence.CascadeType;
 import javax.persistence.Id;
 import javax.persistence.OneToMany;
 import javax.persistence.Table;
+import javax.validation.constraints.NotNull;
+import javax.validation.constraints.Size;
 
 import org.hibernate.annotations.BatchSize;
 import org.hibernate.annotations.Cache;
 import org.hibernate.annotations.CacheConcurrencyStrategy;
 import org.hibernate.envers.Audited;
-import org.hibernate.validator.Length;
-import org.hibernate.validator.NotNull;
-
-import com.redhat.topicindex.entity.base.AuditedEntity;
-import com.redhat.topicindex.utils.Constants;
+import org.jboss.pressgangccms.restserver.constants.Constants;
+import org.jboss.pressgangccms.restserver.entities.base.AuditedEntity;
 
 @Entity
 @Audited
@@ -82,7 +81,7 @@ public class Role extends AuditedEntity<Role> implements java.io.Serializable
 
 	@Column(name = "RoleName", nullable = false, length = 512)
 	@NotNull
-	@Length(max = 512)
+	@Size(max = 512)
 	public String getRoleName()
 	{
 		return this.roleName;
@@ -95,7 +94,7 @@ public class Role extends AuditedEntity<Role> implements java.io.Serializable
 
 	// @Column(name = "Description", length = 512)
 	@Column(name = "Description", columnDefinition = "TEXT")
-	@Length(max = 512)
+	@Size(max = 512)
 	public String getDescription()
 	{
 		return this.description;
