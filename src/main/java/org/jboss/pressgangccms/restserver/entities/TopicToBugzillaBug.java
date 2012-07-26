@@ -15,13 +15,13 @@ import javax.persistence.ManyToOne;
 import javax.persistence.Table;
 import javax.persistence.Transient;
 import javax.persistence.UniqueConstraint;
+import javax.validation.constraints.NotNull;
 
 import org.hibernate.annotations.Cache;
 import org.hibernate.annotations.CacheConcurrencyStrategy;
 import org.hibernate.envers.Audited;
-import org.hibernate.validator.NotNull;
+import org.jboss.pressgangccms.restserver.entities.base.AuditedEntity;
 
-import com.redhat.topicindex.entity.base.AuditedEntity;
 
 @Entity
 @Audited

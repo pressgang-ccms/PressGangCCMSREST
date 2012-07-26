@@ -17,6 +17,7 @@ import javax.persistence.FetchType;
 import javax.persistence.GeneratedValue;
 import javax.persistence.Id;
 import javax.persistence.OneToMany;
+import javax.persistence.PersistenceContext;
 import javax.persistence.Table;
 import javax.persistence.Transient;
 import javax.persistence.UniqueConstraint;
@@ -47,6 +48,8 @@ import org.jboss.pressgangccms.utils.common.CollectionUtilities;
 @Table(name = "TranslatedTopic", uniqueConstraints = @UniqueConstraint(columnNames = { "TopicRevision", "TopicID" }))
 public class TranslatedTopic extends AuditedEntity<TranslatedTopic> implements java.io.Serializable
 {
+	@PersistenceContext(unitName="TranslatedTopic") EntityManager entityManager;
+	
 	private static final long serialVersionUID = 4190214754023153898L;
 	public static final String SELECT_ALL_QUERY = "select translatedTopic from TranslatedTopic translatedTopic";
 	private Integer translatedTopicId;
@@ -145,7 +148,6 @@ public class TranslatedTopic extends AuditedEntity<TranslatedTopic> implements j
 	@Transient
 	public Topic getEnversTopic()
 	{
-		final EntityManager entityManager = (EntityManager) Component.getInstance("entityManager");
 		return getEnversTopic(entityManager);
 	}
 	

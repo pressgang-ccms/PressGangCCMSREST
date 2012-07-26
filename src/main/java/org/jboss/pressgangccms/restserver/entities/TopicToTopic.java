@@ -17,17 +17,13 @@ import javax.persistence.Id;
 import javax.persistence.Table;
 import javax.transaction.Transaction;
 import javax.transaction.TransactionManager;
+import javax.validation.constraints.NotNull;
 
 import org.hibernate.annotations.Cache;
 import org.hibernate.annotations.CacheConcurrencyStrategy;
 import org.hibernate.envers.Audited;
-import org.hibernate.validator.NotNull;
-
-import com.redhat.ecs.commonthread.WorkQueue;
-import com.redhat.topicindex.entity.base.AuditedEntity;
-import com.redhat.topicindex.utils.SkynetExceptionUtilities;
-import com.redhat.topicindex.utils.topicrenderer.TopicQueueRenderer;
-import com.redhat.topicindex.messaging.TopicRendererType;
+import org.jboss.pressgangccms.restserver.entities.base.AuditedEntity;
+import org.jboss.pressgangccms.restserver.utils.SkynetExceptionUtilities;
 
 @Audited
 @Entity

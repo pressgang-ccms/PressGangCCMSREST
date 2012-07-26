@@ -69,6 +69,7 @@ import org.jboss.pressgangccms.restserver.sort.CategoryNameComparator;
 import org.jboss.pressgangccms.restserver.sort.TagIDComparator;
 import org.jboss.pressgangccms.restserver.sort.TagNameComparator;
 import org.jboss.pressgangccms.restserver.sort.TagToCategorySortingComparator;
+import org.jboss.pressgangccms.restserver.sort.TopicIDComparator;
 import org.jboss.pressgangccms.restserver.sort.TopicToTagTagIDSort;
 import org.jboss.pressgangccms.restserver.sort.TopicToTopicMainTopicIDSort;
 import org.jboss.pressgangccms.restserver.sort.TopicToTopicRelatedTopicIDSort;
@@ -97,7 +98,7 @@ import com.j2bugzilla.rpc.LogIn;
 @Table(name = "Topic")
 public class Topic extends ParentToPropertyTag<Topic> implements java.io.Serializable
 {
-	@PersistenceContext(unitName="Topic") EntityManager entityManager;
+	@PersistenceContext(unitName="Topic") static EntityManager entityManager;
 	
 	public static final String SELECT_ALL_QUERY = "SELECT topic FROM Topic as Topic";
 	/**
@@ -105,14 +106,7 @@ public class Topic extends ParentToPropertyTag<Topic> implements java.io.Seriali
 	 * the end of the XML
 	 */
 	private static final String DETAILS_COMMENT_NODE_START = " Generated Topic Details";
-	/** The string constant that is used as a conceptual overview template */
-	private static final Integer CONCEPTUAL_OVERVIEW_TOPIC_STRINGCONSTANTID = 11;
-	/** The string constant that is used as a reference template */
-	private static final Integer REFERENCE_TOPIC_STRINGCONSTANTID = 12;
-	/** The string constant that is used as a task template */
-	private static final Integer TASK_TOPIC_STRINGCONSTANTID = 13;
-	/** The string constant that is used as a concept template */
-	private static final Integer CONCEPT_TOPIC_STRINGCONSTANTID = 14;
+
 
 	private static final long serialVersionUID = 5580473587657911655L;
 
@@ -125,7 +119,6 @@ public class Topic extends ParentToPropertyTag<Topic> implements java.io.Seriali
 	@Transient
 	public static String getCSVHeaderRow()
 	{
-		final EntityManager entityManager = (EntityManager) Component.getInstance("entityManager");
 		final List<Category> categories = entityManager.createQuery(Category.SELECT_ALL_QUERY).getResultList();
 		Collections.sort(categories, new CategoryNameComparator());
 
@@ -321,7 +314,6 @@ public class Topic extends ParentToPropertyTag<Topic> implements java.io.Seriali
 
 	public void addTag(final int tagID)
 	{
-		final EntityManager entityManager = (EntityManager) Component.getInstance("entityManager");
 		final Tag tag = entityManager.getReference(Tag.class, tagID);
 		addTag(tag);
 	}
@@ -442,7 +434,6 @@ public class Topic extends ParentToPropertyTag<Topic> implements java.io.Seriali
 
 		String topicColumns = StringUtilities.cleanTextForCSV(this.topicId.toString()) + "," + StringUtilities.cleanTextForCSV(this.topicTitle) + "," + StringUtilities.cleanTextForCSV(this.topicText) + "," + StringUtilities.cleanTextForCSV(sourceUrls);
 
-		final EntityManager entityManager = (EntityManager) Component.getInstance("entityManager");
 		final List<Category> categories = entityManager.createQuery(Category.SELECT_ALL_QUERY).getResultList();
 		Collections.sort(categories, new CategoryNameComparator());
 
@@ -844,23 +835,17 @@ public class Topic extends ParentToPropertyTag<Topic> implements java.io.Seriali
 	{
 		try
 		{
-			final EntityManager entityManager = (EntityManager) Component.getInstance("entityManager");
-
 			if (filter(having(on(TopicToTag.class).getTag().getTagId(), equalTo(Constants.CONCEPT_TAG_ID)), this.topicToTags).size() != 0)
 			{
-				this.topicXML = entityManager.find(StringConstants.class, CONCEPT_TOPIC_STRINGCONSTANTID).getConstantValue();
+				this.topicXML = entityManager.find(StringConstants.class, Constants.CONCEPT_TOPIC_STRINGCONSTANTID).getConstantValue();
 			}
 			else if (filter(having(on(TopicToTag.class).getTag().getTagId(), equalTo(Constants.TASK_TAG_ID)), this.topicToTags).size() != 0)
 			{
-				this.topicXML = entityManager.find(StringConstants.class, TASK_TOPIC_STRINGCONSTANTID).getConstantValue();
+				this.topicXML = entityManager.find(StringConstants.class, Constants.TASK_TOPIC_STRINGCONSTANTID).getConstantValue();
 			}
 			else if (filter(having(on(TopicToTag.class).getTag().getTagId(), equalTo(Constants.REFERENCE_TAG_ID)), this.topicToTags).size() != 0)
 			{
-				this.topicXML = entityManager.find(StringConstants.class, REFERENCE_TOPIC_STRINGCONSTANTID).getConstantValue();
-			}
-			else if (filter(having(on(TopicToTag.class).getTag().getTagId(), equalTo(Constants.CONCEPTUALOVERVIEW_TAG_ID)), this.topicToTags).size() != 0)
-			{
-				this.topicXML = entityManager.find(StringConstants.class, CONCEPTUAL_OVERVIEW_TOPIC_STRINGCONSTANTID).getConstantValue();
+				this.topicXML = entityManager.find(StringConstants.class, Constants.REFERENCE_TOPIC_STRINGCONSTANTID).getConstantValue();
 			}
 
 			processXML();

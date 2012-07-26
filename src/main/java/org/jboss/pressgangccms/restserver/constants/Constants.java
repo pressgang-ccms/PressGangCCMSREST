@@ -2,6 +2,29 @@ package org.jboss.pressgangccms.restserver.constants;
 
 public final class Constants
 {
+	/* The following database key constants are defined in import.sql */
+	
+	/** The Content Specification tag ID */
+	public static final Integer CONTENT_SPEC_TAG_ID = 4;
+	/** The Concept tag ID */
+	public static final Integer CONCEPT_TAG_ID = 1;
+	/** The Concept tag name */
+	public static final String CONCEPT_TAG_NAME = "Concept";
+	/** The Task tag ID */
+	public static final Integer TASK_TAG_ID = 2;
+	/** The Task tag name */
+	public static final String TASK_TAG_NAME = "Task";
+	/** The Reference tag ID */
+	public static final Integer REFERENCE_TAG_ID = 3;
+	/** The Reference tag name */
+	public static final String REFERENCE_TAG_NAME = "Reference";	
+	/** The string constant that is used as a reference template */
+	public static final Integer REFERENCE_TOPIC_STRINGCONSTANTID = 2;
+	/** The string constant that is used as a task template */
+	public static final Integer TASK_TOPIC_STRINGCONSTANTID = 1;
+	/** The string constant that is used as a concept template */
+	public static final Integer CONCEPT_TOPIC_STRINGCONSTANTID = 3;
+
 	/**
 	 * The default size to use for batch fetching.
 	 */
