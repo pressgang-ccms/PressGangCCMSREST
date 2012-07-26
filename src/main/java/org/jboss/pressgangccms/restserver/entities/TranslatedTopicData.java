@@ -251,7 +251,7 @@ public class TranslatedTopicData extends AuditedEntity<TranslatedTopicData> impl
 	}
 
 	@Transient
-	public List<TranslatedTopicData> getOutgoingRelatedTranslatedTopicData(final EntityManager entityManager) throws Exception
+	public List<TranslatedTopicData> getOutgoingRelatedTranslatedTopicData(final EntityManager entityManager)
 	{
 		final Topic enversTopic = translatedTopic.getEnversTopic(entityManager);
 
@@ -259,7 +259,7 @@ public class TranslatedTopicData extends AuditedEntity<TranslatedTopicData> impl
 	}
 
 	@Transient
-	public List<TranslatedTopicData> getIncomingRelatedTranslatedTopicData(final EntityManager entityManager) throws Exception
+	public List<TranslatedTopicData> getIncomingRelatedTranslatedTopicData(final EntityManager entityManager)
 	{
 		final Topic enversTopic = translatedTopic.getEnversTopic(entityManager);
 
@@ -267,7 +267,7 @@ public class TranslatedTopicData extends AuditedEntity<TranslatedTopicData> impl
 	}
 
 	@Transient
-	private List<TranslatedTopicData> getRelatedTranslatedTopicData(final EntityManager entityManager, final List<Topic> relatedTopics) throws Exception
+	private List<TranslatedTopicData> getRelatedTranslatedTopicData(final EntityManager entityManager, final List<Topic> relatedTopics)
 	{
 
 		final List<TranslatedTopicData> relatedTranslatedTopicDatas = new ArrayList<TranslatedTopicData>();
@@ -293,7 +293,7 @@ public class TranslatedTopicData extends AuditedEntity<TranslatedTopicData> impl
 				 * block can be used as a handy break point.
 				 */
 
-				throw ex;
+				//throw ex;
 			}
 		}
 
@@ -322,7 +322,7 @@ public class TranslatedTopicData extends AuditedEntity<TranslatedTopicData> impl
 	}
 
 	@Transient
-	public List<TranslatedTopicData> getOutgoingDummyFilledRelatedTranslatedTopicDatas(final EntityManager entityManager) throws Exception
+	public List<TranslatedTopicData> getOutgoingDummyFilledRelatedTranslatedTopicDatas(final EntityManager entityManager)
 	{
 		final List<TranslatedTopicData> outgoingRelatedTranslatedTopicDatas = this.getOutgoingRelatedTranslatedTopicData(entityManager);
 
@@ -331,7 +331,7 @@ public class TranslatedTopicData extends AuditedEntity<TranslatedTopicData> impl
 	}
 
 	@Transient
-	public List<TranslatedTopicData> getIncomingDummyFilledRelatedTranslatedTopicDatas(final EntityManager entityManager) throws Exception
+	public List<TranslatedTopicData> getIncomingDummyFilledRelatedTranslatedTopicDatas(final EntityManager entityManager)
 	{
 		final List<TranslatedTopicData> incomingRelatedTranslatedTopicDatas = this.getIncomingRelatedTranslatedTopicData(entityManager);
 
