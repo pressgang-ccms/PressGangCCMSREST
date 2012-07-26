@@ -51,7 +51,7 @@ import org.jboss.pressgangccms.utils.structures.Pair;
 @Table(name = "TranslatedTopic", uniqueConstraints = @UniqueConstraint(columnNames = { "TopicRevision", "TopicID" }))
 public class TranslatedTopic extends AuditedEntity<TranslatedTopic> implements java.io.Serializable
 {
-	@PersistenceContext(unitName="TranslatedTopic") EntityManager entityManager;
+	@PersistenceContext EntityManager entityManager;
 	
 	private static final long serialVersionUID = 4190214754023153898L;
 	public static final String SELECT_ALL_QUERY = "select translatedTopic from TranslatedTopic translatedTopic";

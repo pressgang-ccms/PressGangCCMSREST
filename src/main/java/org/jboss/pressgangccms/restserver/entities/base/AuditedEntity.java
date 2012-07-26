@@ -19,8 +19,7 @@ import org.hibernate.envers.AuditReaderFactory;
  */
 abstract public class AuditedEntity<T extends AuditedEntity<T>>
 {
-	@PersistenceContext(unitName="Topic")
-	EntityManager entityManager;
+	@PersistenceContext	EntityManager entityManager;
 	
 	final Class<T> classType;
 	private Date lastModified;

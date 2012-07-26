@@ -50,7 +50,7 @@ import com.redhat.contentspec.processor.ContentSpecParser;
  */
 public class EntityUtilities
 {
-	@PersistenceContext(unitName="EntityUtilities") static EntityManager entityManager;
+	@PersistenceContext static EntityManager entityManager;
 	
 	public static byte[] loadBlobConstant(final EntityManager entityManager, final Integer id)
 	{

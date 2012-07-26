@@ -11,7 +11,7 @@ import org.jboss.pressgangccms.restserver.entities.PropertyTag;
  */
 public abstract class ToPropertyTag<T extends AuditedEntity<T>> extends AuditedEntity<T>
 {
-	@PersistenceContext(unitName="ToPropertyTag") EntityManager entityManager;
+	@PersistenceContext EntityManager entityManager;
 	
 	protected PropertyTag propertyTag;
 	protected String value;

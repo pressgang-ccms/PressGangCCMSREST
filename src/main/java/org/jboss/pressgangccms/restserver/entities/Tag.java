@@ -57,7 +57,7 @@ import org.jboss.pressgangccms.utils.common.CollectionUtilities;
 @Table(name = "Tag", uniqueConstraints = @UniqueConstraint(columnNames = { "TagName" }))
 public class Tag extends ParentToPropertyTag<Tag> implements java.io.Serializable
 {
-	@PersistenceContext(unitName="Topic") EntityManager entityManager;
+	@PersistenceContext EntityManager entityManager;
 	
 	public static final String SELECT_ALL_QUERY = "select tag from Tag tag";
 	private static final long serialVersionUID = 2841080567638275194L;

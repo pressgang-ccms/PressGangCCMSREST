@@ -7,11 +7,13 @@ import java.util.Date;
 import java.util.List;
 import java.util.Set;
 
+import javax.ejb.Stateless;
 import javax.naming.InitialContext;
 import javax.naming.NamingException;
 import javax.persistence.EntityManager;
 import javax.persistence.EntityManagerFactory;
 import javax.persistence.FlushModeType;
+import javax.persistence.PersistenceContext;
 import javax.persistence.TypedQuery;
 import javax.persistence.criteria.CriteriaBuilder;
 import javax.persistence.criteria.CriteriaQuery;
@@ -60,6 +62,8 @@ import org.jboss.resteasy.spi.InternalServerErrorException;
  */
 public class BaseRESTv1
 {
+	//@PersistenceContext static EntityManager entityManager;
+	
 	protected static final String REST_DATE_FORMAT = "dd-MMM-yyyy";
 
 	public static final String TOPICS_EXPANSION_NAME = "topics";
@@ -177,12 +181,12 @@ public class BaseRESTv1
 	{
 		assert date != null : "The date parameter can not be null";
 
-		EntityManager entityManager = null;
-		TransactionManager transactionManager = null;
+		/*EntityManager entityManager = null;
+		TransactionManager transactionManager = null;*/
 
 		try
 		{
-			final InitialContext initCtx = new InitialContext();
+			/*final InitialContext initCtx = new InitialContext();
 
 			final EntityManagerFactory entityManagerFactory = (EntityManagerFactory) initCtx.lookup("java:jboss/EntityManagerFactory");
 			if (entityManagerFactory == null)
@@ -199,7 +203,7 @@ public class BaseRESTv1
 
 			entityManager = entityManagerFactory.createEntityManager();
 			if (entityManager == null)
-				throw new InternalServerErrorException("Could not create an EntityManager");
+				throw new InternalServerErrorException("Could not create an EntityManager");*/
 
 			/*
 			 * get the list of topic ids that were edited after the selected
@@ -221,7 +225,7 @@ public class BaseRESTv1
 
 			final List<U> entities = jpaQuery.getResultList();
 
-			transactionManager.commit();
+			//transactionManager.commit();
 
 			/*
 			 * convert the expand string from JSON to an instance of
@@ -238,21 +242,21 @@ public class BaseRESTv1
 		{
 			SkynetExceptionUtilities.handleException(ex, false, "Probably an issue querying Envers");
 
-			try
+			/*try
 			{
 				transactionManager.rollback();
 			}
 			catch (final Exception ex2)
 			{
 				SkynetExceptionUtilities.handleException(ex2, false, "There was an issue rolling back the transaction");
-			}
+			}*/
 
 			throw new InternalServerErrorException("There was an error running the query");
 		}
 		finally
 		{
-			if (entityManager != null)
-				entityManager.close();
+			/*if (entityManager != null)
+				entityManager.close();*/
 		}
 
 	}
@@ -271,12 +275,12 @@ public class BaseRESTv1
 	{
 		assert id != null : "id should not be null";
 
-		TransactionManager transactionManager = null;
-		EntityManager entityManager = null;
+		/*TransactionManager transactionManager = null;
+		EntityManager entityManager = null;*/
 
 		try
 		{
-			final InitialContext initCtx = new InitialContext();
+			/*final InitialContext initCtx = new InitialContext();
 
 			final EntityManagerFactory entityManagerFactory = (EntityManagerFactory) initCtx.lookup("java:jboss/EntityManagerFactory");
 			if (entityManagerFactory == null)
@@ -295,7 +299,7 @@ public class BaseRESTv1
 			if (entityManager == null)
 				throw new InternalServerErrorException("Could not create an EntityManager");
 
-			assert entityManager != null : "entityManager should not be null";
+			assert entityManager != null : "entityManager should not be null";*/
 
 			final U entity = entityManager.find(type, id);
 
@@ -304,7 +308,9 @@ public class BaseRESTv1
 
 			entityManager.remove(entity);
 			entityManager.flush();
-			transactionManager.commit();
+			
+			
+			//transactionManager.commit();
 
 			return entity;
 		}
@@ -315,7 +321,7 @@ public class BaseRESTv1
 		}
 		catch (final Exception ex)
 		{
-			SkynetExceptionUtilities.handleException(ex, false, "Probably an error saving the entity");
+			/*SkynetExceptionUtilities.handleException(ex, false, "Probably an error saving the entity");
 
 			try
 			{
@@ -324,14 +330,14 @@ public class BaseRESTv1
 			catch (final Exception ex2)
 			{
 				SkynetExceptionUtilities.handleException(ex2, false, "There was an error rolling back the transaction");
-			}
+			}*/
 
 			throw new InternalServerErrorException("There was an error saving the entity");
 		}
 		finally
 		{
-			if (entityManager != null)
-				entityManager.close();
+			/*if (entityManager != null)
+				entityManager.close();*/
 		}
 	}
 
@@ -340,12 +346,12 @@ public class BaseRESTv1
 		assert restEntity != null : "restEntity should not be null";
 		assert factory != null : "factory should not be null";
 
-		TransactionManager transactionManager = null;
-		EntityManager entityManager = null;
+		/*TransactionManager transactionManager = null;
+		EntityManager entityManager = null;*/
 
 		try
 		{
-			final InitialContext initCtx = new InitialContext();
+			/*final InitialContext initCtx = new InitialContext();
 
 			final EntityManagerFactory entityManagerFactory = (EntityManagerFactory) initCtx.lookup("java:jboss/EntityManagerFactory");
 			if (entityManagerFactory == null)
@@ -364,7 +370,7 @@ public class BaseRESTv1
 			if (entityManager == null)
 				throw new InternalProcessingException("Could not create an EntityManager");
 
-			assert entityManager != null : "entityManager should not be null";
+			assert entityManager != null : "entityManager should not be null";*/
 
 			/*
 			 * The difference between creating or updating an entity is that we
@@ -396,15 +402,16 @@ public class BaseRESTv1
 			assert entity != null : "entity should not be null";
 
 			entityManager.flush();
-			transactionManager.commit();
+			
+			//transactionManager.commit();
 			
 			return factory.createRESTEntityFromDBEntity(entity, this.getBaseUrl(), JSON_URL, expand, null, entityManager);
 		}
-		catch (final InternalProcessingException ex)
+		/*catch (final InternalProcessingException ex)
 		{
 			SkynetExceptionUtilities.handleException(ex, false, "There was an error looking up the required manager objects");
 			throw ex;
-		}
+		}*/
 		catch (final InvalidParameterException ex)
 		{
 			SkynetExceptionUtilities.handleException(ex, true, "There was an error looking up the entities");
@@ -414,21 +421,21 @@ public class BaseRESTv1
 		{
 			SkynetExceptionUtilities.handleException(ex, false, "Probably an error saving the entity");
 
-			try
+			/*try
 			{
 				transactionManager.rollback();
 			}
 			catch (final Exception ex2)
 			{
 				SkynetExceptionUtilities.handleException(ex2, false, "There was an error rolling back the transaction");
-			}
+			}*/
 
 			throw new InternalProcessingException("There was an error saving the entity");
 		}
 		finally
 		{
-			if (entityManager != null)
-				entityManager.close();
+			/*if (entityManager != null)
+				entityManager.close();*/
 		}
 	}
 
@@ -448,12 +455,12 @@ public class BaseRESTv1
 		assert ids != null : "ids should not be null";
 		assert factory != null : "factory should not be null";
 
-		TransactionManager transactionManager = null;
-		EntityManager entityManager = null;
+		/*TransactionManager transactionManager = null;
+		EntityManager entityManager = null;*/
 
 		try
 		{
-			final InitialContext initCtx = new InitialContext();
+			/*final InitialContext initCtx = new InitialContext();
 
 			final EntityManagerFactory entityManagerFactory = (EntityManagerFactory) initCtx.lookup("java:jboss/EntityManagerFactory");
 			if (entityManagerFactory == null)
@@ -472,7 +479,7 @@ public class BaseRESTv1
 			if (entityManager == null)
 				throw new InternalProcessingException("Could not create an EntityManager");
 
-			assert entityManager != null : "entityManager should not be null";
+			assert entityManager != null : "entityManager should not be null";*/
 
 			final List<U> retValue = new ArrayList<U>();
 			for (final String id : ids)
@@ -502,7 +509,7 @@ public class BaseRESTv1
 				retValue.add(entity);
 			}
 
-			transactionManager.commit();
+			//transactionManager.commit();
 
 			return new RESTDataObjectCollectionFactory<T, U, V>().create(collectionClass, factory, retValue, expandName, dataType, expand, baseUrl, entityManager);
 		}
@@ -511,30 +518,30 @@ public class BaseRESTv1
 			SkynetExceptionUtilities.handleException(ex, true, "There was an error looking up the database entities");
 			throw ex;
 		}
-		catch (final InternalProcessingException ex)
+		/*catch (final InternalProcessingException ex)
 		{
 			SkynetExceptionUtilities.handleException(ex, false, "There was an error looking up the required manager objects");
 			throw ex;
-		}
+		}*/
 		catch (final Exception ex)
 		{
 			SkynetExceptionUtilities.handleException(ex, false, "Probably an error saving the entity");
 
-			try
+			/*try
 			{
 				transactionManager.rollback();
 			}
 			catch (final Exception ex2)
 			{
 				SkynetExceptionUtilities.handleException(ex2, false, "There was an error rolling back the transaction");
-			}
+			}*/
 
 			throw new InternalServerErrorException("There was an error saving the entity");
 		}
 		finally
 		{
-			if (entityManager != null)
-				entityManager.close();
+			/*if (entityManager != null)
+				entityManager.close();*/
 		}
 	}
 
@@ -547,12 +554,12 @@ public class BaseRESTv1
 		assert entities != null : "dataObject should not be null";
 		assert factory != null : "factory should not be null";
 
-		TransactionManager transactionManager = null;
-		EntityManager entityManager = null;
+		/*TransactionManager transactionManager = null;
+		EntityManager entityManager = null;*/
 
 		try
 		{
-			final InitialContext initCtx = new InitialContext();
+			/*final InitialContext initCtx = new InitialContext();
 
 			final EntityManagerFactory entityManagerFactory = (EntityManagerFactory) initCtx.lookup("java:jboss/EntityManagerFactory");
 			if (entityManagerFactory == null)
@@ -573,7 +580,7 @@ public class BaseRESTv1
 			
 			entityManager.setFlushMode(FlushModeType.AUTO);
 
-			assert entityManager != null : "entityManager should not be null";
+			assert entityManager != null : "entityManager should not be null";*/
 
 			final List<U> retValue = new ArrayList<U>();
 			for (final T restEntity : entities.getItems())
@@ -617,7 +624,7 @@ public class BaseRESTv1
 				retValue.add(entity);
 			}
 
-			transactionManager.commit();
+			//transactionManager.commit();
 
 			return new RESTDataObjectCollectionFactory<T, U, V>().create(collectionClass, factory, retValue, expandName, dataType, expand, baseUrl, entityManager);
 		}
@@ -630,21 +637,21 @@ public class BaseRESTv1
 		{
 			SkynetExceptionUtilities.handleException(ex, false, "Probably an error saving the entity");
 
-			try
+			/*try
 			{
 				transactionManager.rollback();
 			}
 			catch (final Exception ex2)
 			{
 				SkynetExceptionUtilities.handleException(ex2, false, "There was an error rolling back the transaction");
-			}
+			}*/
 
 			throw new InternalServerErrorException("There was an error saving the entity");
 		}
 		finally
 		{
-			if (entityManager != null)
-				entityManager.close();
+			/*if (entityManager != null)
+				entityManager.close();*/
 		}
 	}
 	
@@ -689,7 +696,7 @@ public class BaseRESTv1
 
 		try
 		{
-			final InitialContext initCtx = new InitialContext();
+			/*final InitialContext initCtx = new InitialContext();
 
 			final EntityManagerFactory entityManagerFactory = (EntityManagerFactory) initCtx.lookup("java:jboss/EntityManagerFactory");
 			if (entityManagerFactory == null)
@@ -697,7 +704,7 @@ public class BaseRESTv1
 
 			final EntityManager entityManager = entityManagerFactory.createEntityManager();
 			if (entityManager == null)
-				throw new InternalServerErrorException("Could not create an EntityManager");
+				throw new InternalServerErrorException("Could not create an EntityManager");*/
 
 			final U entity;
 			
@@ -735,9 +742,12 @@ public class BaseRESTv1
 				
 				entity = parentAuditedEntity.getRevision(closestRevision);
 				
-			} else {
+			}
+			else 
+			{
 				entity = entityManager.find(type, id);
 			}
+			
 			if (entity == null)
 				throw new BadRequestException("No entity was found with the primary key " + id);
 
@@ -754,7 +764,7 @@ public class BaseRESTv1
 
 			return restRepresentation;
 		}
-		catch (final NamingException ex)
+		catch (final Exception /*NamingException*/ ex)
 		{
 			throw new InternalProcessingException("Could not find the EntityManagerFactory");
 		}
@@ -764,7 +774,7 @@ public class BaseRESTv1
 	{
 		try
 		{
-			final InitialContext initCtx = new InitialContext();
+			/*final InitialContext initCtx = new InitialContext();
 
 			final EntityManagerFactory entityManagerFactory = (EntityManagerFactory) initCtx.lookup("java:jboss/EntityManagerFactory");
 			if (entityManagerFactory == null)
@@ -772,7 +782,7 @@ public class BaseRESTv1
 
 			final EntityManager entityManager = entityManagerFactory.createEntityManager();
 			if (entityManager == null)
-				throw new InternalServerErrorException("Could not create an EntityManager");
+				throw new InternalServerErrorException("Could not create an EntityManager");*/
 
 			final U entity = entityManager.find(type, id);
 			if (entity == null)
@@ -780,7 +790,7 @@ public class BaseRESTv1
 
 			return entity;
 		}
-		catch (final NamingException ex)
+		catch (final /*NamingException*/ Exception ex)
 		{
 			throw new InternalServerErrorException("Could not find the EntityManagerFactory");
 		}
@@ -803,7 +813,7 @@ public class BaseRESTv1
 
 		try
 		{
-			final InitialContext initCtx = new InitialContext();
+			/*final InitialContext initCtx = new InitialContext();
 
 			final EntityManagerFactory entityManagerFactory = (EntityManagerFactory) initCtx.lookup("java:jboss/EntityManagerFactory");
 			if (entityManagerFactory == null)
@@ -811,7 +821,7 @@ public class BaseRESTv1
 
 			final EntityManager entityManager = entityManagerFactory.createEntityManager();
 			if (entityManager == null)
-				throw new InternalServerErrorException("Could not create an EntityManager");
+				throw new InternalServerErrorException("Could not create an EntityManager");*/
 
 			final CriteriaBuilder criteriaBuilder = entityManager.getCriteriaBuilder();
 			final CriteriaQuery<U> criteriaQuery = criteriaBuilder.createQuery(type);
@@ -837,10 +847,10 @@ public class BaseRESTv1
 
 			return retValue;
 		}
-		catch (final NamingException ex)
+		/*catch (final NamingException ex)
 		{
 			throw new InternalProcessingException("Could not find the EntityManagerFactory");
-		}
+		}*/
 		catch (final JsonParseException ex)
 		{
 			throw new InvalidParameterException("Could not convert expand data from JSON to an instance of ExpandDataTrunk");
@@ -871,7 +881,7 @@ public class BaseRESTv1
 
 		try
 		{
-			final InitialContext initCtx = new InitialContext();
+			/*final InitialContext initCtx = new InitialContext();
 
 			final EntityManagerFactory entityManagerFactory = (EntityManagerFactory) initCtx.lookup("java:jboss/EntityManagerFactory");
 			if (entityManagerFactory == null)
@@ -879,7 +889,7 @@ public class BaseRESTv1
 
 			final EntityManager entityManager = entityManagerFactory.createEntityManager();
 			if (entityManager == null)
-				throw new InternalProcessingException("Could not create an EntityManager");
+				throw new InternalProcessingException("Could not create an EntityManager");*/
 
 			// build up a Filter object from the URL variables
 			final Filter filter = EntityUtilities.populateFilter(queryParams, Constants.FILTER_ID, Constants.MATCH_TAG, Constants.GROUP_TAG, Constants.CATEORY_INTERNAL_LOGIC, Constants.CATEORY_EXTERNAL_LOGIC, Constants.MATCH_LOCALE);
@@ -904,10 +914,10 @@ public class BaseRESTv1
 
 			return retValue;
 		}
-		catch (final NamingException ex)
+		/*catch (final NamingException ex)
 		{
 			throw new InternalServerErrorException("Could not find the EntityManagerFactory");
-		}
+		}*/
 		catch (final JsonParseException ex)
 		{
 			throw new InternalServerErrorException("Could not convert expand data from JSON to an instance of ExpandDataTrunk");

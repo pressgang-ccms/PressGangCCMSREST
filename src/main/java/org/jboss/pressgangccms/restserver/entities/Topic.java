@@ -101,7 +101,7 @@ import com.j2bugzilla.rpc.LogIn;
 @Table(name = "Topic")
 public class Topic extends ParentToPropertyTag<Topic> implements java.io.Serializable
 {
-	@PersistenceContext(unitName="Topic") static EntityManager entityManager;
+	@PersistenceContext static EntityManager entityManager;
 	
 	public static final String SELECT_ALL_QUERY = "SELECT topic FROM Topic as Topic";
 	/**
