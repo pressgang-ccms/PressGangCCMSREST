@@ -10,13 +10,12 @@ import javax.persistence.GeneratedValue;
 import javax.persistence.Id;
 import javax.persistence.Table;
 import javax.persistence.Transient;
+import javax.validation.constraints.Size;
 
 import org.hibernate.annotations.Cache;
 import org.hibernate.annotations.CacheConcurrencyStrategy;
 import org.hibernate.envers.Audited;
-import org.hibernate.validator.Length;
-
-import com.redhat.topicindex.entity.base.AuditedEntity;
+import org.jboss.pressgangccms.restserver.entities.base.AuditedEntity;
 
 @Audited
 @Entity
@@ -56,7 +55,7 @@ public class TopicSecondOrderData extends AuditedEntity<TopicSecondOrderData> im
 	
 	// @Column(name = "TopicHTMLView", length = 65535)
 	@Column(name = "TopicHTMLView", columnDefinition = "MEDIUMTEXT")
-	@Length(max = 16777215)
+	@Size(max = 16777215)
 	public String getTopicHTMLView()
 	{
 		return this.topicHTMLView;
@@ -69,7 +68,7 @@ public class TopicSecondOrderData extends AuditedEntity<TopicSecondOrderData> im
 	
 	// @Column(name = "TopicXMLErrors", length = 65535)
 	@Column(name = "TopicXMLErrors", columnDefinition = "TEXT")
-	@Length(max = 65535)
+	@Size(max = 65535)
 	public String getTopicXMLErrors()
 	{
 		return this.topicXMLErrors;

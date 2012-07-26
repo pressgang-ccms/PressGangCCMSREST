@@ -16,6 +16,7 @@ import javax.persistence.GeneratedValue;
 import javax.persistence.JoinColumn;
 import javax.persistence.JoinTable;
 import javax.persistence.OneToMany;
+import javax.persistence.PersistenceContext;
 import javax.persistence.PrePersist;
 import javax.persistence.PreRemove;
 import javax.persistence.PreUpdate;
@@ -56,6 +57,8 @@ import org.jboss.pressgangccms.utils.common.CollectionUtilities;
 @Table(name = "Tag", uniqueConstraints = @UniqueConstraint(columnNames = { "TagName" }))
 public class Tag extends ParentToPropertyTag<Tag> implements java.io.Serializable
 {
+	@PersistenceContext(unitName="Topic") EntityManager entityManager;
+	
 	public static final String SELECT_ALL_QUERY = "select tag from Tag tag";
 	private static final long serialVersionUID = 2841080567638275194L;
 	private Integer tagId;
@@ -369,7 +372,6 @@ public class Tag extends ParentToPropertyTag<Tag> implements java.io.Serializabl
 	@Transient
 	public List<Number> getRevisions()
 	{
-		final EntityManager entityManager = (EntityManager) Component.getInstance("entityManager");
 		final AuditReader reader = AuditReaderFactory.get(entityManager);
 		final List<Number> retValue = reader.getRevisions(Tag.class, this.tagId);
 		Collections.sort(retValue, Collections.reverseOrder());

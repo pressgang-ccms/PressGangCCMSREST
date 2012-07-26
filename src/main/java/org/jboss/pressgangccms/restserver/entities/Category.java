@@ -6,6 +6,11 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
+import static ch.lambdaj.Lambda.filter;
+import static ch.lambdaj.Lambda.having;
+import static ch.lambdaj.Lambda.on;
+import static org.hamcrest.Matchers.equalTo;
+
 import javax.persistence.Cacheable;
 import javax.persistence.CascadeType;
 import javax.persistence.Column;

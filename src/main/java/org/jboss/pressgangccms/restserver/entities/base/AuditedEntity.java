@@ -7,11 +7,11 @@ import java.util.List;
 import java.util.Map;
 
 import javax.persistence.EntityManager;
+import javax.persistence.PersistenceContext;
 import javax.persistence.Transient;
 
 import org.hibernate.envers.AuditReader;
 import org.hibernate.envers.AuditReaderFactory;
-import org.jboss.seam.Component;
 
 /**
  * This base class is used to provide consistent access to previous versions of
@@ -19,6 +19,9 @@ import org.jboss.seam.Component;
  */
 abstract public class AuditedEntity<T extends AuditedEntity<T>>
 {
+	@PersistenceContext(unitName="Topic")
+	EntityManager entityManager;
+	
 	final Class<T> classType;
 	private Date lastModified;
 
@@ -71,7 +74,6 @@ abstract public class AuditedEntity<T extends AuditedEntity<T>>
 	@Transient
 	public Map<Number, T> getRevisionEntities()
 	{
-		final EntityManager entityManager = (EntityManager) Component.getInstance("entityManager");
 		final AuditReader reader = AuditReaderFactory.get(entityManager);
 		final List<Number> revisions = reader.getRevisions(classType, this.getId());
 		Collections.sort(revisions, Collections.reverseOrder());
@@ -91,7 +93,6 @@ abstract public class AuditedEntity<T extends AuditedEntity<T>>
 	@Transient
 	public List<Number> getRevisions()
 	{
-		final EntityManager entityManager = (EntityManager) Component.getInstance("entityManager");
 		final AuditReader reader = AuditReaderFactory.get(entityManager);
 		final List<Number> retValue = reader.getRevisions(classType, this.getId());
 		Collections.sort(retValue, Collections.reverseOrder());
@@ -110,7 +111,6 @@ abstract public class AuditedEntity<T extends AuditedEntity<T>>
 	@Transient
 	public T getRevision(final Number revision)
 	{
-		final EntityManager entityManager = (EntityManager) Component.getInstance("entityManager");
 		final AuditReader reader = AuditReaderFactory.get(entityManager);
 
 		return getRevision(reader, revision);
@@ -130,7 +130,6 @@ abstract public class AuditedEntity<T extends AuditedEntity<T>>
 	@Transient
 	public Number getLatestRevision()
 	{
-		final EntityManager entityManager = (EntityManager) Component.getInstance("entityManager");
 		final AuditReader reader = AuditReaderFactory.get(entityManager);
 		final List<Number> retValue = reader.getRevisions(classType, this.getId());
 		Collections.sort(retValue, Collections.reverseOrder());
@@ -143,7 +142,6 @@ abstract public class AuditedEntity<T extends AuditedEntity<T>>
 	@Transient
 	public Date getLatestRevisionDate()
 	{
-		final EntityManager entityManager = (EntityManager) Component.getInstance("entityManager");
 		final AuditReader reader = AuditReaderFactory.get(entityManager);
 		return reader.getRevisionDate(getLatestRevision());
 	}

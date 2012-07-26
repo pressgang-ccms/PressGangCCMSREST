@@ -30,6 +30,7 @@ import javax.persistence.JoinColumn;
 import javax.persistence.JoinTable;
 import javax.persistence.OneToMany;
 import javax.persistence.OneToOne;
+import javax.persistence.PersistenceContext;
 import javax.persistence.PersistenceException;
 import javax.persistence.PostPersist;
 import javax.persistence.PostUpdate;
@@ -79,7 +80,6 @@ import org.jboss.pressgangccms.utils.common.XMLUtilities;
 import org.jboss.pressgangccms.utils.concurrency.WorkQueue;
 import org.jboss.pressgangccms.utils.constants.CommonConstants;
 import org.jboss.pressgangccms.utils.structures.NameIDSortMap;
-import org.jboss.seam.Component;
 import org.w3c.dom.Document;
 import org.w3c.dom.Node;
 
@@ -97,6 +97,8 @@ import com.j2bugzilla.rpc.LogIn;
 @Table(name = "Topic")
 public class Topic extends ParentToPropertyTag<Topic> implements java.io.Serializable
 {
+	@PersistenceContext(unitName="Topic") EntityManager entityManager;
+	
 	public static final String SELECT_ALL_QUERY = "SELECT topic FROM Topic as Topic";
 	/**
 	 * The string that identifies the automatically generated comment added to
@@ -1609,8 +1611,6 @@ public class Topic extends ParentToPropertyTag<Topic> implements java.io.Seriali
 	@Transient
 	public List<TranslatedTopicData> getTranslatedTopics()
 	{
-		final EntityManager entityManager = (EntityManager) Component.getInstance("entityManager");
-
 		final List<TranslatedTopicData> translatedTopics = getTranslatedTopics(entityManager);
 		return translatedTopics;
 	}
@@ -1650,8 +1650,6 @@ public class Topic extends ParentToPropertyTag<Topic> implements java.io.Seriali
 	@Transient
 	public void createTranslatedTopic()
 	{
-		final EntityManager entityManager = (EntityManager) Component.getInstance("entityManager");
-
 		final Number revision = getLatestRevision();
 
 		/*

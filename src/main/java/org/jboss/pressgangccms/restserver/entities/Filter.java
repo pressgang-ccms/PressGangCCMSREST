@@ -15,6 +15,7 @@ import javax.persistence.Entity;
 import javax.persistence.EntityManager;
 import javax.persistence.FetchType;
 import javax.persistence.GeneratedValue;
+import javax.persistence.PersistenceContext;
 import javax.persistence.Transient;
 import javax.persistence.UniqueConstraint;
 
@@ -27,6 +28,8 @@ import static org.hamcrest.Matchers.equalTo;
 import javax.persistence.Id;
 import javax.persistence.OneToMany;
 import javax.persistence.Table;
+import javax.validation.constraints.NotNull;
+import javax.validation.constraints.Size;
 
 import org.hibernate.annotations.BatchSize;
 import org.hibernate.annotations.Cache;
@@ -46,6 +49,8 @@ import org.jboss.pressgangccms.utils.common.CollectionUtilities;
 @Table(name = "Filter", uniqueConstraints = @UniqueConstraint(columnNames = { "FilterName" }))
 public class Filter extends AuditedEntity<Filter> implements java.io.Serializable
 {
+	@PersistenceContext(unitName="Topic") EntityManager entityManager;
+	
 	public static final String SELECT_ALL_QUERY = "select filter from Filter filter";
 	/** Serializable version identifier */
 	private static final long serialVersionUID = 1378015715100292871L;
@@ -93,7 +98,7 @@ public class Filter extends AuditedEntity<Filter> implements java.io.Serializabl
 
 	@Column(name = "FilterName", nullable = false, length = 512)
 	@NotNull
-	@Length(max = 512)
+	@Size(max = 512)
 	public String getFilterName()
 	{
 		return this.filterName;
@@ -106,7 +111,7 @@ public class Filter extends AuditedEntity<Filter> implements java.io.Serializabl
 
 	// @Column(name = "FilterDescription", length = 65535)
 	@Column(name = "FilterDescription", columnDefinition = "TEXT")
-	@Length(max = 65535)
+	@Size(max = 65535)
 	public String getFilterDescription()
 	{
 		return this.filterDescription;
@@ -795,8 +800,6 @@ public class Filter extends AuditedEntity<Filter> implements java.io.Serializabl
 
 	public void syncFilterWithTags(final UIProjectsData selectedTags)
 	{
-		final EntityManager entityManager = (EntityManager) Component.getInstance("entityManager");
-
 		/*
 		 * loop through the list of tags selected via the checkboxes, and update
 		 * their representation in the Filter
