@@ -8,6 +8,9 @@
         <dependent-module archiveName="pressgang-ccms-utils-1.0-SNAPSHOT.jar" deploy-path="/WEB-INF/lib" handle="module:/resource/PressGangCCMSCommonUtilities/PressGangCCMSCommonUtilities">
             <dependency-type>uses</dependency-type>
         </dependent-module>
+        <dependent-module archiveName="pressgang-ccms-contentspec-1.0-SNAPSHOT.jar" deploy-path="/WEB-INF/lib" handle="module:/resource/PressGangCCMSContentSpec/PressGangCCMSContentSpec">
+            <dependency-type>uses</dependency-type>
+        </dependent-module>
         <property name="context-root" value="devrest"/>
         <property name="java-output-path" value="/devrest/target/classes"/>
     </wb-module>

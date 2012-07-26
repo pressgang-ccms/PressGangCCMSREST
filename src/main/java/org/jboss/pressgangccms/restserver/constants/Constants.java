@@ -98,4 +98,13 @@ public final class Constants
 	 * The SQL logic keyword to use when two conditions need to be or'ed 
 	 */
 	public static final String OR_LOGIC = "Or";
+	
+	/**
+	 * The system property that defines the STOMP message queue that skynet should send topic rendering requests to
+	 */
+	public static final String STOMP_MESSAGE_SERVER_TOPIC_RENDER_QUEUE_SYSTEM_PROPERTY = "topicIndex.stompMessageServerRenderTopicQueue";
+	/** 
+	 * The system property that defines the STOMP message queue that skynet should send topic rendering requests to
+	 */
+	public static final String STOMP_MESSAGE_SERVER_TRANSLATED_TOPIC_RENDER_QUEUE_SYSTEM_PROPERTY = "topicIndex.stompMessageServerRenderTranslatedTopicQueue";
 }
