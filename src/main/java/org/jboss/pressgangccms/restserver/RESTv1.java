@@ -22,7 +22,6 @@ import javax.ws.rs.core.Response.ResponseBuilder;
 import javax.ws.rs.ext.Provider;
 
 import org.jboss.pressgangccms.rest.v1.collections.RESTBlobConstantCollectionV1;
-import org.jboss.pressgangccms.rest.v1.collections.RESTBugzillaBugCollectionV1;
 import org.jboss.pressgangccms.rest.v1.collections.RESTCategoryCollectionV1;
 import org.jboss.pressgangccms.rest.v1.collections.RESTImageCollectionV1;
 import org.jboss.pressgangccms.rest.v1.collections.RESTProjectCollectionV1;
@@ -107,7 +106,7 @@ public class RESTv1 extends BaseRESTv1 implements RESTInterfaceV1, RESTInterface
 	 */
 	@OPTIONS
 	@Path("/{path:.*}")
-	public Response handleCORSRequest(@HeaderParam(RESTInterfaceV1.ACCESS_CONTROL_REQUEST_METHOD) final String requestMethod, @HeaderParam(RESTInterfaceV1.ACCESS_CONTROL_REQUEST_HEADERS) final String requestHeaders)
+	public Response handleCORSRequest(@PathParam(value = "path") final String path, @HeaderParam(RESTInterfaceV1.ACCESS_CONTROL_REQUEST_METHOD) final String requestMethod, @HeaderParam(RESTInterfaceV1.ACCESS_CONTROL_REQUEST_HEADERS) final String requestHeaders)
 	{
 		final ResponseBuilder retValue = Response.ok();
 		
