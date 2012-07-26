@@ -2,6 +2,9 @@ package org.jboss.pressgangccms.restserver.constants;
 
 public final class Constants
 {
+	/** The base URL from which the REST interface can be accessed */
+	public static final String BASE_REST_PATH = "/";
+	
 	/* The following database key constants are defined in import.sql */
 	
 	/** The Content Specification tag ID */
@@ -44,7 +47,8 @@ public final class Constants
 	public static final String PROPERTY_TAG_SELECT_LABEL_PREFIX = "- ";
 	
 	
-	
+	/** The URL variable the indicates the filter to be used */
+	public static final String FILTER_ID = "filterId";
 	/**
 	 * The URL variable prefix to indicate the internal logic of a category (and
 	 * optionally also specify a project)

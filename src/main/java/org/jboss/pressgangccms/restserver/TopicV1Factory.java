@@ -16,6 +16,7 @@ import org.jboss.pressgangccms.rest.v1.entities.RESTPropertyTagV1;
 import org.jboss.pressgangccms.rest.v1.entities.RESTTagV1;
 import org.jboss.pressgangccms.rest.v1.entities.RESTTopicSourceUrlV1;
 import org.jboss.pressgangccms.rest.v1.entities.RESTTopicV1;
+import org.jboss.pressgangccms.rest.v1.entities.RESTTranslatedTopicV1;
 import org.jboss.pressgangccms.rest.v1.entities.base.RESTBaseEntityV1;
 import org.jboss.pressgangccms.rest.v1.exceptions.InvalidParameterException;
 import org.jboss.pressgangccms.rest.v1.expansion.ExpandDataTrunk;
@@ -24,6 +25,8 @@ import org.jboss.pressgangccms.restserver.entities.PropertyTag;
 import org.jboss.pressgangccms.restserver.entities.Tag;
 import org.jboss.pressgangccms.restserver.entities.Topic;
 import org.jboss.pressgangccms.restserver.entities.TopicSourceUrl;
+import org.jboss.pressgangccms.restserver.entities.TranslatedTopicData;
+import org.jboss.pressgangccms.restserver.entities.TopicToPropertyTag;
 
 class TopicV1Factory extends RESTDataObjectFactory<RESTTopicV1, Topic, RESTTopicCollectionV1>
 {

@@ -880,7 +880,7 @@ public class RESTv1 extends BaseRESTv1 implements RESTInterfaceV1, RESTInterface
 	@Path("/propertytag/get/json/{id}")
 	@Produces(MediaType.APPLICATION_JSON)
 	@Consumes({ "*" })
-	public RESTTagV1 getJSONPropertyTag(@PathParam("id") final Integer id, @QueryParam("expand") final String expand) throws InvalidParameterException, InternalProcessingException
+	public RESTPropertyTagV1 getJSONPropertyTag(@PathParam("id") final Integer id, @QueryParam("expand") final String expand) throws InvalidParameterException, InternalProcessingException
 	{
 		if (id == null)
 			throw new InvalidParameterException("The id parameter can not be null");
@@ -1060,7 +1060,7 @@ public class RESTv1 extends BaseRESTv1 implements RESTInterfaceV1, RESTInterface
 	@Path("/roles/put/jsonp")
 	@Consumes({ MediaType.APPLICATION_JSON })
 	@Produces(MediaType.APPLICATION_JSON)
-	public String updateJSONPRoles(@QueryParam("expand") final String expand, final RESTBugzillaBugCollectionV1 dataObjects, @QueryParam("callback") final String callback) throws InvalidParameterException, InternalProcessingException
+	public String updateJSONPRoles(@QueryParam("expand") final String expand, final RESTRoleCollectionV1 dataObjects, @QueryParam("callback") final String callback) throws InvalidParameterException, InternalProcessingException
 	{
 		if (callback == null)
 			throw new InvalidParameterException("The callback parameter can not be null");
