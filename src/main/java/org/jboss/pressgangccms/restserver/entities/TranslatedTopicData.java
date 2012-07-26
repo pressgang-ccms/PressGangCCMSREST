@@ -41,9 +41,12 @@ import org.hibernate.annotations.BatchSize;
 import org.hibernate.annotations.Cache;
 import org.hibernate.annotations.CacheConcurrencyStrategy;
 import org.hibernate.envers.Audited;
+import org.jboss.pressgangccms.docbook.messaging.TopicRendererType;
 import org.jboss.pressgangccms.restserver.constants.Constants;
 import org.jboss.pressgangccms.restserver.entities.base.AuditedEntity;
+import org.jboss.pressgangccms.restserver.renderer.TopicQueueRenderer;
 import org.jboss.pressgangccms.restserver.utils.SkynetExceptionUtilities;
+import org.jboss.pressgangccms.utils.common.CollectionUtilities;
 import org.jboss.pressgangccms.utils.concurrency.WorkQueue;
 import org.jboss.pressgangccms.utils.constants.CommonConstants;
 
@@ -248,7 +251,7 @@ public class TranslatedTopicData extends AuditedEntity<TranslatedTopicData> impl
 	}
 
 	@Transient
-	public List<TranslatedTopicData> getOutgoingRelatedTranslatedTopicData(final EntityManager entityManager)
+	public List<TranslatedTopicData> getOutgoingRelatedTranslatedTopicData(final EntityManager entityManager) throws Exception
 	{
 		final Topic enversTopic = translatedTopic.getEnversTopic(entityManager);
 
@@ -256,7 +259,7 @@ public class TranslatedTopicData extends AuditedEntity<TranslatedTopicData> impl
 	}
 
 	@Transient
-	public List<TranslatedTopicData> getIncomingRelatedTranslatedTopicData(final EntityManager entityManager)
+	public List<TranslatedTopicData> getIncomingRelatedTranslatedTopicData(final EntityManager entityManager) throws Exception
 	{
 		final Topic enversTopic = translatedTopic.getEnversTopic(entityManager);
 
@@ -264,7 +267,7 @@ public class TranslatedTopicData extends AuditedEntity<TranslatedTopicData> impl
 	}
 
 	@Transient
-	private List<TranslatedTopicData> getRelatedTranslatedTopicData(final EntityManager entityManager, final List<Topic> relatedTopics)
+	private List<TranslatedTopicData> getRelatedTranslatedTopicData(final EntityManager entityManager, final List<Topic> relatedTopics) throws Exception
 	{
 
 		final List<TranslatedTopicData> relatedTranslatedTopicDatas = new ArrayList<TranslatedTopicData>();
@@ -298,7 +301,7 @@ public class TranslatedTopicData extends AuditedEntity<TranslatedTopicData> impl
 	}
 
 	@Transient
-	public TranslatedTopicData getLatestRelatedTranslationDataByTopicID(final EntityManager entityManager, final int topicId)
+	public TranslatedTopicData getLatestRelatedTranslationDataByTopicID(final EntityManager entityManager, final int topicId) throws Exception
 	{
 		final List<TranslatedTopicData> relatedOutgoingTranslatedTopicDatas = getOutgoingRelatedTranslatedTopicData(entityManager);
 		TranslatedTopicData relatedTranslatedTopicData = null;
@@ -319,7 +322,7 @@ public class TranslatedTopicData extends AuditedEntity<TranslatedTopicData> impl
 	}
 
 	@Transient
-	public List<TranslatedTopicData> getOutgoingDummyFilledRelatedTranslatedTopicDatas(final EntityManager entityManager)
+	public List<TranslatedTopicData> getOutgoingDummyFilledRelatedTranslatedTopicDatas(final EntityManager entityManager) throws Exception
 	{
 		final List<TranslatedTopicData> outgoingRelatedTranslatedTopicDatas = this.getOutgoingRelatedTranslatedTopicData(entityManager);
 
@@ -328,7 +331,7 @@ public class TranslatedTopicData extends AuditedEntity<TranslatedTopicData> impl
 	}
 
 	@Transient
-	public List<TranslatedTopicData> getIncomingDummyFilledRelatedTranslatedTopicDatas(final EntityManager entityManager)
+	public List<TranslatedTopicData> getIncomingDummyFilledRelatedTranslatedTopicDatas(final EntityManager entityManager) throws Exception
 	{
 		final List<TranslatedTopicData> incomingRelatedTranslatedTopicDatas = this.getIncomingRelatedTranslatedTopicData(entityManager);
 

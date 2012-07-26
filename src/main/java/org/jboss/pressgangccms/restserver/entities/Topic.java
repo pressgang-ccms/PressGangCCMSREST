@@ -1592,7 +1592,7 @@ public class Topic extends ParentToPropertyTag<Topic> implements java.io.Seriali
 		}
 		catch (final Exception ex)
 		{
-			SkynetExceptionUtilities.handleSeamException(ex, false, "Probably an error searching Bugzilla");
+			SkynetExceptionUtilities.handleException(ex, false, "Probably an error searching Bugzilla");
 		}
 	}
 

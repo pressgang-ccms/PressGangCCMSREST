@@ -24,6 +24,11 @@ public final class Constants
 	public static final Integer TASK_TOPIC_STRINGCONSTANTID = 1;
 	/** The string constant that is used as a concept template */
 	public static final Integer CONCEPT_TOPIC_STRINGCONSTANTID = 3;
+	
+	/**
+	 * A Topic ID that no topic should ever match
+	 */
+	public static final String NULL_TOPIC_ID = "-1";
 
 	/**
 	 * The default size to use for batch fetching.
@@ -98,6 +103,222 @@ public final class Constants
 	 * The SQL logic keyword to use when two conditions need to be or'ed 
 	 */
 	public static final String OR_LOGIC = "Or";
+	/** 
+	 * The default logic to be applied to tags within a category 
+	 */
+	public static final String DEFAULT_INTERNAL_LOGIC = OR_LOGIC;
+	/** 
+	 * The default logic to be applied between categories 
+	 */
+	public static final String DEFAULT_EXTERNAL_LOGIC = AND_LOGIC;
+	/** 
+	 * The url variable prefix to indicate that a tag needs to be matched 
+	 */
+	public static final String MATCH_TAG = "tag";
+	/** 
+	 * The url variable prefix to indicate that a tag will be used for grouping 
+	 */
+	public static final String GROUP_TAG = "grouptab";
+	/** 
+	 * The url variable prefix to indicate that a locale needs to be matched 
+	 */
+	public static final String MATCH_LOCALE = "locale";
+	/** 
+	 * The url variable prefix to indicate that a locale will be used for grouping 
+	 */
+	public static final String GROUP_LOCALE = "grouplocale";
+	/**
+	 * The URL variable that defines the logic to be applied to the search
+	 * fields
+	 */
+	public static final String TOPIC_LOGIC_FILTER_VAR = "logic";
+	/** 
+	 * The default logic to be applied to the search fields 
+	 */
+	public static final String TOPIC_LOGIC_FILTER_VAR_DEFAULT_VALUE = "and";
+	/** The description the logic to be applied to the search fields */
+	public static final String TOPIC_LOGIC_FILTER_VAR_DESC = "Field Logic";
+	/** The URL variable that defines the has relationships search field */
+	public static final String TOPIC_HAS_OPEN_BUGZILLA_BUGS = "topicHasOpenBugzillaBugs";
+	/** The description of the has relationships search field */
+	public static final String TOPIC_HAS_OPEN_BUGZILLA_BUGS_DESC = "Has Open Bugzilla Bugs";
+	/** The URL variable that defines the has relationships search field */
+	public static final String TOPIC_HAS_NOT_OPEN_BUGZILLA_BUGS = "topicHasNotOpenBugzillaBugs";
+	/** The description of the has relationships search field */
+	public static final String TOPIC_HAS_NOT_OPEN_BUGZILLA_BUGS_DESC = "Doesn't have Open Bugzilla Bugs";
+	/** The URL variable that defines the has relationships search field */
+	public static final String TOPIC_HAS_BUGZILLA_BUGS = "topicHasBugzillaBugs";
+	/** The description of the has relationships search field */
+	public static final String TOPIC_HAS_BUGZILLA_BUGS_DESC = "Has Bugzilla Bugs";
+	/** The URL variable that defines the has relationships search field */
+	public static final String TOPIC_HAS_NOT_BUGZILLA_BUGS = "topicHasNotBugzillaBugs";
+	/** The description of the has relationships search field */
+	public static final String TOPIC_HAS_NOT_BUGZILLA_BUGS_DESC = "Doesn't have Bugzilla Bugs";
+	/** The URL variable that defines the has relationships search field */
+	public static final String TOPIC_HAS_RELATIONSHIPS = "topicHasRelationships";
+	/** The description of the has relationships search field */
+	public static final String TOPIC_HAS_RELATIONSHIPS_DESC = "Has Relationships";
+	/** The URL variable that defines the has relationships search field */
+	public static final String TOPIC_HAS_NOT_RELATIONSHIPS = "topicHasNotRelationships";
+	/** The description of the has relationships search field */
+	public static final String TOPIC_HAS_NOT_RELATIONSHIPS_DESC = "Doesn't have Relationships";
+	/**
+	 * The URL variable that defines the has incoming relationships search field
+	 */
+	public static final String TOPIC_HAS_INCOMING_RELATIONSHIPS = "topicHasIncomingRelationships";
+	/** The description of the has incoming relationships search field */
+	public static final String TOPIC_HAS_INCOMING_RELATIONSHIPS_DESC = "Has Incoming Relationships";
+	/**
+	 * The URL variable that defines the has incoming relationships search field
+	 */
+	public static final String TOPIC_HAS_NOT_INCOMING_RELATIONSHIPS = "topicHasNotIncomingRelationships";
+	/** The description of the has incoming relationships search field */
+	public static final String TOPIC_HAS_NOT_INCOMING_RELATIONSHIPS_DESC = "Doesn't Have Incoming Relationships";
+	/** The URL variable that defines the has related to search field */
+	public static final String TOPIC_RELATED_TO = "topicRelatedTo";
+	/** The description of the has related to search field */
+	public static final String TOPIC_RELATED_TO_DESC = "Related To";
+	/** The URL variable that defines the has related from search field */
+	public static final String TOPIC_RELATED_FROM = "topicRelatedFrom";
+	/** The description of the has related from search field */
+	public static final String TOPIC_RELATED_FROM_DESC = "Related From";
+	/** The URL variable that defines the has related to search field */
+	public static final String TOPIC_NOT_RELATED_TO = "topicNotRelatedTo";
+	/** The description of the has related to search field */
+	public static final String TOPIC_NOT_RELATED_TO_DESC = "Not Related To";
+	/** The URL variable that defines the has related from search field */
+	public static final String TOPIC_NOT_RELATED_FROM = "topicNotRelatedFrom";
+	/** The description of the has related from search field */
+	public static final String TOPIC_NOT_RELATED_FROM_DESC = "NotRelated From";
+	/** The URL variable that defines the has related from search field */
+	public static final String TOPIC_HAS_XML_ERRORS = "topicHasXMLErrors";
+	/** The description of the has related from search field */
+	public static final String TOPIC_HAS_XML_ERRORS_DESC = "Topic Has XML Errors";
+	/** The URL variable that defines the has related from search field */
+	public static final String TOPIC_HAS_NOT_XML_ERRORS = "topicHasNotXMLErrors";
+	/** The description of the has related from search field */
+	public static final String TOPIC_HAS_NOT_XML_ERRORS_DESC = "Topic doesn't have XML Errors";
+	/** The URL variable that defines the has related from search field */
+	public static final String TOPIC_EDITED_IN_LAST_DAYS = "topicEditedInLastDays";
+	/** The description of the has related from search field */
+	public static final String TOPIC_EDITED_IN_LAST_DAYS_DESC = "Topic Edited In Last Days";
+	/** The URL variable that defines the has related from search field */
+	public static final String TOPIC_NOT_EDITED_IN_LAST_DAYS = "topicNotEditedInLastDays";
+	/** The description of the has related from search field */
+	public static final String TOPIC_NOT_EDITED_IN_LAST_DAYS_DESC = "Topic Not Edited In Last Days";
+	/** The URL variable that defines the topic property tag */
+	public static final String TOPIC_PROPERTY_TAG = "propertyTag";
+	/** The description of the property tag search field */
+	public static final String TOPIC_PROPERTY_TAG_DESC = "Property Tag";
+	/** The URL variable that defines the has relationships search field */
+	public static final String TOPIC_IS_INCLUDED_IN_SPEC = "topicIncludedInSpec";
+	/** The description of the has relationships search field */
+	public static final String TOPIC_IS_INCLUDED_IN_SPEC_DESC = "Topics Included In Spec";
+	/** The URL variable that defines the has relationships search field */
+	public static final String TOPIC_IS_NOT_INCLUDED_IN_SPEC = "topicNotIncludedInSpec";
+	/** The description of the has relationships search field */
+	public static final String TOPIC_IS_NOT_INCLUDED_IN_SPEC_DESC = "Topics Not Included In Spec";
+	
+	/** The URL variable that defines if translated topics should be filter to only include the latest copy */
+	public static final String LATEST_TRANSLATIONS_FILTER_VAR = "latestTranslations";
+	/** The description of the latest translated topic search field */
+	public static final String LATEST_TRANSLATIONS_FILTER_VAR_DESC = "Latest Translations";
+	/** The URL variable that defines if translated topics should be filter to only include the latest finished copy */
+	public static final String LATEST_COMPLETED_TRANSLATIONS_FILTER_VAR = "latestCompletedTranslations";
+	/** The description of the latest completed translated topic search field */
+	public static final String LATEST_COMPLETED_TRANSLATIONS_FILTER_VAR_DESC = "Latest Completed Translations";
+	/** The URL variable that defines if translated topics should be filter to only include the latest copy */
+	public static final String NOT_LATEST_TRANSLATIONS_FILTER_VAR = "notLatestTranslations";
+	/** The description of the latest translated topic search field */
+	public static final String NOT_LATEST_TRANSLATIONS_FILTER_VAR_DESC = "Not Latest Translations";
+	/** The URL variable that defines if translated topics should be filter to only include the latest finished copy */
+	public static final String NOT_LATEST_COMPLETED_TRANSLATIONS_FILTER_VAR = "notLatestCompletedTranslations";
+	/** The description of the latest completed translated topic search field */
+	public static final String NOT_LATEST_COMPLETED_TRANSLATIONS_FILTER_VAR_DESC = "Not Latest Completed Translations";
+	
+	/** The URL variable that defines the topic IDs search field */
+	public static final String ZANATA_IDS_FILTER_VAR = "zanataIds";
+	/** The description of the topic IDs search field */
+	public static final String ZANATA_IDS_FILTER_VAR_DESC = "Zanata IDs";
+	/** The URL variable that defines the not topic IDs search field */
+	public static final String ZANATA_IDS_NOT_FILTER_VAR = "zanataNotIds";
+	/** The description of the not topic IDs search field */
+	public static final String ZANATA_IDS_NOT_FILTER_VAR_DESC = "Not Zanata IDs";
+	
+	/** The URL variable that defines the topic text search field */
+	public static final String TOPIC_TEXT_SEARCH_FILTER_VAR = "topicTextSearch";
+	/** The description of the topic text search field */
+	public static final String TOPIC_TEXT_SEARCH_FILTER_VAR_DESC = "Topic Text Search";
+	/** The URL variable that defines the topic IDs search field */
+	public static final String TOPIC_IDS_FILTER_VAR = "topicIds";
+	/** The description of the topic IDs search field */
+	public static final String TOPIC_IDS_FILTER_VAR_DESC = "Topic IDs";
+	/** The URL variable that defines the not topic IDs search field */
+	public static final String TOPIC_IDS_NOT_FILTER_VAR = "topicNotIds";
+	/** The description of the not topic IDs search field */
+	public static final String TOPIC_IDS_NOT_FILTER_VAR_DESC = "Not Topic IDs";
+	/** The URL variable that defines the topic title search field */
+	public static final String TOPIC_TITLE_FILTER_VAR = "topicTitle";
+	/** The description of the topic title search field */
+	public static final String TOPIC_TITLE_FILTER_VAR_DESC = "Title";
+	/** The URL variable that defines the not topic title search field */
+	public static final String TOPIC_TITLE_NOT_FILTER_VAR = "topicNotTitle";
+	/** The description of the not topic title search field */
+	public static final String TOPIC_TITLE_NOT_FILTER_VAR_DESC = "Not Title";
+	/** The URL variable that defines the topic description search field */
+	public static final String TOPIC_DESCRIPTION_FILTER_VAR = "topicText";
+	/** The description of the topic description search field */
+	public static final String TOPIC_DESCRIPTION_FILTER_VAR_DESC = "Description";
+	/** The URL variable that defines the not topic description search field */
+	public static final String TOPIC_DESCRIPTION_NOT_FILTER_VAR = "topicNotText";
+	/** The description of the not topic description search field */
+	public static final String TOPIC_DESCRIPTION_NOT_FILTER_VAR_DESC = "Not Description";
+	/** The URL variable that defines the topic xml search field */
+	public static final String TOPIC_XML_FILTER_VAR = "topicXml";
+	/** The description of the topic xml search field */
+	public static final String TOPIC_XML_FILTER_VAR_DESC = "XML";
+	/** The URL variable that defines the not topic xml search field */
+	public static final String TOPIC_XML_NOT_FILTER_VAR = "topicNotXml";
+	/** The description of the not topic xml search field */
+	public static final String TOPIC_XML_NOT_FILTER_VAR_DESC = "Not XML";
+	/**
+	 * The URL variable that defines the start range for the topic create date
+	 * search field
+	 */
+	public static final String TOPIC_STARTDATE_FILTER_VAR = "startDate";
+	/**
+	 * The description of the start range for the topic create date search field
+	 */
+	public static final String TOPIC_STARTDATE_FILTER_VAR_DESC = "Min Creation Date";
+	/**
+	 * The URL variable that defines the end range for the topic create date
+	 * search field
+	 */
+	public static final String TOPIC_ENDDATE_FILTER_VAR = "endDate";
+	/** The description of the end range for the topic create date search field */
+	public static final String TOPIC_ENDDATE_FILTER_VAR_DESC = "Max Creation Date";
+	/**
+	 * The URL variable that defines the start edit range for the topic create
+	 * date search field
+	 */
+	public static final String TOPIC_STARTEDITDATE_FILTER_VAR = "startEditDate";
+	/**
+	 * The description of the start edit range for the topic create date search
+	 * field
+	 */
+	public static final String TOPIC_STARTEDITDATE_FILTER_VAR_DESC = "Min Edited Date";
+	/**
+	 * The URL variable that defines the end edit range for the topic create
+	 * date search field
+	 */
+	public static final String TOPIC_ENDEDITDATE_FILTER_VAR = "endEditDate";
+	/**
+	 * The description of the end edit range for the topic create date search
+	 * field
+	 */
+	public static final String TOPIC_ENDEDITDATE_FILTER_VAR_DESC = "Max Edited Date";
+	
+	
 	
 	/**
 	 * The system property that defines the STOMP message queue that skynet should send topic rendering requests to
