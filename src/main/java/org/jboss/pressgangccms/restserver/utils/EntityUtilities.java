@@ -1,10 +1,14 @@
 package org.jboss.pressgangccms.restserver.utils;
 
+import java.net.URLDecoder;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import javax.persistence.EntityManager;
 import javax.persistence.PersistenceContext;
+import javax.ws.rs.core.MultivaluedMap;
 
 import org.apache.lucene.queryParser.QueryParser;
 import org.apache.lucene.util.Version;
@@ -17,16 +21,26 @@ import org.hibernate.search.FullTextSession;
 import org.hibernate.search.Search;
 import org.jboss.pressgangccms.restserver.constants.Constants;
 import org.jboss.pressgangccms.restserver.entities.BlobConstants;
+import org.jboss.pressgangccms.restserver.entities.Category;
+import org.jboss.pressgangccms.restserver.entities.Filter;
+import org.jboss.pressgangccms.restserver.entities.FilterCategory;
+import org.jboss.pressgangccms.restserver.entities.FilterField;
+import org.jboss.pressgangccms.restserver.entities.FilterLocale;
+import org.jboss.pressgangccms.restserver.entities.FilterTag;
 import org.jboss.pressgangccms.restserver.entities.IntegerConstants;
+import org.jboss.pressgangccms.restserver.entities.Project;
 import org.jboss.pressgangccms.restserver.entities.StringConstants;
+import org.jboss.pressgangccms.restserver.entities.Tag;
 import org.jboss.pressgangccms.restserver.entities.Topic;
 import org.jboss.pressgangccms.restserver.entities.TopicToBugzillaBug;
 import org.jboss.pressgangccms.restserver.entities.TopicToPropertyTag;
 import org.jboss.pressgangccms.restserver.entities.TranslatedTopicData;
+import org.jboss.pressgangccms.restserver.filter.TopicFilter;
 import org.jboss.pressgangccms.utils.common.CollectionUtilities;
 import org.joda.time.DateTime;
 
 import com.redhat.contentspec.processor.ContentSpecParser;
+
 
 
 /**
@@ -370,5 +384,224 @@ public class EntityUtilities
 			if (!retValue.contains(topic.getTranslatedTopicDataId()))
 				retValue.add(topic.getTranslatedTopicDataId());
 		return retValue;
+	}
+	
+	public static Filter populateFilter(final MultivaluedMap<String, String> paramMap, final String filterName, final String tagPrefix, final String groupTagPrefix, final String categoryInternalPrefix, final String categoryExternalPrefix, final String localePrefix)
+	{
+		final Map<String, String> newParamMap = new HashMap<String, String>();
+		for (final String key : paramMap.keySet())
+		{
+			try
+			{
+				newParamMap.put(key, URLDecoder.decode(paramMap.getFirst(key), "UTF-8"));
+			}
+			catch (final Exception ex)
+			{
+				SkynetExceptionUtilities.handleException(ex, true, "The URL query parameter " + key + " with value " + paramMap.getFirst(key) + " could not be URLDecoded");
+			}
+		}
+		return populateFilter(newParamMap, filterName, tagPrefix, groupTagPrefix, categoryInternalPrefix, categoryExternalPrefix, localePrefix);
+
+	}
+	
+	/**
+	 * This function takes the url parameters and uses them to populate a Filter
+	 * object
+	 */
+	public static Filter populateFilter(final Map<String, String> paramMap, final String filterName, final String tagPrefix, final String groupTagPrefix, final String categoryInternalPrefix, final String categoryExternalPrefix, final String localePrefix)
+	{
+		// attempt to get the filter id from the url
+		Integer filterId = null;
+		if (paramMap.containsKey(filterName))
+		{
+			final String filterQueryParam = paramMap.get(filterName);
+
+			try
+			{
+				filterId = Integer.parseInt(filterQueryParam);
+			}
+			catch (final Exception ex)
+			{
+				// filter value was not an integer
+				filterId = null;
+
+				SkynetExceptionUtilities.handleException(ex, true, "The filter ID URL query parameter was not an integer. Got " + filterQueryParam + ". Probably a malformed URL.");
+			}
+		}
+
+		Filter filter = null;
+
+		/* First attempt to populate the filter from a filterID variable */
+		if (filterId != null)
+		{
+			filter = entityManager.find(Filter.class, filterId);
+		}
+
+		/* If that fails, use the other URL params */
+		if (filter == null)
+		{
+			filter = new Filter();
+
+			for (final String key : paramMap.keySet())
+			{
+				final boolean tagVar = key.startsWith(tagPrefix);
+				final boolean groupTagVar = key.startsWith(groupTagPrefix);
+				final boolean catIntVar = key.startsWith(categoryInternalPrefix);
+				final boolean catExtVar = key.startsWith(categoryExternalPrefix);
+				final boolean localeVar = key.matches("^" + localePrefix + "\\d*$");
+				final String state = paramMap.get(key);
+
+				// add the filter category states
+				if (catIntVar || catExtVar)
+				{
+					/*
+					 * get the category and project id data from the variable
+					 * name
+					 */
+					final String catProjDetails = catIntVar ? key.replaceFirst(categoryInternalPrefix, "") : key.replaceFirst(categoryExternalPrefix, "");
+					// split the category and project id out of the data
+					final String[] catProjID = catProjDetails.split("-");
+
+					/*
+					 * some validity checks. make sure we have one or two
+					 * strings after the split.
+					 */
+					if (catProjID.length != 1 && catProjID.length != 2)
+						continue;
+
+					// try to get the category and project ids
+					Integer catID = null;
+					Integer projID = null;
+					try
+					{
+						catID = Integer.parseInt(catProjID[0]);
+
+						/*
+						 * if the array has just one element, we have only
+						 * specified the category. in this case the project is
+						 * the common project
+						 */
+						if (catProjID.length == 2)
+							projID = Integer.parseInt(catProjID[1]);
+					}
+					catch (final Exception ex)
+					{
+						SkynetExceptionUtilities.handleException(ex, true, "Was expecting an integer. Got " + catProjID[0] + ". Probably a malformed URL.");
+						continue;
+					}
+
+					// at this point we have found a url variable that
+					// contains a catgeory and project id
+
+					final Category category = entityManager.find(Category.class, catID);
+					final Project project = projID != null ? entityManager.find(Project.class, projID) : null;
+
+					Integer dbState;
+
+					if (catIntVar)
+					{
+						if (state.equals(Constants.AND_LOGIC))
+							dbState = Constants.CATEGORY_INTERNAL_AND_STATE;
+						else
+							dbState = Constants.CATEGORY_INTERNAL_OR_STATE;
+					}
+					else
+					{
+						if (state.equals(Constants.AND_LOGIC))
+							dbState = Constants.CATEGORY_EXTERNAL_AND_STATE;
+						else
+							dbState = Constants.CATEGORY_EXTERNAL_OR_STATE;
+					}
+
+					final FilterCategory filterCategory = new FilterCategory();
+					filterCategory.setFilter(filter);
+					filterCategory.setProject(project);
+					filterCategory.setCategory(category);
+					filterCategory.setCategoryState(dbState);
+
+					filter.getFilterCategories().add(filterCategory);
+				}
+
+				// add the filter tag states
+				else if (tagVar)
+				{
+					try
+					{
+						final Integer tagId = Integer.parseInt(key.replaceFirst(tagPrefix, ""));
+						final Integer intState = Integer.parseInt(state);
+
+						// get the Tag object that the tag id represents
+						final Tag tag = entityManager.getReference(Tag.class, tagId);
+
+						if (tag != null)
+						{
+							final FilterTag filterTag = new FilterTag();
+							filterTag.setTag(tag);
+							filterTag.setTagState(intState);
+							filterTag.setFilter(filter);
+							filter.getFilterTags().add(filterTag);
+						}
+					}
+					catch (final Exception ex)
+					{
+						SkynetExceptionUtilities.handleException(ex, true, "Probably an invalid tag query pramater. Parameter: " + key + " Value: " + state);
+					}
+				}
+
+				else if (groupTagVar)
+				{
+					final Integer tagId = Integer.parseInt(key.replaceFirst(groupTagPrefix, ""));
+					// final Integer intState = Integer.parseInt(state);
+
+					// get the Tag object that the tag id represents
+					final Tag tag = entityManager.getReference(Tag.class, tagId);
+
+					if (tag != null)
+					{
+						final FilterTag filterTag = new FilterTag();
+						filterTag.setTag(tag);
+						filterTag.setTagState(Constants.GROUP_TAG_STATE);
+						filterTag.setFilter(filter);
+						filter.getFilterTags().add(filterTag);
+					}
+				}
+				else if (localeVar)
+				{
+					try
+					{
+						final String localeName = state.replaceAll("\\d", "");
+						final Integer intState = Integer.parseInt(state.replaceAll("[^\\d]", ""));
+
+						final FilterLocale filterLocale = new FilterLocale();
+						filterLocale.setLocaleName(localeName);
+						filterLocale.setLocaleState(intState);
+						filterLocale.setFilter(filter);
+						filter.getFilterLocales().add(filterLocale);
+					}
+					catch (final Exception ex)
+					{
+						SkynetExceptionUtilities.handleException(ex, true, "Probably an invalid locale query pramater. Parameter: " + key + " Value: " + state);
+					}
+				}
+
+				// add the filter field states
+				else
+				{
+					if (TopicFilter.hasFilterName(key))
+					{
+						final FilterField filterField = new FilterField();
+						filterField.setFilter(filter);
+						filterField.setField(key);
+						filterField.setValue(state);
+						filterField.setDescription(TopicFilter.getFilterDesc(key));
+						filter.getFilterFields().add(filterField);
+					}
+				}
+
+			}
+
+		}
+
+		return filter;
 	}
 }

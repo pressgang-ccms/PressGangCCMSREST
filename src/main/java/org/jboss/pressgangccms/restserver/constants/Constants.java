@@ -35,11 +35,15 @@ public final class Constants
 	 */
 	public static final int DEFAULT_BATCH_SIZE = 15;
 	
+	
+	
 	public static final String PROPERTY_TAG_SELECT_ITEM_VALUE_PREFIX = "PropertyTag";
 	public static final String UNCATEGORISED_PROPERTY_TAG_CATEGORY_SELECT_ITEM_VALUE = "UncategorisedPropertyTagCategory";
 	public static final String PROPERTY_TAG_CATEGORY_SELECT_ITEM_VALUE_PREFIX = "PropertyTagCategory";
 	public static final String UNCATEGORISED_PROPERTY_TAG_CATEGORY_SELECT_ITEM_LABEL = "Uncategorised";
 	public static final String PROPERTY_TAG_SELECT_LABEL_PREFIX = "- ";
+	
+	
 	
 	/**
 	 * The URL variable prefix to indicate the internal logic of a category (and
@@ -328,4 +332,9 @@ public final class Constants
 	 * The system property that defines the STOMP message queue that skynet should send topic rendering requests to
 	 */
 	public static final String STOMP_MESSAGE_SERVER_TRANSLATED_TOPIC_RENDER_QUEUE_SYSTEM_PROPERTY = "topicIndex.stompMessageServerRenderTranslatedTopicQueue";
+	/**
+	 * The system property that determines if topics should be rendered into
+	 * HTML
+	 */
+	public static final String ENABLE_RENDERING_PROPERTY = "topicIndex.rerenderTopic";
 }
