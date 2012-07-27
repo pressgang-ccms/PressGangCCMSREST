@@ -7,7 +7,10 @@
       <jta-data-source>java:jboss/datasources/MysqlDS</jta-data-source>
       <properties>
 	        <property name="hibernate.dialect" value="org.hibernate.dialect.MySQL5InnoDBDialect"/>
+	        <!-- Set to create to run the import.sql script -->
 	        <property name="hibernate.hbm2ddl.auto" value="update"/>
+	        <!-- The import.sql script contains SQL commands spread over multiple lines, so use the MultipleLinesSqlCommandExtractor -->
+	        <!-- <property name="hibernate.hbm2ddl.import_files_sql_extractor" value="org.hibernate.tool.hbm2ddl.MultipleLinesSqlCommandExtractor"/> -->
 	        <property name="hibernate.show_sql" value="false"/>
 	        <property name="hibernate.format_sql" value="false"/>
 	        <property name="jboss.entity.manager.factory.jndi.name" value="java:jboss/EntityManagerFactory"/>

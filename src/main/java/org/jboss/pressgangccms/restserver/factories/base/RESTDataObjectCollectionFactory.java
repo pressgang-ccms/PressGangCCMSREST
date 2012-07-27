@@ -23,7 +23,13 @@ import org.jboss.resteasy.spi.BadRequestException;
  */
 public class RESTDataObjectCollectionFactory<T extends RESTBaseEntityV1<T, V>, U extends AuditedEntity<U>, V extends BaseRestCollectionV1<T, V>>
 {
-	V create(final Class<V> clazz, final RESTDataObjectFactory<T, U, V> dataObjectFactory, final List<U> entities, final String expandName, final String dataType, final EntityManager entityManager)
+	/**
+	 * A value used to populate the size attribute on the returned collections to indicate that the
+	 * size was not defined.
+	 */
+	private static int SIZE_NOT_SET = -1;
+	
+	public V create(final Class<V> clazz, final RESTDataObjectFactory<T, U, V> dataObjectFactory, final List<U> entities, final String expandName, final String dataType, final EntityManager entityManager)
 	{
 		return create(clazz, dataObjectFactory, entities, expandName, dataType, "", null, entityManager);
 	}
@@ -144,6 +150,10 @@ public class RESTDataObjectCollectionFactory<T extends RESTBaseEntityV1<T, V>, U
 					if (indexes.isShowSize() != null && indexes.isShowSize())
 					{
 						retValue.setSize(usingRevisions ? revisions.size() : entities.size());
+					}
+					else
+					{
+						retValue.setSize(SIZE_NOT_SET);
 					}
 					
 					int start = 0;
