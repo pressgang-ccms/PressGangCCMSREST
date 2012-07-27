@@ -52,7 +52,7 @@ public class TranslatedTopicStringV1Factory extends RESTDataObjectFactory<RESTTr
 		
 		if (revision == null) 
 		{
-			retValue.setRevisions(new RESTDataObjectCollectionFactory<RESTTranslatedTopicStringV1, TranslatedTopicString, RESTTranslatedTopicStringCollectionV1>().create(RESTTranslatedTopicStringCollectionV1.class, new TranslatedTopicStringV1Factory(), entity, entity.getRevisions(), RESTBaseEntityV1.REVISIONS_NAME, dataType, expand, baseUrl, entityManager));
+			retValue.setRevisions(new RESTDataObjectCollectionFactory<RESTTranslatedTopicStringV1, TranslatedTopicString, RESTTranslatedTopicStringCollectionV1>().create(RESTTranslatedTopicStringCollectionV1.class, new TranslatedTopicStringV1Factory(), entity, entity.getRevisions(entityManager), RESTBaseEntityV1.REVISIONS_NAME, dataType, expand, baseUrl, entityManager));
 		}
 		
 		retValue.setLinks(baseUrl, BaseRESTv1.TRANSLATEDTOPICSTRING_URL_NAME, dataType, retValue.getId());

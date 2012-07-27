@@ -11,20 +11,12 @@ import org.jboss.pressgangccms.restserver.entities.PropertyTag;
  */
 public abstract class ToPropertyTag<T extends AuditedEntity<T>> extends AuditedEntity<T>
 {
-	@PersistenceContext EntityManager entityManager;
-	
 	protected PropertyTag propertyTag;
 	protected String value;
 
 	public ToPropertyTag(final Class<T> classType)
 	{
 		super(classType);
-	}
-	
-	@Transient
-	public boolean isValid(final Number revision)
-	{
-		return isValid(entityManager, revision);
 	}
 
 	@Transient

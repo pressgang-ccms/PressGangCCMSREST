@@ -43,7 +43,7 @@ class TopicPropertyTagV1Factory extends RESTDataObjectFactory<RESTPropertyTagV1,
 		
 		if (revision == null)
 		{
-			retValue.setRevisions(new RESTDataObjectCollectionFactory<RESTPropertyTagV1, TopicToPropertyTag, RESTPropertyTagCollectionV1>().create(RESTPropertyTagCollectionV1.class, new TopicPropertyTagV1Factory(), entity, entity.getRevisions(), RESTBaseEntityV1.REVISIONS_NAME, dataType, expand, baseUrl, entityManager));
+			retValue.setRevisions(new RESTDataObjectCollectionFactory<RESTPropertyTagV1, TopicToPropertyTag, RESTPropertyTagCollectionV1>().create(RESTPropertyTagCollectionV1.class, new TopicPropertyTagV1Factory(), entity, entity.getRevisions(entityManager), RESTBaseEntityV1.REVISIONS_NAME, dataType, expand, baseUrl, entityManager));
 		}
 		
 		return retValue;

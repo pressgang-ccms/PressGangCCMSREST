@@ -19,8 +19,6 @@ import org.hibernate.envers.AuditReaderFactory;
  */
 abstract public class AuditedEntity<T extends AuditedEntity<T>>
 {
-	@PersistenceContext	EntityManager entityManager;
-	
 	final Class<T> classType;
 	private Date lastModified;
 
@@ -44,9 +42,9 @@ abstract public class AuditedEntity<T extends AuditedEntity<T>>
 	 *         revision date if lastModified is null
 	 */
 	@Transient
-	public Date getFixedLastModifiedDate()
+	public Date getFixedLastModifiedDate(final EntityManager entityManager)
 	{
-		return lastModified != null ? lastModified : getLatestRevisionDate();
+		return lastModified != null ? lastModified : getLatestRevisionDate(entityManager);
 	}
 
 	/**
@@ -71,7 +69,7 @@ abstract public class AuditedEntity<T extends AuditedEntity<T>>
 	 * @return Returns a collection of revisions
 	 */
 	@Transient
-	public Map<Number, T> getRevisionEntities()
+	public Map<Number, T> getRevisionEntities(final EntityManager entityManager)
 	{
 		final AuditReader reader = AuditReaderFactory.get(entityManager);
 		final List<Number> revisions = reader.getRevisions(classType, this.getId());
@@ -84,22 +82,9 @@ abstract public class AuditedEntity<T extends AuditedEntity<T>>
 
 		return retValue;
 	}
-
-	/**
-	 * @return Returns the list of revision numbers for this entity, as
-	 *         maintained by Envers
-	 */
-	@Transient
-	public List<Number> getRevisions()
-	{
-		final AuditReader reader = AuditReaderFactory.get(entityManager);
-		final List<Number> retValue = reader.getRevisions(classType, this.getId());
-		Collections.sort(retValue, Collections.reverseOrder());
-		return retValue;
-	}
 	
 	@Transient
-	public List<Number> getRevisions(EntityManager entityManager)
+	public List<Number> getRevisions(final EntityManager entityManager)
 	{
 		final AuditReader reader = AuditReaderFactory.get(entityManager);
 		final List<Number> retValue = reader.getRevisions(classType, this.getId());
@@ -108,7 +93,7 @@ abstract public class AuditedEntity<T extends AuditedEntity<T>>
 	}
 
 	@Transient
-	public T getRevision(final Number revision)
+	public T getRevision(final EntityManager entityManager, final Number revision)
 	{
 		final AuditReader reader = AuditReaderFactory.get(entityManager);
 
@@ -127,7 +112,7 @@ abstract public class AuditedEntity<T extends AuditedEntity<T>>
 	}
 
 	@Transient
-	public Number getLatestRevision()
+	public Number getLatestRevision(final EntityManager entityManager)
 	{
 		final AuditReader reader = AuditReaderFactory.get(entityManager);
 		final List<Number> retValue = reader.getRevisions(classType, this.getId());
@@ -139,9 +124,9 @@ abstract public class AuditedEntity<T extends AuditedEntity<T>>
 	 * @return Returns the latest Envers revision number
 	 */
 	@Transient
-	public Date getLatestRevisionDate()
+	public Date getLatestRevisionDate(final EntityManager entityManager)
 	{
 		final AuditReader reader = AuditReaderFactory.get(entityManager);
-		return reader.getRevisionDate(getLatestRevision());
+		return reader.getRevisionDate(getLatestRevision(entityManager));
 	}
 }

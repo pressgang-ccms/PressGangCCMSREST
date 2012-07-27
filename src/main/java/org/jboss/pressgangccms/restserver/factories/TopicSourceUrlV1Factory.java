@@ -42,7 +42,7 @@ class TopicSourceUrlV1Factory extends RESTDataObjectFactory<RESTTopicSourceUrlV1
 		
 		if (revision == null)
 		{
-			retValue.setRevisions(new RESTDataObjectCollectionFactory<RESTTopicSourceUrlV1, TopicSourceUrl, RESTTopicSourceUrlCollectionV1>().create(RESTTopicSourceUrlCollectionV1.class, new TopicSourceUrlV1Factory(), entity, entity.getRevisions(), RESTBaseEntityV1.REVISIONS_NAME, dataType, expand, baseUrl, entityManager));
+			retValue.setRevisions(new RESTDataObjectCollectionFactory<RESTTopicSourceUrlV1, TopicSourceUrl, RESTTopicSourceUrlCollectionV1>().create(RESTTopicSourceUrlCollectionV1.class, new TopicSourceUrlV1Factory(), entity, entity.getRevisions(entityManager), RESTBaseEntityV1.REVISIONS_NAME, dataType, expand, baseUrl, entityManager));
 		}
 		
 		retValue.setLinks(baseUrl, BaseRESTv1.TOPICSOURCEURL_URL_NAME, dataType, retValue.getId());

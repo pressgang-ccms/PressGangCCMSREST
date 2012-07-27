@@ -101,8 +101,6 @@ import com.j2bugzilla.rpc.LogIn;
 @Table(name = "Topic")
 public class Topic extends ParentToPropertyTag<Topic> implements java.io.Serializable
 {
-	@PersistenceContext static EntityManager entityManager;
-	
 	public static final String SELECT_ALL_QUERY = "SELECT topic FROM Topic as Topic";
 	/**
 	 * The string that identifies the automatically generated comment added to
@@ -120,7 +118,7 @@ public class Topic extends ParentToPropertyTag<Topic> implements java.io.Seriali
 	 */
 	@SuppressWarnings("unchecked")
 	@Transient
-	public static String getCSVHeaderRow()
+	public static String getCSVHeaderRow(final EntityManager entityManager)
 	{
 		final List<Category> categories = entityManager.createQuery(Category.SELECT_ALL_QUERY).getResultList();
 		Collections.sort(categories, new CategoryNameComparator());
@@ -315,12 +313,6 @@ public class Topic extends ParentToPropertyTag<Topic> implements java.io.Seriali
 		addTag(tag);
 	}
 
-	public void addTag(final int tagID)
-	{
-		final Tag tag = entityManager.getReference(Tag.class, tagID);
-		addTag(tag);
-	}
-
 	public void addTag(final Tag tag)
 	{
 		if (filter(having(on(TopicToTag.class).getTag(), equalTo(tag)), this.getTopicToTags()).size() == 0)
@@ -424,7 +416,7 @@ public class Topic extends ParentToPropertyTag<Topic> implements java.io.Seriali
 
 	@SuppressWarnings("unchecked")
 	@Transient
-	public String getCSVRow()
+	public String getCSVRow(final EntityManager entityManager)
 	{
 		// get a space separated list of source URLs
 		String sourceUrls = "";
@@ -834,7 +826,7 @@ public class Topic extends ParentToPropertyTag<Topic> implements java.io.Seriali
 		return baseURL + "?" + buildIDRegexParam + "&" + componentParam + "&" + productParam;
 	}
 
-	public void initializeFromTemplate()
+	public void initializeFromTemplate(final EntityManager entityManager)
 	{
 		try
 		{
@@ -1596,13 +1588,6 @@ public class Topic extends ParentToPropertyTag<Topic> implements java.io.Seriali
 		}
 	}
 
-	@Transient
-	public List<TranslatedTopicData> getTranslatedTopics()
-	{
-		final List<TranslatedTopicData> translatedTopics = getTranslatedTopics(entityManager);
-		return translatedTopics;
-	}
-
 	@SuppressWarnings("unchecked")
 	@Transient
 	public List<TranslatedTopicData> getTranslatedTopics(final EntityManager entityManager)
@@ -1636,9 +1621,9 @@ public class Topic extends ParentToPropertyTag<Topic> implements java.io.Seriali
 	}
 
 	@Transient
-	public void createTranslatedTopic()
+	public void createTranslatedTopic(final EntityManager entityManager)
 	{
-		final Number revision = getLatestRevision();
+		final Number revision = getLatestRevision(entityManager);
 
 		/*
 		 * Search to see if a translated topic already exists for the current

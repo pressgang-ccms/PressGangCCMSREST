@@ -48,7 +48,7 @@ public class CategoryV1Factory extends RESTDataObjectFactory<RESTCategoryV1, Cat
 
 		if (revision == null)
 		{
-			retValue.setRevisions(new RESTDataObjectCollectionFactory<RESTCategoryV1, Category, RESTCategoryCollectionV1>().create(RESTCategoryCollectionV1.class, new CategoryV1Factory(), entity, entity.getRevisions(), RESTBaseEntityV1.REVISIONS_NAME, dataType, expand, baseUrl, entityManager));
+			retValue.setRevisions(new RESTDataObjectCollectionFactory<RESTCategoryV1, Category, RESTCategoryCollectionV1>().create(RESTCategoryCollectionV1.class, new CategoryV1Factory(), entity, entity.getRevisions(entityManager), RESTBaseEntityV1.REVISIONS_NAME, dataType, expand, baseUrl, entityManager));
 		}
 		retValue.setTags(new RESTDataObjectCollectionFactory<RESTTagV1, Tag, RESTTagCollectionV1>().create(RESTTagCollectionV1.class, new TagV1Factory(), entity.getTags(), BaseRESTv1.TAGS_EXPANSION_NAME, dataType, expand, baseUrl, entityManager));
 

@@ -46,7 +46,7 @@ public class ProjectV1Factory extends RESTDataObjectFactory<RESTProjectV1, Proje
 
 		if (revision == null)
 		{
-			retValue.setRevisions(new RESTDataObjectCollectionFactory<RESTProjectV1, Project, RESTProjectCollectionV1>().create(RESTProjectCollectionV1.class, new ProjectV1Factory(), entity, entity.getRevisions(), RESTBaseEntityV1.REVISIONS_NAME, dataType, expand, baseUrl, entityManager));
+			retValue.setRevisions(new RESTDataObjectCollectionFactory<RESTProjectV1, Project, RESTProjectCollectionV1>().create(RESTProjectCollectionV1.class, new ProjectV1Factory(), entity, entity.getRevisions(entityManager), RESTBaseEntityV1.REVISIONS_NAME, dataType, expand, baseUrl, entityManager));
 		}
 		retValue.setTags(new RESTDataObjectCollectionFactory<RESTTagV1, Tag, RESTTagCollectionV1>().create(RESTTagCollectionV1.class, new TagV1Factory(), entity.getTags(), BaseRESTv1.TAGS_EXPANSION_NAME, dataType, expand, baseUrl, entityManager));
 

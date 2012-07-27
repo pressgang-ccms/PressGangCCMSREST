@@ -51,8 +51,6 @@ import org.jboss.pressgangccms.utils.structures.Pair;
 @Table(name = "TranslatedTopic", uniqueConstraints = @UniqueConstraint(columnNames = { "TopicRevision", "TopicID" }))
 public class TranslatedTopic extends AuditedEntity<TranslatedTopic> implements java.io.Serializable
 {
-	@PersistenceContext EntityManager entityManager;
-	
 	private static final long serialVersionUID = 4190214754023153898L;
 	public static final String SELECT_ALL_QUERY = "select translatedTopic from TranslatedTopic translatedTopic";
 	private Integer translatedTopicId;
@@ -149,12 +147,6 @@ public class TranslatedTopic extends AuditedEntity<TranslatedTopic> implements j
 	}
 	
 	@Transient
-	public Topic getEnversTopic()
-	{
-		return getEnversTopic(entityManager);
-	}
-	
-	@Transient
 	public Topic getEnversTopic(final EntityManager entityManager)
 	{
 		if (enversTopic == null) 
@@ -168,20 +160,20 @@ public class TranslatedTopic extends AuditedEntity<TranslatedTopic> implements j
 	}
 	
 	@Transient
-	public String getTopicTitle()
+	public String getTopicTitle(final EntityManager entityManager)
 	{
-		if (getEnversTopic() != null)
-			return getEnversTopic().getTopicTitle();
+		final Topic topic = getEnversTopic(entityManager);
+		if (topic != null)
+			return topic.getTopicTitle();
 		return null;
 	}
 
 	@Transient
-	public String getTopicTags()
+	public String getTopicTags(final EntityManager entityManager)
 	{
-		if (getEnversTopic() != null)
-		{
-			return getEnversTopic().getTagsList(true);
-		}
+		final Topic topic = getEnversTopic(entityManager);
+		if (topic != null)
+			return topic.getTagsList(true);
 
 		return null;
 	}

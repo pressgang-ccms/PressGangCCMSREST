@@ -63,7 +63,7 @@ public class LanguageImageV1Factory extends RESTDataObjectFactory<RESTLanguageIm
 						RESTLanguageImageCollectionV1.class,
 						new LanguageImageV1Factory(), 
 						entity, 
-						entity.getRevisions(), 
+						entity.getRevisions(entityManager), 
 						RESTBaseEntityV1.REVISIONS_NAME, 
 						dataType, 
 						expand, 

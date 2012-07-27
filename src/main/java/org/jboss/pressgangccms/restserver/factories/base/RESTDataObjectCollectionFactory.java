@@ -211,7 +211,7 @@ public class RESTDataObjectCollectionFactory<T extends RESTBaseEntityV1<T, V>, U
 							 */
 							final AuditedEntity<U> parentAuditedEntity = (AuditedEntity<U>) parent;
 							revision = revisions.get(i);
-							dbEntity = parentAuditedEntity.getRevision(revision);
+							dbEntity = parentAuditedEntity.getRevision(entityManager, revision);
 
 						}
 						else

@@ -57,8 +57,6 @@ import org.jboss.pressgangccms.utils.common.CollectionUtilities;
 @Table(name = "Tag", uniqueConstraints = @UniqueConstraint(columnNames = { "TagName" }))
 public class Tag extends ParentToPropertyTag<Tag> implements java.io.Serializable
 {
-	@PersistenceContext EntityManager entityManager;
-	
 	public static final String SELECT_ALL_QUERY = "select tag from Tag tag";
 	private static final long serialVersionUID = 2841080567638275194L;
 	private Integer tagId;
@@ -364,24 +362,6 @@ public class Tag extends ParentToPropertyTag<Tag> implements java.io.Serializabl
 	{
 		this.excludedTags = excludedTags;
 	}
-
-	/**
-	 * @return Returns the list of revision numbers for this entity, as
-	 *         maintained by Envers
-	 */
-	@Transient
-	public List<Number> getRevisions()
-	{
-		final AuditReader reader = AuditReaderFactory.get(entityManager);
-		final List<Number> retValue = reader.getRevisions(Tag.class, this.tagId);
-		Collections.sort(retValue, Collections.reverseOrder());
-		return retValue;
-	}
-
-	/*
-	 * @Override public int hashCode() { int result; result = (tagId != null ?
-	 * tagId.hashCode() : 0); return result; }
-	 */
 
 	@PrePersist
 	protected void onCreate()

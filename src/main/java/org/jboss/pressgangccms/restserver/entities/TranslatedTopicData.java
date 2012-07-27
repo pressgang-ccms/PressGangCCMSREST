@@ -326,7 +326,7 @@ public class TranslatedTopicData extends AuditedEntity<TranslatedTopicData> impl
 	{
 		final List<TranslatedTopicData> outgoingRelatedTranslatedTopicDatas = this.getOutgoingRelatedTranslatedTopicData(entityManager);
 
-		final List<TranslatedTopicData> results = getDummyFilledRelatedTranslatedTopicData(outgoingRelatedTranslatedTopicDatas, this.getTranslatedTopic().getEnversTopic().getOutgoingRelatedTopicsArray());
+		final List<TranslatedTopicData> results = getDummyFilledRelatedTranslatedTopicData(outgoingRelatedTranslatedTopicDatas, this.getTranslatedTopic().getEnversTopic(entityManager).getOutgoingRelatedTopicsArray(), entityManager);
 		return results;
 	}
 
@@ -335,12 +335,12 @@ public class TranslatedTopicData extends AuditedEntity<TranslatedTopicData> impl
 	{
 		final List<TranslatedTopicData> incomingRelatedTranslatedTopicDatas = this.getIncomingRelatedTranslatedTopicData(entityManager);
 
-		final List<TranslatedTopicData> results = getDummyFilledRelatedTranslatedTopicData(incomingRelatedTranslatedTopicDatas, this.getTranslatedTopic().getEnversTopic().getIncomingRelatedTopicsArray());
+		final List<TranslatedTopicData> results = getDummyFilledRelatedTranslatedTopicData(incomingRelatedTranslatedTopicDatas, this.getTranslatedTopic().getEnversTopic(entityManager).getIncomingRelatedTopicsArray(), entityManager);
 		return results;
 	}
 
 	@Transient
-	private List<TranslatedTopicData> getDummyFilledRelatedTranslatedTopicData(final List<TranslatedTopicData> currentRelatedTranslatedTopicData, final List<Topic> enversRelatedTopicData)
+	private List<TranslatedTopicData> getDummyFilledRelatedTranslatedTopicData(final List<TranslatedTopicData> currentRelatedTranslatedTopicData, final List<Topic> enversRelatedTopicData, final EntityManager entityManager)
 	{
 		final List<TranslatedTopicData> relationships = new ArrayList<TranslatedTopicData>();
 
@@ -367,7 +367,7 @@ public class TranslatedTopicData extends AuditedEntity<TranslatedTopicData> impl
 			{
 				if (!translatedTopics.containsKey(topic.getId()))
 				{
-					final TranslatedTopicData dummyTranslation = createDummyTranslatedTopicData(topic);
+					final TranslatedTopicData dummyTranslation = createDummyTranslatedTopicData(topic, entityManager);
 					translatedTopics.put(topic.getId(), dummyTranslation);
 				}
 			}
@@ -381,7 +381,7 @@ public class TranslatedTopicData extends AuditedEntity<TranslatedTopicData> impl
 	}
 
 	@Transient
-	public TranslatedTopicData createDummyTranslatedTopicData(final Topic topic)
+	public TranslatedTopicData createDummyTranslatedTopicData(final Topic topic, final EntityManager entityManager)
 	{
 		final TranslatedTopicData translatedTopicData = new TranslatedTopicData();
 		final TranslatedTopic translatedTopic = new TranslatedTopic();
@@ -390,7 +390,7 @@ public class TranslatedTopicData extends AuditedEntity<TranslatedTopicData> impl
 
 		/* find the revision for the related topic */
 		Number topicRevision = 0;
-		for (final Number revision : topic.getRevisions())
+		for (final Number revision : topic.getRevisions(entityManager))
 		{
 			if (revision.longValue() <= this.translatedTopic.getTopicRevision().longValue() && revision.longValue() > topicRevision.longValue())
 				topicRevision = revision;

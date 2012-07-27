@@ -65,8 +65,8 @@ public class TopicV1Factory extends RESTDataObjectFactory<RESTTopicV1, Topic, RE
 		retValue.setDescription(entity.getTopicText());
 		retValue.setXml(entity.getTopicXML());
 		retValue.setHtml(entity.getTopicRendered());
-		retValue.setLastModified(entity.getFixedLastModifiedDate());
-		retValue.setRevision(entity.getLatestRevision().intValue());
+		retValue.setLastModified(entity.getFixedLastModifiedDate(entityManager));
+		retValue.setRevision(entity.getLatestRevision(entityManager).intValue());
 		retValue.setCreated(entity.getTopicTimeStamp());
 		retValue.setLocale(entity.getTopicLocale());
 		retValue.setXmlErrors(entity.getTopicXMLErrors());
@@ -74,7 +74,7 @@ public class TopicV1Factory extends RESTDataObjectFactory<RESTTopicV1, Topic, RE
 		/* Set collections */
 		if (revision == null)
 		{
-			retValue.setRevisions(new RESTDataObjectCollectionFactory<RESTTopicV1, Topic, RESTTopicCollectionV1>().create(RESTTopicCollectionV1.class, new TopicV1Factory(), entity, entity.getRevisions(), RESTBaseEntityV1.REVISIONS_NAME, dataType, expand, baseUrl, entityManager));
+			retValue.setRevisions(new RESTDataObjectCollectionFactory<RESTTopicV1, Topic, RESTTopicCollectionV1>().create(RESTTopicCollectionV1.class, new TopicV1Factory(), entity, entity.getRevisions(entityManager), RESTBaseEntityV1.REVISIONS_NAME, dataType, expand, baseUrl, entityManager));
 		}
 		retValue.setTags(new RESTDataObjectCollectionFactory<RESTTagV1, Tag, RESTTagCollectionV1>().create(RESTTagCollectionV1.class, new TagV1Factory(), entity.getTags(), BaseRESTv1.TAGS_EXPANSION_NAME, dataType, expand, baseUrl, entityManager));
 		retValue.setOutgoingRelationships(new RESTDataObjectCollectionFactory<RESTTopicV1, Topic, RESTTopicCollectionV1>().create(RESTTopicCollectionV1.class, new TopicV1Factory(), entity.getOutgoingRelatedTopicsArray(), BaseRESTv1.TOPIC_OUTGOING_RELATIONSHIPS_EXPANSION_NAME, dataType, expand, baseUrl, revision, entityManager));

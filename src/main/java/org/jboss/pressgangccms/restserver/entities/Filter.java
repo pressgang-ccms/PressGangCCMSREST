@@ -52,8 +52,6 @@ import org.jboss.pressgangccms.utils.common.CollectionUtilities;
 @Table(name = "Filter", uniqueConstraints = @UniqueConstraint(columnNames = { "FilterName" }))
 public class Filter extends AuditedEntity<Filter> implements java.io.Serializable
 {
-	@PersistenceContext EntityManager entityManager;
-	
 	public static final String SELECT_ALL_QUERY = "select filter from Filter filter";
 	/** Serializable version identifier */
 	private static final long serialVersionUID = 1378015715100292871L;

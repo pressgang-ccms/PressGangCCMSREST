@@ -62,7 +62,7 @@ public class TagV1Factory extends RESTDataObjectFactory<RESTTagV1, Tag, RESTTagC
 		/* Set collections */
 		if (revision == null)
 		{
-			retValue.setRevisions(new RESTDataObjectCollectionFactory<RESTTagV1, Tag, RESTTagCollectionV1>().create(RESTTagCollectionV1.class, new TagV1Factory(), entity, entity.getRevisions(), RESTBaseEntityV1.REVISIONS_NAME, dataType, expand, baseUrl, entityManager));
+			retValue.setRevisions(new RESTDataObjectCollectionFactory<RESTTagV1, Tag, RESTTagCollectionV1>().create(RESTTagCollectionV1.class, new TagV1Factory(), entity, entity.getRevisions(entityManager), RESTBaseEntityV1.REVISIONS_NAME, dataType, expand, baseUrl, entityManager));
 		}
 		retValue.setCategories(new RESTDataObjectCollectionFactory<RESTCategoryV1, TagToCategory, RESTCategoryCollectionV1>().create(RESTCategoryCollectionV1.class, new TagCategoryV1Factory(), CollectionUtilities.toArrayList(entity.getTagToCategories()), RESTTagV1.CATEGORIES_NAME, dataType, expand, baseUrl, entityManager));
 		retValue.setParentTags(new RESTDataObjectCollectionFactory<RESTTagV1, Tag, RESTTagCollectionV1>().create(RESTTagCollectionV1.class, new TagV1Factory(), entity.getParentTags(), RESTTagV1.PARENT_TAGS_NAME, dataType, expand, baseUrl, entityManager));

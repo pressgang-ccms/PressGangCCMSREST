@@ -49,7 +49,7 @@ public class RoleV1Factory extends RESTDataObjectFactory<RESTRoleV1, Role, RESTR
 
 		if (revision == null)
 		{
-			retValue.setRevisions(new RESTDataObjectCollectionFactory<RESTRoleV1, Role, RESTRoleCollectionV1>().create(RESTRoleCollectionV1.class, new RoleV1Factory(), entity, entity.getRevisions(), RESTBaseEntityV1.REVISIONS_NAME, dataType, expand, baseUrl, entityManager));
+			retValue.setRevisions(new RESTDataObjectCollectionFactory<RESTRoleV1, Role, RESTRoleCollectionV1>().create(RESTRoleCollectionV1.class, new RoleV1Factory(), entity, entity.getRevisions(entityManager), RESTBaseEntityV1.REVISIONS_NAME, dataType, expand, baseUrl, entityManager));
 		}
 		retValue.setUsers(new RESTDataObjectCollectionFactory<RESTUserV1, User, RESTUserCollectionV1>().create(RESTUserCollectionV1.class, new UserV1Factory(), entity.getUsers(), RESTRoleV1.USERS_NAME, dataType, expand, baseUrl, entityManager));
 		retValue.setParentRoles(new RESTDataObjectCollectionFactory<RESTRoleV1, Role, RESTRoleCollectionV1>().create(RESTRoleCollectionV1.class, new RoleV1Factory(), entity.getParentRoles(), RESTRoleV1.PARENTROLES_NAME, dataType, expand, baseUrl, entityManager));

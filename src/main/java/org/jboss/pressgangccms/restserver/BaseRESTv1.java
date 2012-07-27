@@ -724,7 +724,7 @@ public class BaseRESTv1
 				/*
 				 * Find the closest revision that is less than or equal to "revision"
 				 */
-				final List<Number> revisions = parentAuditedEntity.getRevisions();
+				final List<Number> revisions = parentAuditedEntity.getRevisions(entityManager);
 				for (final Number entityRevision : revisions)
 				{
 					if ((closestRevision == null || entityRevision.longValue() > closestRevision.longValue()) && entityRevision.longValue() <= revision.longValue())
@@ -735,7 +735,7 @@ public class BaseRESTv1
 				if (closestRevision == null)
 					closestRevision = revision;
 
-				entity = parentAuditedEntity.getRevision(closestRevision);
+				entity = parentAuditedEntity.getRevision(entityManager, closestRevision);
 
 			}
 			else

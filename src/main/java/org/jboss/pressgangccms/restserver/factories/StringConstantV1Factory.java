@@ -40,7 +40,7 @@ public class StringConstantV1Factory extends RESTDataObjectFactory<RESTStringCon
 		
 		if (revision == null)
 		{
-			retValue.setRevisions(new RESTDataObjectCollectionFactory<RESTStringConstantV1, StringConstants, RESTStringConstantCollectionV1>().create(RESTStringConstantCollectionV1.class, new StringConstantV1Factory(), entity, entity.getRevisions(), RESTBaseEntityV1.REVISIONS_NAME, dataType, expand, baseUrl, entityManager));
+			retValue.setRevisions(new RESTDataObjectCollectionFactory<RESTStringConstantV1, StringConstants, RESTStringConstantCollectionV1>().create(RESTStringConstantCollectionV1.class, new StringConstantV1Factory(), entity, entity.getRevisions(entityManager), RESTBaseEntityV1.REVISIONS_NAME, dataType, expand, baseUrl, entityManager));
 		}
 		
 		retValue.setLinks(baseUrl, BaseRESTv1.STRINGCONSTANT_URL_NAME, dataType, retValue.getId());
