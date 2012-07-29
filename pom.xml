@@ -131,6 +131,11 @@
 			<artifactId>named-regexp</artifactId>
 			<version>0.1-SNAPSHOT</version>
 		</dependency>
+		<dependency>
+			<groupId>org.hibernate</groupId>
+			<artifactId>hibernate-search-infinispan</artifactId>
+			<version>4.2.0.Beta1</version>
+		</dependency>
 	</dependencies>
 	
 	<build>
