@@ -36,13 +36,13 @@
 
 	<management>
 		<management-interfaces>
-            <native-interface>
-                <socket-binding native="management-native"/>
-            </native-interface>
-            <http-interface>
-                <socket-binding http="management-http"/>
-            </http-interface>
-        </management-interfaces>
+			<native-interface>
+				<socket-binding native="management-native" />
+			</native-interface>
+			<http-interface>
+				<socket-binding http="management-http" />
+			</http-interface>
+		</management-interfaces>
 	</management>
 
 	<profile>
@@ -85,16 +85,10 @@
 		<subsystem xmlns="urn:jboss:domain:configadmin:1.0" />
 		<subsystem xmlns="urn:jboss:domain:datasources:1.1">
 			<datasources>
-				<!-- <datasource jndi-name="java:jboss/datasources/ExampleDS"
-					enabled="true" use-java-context="true" pool-name="H2DS">
-					<connection-url>jdbc:h2:${jboss.server.data.dir}/test;DB_CLOSE_DELAY=-1
-					</connection-url>
-					<driver>h2</driver>
-					<security>
-						<user-name>sa</user-name>
-						<password>sa</password>
-					</security>
-				</datasource> -->
+				<!-- <datasource jndi-name="java:jboss/datasources/ExampleDS" enabled="true" 
+					use-java-context="true" pool-name="H2DS"> <connection-url>jdbc:h2:${jboss.server.data.dir}/test;DB_CLOSE_DELAY=-1 
+					</connection-url> <driver>h2</driver> <security> <user-name>sa</user-name> 
+					<password>sa</password> </security> </datasource> -->
 				<datasource jndi-name="java:jboss/datasources/MysqlDS"
 					enabled="${mysql.enabled}" use-java-context="true" pool-name="MysqlDS">
 					<connection-url>jdbc:mysql://${env.OPENSHIFT_DB_HOST}:${env.OPENSHIFT_DB_PORT}/${env.OPENSHIFT_APP_NAME}?jdbcCompliantTruncation=false
@@ -105,17 +99,10 @@
 						<password>${env.OPENSHIFT_DB_PASSWORD}</password>
 					</security>
 				</datasource>
-				<!-- <datasource jndi-name="java:jboss/datasources/PostgreSQLDS"
-					enabled="${postgresql.enabled}" use-java-context="true" pool-name="PostgreSQLDS"
-					use-ccm="true">
-					<connection-url>jdbc:postgresql://${env.OPENSHIFT_DB_HOST}:${env.OPENSHIFT_DB_PORT}/${env.OPENSHIFT_APP_NAME}
-					</connection-url>
-					<driver>postgresql</driver>
-					<security>
-						<user-name>${env.OPENSHIFT_DB_USERNAME}</user-name>
-						<password>${env.OPENSHIFT_DB_PASSWORD}</password>
-					</security>
-				</datasource> -->
+				<!-- <datasource jndi-name="java:jboss/datasources/PostgreSQLDS" enabled="${postgresql.enabled}" 
+					use-java-context="true" pool-name="PostgreSQLDS" use-ccm="true"> <connection-url>jdbc:postgresql://${env.OPENSHIFT_DB_HOST}:${env.OPENSHIFT_DB_PORT}/${env.OPENSHIFT_APP_NAME} 
+					</connection-url> <driver>postgresql</driver> <security> <user-name>${env.OPENSHIFT_DB_USERNAME}</user-name> 
+					<password>${env.OPENSHIFT_DB_PASSWORD}</password> </security> </datasource> -->
 				<drivers>
 					<driver name="h2" module="com.h2database.h2">
 						<xa-datasource-class>org.h2.jdbcx.JdbcDataSource
@@ -260,8 +247,9 @@
 		</subsystem>
 		<subsystem xmlns="urn:jboss:domain:jaxrs:1.0" />
 		<subsystem xmlns="urn:jboss:domain:jca:1.1">
-			<archive-validation enabled="true" fail-on-error="true" fail-on-warn="false"/>
-            <bean-validation enabled="true"/>
+			<archive-validation enabled="true" fail-on-error="true"
+				fail-on-warn="false" />
+			<bean-validation enabled="true" />
 			<default-workmanager>
 				<short-running-threads>
 					<core-threads count="50" />
@@ -429,29 +417,29 @@
 		<subsystem xmlns="urn:jboss:domain:resource-adapters:1.0" />
 		<subsystem xmlns="urn:jboss:domain:sar:1.0" />
 		<subsystem xmlns="urn:jboss:domain:security:1.2">
-            <security-domains>
-                <security-domain name="other" cache-type="default">
-                    <authentication>
-                        <login-module code="Remoting" flag="optional">
-                            <module-option name="password-stacking" value="useFirstPass"/>
-                        </login-module>
-                        <login-module code="RealmDirect" flag="required">
-                            <module-option name="password-stacking" value="useFirstPass"/>
-                        </login-module>
-                    </authentication>
-                </security-domain>
-                <security-domain name="jboss-web-policy" cache-type="default">
-                    <authorization>
-                        <policy-module code="Delegating" flag="required"/>
-                    </authorization>
-                </security-domain>
-                <security-domain name="jboss-ejb-policy" cache-type="default">
-                    <authorization>
-                        <policy-module code="Delegating" flag="required"/>
-                    </authorization>
-                </security-domain>
-            </security-domains>
-        </subsystem>
+			<security-domains>
+				<security-domain name="other" cache-type="default">
+					<authentication>
+						<login-module code="Remoting" flag="optional">
+							<module-option name="password-stacking" value="useFirstPass" />
+						</login-module>
+						<login-module code="RealmDirect" flag="required">
+							<module-option name="password-stacking" value="useFirstPass" />
+						</login-module>
+					</authentication>
+				</security-domain>
+				<security-domain name="jboss-web-policy" cache-type="default">
+					<authorization>
+						<policy-module code="Delegating" flag="required" />
+					</authorization>
+				</security-domain>
+				<security-domain name="jboss-ejb-policy" cache-type="default">
+					<authorization>
+						<policy-module code="Delegating" flag="required" />
+					</authorization>
+				</security-domain>
+			</security-domains>
+		</subsystem>
 		<subsystem xmlns="urn:jboss:domain:threads:1.1" />
 		<subsystem xmlns="urn:jboss:domain:transactions:1.2">
 			<core-environment>

@@ -9,7 +9,7 @@ import javax.transaction.TransactionManager;
 import org.codehaus.jackson.map.ObjectMapper;
 import org.hibernate.envers.AuditReader;
 import org.hibernate.envers.AuditReaderFactory;
-import org.jboss.pressgangccms.docbook.compiling.DocbookRendererMessage;
+import org.jboss.pressgangccms.docbook.messaging.DocbookRendererMessage;
 import org.jboss.pressgangccms.docbook.messaging.TopicRendererType;
 import org.jboss.pressgangccms.restserver.constants.Constants;
 import org.jboss.pressgangccms.restserver.entities.Topic;

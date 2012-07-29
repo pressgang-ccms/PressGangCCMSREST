@@ -15,6 +15,9 @@ import org.jboss.pressgangccms.utils.constants.CommonConstants;
 import org.joda.time.DateTime;
 import org.joda.time.format.ISODateTimeFormat;
 
+import com.google.code.regexp.NamedMatcher;
+import com.google.code.regexp.NamedPattern;
+
 /**
  * Provides the query elements required by Filter.buildQuery() to get a list of
  * Topic elements
@@ -467,8 +470,8 @@ public class TranslatedTopicDataFilterQueryBuilder implements FilterQueryBuilder
 		{
 			try
 			{
-				final Pattern pattern = Pattern.compile(CommonConstants.PROPERTY_TAG_SEARCH_RE);
-				final Matcher matcher = pattern.matcher(fieldValue);
+				final NamedPattern pattern = NamedPattern.compile(CommonConstants.PROPERTY_TAG_SEARCH_RE);
+				final NamedMatcher matcher = pattern.matcher(fieldValue);
 				
 				while (matcher.find())
 				{

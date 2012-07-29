@@ -2,8 +2,6 @@ package org.jboss.pressgangccms.restserver.filter;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 
 import org.jboss.pressgangccms.restserver.constants.Constants;
 import org.jboss.pressgangccms.restserver.entities.Topic;
@@ -13,6 +11,9 @@ import org.jboss.pressgangccms.utils.common.CollectionUtilities;
 import org.jboss.pressgangccms.utils.constants.CommonConstants;
 import org.joda.time.DateTime;
 import org.joda.time.format.ISODateTimeFormat;
+
+import com.google.code.regexp.NamedMatcher;
+import com.google.code.regexp.NamedPattern;
 
 /**
  * Provides the query elements required by Filter.buildQuery() to get a list of Topic elements
@@ -465,8 +466,8 @@ public class TopicFilterQueryBuilder implements FilterQueryBuilder
 		{
 			try
 			{
-				final Pattern pattern = Pattern.compile(CommonConstants.PROPERTY_TAG_SEARCH_RE);
-				final Matcher matcher = pattern.matcher(fieldName);
+				final NamedPattern pattern = NamedPattern.compile(CommonConstants.PROPERTY_TAG_SEARCH_RE);
+				final NamedMatcher matcher = pattern.matcher(fieldName);
 
 				while (matcher.find())
 				{
