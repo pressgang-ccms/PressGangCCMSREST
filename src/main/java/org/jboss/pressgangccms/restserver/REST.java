@@ -25,7 +25,6 @@ public class REST
 	@Path("/")
 	@Produces(MediaType.APPLICATION_JSON)
 	@Consumes({ "*" })
-	@RolesAllowed(value = {RESTSecurity.RESTv1ROLE})
 	public RESTInfo getRESTInfo()
 	{
 		final RESTInfo restInfo = new RESTInfo();
