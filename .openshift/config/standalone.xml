@@ -91,8 +91,8 @@
 					<password>sa</password> </security> </datasource> -->
 				<datasource jndi-name="java:jboss/datasources/MysqlDS"
 					enabled="${mysql.enabled}" use-java-context="true" pool-name="MysqlDS">
-					<!-- autoReconnect fixes the "Communications link failure" exception in OpenShift  -->
-					<connection-url>jdbc:mysql://${env.OPENSHIFT_DB_HOST}:${env.OPENSHIFT_DB_PORT}/${env.OPENSHIFT_APP_NAME}?jdbcCompliantTruncation=false&amp;autoReconnect=true
+					<!-- autoReconnect fixes the "Communications link failure" exception in OpenShift. Also see https://bugzilla.redhat.com/show_bug.cgi?id=841389  -->
+					<connection-url>jdbc:mysql://${env.OPENSHIFT_DB_HOST}:${env.OPENSHIFT_DB_PORT}/${env.OPENSHIFT_APP_NAME}?jdbcCompliantTruncation=false&amp;autoReconnect=true&amp;validationQuery="Select 1"
 					</connection-url>
 					<driver>mysql</driver>
 					<security>
