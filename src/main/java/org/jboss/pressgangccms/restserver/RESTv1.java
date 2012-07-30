@@ -3,6 +3,7 @@ package org.jboss.pressgangccms.restserver;
 import java.io.IOException;
 import java.util.Set;
 
+import javax.annotation.security.RolesAllowed;
 import javax.ws.rs.Consumes;
 import javax.ws.rs.DELETE;
 import javax.ws.rs.GET;
@@ -137,6 +138,7 @@ public class RESTv1 extends BaseRESTv1 implements RESTInterfaceV1, RESTInterface
 	@PUT
 	@Path("/settings/rerenderTopic")
 	@Consumes({ "*" })
+	@RolesAllowed(value = {RESTSecurity.RESTv1ROLE})
 	public void setRerenderTopic(@QueryParam("enabled") final Boolean enalbed)
 	{
 		System.setProperty(Constants.ENABLE_RENDERING_PROPERTY, enalbed == null ? null : enalbed.toString());
@@ -147,6 +149,7 @@ public class RESTv1 extends BaseRESTv1 implements RESTInterfaceV1, RESTInterface
 	@Path("/expanddatatrunk/get/json")
 	@Produces(MediaType.APPLICATION_JSON)
 	@Consumes({ "*" })
+	@RolesAllowed(value = {RESTSecurity.RESTv1ROLE})
 	public ExpandDataTrunk getJSONExpandTrunkExample() throws InvalidParameterException, InternalProcessingException
 	{
 		final ExpandDataTrunk expand = new ExpandDataTrunk();
@@ -166,6 +169,7 @@ public class RESTv1 extends BaseRESTv1 implements RESTInterfaceV1, RESTInterface
 	@Path("/blobconstant/get/jsonp/{id}")
 	@Produces(MediaType.APPLICATION_JSON)
 	@Consumes({ "*" })
+	@RolesAllowed(value = {RESTSecurity.RESTv1ROLE})
 	public String getJSONPBlobConstant(@PathParam("id") final Integer id, @QueryParam("expand") final String expand, @QueryParam("callback") final String callback) throws InvalidParameterException, InternalProcessingException
 	{
 		if (callback == null)
@@ -186,6 +190,7 @@ public class RESTv1 extends BaseRESTv1 implements RESTInterfaceV1, RESTInterface
 	@Path("/blobconstants/get/jsonp/all")
 	@Produces(MediaType.APPLICATION_JSON)
 	@Consumes({ "*" })
+	@RolesAllowed(value = {RESTSecurity.RESTv1ROLE})
 	public String getJSONPBlobConstants(@QueryParam("expand") final String expand, @QueryParam("callback") final String callback) throws InvalidParameterException, InternalProcessingException
 	{
 		if (callback == null)
@@ -206,6 +211,7 @@ public class RESTv1 extends BaseRESTv1 implements RESTInterfaceV1, RESTInterface
 	@Path("/blobconstant/put/jsonp")
 	@Consumes({ MediaType.APPLICATION_JSON })
 	@Produces(MediaType.APPLICATION_JSON)
+	@RolesAllowed(value = {RESTSecurity.RESTv1ROLE})
 	public String updateJSONPBlobConstant(@QueryParam("expand") final String expand, final RESTBlobConstantV1 dataObject, @QueryParam("callback") final String callback) throws InvalidParameterException, InternalProcessingException
 	{
 		if (callback == null)
@@ -226,6 +232,7 @@ public class RESTv1 extends BaseRESTv1 implements RESTInterfaceV1, RESTInterface
 	@Path("/blobconstants/put/jsonp")
 	@Consumes({ MediaType.APPLICATION_JSON })
 	@Produces(MediaType.APPLICATION_JSON)
+	@RolesAllowed(value = {RESTSecurity.RESTv1ROLE})
 	public String updateJSONPBlobConstants(@QueryParam("expand") final String expand, final RESTBlobConstantCollectionV1 dataObjects, @QueryParam("callback") final String callback) throws InvalidParameterException, InternalProcessingException
 	{
 		if (callback == null)
@@ -246,6 +253,7 @@ public class RESTv1 extends BaseRESTv1 implements RESTInterfaceV1, RESTInterface
 	@Path("/blobconstant/post/jsonp")
 	@Produces(MediaType.APPLICATION_JSON)
 	@Consumes({ MediaType.APPLICATION_JSON })
+	@RolesAllowed(value = {RESTSecurity.RESTv1ROLE})
 	public String createJSONPBlobConstant(@QueryParam("expand") final String expand, final RESTBlobConstantV1 dataObject, @QueryParam("callback") final String callback) throws InvalidParameterException, InternalProcessingException
 	{
 		if (callback == null)
@@ -267,6 +275,7 @@ public class RESTv1 extends BaseRESTv1 implements RESTInterfaceV1, RESTInterface
 	@Path("/blobconstants/post/jsonp")
 	@Produces(MediaType.APPLICATION_JSON)
 	@Consumes({ MediaType.APPLICATION_JSON })
+	@RolesAllowed(value = {RESTSecurity.RESTv1ROLE})
 	public String createJSONPBlobConstants(@QueryParam("expand") final String expand, final RESTBlobConstantCollectionV1 dataObjects, @QueryParam("callback") final String callback) throws InvalidParameterException, InternalProcessingException
 	{
 		if (callback == null)
@@ -287,6 +296,7 @@ public class RESTv1 extends BaseRESTv1 implements RESTInterfaceV1, RESTInterface
 	@Path("/blobconstant/delete/jsonp/{id}")
 	@Produces(MediaType.APPLICATION_JSON)
 	@Consumes({ "*" })
+	@RolesAllowed(value = {RESTSecurity.RESTv1ROLE})
 	public String deleteJSONPBlobConstant(@PathParam("id") final Integer id, @QueryParam("expand") final String expand, @QueryParam("callback") final String callback) throws InvalidParameterException, InternalProcessingException
 	{
 		if (callback == null)
@@ -307,6 +317,7 @@ public class RESTv1 extends BaseRESTv1 implements RESTInterfaceV1, RESTInterface
 	@Path("/blobconstants/delete/jsonp/{ids}")
 	@Produces(MediaType.APPLICATION_JSON)
 	@Consumes({ "*" })
+	@RolesAllowed(value = {RESTSecurity.RESTv1ROLE})
 	public String deleteJSONPBlobConstants(@PathParam("ids") final PathSegment ids, @QueryParam("expand") final String expand, @QueryParam("callback") final String callback) throws InvalidParameterException, InternalProcessingException
 	{
 		if (callback == null)
@@ -328,6 +339,7 @@ public class RESTv1 extends BaseRESTv1 implements RESTInterfaceV1, RESTInterface
 	@Path("/blobconstant/get/json/{id}")
 	@Produces(MediaType.APPLICATION_JSON)
 	@Consumes({ "*" })
+	@RolesAllowed(value = {RESTSecurity.RESTv1ROLE})
 	public RESTBlobConstantV1 getJSONBlobConstant(@PathParam("id") final Integer id, @QueryParam("expand") final String expand) throws InvalidParameterException, InternalProcessingException
 	{
 		if (id == null)
@@ -341,6 +353,7 @@ public class RESTv1 extends BaseRESTv1 implements RESTInterfaceV1, RESTInterface
 	@Path("/blobconstants/get/json/all")
 	@Produces(MediaType.APPLICATION_JSON)
 	@Consumes({ "*" })
+	@RolesAllowed(value = {RESTSecurity.RESTv1ROLE})
 	public RESTBlobConstantCollectionV1 getJSONBlobConstants(@QueryParam("expand") final String expand) throws InvalidParameterException, InternalProcessingException
 	{
 		return getJSONResources(RESTBlobConstantCollectionV1.class, BlobConstants.class, new BlobConstantV1Factory(), BaseRESTv1.BLOBCONSTANTS_EXPANSION_NAME, expand);
@@ -351,6 +364,7 @@ public class RESTv1 extends BaseRESTv1 implements RESTInterfaceV1, RESTInterface
 	@Path("/blobconstant/put/json")
 	@Consumes({ MediaType.APPLICATION_JSON })
 	@Produces(MediaType.APPLICATION_JSON)
+	@RolesAllowed(value = {RESTSecurity.RESTv1ROLE})
 	public RESTBlobConstantV1 updateJSONBlobConstant(@QueryParam("expand") final String expand, final RESTBlobConstantV1 dataObject) throws InvalidParameterException, InternalProcessingException
 	{
 		if (dataObject == null)
@@ -368,6 +382,7 @@ public class RESTv1 extends BaseRESTv1 implements RESTInterfaceV1, RESTInterface
 	@Path("/blobconstants/put/json")
 	@Consumes({ MediaType.APPLICATION_JSON })
 	@Produces(MediaType.APPLICATION_JSON)
+	@RolesAllowed(value = {RESTSecurity.RESTv1ROLE})
 	public RESTBlobConstantCollectionV1 updateJSONBlobConstants(@QueryParam("expand") final String expand, final RESTBlobConstantCollectionV1 dataObjects) throws InvalidParameterException, InternalProcessingException
 	{
 		if (dataObjects == null)
@@ -385,6 +400,7 @@ public class RESTv1 extends BaseRESTv1 implements RESTInterfaceV1, RESTInterface
 	@Path("/blobconstant/post/json")
 	@Produces(MediaType.APPLICATION_JSON)
 	@Consumes({ MediaType.APPLICATION_JSON })
+	@RolesAllowed(value = {RESTSecurity.RESTv1ROLE})
 	public RESTBlobConstantV1 createJSONBlobConstant(@QueryParam("expand") final String expand, final RESTBlobConstantV1 dataObject) throws InvalidParameterException, InternalProcessingException
 	{
 		if (dataObject == null)
@@ -399,6 +415,7 @@ public class RESTv1 extends BaseRESTv1 implements RESTInterfaceV1, RESTInterface
 	@Path("/blobconstants/post/json")
 	@Produces(MediaType.APPLICATION_JSON)
 	@Consumes({ MediaType.APPLICATION_JSON })
+	@RolesAllowed(value = {RESTSecurity.RESTv1ROLE})
 	public RESTBlobConstantCollectionV1 createJSONBlobConstants(@QueryParam("expand") final String expand, final RESTBlobConstantCollectionV1 dataObjects) throws InvalidParameterException, InternalProcessingException
 	{
 		if (dataObjects == null)
@@ -416,6 +433,7 @@ public class RESTv1 extends BaseRESTv1 implements RESTInterfaceV1, RESTInterface
 	@Path("/blobconstant/delete/json/{id}")
 	@Produces(MediaType.APPLICATION_JSON)
 	@Consumes({ "*" })
+	@RolesAllowed(value = {RESTSecurity.RESTv1ROLE})
 	public RESTBlobConstantV1 deleteJSONBlobConstant(@PathParam("id") final Integer id, @QueryParam("expand") final String expand) throws InvalidParameterException, InternalProcessingException
 	{
 		if (id == null)
@@ -430,6 +448,7 @@ public class RESTv1 extends BaseRESTv1 implements RESTInterfaceV1, RESTInterface
 	@Path("/blobconstants/delete/json/{ids}")
 	@Produces(MediaType.APPLICATION_JSON)
 	@Consumes({ "*" })
+	@RolesAllowed(value = {RESTSecurity.RESTv1ROLE})
 	public RESTBlobConstantCollectionV1 deleteJSONBlobConstants(@PathParam("ids") final PathSegment ids, @QueryParam("expand") final String expand) throws InvalidParameterException, InternalProcessingException
 	{
 		if (ids == null)
@@ -448,6 +467,7 @@ public class RESTv1 extends BaseRESTv1 implements RESTInterfaceV1, RESTInterface
 	@Path("/project/get/jsonp/{id}")
 	@Produces(MediaType.APPLICATION_JSON)
 	@Consumes({ "*" })
+	@RolesAllowed(value = {RESTSecurity.RESTv1ROLE})
 	public String getJSONPProject(@PathParam("id") final Integer id, @QueryParam("expand") final String expand, @QueryParam("callback") final String callback) throws InvalidParameterException, InternalProcessingException
 	{
 		if (callback == null)
@@ -468,6 +488,7 @@ public class RESTv1 extends BaseRESTv1 implements RESTInterfaceV1, RESTInterface
 	@Path("/projects/get/jsonp/all")
 	@Produces(MediaType.APPLICATION_JSON)
 	@Consumes({ "*" })
+	@RolesAllowed(value = {RESTSecurity.RESTv1ROLE})
 	public String getJSONPProjects(@QueryParam("expand") final String expand, @QueryParam("callback") final String callback) throws InvalidParameterException, InternalProcessingException
 	{
 		if (callback == null)
@@ -488,6 +509,7 @@ public class RESTv1 extends BaseRESTv1 implements RESTInterfaceV1, RESTInterface
 	@Path("/project/put/jsonp")
 	@Consumes({ MediaType.APPLICATION_JSON })
 	@Produces(MediaType.APPLICATION_JSON)
+	@RolesAllowed(value = {RESTSecurity.RESTv1ROLE})
 	public String updateJSONPProject(@QueryParam("expand") final String expand, final RESTProjectV1 dataObject, @QueryParam("callback") final String callback) throws InvalidParameterException, InternalProcessingException
 	{
 		if (callback == null)
@@ -508,6 +530,7 @@ public class RESTv1 extends BaseRESTv1 implements RESTInterfaceV1, RESTInterface
 	@Path("/projects/put/jsonp")
 	@Consumes({ MediaType.APPLICATION_JSON })
 	@Produces(MediaType.APPLICATION_JSON)
+	@RolesAllowed(value = {RESTSecurity.RESTv1ROLE})
 	public String updateJSONPProjects(@QueryParam("expand") final String expand, final RESTProjectCollectionV1 dataObjects, @QueryParam("callback") final String callback) throws InvalidParameterException, InternalProcessingException
 	{
 		if (callback == null)
@@ -528,6 +551,7 @@ public class RESTv1 extends BaseRESTv1 implements RESTInterfaceV1, RESTInterface
 	@Path("/project/post/jsonp")
 	@Produces(MediaType.APPLICATION_JSON)
 	@Consumes({ MediaType.APPLICATION_JSON })
+	@RolesAllowed(value = {RESTSecurity.RESTv1ROLE})
 	public String createJSONPProject(@QueryParam("expand") final String expand, final RESTProjectV1 dataObject, @QueryParam("callback") final String callback) throws InvalidParameterException, InternalProcessingException
 	{
 		if (callback == null)
@@ -548,6 +572,7 @@ public class RESTv1 extends BaseRESTv1 implements RESTInterfaceV1, RESTInterface
 	@Path("/projects/post/jsonp")
 	@Produces(MediaType.APPLICATION_JSON)
 	@Consumes({ MediaType.APPLICATION_JSON })
+	@RolesAllowed(value = {RESTSecurity.RESTv1ROLE})
 	public String createJSONPProjects(@QueryParam("expand") final String expand, final RESTProjectCollectionV1 dataObjects, @QueryParam("callback") final String callback) throws InvalidParameterException, InternalProcessingException
 	{
 		if (callback == null)
@@ -568,6 +593,7 @@ public class RESTv1 extends BaseRESTv1 implements RESTInterfaceV1, RESTInterface
 	@Path("/project/delete/jsonp/{id}")
 	@Produces(MediaType.APPLICATION_JSON)
 	@Consumes({ "*" })
+	@RolesAllowed(value = {RESTSecurity.RESTv1ROLE})
 	public String deleteJSONPProject(@PathParam("id") final Integer id, @QueryParam("expand") final String expand, @QueryParam("callback") final String callback) throws InvalidParameterException, InternalProcessingException
 	{
 		if (callback == null)
@@ -588,6 +614,7 @@ public class RESTv1 extends BaseRESTv1 implements RESTInterfaceV1, RESTInterface
 	@Path("/projects/delete/jsonp/{ids}")
 	@Produces(MediaType.APPLICATION_JSON)
 	@Consumes({ "*" })
+	@RolesAllowed(value = {RESTSecurity.RESTv1ROLE})
 	public String deleteJSONPProjects(@PathParam("ids") final PathSegment ids, @QueryParam("expand") final String expand, @QueryParam("callback") final String callback) throws InvalidParameterException, InternalProcessingException
 	{
 		if (callback == null)
@@ -609,6 +636,7 @@ public class RESTv1 extends BaseRESTv1 implements RESTInterfaceV1, RESTInterface
 	@Path("/project/get/json/{id}")
 	@Produces(MediaType.APPLICATION_JSON)
 	@Consumes({ "*" })
+	@RolesAllowed(value = {RESTSecurity.RESTv1ROLE})
 	public RESTProjectV1 getJSONProject(@PathParam("id") final Integer id, @QueryParam("expand") final String expand) throws InvalidParameterException, InternalProcessingException
 	{
 		if (id == null)
@@ -622,6 +650,7 @@ public class RESTv1 extends BaseRESTv1 implements RESTInterfaceV1, RESTInterface
 	@Path("/projects/get/json/all")
 	@Produces(MediaType.APPLICATION_JSON)
 	@Consumes({ "*" })
+	@RolesAllowed(value = {RESTSecurity.RESTv1ROLE})
 	public RESTProjectCollectionV1 getJSONProjects(@QueryParam("expand") final String expand) throws InvalidParameterException, InternalProcessingException
 	{
 		return getJSONResources(RESTProjectCollectionV1.class, Project.class, new ProjectV1Factory(), BaseRESTv1.PROJECTS_EXPANSION_NAME, expand);
@@ -632,6 +661,7 @@ public class RESTv1 extends BaseRESTv1 implements RESTInterfaceV1, RESTInterface
 	@Path("/project/put/json")
 	@Consumes({ MediaType.APPLICATION_JSON })
 	@Produces(MediaType.APPLICATION_JSON)
+	@RolesAllowed(value = {RESTSecurity.RESTv1ROLE})
 	public RESTProjectV1 updateJSONProject(@QueryParam("expand") final String expand, final RESTProjectV1 dataObject) throws InvalidParameterException, InternalProcessingException
 	{
 		if (dataObject == null)
@@ -649,6 +679,7 @@ public class RESTv1 extends BaseRESTv1 implements RESTInterfaceV1, RESTInterface
 	@Path("/projects/put/json")
 	@Consumes({ MediaType.APPLICATION_JSON })
 	@Produces(MediaType.APPLICATION_JSON)
+	@RolesAllowed(value = {RESTSecurity.RESTv1ROLE})
 	public RESTProjectCollectionV1 updateJSONProjects(@QueryParam("expand") final String expand, final RESTProjectCollectionV1 dataObjects) throws InvalidParameterException, InternalProcessingException
 	{
 		if (dataObjects == null)
@@ -666,6 +697,7 @@ public class RESTv1 extends BaseRESTv1 implements RESTInterfaceV1, RESTInterface
 	@Path("/project/post/json")
 	@Produces(MediaType.APPLICATION_JSON)
 	@Consumes({ MediaType.APPLICATION_JSON })
+	@RolesAllowed(value = {RESTSecurity.RESTv1ROLE})
 	public RESTProjectV1 createJSONProject(@QueryParam("expand") final String expand, final RESTProjectV1 dataObject) throws InvalidParameterException, InternalProcessingException
 	{
 		if (dataObject == null)
@@ -680,6 +712,7 @@ public class RESTv1 extends BaseRESTv1 implements RESTInterfaceV1, RESTInterface
 	@Path("/projects/post/json")
 	@Produces(MediaType.APPLICATION_JSON)
 	@Consumes({ MediaType.APPLICATION_JSON })
+	@RolesAllowed(value = {RESTSecurity.RESTv1ROLE})
 	public RESTProjectCollectionV1 createJSONProjects(@QueryParam("expand") final String expand, final RESTProjectCollectionV1 dataObjects) throws InvalidParameterException, InternalProcessingException
 	{
 		if (dataObjects == null)
@@ -697,6 +730,7 @@ public class RESTv1 extends BaseRESTv1 implements RESTInterfaceV1, RESTInterface
 	@Path("/project/delete/json/{id}")
 	@Produces(MediaType.APPLICATION_JSON)
 	@Consumes({ "*" })
+	@RolesAllowed(value = {RESTSecurity.RESTv1ROLE})
 	public RESTProjectV1 deleteJSONProject(@PathParam("id") final Integer id, @QueryParam("expand") final String expand) throws InvalidParameterException, InternalProcessingException
 	{
 		if (id == null)
@@ -711,6 +745,7 @@ public class RESTv1 extends BaseRESTv1 implements RESTInterfaceV1, RESTInterface
 	@Path("/projects/delete/json/{ids}")
 	@Produces(MediaType.APPLICATION_JSON)
 	@Consumes({ "*" })
+	@RolesAllowed(value = {RESTSecurity.RESTv1ROLE})
 	public RESTProjectCollectionV1 deleteJSONProjects(@PathParam("ids") final PathSegment ids, @QueryParam("expand") final String expand) throws InvalidParameterException, InternalProcessingException
 	{
 		if (ids == null)
@@ -729,6 +764,7 @@ public class RESTv1 extends BaseRESTv1 implements RESTInterfaceV1, RESTInterface
 	@Path("/propertytag/get/jsonp/{id}")
 	@Produces(MediaType.APPLICATION_JSON)
 	@Consumes({ "*" })
+	@RolesAllowed(value = {RESTSecurity.RESTv1ROLE})
 	public String getJSONPPropertyTag(@PathParam("id") final Integer id, @QueryParam("expand") final String expand, @QueryParam("callback") final String callback) throws InvalidParameterException, InternalProcessingException
 	{
 		if (callback == null)
@@ -749,6 +785,7 @@ public class RESTv1 extends BaseRESTv1 implements RESTInterfaceV1, RESTInterface
 	@Path("/propertytags/get/jsonp/all")
 	@Produces(MediaType.APPLICATION_JSON)
 	@Consumes({ "*" })
+	@RolesAllowed(value = {RESTSecurity.RESTv1ROLE})
 	public String getJSONPPropertyTags(@QueryParam("expand") final String expand, @QueryParam("callback") final String callback) throws InvalidParameterException, InternalProcessingException
 	{
 		if (callback == null)
@@ -769,6 +806,7 @@ public class RESTv1 extends BaseRESTv1 implements RESTInterfaceV1, RESTInterface
 	@Path("/propertytag/put/jsonp")
 	@Consumes({ MediaType.APPLICATION_JSON })
 	@Produces(MediaType.APPLICATION_JSON)
+	@RolesAllowed(value = {RESTSecurity.RESTv1ROLE})
 	public String updateJSONPPropertyTag(@QueryParam("expand") final String expand, final RESTPropertyTagV1 dataObject, @QueryParam("callback") final String callback) throws InvalidParameterException, InternalProcessingException
 	{
 		if (callback == null)
@@ -789,6 +827,7 @@ public class RESTv1 extends BaseRESTv1 implements RESTInterfaceV1, RESTInterface
 	@Path("/propertytags/put/jsonp")
 	@Consumes({ MediaType.APPLICATION_JSON })
 	@Produces(MediaType.APPLICATION_JSON)
+	@RolesAllowed(value = {RESTSecurity.RESTv1ROLE})
 	public String updateJSONPPropertyTags(@QueryParam("expand") final String expand, final RESTPropertyTagCollectionV1 dataObjects, @QueryParam("callback") final String callback) throws InvalidParameterException, InternalProcessingException
 	{
 		if (callback == null)
@@ -809,6 +848,7 @@ public class RESTv1 extends BaseRESTv1 implements RESTInterfaceV1, RESTInterface
 	@Path("/propertytag/post/jsonp")
 	@Produces(MediaType.APPLICATION_JSON)
 	@Consumes({ MediaType.APPLICATION_JSON })
+	@RolesAllowed(value = {RESTSecurity.RESTv1ROLE})
 	public String createJSONPPropertyTag(@QueryParam("expand") final String expand, final RESTPropertyTagV1 dataObject, @QueryParam("callback") final String callback) throws InvalidParameterException, InternalProcessingException
 	{
 		if (callback == null)
@@ -829,6 +869,7 @@ public class RESTv1 extends BaseRESTv1 implements RESTInterfaceV1, RESTInterface
 	@Path("/propertytags/post/jsonp")
 	@Produces(MediaType.APPLICATION_JSON)
 	@Consumes({ MediaType.APPLICATION_JSON })
+	@RolesAllowed(value = {RESTSecurity.RESTv1ROLE})
 	public String createJSONPPropertyTags(@QueryParam("expand") final String expand, final RESTPropertyTagCollectionV1 dataObjects, @QueryParam("callback") final String callback) throws InvalidParameterException, InternalProcessingException
 	{
 		if (callback == null)
@@ -849,6 +890,7 @@ public class RESTv1 extends BaseRESTv1 implements RESTInterfaceV1, RESTInterface
 	@Path("/propertytag/delete/jsonp/{id}")
 	@Produces(MediaType.APPLICATION_JSON)
 	@Consumes({ "*" })
+	@RolesAllowed(value = {RESTSecurity.RESTv1ROLE})
 	public String deleteJSONPPropertyTag(@PathParam("id") final Integer id, @QueryParam("expand") final String expand, @QueryParam("callback") final String callback) throws InvalidParameterException, InternalProcessingException
 	{
 		if (callback == null)
@@ -869,6 +911,7 @@ public class RESTv1 extends BaseRESTv1 implements RESTInterfaceV1, RESTInterface
 	@Path("/propertytags/delete/jsonp/{ids}")
 	@Produces(MediaType.APPLICATION_JSON)
 	@Consumes({ "*" })
+	@RolesAllowed(value = {RESTSecurity.RESTv1ROLE})
 	public String deleteJSONPPropertyTags(@PathParam("ids") final PathSegment ids, @QueryParam("expand") final String expand, @QueryParam("callback") final String callback) throws InvalidParameterException, InternalProcessingException
 	{
 		if (callback == null)
@@ -890,6 +933,7 @@ public class RESTv1 extends BaseRESTv1 implements RESTInterfaceV1, RESTInterface
 	@Path("/propertytag/get/json/{id}")
 	@Produces(MediaType.APPLICATION_JSON)
 	@Consumes({ "*" })
+	@RolesAllowed(value = {RESTSecurity.RESTv1ROLE})
 	public RESTPropertyTagV1 getJSONPropertyTag(@PathParam("id") final Integer id, @QueryParam("expand") final String expand) throws InvalidParameterException, InternalProcessingException
 	{
 		if (id == null)
@@ -903,6 +947,7 @@ public class RESTv1 extends BaseRESTv1 implements RESTInterfaceV1, RESTInterface
 	@Path("/propertytags/get/json/all")
 	@Produces(MediaType.APPLICATION_JSON)
 	@Consumes({ "*" })
+	@RolesAllowed(value = {RESTSecurity.RESTv1ROLE})
 	public RESTPropertyTagCollectionV1 getJSONPropertyTags(@QueryParam("expand") final String expand) throws InvalidParameterException, InternalProcessingException
 	{
 		return getJSONResources(RESTPropertyTagCollectionV1.class, PropertyTag.class, new PropertyTagV1Factory(), BaseRESTv1.PROPERTYTAGS_EXPANSION_NAME, expand);
@@ -913,6 +958,7 @@ public class RESTv1 extends BaseRESTv1 implements RESTInterfaceV1, RESTInterface
 	@Path("/propertytag/put/json")
 	@Consumes({ MediaType.APPLICATION_JSON })
 	@Produces(MediaType.APPLICATION_JSON)
+	@RolesAllowed(value = {RESTSecurity.RESTv1ROLE})
 	public RESTPropertyTagV1 updateJSONPropertyTag(@QueryParam("expand") final String expand, final RESTPropertyTagV1 dataObject) throws InvalidParameterException, InternalProcessingException
 	{
 		if (dataObject == null)
@@ -930,6 +976,7 @@ public class RESTv1 extends BaseRESTv1 implements RESTInterfaceV1, RESTInterface
 	@Path("/propertytags/put/json")
 	@Consumes({ MediaType.APPLICATION_JSON })
 	@Produces(MediaType.APPLICATION_JSON)
+	@RolesAllowed(value = {RESTSecurity.RESTv1ROLE})
 	public RESTPropertyTagCollectionV1 updateJSONPropertyTags(@QueryParam("expand") final String expand, final RESTPropertyTagCollectionV1 dataObjects) throws InvalidParameterException, InternalProcessingException
 	{
 		if (dataObjects == null)
@@ -947,6 +994,7 @@ public class RESTv1 extends BaseRESTv1 implements RESTInterfaceV1, RESTInterface
 	@Path("/propertytag/post/json")
 	@Produces(MediaType.APPLICATION_JSON)
 	@Consumes({ MediaType.APPLICATION_JSON })
+	@RolesAllowed(value = {RESTSecurity.RESTv1ROLE})
 	public RESTPropertyTagV1 createJSONPropertyTag(@QueryParam("expand") final String expand, final RESTPropertyTagV1 dataObject) throws InvalidParameterException, InternalProcessingException
 	{
 		if (dataObject == null)
@@ -961,6 +1009,7 @@ public class RESTv1 extends BaseRESTv1 implements RESTInterfaceV1, RESTInterface
 	@Path("/propertytags/post/json")
 	@Produces(MediaType.APPLICATION_JSON)
 	@Consumes({ MediaType.APPLICATION_JSON })
+	@RolesAllowed(value = {RESTSecurity.RESTv1ROLE})
 	public RESTPropertyTagCollectionV1 createJSONPropertyTags(@QueryParam("expand") final String expand, final RESTPropertyTagCollectionV1 dataObjects) throws InvalidParameterException, InternalProcessingException
 	{
 		if (dataObjects == null)
@@ -978,6 +1027,7 @@ public class RESTv1 extends BaseRESTv1 implements RESTInterfaceV1, RESTInterface
 	@Path("/propertytag/delete/json/{id}")
 	@Produces(MediaType.APPLICATION_JSON)
 	@Consumes({ "*" })
+	@RolesAllowed(value = {RESTSecurity.RESTv1ROLE})
 	public RESTPropertyTagV1 deleteJSONPropertyTag(@PathParam("id") final Integer id, @QueryParam("expand") final String expand) throws InvalidParameterException, InternalProcessingException
 	{
 		if (id == null)
@@ -992,6 +1042,7 @@ public class RESTv1 extends BaseRESTv1 implements RESTInterfaceV1, RESTInterface
 	@Path("/propertytags/delete/json/{ids}")
 	@Produces(MediaType.APPLICATION_JSON)
 	@Consumes({ "*" })
+	@RolesAllowed(value = {RESTSecurity.RESTv1ROLE})
 	public RESTPropertyTagCollectionV1 deleteJSONPropertyTags(@PathParam("ids") final PathSegment ids, @QueryParam("expand") final String expand) throws InvalidParameterException, InternalProcessingException
 	{
 		if (ids == null)
@@ -1010,6 +1061,7 @@ public class RESTv1 extends BaseRESTv1 implements RESTInterfaceV1, RESTInterface
 	@Path("/role/get/jsonp/{id}")
 	@Produces(MediaType.APPLICATION_JSON)
 	@Consumes({ "*" })
+	@RolesAllowed(value = {RESTSecurity.RESTv1ROLE})
 	public String getJSONPRole(@PathParam("id") final Integer id, @QueryParam("expand") final String expand, @QueryParam("callback") final String callback) throws InvalidParameterException, InternalProcessingException
 	{
 		if (callback == null)
@@ -1030,6 +1082,7 @@ public class RESTv1 extends BaseRESTv1 implements RESTInterfaceV1, RESTInterface
 	@Path("/roles/get/jsonp/all")
 	@Produces(MediaType.APPLICATION_JSON)
 	@Consumes({ "*" })
+	@RolesAllowed(value = {RESTSecurity.RESTv1ROLE})
 	public String getJSONPRoles(@QueryParam("expand") final String expand, @QueryParam("callback") final String callback) throws InvalidParameterException, InternalProcessingException
 	{
 		if (callback == null)
@@ -1050,6 +1103,7 @@ public class RESTv1 extends BaseRESTv1 implements RESTInterfaceV1, RESTInterface
 	@Path("/role/put/jsonp")
 	@Consumes({ MediaType.APPLICATION_JSON })
 	@Produces(MediaType.APPLICATION_JSON)
+	@RolesAllowed(value = {RESTSecurity.RESTv1ROLE})
 	public String updateJSONPRole(@QueryParam("expand") final String expand, final RESTRoleV1 dataObject, @QueryParam("callback") final String callback) throws InvalidParameterException, InternalProcessingException
 	{
 		if (callback == null)
@@ -1070,6 +1124,7 @@ public class RESTv1 extends BaseRESTv1 implements RESTInterfaceV1, RESTInterface
 	@Path("/roles/put/jsonp")
 	@Consumes({ MediaType.APPLICATION_JSON })
 	@Produces(MediaType.APPLICATION_JSON)
+	@RolesAllowed(value = {RESTSecurity.RESTv1ROLE})
 	public String updateJSONPRoles(@QueryParam("expand") final String expand, final RESTRoleCollectionV1 dataObjects, @QueryParam("callback") final String callback) throws InvalidParameterException, InternalProcessingException
 	{
 		if (callback == null)
@@ -1090,6 +1145,7 @@ public class RESTv1 extends BaseRESTv1 implements RESTInterfaceV1, RESTInterface
 	@Path("/role/post/jsonp")
 	@Produces(MediaType.APPLICATION_JSON)
 	@Consumes({ MediaType.APPLICATION_JSON })
+	@RolesAllowed(value = {RESTSecurity.RESTv1ROLE})
 	public String createJSONPRole(@QueryParam("expand") final String expand, final RESTRoleV1 dataObject, @QueryParam("callback") final String callback) throws InvalidParameterException, InternalProcessingException
 	{
 		if (callback == null)
@@ -1110,6 +1166,7 @@ public class RESTv1 extends BaseRESTv1 implements RESTInterfaceV1, RESTInterface
 	@Path("/roles/post/jsonp")
 	@Produces(MediaType.APPLICATION_JSON)
 	@Consumes({ MediaType.APPLICATION_JSON })
+	@RolesAllowed(value = {RESTSecurity.RESTv1ROLE})
 	public String createJSONPRoles(@QueryParam("expand") final String expand, final RESTRoleCollectionV1 dataObjects, @QueryParam("callback") final String callback) throws InvalidParameterException, InternalProcessingException
 	{
 		if (callback == null)
@@ -1130,6 +1187,7 @@ public class RESTv1 extends BaseRESTv1 implements RESTInterfaceV1, RESTInterface
 	@Path("/role/delete/jsonp/{id}")
 	@Produces(MediaType.APPLICATION_JSON)
 	@Consumes({ "*" })
+	@RolesAllowed(value = {RESTSecurity.RESTv1ROLE})
 	public String deleteJSONPRole(@PathParam("id") final Integer id, @QueryParam("expand") final String expand, @QueryParam("callback") final String callback) throws InvalidParameterException, InternalProcessingException
 	{
 		if (callback == null)
@@ -1150,6 +1208,7 @@ public class RESTv1 extends BaseRESTv1 implements RESTInterfaceV1, RESTInterface
 	@Path("/roles/delete/jsonp/{ids}")
 	@Produces(MediaType.APPLICATION_JSON)
 	@Consumes({ "*" })
+	@RolesAllowed(value = {RESTSecurity.RESTv1ROLE})
 	public String deleteJSONPRoles(@PathParam("ids") final PathSegment ids, @QueryParam("expand") final String expand, @QueryParam("callback") final String callback) throws InvalidParameterException, InternalProcessingException
 	{
 		if (callback == null)
@@ -1171,6 +1230,7 @@ public class RESTv1 extends BaseRESTv1 implements RESTInterfaceV1, RESTInterface
 	@Path("/role/get/json/{id}")
 	@Produces(MediaType.APPLICATION_JSON)
 	@Consumes({ "*" })
+	@RolesAllowed(value = {RESTSecurity.RESTv1ROLE})
 	public RESTRoleV1 getJSONRole(@PathParam("id") final Integer id, @QueryParam("expand") final String expand) throws InvalidParameterException, InternalProcessingException
 	{
 		if (id == null)
@@ -1184,6 +1244,7 @@ public class RESTv1 extends BaseRESTv1 implements RESTInterfaceV1, RESTInterface
 	@Path("/roles/get/json/all")
 	@Produces(MediaType.APPLICATION_JSON)
 	@Consumes({ "*" })
+	@RolesAllowed(value = {RESTSecurity.RESTv1ROLE})
 	public RESTRoleCollectionV1 getJSONRoles(@QueryParam("expand") final String expand) throws InvalidParameterException, InternalProcessingException
 	{
 		return getJSONResources(RESTRoleCollectionV1.class, Role.class, new RoleV1Factory(), BaseRESTv1.ROLES_EXPANSION_NAME, expand);
@@ -1194,6 +1255,7 @@ public class RESTv1 extends BaseRESTv1 implements RESTInterfaceV1, RESTInterface
 	@Path("/role/put/json")
 	@Consumes({ MediaType.APPLICATION_JSON })
 	@Produces(MediaType.APPLICATION_JSON)
+	@RolesAllowed(value = {RESTSecurity.RESTv1ROLE})
 	public RESTRoleV1 updateJSONRole(@QueryParam("expand") final String expand, final RESTRoleV1 dataObject) throws InvalidParameterException, InternalProcessingException
 	{
 		if (dataObject == null)
@@ -1211,6 +1273,7 @@ public class RESTv1 extends BaseRESTv1 implements RESTInterfaceV1, RESTInterface
 	@Path("/roles/put/json")
 	@Consumes({ MediaType.APPLICATION_JSON })
 	@Produces(MediaType.APPLICATION_JSON)
+	@RolesAllowed(value = {RESTSecurity.RESTv1ROLE})
 	public RESTRoleCollectionV1 updateJSONRoles(@QueryParam("expand") final String expand, final RESTRoleCollectionV1 dataObjects) throws InvalidParameterException, InternalProcessingException
 	{
 		if (dataObjects == null)
@@ -1228,6 +1291,7 @@ public class RESTv1 extends BaseRESTv1 implements RESTInterfaceV1, RESTInterface
 	@Path("/role/post/json")
 	@Produces(MediaType.APPLICATION_JSON)
 	@Consumes({ MediaType.APPLICATION_JSON })
+	@RolesAllowed(value = {RESTSecurity.RESTv1ROLE})
 	public RESTRoleV1 createJSONRole(@QueryParam("expand") final String expand, final RESTRoleV1 dataObject) throws InvalidParameterException, InternalProcessingException
 	{
 		if (dataObject == null)
@@ -1242,6 +1306,7 @@ public class RESTv1 extends BaseRESTv1 implements RESTInterfaceV1, RESTInterface
 	@Path("/roles/post/json")
 	@Produces(MediaType.APPLICATION_JSON)
 	@Consumes({ MediaType.APPLICATION_JSON })
+	@RolesAllowed(value = {RESTSecurity.RESTv1ROLE})
 	public RESTRoleCollectionV1 createJSONRoles(@QueryParam("expand") final String expand, final RESTRoleCollectionV1 dataObjects) throws InvalidParameterException, InternalProcessingException
 	{
 		if (dataObjects == null)
@@ -1259,6 +1324,7 @@ public class RESTv1 extends BaseRESTv1 implements RESTInterfaceV1, RESTInterface
 	@Path("/role/delete/json/{id}")
 	@Produces(MediaType.APPLICATION_JSON)
 	@Consumes({ "*" })
+	@RolesAllowed(value = {RESTSecurity.RESTv1ROLE})
 	public RESTRoleV1 deleteJSONRole(@PathParam("id") final Integer id, @QueryParam("expand") final String expand) throws InvalidParameterException, InternalProcessingException
 	{
 		if (id == null)
@@ -1273,6 +1339,7 @@ public class RESTv1 extends BaseRESTv1 implements RESTInterfaceV1, RESTInterface
 	@Path("/roles/delete/json/{ids}")
 	@Produces(MediaType.APPLICATION_JSON)
 	@Consumes({ "*" })
+	@RolesAllowed(value = {RESTSecurity.RESTv1ROLE})
 	public RESTRoleCollectionV1 deleteJSONRoles(@PathParam("ids") final PathSegment ids, @QueryParam("expand") final String expand) throws InvalidParameterException, InternalProcessingException
 	{
 		if (ids == null)
@@ -1291,6 +1358,7 @@ public class RESTv1 extends BaseRESTv1 implements RESTInterfaceV1, RESTInterface
 	@Path("/translatedtopic/get/jsonp/{id}")
 	@Produces(MediaType.APPLICATION_JSON)
 	@Consumes({ "*" })
+	@RolesAllowed(value = {RESTSecurity.RESTv1ROLE})
 	public String getJSONPTranslatedTopic(@PathParam("id") final Integer id, @QueryParam("expand") final String expand, @QueryParam("callback") final String callback) throws InvalidParameterException, InternalProcessingException
 	{
 		if (callback == null)
@@ -1311,6 +1379,7 @@ public class RESTv1 extends BaseRESTv1 implements RESTInterfaceV1, RESTInterface
 	@Path("/translatedtopics/get/jsonp/all")
 	@Produces(MediaType.APPLICATION_JSON)
 	@Consumes({ "*" })
+	@RolesAllowed(value = {RESTSecurity.RESTv1ROLE})
 	public String getJSONPTranslatedTopics(@QueryParam("expand") final String expand, @QueryParam("callback") final String callback) throws InvalidParameterException, InternalProcessingException
 	{
 		if (callback == null)
@@ -1331,6 +1400,7 @@ public class RESTv1 extends BaseRESTv1 implements RESTInterfaceV1, RESTInterface
 	@Path("/translatedtopic/put/jsonp")
 	@Consumes({ MediaType.APPLICATION_JSON })
 	@Produces(MediaType.APPLICATION_JSON)
+	@RolesAllowed(value = {RESTSecurity.RESTv1ROLE})
 	public String updateJSONPTranslatedTopic(@QueryParam("expand") final String expand, final RESTTranslatedTopicV1 dataObject, @QueryParam("callback") final String callback) throws InvalidParameterException, InternalProcessingException
 	{
 		if (callback == null)
@@ -1351,6 +1421,7 @@ public class RESTv1 extends BaseRESTv1 implements RESTInterfaceV1, RESTInterface
 	@Path("/translatedtopics/put/jsonp")
 	@Consumes({ MediaType.APPLICATION_JSON + ";charset=utf-8" })
 	@Produces(MediaType.APPLICATION_JSON + ";charset=utf-8")
+	@RolesAllowed(value = {RESTSecurity.RESTv1ROLE})
 	public String updateJSONPTranslatedTopics(@QueryParam("expand") final String expand, final RESTTranslatedTopicCollectionV1 dataObjects, @QueryParam("callback") final String callback) throws InvalidParameterException, InternalProcessingException
 	{
 		if (callback == null)
@@ -1371,6 +1442,7 @@ public class RESTv1 extends BaseRESTv1 implements RESTInterfaceV1, RESTInterface
 	@Path("/translatedtopic/post/jsonp")
 	@Produces(MediaType.APPLICATION_JSON)
 	@Consumes({ MediaType.APPLICATION_JSON })
+	@RolesAllowed(value = {RESTSecurity.RESTv1ROLE})
 	public String createJSONPTranslatedTopic(@QueryParam("expand") final String expand, final RESTTranslatedTopicV1 dataObject, @QueryParam("callback") final String callback) throws InvalidParameterException, InternalProcessingException
 	{
 		if (callback == null)
@@ -1391,6 +1463,7 @@ public class RESTv1 extends BaseRESTv1 implements RESTInterfaceV1, RESTInterface
 	@Path("/translatedtopics/post/jsonp")
 	@Produces(MediaType.APPLICATION_JSON)
 	@Consumes({ MediaType.APPLICATION_JSON })
+	@RolesAllowed(value = {RESTSecurity.RESTv1ROLE})
 	public String createJSONPTranslatedTopics(@QueryParam("expand") final String expand, final RESTTranslatedTopicCollectionV1 dataObjects, @QueryParam("callback") final String callback) throws InvalidParameterException, InternalProcessingException
 	{
 		if (callback == null)
@@ -1411,6 +1484,7 @@ public class RESTv1 extends BaseRESTv1 implements RESTInterfaceV1, RESTInterface
 	@Path("/translatedtopic/delete/jsonp/{id}")
 	@Produces(MediaType.APPLICATION_JSON)
 	@Consumes({ "*" })
+	@RolesAllowed(value = {RESTSecurity.RESTv1ROLE})
 	public String deleteJSONPTranslatedTopic(@PathParam("id") final Integer id, @QueryParam("expand") final String expand, @QueryParam("callback") final String callback) throws InvalidParameterException, InternalProcessingException
 	{
 		if (callback == null)
@@ -1431,6 +1505,7 @@ public class RESTv1 extends BaseRESTv1 implements RESTInterfaceV1, RESTInterface
 	@Path("/translatedtopics/delete/jsonp/{ids}")
 	@Produces(MediaType.APPLICATION_JSON)
 	@Consumes({ "*" })
+	@RolesAllowed(value = {RESTSecurity.RESTv1ROLE})
 	public String deleteJSONPTranslatedTopics(@PathParam("ids") final PathSegment ids, @QueryParam("expand") final String expand, @QueryParam("callback") final String callback) throws InvalidParameterException, InternalProcessingException
 	{
 		if (callback == null)
@@ -1452,6 +1527,7 @@ public class RESTv1 extends BaseRESTv1 implements RESTInterfaceV1, RESTInterface
 	@Path("/translatedtopic/get/json/{id}")
 	@Produces(MediaType.APPLICATION_JSON)
 	@Consumes({ "*" })
+	@RolesAllowed(value = {RESTSecurity.RESTv1ROLE})
 	public RESTTranslatedTopicV1 getJSONTranslatedTopic(@PathParam("id") final Integer id, @QueryParam("expand") final String expand) throws InvalidParameterException, InternalProcessingException
 	{
 		if (id == null)
@@ -1465,6 +1541,7 @@ public class RESTv1 extends BaseRESTv1 implements RESTInterfaceV1, RESTInterface
 	@Path("/translatedtopics/get/json/{query}")
 	@Produces(MediaType.APPLICATION_JSON)
 	@Consumes({ "*" })
+	@RolesAllowed(value = {RESTSecurity.RESTv1ROLE})
 	public RESTTranslatedTopicCollectionV1 getJSONTranslatedTopicsWithQuery(@PathParam("query") PathSegment query, @QueryParam("expand") final String expand) throws InvalidParameterException, InternalProcessingException
 	{
 		return getJSONTopicsFromQuery(RESTTranslatedTopicCollectionV1.class, query.getMatrixParameters(), new TranslatedTopicDataFilterQueryBuilder(), new TranslatedTopicV1Factory(), TRANSLATEDTOPICS_EXPANSION_NAME, expand);
@@ -1475,6 +1552,7 @@ public class RESTv1 extends BaseRESTv1 implements RESTInterfaceV1, RESTInterface
 	@Path("/translatedtopics/get/json/all")
 	@Produces(MediaType.APPLICATION_JSON)
 	@Consumes({ "*" })
+	@RolesAllowed(value = {RESTSecurity.RESTv1ROLE})
 	public RESTTranslatedTopicCollectionV1 getJSONTranslatedTopics(@QueryParam("expand") final String expand) throws InvalidParameterException, InternalProcessingException
 	{
 		return getJSONResources(RESTTranslatedTopicCollectionV1.class, TranslatedTopicData.class, new TranslatedTopicV1Factory(), BaseRESTv1.TRANSLATEDTOPICS_EXPANSION_NAME, expand);
@@ -1485,6 +1563,7 @@ public class RESTv1 extends BaseRESTv1 implements RESTInterfaceV1, RESTInterface
 	@Path("/translatedtopic/put/json")
 	@Consumes({ MediaType.APPLICATION_JSON})
 	@Produces(MediaType.APPLICATION_JSON)
+	@RolesAllowed(value = {RESTSecurity.RESTv1ROLE})
 	public RESTTranslatedTopicV1 updateJSONTranslatedTopic(@QueryParam("expand") final String expand, final RESTTranslatedTopicV1 dataObject) throws InvalidParameterException, InternalProcessingException
 	{
 		if (dataObject == null)
@@ -1502,6 +1581,7 @@ public class RESTv1 extends BaseRESTv1 implements RESTInterfaceV1, RESTInterface
 	@Path("/translatedtopics/put/json")
 	@Consumes({ MediaType.APPLICATION_JSON })
 	@Produces(MediaType.APPLICATION_JSON)
+	@RolesAllowed(value = {RESTSecurity.RESTv1ROLE})
 	public RESTTranslatedTopicCollectionV1 updateJSONTranslatedTopics(@QueryParam("expand") final String expand, final RESTTranslatedTopicCollectionV1 dataObjects) throws InvalidParameterException, InternalProcessingException
 	{
 		if (dataObjects == null)
@@ -1519,6 +1599,7 @@ public class RESTv1 extends BaseRESTv1 implements RESTInterfaceV1, RESTInterface
 	@Path("/translatedtopic/post/json")
 	@Produces(MediaType.APPLICATION_JSON)
 	@Consumes({ MediaType.APPLICATION_JSON })
+	@RolesAllowed(value = {RESTSecurity.RESTv1ROLE})
 	public RESTTranslatedTopicV1 createJSONTranslatedTopic(@QueryParam("expand") final String expand, final RESTTranslatedTopicV1 dataObject) throws InvalidParameterException, InternalProcessingException
 	{
 		if (dataObject == null)
@@ -1533,6 +1614,7 @@ public class RESTv1 extends BaseRESTv1 implements RESTInterfaceV1, RESTInterface
 	@Path("/translatedtopics/post/json")
 	@Produces(MediaType.APPLICATION_JSON)
 	@Consumes({ MediaType.APPLICATION_JSON })
+	@RolesAllowed(value = {RESTSecurity.RESTv1ROLE})
 	public RESTTranslatedTopicCollectionV1 createJSONTranslatedTopics(@QueryParam("expand") final String expand, final RESTTranslatedTopicCollectionV1 dataObjects) throws InvalidParameterException, InternalProcessingException
 	{
 		if (dataObjects == null)
@@ -1551,6 +1633,7 @@ public class RESTv1 extends BaseRESTv1 implements RESTInterfaceV1, RESTInterface
 	@Path("/translatedtopic/delete/json/{id}")
 	@Produces(MediaType.APPLICATION_JSON)
 	@Consumes({ "*" })
+	@RolesAllowed(value = {RESTSecurity.RESTv1ROLE})
 	public RESTTranslatedTopicV1 deleteJSONTranslatedTopic(@PathParam("id") final Integer id, @QueryParam("expand") final String expand) throws InvalidParameterException, InternalProcessingException
 	{
 		if (id == null)
@@ -1565,6 +1648,7 @@ public class RESTv1 extends BaseRESTv1 implements RESTInterfaceV1, RESTInterface
 	@Path("/translatedtopics/delete/json/{ids}")
 	@Produces(MediaType.APPLICATION_JSON)
 	@Consumes({ "*" })
+	@RolesAllowed(value = {RESTSecurity.RESTv1ROLE})
 	public RESTTranslatedTopicCollectionV1 deleteJSONTranslatedTopics(@PathParam("ids") final PathSegment ids, @QueryParam("expand") final String expand) throws InvalidParameterException, InternalProcessingException
 	{
 		if (ids == null)
@@ -1583,6 +1667,7 @@ public class RESTv1 extends BaseRESTv1 implements RESTInterfaceV1, RESTInterface
 	@Path("/stringconstant/get/jsonp/{id}")
 	@Produces(MediaType.APPLICATION_JSON)
 	@Consumes({ "*" })
+	@RolesAllowed(value = {RESTSecurity.RESTv1ROLE})
 	public String getJSONPStringConstant(@PathParam("id") final Integer id, @QueryParam("expand") final String expand, @QueryParam("callback") final String callback) throws InvalidParameterException, InternalProcessingException
 	{
 		if (callback == null)
@@ -1603,6 +1688,7 @@ public class RESTv1 extends BaseRESTv1 implements RESTInterfaceV1, RESTInterface
 	@Path("/stringconstants/get/jsonp/all")
 	@Produces(MediaType.APPLICATION_JSON)
 	@Consumes({ "*" })
+	@RolesAllowed(value = {RESTSecurity.RESTv1ROLE})
 	public String getJSONPStringConstants(@QueryParam("expand") final String expand, @QueryParam("callback") final String callback) throws InvalidParameterException, InternalProcessingException
 	{
 		if (callback == null)
@@ -1623,6 +1709,7 @@ public class RESTv1 extends BaseRESTv1 implements RESTInterfaceV1, RESTInterface
 	@Path("/stringconstant/put/jsonp")
 	@Consumes({ MediaType.APPLICATION_JSON })
 	@Produces(MediaType.APPLICATION_JSON)
+	@RolesAllowed(value = {RESTSecurity.RESTv1ROLE})
 	public String updateJSONPStringConstant(@QueryParam("expand") final String expand, final RESTStringConstantV1 dataObject, @QueryParam("callback") final String callback) throws InvalidParameterException, InternalProcessingException
 	{
 		if (callback == null)
@@ -1643,6 +1730,7 @@ public class RESTv1 extends BaseRESTv1 implements RESTInterfaceV1, RESTInterface
 	@Path("/stringconstants/put/jsonp")
 	@Consumes({ MediaType.APPLICATION_JSON })
 	@Produces(MediaType.APPLICATION_JSON)
+	@RolesAllowed(value = {RESTSecurity.RESTv1ROLE})
 	public String updateJSONPStringConstants(@QueryParam("expand") final String expand, final RESTStringConstantCollectionV1 dataObjects, @QueryParam("callback") final String callback) throws InvalidParameterException, InternalProcessingException
 	{
 		if (callback == null)
@@ -1663,6 +1751,7 @@ public class RESTv1 extends BaseRESTv1 implements RESTInterfaceV1, RESTInterface
 	@Path("/stringconstant/post/jsonp")
 	@Produces(MediaType.APPLICATION_JSON)
 	@Consumes({ MediaType.APPLICATION_JSON })
+	@RolesAllowed(value = {RESTSecurity.RESTv1ROLE})
 	public String createJSONPStringConstant(@QueryParam("expand") final String expand, final RESTStringConstantV1 dataObject, @QueryParam("callback") final String callback) throws InvalidParameterException, InternalProcessingException
 	{
 		if (callback == null)
@@ -1683,6 +1772,7 @@ public class RESTv1 extends BaseRESTv1 implements RESTInterfaceV1, RESTInterface
 	@Path("/stringconstants/post/jsonp")
 	@Produces(MediaType.APPLICATION_JSON)
 	@Consumes({ MediaType.APPLICATION_JSON })
+	@RolesAllowed(value = {RESTSecurity.RESTv1ROLE})
 	public String createJSONPStringConstants(@QueryParam("expand") final String expand, final RESTStringConstantCollectionV1 dataObjects, @QueryParam("callback") final String callback) throws InvalidParameterException, InternalProcessingException
 	{
 		if (callback == null)
@@ -1703,6 +1793,7 @@ public class RESTv1 extends BaseRESTv1 implements RESTInterfaceV1, RESTInterface
 	@Path("/stringconstant/delete/jsonp/{id}")
 	@Produces(MediaType.APPLICATION_JSON)
 	@Consumes({ "*" })
+	@RolesAllowed(value = {RESTSecurity.RESTv1ROLE})
 	public String deleteJSONPStringConstant(@PathParam("id") final Integer id, @QueryParam("expand") final String expand, @QueryParam("callback") final String callback) throws InvalidParameterException, InternalProcessingException
 	{
 		if (callback == null)
@@ -1723,6 +1814,7 @@ public class RESTv1 extends BaseRESTv1 implements RESTInterfaceV1, RESTInterface
 	@Path("/stringconstants/delete/jsonp/{ids}")
 	@Produces(MediaType.APPLICATION_JSON)
 	@Consumes({ "*" })
+	@RolesAllowed(value = {RESTSecurity.RESTv1ROLE})
 	public String deleteJSONPStringConstants(@PathParam("ids") final PathSegment ids, @QueryParam("expand") final String expand, @QueryParam("callback") final String callback) throws InvalidParameterException, InternalProcessingException
 	{
 		if (callback == null)
@@ -1744,6 +1836,7 @@ public class RESTv1 extends BaseRESTv1 implements RESTInterfaceV1, RESTInterface
 	@Path("/stringconstant/get/json/{id}")
 	@Produces(MediaType.APPLICATION_JSON)
 	@Consumes({ "*" })
+	@RolesAllowed(value = {RESTSecurity.RESTv1ROLE})
 	public RESTStringConstantV1 getJSONStringConstant(@PathParam("id") final Integer id, @QueryParam("expand") final String expand) throws InvalidParameterException, InternalProcessingException
 	{
 		if (id == null)
@@ -1757,6 +1850,7 @@ public class RESTv1 extends BaseRESTv1 implements RESTInterfaceV1, RESTInterface
 	@Path("/stringconstants/get/json/all")
 	@Produces(MediaType.APPLICATION_JSON)
 	@Consumes({ "*" })
+	@RolesAllowed(value = {RESTSecurity.RESTv1ROLE})
 	public RESTStringConstantCollectionV1 getJSONStringConstants(@QueryParam("expand") final String expand) throws InvalidParameterException, InternalProcessingException
 	{
 		return getJSONResources(RESTStringConstantCollectionV1.class, StringConstants.class, new StringConstantV1Factory(), BaseRESTv1.STRINGCONSTANTS_EXPANSION_NAME, expand);
@@ -1767,6 +1861,7 @@ public class RESTv1 extends BaseRESTv1 implements RESTInterfaceV1, RESTInterface
 	@Path("/stringconstant/put/json")
 	@Consumes({ MediaType.APPLICATION_JSON })
 	@Produces(MediaType.APPLICATION_JSON)
+	@RolesAllowed(value = {RESTSecurity.RESTv1ROLE})
 	public RESTStringConstantV1 updateJSONStringConstant(@QueryParam("expand") final String expand, final RESTStringConstantV1 dataObject) throws InvalidParameterException, InternalProcessingException
 	{
 		if (dataObject == null)
@@ -1784,6 +1879,7 @@ public class RESTv1 extends BaseRESTv1 implements RESTInterfaceV1, RESTInterface
 	@Path("/stringconstants/put/json")
 	@Consumes({ MediaType.APPLICATION_JSON })
 	@Produces(MediaType.APPLICATION_JSON)
+	@RolesAllowed(value = {RESTSecurity.RESTv1ROLE})
 	public RESTStringConstantCollectionV1 updateJSONStringConstants(@QueryParam("expand") final String expand, final RESTStringConstantCollectionV1 dataObjects) throws InvalidParameterException, InternalProcessingException
 	{
 		if (dataObjects == null)
@@ -1801,6 +1897,7 @@ public class RESTv1 extends BaseRESTv1 implements RESTInterfaceV1, RESTInterface
 	@Path("/stringconstant/post/json")
 	@Produces(MediaType.APPLICATION_JSON)
 	@Consumes({ MediaType.APPLICATION_JSON })
+	@RolesAllowed(value = {RESTSecurity.RESTv1ROLE})
 	public RESTStringConstantV1 createJSONStringConstant(@QueryParam("expand") final String expand, final RESTStringConstantV1 dataObject) throws InvalidParameterException, InternalProcessingException
 	{
 		if (dataObject == null)
@@ -1815,6 +1912,7 @@ public class RESTv1 extends BaseRESTv1 implements RESTInterfaceV1, RESTInterface
 	@Path("/stringconstants/post/json")
 	@Produces(MediaType.APPLICATION_JSON)
 	@Consumes({ MediaType.APPLICATION_JSON })
+	@RolesAllowed(value = {RESTSecurity.RESTv1ROLE})
 	public RESTStringConstantCollectionV1 createJSONStringConstants(@QueryParam("expand") final String expand, final RESTStringConstantCollectionV1 dataObjects) throws InvalidParameterException, InternalProcessingException
 	{
 		if (dataObjects == null)
@@ -1832,6 +1930,7 @@ public class RESTv1 extends BaseRESTv1 implements RESTInterfaceV1, RESTInterface
 	@Path("/stringconstant/delete/json/{id}")
 	@Produces(MediaType.APPLICATION_JSON)
 	@Consumes({ "*" })
+	@RolesAllowed(value = {RESTSecurity.RESTv1ROLE})
 	public RESTStringConstantV1 deleteJSONStringConstant(@PathParam("id") final Integer id, @QueryParam("expand") final String expand) throws InvalidParameterException, InternalProcessingException
 	{
 		if (id == null)
@@ -1846,6 +1945,7 @@ public class RESTv1 extends BaseRESTv1 implements RESTInterfaceV1, RESTInterface
 	@Path("/stringconstants/delete/json/{ids}")
 	@Produces(MediaType.APPLICATION_JSON)
 	@Consumes({ "*" })
+	@RolesAllowed(value = {RESTSecurity.RESTv1ROLE})
 	public RESTStringConstantCollectionV1 deleteJSONStringConstants(@PathParam("ids") final PathSegment ids, @QueryParam("expand") final String expand) throws InvalidParameterException, InternalProcessingException
 	{
 		if (ids == null)
@@ -1864,6 +1964,7 @@ public class RESTv1 extends BaseRESTv1 implements RESTInterfaceV1, RESTInterface
 	@Path("/user/get/jsonp/{id}")
 	@Produces(MediaType.APPLICATION_JSON)
 	@Consumes({ "*" })
+	@RolesAllowed(value = {RESTSecurity.RESTv1ROLE})
 	public String getJSONPUser(@PathParam("id") final Integer id, @QueryParam("expand") final String expand, @QueryParam("callback") final String callback) throws InvalidParameterException, InternalProcessingException
 	{
 		if (callback == null)
@@ -1884,6 +1985,7 @@ public class RESTv1 extends BaseRESTv1 implements RESTInterfaceV1, RESTInterface
 	@Path("/users/get/jsonp/all")
 	@Produces(MediaType.APPLICATION_JSON)
 	@Consumes({ "*" })
+	@RolesAllowed(value = {RESTSecurity.RESTv1ROLE})
 	public String getJSONPUsers(@QueryParam("expand") final String expand, @QueryParam("callback") final String callback) throws InvalidParameterException, InternalProcessingException
 	{
 		if (callback == null)
@@ -1904,6 +2006,7 @@ public class RESTv1 extends BaseRESTv1 implements RESTInterfaceV1, RESTInterface
 	@Path("/user/put/jsonp")
 	@Consumes({ MediaType.APPLICATION_JSON })
 	@Produces(MediaType.APPLICATION_JSON)
+	@RolesAllowed(value = {RESTSecurity.RESTv1ROLE})
 	public String updateJSONPUser(@QueryParam("expand") final String expand, final RESTUserV1 dataObject, @QueryParam("callback") final String callback) throws InvalidParameterException, InternalProcessingException
 	{
 		if (callback == null)
@@ -1924,6 +2027,7 @@ public class RESTv1 extends BaseRESTv1 implements RESTInterfaceV1, RESTInterface
 	@Path("/users/put/jsonp")
 	@Consumes({ MediaType.APPLICATION_JSON })
 	@Produces(MediaType.APPLICATION_JSON)
+	@RolesAllowed(value = {RESTSecurity.RESTv1ROLE})
 	public String updateJSONPUsers(@QueryParam("expand") final String expand, final RESTUserCollectionV1 dataObjects, @QueryParam("callback") final String callback) throws InvalidParameterException, InternalProcessingException
 	{
 		if (callback == null)
@@ -1944,6 +2048,7 @@ public class RESTv1 extends BaseRESTv1 implements RESTInterfaceV1, RESTInterface
 	@Path("/user/post/jsonp")
 	@Produces(MediaType.APPLICATION_JSON)
 	@Consumes({ MediaType.APPLICATION_JSON })
+	@RolesAllowed(value = {RESTSecurity.RESTv1ROLE})
 	public String createJSONPUser(@QueryParam("expand") final String expand, final RESTUserV1 dataObject, @QueryParam("callback") final String callback) throws InvalidParameterException, InternalProcessingException
 	{
 		if (callback == null)
@@ -1964,6 +2069,7 @@ public class RESTv1 extends BaseRESTv1 implements RESTInterfaceV1, RESTInterface
 	@Path("/users/post/jsonp")
 	@Produces(MediaType.APPLICATION_JSON)
 	@Consumes({ MediaType.APPLICATION_JSON })
+	@RolesAllowed(value = {RESTSecurity.RESTv1ROLE})
 	public String createJSONPUsers(@QueryParam("expand") final String expand, final RESTUserCollectionV1 dataObjects, @QueryParam("callback") final String callback) throws InvalidParameterException, InternalProcessingException
 	{
 		if (callback == null)
@@ -1984,6 +2090,7 @@ public class RESTv1 extends BaseRESTv1 implements RESTInterfaceV1, RESTInterface
 	@Path("/user/delete/jsonp/{id}")
 	@Produces(MediaType.APPLICATION_JSON)
 	@Consumes({ "*" })
+	@RolesAllowed(value = {RESTSecurity.RESTv1ROLE})
 	public String deleteJSONPUser(@PathParam("id") final Integer id, @QueryParam("expand") final String expand, @QueryParam("callback") final String callback) throws InvalidParameterException, InternalProcessingException
 	{
 		if (callback == null)
@@ -2004,6 +2111,7 @@ public class RESTv1 extends BaseRESTv1 implements RESTInterfaceV1, RESTInterface
 	@Path("/users/delete/jsonp/{ids}")
 	@Produces(MediaType.APPLICATION_JSON)
 	@Consumes({ "*" })
+	@RolesAllowed(value = {RESTSecurity.RESTv1ROLE})
 	public String deleteJSONPUsers(@PathParam("ids") final PathSegment ids, @QueryParam("expand") final String expand, @QueryParam("callback") final String callback) throws InvalidParameterException, InternalProcessingException
 	{
 		if (callback == null)
@@ -2026,6 +2134,7 @@ public class RESTv1 extends BaseRESTv1 implements RESTInterfaceV1, RESTInterface
 	@Path("/user/get/json/{id}")
 	@Produces(MediaType.APPLICATION_JSON)
 	@Consumes({ "*" })
+	@RolesAllowed(value = {RESTSecurity.RESTv1ROLE})
 	public RESTUserV1 getJSONUser(@PathParam("id") final Integer id, @QueryParam("expand") final String expand) throws InvalidParameterException, InternalProcessingException
 	{
 		if (id == null)
@@ -2039,6 +2148,7 @@ public class RESTv1 extends BaseRESTv1 implements RESTInterfaceV1, RESTInterface
 	@Path("/users/get/json/all")
 	@Produces(MediaType.APPLICATION_JSON)
 	@Consumes({ "*" })
+	@RolesAllowed(value = {RESTSecurity.RESTv1ROLE})
 	public RESTUserCollectionV1 getJSONUsers(@QueryParam("expand") final String expand) throws InvalidParameterException, InternalProcessingException
 	{
 		return getJSONResources(RESTUserCollectionV1.class, User.class, new UserV1Factory(), BaseRESTv1.USERS_EXPANSION_NAME, expand);
@@ -2049,6 +2159,7 @@ public class RESTv1 extends BaseRESTv1 implements RESTInterfaceV1, RESTInterface
 	@Path("/user/put/json")
 	@Consumes({ MediaType.APPLICATION_JSON })
 	@Produces(MediaType.APPLICATION_JSON)
+	@RolesAllowed(value = {RESTSecurity.RESTv1ROLE})
 	public RESTUserV1 updateJSONUser(@QueryParam("expand") final String expand, final RESTUserV1 dataObject) throws InvalidParameterException, InternalProcessingException
 	{
 		if (dataObject == null)
@@ -2066,6 +2177,7 @@ public class RESTv1 extends BaseRESTv1 implements RESTInterfaceV1, RESTInterface
 	@Path("/users/put/json")
 	@Consumes({ MediaType.APPLICATION_JSON })
 	@Produces(MediaType.APPLICATION_JSON)
+	@RolesAllowed(value = {RESTSecurity.RESTv1ROLE})
 	public RESTUserCollectionV1 updateJSONUsers(@QueryParam("expand") final String expand, final RESTUserCollectionV1 dataObjects) throws InvalidParameterException, InternalProcessingException
 	{
 		if (dataObjects == null)
@@ -2083,6 +2195,7 @@ public class RESTv1 extends BaseRESTv1 implements RESTInterfaceV1, RESTInterface
 	@Path("/user/post/json")
 	@Produces(MediaType.APPLICATION_JSON)
 	@Consumes({ MediaType.APPLICATION_JSON })
+	@RolesAllowed(value = {RESTSecurity.RESTv1ROLE})
 	public RESTUserV1 createJSONUser(@QueryParam("expand") final String expand, final RESTUserV1 dataObject) throws InvalidParameterException, InternalProcessingException
 	{
 		if (dataObject == null)
@@ -2097,6 +2210,7 @@ public class RESTv1 extends BaseRESTv1 implements RESTInterfaceV1, RESTInterface
 	@Path("/users/post/json")
 	@Produces(MediaType.APPLICATION_JSON)
 	@Consumes({ MediaType.APPLICATION_JSON })
+	@RolesAllowed(value = {RESTSecurity.RESTv1ROLE})
 	public RESTUserCollectionV1 createJSONUsers(@QueryParam("expand") final String expand, final RESTUserCollectionV1 dataObjects) throws InvalidParameterException, InternalProcessingException
 	{
 		if (dataObjects == null)
@@ -2114,6 +2228,7 @@ public class RESTv1 extends BaseRESTv1 implements RESTInterfaceV1, RESTInterface
 	@Path("/user/delete/json/{id}")
 	@Produces(MediaType.APPLICATION_JSON)
 	@Consumes({ "*" })
+	@RolesAllowed(value = {RESTSecurity.RESTv1ROLE})
 	public RESTUserV1 deleteJSONUser(@PathParam("id") final Integer id, @QueryParam("expand") final String expand) throws InvalidParameterException, InternalProcessingException
 	{
 		if (id == null)
@@ -2128,6 +2243,7 @@ public class RESTv1 extends BaseRESTv1 implements RESTInterfaceV1, RESTInterface
 	@Path("/users/delete/json/{ids}")
 	@Produces(MediaType.APPLICATION_JSON)
 	@Consumes({ "*" })
+	@RolesAllowed(value = {RESTSecurity.RESTv1ROLE})
 	public RESTUserCollectionV1 deleteJSONUsers(@PathParam("ids") final PathSegment ids, @QueryParam("expand") final String expand) throws InvalidParameterException, InternalProcessingException
 	{
 		if (ids == null)
@@ -2145,6 +2261,7 @@ public class RESTv1 extends BaseRESTv1 implements RESTInterfaceV1, RESTInterface
 	@Path("/translatedtopicstring/get/jsonp/{id}")
 	@Produces(MediaType.APPLICATION_JSON)
 	@Consumes({ "*" })
+	@RolesAllowed(value = {RESTSecurity.RESTv1ROLE})
 	public String getJSONPTranslatedTopicString(@PathParam("id") final Integer id, @QueryParam("expand") final String expand, @QueryParam("callback") final String callback) throws InvalidParameterException, InternalProcessingException
 	{
 		if (callback == null)
@@ -2165,6 +2282,7 @@ public class RESTv1 extends BaseRESTv1 implements RESTInterfaceV1, RESTInterface
 	@Path("/translatedtopicstrings/get/jsonp/all")
 	@Produces(MediaType.APPLICATION_JSON)
 	@Consumes({ "*" })
+	@RolesAllowed(value = {RESTSecurity.RESTv1ROLE})
 	public String getJSONPTranslatedTopicStrings(@QueryParam("expand") final String expand, @QueryParam("callback") final String callback) throws InvalidParameterException, InternalProcessingException
 	{
 		if (callback == null)
@@ -2184,6 +2302,7 @@ public class RESTv1 extends BaseRESTv1 implements RESTInterfaceV1, RESTInterface
 	@Path("/translatedtopicstring/put/jsonp")
 	@Consumes({ MediaType.APPLICATION_JSON })
 	@Produces(MediaType.APPLICATION_JSON)
+	@RolesAllowed(value = {RESTSecurity.RESTv1ROLE})
 	public String updateJSONPTranslatedTopicString(@QueryParam("expand") final String expand, final RESTTranslatedTopicStringV1 dataObject, @QueryParam("callback") final String callback) throws InvalidParameterException, InternalProcessingException
 	{
 		if (callback == null)
@@ -2203,6 +2322,7 @@ public class RESTv1 extends BaseRESTv1 implements RESTInterfaceV1, RESTInterface
 	@Path("/translatedtopicstrings/put/jsonp")
 	@Consumes({ MediaType.APPLICATION_JSON })
 	@Produces(MediaType.APPLICATION_JSON)
+	@RolesAllowed(value = {RESTSecurity.RESTv1ROLE})
 	public String updateJSONPTranslatedTopicStrings(@QueryParam("expand") final String expand, final RESTTranslatedTopicStringCollectionV1 dataObjects, @QueryParam("callback") final String callback) throws InvalidParameterException, InternalProcessingException
 	{
 		if (callback == null)
@@ -2222,6 +2342,7 @@ public class RESTv1 extends BaseRESTv1 implements RESTInterfaceV1, RESTInterface
 	@Path("/translatedtopicstring/delete/jsonp/{id}")
 	@Produces(MediaType.APPLICATION_JSON)
 	@Consumes({ "*" })
+	@RolesAllowed(value = {RESTSecurity.RESTv1ROLE})
 	public String deleteJSONPTranslatedTopicString(@PathParam("id") final Integer id, @QueryParam("expand") final String expand, @QueryParam("callback") final String callback) throws InvalidParameterException, InternalProcessingException
 	{
 		if (callback == null)
@@ -2241,6 +2362,7 @@ public class RESTv1 extends BaseRESTv1 implements RESTInterfaceV1, RESTInterface
 	@Path("/translatedtopicstrings/delete/jsonp/{ids}")
 	@Produces(MediaType.APPLICATION_JSON)
 	@Consumes({ "*" })
+	@RolesAllowed(value = {RESTSecurity.RESTv1ROLE})
 	public String deleteJSONPTranslatedTopicStrings(@PathParam("ids") final PathSegment ids, @QueryParam("expand") final String expand, @QueryParam("callback") final String callback) throws InvalidParameterException, InternalProcessingException
 	{
 		if (callback == null)
@@ -2262,6 +2384,7 @@ public class RESTv1 extends BaseRESTv1 implements RESTInterfaceV1, RESTInterface
 	@Path("/translatedtopicstring/get/json/{id}")
 	@Produces(MediaType.APPLICATION_JSON)
 	@Consumes({ "*" })
+	@RolesAllowed(value = {RESTSecurity.RESTv1ROLE})
 	public RESTTranslatedTopicStringV1 getJSONTranslatedTopicString(@PathParam("id") final Integer id, @QueryParam("expand") final String expand) throws InvalidParameterException, InternalProcessingException
 	{
 		if (id == null)
@@ -2277,6 +2400,7 @@ public class RESTv1 extends BaseRESTv1 implements RESTInterfaceV1, RESTInterface
 	@Path("/translatedtopicstrings/get/json/all")
 	@Produces(MediaType.APPLICATION_JSON)
 	@Consumes({ "*" })
+	@RolesAllowed(value = {RESTSecurity.RESTv1ROLE})
 	public RESTTranslatedTopicStringCollectionV1 getJSONTranslatedTopicStrings(@QueryParam("expand") final String expand) throws InvalidParameterException, InternalProcessingException
 	{
 		return getJSONResources(RESTTranslatedTopicStringCollectionV1.class, TranslatedTopicString.class, new TranslatedTopicStringV1Factory(), BaseRESTv1.TRANSLATEDTOPICSTRINGS_EXPANSION_NAME, expand);
@@ -2287,6 +2411,7 @@ public class RESTv1 extends BaseRESTv1 implements RESTInterfaceV1, RESTInterface
 	@Path("/translatedtopicstring/put/json")
 	@Consumes({ MediaType.APPLICATION_JSON })
 	@Produces(MediaType.APPLICATION_JSON)
+	@RolesAllowed(value = {RESTSecurity.RESTv1ROLE})
 	public RESTTranslatedTopicStringV1 updateJSONTranslatedTopicString(@QueryParam("expand") final String expand, final RESTTranslatedTopicStringV1 dataObject) throws InvalidParameterException, InternalProcessingException
 	{
 		if (dataObject == null)
@@ -2304,6 +2429,7 @@ public class RESTv1 extends BaseRESTv1 implements RESTInterfaceV1, RESTInterface
 	@Path("/translatedtopicstrings/put/json")
 	@Consumes({ MediaType.APPLICATION_JSON })
 	@Produces(MediaType.APPLICATION_JSON)
+	@RolesAllowed(value = {RESTSecurity.RESTv1ROLE})
 	public RESTTranslatedTopicStringCollectionV1 updateJSONTranslatedTopicStrings(@QueryParam("expand") final String expand, final RESTTranslatedTopicStringCollectionV1 dataObjects) throws InvalidParameterException, InternalProcessingException
 	{
 		if (dataObjects == null)
@@ -2321,6 +2447,7 @@ public class RESTv1 extends BaseRESTv1 implements RESTInterfaceV1, RESTInterface
 	@Path("/translatedtopicstring/delete/json/{id}")
 	@Produces(MediaType.APPLICATION_JSON)
 	@Consumes({ "*" })
+	@RolesAllowed(value = {RESTSecurity.RESTv1ROLE})
 	public RESTTranslatedTopicStringV1 deleteJSONTranslatedTopicString(@PathParam("id") final Integer id, @QueryParam("expand") final String expand) throws InvalidParameterException, InternalProcessingException
 	{
 		if (id == null)
@@ -2335,6 +2462,7 @@ public class RESTv1 extends BaseRESTv1 implements RESTInterfaceV1, RESTInterface
 	@Path("/translatedtopicstrings/delete/json/{ids}")
 	@Produces(MediaType.APPLICATION_JSON)
 	@Consumes({ "*" })
+	@RolesAllowed(value = {RESTSecurity.RESTv1ROLE})
 	public RESTTranslatedTopicStringCollectionV1 deleteJSONTranslatedTopicStrings(@PathParam("ids") final PathSegment ids, @QueryParam("expand") final String expand) throws InvalidParameterException, InternalProcessingException
 	{
 		if (ids == null)
@@ -2353,6 +2481,7 @@ public class RESTv1 extends BaseRESTv1 implements RESTInterfaceV1, RESTInterface
 	@Path("/tag/get/jsonp/{id}")
 	@Produces(MediaType.APPLICATION_JSON)
 	@Consumes({ "*" })
+	@RolesAllowed(value = {RESTSecurity.RESTv1ROLE})
 	public String getJSONPTag(@PathParam("id") final Integer id, @QueryParam("expand") final String expand, @QueryParam("callback") final String callback) throws InvalidParameterException, InternalProcessingException
 	{
 		if (callback == null)
@@ -2373,6 +2502,7 @@ public class RESTv1 extends BaseRESTv1 implements RESTInterfaceV1, RESTInterface
 	@Path("/tags/get/jsonp/all")
 	@Produces(MediaType.APPLICATION_JSON)
 	@Consumes({ "*" })
+	@RolesAllowed(value = {RESTSecurity.RESTv1ROLE})
 	public String getJSONPTags(@QueryParam("expand") final String expand, @QueryParam("callback") final String callback) throws InvalidParameterException, InternalProcessingException
 	{
 		if (callback == null)
@@ -2393,6 +2523,7 @@ public class RESTv1 extends BaseRESTv1 implements RESTInterfaceV1, RESTInterface
 	@Path("/tag/put/jsonp")
 	@Consumes({ MediaType.APPLICATION_JSON })
 	@Produces(MediaType.APPLICATION_JSON)
+	@RolesAllowed(value = {RESTSecurity.RESTv1ROLE})
 	public String updateJSONPTag(@QueryParam("expand") final String expand, final RESTTagV1 dataObject, @QueryParam("callback") final String callback) throws InvalidParameterException, InternalProcessingException
 	{
 		if (callback == null)
@@ -2413,6 +2544,7 @@ public class RESTv1 extends BaseRESTv1 implements RESTInterfaceV1, RESTInterface
 	@Path("/tags/put/jsonp")
 	@Consumes({ MediaType.APPLICATION_JSON })
 	@Produces(MediaType.APPLICATION_JSON)
+	@RolesAllowed(value = {RESTSecurity.RESTv1ROLE})
 	public String updateJSONPTags(@QueryParam("expand") final String expand, final RESTTagCollectionV1 dataObjects, @QueryParam("callback") final String callback) throws InvalidParameterException, InternalProcessingException
 	{
 		if (callback == null)
@@ -2433,6 +2565,7 @@ public class RESTv1 extends BaseRESTv1 implements RESTInterfaceV1, RESTInterface
 	@Path("/tag/post/jsonp")
 	@Produces(MediaType.APPLICATION_JSON)
 	@Consumes({ MediaType.APPLICATION_JSON })
+	@RolesAllowed(value = {RESTSecurity.RESTv1ROLE})
 	public String createJSONPTag(@QueryParam("expand") final String expand, final RESTTagV1 dataObject, @QueryParam("callback") final String callback) throws InvalidParameterException, InternalProcessingException
 	{
 		if (callback == null)
@@ -2453,6 +2586,7 @@ public class RESTv1 extends BaseRESTv1 implements RESTInterfaceV1, RESTInterface
 	@Path("/tags/post/jsonp")
 	@Produces(MediaType.APPLICATION_JSON)
 	@Consumes({ MediaType.APPLICATION_JSON })
+	@RolesAllowed(value = {RESTSecurity.RESTv1ROLE})
 	public String createJSONPTags(@QueryParam("expand") final String expand, final RESTTagCollectionV1 dataObjects, @QueryParam("callback") final String callback) throws InvalidParameterException, InternalProcessingException
 	{
 		if (callback == null)
@@ -2473,6 +2607,7 @@ public class RESTv1 extends BaseRESTv1 implements RESTInterfaceV1, RESTInterface
 	@Path("/tag/delete/jsonp/{id}")
 	@Produces(MediaType.APPLICATION_JSON)
 	@Consumes({ "*" })
+	@RolesAllowed(value = {RESTSecurity.RESTv1ROLE})
 	public String deleteJSONPTag(@PathParam("id") final Integer id, @QueryParam("expand") final String expand, @QueryParam("callback") final String callback) throws InvalidParameterException, InternalProcessingException
 	{
 		if (callback == null)
@@ -2493,6 +2628,7 @@ public class RESTv1 extends BaseRESTv1 implements RESTInterfaceV1, RESTInterface
 	@Path("/tags/delete/jsonp/{ids}")
 	@Produces(MediaType.APPLICATION_JSON)
 	@Consumes({ "*" })
+	@RolesAllowed(value = {RESTSecurity.RESTv1ROLE})
 	public String deleteJSONPTags(@PathParam("ids") final PathSegment ids, @QueryParam("expand") final String expand, @QueryParam("callback") final String callback) throws InvalidParameterException, InternalProcessingException
 	{
 		if (callback == null)
@@ -2514,6 +2650,7 @@ public class RESTv1 extends BaseRESTv1 implements RESTInterfaceV1, RESTInterface
 	@Path("/tag/get/json/{id}")
 	@Produces(MediaType.APPLICATION_JSON)
 	@Consumes({ "*" })
+	@RolesAllowed(value = {RESTSecurity.RESTv1ROLE})
 	public RESTTagV1 getJSONTag(@PathParam("id") final Integer id, @QueryParam("expand") final String expand) throws InvalidParameterException, InternalProcessingException
 	{
 		if (id == null)
@@ -2527,6 +2664,7 @@ public class RESTv1 extends BaseRESTv1 implements RESTInterfaceV1, RESTInterface
 	@Path("/tags/get/json/all")
 	@Produces(MediaType.APPLICATION_JSON)
 	@Consumes({ "*" })
+	@RolesAllowed(value = {RESTSecurity.RESTv1ROLE})
 	public RESTTagCollectionV1 getJSONTags(@QueryParam("expand") final String expand) throws InvalidParameterException, InternalProcessingException
 	{
 		return getJSONResources(RESTTagCollectionV1.class, Tag.class, new TagV1Factory(), BaseRESTv1.TAGS_EXPANSION_NAME, expand);
@@ -2537,6 +2675,7 @@ public class RESTv1 extends BaseRESTv1 implements RESTInterfaceV1, RESTInterface
 	@Path("/tag/put/json")
 	@Consumes({ MediaType.APPLICATION_JSON })
 	@Produces(MediaType.APPLICATION_JSON)
+	@RolesAllowed(value = {RESTSecurity.RESTv1ROLE})
 	public RESTTagV1 updateJSONTag(@QueryParam("expand") final String expand, final RESTTagV1 dataObject) throws InvalidParameterException, InternalProcessingException
 	{
 		if (dataObject == null)
@@ -2554,6 +2693,7 @@ public class RESTv1 extends BaseRESTv1 implements RESTInterfaceV1, RESTInterface
 	@Path("/tags/put/json")
 	@Consumes({ MediaType.APPLICATION_JSON })
 	@Produces(MediaType.APPLICATION_JSON)
+	@RolesAllowed(value = {RESTSecurity.RESTv1ROLE})
 	public RESTTagCollectionV1 updateJSONTags(@QueryParam("expand") final String expand, final RESTTagCollectionV1 dataObjects) throws InvalidParameterException, InternalProcessingException
 	{
 		if (dataObjects == null)
@@ -2570,6 +2710,7 @@ public class RESTv1 extends BaseRESTv1 implements RESTInterfaceV1, RESTInterface
 	@Path("/tag/post/json")
 	@Produces(MediaType.APPLICATION_JSON)
 	@Consumes({ MediaType.APPLICATION_JSON })
+	@RolesAllowed(value = {RESTSecurity.RESTv1ROLE})
 	public RESTTagV1 createJSONTag(@QueryParam("expand") final String expand, final RESTTagV1 dataObject) throws InvalidParameterException, InternalProcessingException
 	{
 		if (dataObject == null)
@@ -2583,6 +2724,7 @@ public class RESTv1 extends BaseRESTv1 implements RESTInterfaceV1, RESTInterface
 	@Path("/tags/post/json")
 	@Produces(MediaType.APPLICATION_JSON)
 	@Consumes({ MediaType.APPLICATION_JSON })
+	@RolesAllowed(value = {RESTSecurity.RESTv1ROLE})
 	public RESTTagCollectionV1 createJSONTags(@QueryParam("expand") final String expand, final RESTTagCollectionV1 dataObjects) throws InvalidParameterException, InternalProcessingException
 	{
 		if (dataObjects == null)
@@ -2599,6 +2741,7 @@ public class RESTv1 extends BaseRESTv1 implements RESTInterfaceV1, RESTInterface
 	@Path("/tag/delete/json/{id}")
 	@Produces(MediaType.APPLICATION_JSON)
 	@Consumes({ "*" })
+	@RolesAllowed(value = {RESTSecurity.RESTv1ROLE})
 	public RESTTagV1 deleteJSONTag(@PathParam("id") final Integer id, @QueryParam("expand") final String expand) throws InvalidParameterException, InternalProcessingException
 	{
 		if (id == null)
@@ -2612,6 +2755,7 @@ public class RESTv1 extends BaseRESTv1 implements RESTInterfaceV1, RESTInterface
 	@Path("/tags/delete/json/{ids}")
 	@Produces(MediaType.APPLICATION_JSON)
 	@Consumes({ "*" })
+	@RolesAllowed(value = {RESTSecurity.RESTv1ROLE})
 	public RESTTagCollectionV1 deleteJSONTags(@PathParam("ids") final PathSegment ids, @QueryParam("expand") final String expand) throws InvalidParameterException, InternalProcessingException
 	{
 		if (ids == null)
@@ -2630,6 +2774,7 @@ public class RESTv1 extends BaseRESTv1 implements RESTInterfaceV1, RESTInterface
 	@Path("/category/get/jsonp/{id}")
 	@Produces(MediaType.APPLICATION_JSON)
 	@Consumes({ "*" })
+	@RolesAllowed(value = {RESTSecurity.RESTv1ROLE})
 	public String getJSONPCategory(@PathParam("id") final Integer id, @QueryParam("expand") final String expand, @QueryParam("callback") final String callback) throws InvalidParameterException, InternalProcessingException
 	{
 		if (callback == null)
@@ -2650,6 +2795,7 @@ public class RESTv1 extends BaseRESTv1 implements RESTInterfaceV1, RESTInterface
 	@Path("/categories/get/jsonp/all")
 	@Produces(MediaType.APPLICATION_JSON)
 	@Consumes({ "*" })
+	@RolesAllowed(value = {RESTSecurity.RESTv1ROLE})
 	public String getJSONPCategories(@QueryParam("expand") final String expand, @QueryParam("callback") final String callback) throws InvalidParameterException, InternalProcessingException
 	{
 		if (callback == null)
@@ -2671,6 +2817,7 @@ public class RESTv1 extends BaseRESTv1 implements RESTInterfaceV1, RESTInterface
 	@Path("/category/put/jsonp")
 	@Consumes({ MediaType.APPLICATION_JSON })
 	@Produces(MediaType.APPLICATION_JSON)
+	@RolesAllowed(value = {RESTSecurity.RESTv1ROLE})
 	public String updateJSONPCategory(@QueryParam("expand") final String expand, final RESTCategoryV1 dataObject, @QueryParam("callback") final String callback) throws InvalidParameterException, InternalProcessingException
 	{
 		if (callback == null)
@@ -2692,6 +2839,7 @@ public class RESTv1 extends BaseRESTv1 implements RESTInterfaceV1, RESTInterface
 	@Path("/categories/put/jsonp")
 	@Consumes({ MediaType.APPLICATION_JSON })
 	@Produces(MediaType.APPLICATION_JSON)
+	@RolesAllowed(value = {RESTSecurity.RESTv1ROLE})
 	public String updateJSONPCategories(@QueryParam("expand") final String expand, final RESTCategoryCollectionV1 dataObjects, @QueryParam("callback") final String callback) throws InvalidParameterException, InternalProcessingException
 	{
 		if (callback == null)
@@ -2712,6 +2860,7 @@ public class RESTv1 extends BaseRESTv1 implements RESTInterfaceV1, RESTInterface
 	@Path("/category/post/jsonp")
 	@Produces(MediaType.APPLICATION_JSON)
 	@Consumes({ MediaType.APPLICATION_JSON })
+	@RolesAllowed(value = {RESTSecurity.RESTv1ROLE})
 	public String createJSONPCategory(@QueryParam("expand") final String expand, final RESTCategoryV1 dataObject, @QueryParam("callback") final String callback) throws InvalidParameterException, InternalProcessingException
 	{
 		if (callback == null)
@@ -2732,6 +2881,7 @@ public class RESTv1 extends BaseRESTv1 implements RESTInterfaceV1, RESTInterface
 	@Path("/categories/post/jsonp")
 	@Produces(MediaType.APPLICATION_JSON)
 	@Consumes({ MediaType.APPLICATION_JSON })
+	@RolesAllowed(value = {RESTSecurity.RESTv1ROLE})
 	public String createJSONPCategories(@QueryParam("expand") final String expand, final RESTCategoryCollectionV1 dataObjects, @QueryParam("callback") final String callback) throws InvalidParameterException, InternalProcessingException
 	{
 		if (callback == null)
@@ -2752,6 +2902,7 @@ public class RESTv1 extends BaseRESTv1 implements RESTInterfaceV1, RESTInterface
 	@Path("/category/delete/jsonp/{id}")
 	@Produces(MediaType.APPLICATION_JSON)
 	@Consumes({ "*" })
+	@RolesAllowed(value = {RESTSecurity.RESTv1ROLE})
 	public String deleteJSONPCategory(@PathParam("id") final Integer id, @QueryParam("expand") final String expand, @QueryParam("callback") final String callback) throws InvalidParameterException, InternalProcessingException
 	{
 		if (callback == null)
@@ -2772,6 +2923,7 @@ public class RESTv1 extends BaseRESTv1 implements RESTInterfaceV1, RESTInterface
 	@Path("/categories/delete/jsonp/{ids}")
 	@Produces(MediaType.APPLICATION_JSON)
 	@Consumes({ "*" })
+	@RolesAllowed(value = {RESTSecurity.RESTv1ROLE})
 	public String deleteJSONPCategories(@PathParam("ids") final PathSegment ids, @QueryParam("expand") final String expand, @QueryParam("callback") final String callback) throws InvalidParameterException, InternalProcessingException
 	{
 		if (callback == null)
@@ -2793,6 +2945,7 @@ public class RESTv1 extends BaseRESTv1 implements RESTInterfaceV1, RESTInterface
 	@Path("/categories/get/json/all")
 	@Produces(MediaType.APPLICATION_JSON)
 	@Consumes({ "*" })
+	@RolesAllowed(value = {RESTSecurity.RESTv1ROLE})
 	public RESTCategoryCollectionV1 getJSONCategories(@QueryParam("expand") final String expand) throws InvalidParameterException, InternalProcessingException
 	{
 		return getJSONResources(RESTCategoryCollectionV1.class, Category.class, new CategoryV1Factory(), CATEGORIES_EXPANSION_NAME, expand);
@@ -2803,6 +2956,7 @@ public class RESTv1 extends BaseRESTv1 implements RESTInterfaceV1, RESTInterface
 	@Path("/category/get/json/{id}")
 	@Produces(MediaType.APPLICATION_JSON)
 	@Consumes({ "*" })
+	@RolesAllowed(value = {RESTSecurity.RESTv1ROLE})
 	public RESTCategoryV1 getJSONCategory(@PathParam("id") final Integer id, @QueryParam("expand") final String expand) throws InvalidParameterException, InternalProcessingException
 	{
 		if (id == null)
@@ -2816,6 +2970,7 @@ public class RESTv1 extends BaseRESTv1 implements RESTInterfaceV1, RESTInterface
 	@Path("/category/put/json")
 	@Consumes({ MediaType.APPLICATION_JSON })
 	@Produces(MediaType.APPLICATION_JSON)
+	@RolesAllowed(value = {RESTSecurity.RESTv1ROLE})
 	public RESTCategoryV1 updateJSONCategory(@QueryParam("expand") final String expand, final RESTCategoryV1 dataObject) throws InvalidParameterException, InternalProcessingException
 	{
 		if (dataObject == null)
@@ -2833,6 +2988,7 @@ public class RESTv1 extends BaseRESTv1 implements RESTInterfaceV1, RESTInterface
 	@Path("/categories/put/json")
 	@Consumes({ MediaType.APPLICATION_JSON })
 	@Produces(MediaType.APPLICATION_JSON)
+	@RolesAllowed(value = {RESTSecurity.RESTv1ROLE})
 	public RESTCategoryCollectionV1 updateJSONCategories(@QueryParam("expand") final String expand, final RESTCategoryCollectionV1 dataObjects) throws InvalidParameterException, InternalProcessingException
 	{
 		if (dataObjects == null)
@@ -2850,6 +3006,7 @@ public class RESTv1 extends BaseRESTv1 implements RESTInterfaceV1, RESTInterface
 	@Path("/category/post/json")
 	@Produces(MediaType.APPLICATION_JSON)
 	@Consumes({ MediaType.APPLICATION_JSON })
+	@RolesAllowed(value = {RESTSecurity.RESTv1ROLE})
 	public RESTCategoryV1 createJSONCategory(@QueryParam("expand") final String expand, final RESTCategoryV1 dataObject) throws InvalidParameterException, InternalProcessingException
 	{
 		if (dataObject == null)
@@ -2864,6 +3021,7 @@ public class RESTv1 extends BaseRESTv1 implements RESTInterfaceV1, RESTInterface
 	@Path("/categories/post/json")
 	@Produces(MediaType.APPLICATION_JSON)
 	@Consumes({ MediaType.APPLICATION_JSON })
+	@RolesAllowed(value = {RESTSecurity.RESTv1ROLE})
 	public RESTCategoryCollectionV1 createJSONCategories(@QueryParam("expand") final String expand, final RESTCategoryCollectionV1 dataObjects) throws InvalidParameterException, InternalProcessingException
 	{
 		if (dataObjects == null)
@@ -2881,6 +3039,7 @@ public class RESTv1 extends BaseRESTv1 implements RESTInterfaceV1, RESTInterface
 	@Path("/category/delete/json/{id}")
 	@Produces(MediaType.APPLICATION_JSON)
 	@Consumes({ "*" })
+	@RolesAllowed(value = {RESTSecurity.RESTv1ROLE})
 	public RESTCategoryV1 deleteJSONCategory(@PathParam("id") final Integer id, @QueryParam("expand") final String expand) throws InvalidParameterException, InternalProcessingException
 	{
 		if (id == null)
@@ -2895,6 +3054,7 @@ public class RESTv1 extends BaseRESTv1 implements RESTInterfaceV1, RESTInterface
 	@Path("/categories/delete/json/{ids}")
 	@Produces(MediaType.APPLICATION_JSON)
 	@Consumes({ "*" })
+	@RolesAllowed(value = {RESTSecurity.RESTv1ROLE})
 	public RESTCategoryCollectionV1 deleteJSONCategories(@PathParam("ids") final PathSegment ids, @QueryParam("expand") final String expand) throws InvalidParameterException, InternalProcessingException
 	{
 		if (ids == null)
@@ -2913,6 +3073,7 @@ public class RESTv1 extends BaseRESTv1 implements RESTInterfaceV1, RESTInterface
 	@Path("/image/get/jsonp/{id}")
 	@Produces(MediaType.APPLICATION_JSON)
 	@Consumes({ "*" })
+	@RolesAllowed(value = {RESTSecurity.RESTv1ROLE})
 	public String getJSONPImage(@PathParam("id") final Integer id, @QueryParam("expand") final String expand, @QueryParam("callback") final String callback) throws InvalidParameterException, InternalProcessingException
 	{
 		if (callback == null)
@@ -2933,6 +3094,7 @@ public class RESTv1 extends BaseRESTv1 implements RESTInterfaceV1, RESTInterface
 	@Path("/images/get/jsonp/all")
 	@Produces(MediaType.APPLICATION_JSON)
 	@Consumes({ "*" })
+	@RolesAllowed(value = {RESTSecurity.RESTv1ROLE})
 	public String getJSONPImages(@QueryParam("expand") final String expand, @QueryParam("callback") final String callback) throws InvalidParameterException, InternalProcessingException
 	{
 		if (callback == null)
@@ -2953,6 +3115,7 @@ public class RESTv1 extends BaseRESTv1 implements RESTInterfaceV1, RESTInterface
 	@Path("/image/put/jsonp")
 	@Produces(MediaType.APPLICATION_JSON)
 	@Consumes({ MediaType.APPLICATION_JSON })
+	@RolesAllowed(value = {RESTSecurity.RESTv1ROLE})
 	public String updateJSONPImage(@QueryParam("expand") final String expand, final RESTImageV1 dataObject, @QueryParam("callback") final String callback) throws InvalidParameterException, InternalProcessingException
 	{
 		if (callback == null)
@@ -2973,6 +3136,7 @@ public class RESTv1 extends BaseRESTv1 implements RESTInterfaceV1, RESTInterface
 	@Path("/images/put/jsonp")
 	@Produces(MediaType.APPLICATION_JSON)
 	@Consumes({ MediaType.APPLICATION_JSON })
+	@RolesAllowed(value = {RESTSecurity.RESTv1ROLE})
 	public String updateJSONPImages(@QueryParam("expand") final String expand, final RESTImageCollectionV1 dataObjects, @QueryParam("callback") final String callback) throws InvalidParameterException, InternalProcessingException
 	{
 		if (callback == null)
@@ -2993,6 +3157,7 @@ public class RESTv1 extends BaseRESTv1 implements RESTInterfaceV1, RESTInterface
 	@Path("/image/post/jsonp")
 	@Produces(MediaType.APPLICATION_JSON)
 	@Consumes({ MediaType.APPLICATION_JSON })
+	@RolesAllowed(value = {RESTSecurity.RESTv1ROLE})
 	public String createJSONPImage(@QueryParam("expand") final String expand, final RESTImageV1 dataObject, @QueryParam("callback") final String callback) throws InvalidParameterException, InternalProcessingException
 	{
 		if (callback == null)
@@ -3013,6 +3178,7 @@ public class RESTv1 extends BaseRESTv1 implements RESTInterfaceV1, RESTInterface
 	@Path("/images/post/jsonp")
 	@Produces(MediaType.APPLICATION_JSON)
 	@Consumes({ MediaType.APPLICATION_JSON })
+	@RolesAllowed(value = {RESTSecurity.RESTv1ROLE})
 	public String createJSONPImages(@QueryParam("expand") final String expand, final RESTImageCollectionV1 dataObjects, @QueryParam("callback") final String callback) throws InvalidParameterException, InternalProcessingException
 	{
 		if (callback == null)
@@ -3033,6 +3199,7 @@ public class RESTv1 extends BaseRESTv1 implements RESTInterfaceV1, RESTInterface
 	@Path("/image/delete/jsonp/{id}")
 	@Produces(MediaType.APPLICATION_JSON)
 	@Consumes({ "*" })
+	@RolesAllowed(value = {RESTSecurity.RESTv1ROLE})
 	public String deleteJSONPImage(@PathParam("id") final Integer id, @QueryParam("expand") final String expand, @QueryParam("callback") final String callback) throws InvalidParameterException, InternalProcessingException
 	{
 		if (callback == null)
@@ -3053,6 +3220,7 @@ public class RESTv1 extends BaseRESTv1 implements RESTInterfaceV1, RESTInterface
 	@Path("/images/delete/jsonp/{ids}")
 	@Produces(MediaType.APPLICATION_JSON)
 	@Consumes({ "*" })
+	@RolesAllowed(value = {RESTSecurity.RESTv1ROLE})
 	public String deleteJSONPImages(@PathParam("ids") final PathSegment ids, @QueryParam("expand") final String expand, @QueryParam("callback") final String callback) throws InvalidParameterException, InternalProcessingException
 	{
 		if (callback == null)
@@ -3074,6 +3242,7 @@ public class RESTv1 extends BaseRESTv1 implements RESTInterfaceV1, RESTInterface
 	@Path("/image/get/json/{id}")
 	@Produces(MediaType.APPLICATION_JSON)
 	@Consumes({ "*" })
+	@RolesAllowed(value = {RESTSecurity.RESTv1ROLE})
 	public RESTImageV1 getJSONImage(@PathParam("id") final Integer id, @QueryParam("expand") final String expand) throws InvalidParameterException, InternalProcessingException
 	{
 		if (id == null)
@@ -3086,6 +3255,7 @@ public class RESTv1 extends BaseRESTv1 implements RESTInterfaceV1, RESTInterface
 	@Path("/images/get/json/all")
 	@Produces(MediaType.APPLICATION_JSON)
 	@Consumes({ "*" })
+	@RolesAllowed(value = {RESTSecurity.RESTv1ROLE})
 	public RESTImageCollectionV1 getJSONImages(@QueryParam("expand") final String expand) throws InvalidParameterException, InternalProcessingException
 	{
 		/*
@@ -3099,6 +3269,7 @@ public class RESTv1 extends BaseRESTv1 implements RESTInterfaceV1, RESTInterface
 	@Path("/image/put/json")
 	@Produces(MediaType.APPLICATION_JSON)
 	@Consumes({ MediaType.APPLICATION_JSON })
+	@RolesAllowed(value = {RESTSecurity.RESTv1ROLE})
 	public RESTImageV1 updateJSONImage(@QueryParam("expand") final String expand, final RESTImageV1 dataObject) throws InvalidParameterException, InternalProcessingException
 	{
 		if (dataObject == null)
@@ -3115,6 +3286,7 @@ public class RESTv1 extends BaseRESTv1 implements RESTInterfaceV1, RESTInterface
 	@Path("/images/put/json")
 	@Produces(MediaType.APPLICATION_JSON)
 	@Consumes({ MediaType.APPLICATION_JSON })
+	@RolesAllowed(value = {RESTSecurity.RESTv1ROLE})
 	public RESTImageCollectionV1 updateJSONImages(@QueryParam("expand") final String expand, final RESTImageCollectionV1 dataObjects) throws InvalidParameterException, InternalProcessingException
 	{
 		if (dataObjects == null)
@@ -3131,6 +3303,7 @@ public class RESTv1 extends BaseRESTv1 implements RESTInterfaceV1, RESTInterface
 	@Path("/image/post/json")
 	@Produces(MediaType.APPLICATION_JSON)
 	@Consumes({ MediaType.APPLICATION_JSON })
+	@RolesAllowed(value = {RESTSecurity.RESTv1ROLE})
 	public RESTImageV1 createJSONImage(@QueryParam("expand") final String expand, final RESTImageV1 dataObject) throws InvalidParameterException, InternalProcessingException
 	{
 		if (dataObject == null)
@@ -3144,6 +3317,7 @@ public class RESTv1 extends BaseRESTv1 implements RESTInterfaceV1, RESTInterface
 	@Path("/images/post/json")
 	@Produces(MediaType.APPLICATION_JSON)
 	@Consumes({ MediaType.APPLICATION_JSON })
+	@RolesAllowed(value = {RESTSecurity.RESTv1ROLE})
 	public RESTImageCollectionV1 createJSONImages(@QueryParam("expand") final String expand, final RESTImageCollectionV1 dataObjects) throws InvalidParameterException, InternalProcessingException
 	{
 		if (dataObjects == null)
@@ -3160,6 +3334,7 @@ public class RESTv1 extends BaseRESTv1 implements RESTInterfaceV1, RESTInterface
 	@Path("/image/delete/json/{id}")
 	@Produces(MediaType.APPLICATION_JSON)
 	@Consumes({ "*" })
+	@RolesAllowed(value = {RESTSecurity.RESTv1ROLE})
 	public RESTImageV1 deleteJSONImage(@PathParam("id") final Integer id, @QueryParam("expand") final String expand) throws InvalidParameterException, InternalProcessingException
 	{
 		if (id == null)
@@ -3173,6 +3348,7 @@ public class RESTv1 extends BaseRESTv1 implements RESTInterfaceV1, RESTInterface
 	@Path("/images/delete/json/{ids}")
 	@Produces(MediaType.APPLICATION_JSON)
 	@Consumes({ "*" })
+	@RolesAllowed(value = {RESTSecurity.RESTv1ROLE})
 	public RESTImageCollectionV1 deleteJSONImages(@PathParam("ids") final PathSegment ids, @QueryParam("expand") final String expand) throws InvalidParameterException, InternalProcessingException
 	{
 		if (ids == null)
@@ -3191,6 +3367,7 @@ public class RESTv1 extends BaseRESTv1 implements RESTInterfaceV1, RESTInterface
 	@Path("/topics/get/jsonp/{query}")
 	@Produces(MediaType.APPLICATION_JSON)
 	@Consumes({ "*" })
+	@RolesAllowed(value = {RESTSecurity.RESTv1ROLE})
 	public String getJSONPTopicsWithQuery(@PathParam("query") PathSegment query, @QueryParam("expand") final String expand, @QueryParam("callback") final String callback) throws InvalidParameterException, InternalProcessingException
 	{
 		if (callback == null)
@@ -3211,6 +3388,7 @@ public class RESTv1 extends BaseRESTv1 implements RESTInterfaceV1, RESTInterface
 	@Path("/topics/get/jsonp/all")
 	@Produces(MediaType.APPLICATION_JSON)
 	@Consumes({ "*" })
+	@RolesAllowed(value = {RESTSecurity.RESTv1ROLE})
 	public String getJSONPTopics(@QueryParam("expand") final String expand, @QueryParam("callback") final String callback) throws InvalidParameterException, InternalProcessingException
 	{
 		if (callback == null)
@@ -3231,6 +3409,7 @@ public class RESTv1 extends BaseRESTv1 implements RESTInterfaceV1, RESTInterface
 	@Path("/topic/get/jsonp/{id}")
 	@Produces(MediaType.APPLICATION_JSON)
 	@Consumes({ "*" })
+	@RolesAllowed(value = {RESTSecurity.RESTv1ROLE})
 	public String getJSONPTopic(@PathParam("id") final Integer id, @QueryParam("expand") final String expand, @QueryParam("callback") final String callback) throws InvalidParameterException, InternalProcessingException
 	{
 		if (callback == null)
@@ -3251,6 +3430,7 @@ public class RESTv1 extends BaseRESTv1 implements RESTInterfaceV1, RESTInterface
 	@Path("/topic/put/jsonp")
 	@Consumes({ MediaType.APPLICATION_JSON })
 	@Produces(MediaType.APPLICATION_JSON)
+	@RolesAllowed(value = {RESTSecurity.RESTv1ROLE})
 	public String updateJSONPTopic(@QueryParam("expand") final String expand, final RESTTopicV1 dataObject, @QueryParam("callback") final String callback) throws InvalidParameterException, InternalProcessingException
 	{
 		if (callback == null)
@@ -3271,6 +3451,7 @@ public class RESTv1 extends BaseRESTv1 implements RESTInterfaceV1, RESTInterface
 	@Path("/topics/put/jsonp")
 	@Consumes({ MediaType.APPLICATION_JSON })
 	@Produces(MediaType.APPLICATION_JSON)
+	@RolesAllowed(value = {RESTSecurity.RESTv1ROLE})
 	public String updateJSONPTopics(@QueryParam("expand") final String expand, final RESTTopicCollectionV1 dataObjects, @QueryParam("callback") final String callback) throws InvalidParameterException, InternalProcessingException
 	{
 		if (callback == null)
@@ -3291,6 +3472,7 @@ public class RESTv1 extends BaseRESTv1 implements RESTInterfaceV1, RESTInterface
 	@Path("/topic/post/jsonp")
 	@Produces(MediaType.APPLICATION_JSON)
 	@Consumes({ MediaType.APPLICATION_JSON })
+	@RolesAllowed(value = {RESTSecurity.RESTv1ROLE})
 	public String createJSONPTopic(@QueryParam("expand") final String expand, final RESTTopicV1 dataObject, @QueryParam("callback") final String callback) throws InvalidParameterException, InternalProcessingException
 	{
 		if (callback == null)
@@ -3311,6 +3493,7 @@ public class RESTv1 extends BaseRESTv1 implements RESTInterfaceV1, RESTInterface
 	@Path("/topics/post/jsonp")
 	@Produces(MediaType.APPLICATION_JSON)
 	@Consumes({ MediaType.APPLICATION_JSON })
+	@RolesAllowed(value = {RESTSecurity.RESTv1ROLE})
 	public String createJSONPTopics(@QueryParam("expand") final String expand, final RESTTopicCollectionV1 dataObjects, @QueryParam("callback") final String callback) throws InvalidParameterException, InternalProcessingException
 	{
 		if (callback == null)
@@ -3331,6 +3514,7 @@ public class RESTv1 extends BaseRESTv1 implements RESTInterfaceV1, RESTInterface
 	@Path("/topic/delete/jsonp/{id}")
 	@Produces(MediaType.APPLICATION_JSON)
 	@Consumes({ "*" })
+	@RolesAllowed(value = {RESTSecurity.RESTv1ROLE})
 	public String deleteJSONPTopic(@PathParam("id") final Integer id, @QueryParam("expand") final String expand, @QueryParam("callback") final String callback) throws InvalidParameterException, InternalProcessingException
 	{
 		if (callback == null)
@@ -3351,6 +3535,7 @@ public class RESTv1 extends BaseRESTv1 implements RESTInterfaceV1, RESTInterface
 	@Path("/topics/delete/jsonp/{ids}")
 	@Produces(MediaType.APPLICATION_JSON)
 	@Consumes({ "*" })
+	@RolesAllowed(value = {RESTSecurity.RESTv1ROLE})
 	public String deleteJSONPTopics(@PathParam("ids") final PathSegment ids, @QueryParam("expand") final String expand, @QueryParam("callback") final String callback) throws InvalidParameterException, InternalProcessingException
 	{
 		if (callback == null)
@@ -3372,6 +3557,7 @@ public class RESTv1 extends BaseRESTv1 implements RESTInterfaceV1, RESTInterface
 	@Path("/topics/get/json/all")
 	@Produces(MediaType.APPLICATION_JSON)
 	@Consumes({ "*" })
+	@RolesAllowed(value = {RESTSecurity.RESTv1ROLE})
 	public RESTTopicCollectionV1 getJSONTopics(@QueryParam("expand") final String expand) throws InvalidParameterException, InternalProcessingException
 	{
 		return getJSONResources(RESTTopicCollectionV1.class, Topic.class, new TopicV1Factory(), TOPICS_EXPANSION_NAME, expand);
@@ -3382,6 +3568,7 @@ public class RESTv1 extends BaseRESTv1 implements RESTInterfaceV1, RESTInterface
 	@Path("/topics/get/json/{query}")
 	@Produces(MediaType.APPLICATION_JSON)
 	@Consumes({ "*" })
+	@RolesAllowed(value = {RESTSecurity.RESTv1ROLE})
 	public RESTTopicCollectionV1 getJSONTopicsWithQuery(@PathParam("query") PathSegment query, @QueryParam("expand") final String expand) throws InvalidParameterException, InternalProcessingException
 	{
 		return getJSONTopicsFromQuery(RESTTopicCollectionV1.class, query.getMatrixParameters(), new TopicFilterQueryBuilder(), new TopicV1Factory(), TOPICS_EXPANSION_NAME, expand);
@@ -3392,6 +3579,7 @@ public class RESTv1 extends BaseRESTv1 implements RESTInterfaceV1, RESTInterface
 	@Path("/topics/get/atom/{query}")
 	@Produces(MediaType.APPLICATION_ATOM_XML)
 	@Consumes({ "*" })
+	@RolesAllowed(value = {RESTSecurity.RESTv1ROLE})
 	public Feed getATOMTopicsWithQuery(@PathParam("query") PathSegment query, @QueryParam("expand") final String expand) throws InvalidParameterException, InternalProcessingException
 	{
 		final RESTTopicCollectionV1 topics = getJSONTopicsFromQuery(RESTTopicCollectionV1.class, query.getMatrixParameters(), new TopicFilterQueryBuilder(), new TopicV1Factory(), TOPICS_EXPANSION_NAME, expand);
@@ -3403,6 +3591,7 @@ public class RESTv1 extends BaseRESTv1 implements RESTInterfaceV1, RESTInterface
 	@Path("/topics/get/xml/all")
 	@Produces(MediaType.TEXT_XML)
 	@Consumes({ "*" })
+	@RolesAllowed(value = {RESTSecurity.RESTv1ROLE})
 	public RESTTopicCollectionV1 getXMLTopics(@QueryParam("expand") final String expand) throws InvalidParameterException, InternalProcessingException
 	{
 		return getXMLResources(RESTTopicCollectionV1.class, Topic.class, new TopicV1Factory(), TOPICS_EXPANSION_NAME, expand);
@@ -3413,6 +3602,7 @@ public class RESTv1 extends BaseRESTv1 implements RESTInterfaceV1, RESTInterface
 	@Path("/topic/get/json/{id}")
 	@Produces(MediaType.APPLICATION_JSON)
 	@Consumes({ "*" })
+	@RolesAllowed(value = {RESTSecurity.RESTv1ROLE})
 	public RESTTopicV1 getJSONTopic(@PathParam("id") final Integer id, @QueryParam("expand") final String expand) throws InvalidParameterException, InternalProcessingException
 	{
 		assert id != null : "The id parameter can not be null";
@@ -3425,6 +3615,7 @@ public class RESTv1 extends BaseRESTv1 implements RESTInterfaceV1, RESTInterface
 	@Path("/topic/get/json/{id}/r/{rev}")
 	@Produces(MediaType.APPLICATION_JSON)
 	@Consumes({ "*" })
+	@RolesAllowed(value = {RESTSecurity.RESTv1ROLE})
 	public RESTTopicV1 getJSONTopicRevision(@PathParam("id") final Integer id, @PathParam("rev") final Integer revision, @QueryParam("expand") final String expand) throws InvalidParameterException, InternalProcessingException
 	{
 		assert id != null : "The id parameter can not be null";
@@ -3437,6 +3628,7 @@ public class RESTv1 extends BaseRESTv1 implements RESTInterfaceV1, RESTInterface
 	@Path("/topic/get/xml/{id}")
 	@Produces(MediaType.TEXT_XML)
 	@Consumes({ "*" })
+	@RolesAllowed(value = {RESTSecurity.RESTv1ROLE})
 	public RESTTopicV1 getXMLTopic(@PathParam("id") final Integer id, @QueryParam("expand") final String expand) throws InvalidParameterException, InternalProcessingException
 	{
 		assert id != null : "The id parameter can not be null";
@@ -3449,6 +3641,7 @@ public class RESTv1 extends BaseRESTv1 implements RESTInterfaceV1, RESTInterface
 	@Path("/topic/get/xml/{id}/r/{rev}")
 	@Produces(MediaType.TEXT_XML)
 	@Consumes({ "*" })
+	@RolesAllowed(value = {RESTSecurity.RESTv1ROLE})
 	public RESTTopicV1 getXMLTopicRevision(@PathParam("id") final Integer id, @PathParam("rev") final Integer revision, @QueryParam("expand") final String expand) throws InvalidParameterException, InternalProcessingException
 	{
 		assert id != null : "The id parameter can not be null";
@@ -3461,6 +3654,7 @@ public class RESTv1 extends BaseRESTv1 implements RESTInterfaceV1, RESTInterface
 	@Path("/topic/get/xml/{id}/xml")
 	@Produces(MediaType.TEXT_XML)
 	@Consumes({ "*" })
+	@RolesAllowed(value = {RESTSecurity.RESTv1ROLE})
 	public String getXMLTopicXML(@PathParam("id") final Integer id, @QueryParam("expand") final String expand) throws InvalidParameterException, InternalProcessingException
 	{
 		assert id != null : "The id parameter can not be null";
@@ -3473,6 +3667,7 @@ public class RESTv1 extends BaseRESTv1 implements RESTInterfaceV1, RESTInterface
 	@Path("/topic/get/xml/{id}/xmlContainedIn")
 	@Produces(MediaType.TEXT_XML)
 	@Consumes({ "*" })
+	@RolesAllowed(value = {RESTSecurity.RESTv1ROLE})
 	public String getXMLTopicXMLContained(@PathParam("id") final Integer id, @QueryParam("expand") final String expand, @QueryParam("container") final String containerName) throws InvalidParameterException, InternalProcessingException
 	{
 		assert id != null : "The id parameter can not be null";
@@ -3486,6 +3681,7 @@ public class RESTv1 extends BaseRESTv1 implements RESTInterfaceV1, RESTInterface
 	@Path("/topic/get/xml/{id}/xmlNoContainer")
 	@Produces(MediaType.TEXT_PLAIN)
 	@Consumes({ "*" })
+	@RolesAllowed(value = {RESTSecurity.RESTv1ROLE})
 	public String getXMLTopicXMLNoContainer(@PathParam("id") final Integer id, @QueryParam("expand") final String expand, @QueryParam("includeTitle") final Boolean includeTitle) throws InvalidParameterException, InternalProcessingException
 	{
 		assert id != null : "The id parameter can not be null";
@@ -3499,6 +3695,7 @@ public class RESTv1 extends BaseRESTv1 implements RESTInterfaceV1, RESTInterface
 	@Path("/topic/get/html/{id}/html")
 	@Produces(MediaType.APPLICATION_XHTML_XML)
 	@Consumes({ "*" })
+	@RolesAllowed(value = {RESTSecurity.RESTv1ROLE})
 	public String getHTMLTopicHTML(@PathParam("id") final Integer id, @QueryParam("expand") final String expand) throws InvalidParameterException, InternalProcessingException
 	{
 		assert id != null : "The id parameter can not be null";
@@ -3511,6 +3708,7 @@ public class RESTv1 extends BaseRESTv1 implements RESTInterfaceV1, RESTInterface
 	@Path("/topic/get/html/{id}/r/{rev}/html")
 	@Produces(MediaType.APPLICATION_XHTML_XML)
 	@Consumes({ "*" })
+	@RolesAllowed(value = {RESTSecurity.RESTv1ROLE})
 	public String getHTMLTopicRevisionHTML(@PathParam("id") final Integer id, @PathParam("rev") final Integer revision, @QueryParam("expand") final String expand) throws InvalidParameterException, InternalProcessingException
 	{
 		assert id != null : "The id parameter can not be null";
@@ -3524,6 +3722,7 @@ public class RESTv1 extends BaseRESTv1 implements RESTInterfaceV1, RESTInterface
 	@Path("/topic/put/json")
 	@Consumes({ MediaType.APPLICATION_JSON })
 	@Produces(MediaType.APPLICATION_JSON)
+	@RolesAllowed(value = {RESTSecurity.RESTv1ROLE})
 	public RESTTopicV1 updateJSONTopic(@QueryParam("expand") final String expand, final RESTTopicV1 dataObject) throws InvalidParameterException, InternalProcessingException
 	{
 		if (dataObject == null)
@@ -3541,6 +3740,7 @@ public class RESTv1 extends BaseRESTv1 implements RESTInterfaceV1, RESTInterface
 	@Path("/topics/put/json")
 	@Consumes({ MediaType.APPLICATION_JSON })
 	@Produces(MediaType.APPLICATION_JSON)
+	@RolesAllowed(value = {RESTSecurity.RESTv1ROLE})
 	public RESTTopicCollectionV1 updateJSONTopics(@QueryParam("expand") final String expand, final RESTTopicCollectionV1 dataObjects) throws InvalidParameterException, InternalProcessingException
 	{
 		if (dataObjects == null)
@@ -3558,6 +3758,7 @@ public class RESTv1 extends BaseRESTv1 implements RESTInterfaceV1, RESTInterface
 	@Path("/topic/post/json")
 	@Produces(MediaType.APPLICATION_JSON)
 	@Consumes({ MediaType.APPLICATION_JSON })
+	@RolesAllowed(value = {RESTSecurity.RESTv1ROLE})
 	public RESTTopicV1 createJSONTopic(@QueryParam("expand") final String expand, final RESTTopicV1 dataObject) throws InvalidParameterException, InternalProcessingException
 	{
 		if (dataObject == null)
@@ -3572,6 +3773,7 @@ public class RESTv1 extends BaseRESTv1 implements RESTInterfaceV1, RESTInterface
 	@Path("/topics/post/json")
 	@Produces(MediaType.APPLICATION_JSON)
 	@Consumes({ MediaType.APPLICATION_JSON })
+	@RolesAllowed(value = {RESTSecurity.RESTv1ROLE})
 	public RESTTopicCollectionV1 createJSONTopics(@QueryParam("expand") final String expand, final RESTTopicCollectionV1 dataObjects) throws InvalidParameterException, InternalProcessingException
 	{
 		if (dataObjects == null)
@@ -3589,6 +3791,7 @@ public class RESTv1 extends BaseRESTv1 implements RESTInterfaceV1, RESTInterface
 	@Path("/topic/delete/json/{id}")
 	@Produces(MediaType.APPLICATION_JSON)
 	@Consumes({ "*" })
+	@RolesAllowed(value = {RESTSecurity.RESTv1ROLE})
 	public RESTTopicV1 deleteJSONTopic(@PathParam("id") final Integer id, @QueryParam("expand") final String expand) throws InvalidParameterException, InternalProcessingException
 	{
 		if (id == null)
@@ -3603,6 +3806,7 @@ public class RESTv1 extends BaseRESTv1 implements RESTInterfaceV1, RESTInterface
 	@Path("/topics/delete/json/{ids}")
 	@Produces(MediaType.APPLICATION_JSON)
 	@Consumes({ "*" })
+	@RolesAllowed(value = {RESTSecurity.RESTv1ROLE})
 	public RESTTopicCollectionV1 deleteJSONTopics(@PathParam("ids") final PathSegment ids, @QueryParam("expand") final String expand) throws InvalidParameterException, InternalProcessingException
 	{
 		if (ids == null)
