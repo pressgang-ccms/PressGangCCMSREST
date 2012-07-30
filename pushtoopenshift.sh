@@ -1,5 +1,6 @@
 #!/bin/bash
 git add pom.xml
+git add deployments/ROOT.war
 git commit -m "Saving any changes to pom.xml"
 cp pom.xml pom.xml.old
 git rm pom.xml

@@ -26,7 +26,6 @@ public class REST
 	@Path("/")
 	@Produces(MediaType.APPLICATION_JSON)
 	@Consumes({ "*" })
-	@PermitAll
 	public RESTInfo getRESTInfo()
 	{
 		final RESTInfo restInfo = new RESTInfo();
