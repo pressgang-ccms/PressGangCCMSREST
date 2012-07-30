@@ -91,7 +91,7 @@
 					<password>sa</password> </security> </datasource> -->
 				<datasource jndi-name="java:jboss/datasources/MysqlDS"
 					enabled="${mysql.enabled}" use-java-context="true" pool-name="MysqlDS">
-					<connection-url>jdbc:mysql://${env.OPENSHIFT_DB_HOST}:${env.OPENSHIFT_DB_PORT}/${env.OPENSHIFT_APP_NAME}?jdbcCompliantTruncation=false
+					<connection-url>jdbc:mysql://${env.OPENSHIFT_DB_HOST}:${env.OPENSHIFT_DB_PORT}/${env.OPENSHIFT_APP_NAME}?jdbcCompliantTruncation=false&amp;autoReconnect=true
 					</connection-url>
 					<driver>mysql</driver>
 					<security>

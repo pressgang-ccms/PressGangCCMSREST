@@ -56,6 +56,8 @@ import org.jboss.resteasy.spi.BadRequestException;
 import org.jboss.resteasy.spi.Failure;
 import org.jboss.resteasy.spi.InternalServerErrorException;
 
+import com.redhat.ecs.commonutils.ExceptionUtilities;
+
 /**
  * This class provides the functions that retrieve, update, create and delete entities. It is expected that other classes will extend BaseRESTv1 to provide
  * expose REST functions.
@@ -848,7 +850,7 @@ public class BaseRESTv1
 		 * catch (final NamingException ex) { throw new InternalProcessingException("Could not find the EntityManagerFactory"); }
 		 */
 		catch (final JsonParseException ex)
-		{
+		{			
 			throw new InvalidParameterException("Could not convert expand data from JSON to an instance of ExpandDataTrunk");
 		}
 		catch (final JsonMappingException ex)
@@ -861,6 +863,7 @@ public class BaseRESTv1
 		}
 		catch (final Exception ex)
 		{
+			ExceptionUtilities.handleException(ex);
 			throw new InvalidParameterException("Internal processing error");
 		}
 	}
