@@ -10,6 +10,11 @@
 		<param-value>true</param-value>
 	</context-param>
 
+	<context-param>
+		<param-name>resteasy.role.based.security</param-name>
+		<param-value>true</param-value>
+	</context-param>
+
 	<!-- This setting needs to match the url-pattern below if the REST server 
 		is not going to respond to requests at the root level -->
 	<!-- <context-param> <param-name>resteasy.servlet.mapping.prefix</param-name> 
@@ -18,8 +23,7 @@
 	<servlet>
 		<servlet-name>resteasy-servlet</servlet-name>
 		<servlet-class>
-			org.jboss.resteasy.plugins.server.servlet.HttpServletDispatcher
-		</servlet-class>
+			org.jboss.resteasy.plugins.server.servlet.HttpServletDispatcher</servlet-class>
 	</servlet>
 
 	<servlet-mapping>
@@ -27,6 +31,25 @@
 		<!-- <url-pattern>/rest/*</url-pattern> -->
 		<url-pattern>/*</url-pattern>
 	</servlet-mapping>
+
+	<security-constraint>
+		<web-resource-collection>
+			<web-resource-name>Resteasy</web-resource-name>
+			<url-pattern>/*</url-pattern>
+		</web-resource-collection>
+		<auth-constraint>
+			<role-name>RESTAdmin</role-name>
+		</auth-constraint>
+	</security-constraint>
+
+	<login-config>
+		<auth-method>BASIC</auth-method>
+		<realm-name>PressGang CCMS REST Interface</realm-name>
+	</login-config>
+
+	<security-role>
+		<role-name>RESTAdmin</role-name>
+	</security-role>
 
 </web-app>
 

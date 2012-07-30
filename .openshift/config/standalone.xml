@@ -91,14 +91,17 @@
 					<password>sa</password> </security> </datasource> -->
 				<datasource jndi-name="java:jboss/datasources/MysqlDS"
 					enabled="${mysql.enabled}" use-java-context="true" pool-name="MysqlDS">
-					<!-- autoReconnect fixes the "Communications link failure" exception in OpenShift. Also see https://bugzilla.redhat.com/show_bug.cgi?id=841389  -->
-					<connection-url>jdbc:mysql://${env.OPENSHIFT_DB_HOST}:${env.OPENSHIFT_DB_PORT}/${env.OPENSHIFT_APP_NAME}?jdbcCompliantTruncation=false&amp;autoReconnect=true&amp;validationQuery="Select 1"
+					<connection-url>jdbc:mysql://${env.OPENSHIFT_DB_HOST}:${env.OPENSHIFT_DB_PORT}/${env.OPENSHIFT_APP_NAME}?jdbcCompliantTruncation=false
 					</connection-url>
 					<driver>mysql</driver>
 					<security>
 						<user-name>${env.OPENSHIFT_DB_USERNAME}</user-name>
 						<password>${env.OPENSHIFT_DB_PASSWORD}</password>
 					</security>
+					<validation>
+						<!-- See https://bugzilla.redhat.com/show_bug.cgi?id=841389 -->
+						<check-valid-connection-sql>SELECT 1</check-valid-connection-sql>
+					</validation>
 				</datasource>
 				<!-- <datasource jndi-name="java:jboss/datasources/PostgreSQLDS" enabled="${postgresql.enabled}" 
 					use-java-context="true" pool-name="PostgreSQLDS" use-ccm="true"> <connection-url>jdbc:postgresql://${env.OPENSHIFT_DB_HOST}:${env.OPENSHIFT_DB_PORT}/${env.OPENSHIFT_APP_NAME} 
@@ -419,6 +422,18 @@
 		<subsystem xmlns="urn:jboss:domain:sar:1.0" />
 		<subsystem xmlns="urn:jboss:domain:security:1.2">
 			<security-domains>
+				<security-domain name="PressGangCCMSREST">
+					<authentication>
+						<login-module code="UsersRoles" flag="required">
+							<module-option name="usersProperties"
+								value="${jboss.server.config.dir}/users.properties" />
+							<module-option name="rolesProperties"
+								value="${jboss.server.config.dir}/roles.properties" />
+							<module-option name="hashAlgorithm" value="SHA-256" />
+							<module-option name="hashEncoding" value="hex" />
+						</login-module>
+					</authentication>
+				</security-domain>
 				<security-domain name="other" cache-type="default">
 					<authentication>
 						<login-module code="Remoting" flag="optional">
