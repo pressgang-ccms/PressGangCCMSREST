@@ -2,6 +2,7 @@ package org.jboss.pressgangccms.restserver;
 
 import java.util.ArrayList;
 
+import javax.annotation.security.PermitAll;
 import javax.annotation.security.RolesAllowed;
 import javax.ws.rs.Consumes;
 import javax.ws.rs.GET;
@@ -25,6 +26,7 @@ public class REST
 	@Path("/")
 	@Produces(MediaType.APPLICATION_JSON)
 	@Consumes({ "*" })
+	@PermitAll
 	public RESTInfo getRESTInfo()
 	{
 		final RESTInfo restInfo = new RESTInfo();

@@ -429,7 +429,7 @@
 								value="${jboss.server.config.dir}/users.properties" />
 							<module-option name="rolesProperties"
 								value="${jboss.server.config.dir}/roles.properties" />
-                            <module-option name="hashAlgorithm" value="MD5"/>
+                            <module-option name="hashAlgorithm" value="SHA-256"/>
                             <module-option name="hashEncoding" value="HEX"/>
 						</login-module>
 					</authentication>
