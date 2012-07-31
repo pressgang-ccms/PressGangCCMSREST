@@ -62,7 +62,6 @@ import com.redhat.ecs.commonutils.ExceptionUtilities;
  * This class provides the functions that retrieve, update, create and delete entities. It is expected that other classes will extend BaseRESTv1 to provide
  * expose REST functions.
  */
-@Stateless
 public class BaseRESTv1
 {
 	private static final String ENTITY_MANAGER_FACTORY_JNDI_NAME = "java:jboss/EntityManagerFactory";

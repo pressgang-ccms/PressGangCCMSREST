@@ -21,6 +21,13 @@
 
 	<dependencies>
 		<dependency>
+			<groupId>org.jboss.arquillian</groupId>
+			<artifactId>arquillian-bom</artifactId>
+			<version>1.0.2.Final</version>
+			<scope>import</scope>
+			<type>pom</type>
+		</dependency>
+		<dependency>
 			<groupId>org.jboss.spec</groupId>
 			<artifactId>jboss-javaee-6.0</artifactId>
 			<version>3.0.1.Final</version>
@@ -136,25 +143,46 @@
 			<artifactId>hibernate-search-infinispan</artifactId>
 			<version>4.2.0.Beta1</version>
 		</dependency>
+		<dependency>
+			<groupId>junit</groupId>
+			<artifactId>junit</artifactId>
+			<version>4.10</version>
+			<scope>test</scope>
+		</dependency>
+		<dependency>
+			<groupId>org.jboss.arquillian.junit</groupId>
+			<artifactId>arquillian-junit-container</artifactId>
+			<version>1.0.1.Final</version>
+		</dependency>
+		<dependency>
+			<groupId>com.jayway.restassured</groupId>
+			<artifactId>rest-assured</artifactId>
+			<version>1.6.2</version>
+			<scope>test</scope>
+		</dependency>
 	</dependencies>
-	
+
 	<build>
-       <plugins>
-         <plugin>
-           <groupId>org.apache.maven.plugins</groupId>
-           <artifactId>maven-war-plugin</artifactId>
-           <configuration>
-              <archive>
-                 <manifestEntries>
-                    <!-- <Dependencies>org.codehaus.jackson.jackson-core-asl export</Dependencies>  -->
-                 </manifestEntries>  
-              </archive>
-           </configuration>
-         </plugin>   
-       </plugins>
-    </build>
-	
-	
+		<plugins>
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-war-plugin</artifactId>
+				<configuration>
+					<archive>
+						<manifestEntries>
+							<!-- <Dependencies>org.codehaus.jackson.jackson-core-asl export</Dependencies> -->
+						</manifestEntries>
+					</archive>
+				</configuration>
+			</plugin>
+			<plugin>
+				<artifactId>maven-surefire-plugin</artifactId>
+				<version>2.12</version>
+			</plugin>
+		</plugins>
+	</build>
+
+
 	<profiles>
 		<profile>
 			<!-- When built in OpenShift the 'openshift' profile will be used when 
