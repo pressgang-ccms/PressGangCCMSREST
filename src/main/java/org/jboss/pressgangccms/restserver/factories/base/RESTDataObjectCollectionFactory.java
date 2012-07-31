@@ -141,6 +141,9 @@ public class RESTDataObjectCollectionFactory<T extends RESTBaseEntityV1<T, V>, U
 		{
 			if (expand != null)
 			{	
+				/* Set the size to -1 to indicate that the size has not been calculated */
+				retValue.setSize(SIZE_NOT_SET);
+				
 				if (expand.getTrunk().getName().equals(expandName))
 				{
 					assert baseUrl != null : "Parameter baseUrl can not be null if parameter expand is not null";
@@ -150,10 +153,6 @@ public class RESTDataObjectCollectionFactory<T extends RESTBaseEntityV1<T, V>, U
 					if (indexes.isShowSize() != null && indexes.isShowSize())
 					{
 						retValue.setSize(usingRevisions ? revisions.size() : entities.size());
-					}
-					else
-					{
-						retValue.setSize(SIZE_NOT_SET);
 					}
 					
 					int start = 0;

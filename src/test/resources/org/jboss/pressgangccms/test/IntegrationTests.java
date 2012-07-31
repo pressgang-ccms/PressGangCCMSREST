@@ -98,6 +98,10 @@ public class IntegrationTests
 				assertTrue(item.get("id").toString().matches("\\d+"));
 				assertNull(item.get("revision"));
 				assertNull(item.get("configuredParameters"));
+				assertEquals(item.get("selfLink"), RestAssured.baseURI + "1/tag/get/json/" + item.get("id"));
+				assertEquals(item.get("editLink"), RestAssured.baseURI + "1/tag/put/json/" + item.get("id"));
+				assertEquals(item.get("deleteLink"), RestAssured.baseURI + "1/tag/delete/json/" + item.get("id"));
+				assertEquals(item.get("addLink"), RestAssured.baseURI + "1/tag/post/json");
 			}
 		}
 	}

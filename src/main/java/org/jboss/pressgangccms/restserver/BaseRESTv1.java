@@ -113,12 +113,7 @@ public class BaseRESTv1
 
 	protected String getBaseUrl()
 	{
-		final String fullPath = uriInfo.getAbsolutePath().toString();
-		final int index = fullPath.indexOf(Constants.BASE_REST_PATH);
-		if (index != -1)
-			return fullPath.substring(0, index + Constants.BASE_REST_PATH.length());
-
-		return null;
+		return uriInfo.getBaseUri() + (Constants.BASE_REST_PATH.equals("/") ? "" : Constants.BASE_REST_PATH);
 	}
 
 	protected String getUrl()
@@ -849,7 +844,7 @@ public class BaseRESTv1
 		 * catch (final NamingException ex) { throw new InternalProcessingException("Could not find the EntityManagerFactory"); }
 		 */
 		catch (final JsonParseException ex)
-		{			
+		{
 			throw new InvalidParameterException("Could not convert expand data from JSON to an instance of ExpandDataTrunk");
 		}
 		catch (final JsonMappingException ex)
