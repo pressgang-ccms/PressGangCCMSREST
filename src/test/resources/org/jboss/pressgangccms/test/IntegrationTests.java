@@ -38,6 +38,7 @@ public class IntegrationTests
 			RestAssured.baseURI = "http://devrest-pressgangccms.rhcloud.com";
 			RestAssured.authentication = basic(restUser, restPass);
 			RestAssured.urlEncodingEnabled = true;
+			RestAssured.port = 80;
 			
 			given()
 				.param("expand", "{\"branches\":[{\"trunk\":{\"name\":\"tags\",\"showSize\":true}}]}")
