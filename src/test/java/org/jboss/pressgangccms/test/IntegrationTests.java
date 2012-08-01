@@ -44,7 +44,7 @@ public class IntegrationTests
 	 * @param path The REST endpoint path
 	 * @param collectionName The name of the collection holding the entities
 	 */
-	public void getCollection(final String path, final String collectionName)
+	private void getCollection(final String path, final String collectionName)
 	{
 		final Map<String, String> env = System.getenv();
 		if (env.containsKey(RESTPASS) && env.containsKey(RESTUSER))
@@ -153,7 +153,7 @@ public class IntegrationTests
 	}
 
 	@Test
-	public void testTags()
+	public void testGetTags()
 	{
 		final String path = "/1/tags/get/json/all";
 		final String collectionName = "tags";
@@ -161,7 +161,7 @@ public class IntegrationTests
 	}
 	
 	@Test
-	public void testCategories()
+	public void testGetCategories()
 	{
 		final String path = "/1/categories/get/json/all";
 		final String collectionName = "categories";
@@ -169,7 +169,7 @@ public class IntegrationTests
 	}
 	
 	@Test
-	public void testProjects()
+	public void testGetProjects()
 	{
 		final String path = "/1/projects/get/json/all";
 		final String collectionName = "projects";
@@ -177,7 +177,7 @@ public class IntegrationTests
 	}
 	
 	@Test
-	public void testTopics()
+	public void testGetTopics()
 	{
 		final String path = "/1/topics/get/json/all";
 		final String collectionName = "topics";
@@ -185,7 +185,7 @@ public class IntegrationTests
 	}
 	
 	@Test
-	public void testTranslatedTopics()
+	public void testGetTranslatedTopics()
 	{
 		final String path = "/1/translatedtopics/get/json/all";
 		final String collectionName = "translatedtopics";
@@ -193,7 +193,7 @@ public class IntegrationTests
 	}
 	
 	@Test
-	public void testImages()
+	public void testGetImages()
 	{
 		final String path = "/1/images/get/json/all";
 		final String collectionName = "images";
@@ -201,7 +201,7 @@ public class IntegrationTests
 	}
 	
 	@Test
-	public void testUsers()
+	public void testGetUsers()
 	{
 		final String path = "/1/users/get/json/all";
 		final String collectionName = "users";
@@ -209,7 +209,7 @@ public class IntegrationTests
 	}
 	
 	@Test
-	public void testBlobConstants()
+	public void testGetBlobConstants()
 	{
 		final String path = "/1/blobconstants/get/json/all";
 		final String collectionName = "blobconstants";
@@ -217,7 +217,7 @@ public class IntegrationTests
 	}
 	
 	@Test
-	public void testStringConstants()
+	public void testGetStringConstants()
 	{
 		final String path = "/1/stringconstants/get/json/all";
 		final String collectionName = "stringconstants";
@@ -228,7 +228,7 @@ public class IntegrationTests
 	 * Tests an expanded collection of tags
 	 */
 	@Test
-	public void getTagsExpanded()
+	public void getGetTagsExpanded()
 	{
 		/* The list of collections held by this entity */
 		final String[] collections = new String[] { "categories", "parentTags", "childTags", "projects", "properties", "revisions" };
@@ -244,7 +244,7 @@ public class IntegrationTests
 	 * Tests an expanded collection of topics
 	 */
 	@Test
-	public void getTopicsExpanded()
+	public void getGetTopicsExpanded()
 	{
 		/* The list of collections held by this entity */
 		final String[] collections = new String[] { "categories", "parentTags", "childTags", "projects", "properties", "revisions" };
@@ -260,7 +260,7 @@ public class IntegrationTests
 	 * Tests an expanded collection of categories
 	 */
 	@Test
-	public void getCategoriesExpanded()
+	public void getGetCategoriesExpanded()
 	{
 		/* The list of collections held by this entity */
 		final String[] collections = new String[] { "tags", "revisions" };
@@ -276,7 +276,7 @@ public class IntegrationTests
 	 * Tests an expanded collection of projects
 	 */
 	@Test
-	public void getProjectsExpanded()
+	public void getGetProjectsExpanded()
 	{		
 		/* The list of collections held by this entity */
 		final String[] collections = new String[] { "tags", "revisions" };
