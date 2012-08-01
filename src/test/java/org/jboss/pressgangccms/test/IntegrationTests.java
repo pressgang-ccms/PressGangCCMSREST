@@ -6,6 +6,11 @@ import java.util.Map;
 import org.junit.Test;
 import static org.junit.Assert.*;
 
+import com.carrotsearch.junitbenchmarks.AbstractBenchmark;
+import com.carrotsearch.junitbenchmarks.annotation.AxisRange;
+import com.carrotsearch.junitbenchmarks.annotation.BenchmarkHistoryChart;
+import com.carrotsearch.junitbenchmarks.annotation.BenchmarkMethodChart;
+import com.carrotsearch.junitbenchmarks.annotation.LabelType;
 import com.jayway.restassured.RestAssured;
 import com.jayway.restassured.path.json.JsonPath;
 import com.jayway.restassured.response.Response;
@@ -19,7 +24,10 @@ import static org.hamcrest.Matchers.*;
  * @author Matthew Casperson
  *
  */
-public class IntegrationTests
+@AxisRange(min = 0, max = 20)
+//@BenchmarkMethodChart(filePrefix = "benchmark-lists")
+@BenchmarkHistoryChart(labelWith = LabelType.CUSTOM_KEY, maxRuns = 20)
+public class IntegrationTests extends AbstractBenchmark
 {
 	/** The environment variable that holds the REST password */
 	private static final String RESTPASS = "REST_PASSWORD";
