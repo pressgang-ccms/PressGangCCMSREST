@@ -19,9 +19,9 @@ import static com.jayway.restassured.matcher.RestAssuredMatchers.*;
 import static org.hamcrest.Matchers.*;
 
 /**
- * A collection of tests designed to test the functionality of the REST interface. The results are benchmarked: see
- * http://labs.carrotsearch.com/junit-benchmarks-tutorial.html. You can then use https://github.com/ryt/githtml to
- * view the results directly from GitHub.
+ * A collection of tests designed to test the functionality of the REST interface. These tests are read only, so will not add to the size of the envers tables.
+ * The results are benchmarked: see http://labs.carrotsearch.com/junit-benchmarks-tutorial.html. You can then use https://github.com/ryt/githtml to view the
+ * results directly from GitHub.
  * 
  * @author Matthew Casperson
  * 

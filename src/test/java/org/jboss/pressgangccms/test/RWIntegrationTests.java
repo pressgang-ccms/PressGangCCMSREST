@@ -20,6 +20,13 @@ import static com.jayway.restassured.RestAssured.*;
 import static com.jayway.restassured.matcher.RestAssuredMatchers.*;
 import static org.hamcrest.Matchers.*;
 
+/**
+ * A collection of tests designed to test Create, Read, Update and Delete REST methods. These tests should only be run
+ * on a test server, as the operations are run multiple times by the JUnitBenchmark library (15 times by default), and
+ * these repeated modifications will lead to a lot of redundant information in the audit tables. 
+ * 
+ * @author Matthew Casperson
+ */
 @AxisRange(min = 0, max = 20)
 @BenchmarkHistoryChart(filePrefix = "rwbenchmarks", labelWith = LabelType.TIMESTAMP, maxRuns = 356)
 public class RWIntegrationTests extends AbstractBenchmark implements TestBase
