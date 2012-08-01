@@ -1,0 +1,10 @@
+{
+"cols": [
+{"label": "Run", "type": "string"},
+{"label": "Custom key", "type": "string"},
+{"label": "Timestamp", "type": "string"},
+{"label": "crudTag", "type": "string"} ],
+"rows": [
+{"c": [{"v": "73"}, {"v": "[73]"}, {"v": "2012-08-02 08:23:42.151"}, {"v": 3.656}]},
+{"c": [{"v": "74"}, {"v": "[74]"}, {"v": "2012-08-02 08:44:00.438"}, {"v": 3.926}]}
+]}

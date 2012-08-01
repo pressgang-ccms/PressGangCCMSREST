@@ -10,6 +10,8 @@ public interface TestBase
 	String JSON_CONTENT_TYPE = "application/json";
 	/** HTTP OK Response Code */
 	int HTTP_OK = 200;
+	/** HTTP Custom Error Response Code */
+	int HTTP_CUSTOM_ERROR = 500;
 	/** A marker used to replace with the ID */
 	String ID_MARKER = "#ID#";
 }
