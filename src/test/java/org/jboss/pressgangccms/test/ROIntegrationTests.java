@@ -27,7 +27,7 @@ import static org.hamcrest.Matchers.*;
  * 
  */
 @AxisRange(min = 0, max = 20)
-@BenchmarkHistoryChart(filePrefix = "benchmarks", labelWith = LabelType.TIMESTAMP, maxRuns = 356)
+@BenchmarkHistoryChart(filePrefix = "robenchmarks", labelWith = LabelType.TIMESTAMP, maxRuns = 356)
 public class ROIntegrationTests extends AbstractBenchmark implements TestBase
 {
 	/**
