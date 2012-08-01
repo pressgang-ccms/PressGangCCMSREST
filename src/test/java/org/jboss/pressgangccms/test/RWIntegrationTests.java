@@ -57,7 +57,7 @@ public class RWIntegrationTests extends AbstractBenchmark implements TestBase
 			RestAssured.urlEncodingEnabled = true;
 			RestAssured.port = 80;
 
-			/* Attempt to create an entity */
+			//======== Attempt to create an entity ========
 			final Response createResponse = given().body(createJson).contentType(JSON_CONTENT_TYPE).post(createURL);
 
 			assertEquals(HTTP_OK, createResponse.getStatusCode());
@@ -70,8 +70,19 @@ public class RWIntegrationTests extends AbstractBenchmark implements TestBase
 			assertNotNull(createJsonPath.get("id"));
 
 			final int id = createJsonPath.getInt("id");
+			
+			//======== Attempt to get the created entity ========
+			final Response getCreateResponse = get(getURL + "/" + id);
 
-			/* Attempt to update the entity */
+			assertEquals(HTTP_OK, getCreateResponse.getStatusCode());
+			assertEquals(JSON_CONTENT_TYPE, getCreateResponse.getContentType());
+			
+			final String getCreateJsonResponse = getCreateResponse.asString();
+			final JsonPath getCreateJsonPath = new JsonPath(getCreateJsonResponse);
+			
+			assertEquals(getCreateJsonPath.get("id"), createJsonPath.get("id"));
+
+			//======== Attempt to update the entity ========
 			final String fixedUpdateJson = updateJson.replace(ID_MARKER, id + "");
 
 			final Response updateResponse = given().body(fixedUpdateJson).contentType(JSON_CONTENT_TYPE).put(updateURL);
@@ -84,14 +95,25 @@ public class RWIntegrationTests extends AbstractBenchmark implements TestBase
 
 			assertNotNull(updateJsonPath.get("id"));
 			assertEquals(updateJsonPath.get("id"), createJsonPath.get("id"));
+			
+			//======== Attempt to get the updated entity ========
+			final Response getUpdateResponse = get(getURL + "/" + id);
 
-			/* Attempt to delete the entity */
+			assertEquals(HTTP_OK, getUpdateResponse.getStatusCode());
+			assertEquals(JSON_CONTENT_TYPE, getUpdateResponse.getContentType());
+			
+			final String getUpdateJsonResponse = getUpdateResponse.asString();
+			final JsonPath getUpdateJsonPath = new JsonPath(getUpdateJsonResponse);
+			
+			assertEquals(getUpdateJsonPath.get("id"), updateJsonPath.get("id"));
+
+			//======== Attempt to delete the entity ========
 			final Response deleteResponse = delete(deleteURL + "/" + id);
 
 			assertEquals(HTTP_OK, deleteResponse.getStatusCode());
 			assertEquals(JSON_CONTENT_TYPE, deleteResponse.getContentType());
 			
-			/* Attempt to get the deleted entity. This should fail. */
+			//======== Attempt to get the deleted entity. This should fail. ========
 			final Response getResponse = get(getURL + "/" + id);
 
 			assertEquals(HTTP_CUSTOM_ERROR, getResponse.getStatusCode());
