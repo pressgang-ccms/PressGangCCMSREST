@@ -14,9 +14,16 @@ import static com.jayway.restassured.RestAssured.*;
 import static com.jayway.restassured.matcher.RestAssuredMatchers.*;
 import static org.hamcrest.Matchers.*;
 
+/**
+ * A collection of tests designed to test the functionality of the REST interface.
+ * @author Matthew Casperson
+ *
+ */
 public class IntegrationTests
 {
+	/** The environment variable that holds the REST password */
 	private static final String RESTPASS = "REST_PASSWORD";
+	/** The environment variable that holds the REST username */
 	private static final String RESTUSER = "REST_USERNAME";
 
 	/**
