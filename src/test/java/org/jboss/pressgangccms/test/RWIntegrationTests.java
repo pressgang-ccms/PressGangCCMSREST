@@ -46,6 +46,7 @@ public class RWIntegrationTests  extends AbstractBenchmark implements TestBase
 			final Response createResponse = given().body(createJson).contentType(JSON_CONTENT_TYPE).post(createURL);
 			
 			assertEquals(HTTP_OK, createResponse.getStatusCode());
+			assertEquals(JSON_CONTENT_TYPE, createResponse.getContentType());
 
 			final String createJsonResponse = createResponse.asString();
 			final JsonPath createJsonPath = new JsonPath(createJsonResponse);
