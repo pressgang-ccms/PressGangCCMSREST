@@ -267,7 +267,7 @@ public class BaseRESTv1
 		return createOrUdpateEntity(type, restEntity, factory, DatabaseOperation.UPDATE, baseUrl, dataType, expand);
 	}
 
-	protected <U> U deleteEntity(final Class<U> type, final Integer id)
+	protected <T extends RESTBaseEntityV1<T, V>, U, V extends BaseRestCollectionV1<T, V>> T deleteEntity(final Class<U> type, final Integer id, final RESTDataObjectFactory<T, U, V> factory, final String expand)
 	{
 		assert id != null : "id should not be null";
 
@@ -307,7 +307,7 @@ public class BaseRESTv1
 
 			transactionManager.commit();
 
-			return entity;
+			return factory.createRESTEntityFromDBEntity(entity, this.getBaseUrl(), JSON_URL, expand, null, entityManager);
 		}
 		catch (final Failure ex)
 		{

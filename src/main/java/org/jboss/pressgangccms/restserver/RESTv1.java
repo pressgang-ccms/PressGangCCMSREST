@@ -439,8 +439,7 @@ public class RESTv1 extends BaseRESTv1 implements RESTInterfaceV1, RESTInterface
 		if (id == null)
 			throw new InvalidParameterException("The dataObject parameter can not be null");
 
-		final BlobConstants dbEntity = deleteEntity(BlobConstants.class, id);
-		return new BlobConstantV1Factory().createRESTEntityFromDBEntity(dbEntity, this.getBaseUrl(), JSON_URL, expand);
+		return deleteEntity(BlobConstants.class, id, new BlobConstantV1Factory(), expand);
 	}
 
 	@Override
@@ -736,8 +735,7 @@ public class RESTv1 extends BaseRESTv1 implements RESTInterfaceV1, RESTInterface
 		if (id == null)
 			throw new InvalidParameterException("The dataObject parameter can not be null");
 
-		final Project dbEntity = deleteEntity(Project.class, id);
-		return new ProjectV1Factory().createRESTEntityFromDBEntity(dbEntity, this.getBaseUrl(), JSON_URL, expand);
+		return deleteEntity(Project.class, id, new ProjectV1Factory(), expand);
 	}
 
 	@Override
@@ -1033,8 +1031,7 @@ public class RESTv1 extends BaseRESTv1 implements RESTInterfaceV1, RESTInterface
 		if (id == null)
 			throw new InvalidParameterException("The dataObject parameter can not be null");
 
-		final PropertyTag dbEntity = deleteEntity(PropertyTag.class, id);
-		return new PropertyTagV1Factory().createRESTEntityFromDBEntity(dbEntity, this.getBaseUrl(), JSON_URL, expand);
+		return deleteEntity(PropertyTag.class, id, new PropertyTagV1Factory(), expand);
 	}
 
 	@Override
@@ -1330,8 +1327,7 @@ public class RESTv1 extends BaseRESTv1 implements RESTInterfaceV1, RESTInterface
 		if (id == null)
 			throw new InvalidParameterException("The dataObject parameter can not be null");
 
-		final Role dbEntity = deleteEntity(Role.class, id);
-		return new RoleV1Factory().createRESTEntityFromDBEntity(dbEntity, this.getBaseUrl(), JSON_URL, expand);
+		return deleteEntity(Role.class, id, new RoleV1Factory(), expand);
 	}
 
 	@Override
@@ -1639,8 +1635,7 @@ public class RESTv1 extends BaseRESTv1 implements RESTInterfaceV1, RESTInterface
 		if (id == null)
 			throw new InvalidParameterException("The dataObject parameter can not be null");
 
-		final TranslatedTopicData dbEntity = deleteEntity(TranslatedTopicData.class, id);
-		return new TranslatedTopicV1Factory().createRESTEntityFromDBEntity(dbEntity, this.getBaseUrl(), JSON_URL, expand);
+		return deleteEntity(TranslatedTopicData.class, id, new TranslatedTopicV1Factory(), expand);
 	}
 
 	@Override
@@ -1936,8 +1931,7 @@ public class RESTv1 extends BaseRESTv1 implements RESTInterfaceV1, RESTInterface
 		if (id == null)
 			throw new InvalidParameterException("The dataObject parameter can not be null");
 
-		final StringConstants dbEntity = deleteEntity(StringConstants.class, id);
-		return new StringConstantV1Factory().createRESTEntityFromDBEntity(dbEntity, this.getBaseUrl(), JSON_URL, expand);
+		return deleteEntity(StringConstants.class, id, new StringConstantV1Factory(), expand);
 	}
 
 	@Override
@@ -2234,8 +2228,7 @@ public class RESTv1 extends BaseRESTv1 implements RESTInterfaceV1, RESTInterface
 		if (id == null)
 			throw new InvalidParameterException("The dataObject parameter can not be null");
 
-		final User dbEntity = deleteEntity(User.class, id);
-		return new UserV1Factory().createRESTEntityFromDBEntity(dbEntity, this.getBaseUrl(), JSON_URL, expand);
+		return deleteEntity(User.class, id, new UserV1Factory(), expand);
 	}
 
 	@Override
@@ -2453,8 +2446,7 @@ public class RESTv1 extends BaseRESTv1 implements RESTInterfaceV1, RESTInterface
 		if (id == null)
 			throw new InvalidParameterException("The dataObject parameter can not be null");
 
-		final TranslatedTopicString dbEntity = deleteEntity(TranslatedTopicString.class, id);
-		return new TranslatedTopicStringV1Factory().createRESTEntityFromDBEntity(dbEntity, this.getBaseUrl(), JSON_URL, expand);
+		return deleteEntity(TranslatedTopicString.class, id, new TranslatedTopicStringV1Factory(), expand);
 	}
 
 	@Override
@@ -2747,8 +2739,7 @@ public class RESTv1 extends BaseRESTv1 implements RESTInterfaceV1, RESTInterface
 		if (id == null)
 			throw new InvalidParameterException("The dataObject parameter can not be null");
 
-		final Tag dbEntity = deleteEntity(Tag.class, id);
-		return new TagV1Factory().createRESTEntityFromDBEntity(dbEntity, this.getBaseUrl(), JSON_URL, expand);
+		return deleteEntity(Tag.class, id, new TagV1Factory(), expand);
 	}
 
 	@DELETE
@@ -3045,8 +3036,7 @@ public class RESTv1 extends BaseRESTv1 implements RESTInterfaceV1, RESTInterface
 		if (id == null)
 			throw new InvalidParameterException("The dataObject parameter can not be null");
 
-		final Category dbEntity = deleteEntity(Category.class, id);
-		return new CategoryV1Factory().createRESTEntityFromDBEntity(dbEntity, this.getBaseUrl(), JSON_URL, expand);
+		return deleteEntity(Category.class, id, new CategoryV1Factory(), expand);
 	}
 
 	@Override
@@ -3340,8 +3330,7 @@ public class RESTv1 extends BaseRESTv1 implements RESTInterfaceV1, RESTInterface
 		if (id == null)
 			throw new InvalidParameterException("The dataObject parameter can not be null");
 
-		final ImageFile dbEntity = deleteEntity(ImageFile.class, id);
-		return new ImageV1Factory().createRESTEntityFromDBEntity(dbEntity, this.getBaseUrl(), JSON_URL, expand);
+		return deleteEntity(ImageFile.class, id, new ImageV1Factory(), expand);
 	}
 
 	@DELETE
@@ -3797,8 +3786,7 @@ public class RESTv1 extends BaseRESTv1 implements RESTInterfaceV1, RESTInterface
 		if (id == null)
 			throw new InvalidParameterException("The dataObject parameter can not be null");
 
-		final Topic dbEntity = deleteEntity(Topic.class, id);
-		return new TopicV1Factory().createRESTEntityFromDBEntity(dbEntity, this.getBaseUrl(), JSON_URL, expand);
+		return deleteEntity(Topic.class, id, new TopicV1Factory(), expand);
 	}
 
 	@Override

@@ -9,7 +9,6 @@ import static org.junit.Assert.*;
 import com.carrotsearch.junitbenchmarks.AbstractBenchmark;
 import com.carrotsearch.junitbenchmarks.annotation.AxisRange;
 import com.carrotsearch.junitbenchmarks.annotation.BenchmarkHistoryChart;
-import com.carrotsearch.junitbenchmarks.annotation.BenchmarkMethodChart;
 import com.carrotsearch.junitbenchmarks.annotation.LabelType;
 import com.jayway.restassured.RestAssured;
 import com.jayway.restassured.path.json.JsonPath;
@@ -29,13 +28,8 @@ import static org.hamcrest.Matchers.*;
  */
 @AxisRange(min = 0, max = 20)
 @BenchmarkHistoryChart(filePrefix = "benchmarks", labelWith = LabelType.TIMESTAMP, maxRuns = 356)
-public class IntegrationTests extends AbstractBenchmark
+public class ROIntegrationTests extends AbstractBenchmark implements TestBase
 {
-	/** The environment variable that holds the REST password */
-	private static final String RESTPASS = "REST_PASSWORD";
-	/** The environment variable that holds the REST username */
-	private static final String RESTUSER = "REST_USERNAME";
-
 	/**
 	 * Tests the root URL of the REST interface, which should return a HTTP code of 200. If not, the HAProxy will not recognise the web app.
 	 */
