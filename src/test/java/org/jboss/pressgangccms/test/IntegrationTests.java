@@ -20,12 +20,15 @@ import static com.jayway.restassured.matcher.RestAssuredMatchers.*;
 import static org.hamcrest.Matchers.*;
 
 /**
- * A collection of tests designed to test the functionality of the REST interface.
+ * A collection of tests designed to test the functionality of the REST interface. The results are benchmarked: see
+ * http://labs.carrotsearch.com/junit-benchmarks-tutorial.html. You can then use https://github.com/ryt/githtml to
+ * view the results directly from GitHub.
+ * 
  * @author Matthew Casperson
- *
+ * 
  */
 @AxisRange(min = 0, max = 20)
-//@BenchmarkMethodChart(filePrefix = "benchmark-lists")
+// @BenchmarkMethodChart(filePrefix = "benchmark-lists")
 @BenchmarkHistoryChart(labelWith = LabelType.CUSTOM_KEY, maxRuns = 20)
 public class IntegrationTests extends AbstractBenchmark
 {
@@ -49,8 +52,11 @@ public class IntegrationTests extends AbstractBenchmark
 
 	/**
 	 * Tests an unexpanded collection of tags
-	 * @param path The REST endpoint path
-	 * @param collectionName The name of the collection holding the entities
+	 * 
+	 * @param path
+	 *            The REST endpoint path
+	 * @param collectionName
+	 *            The name of the collection holding the entities
 	 */
 	private void getCollection(final String path, final String collectionName)
 	{
@@ -80,14 +86,20 @@ public class IntegrationTests extends AbstractBenchmark
 			assertTrue(collectionName.equals(jp.getString("expand")));
 		}
 	}
-	
+
 	/**
 	 * This method is used to test the validity of a collection of entities
-	 * @param path The REST endpoint path
-	 * @param expandString The expansion string
-	 * @param collections The collections held by each of the entities in the collection
-	 * @param entityName The name of the entity
-	 * @param collectionName The name of the collection holding the entities
+	 * 
+	 * @param path
+	 *            The REST endpoint path
+	 * @param expandString
+	 *            The expansion string
+	 * @param collections
+	 *            The collections held by each of the entities in the collection
+	 * @param entityName
+	 *            The name of the entity
+	 * @param collectionName
+	 *            The name of the collection holding the entities
 	 */
 	@SuppressWarnings("rawtypes")
 	private void getExpandedCollection(final String path, final String expandString, final String[] collections, final String entityName, final String collectionName)
@@ -138,15 +150,15 @@ public class IntegrationTests extends AbstractBenchmark
 				final List expand = (List) item.get("expand");
 
 				assertNotNull(expand);
-				
+
 				/* Every collection should be listed in the expand list */
 				assertTrue(expand.size() == collections.length);
-			
+
 				/* Make sure each collection is initilized as an empty collection */
 				for (final String subCollectionName : collections)
 				{
 					assertTrue(expand.contains(subCollectionName));
-					
+
 					final Map collection = (Map) item.get(subCollectionName);
 
 					assertNotNull(collection);
@@ -167,7 +179,7 @@ public class IntegrationTests extends AbstractBenchmark
 		final String collectionName = "tags";
 		getCollection(path, collectionName);
 	}
-	
+
 	@Test
 	public void testGetCategories()
 	{
@@ -175,7 +187,7 @@ public class IntegrationTests extends AbstractBenchmark
 		final String collectionName = "categories";
 		getCollection(path, collectionName);
 	}
-	
+
 	@Test
 	public void testGetProjects()
 	{
@@ -183,7 +195,7 @@ public class IntegrationTests extends AbstractBenchmark
 		final String collectionName = "projects";
 		getCollection(path, collectionName);
 	}
-	
+
 	@Test
 	public void testGetTopics()
 	{
@@ -191,7 +203,7 @@ public class IntegrationTests extends AbstractBenchmark
 		final String collectionName = "topics";
 		getCollection(path, collectionName);
 	}
-	
+
 	@Test
 	public void testGetTranslatedTopics()
 	{
@@ -199,7 +211,7 @@ public class IntegrationTests extends AbstractBenchmark
 		final String collectionName = "translatedtopics";
 		getCollection(path, collectionName);
 	}
-	
+
 	@Test
 	public void testGetImages()
 	{
@@ -207,7 +219,7 @@ public class IntegrationTests extends AbstractBenchmark
 		final String collectionName = "images";
 		getCollection(path, collectionName);
 	}
-	
+
 	@Test
 	public void testGetUsers()
 	{
@@ -215,7 +227,7 @@ public class IntegrationTests extends AbstractBenchmark
 		final String collectionName = "users";
 		getCollection(path, collectionName);
 	}
-	
+
 	@Test
 	public void testGetBlobConstants()
 	{
@@ -223,7 +235,7 @@ public class IntegrationTests extends AbstractBenchmark
 		final String collectionName = "blobconstants";
 		getCollection(path, collectionName);
 	}
-	
+
 	@Test
 	public void testGetStringConstants()
 	{
@@ -231,7 +243,7 @@ public class IntegrationTests extends AbstractBenchmark
 		final String collectionName = "stringconstants";
 		getCollection(path, collectionName);
 	}
-	
+
 	/**
 	 * Tests an expanded collection of tags
 	 */
@@ -239,12 +251,13 @@ public class IntegrationTests extends AbstractBenchmark
 	public void getGetTagsExpanded()
 	{
 		/* The list of collections held by this entity */
-		final String[] collections = new String[] { "categories", "parentTags", "childTags", "projects", "properties", "revisions" };
-		
+		final String[] collections = new String[]
+		{ "categories", "parentTags", "childTags", "projects", "properties", "revisions" };
+
 		final String path = "/1/tags/get/json/all";
-		
+
 		final String expandString = "{\"branches\":[{\"trunk\":{\"name\":\"tags\",\"showSize\":true}}]}";
-		
+
 		getExpandedCollection(path, expandString, collections, "tag", "tags");
 	}
 
@@ -255,12 +268,13 @@ public class IntegrationTests extends AbstractBenchmark
 	public void getGetTopicsExpanded()
 	{
 		/* The list of collections held by this entity */
-		final String[] collections = new String[] { "categories", "parentTags", "childTags", "projects", "properties", "revisions" };
-		
+		final String[] collections = new String[]
+		{ "categories", "parentTags", "childTags", "projects", "properties", "revisions" };
+
 		final String path = "/1/topics/get/json/all";
-		
+
 		final String expandString = "{\"branches\":[{\"trunk\":{\"name\":\"topics\",\"showSize\":true}}]}";
-		
+
 		getExpandedCollection(path, expandString, collections, "topic", "topics");
 	}
 
@@ -271,12 +285,13 @@ public class IntegrationTests extends AbstractBenchmark
 	public void getGetCategoriesExpanded()
 	{
 		/* The list of collections held by this entity */
-		final String[] collections = new String[] { "tags", "revisions" };
-		
+		final String[] collections = new String[]
+		{ "tags", "revisions" };
+
 		final String path = "/1/categories/get/json/all";
-		
+
 		final String expandString = "{\"branches\":[{\"trunk\":{\"name\":\"categories\",\"showSize\":true}}]}";
-		
+
 		getExpandedCollection(path, expandString, collections, "category", "categories");
 	}
 
@@ -285,14 +300,15 @@ public class IntegrationTests extends AbstractBenchmark
 	 */
 	@Test
 	public void getGetProjectsExpanded()
-	{		
+	{
 		/* The list of collections held by this entity */
-		final String[] collections = new String[] { "tags", "revisions" };
-		
+		final String[] collections = new String[]
+		{ "tags", "revisions" };
+
 		final String path = "/1/projects/get/json/all";
-		
+
 		final String expandString = "{\"branches\":[{\"trunk\":{\"name\":\"projects\",\"showSize\":true}}]}";
-		
+
 		getExpandedCollection(path, expandString, collections, "project", "projects");
 	}
 }
