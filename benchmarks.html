@@ -81,12 +81,12 @@
 		);
 		
 		chart = new google.visualization.LineChart(document.getElementById('chart'));
-		drawData(data, 01);
+		drawData(data, 02);
       }
 
       google.setOnLoadCallback(function() {
           $.ajax({
-            url: "org.jboss.pressgangccms.test.IntegrationTests.json",
+            url: "benchmarks.json",
             method: "GET",
             success: function(data) {
               visualize(data, "org.jboss.pressgangccms.test.IntegrationTests");

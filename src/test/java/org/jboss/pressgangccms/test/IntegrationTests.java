@@ -28,8 +28,7 @@ import static org.hamcrest.Matchers.*;
  * 
  */
 @AxisRange(min = 0, max = 20)
-// @BenchmarkMethodChart(filePrefix = "benchmark-lists")
-@BenchmarkHistoryChart(labelWith = LabelType.CUSTOM_KEY, maxRuns = 20)
+@BenchmarkHistoryChart(filePrefix = "benchmarks", labelWith = LabelType.TIMESTAMP, maxRuns = 356)
 public class IntegrationTests extends AbstractBenchmark
 {
 	/** The environment variable that holds the REST password */
