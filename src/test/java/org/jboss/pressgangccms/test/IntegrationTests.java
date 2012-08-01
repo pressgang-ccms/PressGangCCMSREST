@@ -34,12 +34,11 @@ public class IntegrationTests
 
 	/**
 	 * Tests an unexpanded collection of tags
+	 * @param path The REST endpoint path
+	 * @param collectionName The name of the collection holding the entities
 	 */
-	@Test
-	public void getTags()
+	public void getCollection(final String path, final String collectionName)
 	{
-		final String path = "/1/tags/get/json/all";
-
 		final Map<String, String> env = System.getenv();
 		if (env.containsKey(RESTPASS) && env.containsKey(RESTUSER))
 		{
@@ -63,7 +62,7 @@ public class IntegrationTests
 			assertNull(jp.get("endExpandIndex"));
 			assertNull(jp.get("startExpandIndex"));
 			assertNull(jp.get("items"));
-			assertTrue("tags".equals(jp.getString("expand")));
+			assertTrue(collectionName.equals(jp.getString("expand")));
 		}
 	}
 	
@@ -76,7 +75,7 @@ public class IntegrationTests
 	 * @param collectionName The name of the collection holding the entities
 	 */
 	@SuppressWarnings("rawtypes")
-	private void getCollection(final String path, final String expandString, final String[] collections, final String entityName, final String collectionName)
+	private void getExpandedCollection(final String path, final String expandString, final String[] collections, final String entityName, final String collectionName)
 	{
 		final Map<String, String> env = System.getenv();
 		if (env.containsKey(RESTPASS) && env.containsKey(RESTUSER))
@@ -146,6 +145,78 @@ public class IntegrationTests
 		}
 	}
 
+	@Test
+	public void testTags()
+	{
+		final String path = "/1/tags/get/json/all";
+		final String collectionName = "tags";
+		getCollection(path, collectionName);
+	}
+	
+	@Test
+	public void testCategories()
+	{
+		final String path = "/1/categories/get/json/all";
+		final String collectionName = "categories";
+		getCollection(path, collectionName);
+	}
+	
+	@Test
+	public void testProjects()
+	{
+		final String path = "/1/projects/get/json/all";
+		final String collectionName = "projects";
+		getCollection(path, collectionName);
+	}
+	
+	@Test
+	public void testTopics()
+	{
+		final String path = "/1/topics/get/json/all";
+		final String collectionName = "topics";
+		getCollection(path, collectionName);
+	}
+	
+	@Test
+	public void testTranslatedTopics()
+	{
+		final String path = "/1/translatedtopics/get/json/all";
+		final String collectionName = "translatedtopics";
+		getCollection(path, collectionName);
+	}
+	
+	@Test
+	public void testImages()
+	{
+		final String path = "/1/images/get/json/all";
+		final String collectionName = "images";
+		getCollection(path, collectionName);
+	}
+	
+	@Test
+	public void testUsers()
+	{
+		final String path = "/1/users/get/json/all";
+		final String collectionName = "users";
+		getCollection(path, collectionName);
+	}
+	
+	@Test
+	public void testBlobConstants()
+	{
+		final String path = "/1/blobconstants/get/json/all";
+		final String collectionName = "blobconstants";
+		getCollection(path, collectionName);
+	}
+	
+	@Test
+	public void testStringConstants()
+	{
+		final String path = "/1/stringconstants/get/json/all";
+		final String collectionName = "stringconstants";
+		getCollection(path, collectionName);
+	}
+	
 	/**
 	 * Tests an expanded collection of tags
 	 */
@@ -159,7 +230,7 @@ public class IntegrationTests
 		
 		final String expandString = "{\"branches\":[{\"trunk\":{\"name\":\"tags\",\"showSize\":true}}]}";
 		
-		getCollection(path, expandString, collections, "tag", "tags");
+		getExpandedCollection(path, expandString, collections, "tag", "tags");
 	}
 
 	/**
@@ -175,7 +246,7 @@ public class IntegrationTests
 		
 		final String expandString = "{\"branches\":[{\"trunk\":{\"name\":\"topics\",\"showSize\":true}}]}";
 		
-		getCollection(path, expandString, collections, "topic", "topics");
+		getExpandedCollection(path, expandString, collections, "topic", "topics");
 	}
 
 	/**
@@ -191,7 +262,7 @@ public class IntegrationTests
 		
 		final String expandString = "{\"branches\":[{\"trunk\":{\"name\":\"categories\",\"showSize\":true}}]}";
 		
-		getCollection(path, expandString, collections, "category", "categories");
+		getExpandedCollection(path, expandString, collections, "category", "categories");
 	}
 
 	/**
@@ -207,6 +278,6 @@ public class IntegrationTests
 		
 		final String expandString = "{\"branches\":[{\"trunk\":{\"name\":\"projects\",\"showSize\":true}}]}";
 		
-		getCollection(path, expandString, collections, "project", "projects");
+		getExpandedCollection(path, expandString, collections, "project", "projects");
 	}
 }
