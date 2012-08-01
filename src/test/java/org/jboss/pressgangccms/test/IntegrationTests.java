@@ -19,14 +19,23 @@ public class IntegrationTests
 	private static final String RESTPASS = "REST_PASSWORD";
 	private static final String RESTUSER = "REST_USERNAME";
 	
-	//@Test
+	/**
+	 * Tests the root URL of the REST interface, which should return a HTTP code of 200.
+	 * If not, the HAProxy will not recognise the web app.
+	 */
+	@Test
 	public void getRESTInfo()
 	{
 		RestAssured.reset();
+		RestAssured.baseURI = "http://devrest-pressgangccms.rhcloud.com";
+		RestAssured.port = 80;
 		
-		expect().statusCode(200).when().get("http://devrest-pressgangccms.rhcloud.com");
+		expect().statusCode(200).when().get("/");
 	}
 	
+	/**
+	 * Tests an unexpanded collection of tags
+	 */
 	@Test
 	public void getTags()
 	{
@@ -51,7 +60,7 @@ public class IntegrationTests
 			final String json = res.asString();
 			final JsonPath jp = new JsonPath(json);
 						
-			assertEquals(jp.getInt("size"), 0);
+			assertNull(jp.get("size"));
 			assertNull(jp.get("endExpandIndex"));
 			assertNull(jp.get("startExpandIndex"));
 			assertNull(jp.get("items"));
@@ -59,6 +68,10 @@ public class IntegrationTests
 		}
 	}
 	
+	/**
+	 * Tests an expanded collection of tags
+	 */
+	@SuppressWarnings("rawtypes")
 	@Test
 	public void getTagsExpanded()
 	{
@@ -98,10 +111,34 @@ public class IntegrationTests
 				assertTrue(item.get("id").toString().matches("\\d+"));
 				assertNull(item.get("revision"));
 				assertNull(item.get("configuredParameters"));
-				assertEquals(item.get("selfLink"), RestAssured.baseURI + "1/tag/get/json/" + item.get("id"));
-				assertEquals(item.get("editLink"), RestAssured.baseURI + "1/tag/put/json/" + item.get("id"));
-				assertEquals(item.get("deleteLink"), RestAssured.baseURI + "1/tag/delete/json/" + item.get("id"));
-				assertEquals(item.get("addLink"), RestAssured.baseURI + "1/tag/post/json");
+				assertEquals(item.get("selfLink"), RestAssured.baseURI + "/1/tag/get/json/" + item.get("id"));
+				assertEquals(item.get("editLink"), RestAssured.baseURI + "/1/tag/put/json/" + item.get("id"));
+				assertEquals(item.get("deleteLink"), RestAssured.baseURI + "/1/tag/delete/json/" + item.get("id"));
+				assertEquals(item.get("addLink"), RestAssured.baseURI + "/1/tag/post/json");
+				
+				final List expand = (List)item.get("expand");
+				
+				assertNotNull(expand);
+				assertTrue(expand.contains("categories"));
+				assertTrue(expand.contains("parenttags"));
+				assertTrue(expand.contains("childtags"));
+				assertTrue(expand.contains("projects"));
+				assertTrue(expand.contains("properties"));
+				assertTrue(expand.contains("revisions"));
+				
+				assertFalse((Boolean)item.get("addItem"));
+				assertFalse((Boolean)item.get("removeItem"));
+				
+				assertNotNull(item.get("name"));
+				
+				final Map properties = (Map)item.get("properties");
+				
+				assertNotNull(properties);
+				assertNull(properties.get("size"));
+				assertEquals(properties.get("expand"), "properties");
+				assertNull(properties.get("startExpandIndex"));
+				assertNull(properties.get("endExpandIndex"));
+				assertNull(properties.get("items"));				
 			}
 		}
 	}

@@ -27,7 +27,7 @@ public class RESTDataObjectCollectionFactory<T extends RESTBaseEntityV1<T, V>, U
 	 * A value used to populate the size attribute on the returned collections to indicate that the
 	 * size was not defined.
 	 */
-	private static int SIZE_NOT_SET = -1;
+	private static Integer SIZE_NOT_SET = null;
 	
 	public V create(final Class<V> clazz, final RESTDataObjectFactory<T, U, V> dataObjectFactory, final List<U> entities, final String expandName, final String dataType, final EntityManager entityManager)
 	{
@@ -139,11 +139,11 @@ public class RESTDataObjectCollectionFactory<T extends RESTBaseEntityV1<T, V>, U
 		
 		try
 		{
+			/* Set the size to -1 to indicate that the size has not been calculated */
+			retValue.setSize(SIZE_NOT_SET);
+			
 			if (expand != null)
 			{	
-				/* Set the size to -1 to indicate that the size has not been calculated */
-				retValue.setSize(SIZE_NOT_SET);
-				
 				if (expand.getTrunk().getName().equals(expandName))
 				{
 					assert baseUrl != null : "Parameter baseUrl can not be null if parameter expand is not null";
