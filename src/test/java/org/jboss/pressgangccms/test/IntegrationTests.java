@@ -12,16 +12,15 @@ import com.jayway.restassured.response.Response;
 
 import static com.jayway.restassured.RestAssured.*;
 import static com.jayway.restassured.matcher.RestAssuredMatchers.*;
-import static org.hamcrest.Matchers.*; 
+import static org.hamcrest.Matchers.*;
 
 public class IntegrationTests
 {
 	private static final String RESTPASS = "REST_PASSWORD";
 	private static final String RESTUSER = "REST_USERNAME";
-	
+
 	/**
-	 * Tests the root URL of the REST interface, which should return a HTTP code of 200.
-	 * If not, the HAProxy will not recognise the web app.
+	 * Tests the root URL of the REST interface, which should return a HTTP code of 200. If not, the HAProxy will not recognise the web app.
 	 */
 	@Test
 	public void getRESTInfo()
@@ -29,10 +28,10 @@ public class IntegrationTests
 		RestAssured.reset();
 		RestAssured.baseURI = "http://devrest-pressgangccms.rhcloud.com";
 		RestAssured.port = 80;
-		
+
 		expect().statusCode(200).when().get("/");
 	}
-	
+
 	/**
 	 * Tests an unexpanded collection of tags
 	 */
@@ -40,26 +39,26 @@ public class IntegrationTests
 	public void getTags()
 	{
 		final String path = "/1/tags/get/json/all";
-		
+
 		final Map<String, String> env = System.getenv();
 		if (env.containsKey(RESTPASS) && env.containsKey(RESTUSER))
 		{
 			final String restUser = env.get(RESTUSER);
 			final String restPass = env.get(RESTPASS);
-			
+
 			RestAssured.reset();
 			RestAssured.baseURI = "http://devrest-pressgangccms.rhcloud.com";
 			RestAssured.authentication = basic(restUser, restPass);
 			RestAssured.urlEncodingEnabled = true;
 			RestAssured.port = 80;
-			
+
 			/* Test the response */
 			final Response res = get(path);
 			assertEquals(200, res.getStatusCode());
-			
+
 			final String json = res.asString();
 			final JsonPath jp = new JsonPath(json);
-						
+
 			assertNull(jp.get("size"));
 			assertNull(jp.get("endExpandIndex"));
 			assertNull(jp.get("startExpandIndex"));
@@ -67,7 +66,7 @@ public class IntegrationTests
 			assertTrue("tags".equals(jp.getString("expand")));
 		}
 	}
-	
+
 	/**
 	 * Tests an expanded collection of tags
 	 */
@@ -76,35 +75,39 @@ public class IntegrationTests
 	public void getTagsExpanded()
 	{
 		final String path = "/1/tags/get/json/all";
-		
+
 		final Map<String, String> env = System.getenv();
 		if (env.containsKey(RESTPASS) && env.containsKey(RESTUSER))
 		{
 			final String restUser = env.get(RESTUSER);
 			final String restPass = env.get(RESTPASS);
-			
+
 			RestAssured.reset();
 			RestAssured.baseURI = "http://devrest-pressgangccms.rhcloud.com";
 			RestAssured.authentication = basic(restUser, restPass);
 			RestAssured.urlEncodingEnabled = true;
 			RestAssured.port = 80;
-			
+
 			/* Test the response */
 			final Response res = given().param("expand", "{\"branches\":[{\"trunk\":{\"name\":\"tags\",\"showSize\":true}}]}").get(path);
 			assertEquals(200, res.getStatusCode());
-			
+
 			final String json = res.asString();
 			final JsonPath jp = new JsonPath(json);
-						
+
 			assertEquals(jp.getInt("endExpandIndex"), jp.getInt("size"));
 			assertEquals(jp.getInt("startExpandIndex"), 0);
 			assertTrue("tags".equals(jp.getString("expand")));
-			
+
 			final List<Map> items = jp.getList("items", Map.class);
-			
-			assertNotNull(items);			
+
+			assertNotNull(items);
 			assertTrue(items.size() == jp.getInt("size"));
 			
+			/* The list of collections held by this entity */
+			final String[] collections = new String[] { "categories", "parentTags", "childTags", "projects", "properties", "revisions" };
+
+			/* Loop over each entity in the collection */
 			for (final Map item : items)
 			{
 				assertNotNull(item.get("id"));
@@ -115,30 +118,256 @@ public class IntegrationTests
 				assertEquals(item.get("editLink"), RestAssured.baseURI + "/1/tag/put/json/" + item.get("id"));
 				assertEquals(item.get("deleteLink"), RestAssured.baseURI + "/1/tag/delete/json/" + item.get("id"));
 				assertEquals(item.get("addLink"), RestAssured.baseURI + "/1/tag/post/json");
-				
-				final List expand = (List)item.get("expand");
-				
+				assertFalse((Boolean) item.get("addItem"));
+				assertFalse((Boolean) item.get("removeItem"));
+				assertNotNull(item.get("name"));
+
+				final List expand = (List) item.get("expand");
+
 				assertNotNull(expand);
-				assertTrue(expand.contains("categories"));
-				assertTrue(expand.contains("parenttags"));
-				assertTrue(expand.contains("childtags"));
-				assertTrue(expand.contains("projects"));
-				assertTrue(expand.contains("properties"));
-				assertTrue(expand.contains("revisions"));
 				
-				assertFalse((Boolean)item.get("addItem"));
-				assertFalse((Boolean)item.get("removeItem"));
-				
+				/* Every collection should be listed in the expand list */
+				assertTrue(expand.size() == collections.length);
+			
+				/* Make sure each collection is initilized as an empty collection */
+				for (final String collectionName : collections)
+				{
+					assertTrue(expand.contains(collectionName));
+					
+					final Map collection = (Map) item.get(collectionName);
+
+					assertNotNull(collection);
+					assertNull(collection.get("size"));
+					assertEquals(collection.get("expand"), collectionName);
+					assertNull(collection.get("startExpandIndex"));
+					assertNull(collection.get("endExpandIndex"));
+					assertNull(collection.get("items"));
+				}
+			}
+		}
+	}
+
+	/**
+	 * Tests an expanded collection of topics
+	 */
+	@SuppressWarnings("rawtypes")
+	@Test
+	public void getTopicsExpanded()
+	{
+		final String path = "/1/topics/get/json/all";
+
+		final Map<String, String> env = System.getenv();
+		if (env.containsKey(RESTPASS) && env.containsKey(RESTUSER))
+		{
+			final String restUser = env.get(RESTUSER);
+			final String restPass = env.get(RESTPASS);
+
+			RestAssured.reset();
+			RestAssured.baseURI = "http://devrest-pressgangccms.rhcloud.com";
+			RestAssured.authentication = basic(restUser, restPass);
+			RestAssured.urlEncodingEnabled = true;
+			RestAssured.port = 80;
+
+			/* Test the response */
+			final Response res = given().param("expand", "{\"branches\":[{\"trunk\":{\"name\":\"topics\",\"showSize\":true}}]}").get(path);
+			assertEquals(200, res.getStatusCode());
+
+			final String json = res.asString();
+			final JsonPath jp = new JsonPath(json);
+
+			assertEquals(jp.getInt("endExpandIndex"), jp.getInt("size"));
+			assertEquals(jp.getInt("startExpandIndex"), 0);
+			assertTrue("topics".equals(jp.getString("expand")));
+
+			final List<Map> items = jp.getList("items", Map.class);
+
+			assertNotNull(items);
+			assertTrue(items.size() == jp.getInt("size"));
+			
+			final String[] collections = new String[] { "properties", "categories", "parentTags", "childTags", "projects", "revisions" };
+
+			for (final Map item : items)
+			{							
+				assertNotNull(item.get("id"));
+				assertTrue(item.get("id").toString().matches("\\d+"));
+				assertNull(item.get("revision"));
+				assertNull(item.get("configuredParameters"));
+				assertEquals(item.get("selfLink"), RestAssured.baseURI + "/1/topic/get/json/" + item.get("id"));
+				assertEquals(item.get("editLink"), RestAssured.baseURI + "/1/topic/put/json/" + item.get("id"));
+				assertEquals(item.get("deleteLink"), RestAssured.baseURI + "/1/topic/delete/json/" + item.get("id"));
+				assertEquals(item.get("addLink"), RestAssured.baseURI + "/1/topic/post/json");
+				assertFalse((Boolean) item.get("addItem"));
+				assertFalse((Boolean) item.get("removeItem"));
 				assertNotNull(item.get("name"));
 				
-				final Map properties = (Map)item.get("properties");
-				
-				assertNotNull(properties);
-				assertNull(properties.get("size"));
-				assertEquals(properties.get("expand"), "properties");
-				assertNull(properties.get("startExpandIndex"));
-				assertNull(properties.get("endExpandIndex"));
-				assertNull(properties.get("items"));				
+				final List expand = (List) item.get("expand");
+
+				assertNotNull(expand);
+				assertTrue(expand.size() == collections.length);
+			
+				for (final String collectionName : collections)
+				{
+					assertTrue(expand.contains(collectionName));
+					
+					final Map collection = (Map) item.get(collectionName);
+
+					assertNotNull(collection);
+					assertNull(collection.get("size"));
+					assertEquals(collection.get("expand"), "properties");
+					assertNull(collection.get("startExpandIndex"));
+					assertNull(collection.get("endExpandIndex"));
+					assertNull(collection.get("items"));
+				}
+			}
+		}
+	}
+
+	/**
+	 * Tests an expanded collection of categories
+	 */
+	@SuppressWarnings("rawtypes")
+	@Test
+	public void getCategoriesExpanded()
+	{
+		final String path = "/1/categories/get/json/all";
+
+		final Map<String, String> env = System.getenv();
+		if (env.containsKey(RESTPASS) && env.containsKey(RESTUSER))
+		{
+			final String restUser = env.get(RESTUSER);
+			final String restPass = env.get(RESTPASS);
+
+			RestAssured.reset();
+			RestAssured.baseURI = "http://devrest-pressgangccms.rhcloud.com";
+			RestAssured.authentication = basic(restUser, restPass);
+			RestAssured.urlEncodingEnabled = true;
+			RestAssured.port = 80;
+
+			/* Test the response */
+			final Response res = given().param("expand", "{\"branches\":[{\"trunk\":{\"name\":\"categories\",\"showSize\":true}}]}").get(path);
+			assertEquals(200, res.getStatusCode());
+
+			final String json = res.asString();
+			final JsonPath jp = new JsonPath(json);
+
+			assertEquals(jp.getInt("endExpandIndex"), jp.getInt("size"));
+			assertEquals(jp.getInt("startExpandIndex"), 0);
+			assertTrue("categories".equals(jp.getString("expand")));
+
+			final List<Map> items = jp.getList("items", Map.class);
+
+			assertNotNull(items);
+			assertTrue(items.size() == jp.getInt("size"));
+			
+			final String[] collections = new String[] { "tags", "revisions" };
+			
+			for (final Map item : items)
+			{					
+				assertNotNull(item.get("id"));
+				assertTrue(item.get("id").toString().matches("\\d+"));
+				assertNull(item.get("revision"));
+				assertNull(item.get("configuredParameters"));
+				assertEquals(item.get("selfLink"), RestAssured.baseURI + "/1/category/get/json/" + item.get("id"));
+				assertEquals(item.get("editLink"), RestAssured.baseURI + "/1/category/put/json/" + item.get("id"));
+				assertEquals(item.get("deleteLink"), RestAssured.baseURI + "/1/category/delete/json/" + item.get("id"));
+				assertEquals(item.get("addLink"), RestAssured.baseURI + "/1/category/post/json");
+				assertFalse((Boolean) item.get("addItem"));
+				assertFalse((Boolean) item.get("removeItem"));
+				assertNotNull(item.get("name"));
+
+				final List expand = (List) item.get("expand");
+
+				assertNotNull(expand);
+				assertTrue(expand.size() == collections.length);
+			
+				for (final String collectionName : collections)
+				{
+					assertTrue(expand.contains(collectionName));
+					
+					final Map collection = (Map) item.get(collectionName);
+
+					assertNotNull(collection);
+					assertNull(collection.get("size"));
+					assertEquals(collection.get("expand"), collectionName);
+					assertNull(collection.get("startExpandIndex"));
+					assertNull(collection.get("endExpandIndex"));
+					assertNull(collection.get("items"));
+				}
+			}
+		}
+	}
+
+	/**
+	 * Tests an expanded collection of tags
+	 */
+	@SuppressWarnings("rawtypes")
+	@Test
+	public void getProjectsExpanded()
+	{
+		final String path = "/1/projects/get/json/all";
+
+		final Map<String, String> env = System.getenv();
+		if (env.containsKey(RESTPASS) && env.containsKey(RESTUSER))
+		{
+			final String restUser = env.get(RESTUSER);
+			final String restPass = env.get(RESTPASS);
+
+			RestAssured.reset();
+			RestAssured.baseURI = "http://devrest-pressgangccms.rhcloud.com";
+			RestAssured.authentication = basic(restUser, restPass);
+			RestAssured.urlEncodingEnabled = true;
+			RestAssured.port = 80;
+
+			/* Test the response */
+			final Response res = given().param("expand", "{\"branches\":[{\"trunk\":{\"name\":\"projects\",\"showSize\":true}}]}").get(path);
+			assertEquals(200, res.getStatusCode());
+
+			final String json = res.asString();
+			final JsonPath jp = new JsonPath(json);
+
+			assertEquals(jp.getInt("endExpandIndex"), jp.getInt("size"));
+			assertEquals(jp.getInt("startExpandIndex"), 0);
+			assertTrue("projects".equals(jp.getString("expand")));
+
+			final List<Map> items = jp.getList("items", Map.class);
+
+			assertNotNull(items);
+			assertTrue(items.size() == jp.getInt("size"));
+			
+			final String[] collections = new String[] { "tags", "revisions" };
+
+			for (final Map item : items)
+			{
+				assertNotNull(item.get("id"));
+				assertTrue(item.get("id").toString().matches("\\d+"));
+				assertNull(item.get("revision"));
+				assertNull(item.get("configuredParameters"));
+				assertEquals(item.get("selfLink"), RestAssured.baseURI + "/1/project/get/json/" + item.get("id"));
+				assertEquals(item.get("editLink"), RestAssured.baseURI + "/1/project/put/json/" + item.get("id"));
+				assertEquals(item.get("deleteLink"), RestAssured.baseURI + "/1/project/delete/json/" + item.get("id"));
+				assertEquals(item.get("addLink"), RestAssured.baseURI + "/1/project/post/json");
+				assertFalse((Boolean) item.get("addItem"));
+				assertFalse((Boolean) item.get("removeItem"));
+				assertNotNull(item.get("name"));
+
+				final List expand = (List) item.get("expand");
+
+				assertNotNull(expand);
+				assertTrue(expand.size() == collections.length);
+			
+				for (final String collectionName : collections)
+				{
+					assertTrue(expand.contains(collectionName));
+					
+					final Map collection = (Map) item.get(collectionName);
+
+					assertNotNull(collection);
+					assertNull(collection.get("size"));
+					assertEquals(collection.get("expand"), collectionName);
+					assertNull(collection.get("startExpandIndex"));
+					assertNull(collection.get("endExpandIndex"));
+					assertNull(collection.get("items"));
+				}
 			}
 		}
 	}
