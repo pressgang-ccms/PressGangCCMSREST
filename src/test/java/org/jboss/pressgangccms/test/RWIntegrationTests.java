@@ -159,7 +159,7 @@ public class RWIntegrationTests extends AbstractBenchmark implements TestBase
 			// ======== Attempt to get the deleted entity. This should fail. ========
 			final Response getResponse = get(getURL + "/" + id);
 
-			assertEquals(HTTP_CUSTOM_ERROR, getResponse.getStatusCode());
+			assertEquals(HTTP_BAD_REQUEST, getResponse.getStatusCode());
 		}
 	}
 
