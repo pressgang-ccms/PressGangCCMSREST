@@ -1,5 +1,9 @@
 package org.jboss.pressgangccms.test;
 
+/**
+ * This interface contains some shared constants
+ * @author Matthew Casperson
+ */
 public interface TestBase
 {
 	/** The environment variable that holds the REST password */

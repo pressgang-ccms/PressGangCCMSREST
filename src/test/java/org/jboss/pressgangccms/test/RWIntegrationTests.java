@@ -1,9 +1,12 @@
 package org.jboss.pressgangccms.test;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Map;
 
 import org.codehaus.jackson.map.ObjectMapper;
 import org.jboss.pressgangccms.rest.v1.entities.RESTTagV1;
+import org.jboss.pressgangccms.rest.v1.entities.RESTTopicV1;
 import org.jboss.pressgangccms.utils.common.StringUtilities;
 import org.junit.Test;
 import static org.junit.Assert.*;
@@ -21,9 +24,9 @@ import static com.jayway.restassured.matcher.RestAssuredMatchers.*;
 import static org.hamcrest.Matchers.*;
 
 /**
- * A collection of tests designed to test Create, Read, Update and Delete REST methods. These tests should only be run
- * on a test server, as the operations are run multiple times by the JUnitBenchmark library (15 times by default), and
- * these repeated modifications will lead to a lot of redundant information in the audit tables. 
+ * A collection of tests designed to test Create, Read, Update and Delete REST methods. These tests should only be run on a test server, as the operations are
+ * run multiple times by the JUnitBenchmark library (15 times by default), and these repeated modifications will lead to a lot of redundant information in the
+ * audit tables.
  * 
  * @author Matthew Casperson
  */
@@ -38,19 +41,22 @@ public class RWIntegrationTests extends AbstractBenchmark implements TestBase
 	 * This method will run through a create, update and delete cycle on a entity.
 	 * 
 	 * @param getURL
-	 * The REST endpoint to get the entity
+	 *            The REST end point to get the entity
 	 * @param createURL
-	 *            The REST endpoint to create the entity
+	 *            The REST end point to create the entity
 	 * @param createJson
 	 *            The created entity's JSON
 	 * @param updateURL
-	 *            The REST endpoint to update the entity
+	 *            The REST end point to update the entity
 	 * @param updateJson
 	 *            The updated entity's JSON
 	 * @param deleteURL
-	 *            The REST endpoint to delete the entity
+	 *            The REST end point to delete the entity
+	 * @param setProperties
+	 *            The properties that were set on the entity. The values in this collection are used to compare what was defined for the create and update
+	 *            operations, and what was returned.
 	 */
-	private void createUpdateDelete(final String getURL, final String createURL, final String createJson, final String updateURL, final String updateJson, final String deleteURL)
+	private void createUpdateDelete(final String getURL, final String createURL, final String createJson, final String updateURL, final String updateJson, final String deleteURL, final List<String> setProperties)
 	{
 		final Map<String, String> env = System.getenv();
 		if (env.containsKey(RESTPASS) && env.containsKey(RESTUSER))
@@ -64,7 +70,7 @@ public class RWIntegrationTests extends AbstractBenchmark implements TestBase
 			RestAssured.urlEncodingEnabled = true;
 			RestAssured.port = 80;
 
-			//======== Attempt to create an entity ========
+			// ======== Attempt to create an entity ========
 			final Response createResponse = given().body(createJson).contentType(JSON_CONTENT_TYPE).post(createURL);
 
 			assertEquals(HTTP_OK, createResponse.getStatusCode());
@@ -76,20 +82,30 @@ public class RWIntegrationTests extends AbstractBenchmark implements TestBase
 			/* All entities should have an ID */
 			assertNotNull(createJsonPath.get("id"));
 
+			/* Create a JsonPath from the supplied Json */
+			final JsonPath inputJsonPath = new JsonPath(createJson);
+
+			/* Make sure all the defined properties match */
+			for (final String property : setProperties)
+				assertEquals(inputJsonPath.get(property), createJsonPath.get(property));
+
+			/* We need the ID of the created entity in update and delete operations */
 			final int id = createJsonPath.getInt("id");
-			
-			//======== Attempt to get the created entity ========
+
+			// ======== Attempt to get the created entity ========
 			final Response getCreateResponse = get(getURL + "/" + id);
 
 			assertEquals(HTTP_OK, getCreateResponse.getStatusCode());
 			assertEquals(JSON_CONTENT_TYPE, getCreateResponse.getContentType());
-			
+
 			final String getCreateJsonResponse = getCreateResponse.asString();
 			final JsonPath getCreateJsonPath = new JsonPath(getCreateJsonResponse);
-			
-			assertEquals(getCreateJsonPath.get("id"), createJsonPath.get("id"));
 
-			//======== Attempt to update the entity ========
+			assertEquals(getCreateJsonPath.get("id"), createJsonPath.get("id"));
+			for (final String property : setProperties)
+				assertEquals(getCreateJsonPath.get(property), createJsonPath.get(property));
+
+			// ======== Attempt to update the entity ========
 			final String fixedUpdateJson = updateJson.replace(ID_MARKER, id + "");
 
 			final Response updateResponse = given().body(fixedUpdateJson).contentType(JSON_CONTENT_TYPE).put(updateURL);
@@ -102,25 +118,27 @@ public class RWIntegrationTests extends AbstractBenchmark implements TestBase
 
 			assertNotNull(updateJsonPath.get("id"));
 			assertEquals(updateJsonPath.get("id"), createJsonPath.get("id"));
-			
-			//======== Attempt to get the updated entity ========
+
+			// ======== Attempt to get the updated entity ========
 			final Response getUpdateResponse = get(getURL + "/" + id);
 
 			assertEquals(HTTP_OK, getUpdateResponse.getStatusCode());
 			assertEquals(JSON_CONTENT_TYPE, getUpdateResponse.getContentType());
-			
+
 			final String getUpdateJsonResponse = getUpdateResponse.asString();
 			final JsonPath getUpdateJsonPath = new JsonPath(getUpdateJsonResponse);
-			
-			assertEquals(getUpdateJsonPath.get("id"), updateJsonPath.get("id"));
 
-			//======== Attempt to delete the entity ========
+			assertEquals(getUpdateJsonPath.get("id"), updateJsonPath.get("id"));
+			for (final String property : setProperties)
+				assertEquals(getUpdateJsonPath.get(property), updateJsonPath.get(property));
+
+			// ======== Attempt to delete the entity ========
 			final Response deleteResponse = delete(deleteURL + "/" + id);
 
 			assertEquals(HTTP_OK, deleteResponse.getStatusCode());
 			assertEquals(JSON_CONTENT_TYPE, deleteResponse.getContentType());
-			
-			//======== Attempt to get the deleted entity. This should fail. ========
+
+			// ======== Attempt to get the deleted entity. This should fail. ========
 			final Response getResponse = get(getURL + "/" + id);
 
 			assertEquals(HTTP_CUSTOM_ERROR, getResponse.getStatusCode());
@@ -130,29 +148,83 @@ public class RWIntegrationTests extends AbstractBenchmark implements TestBase
 	@Test
 	public void crudTag()
 	{
+		final String entityName = "tag";
+		final List<String> properties = new ArrayList<String>()
+		{
+			{
+				add("name");
+				add("description");
+			}
+		};
+
 		/* This ID will be replaced with a marker, so the number just has to be something that won't be found anywhere other than the ID field */
 		final Integer updateID = 1234;
 
-		final String getPath = "/1/tag/get/json";
-		final String createPath = "/1/tag/post/json";
-		final String updatePath = "/1/tag/put/json";
-		final String deletePath = "/1/tag/delete/json";
+		final String getPath = "/1/" + entityName + "/get/json";
+		final String createPath = "/1/" + entityName + "/post/json";
+		final String updatePath = "/1/" + entityName + "/put/json";
+		final String deletePath = "/1/" + entityName + "/delete/json";
 
-		final RESTTagV1 createTag = new RESTTagV1();
-		createTag.explicitSetName(StringUtilities.generateRandomString(10));
-		createTag.explicitSetDescription(StringUtilities.generateRandomString(10));
+		final RESTTagV1 createEntity = new RESTTagV1();
+		createEntity.explicitSetName(StringUtilities.generateRandomString(10));
+		createEntity.explicitSetDescription(StringUtilities.generateRandomString(10));
 
-		final RESTTagV1 updateTag = new RESTTagV1();
-		updateTag.setId(updateID);
-		updateTag.explicitSetName(StringUtilities.generateRandomString(10));
-		updateTag.explicitSetDescription(StringUtilities.generateRandomString(10));
+		final RESTTagV1 updateEntity = new RESTTagV1();
+		updateEntity.setId(updateID);
+		updateEntity.explicitSetName(StringUtilities.generateRandomString(10));
+		updateEntity.explicitSetDescription(StringUtilities.generateRandomString(10));
 
 		try
 		{
-			final String createJson = mapper.writeValueAsString(createTag);
-			final String updateJson = mapper.writeValueAsString(updateTag).replace(updateID.toString(), ID_MARKER);
+			final String createJson = mapper.writeValueAsString(createEntity);
+			final String updateJson = mapper.writeValueAsString(updateEntity).replace(updateID.toString(), ID_MARKER);
 
-			createUpdateDelete(getPath, createPath, createJson, updatePath, updateJson, deletePath);
+			createUpdateDelete(getPath, createPath, createJson, updatePath, updateJson, deletePath, properties);
+		}
+		catch (final Exception ex)
+		{
+			fail();
+		}
+	}
+
+	@Test
+	public void crudTopic()
+	{
+		final String entityName = "topic";
+		final List<String> properties = new ArrayList<String>()
+		{
+			{
+				add("title");
+				add("description");
+				add("html");
+			}
+		};
+
+		/* This ID will be replaced with a marker, so the number just has to be something that won't be found anywhere other than the ID field */
+		final Integer updateID = 1234;
+
+		final String getPath = "/1/" + entityName + "/get/json";
+		final String createPath = "/1/" + entityName + "/post/json";
+		final String updatePath = "/1/" + entityName + "/put/json";
+		final String deletePath = "/1/" + entityName + "/delete/json";
+
+		final RESTTopicV1 createEntity = new RESTTopicV1();
+		createEntity.explicitSetTitle(StringUtilities.generateRandomString(10));
+		createEntity.explicitSetDescription(StringUtilities.generateRandomString(10));
+		createEntity.explicitSetHtml(StringUtilities.generateRandomString(10));
+
+		final RESTTopicV1 updateEntity = new RESTTopicV1();
+		updateEntity.setId(updateID);
+		updateEntity.explicitSetTitle(StringUtilities.generateRandomString(10));
+		updateEntity.explicitSetDescription(StringUtilities.generateRandomString(10));
+		updateEntity.explicitSetHtml(StringUtilities.generateRandomString(10));
+
+		try
+		{
+			final String createJson = mapper.writeValueAsString(createEntity);
+			final String updateJson = mapper.writeValueAsString(updateEntity).replace(updateID.toString(), ID_MARKER);
+
+			createUpdateDelete(getPath, createPath, createJson, updatePath, updateJson, deletePath, properties);
 		}
 		catch (final Exception ex)
 		{
