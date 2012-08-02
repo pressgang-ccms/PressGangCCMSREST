@@ -3805,4 +3805,11 @@ public class RESTv1 extends BaseRESTv1 implements RESTInterfaceV1, RESTInterface
 		final TopicV1Factory factory = new TopicV1Factory();
 		return deleteEntities(RESTTopicCollectionV1.class, Topic.class, factory, dbEntityIds, BaseRESTv1.TOPICS_EXPANSION_NAME, JSON_URL, expand, getBaseUrl());
 	}
+
+	@Override
+	public RESTImageV1 getJSONImageRevision(Integer id, Integer revision, String expand) throws InvalidParameterException, InternalProcessingException
+	{
+		// TODO Auto-generated method stub
+		return null;
+	}
 }
