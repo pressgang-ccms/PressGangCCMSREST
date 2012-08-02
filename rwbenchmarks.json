@@ -3,10 +3,17 @@
 {"label": "Run", "type": "string"},
 {"label": "Custom key", "type": "string"},
 {"label": "Timestamp", "type": "string"},
+{"label": "crudBlobConstant", "type": "string"} ,
+{"label": "crudCategory", "type": "string"} ,
+{"label": "crudImage", "type": "string"} ,
+{"label": "crudProject", "type": "string"} ,
+{"label": "crudRole", "type": "string"} ,
+{"label": "crudStringConstant", "type": "string"} ,
 {"label": "crudTag", "type": "string"} ,
 {"label": "crudTopic", "type": "string"} ],
 "rows": [
-{"c": [{"v": "73"}, {"v": "[73]"}, {"v": "2012-08-02 08:23:42.151"}, {"v": 3.656}, {"v": null}]},
-{"c": [{"v": "74"}, {"v": "[74]"}, {"v": "2012-08-02 08:44:00.438"}, {"v": 3.926}, {"v": null}]},
-{"c": [{"v": "76"}, {"v": "[76]"}, {"v": "2012-08-02 10:09:08.741"}, {"v": 5.984}, {"v": 7.563}]}
+{"c": [{"v": "73"}, {"v": "[73]"}, {"v": "2012-08-02 08:23:42.151"}, {"v": null}, {"v": null}, {"v": null}, {"v": null}, {"v": null}, {"v": null}, {"v": 3.656}, {"v": null}]},
+{"c": [{"v": "74"}, {"v": "[74]"}, {"v": "2012-08-02 08:44:00.438"}, {"v": null}, {"v": null}, {"v": null}, {"v": null}, {"v": null}, {"v": null}, {"v": 3.926}, {"v": null}]},
+{"c": [{"v": "76"}, {"v": "[76]"}, {"v": "2012-08-02 10:09:08.741"}, {"v": null}, {"v": null}, {"v": null}, {"v": null}, {"v": null}, {"v": null}, {"v": 5.984}, {"v": 7.563}]},
+{"c": [{"v": "77"}, {"v": "[77]"}, {"v": "2012-08-02 12:51:08.579"}, {"v": 5.834}, {"v": 5.994}, {"v": 5.86}, {"v": 5.727}, {"v": 5.804}, {"v": 5.69}, {"v": 5.796}, {"v": null}]}
 ]}

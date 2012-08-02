@@ -1,12 +1,25 @@
 package org.jboss.pressgangccms.test;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
+import org.codehaus.jackson.JsonGenerationException;
+import org.codehaus.jackson.map.JsonMappingException;
 import org.codehaus.jackson.map.ObjectMapper;
+import org.jboss.pressgangccms.rest.v1.entities.RESTBlobConstantV1;
+import org.jboss.pressgangccms.rest.v1.entities.RESTCategoryV1;
+import org.jboss.pressgangccms.rest.v1.entities.RESTImageV1;
+import org.jboss.pressgangccms.rest.v1.entities.RESTProjectV1;
+import org.jboss.pressgangccms.rest.v1.entities.RESTPropertyTagV1;
+import org.jboss.pressgangccms.rest.v1.entities.RESTRoleV1;
+import org.jboss.pressgangccms.rest.v1.entities.RESTStringConstantV1;
 import org.jboss.pressgangccms.rest.v1.entities.RESTTagV1;
 import org.jboss.pressgangccms.rest.v1.entities.RESTTopicV1;
+import org.jboss.pressgangccms.rest.v1.entities.RESTTranslatedTopicV1;
+import org.jboss.pressgangccms.rest.v1.entities.base.RESTBaseEntityV1;
+import org.jboss.pressgangccms.utils.common.MathUtilities;
 import org.jboss.pressgangccms.utils.common.StringUtilities;
 import org.junit.Test;
 import static org.junit.Assert.*;
@@ -24,9 +37,9 @@ import static com.jayway.restassured.matcher.RestAssuredMatchers.*;
 import static org.hamcrest.Matchers.*;
 
 /**
- * A collection of tests designed to test Create, Read, Update and Delete REST methods. These tests should only be run on a test server, as the operations are
+ * A collection of tests designed to test Create, Read, Update and Delete REST methods. These tests should only be run on a development server, as the operations are
  * run multiple times by the JUnitBenchmark library (15 times by default), and these repeated modifications will lead to a lot of redundant information in the
- * audit tables.
+ * Envers audit tables.
  * 
  * @author Matthew Casperson
  */
@@ -40,24 +53,29 @@ public class RWIntegrationTests extends AbstractBenchmark implements TestBase
 	/**
 	 * This method will run through a create, update and delete cycle on a entity.
 	 * 
-	 * @param getURL
-	 *            The REST end point to get the entity
-	 * @param createURL
-	 *            The REST end point to create the entity
-	 * @param createJson
-	 *            The created entity's JSON
-	 * @param updateURL
-	 *            The REST end point to update the entity
-	 * @param updateJson
-	 *            The updated entity's JSON
-	 * @param deleteURL
-	 *            The REST end point to delete the entity
+	 * @param entityName
+	 *            The name of the entity, as it appears in the REST paths
+	 * @param create
+	 *            The entity to be created
+	 * @param update
+	 *            The entity to be updated
 	 * @param setProperties
-	 *            The properties that were set on the entity. The values in this collection are used to compare what was defined for the create and update
-	 *            operations, and what was returned.
+	 *            The properties that were set on the create and update entities
+	 * @throws JsonGenerationException
+	 * @throws JsonMappingException
+	 * @throws IOException
 	 */
-	private void createUpdateDelete(final String getURL, final String createURL, final String createJson, final String updateURL, final String updateJson, final String deleteURL, final List<String> setProperties)
+	@SuppressWarnings("rawtypes")
+	private void createUpdateDelete(final String entityName, final RESTBaseEntityV1 create, final RESTBaseEntityV1 update, final List<String> setProperties) throws JsonGenerationException, JsonMappingException, IOException
 	{
+		final String getURL = "/1/" + entityName + "/get/json";
+		final String createURL = "/1/" + entityName + "/post/json";
+		final String updateURL = "/1/" + entityName + "/put/json";
+		final String deleteURL = "/1/" + entityName + "/delete/json";
+
+		final String createJson = mapper.writeValueAsString(create);
+		final String updateJson = mapper.writeValueAsString(update);
+
 		final Map<String, String> env = System.getenv();
 		if (env.containsKey(RESTPASS) && env.containsKey(RESTUSER))
 		{
@@ -106,7 +124,7 @@ public class RWIntegrationTests extends AbstractBenchmark implements TestBase
 				assertEquals(getCreateJsonPath.get(property), createJsonPath.get(property));
 
 			// ======== Attempt to update the entity ========
-			final String fixedUpdateJson = updateJson.replace(ID_MARKER, id + "");
+			final String fixedUpdateJson = updateJson.replace(UPDATE_ID.toString(), id + "");
 
 			final Response updateResponse = given().body(fixedUpdateJson).contentType(JSON_CONTENT_TYPE).put(updateURL);
 
@@ -145,6 +163,241 @@ public class RWIntegrationTests extends AbstractBenchmark implements TestBase
 		}
 	}
 
+	@SuppressWarnings("serial")
+	@Test
+	public void crudBlobConstant()
+	{
+		final String entityName = "blobconstant";
+		final List<String> properties = new ArrayList<String>()
+		{
+			{
+				add("name");
+				add("value");
+			}
+		};
+
+		final RESTBlobConstantV1 createEntity = new RESTBlobConstantV1();
+		createEntity.explicitSetName(StringUtilities.generateRandomString(10));
+		createEntity.explicitSetValue(StringUtilities.generateRandomString(10).getBytes());
+
+		final RESTBlobConstantV1 updateEntity = new RESTBlobConstantV1();
+		updateEntity.setId(UPDATE_ID);
+		updateEntity.explicitSetName(StringUtilities.generateRandomString(10));
+		updateEntity.explicitSetValue(StringUtilities.generateRandomString(10).getBytes());
+
+		try
+		{
+			createUpdateDelete(entityName, createEntity, updateEntity, properties);
+		}
+		catch (final Exception ex)
+		{
+			fail();
+		}
+	}
+	
+	@SuppressWarnings("serial")
+	@Test
+	public void crudCategory()
+	{
+		final String entityName = "category";
+		final List<String> properties = new ArrayList<String>()
+		{
+			{
+				add("name");
+				add("description");
+				add("mutuallyExclusive");
+			}
+		};
+
+		final RESTCategoryV1 createEntity = new RESTCategoryV1();
+		createEntity.explicitSetName(StringUtilities.generateRandomString(10));
+		createEntity.explicitSetDescription(StringUtilities.generateRandomString(10));
+		createEntity.explicitSetMutuallyExclusive(MathUtilities.generateRandomBoolean());
+		
+		final RESTCategoryV1 updateEntity = new RESTCategoryV1();
+		updateEntity.setId(UPDATE_ID);
+		updateEntity.explicitSetName(StringUtilities.generateRandomString(10));
+		updateEntity.explicitSetDescription(StringUtilities.generateRandomString(10));
+		updateEntity.explicitSetMutuallyExclusive(MathUtilities.generateRandomBoolean());
+
+		try
+		{
+			createUpdateDelete(entityName, createEntity, updateEntity, properties);
+		}
+		catch (final Exception ex)
+		{
+			fail();
+		}
+	}
+	
+	@SuppressWarnings("serial")
+	@Test
+	public void crudImage()
+	{
+		final String entityName = "image";
+		final List<String> properties = new ArrayList<String>()
+		{
+			{
+				add("description");
+			}
+		};
+
+		final RESTImageV1 createEntity = new RESTImageV1();
+		createEntity.explicitSetDescription(StringUtilities.generateRandomString(10));
+		
+		final RESTImageV1 updateEntity = new RESTImageV1();
+		updateEntity.setId(UPDATE_ID);
+		updateEntity.explicitSetDescription(StringUtilities.generateRandomString(10));
+
+		try
+		{
+			createUpdateDelete(entityName, createEntity, updateEntity, properties);
+		}
+		catch (final Exception ex)
+		{
+			fail();
+		}
+	}
+	
+	@SuppressWarnings("serial")
+	@Test
+	public void crudProject()
+	{
+		final String entityName = "project";
+		final List<String> properties = new ArrayList<String>()
+		{
+			{
+				add("description");
+				add("name");
+			}
+		};
+
+		final RESTProjectV1 createEntity = new RESTProjectV1();
+		createEntity.explicitSetDescription(StringUtilities.generateRandomString(10));
+		createEntity.explicitSetName(StringUtilities.generateRandomString(10));
+		
+		final RESTProjectV1 updateEntity = new RESTProjectV1();
+		updateEntity.setId(UPDATE_ID);
+		updateEntity.explicitSetDescription(StringUtilities.generateRandomString(10));
+		updateEntity.explicitSetName(StringUtilities.generateRandomString(10));
+
+		try
+		{
+			createUpdateDelete(entityName, createEntity, updateEntity, properties);
+		}
+		catch (final Exception ex)
+		{
+			fail();
+		}
+	}
+	
+	@SuppressWarnings("serial")
+	@Test
+	public void crudPropertyTag()
+	{
+		final String entityName = "propertytag";
+		final List<String> properties = new ArrayList<String>()
+		{
+			{
+				add("description");
+				add("name");
+				add("isUnique");
+				add("canBeNull");
+				add("regex");
+				add("value");
+			}
+		};
+
+		final RESTPropertyTagV1 createEntity = new RESTPropertyTagV1();
+		createEntity.explicitSetDescription(StringUtilities.generateRandomString(10));
+		createEntity.explicitSetName(StringUtilities.generateRandomString(10));
+		createEntity.explicitSetIsUnique(MathUtilities.generateRandomBoolean());
+		createEntity.explicitSetRegex(StringUtilities.generateRandomString(10));
+		createEntity.explicitSetValue(StringUtilities.generateRandomString(10));
+		
+		final RESTPropertyTagV1 updateEntity = new RESTPropertyTagV1();
+		updateEntity.setId(UPDATE_ID);
+		updateEntity.explicitSetDescription(StringUtilities.generateRandomString(10));
+		updateEntity.explicitSetName(StringUtilities.generateRandomString(10));
+		updateEntity.explicitSetIsUnique(MathUtilities.generateRandomBoolean());
+		updateEntity.explicitSetRegex(StringUtilities.generateRandomString(10));
+		updateEntity.explicitSetValue(StringUtilities.generateRandomString(10));
+
+		try
+		{
+			createUpdateDelete(entityName, createEntity, updateEntity, properties);
+		}
+		catch (final Exception ex)
+		{
+			fail();
+		}
+	}
+	
+	@SuppressWarnings("serial")
+	@Test
+	public void crudRole()
+	{
+		final String entityName = "role";
+		final List<String> properties = new ArrayList<String>()
+		{
+			{
+				add("description");
+				add("name");
+			}
+		};
+
+		final RESTRoleV1 createEntity = new RESTRoleV1();
+		createEntity.explicitSetDescription(StringUtilities.generateRandomString(10));
+		createEntity.explicitSetName(StringUtilities.generateRandomString(10));
+		
+		final RESTRoleV1 updateEntity = new RESTRoleV1();
+		updateEntity.setId(UPDATE_ID);
+		updateEntity.explicitSetDescription(StringUtilities.generateRandomString(10));
+		updateEntity.explicitSetName(StringUtilities.generateRandomString(10));
+
+		try
+		{
+			createUpdateDelete(entityName, createEntity, updateEntity, properties);
+		}
+		catch (final Exception ex)
+		{
+			fail();
+		}
+	}
+	
+	@SuppressWarnings("serial")
+	@Test
+	public void crudStringConstant()
+	{
+		final String entityName = "stringconstant";
+		final List<String> properties = new ArrayList<String>()
+		{
+			{
+				add("value");
+				add("name");
+			}
+		};
+
+		final RESTStringConstantV1 createEntity = new RESTStringConstantV1();
+		createEntity.explicitSetValue(StringUtilities.generateRandomString(10));
+		createEntity.explicitSetName(StringUtilities.generateRandomString(10));
+		
+		final RESTStringConstantV1 updateEntity = new RESTStringConstantV1();
+		updateEntity.setId(UPDATE_ID);
+		updateEntity.explicitSetValue(StringUtilities.generateRandomString(10));
+		updateEntity.explicitSetName(StringUtilities.generateRandomString(10));
+
+		try
+		{
+			createUpdateDelete(entityName, createEntity, updateEntity, properties);
+		}
+		catch (final Exception ex)
+		{
+			fail();
+		}
+	}
+
+	@SuppressWarnings("serial")
 	@Test
 	public void crudTag()
 	{
@@ -157,29 +410,18 @@ public class RWIntegrationTests extends AbstractBenchmark implements TestBase
 			}
 		};
 
-		/* This ID will be replaced with a marker, so the number just has to be something that won't be found anywhere other than the ID field */
-		final Integer updateID = 1234;
-
-		final String getPath = "/1/" + entityName + "/get/json";
-		final String createPath = "/1/" + entityName + "/post/json";
-		final String updatePath = "/1/" + entityName + "/put/json";
-		final String deletePath = "/1/" + entityName + "/delete/json";
-
 		final RESTTagV1 createEntity = new RESTTagV1();
 		createEntity.explicitSetName(StringUtilities.generateRandomString(10));
 		createEntity.explicitSetDescription(StringUtilities.generateRandomString(10));
 
 		final RESTTagV1 updateEntity = new RESTTagV1();
-		updateEntity.setId(updateID);
+		updateEntity.setId(UPDATE_ID);
 		updateEntity.explicitSetName(StringUtilities.generateRandomString(10));
 		updateEntity.explicitSetDescription(StringUtilities.generateRandomString(10));
 
 		try
 		{
-			final String createJson = mapper.writeValueAsString(createEntity);
-			final String updateJson = mapper.writeValueAsString(updateEntity).replace(updateID.toString(), ID_MARKER);
-
-			createUpdateDelete(getPath, createPath, createJson, updatePath, updateJson, deletePath, properties);
+			createUpdateDelete(entityName, createEntity, updateEntity, properties);
 		}
 		catch (final Exception ex)
 		{
@@ -187,6 +429,7 @@ public class RWIntegrationTests extends AbstractBenchmark implements TestBase
 		}
 	}
 
+	@SuppressWarnings("serial")
 	@Test
 	public void crudTopic()
 	{
@@ -197,34 +440,79 @@ public class RWIntegrationTests extends AbstractBenchmark implements TestBase
 				add("title");
 				add("description");
 				add("html");
+				add("locale");
+				add("xml");
 			}
 		};
-
-		/* This ID will be replaced with a marker, so the number just has to be something that won't be found anywhere other than the ID field */
-		final Integer updateID = 1234;
-
-		final String getPath = "/1/" + entityName + "/get/json";
-		final String createPath = "/1/" + entityName + "/post/json";
-		final String updatePath = "/1/" + entityName + "/put/json";
-		final String deletePath = "/1/" + entityName + "/delete/json";
 
 		final RESTTopicV1 createEntity = new RESTTopicV1();
 		createEntity.explicitSetTitle(StringUtilities.generateRandomString(10));
 		createEntity.explicitSetDescription(StringUtilities.generateRandomString(10));
 		createEntity.explicitSetHtml(StringUtilities.generateRandomString(10));
+		createEntity.explicitSetLocale(StringUtilities.generateRandomString(10));
+		createEntity.explicitSetXml(StringUtilities.generateRandomString(10));
 
 		final RESTTopicV1 updateEntity = new RESTTopicV1();
-		updateEntity.setId(updateID);
+		updateEntity.setId(UPDATE_ID);
 		updateEntity.explicitSetTitle(StringUtilities.generateRandomString(10));
 		updateEntity.explicitSetDescription(StringUtilities.generateRandomString(10));
 		updateEntity.explicitSetHtml(StringUtilities.generateRandomString(10));
+		updateEntity.explicitSetLocale(StringUtilities.generateRandomString(10));
+		updateEntity.explicitSetXml(StringUtilities.generateRandomString(10));
 
 		try
 		{
-			final String createJson = mapper.writeValueAsString(createEntity);
-			final String updateJson = mapper.writeValueAsString(updateEntity).replace(updateID.toString(), ID_MARKER);
+			createUpdateDelete(entityName, createEntity, updateEntity, properties);
+		}
+		catch (final Exception ex)
+		{
+			fail();
+		}
+	}
+	
+	@SuppressWarnings("serial")
+	@Test
+	public void crudTranslatedTopic()
+	{
+		final String entityName = "translatedtopic";
+		final List<String> properties = new ArrayList<String>()
+		{
+			{
+				add("html");
+				add("locale");
+				add("xml");
+				add("topicId");
+				add("topicRevision");
+				add("translationPercentage");
+				add("xmlErrors");
+				add("htmlUpdated");
+			}
+		};
 
-			createUpdateDelete(getPath, createPath, createJson, updatePath, updateJson, deletePath, properties);
+		final RESTTranslatedTopicV1 createEntity = new RESTTranslatedTopicV1();
+		createEntity.explicitSetHtml(StringUtilities.generateRandomString(10));
+		createEntity.explicitSetLocale(StringUtilities.generateRandomString(10));
+		createEntity.explicitSetXml(StringUtilities.generateRandomString(10));
+		createEntity.explicitSetTopicId(MathUtilities.generateRandomInt(1000));
+		createEntity.explicitSetTopicRevision(MathUtilities.generateRandomInt(10000));
+		createEntity.explicitSetTranslationPercentage(MathUtilities.generateRandomInt(100));
+		createEntity.explicitSetXmlErrors(StringUtilities.generateRandomString(10));
+		createEntity.explicitSetHtmlUpdated(MathUtilities.generateRandomDate());
+
+		final RESTTranslatedTopicV1 updateEntity = new RESTTranslatedTopicV1();
+		updateEntity.setId(UPDATE_ID);
+		updateEntity.explicitSetHtml(StringUtilities.generateRandomString(10));
+		updateEntity.explicitSetLocale(StringUtilities.generateRandomString(10));
+		updateEntity.explicitSetXml(StringUtilities.generateRandomString(10));
+		updateEntity.explicitSetTopicId(MathUtilities.generateRandomInt(1000));
+		updateEntity.explicitSetTopicRevision(MathUtilities.generateRandomInt(10000));
+		updateEntity.explicitSetTranslationPercentage(MathUtilities.generateRandomInt(100));
+		updateEntity.explicitSetXmlErrors(StringUtilities.generateRandomString(10));
+		updateEntity.explicitSetHtmlUpdated(MathUtilities.generateRandomDate());
+
+		try
+		{
+			createUpdateDelete(entityName, createEntity, updateEntity, properties);
 		}
 		catch (final Exception ex)
 		{
