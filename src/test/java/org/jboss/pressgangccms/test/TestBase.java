@@ -30,8 +30,12 @@ public interface TestBase
 	String RESTUSER = "REST_USERNAME";
 	/** JSON content type */
 	String JSON_CONTENT_TYPE = "application/json";
+	/** A message to accompany the expectation of a JSON_CONTENT_TYPE content type*/
+	String JSON_CONTENT_TYPE_MESSAGE = "Expected a application/json content type"; 
 	/** HTTP OK Response Code */
 	int HTTP_OK = 200;
+	/** A message to accompany the expectation of a HTTP_OK code */
+	String HTTP_OK_MESSAGE = "Expected a HTTP OK status code"; 
 	/** HTTP Custom Error Response Code */
 	int HTTP_CUSTOM_ERROR = 500;
 	/** HTTP Custom Error Response Code */

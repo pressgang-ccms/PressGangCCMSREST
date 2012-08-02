@@ -17,10 +17,12 @@ import org.jboss.pressgangccms.rest.v1.entities.RESTTopicSourceUrlV1;
 import org.jboss.pressgangccms.rest.v1.entities.RESTTranslatedTopicStringV1;
 import org.jboss.pressgangccms.rest.v1.entities.RESTTranslatedTopicV1;
 import org.jboss.pressgangccms.rest.v1.entities.base.RESTBaseEntityV1;
+import org.jboss.pressgangccms.rest.v1.entities.base.RESTBaseTopicV1;
 import org.jboss.pressgangccms.rest.v1.exceptions.InvalidParameterException;
 import org.jboss.pressgangccms.rest.v1.expansion.ExpandDataTrunk;
 import org.jboss.pressgangccms.restserver.BaseRESTv1;
 import org.jboss.pressgangccms.restserver.entities.Tag;
+import org.jboss.pressgangccms.restserver.entities.Topic;
 import org.jboss.pressgangccms.restserver.entities.TopicSourceUrl;
 import org.jboss.pressgangccms.restserver.entities.TopicToPropertyTag;
 import org.jboss.pressgangccms.restserver.entities.TranslatedTopic;
@@ -29,6 +31,7 @@ import org.jboss.pressgangccms.restserver.entities.TranslatedTopicString;
 import org.jboss.pressgangccms.restserver.factories.base.RESTDataObjectCollectionFactory;
 import org.jboss.pressgangccms.restserver.factories.base.RESTDataObjectFactory;
 import org.jboss.pressgangccms.utils.common.DocBookUtilities;
+import org.xml.sax.SAXParseException;
 
 public class TranslatedTopicV1Factory extends RESTDataObjectFactory<RESTTranslatedTopicV1, TranslatedTopicData, RESTTranslatedTopicCollectionV1>
 {
@@ -68,12 +71,26 @@ public class TranslatedTopicV1Factory extends RESTDataObjectFactory<RESTTranslat
 		retValue.setTopicId(entity.getTranslatedTopic().getTopicId());
 		retValue.setTopicRevision(entity.getTranslatedTopic().getTopicRevision());
 
+		/* get the topic that this translated topic references */
+		final Topic originalTopic = entity.getTranslatedTopic().getEnversTopic(entityManager);
+
 		/*
 		 * Get the title from the XML or if the XML is null then use the original topics title.
 		 */
 		String title = DocBookUtilities.findTitle(entity.getTranslatedXml());
 		if (title == null)
-			title = entity.getTranslatedTopic().getEnversTopic(entityManager).getTopicTitle();
+		{
+			/* If the topic id and revision are invalid, this could be null */
+			if (originalTopic != null)
+			{
+				title = entity.getTranslatedTopic().getEnversTopic(entityManager).getTopicTitle();
+			}
+			else
+			{
+				/* the final fall back */
+				title = "[NONE]";
+			}
+		}
 
 		/*
 		 * Append the locale to the title if its a dummy translation to show that it is missing the related translated topic
@@ -85,39 +102,45 @@ public class TranslatedTopicV1Factory extends RESTDataObjectFactory<RESTTranslat
 		retValue.setXml(entity.getTranslatedXml());
 		retValue.setXmlErrors(entity.getTranslatedXmlErrors());
 		retValue.setHtml(entity.getTranslatedXmlRendered());
+		retValue.setHtmlUpdated(entity.getTranslatedXmlRenderedUpdated());
 		retValue.setLocale(entity.getTranslationLocale());
 		retValue.setTranslationPercentage(entity.getTranslationPercentage());
 
-		/* Set the object references */
-		if (expandParentReferences)
+		/* Set the object references. Watch for invalid topic id and revision (i.e. originalTopic == null) */
+		if (expandParentReferences && originalTopic != null)
 		{
-			retValue.setTopic(new TopicV1Factory().createRESTEntityFromDBEntity(entity.getTranslatedTopic().getEnversTopic(entityManager), baseUrl, dataType, expand.contains(RESTTranslatedTopicV1.TOPIC_NAME), entity.getTranslatedTopic().getTopicRevision(), true, entityManager));
+			retValue.setTopic(new TopicV1Factory().createRESTEntityFromDBEntity(originalTopic, baseUrl, dataType, expand.contains(RESTTranslatedTopicV1.TOPIC_NAME), entity.getTranslatedTopic().getTopicRevision(), true, entityManager));
 			retValue.getTopic().setRevision(entity.getTranslatedTopic().getTopicRevision());
 		}
 
 		if (revision == null)
 		{
-			retValue.setRevisions(new RESTDataObjectCollectionFactory<RESTTranslatedTopicV1, TranslatedTopicData, RESTTranslatedTopicCollectionV1>().create(RESTTranslatedTopicCollectionV1.class, new TranslatedTopicV1Factory(), entity, entity.getRevisions(entityManager), RESTBaseEntityV1.REVISIONS_NAME, dataType, expand, baseUrl,
-					entityManager));
+			retValue.setRevisions(new RESTDataObjectCollectionFactory<RESTTranslatedTopicV1, TranslatedTopicData, RESTTranslatedTopicCollectionV1>().create(RESTTranslatedTopicCollectionV1.class, new TranslatedTopicV1Factory(), entity, entity.getRevisions(entityManager), RESTBaseEntityV1.REVISIONS_NAME, dataType,
+					expand, baseUrl, entityManager));
 		}
 
 		/* Set the collections */
 		retValue.setTranslatedTopicStrings_OTM(new RESTDataObjectCollectionFactory<RESTTranslatedTopicStringV1, TranslatedTopicString, RESTTranslatedTopicStringCollectionV1>().create(RESTTranslatedTopicStringCollectionV1.class, new TranslatedTopicStringV1Factory(), entity.getTranslatedTopicDataStringsArray(),
 				RESTTranslatedTopicV1.TRANSLATEDTOPICSTRING_NAME, dataType, expand, baseUrl, false, /* don't set the reference to this entity on the children */
 				entityManager));
-		retValue.setTags(new RESTDataObjectCollectionFactory<RESTTagV1, Tag, RESTTagCollectionV1>().create(RESTTagCollectionV1.class, new TagV1Factory(), entity.getTranslatedTopic().getEnversTopic(entityManager).getTags(), BaseRESTv1.TAGS_EXPANSION_NAME, dataType, expand, baseUrl, entityManager));
-		retValue.setOutgoingTranslatedRelationships(new RESTDataObjectCollectionFactory<RESTTranslatedTopicV1, TranslatedTopicData, RESTTranslatedTopicCollectionV1>().create(RESTTranslatedTopicCollectionV1.class, new TranslatedTopicV1Factory(), entity.getOutgoingRelatedTranslatedTopicData(entityManager),
-				RESTTranslatedTopicV1.OUTGOING_NAME, dataType, expand, baseUrl, true, entityManager));
-		retValue.setIncomingTranslatedRelationships(new RESTDataObjectCollectionFactory<RESTTranslatedTopicV1, TranslatedTopicData, RESTTranslatedTopicCollectionV1>().create(RESTTranslatedTopicCollectionV1.class, new TranslatedTopicV1Factory(), entity.getIncomingRelatedTranslatedTopicData(entityManager),
-				RESTTranslatedTopicV1.INCOMING_NAME, dataType, expand, baseUrl, true, entityManager));
-		retValue.setOutgoingRelationships(new RESTDataObjectCollectionFactory<RESTTranslatedTopicV1, TranslatedTopicData, RESTTranslatedTopicCollectionV1>().create(RESTTranslatedTopicCollectionV1.class, new TranslatedTopicV1Factory(), entity.getOutgoingDummyFilledRelatedTranslatedTopicDatas(entityManager),
-				RESTTranslatedTopicV1.ALL_LATEST_OUTGOING_NAME, dataType, expand, baseUrl, true, entityManager));
-		retValue.setIncomingRelationships(new RESTDataObjectCollectionFactory<RESTTranslatedTopicV1, TranslatedTopicData, RESTTranslatedTopicCollectionV1>().create(RESTTranslatedTopicCollectionV1.class, new TranslatedTopicV1Factory(), entity.getIncomingDummyFilledRelatedTranslatedTopicDatas(entityManager),
-				RESTTranslatedTopicV1.ALL_LATEST_INCOMING_NAME, dataType, expand, baseUrl, true, entityManager));
-		retValue.setSourceUrls_OTM(new RESTDataObjectCollectionFactory<RESTTopicSourceUrlV1, TopicSourceUrl, RESTTopicSourceUrlCollectionV1>().create(RESTTopicSourceUrlCollectionV1.class, new TopicSourceUrlV1Factory(), entity.getTranslatedTopic().getEnversTopic(entityManager).getTopicSourceUrls(),
-				BaseRESTv1.SOURCE_URLS_EXPANSION_NAME, dataType, expand, baseUrl, false, entityManager));
-		retValue.setProperties(new RESTDataObjectCollectionFactory<RESTPropertyTagV1, TopicToPropertyTag, RESTPropertyTagCollectionV1>().create(RESTPropertyTagCollectionV1.class, new TopicPropertyTagV1Factory(), entity.getTranslatedTopic().getEnversTopic(entityManager).getTopicToPropertyTagsArray(),
-				BaseRESTv1.PROPERTIES_EXPANSION_NAME, dataType, expand, baseUrl, entityManager));
+		
+		/* All other details come from the topic revision */
+		if (originalTopic != null)
+		{
+			retValue.setTags(new RESTDataObjectCollectionFactory<RESTTagV1, Tag, RESTTagCollectionV1>().create(RESTTagCollectionV1.class, new TagV1Factory(), originalTopic.getTags(), BaseRESTv1.TAGS_EXPANSION_NAME, dataType, expand, baseUrl, entityManager));
+			retValue.setOutgoingTranslatedRelationships(new RESTDataObjectCollectionFactory<RESTTranslatedTopicV1, TranslatedTopicData, RESTTranslatedTopicCollectionV1>().create(RESTTranslatedTopicCollectionV1.class, new TranslatedTopicV1Factory(),
+					entity.getOutgoingRelatedTranslatedTopicData(entityManager, originalTopic), RESTTranslatedTopicV1.OUTGOING_NAME, dataType, expand, baseUrl, true, entityManager));
+			retValue.setIncomingTranslatedRelationships(new RESTDataObjectCollectionFactory<RESTTranslatedTopicV1, TranslatedTopicData, RESTTranslatedTopicCollectionV1>().create(RESTTranslatedTopicCollectionV1.class, new TranslatedTopicV1Factory(),
+					entity.getIncomingRelatedTranslatedTopicData(entityManager, originalTopic), RESTTranslatedTopicV1.INCOMING_NAME, dataType, expand, baseUrl, true, entityManager));
+			retValue.setOutgoingRelationships(new RESTDataObjectCollectionFactory<RESTTranslatedTopicV1, TranslatedTopicData, RESTTranslatedTopicCollectionV1>().create(RESTTranslatedTopicCollectionV1.class, new TranslatedTopicV1Factory(),
+					entity.getOutgoingDummyFilledRelatedTranslatedTopicDatas(entityManager, originalTopic), RESTTranslatedTopicV1.ALL_LATEST_OUTGOING_NAME, dataType, expand, baseUrl, true, entityManager));
+			retValue.setIncomingRelationships(new RESTDataObjectCollectionFactory<RESTTranslatedTopicV1, TranslatedTopicData, RESTTranslatedTopicCollectionV1>().create(RESTTranslatedTopicCollectionV1.class, new TranslatedTopicV1Factory(),
+					entity.getIncomingDummyFilledRelatedTranslatedTopicDatas(entityManager, originalTopic), RESTTranslatedTopicV1.ALL_LATEST_INCOMING_NAME, dataType, expand, baseUrl, true, entityManager));
+			retValue.setSourceUrls_OTM(new RESTDataObjectCollectionFactory<RESTTopicSourceUrlV1, TopicSourceUrl, RESTTopicSourceUrlCollectionV1>().create(RESTTopicSourceUrlCollectionV1.class, new TopicSourceUrlV1Factory(), originalTopic.getTopicSourceUrls(), BaseRESTv1.SOURCE_URLS_EXPANSION_NAME, dataType, expand,
+					baseUrl, false, entityManager));
+			retValue.setProperties(new RESTDataObjectCollectionFactory<RESTPropertyTagV1, TopicToPropertyTag, RESTPropertyTagCollectionV1>().create(RESTPropertyTagCollectionV1.class, new TopicPropertyTagV1Factory(), originalTopic.getTopicToPropertyTagsArray(), BaseRESTv1.PROPERTIES_EXPANSION_NAME, dataType, expand,
+					baseUrl, entityManager));
+		}
 
 		retValue.setLinks(baseUrl, BaseRESTv1.TRANSLATEDTOPIC_URL_NAME, dataType, retValue.getId());
 
@@ -125,8 +148,7 @@ public class TranslatedTopicV1Factory extends RESTDataObjectFactory<RESTTranslat
 	}
 
 	@Override
-	public
-	void syncDBEntityWithRESTEntity(EntityManager entityManager, TranslatedTopicData entity, RESTTranslatedTopicV1 dataObject) throws InvalidParameterException
+	public void syncDBEntityWithRESTEntity(EntityManager entityManager, TranslatedTopicData entity, RESTTranslatedTopicV1 dataObject) throws InvalidParameterException
 	{
 		/*
 		 * Since this factory is the rare case where two entities are combined into one. Check if it has a parent, if not then check if one exists that matches

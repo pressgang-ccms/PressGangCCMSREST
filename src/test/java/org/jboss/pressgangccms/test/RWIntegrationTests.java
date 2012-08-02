@@ -39,7 +39,7 @@ import static org.hamcrest.Matchers.*;
 /**
  * A collection of tests designed to test Create, Read, Update and Delete REST methods. These tests should only be run on a development server, as the operations are
  * run multiple times by the JUnitBenchmark library (15 times by default), and these repeated modifications will lead to a lot of redundant information in the
- * Envers audit tables.
+ * Envers audit tables. Also, if an assert fails, the test entity won't be deleted, leaving junk data in the database.
  * 
  * @author Matthew Casperson
  */
@@ -68,20 +68,24 @@ public class RWIntegrationTests extends AbstractBenchmark implements TestBase
 	@SuppressWarnings("rawtypes")
 	private void createUpdateDelete(final String entityName, final RESTBaseEntityV1 create, final RESTBaseEntityV1 update, final List<String> setProperties) throws JsonGenerationException, JsonMappingException, IOException
 	{
+		/* The REST end points should all follow this syntax */
 		final String getURL = "/1/" + entityName + "/get/json";
 		final String createURL = "/1/" + entityName + "/post/json";
 		final String updateURL = "/1/" + entityName + "/put/json";
 		final String deleteURL = "/1/" + entityName + "/delete/json";
 
+		/* Convert the REST POJOs into JSON strings */
 		final String createJson = mapper.writeValueAsString(create);
 		final String updateJson = mapper.writeValueAsString(update);
 
+		/* Make sure the appropriate environment variables are set */
 		final Map<String, String> env = System.getenv();
 		if (env.containsKey(RESTPASS) && env.containsKey(RESTUSER))
 		{
 			final String restUser = env.get(RESTUSER);
 			final String restPass = env.get(RESTPASS);
 
+			/* Configure RestAssured */
 			RestAssured.reset();
 			RestAssured.baseURI = "http://devrest-pressgangccms.rhcloud.com";
 			RestAssured.authentication = basic(restUser, restPass);
@@ -91,8 +95,8 @@ public class RWIntegrationTests extends AbstractBenchmark implements TestBase
 			// ======== Attempt to create an entity ========
 			final Response createResponse = given().body(createJson).contentType(JSON_CONTENT_TYPE).post(createURL);
 
-			assertEquals(HTTP_OK, createResponse.getStatusCode());
-			assertEquals(JSON_CONTENT_TYPE, createResponse.getContentType());
+			assertEquals(HTTP_OK_MESSAGE, HTTP_OK, createResponse.getStatusCode());
+			assertEquals(JSON_CONTENT_TYPE_MESSAGE, JSON_CONTENT_TYPE, createResponse.getContentType());
 
 			final String createJsonResponse = createResponse.asString();
 			final JsonPath createJsonPath = new JsonPath(createJsonResponse);
@@ -113,23 +117,23 @@ public class RWIntegrationTests extends AbstractBenchmark implements TestBase
 			// ======== Attempt to get the created entity ========
 			final Response getCreateResponse = get(getURL + "/" + id);
 
-			assertEquals(HTTP_OK, getCreateResponse.getStatusCode());
-			assertEquals(JSON_CONTENT_TYPE, getCreateResponse.getContentType());
+			assertEquals(HTTP_OK_MESSAGE, HTTP_OK, getCreateResponse.getStatusCode());
+			assertEquals(JSON_CONTENT_TYPE_MESSAGE, JSON_CONTENT_TYPE, getCreateResponse.getContentType());
 
 			final String getCreateJsonResponse = getCreateResponse.asString();
 			final JsonPath getCreateJsonPath = new JsonPath(getCreateJsonResponse);
 
 			assertEquals(getCreateJsonPath.get("id"), createJsonPath.get("id"));
 			for (final String property : setProperties)
-				assertEquals(getCreateJsonPath.get(property), createJsonPath.get(property));
+				assertEquals("Property \"" + property + "\" should be equal between the return value of the POST and GET methods", getCreateJsonPath.get(property), createJsonPath.get(property));
 
 			// ======== Attempt to update the entity ========
 			final String fixedUpdateJson = updateJson.replace(UPDATE_ID.toString(), id + "");
 
 			final Response updateResponse = given().body(fixedUpdateJson).contentType(JSON_CONTENT_TYPE).put(updateURL);
 
-			assertEquals(HTTP_OK, updateResponse.getStatusCode());
-			assertEquals(JSON_CONTENT_TYPE, updateResponse.getContentType());
+			assertEquals(HTTP_OK_MESSAGE, HTTP_OK, updateResponse.getStatusCode());
+			assertEquals(JSON_CONTENT_TYPE_MESSAGE, JSON_CONTENT_TYPE, updateResponse.getContentType());
 
 			final String updateJsonResponse = updateResponse.asString();
 			final JsonPath updateJsonPath = new JsonPath(updateJsonResponse);
@@ -140,26 +144,26 @@ public class RWIntegrationTests extends AbstractBenchmark implements TestBase
 			// ======== Attempt to get the updated entity ========
 			final Response getUpdateResponse = get(getURL + "/" + id);
 
-			assertEquals(HTTP_OK, getUpdateResponse.getStatusCode());
-			assertEquals(JSON_CONTENT_TYPE, getUpdateResponse.getContentType());
+			assertEquals(HTTP_OK_MESSAGE, HTTP_OK, getUpdateResponse.getStatusCode());
+			assertEquals(JSON_CONTENT_TYPE_MESSAGE, JSON_CONTENT_TYPE, getUpdateResponse.getContentType());
 
 			final String getUpdateJsonResponse = getUpdateResponse.asString();
 			final JsonPath getUpdateJsonPath = new JsonPath(getUpdateJsonResponse);
 
 			assertEquals(getUpdateJsonPath.get("id"), updateJsonPath.get("id"));
 			for (final String property : setProperties)
-				assertEquals(getUpdateJsonPath.get(property), updateJsonPath.get(property));
+				assertEquals("Property \"" + property + "\" should be equal between the return value of the PUT and GET methods", getUpdateJsonPath.get(property), updateJsonPath.get(property));
 
 			// ======== Attempt to delete the entity ========
 			final Response deleteResponse = delete(deleteURL + "/" + id);
 
-			assertEquals(HTTP_OK, deleteResponse.getStatusCode());
-			assertEquals(JSON_CONTENT_TYPE, deleteResponse.getContentType());
+			assertEquals(HTTP_OK_MESSAGE, HTTP_OK, deleteResponse.getStatusCode());
+			assertEquals(JSON_CONTENT_TYPE_MESSAGE, JSON_CONTENT_TYPE, deleteResponse.getContentType());
 
 			// ======== Attempt to get the deleted entity. This should fail. ========
 			final Response getResponse = get(getURL + "/" + id);
 
-			assertEquals(HTTP_BAD_REQUEST, getResponse.getStatusCode());
+			assertEquals("Expected a bad request status code, because the entity should have been deleted", HTTP_BAD_REQUEST, getResponse.getStatusCode());
 		}
 	}
 
@@ -439,7 +443,7 @@ public class RWIntegrationTests extends AbstractBenchmark implements TestBase
 				add("description");
 				add("html");
 				add("locale");
-				add("xml");
+				/* Don't add XML here, because that is expected to change between what is saved and what is recovered */
 			}
 		};
 
@@ -448,7 +452,7 @@ public class RWIntegrationTests extends AbstractBenchmark implements TestBase
 		createEntity.explicitSetDescription(StringUtilities.generateRandomString(10));
 		createEntity.explicitSetHtml(StringUtilities.generateRandomString(10));
 		createEntity.explicitSetLocale(StringUtilities.generateRandomString(10));
-		createEntity.explicitSetXml(StringUtilities.generateRandomString(10));
+		createEntity.explicitSetXml("<section><para>A Test</para></section>");
 
 		final RESTTopicV1 updateEntity = new RESTTopicV1();
 		updateEntity.setId(UPDATE_ID);
@@ -456,7 +460,7 @@ public class RWIntegrationTests extends AbstractBenchmark implements TestBase
 		updateEntity.explicitSetDescription(StringUtilities.generateRandomString(10));
 		updateEntity.explicitSetHtml(StringUtilities.generateRandomString(10));
 		updateEntity.explicitSetLocale(StringUtilities.generateRandomString(10));
-		updateEntity.explicitSetXml(StringUtilities.generateRandomString(10));
+		updateEntity.explicitSetXml("<section><para>A Test Update</para></section>");
 
 		try
 		{

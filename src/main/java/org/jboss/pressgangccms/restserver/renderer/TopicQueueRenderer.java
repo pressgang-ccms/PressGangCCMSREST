@@ -181,7 +181,7 @@ public class TopicQueueRenderer extends BaseRenderingThread implements Runnable
 									{
 										if (relatedTopic != null && relatedTopic.getTopicId() != null)
 										{
-											TranslatedTopicData relatedTranslatedTopicData = translatedTopicData.getLatestRelatedTranslationDataByTopicID(entityManager, relatedTopic.getId());
+											TranslatedTopicData relatedTranslatedTopicData = translatedTopicData.getLatestRelatedTranslationDataByTopicID(entityManager, relatedTopic.getId(), topic);
 											
 											/* 
 											 * Check that a related TranslatedTopicData was found.

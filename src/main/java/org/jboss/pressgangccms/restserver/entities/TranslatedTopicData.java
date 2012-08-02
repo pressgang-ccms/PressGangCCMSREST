@@ -251,19 +251,19 @@ public class TranslatedTopicData extends AuditedEntity<TranslatedTopicData> impl
 	}
 
 	@Transient
-	public List<TranslatedTopicData> getOutgoingRelatedTranslatedTopicData(final EntityManager entityManager)
+	public List<TranslatedTopicData> getOutgoingRelatedTranslatedTopicData(final EntityManager entityManager, final Topic enversTopic)
 	{
-		final Topic enversTopic = translatedTopic.getEnversTopic(entityManager);
-
-		return getRelatedTranslatedTopicData(entityManager, enversTopic.getOutgoingRelatedTopicsArray());
+		if (enversTopic != null)
+			return getRelatedTranslatedTopicData(entityManager, enversTopic.getOutgoingRelatedTopicsArray());
+		return new ArrayList<TranslatedTopicData>();
 	}
 
 	@Transient
-	public List<TranslatedTopicData> getIncomingRelatedTranslatedTopicData(final EntityManager entityManager)
+	public List<TranslatedTopicData> getIncomingRelatedTranslatedTopicData(final EntityManager entityManager, final Topic enversTopic)
 	{
-		final Topic enversTopic = translatedTopic.getEnversTopic(entityManager);
-
-		return getRelatedTranslatedTopicData(entityManager, enversTopic.getIncomingRelatedTopicsArray());
+		if (enversTopic != null)
+			return getRelatedTranslatedTopicData(entityManager, enversTopic.getIncomingRelatedTopicsArray());
+		return new ArrayList<TranslatedTopicData>();
 	}
 
 	@Transient
@@ -301,9 +301,9 @@ public class TranslatedTopicData extends AuditedEntity<TranslatedTopicData> impl
 	}
 
 	@Transient
-	public TranslatedTopicData getLatestRelatedTranslationDataByTopicID(final EntityManager entityManager, final int topicId) throws Exception
+	public TranslatedTopicData getLatestRelatedTranslationDataByTopicID(final EntityManager entityManager, final int topicId, final Topic enversTopic) throws Exception
 	{
-		final List<TranslatedTopicData> relatedOutgoingTranslatedTopicDatas = getOutgoingRelatedTranslatedTopicData(entityManager);
+		final List<TranslatedTopicData> relatedOutgoingTranslatedTopicDatas = getOutgoingRelatedTranslatedTopicData(entityManager, enversTopic);
 		TranslatedTopicData relatedTranslatedTopicData = null;
 		if (relatedOutgoingTranslatedTopicDatas != null)
 		{
@@ -322,18 +322,18 @@ public class TranslatedTopicData extends AuditedEntity<TranslatedTopicData> impl
 	}
 
 	@Transient
-	public List<TranslatedTopicData> getOutgoingDummyFilledRelatedTranslatedTopicDatas(final EntityManager entityManager)
+	public List<TranslatedTopicData> getOutgoingDummyFilledRelatedTranslatedTopicDatas(final EntityManager entityManager, final Topic enversTopic)
 	{
-		final List<TranslatedTopicData> outgoingRelatedTranslatedTopicDatas = this.getOutgoingRelatedTranslatedTopicData(entityManager);
+		final List<TranslatedTopicData> outgoingRelatedTranslatedTopicDatas = this.getOutgoingRelatedTranslatedTopicData(entityManager, enversTopic);
 
 		final List<TranslatedTopicData> results = getDummyFilledRelatedTranslatedTopicData(outgoingRelatedTranslatedTopicDatas, this.getTranslatedTopic().getEnversTopic(entityManager).getOutgoingRelatedTopicsArray(), entityManager);
 		return results;
 	}
 
 	@Transient
-	public List<TranslatedTopicData> getIncomingDummyFilledRelatedTranslatedTopicDatas(final EntityManager entityManager)
+	public List<TranslatedTopicData> getIncomingDummyFilledRelatedTranslatedTopicDatas(final EntityManager entityManager, final Topic enversTopic)
 	{
-		final List<TranslatedTopicData> incomingRelatedTranslatedTopicDatas = this.getIncomingRelatedTranslatedTopicData(entityManager);
+		final List<TranslatedTopicData> incomingRelatedTranslatedTopicDatas = this.getIncomingRelatedTranslatedTopicData(entityManager, enversTopic);
 
 		final List<TranslatedTopicData> results = getDummyFilledRelatedTranslatedTopicData(incomingRelatedTranslatedTopicDatas, this.getTranslatedTopic().getEnversTopic(entityManager).getIncomingRelatedTopicsArray(), entityManager);
 		return results;

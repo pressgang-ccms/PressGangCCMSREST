@@ -16,8 +16,8 @@ import javax.persistence.EntityManager;
 import javax.persistence.FetchType;
 import javax.persistence.GeneratedValue;
 import javax.persistence.Id;
+import javax.persistence.NoResultException;
 import javax.persistence.OneToMany;
-import javax.persistence.PersistenceContext;
 import javax.persistence.Table;
 import javax.persistence.Transient;
 import javax.persistence.UniqueConstraint;
@@ -38,17 +38,16 @@ import org.jboss.pressgangccms.restserver.zanata.ZanataPushTopicThread;
 import org.jboss.pressgangccms.utils.common.CollectionUtilities;
 import org.jboss.pressgangccms.utils.structures.Pair;
 
-
 /**
- * A TranslatedTopic represents a particular revision of a topic. This revision
- * then holds the translated version of the document for various locales in a
+ * A TranslatedTopic represents a particular revision of a topic. This revision then holds the translated version of the document for various locales in a
  * collection of TranslatedTopicData entities.
  */
 @Entity
 @Audited
 @Cacheable
 @Cache(usage = CacheConcurrencyStrategy.TRANSACTIONAL)
-@Table(name = "TranslatedTopic", uniqueConstraints = @UniqueConstraint(columnNames = { "TopicRevision", "TopicID" }))
+@Table(name = "TranslatedTopic", uniqueConstraints = @UniqueConstraint(columnNames =
+{ "TopicRevision", "TopicID" }))
 public class TranslatedTopic extends AuditedEntity<TranslatedTopic> implements java.io.Serializable
 {
 	private static final long serialVersionUID = 4190214754023153898L;
@@ -132,33 +131,43 @@ public class TranslatedTopic extends AuditedEntity<TranslatedTopic> implements j
 	{
 		return CollectionUtilities.toArrayList(this.translatedTopicDataEntities);
 	}
-	
+
 	@Transient
-	public List<String> getTranslatedTopicDataLocales() {
+	public List<String> getTranslatedTopicDataLocales()
+	{
 		List<String> locales = new ArrayList<String>();
-		for (TranslatedTopicData translatedTopicData: translatedTopicDataEntities) {
+		for (TranslatedTopicData translatedTopicData : translatedTopicDataEntities)
+		{
 			locales.add(translatedTopicData.getTranslationLocale());
 		}
-		
+
 		/* Sort the locales into alphabetical order */
 		Collections.sort(locales);
-		
+
 		return locales;
 	}
-	
+
 	@Transient
 	public Topic getEnversTopic(final EntityManager entityManager)
 	{
-		if (enversTopic == null) 
+		try
 		{
-			/* Find the envers topic */
-			final AuditReader reader = AuditReaderFactory.get(entityManager);
-			final AuditQuery query = reader.createQuery().forEntitiesAtRevision(Topic.class, this.topicRevision).add(AuditEntity.id().eq(this.topicId));
-			enversTopic = (Topic) query.getSingleResult();
+			if (enversTopic == null)
+			{
+				/* Find the envers topic */
+				final AuditReader reader = AuditReaderFactory.get(entityManager);
+				final AuditQuery query = reader.createQuery().forEntitiesAtRevision(Topic.class, this.topicRevision).add(AuditEntity.id().eq(this.topicId));
+				enversTopic = (Topic) query.getSingleResult();
+			}
+			return enversTopic;
 		}
-		return enversTopic;
+		catch (final NoResultException ex)
+		{
+			/* The topic id and revision doesn't point to a valid topic, so return null */
+			return null;
+		}
 	}
-	
+
 	@Transient
 	public String getTopicTitle(final EntityManager entityManager)
 	{
@@ -177,7 +186,7 @@ public class TranslatedTopic extends AuditedEntity<TranslatedTopic> implements j
 
 		return null;
 	}
-	
+
 	@Transient
 	public void pullFromZanata()
 	{
@@ -192,7 +201,7 @@ public class TranslatedTopic extends AuditedEntity<TranslatedTopic> implements j
 			SkynetExceptionUtilities.handleException(ex, false, "Catch all exception handler");
 		}
 	}
-	
+
 	@SuppressWarnings("unchecked")
 	@Transient
 	public void pushToZanata()
