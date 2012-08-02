@@ -105,7 +105,7 @@ public class RWIntegrationTests extends AbstractBenchmark implements TestBase
 
 			/* Make sure all the defined properties match */
 			for (final String property : setProperties)
-				assertEquals(inputJsonPath.get(property), createJsonPath.get(property));
+				assertEquals("Property \"" + property + "\" should be equal between the return value of the REST create and GET methods", inputJsonPath.get(property), createJsonPath.get(property));
 
 			/* We need the ID of the created entity in update and delete operations */
 			final int id = createJsonPath.getInt("id");
@@ -304,7 +304,7 @@ public class RWIntegrationTests extends AbstractBenchmark implements TestBase
 				add("isUnique");
 				add("canBeNull");
 				add("regex");
-				add("value");
+				/* Don't set the value, because that only has meaning in the context of a parent entity like a Topic or Tag */
 			}
 		};
 
@@ -313,15 +313,13 @@ public class RWIntegrationTests extends AbstractBenchmark implements TestBase
 		createEntity.explicitSetName(StringUtilities.generateRandomString(10));
 		createEntity.explicitSetIsUnique(MathUtilities.generateRandomBoolean());
 		createEntity.explicitSetRegex(StringUtilities.generateRandomString(10));
-		createEntity.explicitSetValue(StringUtilities.generateRandomString(10));
-		
+				
 		final RESTPropertyTagV1 updateEntity = new RESTPropertyTagV1();
 		updateEntity.setId(UPDATE_ID);
 		updateEntity.explicitSetDescription(StringUtilities.generateRandomString(10));
 		updateEntity.explicitSetName(StringUtilities.generateRandomString(10));
 		updateEntity.explicitSetIsUnique(MathUtilities.generateRandomBoolean());
 		updateEntity.explicitSetRegex(StringUtilities.generateRandomString(10));
-		updateEntity.explicitSetValue(StringUtilities.generateRandomString(10));
 
 		try
 		{
