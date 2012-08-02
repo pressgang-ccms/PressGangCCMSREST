@@ -755,7 +755,7 @@ public class BaseRESTv1
 
 			return restRepresentation;
 		}
-		catch (final Exception /* NamingException */ex)
+		catch (final NamingException ex)
 		{
 			throw new InternalProcessingException("Could not find the EntityManagerFactory");
 		}
