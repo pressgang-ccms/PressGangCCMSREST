@@ -13,13 +13,13 @@
         <dependent-module archiveName="pressgang-ccms-contentspec-1.0-SNAPSHOT.jar" deploy-path="/WEB-INF/lib" handle="module:/resource/PressGangCCMSContentSpec/PressGangCCMSContentSpec">
             <dependency-type>uses</dependency-type>
         </dependent-module>
-        <dependent-module archiveName="gozirra-extended-0.5-SNAPSHOT.jar" deploy-path="/WEB-INF/lib" handle="module:/resource/gozirra-extended/gozirra-extended">
-            <dependency-type>uses</dependency-type>
-        </dependent-module>
         <dependent-module archiveName="pressgang-ccms-zanata-1.0-SNAPSHOT.jar" deploy-path="/WEB-INF/lib" handle="module:/resource/PressGangCCMSZanataInterface/PressGangCCMSZanataInterface">
             <dependency-type>uses</dependency-type>
         </dependent-module>
         <dependent-module archiveName="pressgang-ccms-rest-1.0-SNAPSHOT.jar" deploy-path="/WEB-INF/lib" handle="module:/resource/PressGangCCMSRESTv1Common/PressGangCCMSRESTv1Common">
+            <dependency-type>uses</dependency-type>
+        </dependent-module>
+        <dependent-module archiveName="gozirra-extended-0.5-SNAPSHOT.jar" deploy-path="/WEB-INF/lib" handle="module:/resource/gozirra-extended/gozirra-extended">
             <dependency-type>uses</dependency-type>
         </dependent-module>
         <dependent-module archiveName="j2bugzilla-extended-1.1-SNAPSHOT.jar" deploy-path="/WEB-INF/lib" handle="module:/resource/j2bugzilla-extended/j2bugzilla-extended">
