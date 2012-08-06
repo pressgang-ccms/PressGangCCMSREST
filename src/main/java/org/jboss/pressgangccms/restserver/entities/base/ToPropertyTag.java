@@ -1,7 +1,6 @@
 package org.jboss.pressgangccms.restserver.entities.base;
 
 import javax.persistence.EntityManager;
-import javax.persistence.PersistenceContext;
 import javax.persistence.Transient;
 
 import org.jboss.pressgangccms.restserver.entities.PropertyTag;
