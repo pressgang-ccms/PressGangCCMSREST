@@ -5,18 +5,16 @@
         <wb-resource deploy-path="/" source-path="/src/main/webapp" tag="defaultRootSource"/>
         <wb-resource deploy-path="/WEB-INF/classes" source-path="/src/main/java"/>
         <wb-resource deploy-path="/WEB-INF/classes" source-path="/src/main/resources"/>
-        <wb-resource deploy-path="/WEB-INF/classes" source-path="/src/test/java"/>
-        <wb-resource deploy-path="/WEB-INF/classes" source-path="/src/test/resources"/>
-        <dependent-module archiveName="pressgang-ccms-utils-1.0-SNAPSHOT.jar" deploy-path="/WEB-INF/lib" handle="module:/resource/PressGangCCMSCommonUtilities/PressGangCCMSCommonUtilities">
+        <dependent-module archiveName="pressgang-ccms-utils-1.0-SNAPSHOT.jar" deploy-path="/WEB-INF/lib" handle="module:/resource/pressgang-ccms-utils/pressgang-ccms-utils">
             <dependency-type>uses</dependency-type>
         </dependent-module>
-        <dependent-module archiveName="pressgang-ccms-contentspec-1.0-SNAPSHOT.jar" deploy-path="/WEB-INF/lib" handle="module:/resource/PressGangCCMSContentSpec/PressGangCCMSContentSpec">
+        <dependent-module archiveName="pressgang-ccms-contentspec-1.0-SNAPSHOT.jar" deploy-path="/WEB-INF/lib" handle="module:/resource/pressgang-ccms-contentspec/pressgang-ccms-contentspec">
             <dependency-type>uses</dependency-type>
         </dependent-module>
-        <dependent-module archiveName="pressgang-ccms-zanata-1.0-SNAPSHOT.jar" deploy-path="/WEB-INF/lib" handle="module:/resource/PressGangCCMSZanataInterface/PressGangCCMSZanataInterface">
+        <dependent-module archiveName="pressgang-ccms-zanata-1.0-SNAPSHOT.jar" deploy-path="/WEB-INF/lib" handle="module:/resource/pressgang-ccms-zanata/pressgang-ccms-zanata">
             <dependency-type>uses</dependency-type>
         </dependent-module>
-        <dependent-module archiveName="pressgang-ccms-rest-1.0-SNAPSHOT.jar" deploy-path="/WEB-INF/lib" handle="module:/resource/PressGangCCMSRESTv1Common/PressGangCCMSRESTv1Common">
+        <dependent-module archiveName="pressgang-ccms-rest-1.0-SNAPSHOT.jar" deploy-path="/WEB-INF/lib" handle="module:/resource/pressgang-ccms-rest/pressgang-ccms-rest">
             <dependency-type>uses</dependency-type>
         </dependent-module>
         <dependent-module archiveName="gozirra-extended-0.5-SNAPSHOT.jar" deploy-path="/WEB-INF/lib" handle="module:/resource/gozirra-extended/gozirra-extended">

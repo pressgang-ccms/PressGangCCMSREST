@@ -48,6 +48,7 @@ import org.jboss.pressgangccms.restserver.factories.base.RESTDataObjectFactory;
 import org.jboss.pressgangccms.restserver.filter.FilterQueryBuilder;
 import org.jboss.pressgangccms.restserver.utils.EntityUtilities;
 import org.jboss.pressgangccms.restserver.utils.SkynetExceptionUtilities;
+import org.jboss.pressgangccms.utils.common.ExceptionUtilities;
 import org.jboss.pressgangccms.utils.constants.CommonConstants;
 import org.jboss.resteasy.plugins.providers.atom.Content;
 import org.jboss.resteasy.plugins.providers.atom.Entry;
@@ -55,8 +56,6 @@ import org.jboss.resteasy.plugins.providers.atom.Feed;
 import org.jboss.resteasy.spi.BadRequestException;
 import org.jboss.resteasy.spi.Failure;
 import org.jboss.resteasy.spi.InternalServerErrorException;
-
-import com.redhat.ecs.commonutils.ExceptionUtilities;
 
 /**
  * This class provides the functions that retrieve, update, create and delete entities. It is expected that other classes will extend BaseRESTv1 to provide
