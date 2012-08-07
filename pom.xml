@@ -52,8 +52,8 @@
 			<version>2.7.1</version>
 			<scope>provided</scope>
 		</dependency>
-		
-		<!-- RestEASY Libraries -->
+
+		<!-- RestEASY Dependencies -->
 		<dependency>
 			<groupId>org.jboss.resteasy</groupId>
 			<artifactId>resteasy-jaxrs</artifactId>
@@ -61,18 +61,17 @@
 			<scope>provided</scope>
 		</dependency>
 		<dependency>
-			<groupId>org.jboss.resteasy</groupId>
-			<artifactId>resteasy-atom-provider</artifactId>
-			<version>2.3.4.Final</version>
-			<scope>provided</scope>
-		</dependency>
-		<dependency>
-        	<groupId>org.jboss.resteasy</groupId>
-			<artifactId>resteasy-jackson-provider</artifactId>
-        	<version>2.3.4.Final</version>
-    	</dependency>
-    	
-    	<!-- Hibernate Libraries -->
+	        <groupId>org.jboss.resteasy</groupId>
+	        <artifactId>resteasy-atom-provider</artifactId>
+	        <version>2.3.4.Final</version>
+	    </dependency>
+	    <dependency>
+	        <groupId>org.jboss.resteasy</groupId>
+	        <artifactId>resteasy-jackson-provider</artifactId>
+	        <version>2.3.4.Final</version>
+	    </dependency>
+
+		<!-- Hibernate Dependencies -->
 		<dependency>
 			<groupId>org.hibernate</groupId>
 			<artifactId>hibernate-envers</artifactId>
@@ -86,11 +85,16 @@
 			<groupId>org.hibernate</groupId>
 			<artifactId>hibernate-search-infinispan</artifactId>
 		</dependency>
-		
+
 		<!-- PressGangCCMS Libraries -->
 		<dependency>
 			<groupId>org.jboss.pressgangccms</groupId>
 			<artifactId>pressgang-ccms-utils</artifactId>
+			<version>1.0-SNAPSHOT</version>
+		</dependency>
+		<dependency>
+			<groupId>org.jboss.pressgangccms</groupId>
+			<artifactId>pressgang-ccms-contentspec</artifactId>
 			<version>1.0-SNAPSHOT</version>
 		</dependency>
 		<dependency>
@@ -104,14 +108,9 @@
 			<version>1.0-SNAPSHOT</version>
 		</dependency>
 		<dependency>
-			<groupId>org.jboss.pressgangccms</groupId>
-			<artifactId>pressgang-ccms-contentspec</artifactId>
-			<version>1.0-SNAPSHOT</version>
-		</dependency>
-		<dependency>
 			<groupId>com.redhat.contentspec</groupId>
 			<artifactId>csprocessor</artifactId>
-			<version>0.0.2-SNAPSHOT</version>
+			<version>0.0.3-SNAPSHOT</version>
 		</dependency>
 		
 		<dependency>
@@ -149,8 +148,8 @@
 			<artifactId>zanata-common-api</artifactId>
 			<version>1.5.0</version>
 		</dependency>
-		
-		<!-- Custom Library Extensions -->
+
+		<!-- Custom Library Dependencies -->
 		<dependency>
 			<groupId>germane-software</groupId>
 			<artifactId>gozirra-extended</artifactId>
@@ -166,16 +165,8 @@
 			<artifactId>named-regexp</artifactId>
 			<version>0.0.2-SNAPSHOT</version>
 		</dependency>
-		
-		<!-- Test Libraries -->
-		<dependency>
-			<groupId>junit</groupId>
-			<artifactId>junit</artifactId>
-		</dependency>
-		<dependency>
-			<groupId>org.jboss.arquillian.junit</groupId>
-			<artifactId>arquillian-junit-container</artifactId>
-		</dependency>
+
+		<!-- Testing Libraries -->
 		<dependency>
 			<groupId>com.jayway.restassured</groupId>
 			<artifactId>rest-assured</artifactId>
@@ -190,6 +181,10 @@
 			<groupId>com.carrotsearch</groupId>
 			<artifactId>junit-benchmarks</artifactId>
 			<version>0.3.0</version>
+		</dependency>
+		<dependency>
+			<groupId>junit</groupId>
+			<artifactId>junit</artifactId>
 		</dependency>
 	</dependencies>
 
@@ -212,7 +207,6 @@
 			</plugin>
 		</plugins>
 	</build>
-
 
 	<profiles>
 		<profile>

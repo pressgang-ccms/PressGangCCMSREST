@@ -2,8 +2,6 @@ package org.jboss.pressgangccms.restserver.filter;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 
 import org.jboss.pressgangccms.restserver.constants.Constants;
 import org.jboss.pressgangccms.restserver.entities.Topic;
@@ -133,13 +131,13 @@ public class TranslatedTopicDataFilterQueryBuilder implements FilterQueryBuilder
 
 		else if (fieldName.equals(Constants.TOPIC_IDS_FILTER_VAR))
 		{
-			if (fieldValue.trim().length() != 0 && fieldValue.matches("^[0-9,]+$"))
+			if (fieldValue.trim().length() != 0 && fieldValue.matches("^((\\s)*\\d+(\\s)*,?)*((\\s)*\\d+(\\s)*)$"))
 				fields.add("translatedTopicData.translatedTopic.topicId IN (" + fieldValue + ")");
 		}
 		
 		else if (fieldName.equals(Constants.TOPIC_IDS_NOT_FILTER_VAR))
 		{
-			if (fieldValue.trim().length() != 0 && fieldValue.matches("^[0-9,]+$"))
+			if (fieldValue.trim().length() != 0 && fieldValue.matches("^((\\s)*\\d+(\\s)*,?)*((\\s)*\\d+(\\s)*)$"))
 				fields.add("translatedTopicData.translatedTopic.topicId NOT IN (" + fieldValue + ")");
 		}
 		

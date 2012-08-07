@@ -15,8 +15,6 @@ import com.jayway.restassured.path.json.JsonPath;
 import com.jayway.restassured.response.Response;
 
 import static com.jayway.restassured.RestAssured.*;
-import static com.jayway.restassured.matcher.RestAssuredMatchers.*;
-import static org.hamcrest.Matchers.*;
 
 /**
  * A collection of tests designed to test the functionality of the REST interface. These tests are read only, so will not add to the size of the envers tables.

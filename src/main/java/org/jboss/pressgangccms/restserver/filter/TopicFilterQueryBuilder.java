@@ -129,13 +129,13 @@ public class TopicFilterQueryBuilder implements FilterQueryBuilder
 
 		else if (fieldName.equals(Constants.TOPIC_IDS_FILTER_VAR))
 		{
-			if (fieldValue.trim().length() != 0 && fieldValue.matches("^[0-9,]+$"))
+			if (fieldValue.trim().length() != 0 && fieldValue.matches("^((\\s)*\\d+(\\s)*,?)*((\\s)*\\d+(\\s)*)$"))
 				fields.add("topic.topicId IN (" + fieldValue + ")");
 		}
 
 		else if (fieldName.equals(Constants.TOPIC_IDS_NOT_FILTER_VAR))
 		{
-			if (fieldValue.trim().length() != 0 && fieldValue.matches("^[0-9,]+$"))
+			if (fieldValue.trim().length() != 0 && fieldValue.matches("^((\\s)*\\d+(\\s)*,?)*((\\s)*\\d+(\\s)*)$"))
 				fields.add("topic.topicId NOT IN (" + fieldValue + ")");
 		}
 
