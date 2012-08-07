@@ -3240,6 +3240,19 @@ public class RESTv1 extends BaseRESTv1 implements RESTInterfaceV1, RESTInterface
 
 		return getJSONResource(ImageFile.class, new ImageV1Factory(), id, expand);
 	}
+	
+	@Override
+	@GET
+	@Path("/image/get/json/{id}/r/{rev}")
+	@Produces(MediaType.APPLICATION_JSON)
+	@Consumes({ "*" })
+	public RESTImageV1 getJSONImageRevision(@PathParam("id") final Integer id, @PathParam("rev") Integer revision, @QueryParam("expand") final String expand) throws InvalidParameterException, InternalProcessingException
+	{
+		if (id == null)
+			throw new InvalidParameterException("The id parameter can not be null");
+
+		return getJSONResource(ImageFile.class, new ImageV1Factory(), id, revision, expand);
+	}
 
 	@GET
 	@Path("/images/get/json/all")
@@ -3804,12 +3817,5 @@ public class RESTv1 extends BaseRESTv1 implements RESTInterfaceV1, RESTInterface
 
 		final TopicV1Factory factory = new TopicV1Factory();
 		return deleteEntities(RESTTopicCollectionV1.class, Topic.class, factory, dbEntityIds, BaseRESTv1.TOPICS_EXPANSION_NAME, JSON_URL, expand, getBaseUrl());
-	}
-
-	@Override
-	public RESTImageV1 getJSONImageRevision(Integer id, Integer revision, String expand) throws InvalidParameterException, InternalProcessingException
-	{
-		// TODO Auto-generated method stub
-		return null;
 	}
 }

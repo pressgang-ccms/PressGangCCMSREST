@@ -18,15 +18,27 @@
 			<url>http://repository-zanata.forge.cloudbees.com/release/</url>
 		</repository>
 	</repositories>
+	
+	<dependencyManagement>
+		<dependencies>
+			<dependency>
+				<groupId>org.jboss.bom</groupId>
+				<artifactId>jboss-javaee-6.0-with-tools</artifactId>
+				<version>1.0.0.Final</version>
+				<type>pom</type>
+				<scope>import</scope>
+			</dependency>
+			<dependency>
+				<groupId>org.jboss.bom</groupId>
+				<artifactId>jboss-javaee-6.0-with-hibernate</artifactId>
+				<version>1.0.0.Final</version>
+				<type>pom</type>
+				<scope>import</scope>
+			</dependency>
+		</dependencies>
+	</dependencyManagement>
 
 	<dependencies>
-		<dependency>
-			<groupId>org.jboss.arquillian</groupId>
-			<artifactId>arquillian-bom</artifactId>
-			<version>1.0.2.Final</version>
-			<scope>import</scope>
-			<type>pom</type>
-		</dependency>
 		<dependency>
 			<groupId>org.jboss.spec</groupId>
 			<artifactId>jboss-javaee-6.0</artifactId>
@@ -40,6 +52,8 @@
 			<version>2.7.1</version>
 			<scope>provided</scope>
 		</dependency>
+		
+		<!-- RestEASY Libraries -->
 		<dependency>
 			<groupId>org.jboss.resteasy</groupId>
 			<artifactId>resteasy-jaxrs</artifactId>
@@ -47,22 +61,59 @@
 			<scope>provided</scope>
 		</dependency>
 		<dependency>
-			<groupId>org.hibernate</groupId>
-			<artifactId>hibernate-envers</artifactId>
-			<version>4.1.5.SP1</version>
+			<groupId>org.jboss.resteasy</groupId>
+			<artifactId>resteasy-atom-provider</artifactId>
+			<version>2.3.4.Final</version>
 			<scope>provided</scope>
 		</dependency>
+		<dependency>
+        	<groupId>org.jboss.resteasy</groupId>
+			<artifactId>resteasy-jackson-provider</artifactId>
+        	<version>2.3.4.Final</version>
+    	</dependency>
+    	
+    	<!-- Hibernate Libraries -->
+		<dependency>
+			<groupId>org.hibernate</groupId>
+			<artifactId>hibernate-envers</artifactId>
+			<scope>provided</scope>
+		</dependency>
+		<dependency>
+			<groupId>org.hibernate</groupId>
+			<artifactId>hibernate-search</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>org.hibernate</groupId>
+			<artifactId>hibernate-search-infinispan</artifactId>
+		</dependency>
+		
+		<!-- PressGangCCMS Libraries -->
 		<dependency>
 			<groupId>org.jboss.pressgangccms</groupId>
 			<artifactId>pressgang-ccms-utils</artifactId>
 			<version>1.0-SNAPSHOT</version>
 		</dependency>
 		<dependency>
-			<groupId>javax.validation</groupId>
-			<artifactId>validation-api</artifactId>
-			<version>1.1.0.Alpha1</version>
-			<scope>provided</scope>
+			<groupId>org.jboss.pressgangccms</groupId>
+			<artifactId>pressgang-ccms-zanata</artifactId>
+			<version>1.0-SNAPSHOT</version>
 		</dependency>
+		<dependency>
+			<groupId>org.jboss.pressgangccms</groupId>
+			<artifactId>pressgang-ccms-rest</artifactId>
+			<version>1.0-SNAPSHOT</version>
+		</dependency>
+		<dependency>
+			<groupId>org.jboss.pressgangccms</groupId>
+			<artifactId>pressgang-ccms-contentspec</artifactId>
+			<version>1.0-SNAPSHOT</version>
+		</dependency>
+		<dependency>
+			<groupId>com.redhat.contentspec</groupId>
+			<artifactId>csprocessor</artifactId>
+			<version>0.0.2-SNAPSHOT</version>
+		</dependency>
+		
 		<dependency>
 			<groupId>batik</groupId>
 			<artifactId>batik-bridge</artifactId>
@@ -79,11 +130,6 @@
 			<version>2.3.3</version>
 		</dependency>
 		<dependency>
-			<groupId>org.hibernate</groupId>
-			<artifactId>hibernate-search</artifactId>
-			<version>4.1.0.Final</version>
-		</dependency>
-		<dependency>
 			<groupId>net.sourceforge.htmlcleaner</groupId>
 			<artifactId>htmlcleaner</artifactId>
 			<version>2.2</version>
@@ -94,60 +140,41 @@
 			<version>3.2</version>
 		</dependency>
 		<dependency>
-			<groupId>org.jboss.pressgangccms</groupId>
-			<artifactId>pressgang-ccms-contentspec</artifactId>
-			<version>1.0-SNAPSHOT</version>
-		</dependency>
-		<dependency>
-			<groupId>germane-software</groupId>
-			<artifactId>gozirra-extended</artifactId>
-			<version>0.5-SNAPSHOT</version>
-		</dependency>
-		<dependency>
 			<groupId>joda-time</groupId>
 			<artifactId>joda-time</artifactId>
 			<version>2.1</version>
-		</dependency>
-		<dependency>
-			<groupId>com.redhat.contentspec</groupId>
-			<artifactId>csprocessor</artifactId>
-			<version>0.0.2-SNAPSHOT</version>
 		</dependency>
 		<dependency>
 			<groupId>org.zanata</groupId>
 			<artifactId>zanata-common-api</artifactId>
 			<version>1.5.0</version>
 		</dependency>
+		
+		<!-- Custom Library Extensions -->
 		<dependency>
-			<groupId>org.jboss.pressgangccms</groupId>
-			<artifactId>pressgang-ccms-zanata</artifactId>
-			<version>1.0-SNAPSHOT</version>
-		</dependency>
-		<dependency>
-			<groupId>org.jboss.pressgangccms</groupId>
-			<artifactId>pressgang-ccms-rest</artifactId>
-			<version>1.0-SNAPSHOT</version>
+			<groupId>germane-software</groupId>
+			<artifactId>gozirra-extended</artifactId>
+			<version>0.5-SNAPSHOT</version>
 		</dependency>
 		<dependency>
 			<groupId>com.j2bugzilla</groupId>
 			<artifactId>j2bugzilla-extended</artifactId>
 			<version>1.1-SNAPSHOT</version>
 		</dependency>
-
 		<dependency>
-			<groupId>org.hibernate</groupId>
-			<artifactId>hibernate-search-infinispan</artifactId>
-			<version>4.2.0.Beta1</version>
+			<groupId>com.google.code.regexp</groupId>
+			<artifactId>named-regexp</artifactId>
+			<version>0.0.2-SNAPSHOT</version>
 		</dependency>
+		
+		<!-- Test Libraries -->
 		<dependency>
 			<groupId>junit</groupId>
 			<artifactId>junit</artifactId>
-			<version>4.10</version>
 		</dependency>
 		<dependency>
 			<groupId>org.jboss.arquillian.junit</groupId>
 			<artifactId>arquillian-junit-container</artifactId>
-			<version>1.0.1.Final</version>
 		</dependency>
 		<dependency>
 			<groupId>com.jayway.restassured</groupId>
@@ -163,11 +190,6 @@
 			<groupId>com.carrotsearch</groupId>
 			<artifactId>junit-benchmarks</artifactId>
 			<version>0.3.0</version>
-		</dependency>
-		<dependency>
-			<groupId>com.google.code.regexp</groupId>
-			<artifactId>named-regexp</artifactId>
-			<version>0.0.2-SNAPSHOT</version>
 		</dependency>
 	</dependencies>
 

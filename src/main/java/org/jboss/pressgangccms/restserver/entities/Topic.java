@@ -30,7 +30,6 @@ import javax.persistence.JoinColumn;
 import javax.persistence.JoinTable;
 import javax.persistence.OneToMany;
 import javax.persistence.OneToOne;
-import javax.persistence.PersistenceContext;
 import javax.persistence.PersistenceException;
 import javax.persistence.PostPersist;
 import javax.persistence.PostUpdate;
