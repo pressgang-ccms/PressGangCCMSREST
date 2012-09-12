@@ -1,0 +1,828 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml"><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8" /><title>REST Reference</title><link rel="stylesheet" type="text/css" href="Common_Content/css/default.css" /><link rel="stylesheet" media="print" href="Common_Content/css/print.css" type="text/css" /><meta name="generator" content="publican 3.0" /><meta name="package" content="PressGang_CCMS-REST_Reference-1-en-US-0.0-0" /><meta name="description" content="REST Reference" /></head><body><p id="title"><a class="left" href="https://fedorahosted.org/publican"><img alt="Product Site" src="Common_Content/images//image_left.png" /></a><a class="right" href="https://fedorahosted.org/publican"><img alt="Documentation Site" src="Common_Content/images//image_right.png" /></a></p><div class="book" id="id609585"><div class="titlepage"><div><div class="producttitle"><span class="productname">PressGang CCMS</span> <span class="productnumber">1</span></div><div><h1 class="title">REST Reference</h1></div><div><h2 class="subtitle">REST Reference</h2></div><p class="edition">Edition 1</p><div><h3 class="corpauthor">
+		<span class="inlinemediaobject"><object data="Common_Content/images/title_logo.svg" type="image/svg+xml"> </object></span>
+
+	</h3></div><div><div class="authorgroup"><div class="author"><h3 class="author"><span class="firstname"> SkyNet </span> <span class="surname"> Alpha Build System </span></h3><div class="affiliation"><span class="orgname"> Engineering Content Services </span> <span class="orgdiv"> Red Hat </span></div></div></div></div><div><div id="id784008" class="legalnotice"><h1 class="legalnotice">Legal Notice</h1><div class="para"><p></p>
+		Copyright <span class="trademark"></span>© 2012 Red Hat This material may only be distributed subject to the terms and conditions set forth in the GNU Free Documentation License (GFDL), V1.2 or later (the latest version is presently available at <a href="http://www.gnu.org/licenses/fdl.txt">http://www.gnu.org/licenses/fdl.txt</a>).
+	</div></div></div><div><div class="abstract"><h6>Abstract</h6><div class="para"><p></p>
+			REST Reference
+		</div></div></div></div></div><div class="toc"><dl><dt><span class="preface"><a href="#pref-REST_Reference-Preface">Preface</a></span></dt><dd><dl><dt><span class="section"><a href="#id767187">1. Document Conventions</a></span></dt><dd><dl><dt><span class="section"><a href="#id767211">1.1. Typographic Conventions</a></span></dt><dt><span class="section"><a href="#id651952">1.2. Pull-quote Conventions</a></span></dt><dt><span class="section"><a href="#id766970">1.3. Notes and Warnings</a></span></dt></dl></dd><dt><span class="section"><a href="#id764179">2. We Need Feedback!</a></span></dt></dl></dd><dt><span class="chapter"><a href="#chap-Getting_Started_with_Entities">1. Getting Started with Entities</a></span></dt><dd><dl><dt><span class="section"><a href="#About_Primary_Entities">1.1. About Primary Entities</a></span></dt><dt><span class="section"><a href="#Primary_Entity_Types">1.2. Primary Entity Types</a></span></dt><dt><span class="section"><a href="#About_Secondary_Entities">1.3. About Secondary Entities</a></span></dt><dt><span class="section"><a href="#Standard_Methods_for_Primary_Entities">1.4. Standard Methods for Primary Entities</a></span></dt><dt><span class="section"><a href="#About_URL_Components">1.5. About URL Components</a></span></dt><dt><span class="section"><a href="#About_REST_Methods">1.6. About REST Methods</a></span></dt><dt><span class="section"><a href="#About_JSONP">1.7. About JSONP</a></span></dt><dt><span class="section"><a href="#About_json_and_jsonp_Methods">1.8. About json and jsonp Methods</a></span></dt><dt><span class="section"><a href="#Additional_Methods_for_Topic_Entities">1.9. Additional Methods for Topic Entities</a></span></dt><dt><span class="section"><a href="#About_the_Revisions_Collection">1.10. About the Revisions Collection</a></span></dt></dl></dd><dt><span class="chapter"><a href="#chap-Creating_and_Updating_in_the_REST_Interface">2. Creating and Updating in the REST Interface</a></span></dt><dd><dl><dt><span class="section"><a href="#Create_a_Secondary_Entity">2.1. Create a Secondary Entity</a></span></dt><dt><span class="section"><a href="#About_Entity_Relationships">2.2. About Many-To-Many Relationships</a></span></dt><dt><span class="section"><a href="#About_One-To-Many_Relationships">2.3. About One-To-Many Relationships</a></span></dt><dt><span class="section"><a href="#Create_or_Remove_a_Relationship">2.4. Create or Remove a Relationship</a></span></dt><dt><span class="section"><a href="#About_the_configuredParameters_Property">2.5. About the configuredParameters Property</a></span></dt></dl></dd><dt><span class="chapter"><a href="#chap-Manipulating_Request_Results">3. Manipulating Request Results</a></span></dt><dd><dl><dt><span class="section"><a href="#About_Entity_and_Collection_Request_Results">3.1. About Entity and Collection Request Results</a></span></dt><dt><span class="section"><a href="#Request_Results">3.2. Request Results</a></span></dt><dt><span class="section"><a href="#Expand_Collections_through_Requests">3.3. Expand Collections through Requests</a></span></dt><dt><span class="section"><a href="#Expand_Results_of_a_Method_Call">3.4. Expand Results of a Method Call</a></span></dt><dt><span class="section"><a href="#Refine_Expansion_Requests">3.5. Refine Expansion Requests</a></span></dt><dt><span class="section"><a href="#Nest_Expansion_Requests">3.6. Nest Expansion Requests</a></span></dt><dt><span class="section"><a href="#Access_the_Skynet_REST_Interface">3.7. Access the Skynet REST Interface</a></span></dt></dl></dd><dt><span class="chapter"><a href="#id714807">4. Status Report</a></span></dt><dt><span class="appendix"><a href="#appe-REST_Reference-Revision_History">A. Revision History</a></span></dt></dl></div><div class="preface" id="pref-REST_Reference-Preface"><div class="titlepage"><div><div><h1 class="title">Preface</h1></div></div></div><div class="section"><div class="titlepage"><div><div><h2 class="title" id="id767187">1. Document Conventions</h2></div></div></div><div class="para"><p></p>
+		This manual uses several conventions to highlight certain words and phrases and draw attention to specific pieces of information.
+	</div><div class="para"><p></p>
+		In PDF and paper editions, this manual uses typefaces drawn from the <a href="https://fedorahosted.org/liberation-fonts/">Liberation Fonts</a> set. The Liberation Fonts set is also used in HTML editions if the set is installed on your system. If not, alternative but equivalent typefaces are displayed. Note: Red Hat Enterprise Linux 5 and later includes the Liberation Fonts set by default.
+	</div><div class="section"><div class="titlepage"><div><div><h3 class="title" id="id767211">1.1. Typographic Conventions</h3></div></div></div><div class="para"><p></p>
+			Four typographic conventions are used to call attention to specific words and phrases. These conventions, and the circumstances they apply to, are as follows.
+		</div><div class="para"><p></p>
+			<code class="literal">Mono-spaced Bold</code>
+		</div><div class="para"><p></p>
+			Used to highlight system input, including shell commands, file names and paths. Also used to highlight keycaps and key combinations. For example:
+		</div><div class="blockquote"><blockquote class="blockquote"><div class="para"><p></p>
+				To see the contents of the file <code class="filename">my_next_bestselling_novel</code> in your current working directory, enter the <code class="command">cat my_next_bestselling_novel</code> command at the shell prompt and press <span class="keycap"><strong>Enter</strong></span> to execute the command.
+			</div></blockquote></div><div class="para"><p></p>
+			The above includes a file name, a shell command and a keycap, all presented in mono-spaced bold and all distinguishable thanks to context.
+		</div><div class="para"><p></p>
+			Key combinations can be distinguished from keycaps by the plus sign that connects each part of a key combination. For example:
+		</div><div class="blockquote"><blockquote class="blockquote"><div class="para"><p></p>
+				Press <span class="keycap"><strong>Enter</strong></span> to execute the command.
+			</div><div class="para"><p></p>
+				Press <span class="keycap"><strong>Ctrl</strong></span>+<span class="keycap"><strong>Alt</strong></span>+<span class="keycap"><strong>F2</strong></span> to switch to a virtual terminal.
+			</div></blockquote></div><div class="para"><p></p>
+			The first paragraph highlights the particular keycap to press. The second highlights two key combinations (each a set of three keycaps with each set pressed simultaneously).
+		</div><div class="para"><p></p>
+			If source code is discussed, class names, methods, functions, variable names and returned values mentioned within a paragraph will be presented as above, in <code class="literal">mono-spaced bold</code>. For example:
+		</div><div class="blockquote"><blockquote class="blockquote"><div class="para"><p></p>
+				File-related classes include <code class="classname">filesystem</code> for file systems, <code class="classname">file</code> for files, and <code class="classname">dir</code> for directories. Each class has its own associated set of permissions.
+			</div></blockquote></div><div class="para"><p></p>
+			<span class="application"><strong>Proportional Bold</strong></span>
+		</div><div class="para"><p></p>
+			This denotes words or phrases encountered on a system, including application names; dialog box text; labeled buttons; check-box and radio button labels; menu titles and sub-menu titles. For example:
+		</div><div class="blockquote"><blockquote class="blockquote"><div class="para"><p></p>
+				Choose <span class="guimenu"><strong>System</strong></span> → <span class="guisubmenu"><strong>Preferences</strong></span> → <span class="guimenuitem"><strong>Mouse</strong></span> from the main menu bar to launch <span class="application"><strong>Mouse Preferences</strong></span>. In the <span class="guilabel"><strong>Buttons</strong></span> tab, click the <span class="guilabel"><strong>Left-handed mouse</strong></span> check box and click <span class="guibutton"><strong>Close</strong></span> to switch the primary mouse button from the left to the right (making the mouse suitable for use in the left hand).
+			</div><div class="para"><p></p>
+				To insert a special character into a <span class="application"><strong>gedit</strong></span> file, choose <span class="guimenu"><strong>Applications</strong></span> → <span class="guisubmenu"><strong>Accessories</strong></span> → <span class="guimenuitem"><strong>Character Map</strong></span> from the main menu bar. Next, choose <span class="guimenu"><strong>Search</strong></span> → <span class="guimenuitem"><strong>Find…</strong></span> from the <span class="application"><strong>Character Map</strong></span> menu bar, type the name of the character in the <span class="guilabel"><strong>Search</strong></span> field and click <span class="guibutton"><strong>Next</strong></span>. The character you sought will be highlighted in the <span class="guilabel"><strong>Character Table</strong></span>. Double-click this highlighted character to place it in the <span class="guilabel"><strong>Text to copy</strong></span> field and then click the <span class="guibutton"><strong>Copy</strong></span> button. Now switch back to your document and choose <span class="guimenu"><strong>Edit</strong></span> → <span class="guimenuitem"><strong>Paste</strong></span> from the <span class="application"><strong>gedit</strong></span> menu bar.
+			</div></blockquote></div><div class="para"><p></p>
+			The above text includes application names; system-wide menu names and items; application-specific menu names; and buttons and text found within a GUI interface, all presented in proportional bold and all distinguishable by context.
+		</div><div class="para"><p></p>
+			<code class="command"><em class="replaceable"><code>Mono-spaced Bold Italic</code></em></code> or <span class="application"><strong><em class="replaceable"><code>Proportional Bold Italic</code></em></strong></span>
+		</div><div class="para"><p></p>
+			Whether mono-spaced bold or proportional bold, the addition of italics indicates replaceable or variable text. Italics denotes text you do not input literally or displayed text that changes depending on circumstance. For example:
+		</div><div class="blockquote"><blockquote class="blockquote"><div class="para"><p></p>
+				To connect to a remote machine using ssh, type <code class="command">ssh <em class="replaceable"><code>username</code></em>@<em class="replaceable"><code>domain.name</code></em></code> at a shell prompt. If the remote machine is <code class="filename">example.com</code> and your username on that machine is john, type <code class="command">ssh john@example.com</code>.
+			</div><div class="para"><p></p>
+				The <code class="command">mount -o remount <em class="replaceable"><code>file-system</code></em></code> command remounts the named file system. For example, to remount the <code class="filename">/home</code> file system, the command is <code class="command">mount -o remount /home</code>.
+			</div><div class="para"><p></p>
+				To see the version of a currently installed package, use the <code class="command">rpm -q <em class="replaceable"><code>package</code></em></code> command. It will return a result as follows: <code class="command"><em class="replaceable"><code>package-version-release</code></em></code>.
+			</div></blockquote></div><div class="para"><p></p>
+			Note the words in bold italics above — username, domain.name, file-system, package, version and release. Each word is a placeholder, either for text you enter when issuing a command or for text displayed by the system.
+		</div><div class="para"><p></p>
+			Aside from standard usage for presenting the title of a work, italics denotes the first use of a new and important term. For example:
+		</div><div class="blockquote"><blockquote class="blockquote"><div class="para"><p></p>
+				Publican is a <em class="firstterm">DocBook</em> publishing system.
+			</div></blockquote></div></div><div class="section"><div class="titlepage"><div><div><h3 class="title" id="id651952">1.2. Pull-quote Conventions</h3></div></div></div><div class="para"><p></p>
+			Terminal output and source code listings are set off visually from the surrounding text.
+		</div><div class="para"><p></p>
+			Output sent to a terminal is set in <code class="computeroutput">mono-spaced roman</code> and presented thus:
+		</div><pre class="screen">books        Desktop   documentation  drafts  mss    photos   stuff  svn
+books_tests  Desktop1  downloads      images  notes  scripts  svgs</pre><div class="para"><p></p>
+			Source-code listings are also set in <code class="computeroutput">mono-spaced roman</code> but add syntax highlighting as follows:
+		</div><pre class="programlisting">package org.<span class="perl_Function">jboss</span>.<span class="perl_Function">book</span>.<span class="perl_Function">jca</span>.<span class="perl_Function">ex1</span>;
+
+<span class="perl_Keyword">import</span> javax.naming.InitialContext;
+
+<span class="perl_Keyword">public</span> <span class="perl_Keyword">class</span> ExClient
+{
+   <span class="perl_Keyword">public</span> <span class="perl_DataType">static</span> <span class="perl_DataType">void</span> <span class="perl_Function">main</span>(String args[]) 
+       <span class="perl_Keyword">throws</span> Exception
+   {
+      InitialContext iniCtx = <span class="perl_Keyword">new</span> InitialContext();
+      Object         ref    = iniCtx.<span class="perl_Function">lookup</span>(<span class="perl_String">"EchoBean"</span>);
+      EchoHome       home   = (EchoHome) ref;
+      Echo           echo   = home.<span class="perl_Function">create</span>();
+
+      System.<span class="perl_Function">out</span>.<span class="perl_Function">println</span>(<span class="perl_String">"Created Echo"</span>);
+
+      System.<span class="perl_Function">out</span>.<span class="perl_Function">println</span>(<span class="perl_String">"Echo.echo('Hello') = "</span> + echo.<span class="perl_Function">echo</span>(<span class="perl_String">"Hello"</span>));
+   }
+}</pre></div><div class="section"><div class="titlepage"><div><div><h3 class="title" id="id766970">1.3. Notes and Warnings</h3></div></div></div><div class="para"><p></p>
+			Finally, we use three visual styles to draw attention to information that might otherwise be overlooked.
+		</div><div class="note"><div class="admonition_header"><h2>Note</h2></div><div class="admonition"><div class="para"><p></p>
+				Notes are tips, shortcuts or alternative approaches to the task at hand. Ignoring a note should have no negative consequences, but you might miss out on a trick that makes your life easier.
+			</div></div></div><div class="important"><div class="admonition_header"><h2>Important</h2></div><div class="admonition"><div class="para"><p></p>
+				Important boxes detail things that are easily missed: configuration changes that only apply to the current session, or services that need restarting before an update will apply. Ignoring a box labeled 'Important' will not cause data loss but may cause irritation and frustration.
+			</div></div></div><div class="warning"><div class="admonition_header"><h2>Warning</h2></div><div class="admonition"><div class="para"><p></p>
+				Warnings should not be ignored. Ignoring warnings will most likely cause data loss.
+			</div></div></div></div></div><div class="section"><div class="titlepage"><div><div><h2 class="title" id="id764179">2. We Need Feedback!</h2></div></div></div><a id="id644244" class="indexterm"></a><div class="para"><p></p>
+		You should over ride this by creating your own local Feedback.xml file.
+	</div></div></div><div class="chapter" id="chap-Getting_Started_with_Entities"><div class="titlepage"><div><div><h2 class="title">Chapter 1. Getting Started with Entities</h2></div></div></div><div class="toc"><dl><dt><span class="section"><a href="#About_Primary_Entities">1.1. About Primary Entities</a></span></dt><dt><span class="section"><a href="#Primary_Entity_Types">1.2. Primary Entity Types</a></span></dt><dt><span class="section"><a href="#About_Secondary_Entities">1.3. About Secondary Entities</a></span></dt><dt><span class="section"><a href="#Standard_Methods_for_Primary_Entities">1.4. Standard Methods for Primary Entities</a></span></dt><dt><span class="section"><a href="#About_URL_Components">1.5. About URL Components</a></span></dt><dt><span class="section"><a href="#About_REST_Methods">1.6. About REST Methods</a></span></dt><dt><span class="section"><a href="#About_JSONP">1.7. About JSONP</a></span></dt><dt><span class="section"><a href="#About_json_and_jsonp_Methods">1.8. About json and jsonp Methods</a></span></dt><dt><span class="section"><a href="#Additional_Methods_for_Topic_Entities">1.9. Additional Methods for Topic Entities</a></span></dt><dt><span class="section"><a href="#About_the_Revisions_Collection">1.10. About the Revisions Collection</a></span></dt></dl></div><div class="section"><div class="titlepage"><div><div><h2 class="title" id="About_Primary_Entities">1.1. About Primary Entities</h2></div></div></div><div class="para"><p></p>
+		A Primary Entity stands alone in that its life cycle doesn't depend on another entity. They have sixteen standard methods stemming from the four HTTP methods - GET, PUT, POST and DELETE.
+	</div><div class="see-also-list see-also-list"><p></p><h5 class="formalpara" id="id755384">See Also:</h5>
+			<div class="itemizedlist"><ul><li class="listitem"><div class="para"><p></p>
+						<a class="xref" href="#Primary_Entity_Types">Section 1.2, “Primary Entity Types”</a>
+					</div></li><li class="listitem"><div class="para"><p></p>
+						<a class="xref" href="#Standard_Methods_for_Primary_Entities">Section 1.4, “Standard Methods for Primary Entities”</a>
+					</div></li></ul></div>
+
+		</div><div class="simplesect"><div class="titlepage"><div><div><h1 class="title"></h1></div></div></div><div class="RoleCreateBugPara RoleCreateBugPara"><p></p>
+		<a href="http://skynet.usersys.redhat.com:8080/TopicIndex/TopicEdit.seam?topicTopicId=10915">Edit this topic</a>
+	</div></div><div class="simplesect"><div class="titlepage"><div><div><h1 class="title"></h1></div></div></div><div class="RoleCreateBugPara RoleCreateBugPara"><p></p>
+		<a href="https://bugzilla.redhat.com/enter_bug.cgi?cf_environment=Instance+Name%3A+Not+Defined%0ABuild%3A+CSProcessor+Builder+Version+1.6%0ABuild+Filter%3A+null%0ABuild+Name%3A+%0ABuild+Date%3A+13-09-2012+08%3A42%3A53&amp;cf_build_id=10915-190610+13+Sep+2012+08%3A42+en-US&amp;assigned_to=hlawrenc%40redhat.com&amp;product=PressGang+CCMS&amp;component=Documentation&amp;version=1.x&amp;keywords=Documentation">Report a bug</a>
+	</div></div></div><div class="section"><div class="titlepage"><div><div><h2 class="title" id="Primary_Entity_Types">1.2. Primary Entity Types</h2></div></div></div><div class="table"><h6>Table 1.1. Listing of Primary Entity Types in the Skynet REST Interface</h6><div class="table-contents"><table summary="Listing of Primary Entity Types in the Skynet REST Interface" border="1"><colgroup><col width="100%" align="left" class="c1" /></colgroup><thead><tr><th align="left">
+						Entity Type
+					</th></tr></thead><tbody><tr><td align="left">
+						expanddatatrunk
+					</td></tr><tr><td align="left">
+						blobconstant
+					</td></tr><tr><td align="left">
+						stringconstant
+					</td></tr><tr><td align="left">
+						role
+					</td></tr><tr><td align="left">
+						user
+					</td></tr><tr><td align="left">
+						topic
+					</td></tr><tr><td align="left">
+						tag
+					</td></tr><tr><td align="left">
+						category
+					</td></tr><tr><td align="left">
+						image
+					</td></tr><tr><td align="left">
+						project
+					</td></tr><tr><td align="left">
+						propertytag
+					</td></tr><tr><td align="left">
+						translatedtopic
+					</td></tr><tr><td align="left">
+						translatedtopicstring
+					</td></tr></tbody></table></div></div><br class="table-break" /><div class="simplesect"><div class="titlepage"><div><div><h1 class="title"></h1></div></div></div><div class="RoleCreateBugPara RoleCreateBugPara"><p></p>
+		<a href="http://skynet.usersys.redhat.com:8080/TopicIndex/TopicEdit.seam?topicTopicId=11051">Edit this topic</a>
+	</div></div><div class="simplesect"><div class="titlepage"><div><div><h1 class="title"></h1></div></div></div><div class="RoleCreateBugPara RoleCreateBugPara"><p></p>
+		<a href="https://bugzilla.redhat.com/enter_bug.cgi?cf_environment=Instance+Name%3A+Not+Defined%0ABuild%3A+CSProcessor+Builder+Version+1.6%0ABuild+Filter%3A+null%0ABuild+Name%3A+%0ABuild+Date%3A+13-09-2012+08%3A42%3A53&amp;cf_build_id=11051-196283+13+Sep+2012+08%3A42+en-US&amp;assigned_to=hlawrenc%40redhat.com&amp;product=PressGang+CCMS&amp;component=Documentation&amp;version=1.x&amp;keywords=Documentation">Report a bug</a>
+	</div></div></div><div class="section"><div class="titlepage"><div><div><h2 class="title" id="About_Secondary_Entities">1.3. About Secondary Entities</h2></div></div></div><div class="para"><p></p>
+		Secondary entities are those on the many side of a one-to-many relationship. They do not have POST methods, because they cannot exist without a primary entity. They can only be created through the POST or PUT methods of their parents.
+	</div><div class="see-also-list see-also-list"><p></p><h5 class="formalpara" id="id760777">See Also:</h5>
+			<div class="itemizedlist"><ul><li class="listitem"><div class="para"><p></p>
+						<a class="xref" href="#Create_a_Secondary_Entity">Section 2.1, “Create a Secondary Entity”</a>
+					</div></li></ul></div>
+
+		</div><div class="simplesect"><div class="titlepage"><div><div><h1 class="title"></h1></div></div></div><div class="RoleCreateBugPara RoleCreateBugPara"><p></p>
+		<a href="http://skynet.usersys.redhat.com:8080/TopicIndex/TopicEdit.seam?topicTopicId=10916">Edit this topic</a>
+	</div></div><div class="simplesect"><div class="titlepage"><div><div><h1 class="title"></h1></div></div></div><div class="RoleCreateBugPara RoleCreateBugPara"><p></p>
+		<a href="https://bugzilla.redhat.com/enter_bug.cgi?cf_environment=Instance+Name%3A+Not+Defined%0ABuild%3A+CSProcessor+Builder+Version+1.6%0ABuild+Filter%3A+null%0ABuild+Name%3A+%0ABuild+Date%3A+13-09-2012+08%3A42%3A53&amp;cf_build_id=10916-195795+13+Sep+2012+08%3A42+en-US&amp;assigned_to=hlawrenc%40redhat.com&amp;product=PressGang+CCMS&amp;component=Documentation&amp;version=1.x&amp;keywords=Documentation">Report a bug</a>
+	</div></div></div><div class="section"><div class="titlepage"><div><div><h2 class="title" id="Standard_Methods_for_Primary_Entities">1.4. Standard Methods for Primary Entities</h2></div></div></div><div class="table"><h6>Table 1.2. Methods</h6><div class="table-contents"><table summary="Methods" border="1"><colgroup><col width="100%" align="left" class="c1" /></colgroup><thead><tr><th align="left">
+						Functions
+					</th></tr></thead><tbody><tr><td align="left">
+						<code class="code">/{primary entity name}/get/json/{id}</code>
+					</td></tr><tr><td align="left">
+						<code class="code">/{primary entity name}/get/jsonp/{id}</code>
+					</td></tr><tr><td align="left">
+						<code class="code">/{primary entity name plural}/get/json/all</code>
+					</td></tr><tr><td align="left">
+						<code class="code">/{primary entity name plural}/get/jsonp/all</code>
+					</td></tr><tr><td align="left">
+						<code class="code">/{primary entity name}/put/json</code>
+					</td></tr><tr><td align="left">
+						<code class="code">/{primary entity name}/put/jsonp</code>
+					</td></tr><tr><td align="left">
+						<code class="code">/{primary entity name plural}/put/json</code>
+					</td></tr><tr><td align="left">
+						<code class="code">/{primary entity name plural}/put/jsonp</code>
+					</td></tr><tr><td align="left">
+						<code class="code">/{primary entity name}/post/json</code>
+					</td></tr><tr><td align="left">
+						<code class="code">/{primary entity name}/post/jsonp</code>
+					</td></tr><tr><td align="left">
+						<code class="code">/{primary entity name plural}/post/json</code>
+					</td></tr><tr><td align="left">
+						<code class="code">/{primary entity name plural}/post/jsonp</code>
+					</td></tr><tr><td align="left">
+						<code class="code">/{primary entity name}/delete/json/{id}</code>
+					</td></tr><tr><td align="left">
+						<code class="code">/{primary entity name}/delete/jsonp/{id}</code>
+					</td></tr><tr><td align="left">
+						<code class="code">/{primary entity name plural}/delete/json/{ids}</code>
+					</td></tr><tr><td align="left">
+						<code class="code">/{primary entity name plural}/delete/jsonp/{ids}</code>
+					</td></tr></tbody></table></div></div><br class="table-break" /><div class="simplesect"><div class="titlepage"><div><div><h1 class="title"></h1></div></div></div><div class="RoleCreateBugPara RoleCreateBugPara"><p></p>
+		<a href="http://skynet.usersys.redhat.com:8080/TopicIndex/TopicEdit.seam?topicTopicId=10917">Edit this topic</a>
+	</div></div><div class="simplesect"><div class="titlepage"><div><div><h1 class="title"></h1></div></div></div><div class="RoleCreateBugPara RoleCreateBugPara"><p></p>
+		<a href="https://bugzilla.redhat.com/enter_bug.cgi?cf_environment=Instance+Name%3A+Not+Defined%0ABuild%3A+CSProcessor+Builder+Version+1.6%0ABuild+Filter%3A+null%0ABuild+Name%3A+%0ABuild+Date%3A+13-09-2012+08%3A42%3A53&amp;cf_build_id=10917-203379+13+Sep+2012+08%3A42+en-US&amp;assigned_to=hlawrenc%40redhat.com&amp;product=PressGang+CCMS&amp;component=Documentation&amp;version=1.x&amp;keywords=Documentation">Report a bug</a>
+	</div></div></div><div class="section"><div class="titlepage"><div><div><h2 class="title" id="About_URL_Components">1.5. About URL Components</h2></div></div></div><div class="para"><p></p>
+		The URLs are constructed with several standard components:
+	</div><div class="orderedlist"><ol><li class="listitem"><div class="para"><p></p>
+				The first component of the URL is the entity type (tag, topic, blobconstant etc). If the method acts on or returns multiple entities, the first component must be made plural (tags, topics, blobconstants etc).
+			</div></li><li class="listitem"><div class="para"><p></p>
+				The second component is the HTTP method that is used when calling the function (get, put, post or delete).
+			</div></li><li class="listitem"><div class="para"><p></p>
+				The third component is the type of data that is consumed and produced, for example, JSON or JSONP. 
+				<div class="note"><div class="admonition_header"><h2>Note</h2></div><div class="admonition"><div class="para"><p></p>
+						Technically the GET and DELETE methods will consume any data type, since they don't take any data in the body of the request.
+					</div></div></div>
+
+			</div></li><li class="listitem"><div class="para"><p></p>
+				For GET and DELETE methods only: The fourth component will be an entity id or ids, or the text "all". When specifying multiple ids, the format of the query parameter is "ids;1;3;235". For example, <a href="http://localhost:8080/TopicIndex/seam/resource/rest/1/tags/delete/json?ids;1;3;235">http://localhost:8080/TopicIndex/seam/resource/rest/1/tags/delete/json?ids;1;3;235</a>.
+			</div></li></ol></div><div class="see-also-list see-also-list"><p></p><h5 class="formalpara" id="id631678">See Also:</h5>
+			<div class="itemizedlist"><ul><li class="listitem"><div class="para"><p></p>
+						<a class="xref" href="#About_REST_Methods">Section 1.6, “About REST Methods”</a>
+					</div></li></ul></div>
+
+		</div><div class="simplesect"><div class="titlepage"><div><div><h1 class="title"></h1></div></div></div><div class="RoleCreateBugPara RoleCreateBugPara"><p></p>
+		<a href="http://skynet.usersys.redhat.com:8080/TopicIndex/TopicEdit.seam?topicTopicId=10918">Edit this topic</a>
+	</div></div><div class="simplesect"><div class="titlepage"><div><div><h1 class="title"></h1></div></div></div><div class="RoleCreateBugPara RoleCreateBugPara"><p></p>
+		<a href="https://bugzilla.redhat.com/enter_bug.cgi?cf_environment=Instance+Name%3A+Not+Defined%0ABuild%3A+CSProcessor+Builder+Version+1.6%0ABuild+Filter%3A+null%0ABuild+Name%3A+%0ABuild+Date%3A+13-09-2012+08%3A42%3A53&amp;cf_build_id=10918-203379+13+Sep+2012+08%3A42+en-US&amp;assigned_to=hlawrenc%40redhat.com&amp;product=PressGang+CCMS&amp;component=Documentation&amp;version=1.x&amp;keywords=Documentation">Report a bug</a>
+	</div></div></div><div class="section"><div class="titlepage"><div><div><h2 class="title" id="About_REST_Methods">1.6. About REST Methods</h2></div></div></div><div class="para"><p></p>
+		REST uses the four HTTP methods - GET, PUT, POST and DELETE. GET methods retrieve the entities, PUT methods update entities, POST methods create entities and DELETE methods remove entities.
+	</div><div class="para"><p></p>
+		The PUT and POST methods take a representation of the entities to be edited or created in the body of the request.
+	</div><div class="para"><p></p>
+		PUT methods require that the id of the entity is set. This is how the system knows which entities to update. POST methods ignore any ids, as these are generated by the system when a new entity is created.
+	</div><div class="para"><p></p>
+		All REST methods return the entities that were touched by the request. GET and DELETE methods will return the state of the entities as they existed when the methods was called and PUT and POST methods will return the updated state of the entities after any changes have been made.
+	</div><div class="simplesect"><div class="titlepage"><div><div><h1 class="title"></h1></div></div></div><div class="RoleCreateBugPara RoleCreateBugPara"><p></p>
+		<a href="http://skynet.usersys.redhat.com:8080/TopicIndex/TopicEdit.seam?topicTopicId=10919">Edit this topic</a>
+	</div></div><div class="simplesect"><div class="titlepage"><div><div><h1 class="title"></h1></div></div></div><div class="RoleCreateBugPara RoleCreateBugPara"><p></p>
+		<a href="https://bugzilla.redhat.com/enter_bug.cgi?cf_environment=Instance+Name%3A+Not+Defined%0ABuild%3A+CSProcessor+Builder+Version+1.6%0ABuild+Filter%3A+null%0ABuild+Name%3A+%0ABuild+Date%3A+13-09-2012+08%3A42%3A53&amp;cf_build_id=10919-195812+13+Sep+2012+08%3A42+en-US&amp;assigned_to=hlawrenc%40redhat.com&amp;product=PressGang+CCMS&amp;component=Documentation&amp;version=1.x&amp;keywords=Documentation">Report a bug</a>
+	</div></div></div><div class="section"><div class="titlepage"><div><div><h2 class="title" id="About_JSONP">1.7. About JSONP</h2></div></div></div><div class="para"><p></p>
+		JSON with Padding utilises the platform and language independence of JSON and adds cross-domain functionality. By using the JSONP callback function, you can specify the method that the resulting JSON will be passed back in to. Using JSONP you are able to load JSON from an external server into the javascript on your page.
+	</div><div class="simplesect"><div class="titlepage"><div><div><h1 class="title"></h1></div></div></div><div class="RoleCreateBugPara RoleCreateBugPara"><p></p>
+		<a href="http://skynet.usersys.redhat.com:8080/TopicIndex/TopicEdit.seam?topicTopicId=11050">Edit this topic</a>
+	</div></div><div class="simplesect"><div class="titlepage"><div><div><h1 class="title"></h1></div></div></div><div class="RoleCreateBugPara RoleCreateBugPara"><p></p>
+		<a href="https://bugzilla.redhat.com/enter_bug.cgi?cf_environment=Instance+Name%3A+Not+Defined%0ABuild%3A+CSProcessor+Builder+Version+1.6%0ABuild+Filter%3A+null%0ABuild+Name%3A+%0ABuild+Date%3A+13-09-2012+08%3A42%3A53&amp;cf_build_id=11050-196125+13+Sep+2012+08%3A42+en-US&amp;assigned_to=hlawrenc%40redhat.com&amp;product=PressGang+CCMS&amp;component=Documentation&amp;version=1.x&amp;keywords=Documentation">Report a bug</a>
+	</div></div></div><div class="section"><div class="titlepage"><div><div><h2 class="title" id="About_json_and_jsonp_Methods">1.8. About json and jsonp Methods</h2></div></div></div><div class="prereqs-list prereqs-list"><p></p><h5 class="formalpara" id="id670198">Prerequisites:</h5>
+			<div class="itemizedlist"><ul><li class="listitem"><div class="para"><p></p>
+						<a class="xref" href="#About_JSONP">Section 1.7, “About JSONP”</a>
+					</div></li></ul></div>
+
+		</div><div class="para"><p></p>
+		The json methods return plain JSON objects, while the jsonp methods will return JSON objects wrapped in a function call to allow cross domain access to Javascript applications.
+	</div><div class="para"><p></p>
+		For all jsonp methods, there is a query parameter called <span class="guilabel"><strong>callback</strong></span> that defines the name of the function that will be called with the results. Using jQuery these jsonp functions can be called as follows: 
+<pre class="screen">$.getJSON("http://localhost:8080/TopicIndex/seam/resource/rest/1/topic/get/jsonp/33?callback=?", function(json) {/* do something here */});</pre>
+
+	</div><div class="simplesect"><div class="titlepage"><div><div><h1 class="title"></h1></div></div></div><div class="RoleCreateBugPara RoleCreateBugPara"><p></p>
+		<a href="http://skynet.usersys.redhat.com:8080/TopicIndex/TopicEdit.seam?topicTopicId=10920">Edit this topic</a>
+	</div></div><div class="simplesect"><div class="titlepage"><div><div><h1 class="title"></h1></div></div></div><div class="RoleCreateBugPara RoleCreateBugPara"><p></p>
+		<a href="https://bugzilla.redhat.com/enter_bug.cgi?cf_environment=Instance+Name%3A+Not+Defined%0ABuild%3A+CSProcessor+Builder+Version+1.6%0ABuild+Filter%3A+null%0ABuild+Name%3A+%0ABuild+Date%3A+13-09-2012+08%3A42%3A53&amp;cf_build_id=10920-203379+13+Sep+2012+08%3A42+en-US&amp;assigned_to=hlawrenc%40redhat.com&amp;product=PressGang+CCMS&amp;component=Documentation&amp;version=1.x&amp;keywords=Documentation">Report a bug</a>
+	</div></div></div><div class="section"><div class="titlepage"><div><div><h2 class="title" id="Additional_Methods_for_Topic_Entities">1.9. Additional Methods for Topic Entities</h2></div></div></div><div class="para"><p></p>
+		Topic entities have a number of additional GET methods over the other primary entities.
+	</div><div class="table"><h6>Table 1.3. Additonal Methods</h6><div class="table-contents"><table summary="Additonal Methods" border="1"><colgroup><col width="50%" align="left" class="c1" /><col width="50%" align="left" class="c2" /></colgroup><thead><tr><th align="left">
+						Method Syntax
+					</th><th align="left">
+						Description
+					</th></tr></thead><tbody><tr><td align="left">
+						<code class="code">/topics/get/atom/{query}</code>
+					</td><td align="left">
+						Returns the result of a query in the ATOM format*
+					</td></tr><tr><td align="left">
+						<code class="code">/topics/get/json/{query}</code>
+					</td><td align="left">
+						Returns the result of a query in the JSON format*
+					</td></tr><tr><td align="left">
+						<code class="code">/topics/get/xml/all</code>
+					</td><td align="left">
+						Returns all topics in the XML format
+					</td></tr><tr><td align="left">
+						<code class="code">/topic/get/xml/{id}</code>
+					</td><td align="left">
+						Returns a single topic in the XML format
+					</td></tr><tr><td align="left">
+						<code class="code">/topic/get/xml/{id}/xml</code>
+					</td><td align="left">
+						Returns the XML content of a single topic
+					</td></tr><tr><td align="left">
+						<code class="code">/topic/get/xml/{id}/xmlContainedIn</code>
+					</td><td align="left">
+						Returns the XML content of a topic enclosed in a new XML element supplied by the container query parameter
+					</td></tr><tr><td align="left">
+						<code class="code">/topic/get/xml/{id}/xmlNoContainer</code>
+					</td><td align="left">
+						Returns the XML content of a topic without the root section element, and without the title element if the includeTitle query parameter is set to false
+					</td></tr><tr><td align="left">
+						<code class="code">/topic/get/html/{id}/html</code>
+					</td><td align="left">
+						Returns the rendered HTML for the specified topic
+					</td></tr></tbody></table></div></div><br class="table-break" /><div class="note"><div class="admonition_header"><h2>Note</h2></div><div class="admonition"><div class="para"><p></p>
+			* The format for the queries used by the first two methods are the query parameters used by the Skynet web interface search results screen (e.g. <code class="code">tag19=1&amp;tag119=1&amp;catint5=And&amp;tag133=1&amp;tag14=0&amp;tag132=1</code>) prefixed with <code class="code">query;</code>, and with all ampersand symbols replaced by semi colons. So the final results looks like <code class="code">query;tag19=1;tag119=1;catint5=And;tag133=1;tag14=0;tag132=1.</code>
+		</div></div></div><div class="simplesect"><div class="titlepage"><div><div><h1 class="title"></h1></div></div></div><div class="RoleCreateBugPara RoleCreateBugPara"><p></p>
+		<a href="http://skynet.usersys.redhat.com:8080/TopicIndex/TopicEdit.seam?topicTopicId=10921">Edit this topic</a>
+	</div></div><div class="simplesect"><div class="titlepage"><div><div><h1 class="title"></h1></div></div></div><div class="RoleCreateBugPara RoleCreateBugPara"><p></p>
+		<a href="https://bugzilla.redhat.com/enter_bug.cgi?cf_environment=Instance+Name%3A+Not+Defined%0ABuild%3A+CSProcessor+Builder+Version+1.6%0ABuild+Filter%3A+null%0ABuild+Name%3A+%0ABuild+Date%3A+13-09-2012+08%3A42%3A53&amp;cf_build_id=10921-203379+13+Sep+2012+08%3A42+en-US&amp;assigned_to=hlawrenc%40redhat.com&amp;product=PressGang+CCMS&amp;component=Documentation&amp;version=1.x&amp;keywords=Documentation">Report a bug</a>
+	</div></div></div><div class="section"><div class="titlepage"><div><div><h2 class="title" id="About_the_Revisions_Collection">1.10. About the Revisions Collection</h2></div></div></div><div class="para"><p></p>
+		All entities have a collection called revisions. This is read only collection that contains the previous versions of an entity. It can be expanded in the same way as any other collection, but cannot be directly modified by any PUT or POST operations.
+	</div><div class="simplesect"><div class="titlepage"><div><div><h1 class="title"></h1></div></div></div><div class="RoleCreateBugPara RoleCreateBugPara"><p></p>
+		<a href="http://skynet.usersys.redhat.com:8080/TopicIndex/TopicEdit.seam?topicTopicId=10922">Edit this topic</a>
+	</div></div><div class="simplesect"><div class="titlepage"><div><div><h1 class="title"></h1></div></div></div><div class="RoleCreateBugPara RoleCreateBugPara"><p></p>
+		<a href="https://bugzilla.redhat.com/enter_bug.cgi?cf_environment=Instance+Name%3A+Not+Defined%0ABuild%3A+CSProcessor+Builder+Version+1.6%0ABuild+Filter%3A+null%0ABuild+Name%3A+%0ABuild+Date%3A+13-09-2012+08%3A42%3A53&amp;cf_build_id=10922-195844+13+Sep+2012+08%3A42+en-US&amp;assigned_to=hlawrenc%40redhat.com&amp;product=PressGang+CCMS&amp;component=Documentation&amp;version=1.x&amp;keywords=Documentation">Report a bug</a>
+	</div></div></div></div><div class="chapter" id="chap-Creating_and_Updating_in_the_REST_Interface"><div class="titlepage"><div><div><h2 class="title">Chapter 2. Creating and Updating in the REST Interface</h2></div></div></div><div class="toc"><dl><dt><span class="section"><a href="#Create_a_Secondary_Entity">2.1. Create a Secondary Entity</a></span></dt><dt><span class="section"><a href="#About_Entity_Relationships">2.2. About Many-To-Many Relationships</a></span></dt><dt><span class="section"><a href="#About_One-To-Many_Relationships">2.3. About One-To-Many Relationships</a></span></dt><dt><span class="section"><a href="#Create_or_Remove_a_Relationship">2.4. Create or Remove a Relationship</a></span></dt><dt><span class="section"><a href="#About_the_configuredParameters_Property">2.5. About the configuredParameters Property</a></span></dt></dl></div><div class="section"><div class="titlepage"><div><div><h2 class="title" id="Create_a_Secondary_Entity">2.1. Create a Secondary Entity</h2></div></div></div><div class="para"><p></p>
+		To create secondary entities you need add them through their parent entity. To do so:
+	</div><div class="procedure"><h6>Procedure 2.1. Task</h6><ol class="1"><li class="step"><div class="para"><p></p>
+				Create a PUT method to <a href="http://localhost:8080/TopicIndex/seam/resource/rest/1/topic/put/json">http://localhost:8080/TopicIndex/seam/resource/rest/1/topic/put/json</a>.
+			</div></li><li class="step"><div class="para"><p></p>
+				Use the following code as a template for the body of your PUT method and replace the values with your own.
+			</div><pre class="screen">
+{
+   "id":33,
+   "configuredParameters":["sourceUrls_OTM"],
+   "sourceUrls_OTM":{
+      "items":[
+         {
+           "title":"Google",
+           "description":"A search engine",
+           "url":"http://www.google.com",
+           "addItem":true,
+           "configuredParameters":["title","description","url"]
+         }
+      ]
+   }
+}
+</pre><div class="note"><div class="admonition_header"><h2>Note</h2></div><div class="admonition"><div class="para"><p></p>
+					Note that collections of One-To-Many relationships have the postfix "_OTM", and because you are creating a new entity the configuredParameters property has to be set on the secondary entity.
+				</div></div></div></li></ol></div><div class="formalpara"><p></p><h5 class="formalpara" id="id656181">Result</h5>
+			You have created a source URL entity and linked it to the topic with the ID that you specified.
+		</div><div class="simplesect"><div class="titlepage"><div><div><h1 class="title"></h1></div></div></div><div class="RoleCreateBugPara RoleCreateBugPara"><p></p>
+		<a href="http://skynet.usersys.redhat.com:8080/TopicIndex/TopicEdit.seam?topicTopicId=10923">Edit this topic</a>
+	</div></div><div class="simplesect"><div class="titlepage"><div><div><h1 class="title"></h1></div></div></div><div class="RoleCreateBugPara RoleCreateBugPara"><p></p>
+		<a href="https://bugzilla.redhat.com/enter_bug.cgi?cf_environment=Instance+Name%3A+Not+Defined%0ABuild%3A+CSProcessor+Builder+Version+1.6%0ABuild+Filter%3A+null%0ABuild+Name%3A+%0ABuild+Date%3A+13-09-2012+08%3A42%3A53&amp;cf_build_id=10923-195854+13+Sep+2012+08%3A42+en-US&amp;assigned_to=hlawrenc%40redhat.com&amp;product=PressGang+CCMS&amp;component=Documentation&amp;version=1.x&amp;keywords=Documentation">Report a bug</a>
+	</div></div></div><div class="section"><div class="titlepage"><div><div><h2 class="title" id="About_Entity_Relationships">2.2. About Many-To-Many Relationships</h2></div></div></div><div class="para"><p></p>
+		Many-To-Many relationships are where each entity is a primary entity that doesn't rely on the other for its life cycle, for example between a Topic and a Tag.
+	</div><div class="para"><p></p>
+		Modifying the relationships between these means creating or removing a relationship between two entities that currently exist (or between the entity that is being created with a POST method and an entity that currently exists).
+	</div><div class="simplesect"><div class="titlepage"><div><div><h1 class="title"></h1></div></div></div><div class="RoleCreateBugPara RoleCreateBugPara"><p></p>
+		<a href="http://skynet.usersys.redhat.com:8080/TopicIndex/TopicEdit.seam?topicTopicId=10974">Edit this topic</a>
+	</div></div><div class="simplesect"><div class="titlepage"><div><div><h1 class="title"></h1></div></div></div><div class="RoleCreateBugPara RoleCreateBugPara"><p></p>
+		<a href="https://bugzilla.redhat.com/enter_bug.cgi?cf_environment=Instance+Name%3A+Not+Defined%0ABuild%3A+CSProcessor+Builder+Version+1.6%0ABuild+Filter%3A+null%0ABuild+Name%3A+%0ABuild+Date%3A+13-09-2012+08%3A42%3A53&amp;cf_build_id=10974-203379+13+Sep+2012+08%3A42+en-US&amp;assigned_to=hlawrenc%40redhat.com&amp;product=PressGang+CCMS&amp;component=Documentation&amp;version=1.x&amp;keywords=Documentation">Report a bug</a>
+	</div></div></div><div class="section"><div class="titlepage"><div><div><h2 class="title" id="About_One-To-Many_Relationships">2.3. About One-To-Many Relationships</h2></div></div></div><div class="para"><p></p>
+		Are where the secondary entity (always on the many side) can't exist without the primary entity, for example between a Topic and Source URL.
+	</div><div class="para"><p></p>
+		Modifying the relationship between these means creating or removing the secondary entity.
+	</div><div class="simplesect"><div class="titlepage"><div><div><h1 class="title"></h1></div></div></div><div class="RoleCreateBugPara RoleCreateBugPara"><p></p>
+		<a href="http://skynet.usersys.redhat.com:8080/TopicIndex/TopicEdit.seam?topicTopicId=11049">Edit this topic</a>
+	</div></div><div class="simplesect"><div class="titlepage"><div><div><h1 class="title"></h1></div></div></div><div class="RoleCreateBugPara RoleCreateBugPara"><p></p>
+		<a href="https://bugzilla.redhat.com/enter_bug.cgi?cf_environment=Instance+Name%3A+Not+Defined%0ABuild%3A+CSProcessor+Builder+Version+1.6%0ABuild+Filter%3A+null%0ABuild+Name%3A+%0ABuild+Date%3A+13-09-2012+08%3A42%3A53&amp;cf_build_id=11049-196065+13+Sep+2012+08%3A42+en-US&amp;assigned_to=hlawrenc%40redhat.com&amp;product=PressGang+CCMS&amp;component=Documentation&amp;version=1.x&amp;keywords=Documentation">Report a bug</a>
+	</div></div></div><div class="section"><div class="titlepage"><div><div><h2 class="title" id="Create_or_Remove_a_Relationship">2.4. Create or Remove a Relationship</h2></div></div></div><div class="para"><p></p>
+		There are two types of relationships that you can create, a One-To-Many relationship or a Many-To-Many relationship.
+	</div><div class="procedure"><h6>Procedure 2.2. Many-To-Many:</h6><ol class="1"><li class="step"><div class="para"><p></p>
+				Create a PUT request to a URL in the format <a href="http://localhost:8080/TopicIndex/seam/resource/rest/1/user/put/json.">http://localhost:8080/TopicIndex/seam/resource/rest/1/user/put/json.</a>
+			</div></li><li class="step"><div class="para"><p></p>
+				Use the example code below to inform the body of your request. Change the values to suit your requirements. 
+<pre class="screen">
+{
+   "configuredParameters":["name","roles"],
+   "name":"atestuser",
+   "roles":{
+      "items":[
+         {
+            "id":2,
+           "addItem":true
+         }
+      ]
+   }
+}
+</pre>
+
+			</div></li></ol></div><div class="note"><div class="admonition_header"><h2>Note</h2></div><div class="admonition"><div class="para"><p></p>
+			<div class="itemizedlist"><ul><li class="listitem"><div class="para"><p></p>
+						In this example we are updating the name of the user as well as adding a relationship to the role with the id 2.
+					</div></li><li class="listitem"><div class="para"><p></p>
+						The addItem property set on the item in the roles item collection: If this is set to true, the item in the collection will be linked in a relationship. If the removeItem property was set to true, an existing relationship to the item in the collection would be removed.
+					</div></li></ul></div>
+
+		</div></div></div><div class="procedure"><h6>Procedure 2.3. One-To-Many:</h6><ul><li class="step"><div class="para"><p></p>
+				Create a secondary entity and link it to the primary entity.
+			</div></li></ul></div><div class="formalpara"><p></p><h5 class="formalpara" id="id722023">Result</h5>
+			You have created a relationship between a user and a role. If you defined your own parameters instead of using the example code, then you have created a relationship between the two parameters that you defined.
+		</div><div class="see-also-list see-also-list"><p></p><h5 class="formalpara" id="id632131">See Also:</h5>
+			<div class="itemizedlist"><ul><li class="listitem"><div class="para"><p></p>
+						<a class="xref" href="#Create_a_Secondary_Entity">Section 2.1, “Create a Secondary Entity”</a>
+					</div></li></ul></div>
+
+		</div><div class="simplesect"><div class="titlepage"><div><div><h1 class="title"></h1></div></div></div><div class="RoleCreateBugPara RoleCreateBugPara"><p></p>
+		<a href="http://skynet.usersys.redhat.com:8080/TopicIndex/TopicEdit.seam?topicTopicId=10975">Edit this topic</a>
+	</div></div><div class="simplesect"><div class="titlepage"><div><div><h1 class="title"></h1></div></div></div><div class="RoleCreateBugPara RoleCreateBugPara"><p></p>
+		<a href="https://bugzilla.redhat.com/enter_bug.cgi?cf_environment=Instance+Name%3A+Not+Defined%0ABuild%3A+CSProcessor+Builder+Version+1.6%0ABuild+Filter%3A+null%0ABuild+Name%3A+%0ABuild+Date%3A+13-09-2012+08%3A42%3A53&amp;cf_build_id=10975-203379+13+Sep+2012+08%3A42+en-US&amp;assigned_to=hlawrenc%40redhat.com&amp;product=PressGang+CCMS&amp;component=Documentation&amp;version=1.x&amp;keywords=Documentation">Report a bug</a>
+	</div></div></div><div class="section"><div class="titlepage"><div><div><h2 class="title" id="About_the_configuredParameters_Property">2.5. About the configuredParameters Property</h2></div></div></div><div class="para"><p></p>
+		The configuredParameters property is an array that lists the properties that are to be set in an update or create operation. When updating an entity, any property not mentioned in the configuredParameters property is not modified, and when creating an entity any property not mentioned in the configuredParameters property is not set. This helps to define the difference between "set a property to null" and "don't set a property".
+	</div><div class="simplesect"><div class="titlepage"><div><div><h1 class="title"></h1></div></div></div><div class="RoleCreateBugPara RoleCreateBugPara"><p></p>
+		<a href="http://skynet.usersys.redhat.com:8080/TopicIndex/TopicEdit.seam?topicTopicId=10976">Edit this topic</a>
+	</div></div><div class="simplesect"><div class="titlepage"><div><div><h1 class="title"></h1></div></div></div><div class="RoleCreateBugPara RoleCreateBugPara"><p></p>
+		<a href="https://bugzilla.redhat.com/enter_bug.cgi?cf_environment=Instance+Name%3A+Not+Defined%0ABuild%3A+CSProcessor+Builder+Version+1.6%0ABuild+Filter%3A+null%0ABuild+Name%3A+%0ABuild+Date%3A+13-09-2012+08%3A42%3A53&amp;cf_build_id=10976-190610+13+Sep+2012+08%3A42+en-US&amp;assigned_to=hlawrenc%40redhat.com&amp;product=PressGang+CCMS&amp;component=Documentation&amp;version=1.x&amp;keywords=Documentation">Report a bug</a>
+	</div></div></div></div><div class="chapter" id="chap-Manipulating_Request_Results"><div class="titlepage"><div><div><h2 class="title">Chapter 3. Manipulating Request Results</h2></div></div></div><div class="toc"><dl><dt><span class="section"><a href="#About_Entity_and_Collection_Request_Results">3.1. About Entity and Collection Request Results</a></span></dt><dt><span class="section"><a href="#Request_Results">3.2. Request Results</a></span></dt><dt><span class="section"><a href="#Expand_Collections_through_Requests">3.3. Expand Collections through Requests</a></span></dt><dt><span class="section"><a href="#Expand_Results_of_a_Method_Call">3.4. Expand Results of a Method Call</a></span></dt><dt><span class="section"><a href="#Refine_Expansion_Requests">3.5. Refine Expansion Requests</a></span></dt><dt><span class="section"><a href="#Nest_Expansion_Requests">3.6. Nest Expansion Requests</a></span></dt><dt><span class="section"><a href="#Access_the_Skynet_REST_Interface">3.7. Access the Skynet REST Interface</a></span></dt></dl></div><div class="section"><div class="titlepage"><div><div><h2 class="title" id="About_Entity_and_Collection_Request_Results">3.1. About Entity and Collection Request Results</h2></div></div></div><div class="para"><p></p>
+		When a request is made, by default a minimal amount of information about an entity or collection of entities is returned. For single entities, the basic properties are returned, while any collections will only display their properties and not the items contained by them.
+	</div><div class="see-also-list see-also-list"><p></p><h5 class="formalpara" id="id794788">See Also:</h5>
+			<div class="itemizedlist"><ul><li class="listitem"><div class="para"><p></p>
+						<a class="xref" href="#Request_Results">Section 3.2, “Request Results”</a>
+					</div></li></ul></div>
+
+		</div><div class="simplesect"><div class="titlepage"><div><div><h1 class="title"></h1></div></div></div><div class="RoleCreateBugPara RoleCreateBugPara"><p></p>
+		<a href="http://skynet.usersys.redhat.com:8080/TopicIndex/TopicEdit.seam?topicTopicId=10977">Edit this topic</a>
+	</div></div><div class="simplesect"><div class="titlepage"><div><div><h1 class="title"></h1></div></div></div><div class="RoleCreateBugPara RoleCreateBugPara"><p></p>
+		<a href="https://bugzilla.redhat.com/enter_bug.cgi?cf_environment=Instance+Name%3A+Not+Defined%0ABuild%3A+CSProcessor+Builder+Version+1.6%0ABuild+Filter%3A+null%0ABuild+Name%3A+%0ABuild+Date%3A+13-09-2012+08%3A42%3A53&amp;cf_build_id=10977-190610+13+Sep+2012+08%3A42+en-US&amp;assigned_to=hlawrenc%40redhat.com&amp;product=PressGang+CCMS&amp;component=Documentation&amp;version=1.x&amp;keywords=Documentation">Report a bug</a>
+	</div></div></div><div class="section"><div class="titlepage"><div><div><h2 class="title" id="Request_Results">3.2. Request Results</h2></div></div></div><div class="para"><p></p>
+		Example response from a single entity call to <a href="http://localhost:8080/TopicIndex/seam/resource/rest/1/tag/get/json/3">http://localhost:8080/TopicIndex/seam/resource/rest/1/tag/get/json/3</a>
+	</div><pre class="screen">
+{
+   "name":"Migration",
+   "description":"All migration tags, from previous versions or from other app servers.",
+   "categories":{
+      "size":1,
+      "expand":"categories",
+      "startExpandIndex":null,
+      "endExpandIndex":null,
+      "items":null
+   },
+   "childTags":{
+      "size":0,
+      "expand":"childtags",
+      "startExpandIndex":null,
+      "endExpandIndex":null,
+      "items":null
+   },
+   "parentTags":{
+      "size":0,
+      "expand":"parenttags",
+      "startExpandIndex":null,
+      "endExpandIndex":null,
+      "items":null
+   },
+   "properties":{
+      "size":0,
+      "expand":"properties",
+      "startExpandIndex":null,
+      "endExpandIndex":null,
+      "items":null
+   },
+   "id":3,
+   "selfLink":"http://localhost:8080/TopicIndex/seam/resource/rest/1/tag/get/json/3",
+   "editLink":"http://localhost:8080/TopicIndex/seam/resource/rest/1/tag/put/json/3",
+   "addLink":"http://localhost:8080/TopicIndex/seam/resource/rest/1/tag/post/json/3",
+   "expand":[
+      "categories",
+      "parenttags",
+      "childtags",
+      "properties"
+   ],
+   "removeItem":false,
+   "deleteLink":"http://localhost:8080/TopicIndex/seam/resource/rest/1/tag/delete/json/3",
+   "addItem":false,
+   "configuredParameters":null
+}
+</pre><div class="para"><p></p>
+		Example response of a multiple entity call to <a href="http://localhost:8080/TopicIndex/seam/resource/rest/1/tags/get/json/all">http://localhost:8080/TopicIndex/seam/resource/rest/1/tags/get/json/all</a>
+	</div><pre class="screen">
+{
+   "size":4,
+   "expand":"tags",
+   "startExpandIndex":null,
+   "endExpandIndex":null,
+   "items":null
+}
+</pre><div class="simplesect"><div class="titlepage"><div><div><h1 class="title"></h1></div></div></div><div class="RoleCreateBugPara RoleCreateBugPara"><p></p>
+		<a href="http://skynet.usersys.redhat.com:8080/TopicIndex/TopicEdit.seam?topicTopicId=10978">Edit this topic</a>
+	</div></div><div class="simplesect"><div class="titlepage"><div><div><h1 class="title"></h1></div></div></div><div class="RoleCreateBugPara RoleCreateBugPara"><p></p>
+		<a href="https://bugzilla.redhat.com/enter_bug.cgi?cf_environment=Instance+Name%3A+Not+Defined%0ABuild%3A+CSProcessor+Builder+Version+1.6%0ABuild+Filter%3A+null%0ABuild+Name%3A+%0ABuild+Date%3A+13-09-2012+08%3A42%3A53&amp;cf_build_id=10978-190610+13+Sep+2012+08%3A42+en-US&amp;assigned_to=hlawrenc%40redhat.com&amp;product=PressGang+CCMS&amp;component=Documentation&amp;version=1.x&amp;keywords=Documentation">Report a bug</a>
+	</div></div></div><div class="section"><div class="titlepage"><div><div><h2 class="title" id="Expand_Collections_through_Requests">3.3. Expand Collections through Requests</h2></div></div></div><div class="para"><p></p>
+		To return a populated collection, you need to supply an <em class="parameter"><code>expand</code></em> query parameter, which can be supplied to all entity REST methods. This parameter is a JSON representation of the <code class="code">com.redhat.topicindex.rest.expand.ExpandDataTrunk</code> class.
+	</div><div class="procedure"><h6>Procedure 3.1. Task</h6><ol class="1"><li class="step"><div class="para"><p></p>
+				Set the name property of one of the branch items of the ExpandDataTrunk instance to categories as in the example below.
+			</div><pre class="screen">
+{
+   "branches":[
+      {
+         "trunk":{
+            "name":"categories"
+         }
+      }
+   ]
+}
+</pre></li><li class="step"><div class="para"><p></p>
+				URL encode the JSON string, and supply it to the expand query parameter as such: <a href="http://localhost:8080/TopicIndex/seam/resource/rest/1/tag/get/json/3?expand=%7B%22branches%22%3A%5B%7B%22trunk%22%3A%7B%22name%22%3A%22categories%22%7D%7D%5D%7D.">http://localhost:8080/TopicIndex/seam/resource/rest/1/tag/get/json/3?expand=%7B%22branches%22%3A%5B%7B%22trunk%22%3A%7B%22name%22%3A%22categories%22%7D%7D%5D%7D.</a>
+			</div></li></ol></div><div class="formalpara"><p></p><h5 class="formalpara" id="id784493">Result</h5>
+			You receive results including the expanded section that you defined in your query. The collection now has a populated items property, which lists the category entities that the tag is related to. It will be presented in a format similar to the example below.
+		</div><div class="para"><p></p>
+		
+<pre class="screen">
+{
+   "name":"Migration",
+   "description":"All migration tags, from previous versions or from other app servers.",
+   "categories":{
+      "size":1,
+      "expand":"categories",
+      "startExpandIndex":0,
+      "endExpandIndex":1,
+      "items":[
+         {
+            "name":"Common Names",
+            "description":"",
+            "mutuallyExclusive":false,
+            "tags":{
+               "size":76,
+               "expand":"tags",
+               "startExpandIndex":null,
+               "endExpandIndex":null,
+               "items":null
+            },
+            "sort":19,
+            "id":17,
+            "selfLink":"http://localhost:8080/TopicIndex/seam/resource/rest/1/category/get/json/17",
+            "editLink":"http://localhost:8080/TopicIndex/seam/resource/rest/1/category/put/json/17",
+            "addLink":"http://localhost:8080/TopicIndex/seam/resource/rest/1/category/post/json/17",
+            "expand":[
+               "tags"
+            ],
+            "removeItem":false,
+            "deleteLink":"http://localhost:8080/TopicIndex/seam/resource/rest/1/category/delete/json/17",
+            "addItem":false,
+            "configuredParameters":null
+         }
+      ]
+   },
+   "childTags":{
+      "size":0,
+      "expand":"childtags",
+      "startExpandIndex":null,
+      "endExpandIndex":null,
+      "items":null
+   },
+   "parentTags":{
+      "size":0,
+      "expand":"parenttags",
+      "startExpandIndex":null,
+      "endExpandIndex":null,
+      "items":null
+   },
+   "properties":{
+      "size":0,
+      "expand":"properties",
+      "startExpandIndex":null,
+      "endExpandIndex":null,
+      "items":null
+   },
+   "id":3,
+   "selfLink":"http://localhost:8080/TopicIndex/seam/resource/rest/1/tag/get/json/3",
+   "editLink":"http://localhost:8080/TopicIndex/seam/resource/rest/1/tag/put/json/3",
+   "addLink":"http://localhost:8080/TopicIndex/seam/resource/rest/1/tag/post/json/3",
+   "expand":[
+      "categories",
+      "parenttags",
+      "childtags",
+      "properties"
+   ],
+   "removeItem":false,
+   "deleteLink":"http://localhost:8080/TopicIndex/seam/resource/rest/1/tag/delete/json/3",
+   "addItem":false,
+   "configuredParameters":null
+}
+</pre>
+
+	</div><div class="see-also-list see-also-list"><p></p><h5 class="formalpara" id="id722503">See Also:</h5>
+			<div class="itemizedlist"><ul><li class="listitem"><div class="para"><p></p>
+						<a class="xref" href="#Access_the_Skynet_REST_Interface">Section 3.7, “Access the Skynet REST Interface”</a>
+					</div></li></ul></div>
+
+		</div><div class="simplesect"><div class="titlepage"><div><div><h1 class="title"></h1></div></div></div><div class="RoleCreateBugPara RoleCreateBugPara"><p></p>
+		<a href="http://skynet.usersys.redhat.com:8080/TopicIndex/TopicEdit.seam?topicTopicId=10980">Edit this topic</a>
+	</div></div><div class="simplesect"><div class="titlepage"><div><div><h1 class="title"></h1></div></div></div><div class="RoleCreateBugPara RoleCreateBugPara"><p></p>
+		<a href="https://bugzilla.redhat.com/enter_bug.cgi?cf_environment=Instance+Name%3A+Not+Defined%0ABuild%3A+CSProcessor+Builder+Version+1.6%0ABuild+Filter%3A+null%0ABuild+Name%3A+%0ABuild+Date%3A+13-09-2012+08%3A42%3A53&amp;cf_build_id=10980-203379+13+Sep+2012+08%3A42+en-US&amp;assigned_to=hlawrenc%40redhat.com&amp;product=PressGang+CCMS&amp;component=Documentation&amp;version=1.x&amp;keywords=Documentation">Report a bug</a>
+	</div></div></div><div class="section"><div class="titlepage"><div><div><h2 class="title" id="Expand_Results_of_a_Method_Call">3.4. Expand Results of a Method Call</h2></div></div></div><div class="para"><p></p>
+		To expand the returned collection:
+	</div><div class="procedure"><h6>Procedure 3.2. Task</h6><ol class="1"><li class="step"><div class="para"><p></p>
+				Use the following code as a template and supply your own values.
+			</div><pre class="screen">
+{
+   "branches":[
+      {
+         "trunk":{
+            "name":"tags"
+         }
+      }
+   ]
+}
+</pre></li><li class="step"><div class="para"><p></p>
+				URL encode the JSON string, and supply it to the expand query parameter as such:<a href="http://localhost:8080/TopicIndex/seam/resource/rest/1/tags/get/json/all?expand=%7B%22branches%22%3A%5B%7B%22trunk%22%3A%7B%22name%22%3A%22tags%22%7D%7D%5D%7D.">http://localhost:8080/TopicIndex/seam/resource/rest/1/tags/get/json/all?expand=%7B%22branches%22%3A%5B%7B%22trunk%22%3A%7B%22name%22%3A%22tags%22%7D%7D%5D%7D.</a>
+			</div></li></ol></div><div class="formalpara"><p></p><h5 class="formalpara" id="id724845">Result</h5>
+			You receive results which includes all of the categories in expanded format. It will be presented in a format similar to the example below.
+		</div><div class="para"><p></p>
+		
+<pre class="screen">
+      
+{
+   "size":4,
+   "startExpandIndex":0,
+   "endExpandIndex":3,
+   "expand":"tags",
+   "items":[
+      {
+         "name":"Administrator",
+         "description":"Installation, Configuration and Operation",
+         "parentTags":{
+            "size":0,
+            "startExpandIndex":null,
+            "endExpandIndex":null,
+            "expand":"parenttags",
+            "items":null
+         },
+         "categories":{
+            "size":0,
+            "startExpandIndex":null,
+            "endExpandIndex":null,
+            "expand":"categories",
+            "items":null
+         },
+         "childTags":{
+            "size":0,
+            "startExpandIndex":null,
+            "endExpandIndex":null,
+            "expand":"childtags",
+            "items":null
+         },
+         "properties":{
+            "size":0,
+            "startExpandIndex":null,
+            "endExpandIndex":null,
+            "expand":"properties",
+            "items":null
+         },
+         "id":1,
+         "deleteLink":"http://localhost:8080/TopicIndex/seam/resource/rest/1/tag/delete/json/1",
+         "configuredParameters":null,
+         "selfLink":"http://localhost:8080/TopicIndex/seam/resource/rest/1/tag/get/json/1",
+         "editLink":"http://localhost:8080/TopicIndex/seam/resource/rest/1/tag/put/json/1",
+         "addLink":"http://localhost:8080/TopicIndex/seam/resource/rest/1/tag/post/json/1",
+         "expand":[
+            "categories",
+            "parenttags",
+            "childtags",
+            "properties"
+         ],
+         "addItem":false,
+         "removeItem":false
+      },
+      {
+         "name":"Developer",
+         "description":"Development",
+         "parentTags":{
+            "size":0,
+            "startExpandIndex":null,
+            "endExpandIndex":null,
+            "expand":"parenttags",
+            "items":null
+         },
+         "categories":{
+            "size":0,
+            "startExpandIndex":null,
+            "endExpandIndex":null,
+            "expand":"categories",
+            "items":null
+         },
+         "childTags":{
+            "size":0,
+            "startExpandIndex":null,
+            "endExpandIndex":null,
+            "expand":"childtags",
+            "items":null
+         },
+         "properties":{
+            "size":0,
+            "startExpandIndex":null,
+            "endExpandIndex":null,
+            "expand":"properties",
+            "items":null
+         },
+         "id":2,
+         "deleteLink":"http://localhost:8080/TopicIndex/seam/resource/rest/1/tag/delete/json/2",
+         "configuredParameters":null,
+         "selfLink":"http://localhost:8080/TopicIndex/seam/resource/rest/1/tag/get/json/2",
+         "editLink":"http://localhost:8080/TopicIndex/seam/resource/rest/1/tag/put/json/2",
+         "addLink":"http://localhost:8080/TopicIndex/seam/resource/rest/1/tag/post/json/2",
+         "expand":[
+            "categories",
+            "parenttags",
+            "childtags",
+            "properties"
+         ],
+         "addItem":false,
+         "removeItem":false
+      },
+      {
+         "name":"Migration",
+         "description":"All migration tags, from previous versions or from other app servers.",
+         "parentTags":{
+            "size":0,
+            "startExpandIndex":null,
+            "endExpandIndex":null,
+            "expand":"parenttags",
+            "items":null
+         },
+         "categories":{
+            "size":1,
+            "startExpandIndex":null,
+            "endExpandIndex":null,
+            "expand":"categories",
+            "items":null
+         },
+         "childTags":{
+            "size":0,
+            "startExpandIndex":null,
+            "endExpandIndex":null,
+            "expand":"childtags",
+            "items":null
+         },
+         "properties":{
+            "size":0,
+            "startExpandIndex":null,
+            "endExpandIndex":null,
+            "expand":"properties",
+            "items":null
+         },
+         "id":3,
+         "deleteLink":"http://localhost:8080/TopicIndex/seam/resource/rest/1/tag/delete/json/3",
+         "configuredParameters":null,
+         "selfLink":"http://localhost:8080/TopicIndex/seam/resource/rest/1/tag/get/json/3",
+         "editLink":"http://localhost:8080/TopicIndex/seam/resource/rest/1/tag/put/json/3",
+         "addLink":"http://localhost:8080/TopicIndex/seam/resource/rest/1/tag/post/json/3",
+         "expand":[
+            "categories",
+            "parenttags",
+            "childtags",
+            "properties"
+         ],
+         "addItem":false,
+         "removeItem":false
+      }
+   ]
+}
+</pre>
+
+	</div><div class="simplesect"><div class="titlepage"><div><div><h1 class="title"></h1></div></div></div><div class="RoleCreateBugPara RoleCreateBugPara"><p></p>
+		<a href="http://skynet.usersys.redhat.com:8080/TopicIndex/TopicEdit.seam?topicTopicId=10981">Edit this topic</a>
+	</div></div><div class="simplesect"><div class="titlepage"><div><div><h1 class="title"></h1></div></div></div><div class="RoleCreateBugPara RoleCreateBugPara"><p></p>
+		<a href="https://bugzilla.redhat.com/enter_bug.cgi?cf_environment=Instance+Name%3A+Not+Defined%0ABuild%3A+CSProcessor+Builder+Version+1.6%0ABuild+Filter%3A+null%0ABuild+Name%3A+%0ABuild+Date%3A+13-09-2012+08%3A42%3A53&amp;cf_build_id=10981-190676+13+Sep+2012+08%3A42+en-US&amp;assigned_to=hlawrenc%40redhat.com&amp;product=PressGang+CCMS&amp;component=Documentation&amp;version=1.x&amp;keywords=Documentation">Report a bug</a>
+	</div></div></div><div class="section"><div class="titlepage"><div><div><h2 class="title" id="Refine_Expansion_Requests">3.5. Refine Expansion Requests</h2></div></div></div><div class="para"><p></p>
+		The expand query parameter can be further refined with the start and end properties.
+	</div><div class="para"><p></p>
+		The start property sets the index of the first element to be expanded. If it is a negative value, it defines a position from the end of the collection. If omitted, it defaults to 0.
+	</div><div class="para"><p></p>
+		The end property sets the index of the last element to be expanded. If it is a negative value, it defines a position from the end of the collection. If omitted, it defaults to [the size of the collection] - 1.
+	</div><div class="procedure"><h6>Procedure 3.3. Task</h6><ul><li class="step"><div class="para"><p></p>
+				Use the following example code and supply your own values to refine your request.
+			</div><pre class="screen">
+{
+     "trunk":{
+        "name":"tags",
+        "start":1
+        "end":-1
+
+     }
+}
+</pre></li></ul></div><div class="formalpara"><p></p><h5 class="formalpara" id="id770129">Result</h5>
+			Expanded items from the second item (the REST interface uses a 0 based index) to the second last item have been returned.
+		</div><div class="simplesect"><div class="titlepage"><div><div><h1 class="title"></h1></div></div></div><div class="RoleCreateBugPara RoleCreateBugPara"><p></p>
+		<a href="http://skynet.usersys.redhat.com:8080/TopicIndex/TopicEdit.seam?topicTopicId=10982">Edit this topic</a>
+	</div></div><div class="simplesect"><div class="titlepage"><div><div><h1 class="title"></h1></div></div></div><div class="RoleCreateBugPara RoleCreateBugPara"><p></p>
+		<a href="https://bugzilla.redhat.com/enter_bug.cgi?cf_environment=Instance+Name%3A+Not+Defined%0ABuild%3A+CSProcessor+Builder+Version+1.6%0ABuild+Filter%3A+null%0ABuild+Name%3A+%0ABuild+Date%3A+13-09-2012+08%3A42%3A53&amp;cf_build_id=10982-195879+13+Sep+2012+08%3A42+en-US&amp;assigned_to=hlawrenc%40redhat.com&amp;product=PressGang+CCMS&amp;component=Documentation&amp;version=1.x&amp;keywords=Documentation">Report a bug</a>
+	</div></div></div><div class="section"><div class="titlepage"><div><div><h2 class="title" id="Nest_Expansion_Requests">3.6. Nest Expansion Requests</h2></div></div></div><div class="para"><p></p>
+		Expansion options can be nested.
+	</div><div class="procedure"><h6>Procedure 3.4. Task</h6><ul><li class="step"><div class="para"><p></p>
+				Use the following example code and supply your own values to nest your expansion requests.
+			</div><pre class="screen">
+{
+     "trunk":{
+        "name":"tags"
+        "branches":
+         [
+            {
+               "name":"categories"
+            }
+         ]
+     }
+}
+</pre></li></ul></div><div class="formalpara"><p></p><h5 class="formalpara" id="id718091">Result</h5>
+			The items in the tags collection have been expanded, and it has also expanded the categories collection for each tag.
+		</div><div class="simplesect"><div class="titlepage"><div><div><h1 class="title"></h1></div></div></div><div class="RoleCreateBugPara RoleCreateBugPara"><p></p>
+		<a href="http://skynet.usersys.redhat.com:8080/TopicIndex/TopicEdit.seam?topicTopicId=10983">Edit this topic</a>
+	</div></div><div class="simplesect"><div class="titlepage"><div><div><h1 class="title"></h1></div></div></div><div class="RoleCreateBugPara RoleCreateBugPara"><p></p>
+		<a href="https://bugzilla.redhat.com/enter_bug.cgi?cf_environment=Instance+Name%3A+Not+Defined%0ABuild%3A+CSProcessor+Builder+Version+1.6%0ABuild+Filter%3A+null%0ABuild+Name%3A+%0ABuild+Date%3A+13-09-2012+08%3A42%3A53&amp;cf_build_id=10983-203379+13+Sep+2012+08%3A42+en-US&amp;assigned_to=hlawrenc%40redhat.com&amp;product=PressGang+CCMS&amp;component=Documentation&amp;version=1.x&amp;keywords=Documentation">Report a bug</a>
+	</div></div></div><div class="section"><div class="titlepage"><div><div><h2 class="title" id="Access_the_Skynet_REST_Interface">3.7. Access the Skynet REST Interface</h2></div></div></div><div class="para"><p></p>
+		The easiest way to access the Skynet REST interface is through the JAVA interface.
+	</div><div class="procedure"><h6>Procedure 3.5. Task</h6><ol class="1"><li class="step"><div class="para"><p></p>
+				Download the REST JAR file, which is easiest to do <a href="http://sourceforge.net/p/commonclasses/code/349/tree/">through the SVN</a>.
+			</div><ol class="a"><li class="step"><div class="para"><p></p>
+						Click <span class="guibutton"><strong>trunk</strong></span>.
+					</div></li><li class="step"><div class="para"><p></p>
+						Download the <code class="code">redhatcommonutils.jar</code> file.
+					</div></li></ol></li><li class="step"><div class="para"><p></p>
+				Download <a href="http://www.jboss.org/resteasy">RESTEasy</a>.
+			</div><div class="itemizedlist"><ul><li class="listitem"><div class="para"><p></p>
+						The <code class="code">com.redhat.topicindex.rest.sharedinterface.RESTInterfaceV1</code> interface lists all the REST functions that are available. This interface has been designed to only depend on POJOs also found in the JAR file, and the standard JAX-RS annotations.
+					</div></li></ul></div></li><li class="step"><div class="para"><p></p>
+				Using the RESTEasy client, you can access the REST interface through the RESTInterfaceV1 interface.
+			</div><div class="note"><div class="admonition_header"><h2>Note</h2></div><div class="admonition"><div class="para"><p></p>
+					Note that when setting the properties on an entity to be created or updated, you can use the setPropertyExplicit methods. These will automatically populate the configuredParameters array with the correct values.
+				</div></div></div></li></ol></div><div class="formalpara"><p></p><h5 class="formalpara" id="id633521">Result</h5>
+			You have access to the Skynet REST interface.
+		</div><div class="simplesect"><div class="titlepage"><div><div><h1 class="title"></h1></div></div></div><div class="RoleCreateBugPara RoleCreateBugPara"><p></p>
+		<a href="http://skynet.usersys.redhat.com:8080/TopicIndex/TopicEdit.seam?topicTopicId=10984">Edit this topic</a>
+	</div></div><div class="simplesect"><div class="titlepage"><div><div><h1 class="title"></h1></div></div></div><div class="RoleCreateBugPara RoleCreateBugPara"><p></p>
+		<a href="https://bugzilla.redhat.com/enter_bug.cgi?cf_environment=Instance+Name%3A+Not+Defined%0ABuild%3A+CSProcessor+Builder+Version+1.6%0ABuild+Filter%3A+null%0ABuild+Name%3A+%0ABuild+Date%3A+13-09-2012+08%3A42%3A53&amp;cf_build_id=10984-203379+13+Sep+2012+08%3A42+en-US&amp;assigned_to=hlawrenc%40redhat.com&amp;product=PressGang+CCMS&amp;component=Documentation&amp;version=1.x&amp;keywords=Documentation">Report a bug</a>
+	</div></div></div></div><div class="chapter" id="id714807"><div class="titlepage"><div><div><h2 class="title">Chapter 4. Status Report</h2></div></div></div><div class="itemizedlist"><h6>Build Statistics</h6><ul><li class="listitem"><div class="para"><p></p>
+				Total Number of Errors: 0
+			</div></li><li class="listitem"><div class="para"><p></p>
+				Total Number of Warnings: 0
+			</div></li><li class="listitem"><div class="para"><p></p>
+				Number of Topics with No Content: 0
+			</div></li><li class="listitem"><div class="para"><p></p>
+				Number of Topics with Invalid Injection points: 0
+			</div></li><li class="listitem"><div class="para"><p></p>
+				Number of Topics with Invalid Content: 0
+			</div></li><li class="listitem"><div class="para"><p></p>
+				Number of Topics with Invalid Image references: 0
+			</div></li></ul></div></div><div class="appendix" id="appe-REST_Reference-Revision_History"><div class="titlepage"><div><div><h1 class="title">Revision History</h1></div></div></div><div class="para"><p></p>
+		<div class="revhistory"><table border="0" width="100%" summary="Revision history"><tr><th align="left" valign="top" colspan="3"><strong>Revision History</strong></th></tr><tr><td align="left">Revision 0.0-0</td><td align="left">Thu Sep 13 2012</td><td align="left"><span class="author"><span class="firstname"> CS Builder </span> <span class="surname"> Robot </span></span></td></tr><tr><td align="left" colspan="3">
+					<table border="0" summary="Simple list" class="simplelist"><tr><td> Initial creation by publican </td></tr><tr><td> Built from Content Specification: 10914, Revision: 196248 </td></tr></table>
+
+				</td></tr></table></div>
+
+	</div></div></div><div id="site_footer"></div><script type="text/javascript">
+		$("#site_footer").load("../../../../../footer.html");
+	</script></body></html>
