@@ -1,66 +1,12 @@
 <?xml version="1.0" encoding="UTF-8"?>
-
 <web-app version="3.0" xmlns="http://java.sun.com/xml/ns/javaee"
-	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-	xsi:schemaLocation="http://java.sun.com/xml/ns/javaee http://java.sun.com/xml/ns/javaee/web-app_3_0.xsd"
-	metadata-complete="false">
-
-	<context-param>
-		<param-name>resteasy.scan</param-name>
-		<param-value>true</param-value>
-	</context-param>
-
-	<context-param>
-		<param-name>resteasy.role.based.security</param-name>
-		<param-value>true</param-value>
-	</context-param>
-
-	<!-- This setting needs to match the url-pattern below if the REST server 
-		is not going to respond to requests at the root level -->
-	<!-- <context-param> <param-name>resteasy.servlet.mapping.prefix</param-name> 
-		<param-value>/rest</param-value> </context-param> -->
-
-	<servlet>
-		<servlet-name>resteasy-servlet</servlet-name>
-		<servlet-class>
-			org.jboss.resteasy.plugins.server.servlet.HttpServletDispatcher
-		</servlet-class>
-	</servlet>
-
-	<servlet-mapping>
-		<servlet-name>resteasy-servlet</servlet-name>
-		<!-- <url-pattern>/rest/*</url-pattern> -->
-		<url-pattern>/*</url-pattern>
-	</servlet-mapping>
-
-	<!-- The root folder does not have any security to allow HAProxy to detect 
-		the node is up -->
-	<security-constraint>
-		<web-resource-collection>
-			<web-resource-name>Root</web-resource-name>
-			<url-pattern>/</url-pattern>
-		</web-resource-collection>
-	</security-constraint>
-
-	<!-- Everything else is locked down -->
-	<security-constraint>
-		<web-resource-collection>
-			<web-resource-name>RESTInterface</web-resource-name>
-			<url-pattern>/*</url-pattern>
-		</web-resource-collection>
-		<auth-constraint>
-			<role-name>RESTAdmin</role-name>
-		</auth-constraint>
-	</security-constraint>
-
-	<login-config>
-		<auth-method>BASIC</auth-method>
-		<realm-name>PressGang CCMS REST Interface</realm-name>
-	</login-config>
-
-	<security-role>
-		<role-name>RESTAdmin</role-name>
-	</security-role>
-
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xsi:schemaLocation="http://java.sun.com/xml/ns/javaee http://java.sun.com/xml/ns/javaee/web-app_3_0.xsd">
+    <servlet-mapping>
+        <servlet-name>javax.ws.rs.core.Application</servlet-name>
+        <url-pattern>/rest/*</url-pattern>
+    </servlet-mapping>
+    <listener>
+      <listener-class>org.jboss.resteasy.plugins.server.servlet.ResteasyBootstrap</listener-class>
+   </listener>
 </web-app>
-

@@ -1,4 +1,4 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <jboss-web> 
-	<security-domain>PressGangCCMSREST</security-domain>
+	<context-root>pressgang-ccms-rest</context-root>
 </jboss-web>
