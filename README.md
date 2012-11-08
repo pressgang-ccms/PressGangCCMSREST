@@ -43,9 +43,11 @@ Configure JBoss AS 7.1.1
         <property name="topicIndex.defaultLocale" value="en-US"/>
     </system-properties>
 
+
 3. Next setup the Messaging subsystem. First add the following into the extensions:
 
 	<extension module="org.jboss.as.messaging"/>
+
 
 After that, add the following messaging subsystem configuration:
 
@@ -138,10 +140,12 @@ After that, add the following messaging subsystem configuration:
         </hornetq-server>
     </subsystem>
 
+
 and finally add the follwoing to the socket bindings:
 
 	<socket-binding name="messaging" port="5445"/>
     <socket-binding name="messaging-throughput" port="5455"/>
+
 
 4. The next step is to add the data source configuration. Below is a sample configuration:
 
@@ -175,6 +179,7 @@ and finally add the follwoing to the socket bindings:
         <driver name="mysql" module="com.mysql"/>
     </drivers>
 
+
 5. The last step is to unzip the MySQL Driver into the Modules directory. The archive can be found at *program-resources/modules.zip* in this repository.
 
 Importing the Base Database
@@ -190,6 +195,7 @@ Compiling the Source
 
 	mvn clean package
 
+
 Installing to the Application Server
 ------------------------------------
 
@@ -197,3 +203,5 @@ Installing to the Application Server
 2. In the first terminal run the following command:
 
 	mvn clean package jboss-as:deploy
+
+
