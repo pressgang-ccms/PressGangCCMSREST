@@ -142,8 +142,10 @@ Configure JBoss AS 7.1.1
 
         <socket-binding name="messaging" port="5445"/>
         <socket-binding name="messaging-throughput" port="5455"/>
+        
+4. Next add the "guest" user as an Application User by running the *<JBOSS-DIR>/bin/add-user.sh* script. Ensure that the user is given the "guest" role.
 
-4. The next step is to add the data source configuration. Below is a sample configuration:
+5. The next step is to add the data source configuration. Below is a sample configuration:
 
 		<datasource jta="true" jndi-name="java:/PressGangCCMSDatasource" pool-name="PressGangCCMSDatasource" enabled="true" use-java-context="true" use-ccm="true">
 		    <connection-url>jdbc:mysql://localhost:3306/PressGangCCMS?jdbcCompliantTruncation=false&amp;useUnicode=true&amp;characterEncoding=UTF-8</connection-url>
@@ -175,7 +177,7 @@ Configure JBoss AS 7.1.1
 		    <driver name="mysql" module="com.mysql"/>
 		</drivers>
 
-5. The last step is to unzip the MySQL Driver into the Modules directory. The archive can be found at *program-resources/modules.zip* in this repository.
+6. The last step is to unzip the MySQL Driver into the Modules directory. The archive can be found at *program-resources/modules.zip* in this repository.
 
 Importing the Base Database
 ---------------------------
