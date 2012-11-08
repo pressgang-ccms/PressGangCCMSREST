@@ -20,6 +20,6 @@
             <dependency-type>uses</dependency-type>
         </dependent-module>
         <property name="java-output-path" value="/PressGangCCMSREST/target/classes"/>
-        <property name="context-root" value="restserver"/>
+        <property name="context-root" value="pressgang-ccms-restserver"/>
     </wb-module>
 </project-modules>
