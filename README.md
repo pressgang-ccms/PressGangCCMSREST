@@ -6,8 +6,8 @@ This project is setup to run on JBoss AS 7.1.1. See below for setup steps:
 Prerequisites
 -------------
 
-* Downloaded and Extracted JBoss AS 7.1.1 to a location of your choice.
-* Setup and installed a RDMS database of your choice.
+* Downloaded and Extracted JBoss AS 7.1.1 to a location of your choice (referred to as `<JBOSS_DIR>` in this guide).
+* Setup and installed a RDBMS database of your choice.
 	* Note: Currently we only have a setup for MySQL 5.x
 * Installed and configured Maven.
 * Have the OSS Sonatype Repository setup in your local settings.xml (to be able to compile).
