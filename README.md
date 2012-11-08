@@ -138,7 +138,7 @@ Configure JBoss AS 7.1.1
             </hornetq-server>
         </subsystem>
 
-    and finally add the follwoing to the socket bindings:
+    and finally add the following to the socket bindings:
 
         <socket-binding name="messaging" port="5445"/>
         <socket-binding name="messaging-throughput" port="5455"/>
