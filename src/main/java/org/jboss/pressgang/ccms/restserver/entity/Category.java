@@ -114,10 +114,9 @@ public class Category extends AuditedEntity<Category> implements java.io.Seriali
 		this.categoryId = categoryId;
 	}
 
-	// @Column(name = "CategoryName", nullable = false, length = 65535)
-	@Column(name = "CategoryName", nullable = false, columnDefinition = "TEXT")
+	@Column(name = "CategoryName", nullable = false, length = 255)
 	@NotNull
-	@Size(max = 65535)
+	@Size(max = 255)
 	public String getCategoryName()
 	{
 		return this.categoryName;
@@ -128,8 +127,8 @@ public class Category extends AuditedEntity<Category> implements java.io.Seriali
 		this.categoryName = categoryName;
 	}
 
-	@Column(name = "CategoryDescription", length = 2048)
-	@Size(max = 2048)
+	@Column(name = "CategoryDescription", columnDefinition = "TEXT")
+	@Size(max = 65535)
 	public String getCategoryDescription()
 	{
 		return this.categoryDescription;
@@ -151,7 +150,7 @@ public class Category extends AuditedEntity<Category> implements java.io.Seriali
 		this.categorySort = categorySort;
 	}
 
-	@Column(name = "MutuallyExclusive", nullable = false)
+	@Column(name = "MutuallyExclusive", nullable = false, columnDefinition = "BIT", length = 1)
 	@NotNull
 	public boolean isMutuallyExclusive()
 	{

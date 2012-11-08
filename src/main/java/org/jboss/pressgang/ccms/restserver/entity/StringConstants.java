@@ -81,9 +81,8 @@ public class StringConstants extends AuditedEntity<StringConstants> implements j
 		this.constantName = constantName;
 	}
 
-	// @Column(name = "ConstantValue", length = 65535)
-	@Column(name = "ConstantValue", columnDefinition = "TEXT")
-	@Size(max = 65535)
+	@Column(name = "ConstantValue", columnDefinition = "MEDIUMTEXT")
+	@Size(max = 16777215)
 	public String getConstantValue()
 	{
 		return this.constantValue;

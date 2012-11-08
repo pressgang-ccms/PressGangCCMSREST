@@ -75,9 +75,9 @@ public class FilterField extends AuditedEntity<FilterField> implements java.io.S
 		this.filter = filter;
 	}
 
-	@Column(name = "Field", nullable = false, length = 512)
+	@Column(name = "Field", nullable = false, length = 255)
 	@NotNull
-	@Size(max = 512)
+	@Size(max = 255)
 	public String getField() {
 		return this.field;
 	}
@@ -86,7 +86,6 @@ public class FilterField extends AuditedEntity<FilterField> implements java.io.S
 		this.field = field;
 	}
 
-	//@Column(name = "Value", nullable = false, length = 65535)
 	@Column(name = "Value", nullable = false, columnDefinition="TEXT")
 	@NotNull
 	@Size(max = 65535)
@@ -98,7 +97,6 @@ public class FilterField extends AuditedEntity<FilterField> implements java.io.S
 		this.value = value;
 	}
 	
-	//@Column(name = "Description", length = 65535)
 	@Column(name = "Description", columnDefinition="TEXT")
 	@Size(max = 65535)
 	public String getDescription() {

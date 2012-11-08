@@ -679,7 +679,7 @@ public class Topic extends ParentToPropertyTag<Topic> implements java.io.Seriali
 
     @Column(name = "TopicLocale", length = 45)
     @NotNull
-    @Size(max = 512)
+    @Size(max = 45)
     public String getTopicLocale() {
         return this.topicLocale == null ? CommonConstants.DEFAULT_LOCALE : this.topicLocale;
     }
@@ -727,9 +727,9 @@ public class Topic extends ParentToPropertyTag<Topic> implements java.io.Seriali
         return this.topicTimeStamp;
     }
 
-    @Column(name = "TopicTitle", nullable = false, length = 512)
+    @Column(name = "TopicTitle", nullable = false, length = 255)
     @NotNull
-    @Size(max = 512)
+    @Size(max = 255)
     public String getTopicTitle() {
         return this.topicTitle;
     }

@@ -76,7 +76,7 @@ public class LoggingRevisionEntity implements Serializable {
         this.logFlag = logFlag;
     }
 
-    @Column(name = "UserName", length = 512)
+    @Column(name = "UserName", length = 255)
     public String getUserName() {
         return username;
     }

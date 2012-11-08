@@ -64,9 +64,9 @@ public class PropertyTagCategory extends AuditedEntity<PropertyTagCategory> impl
 		this.propertyTagCategoryId = propertyTagCategoryId;
 	}
 
-	@Column(name = "PropertyTagCategoryName", nullable = false, length = 512)
+	@Column(name = "PropertyTagCategoryName", nullable = false, length = 255)
 	@NotNull
-	@Size(max = 512)
+	@Size(max = 255)
 	public String getPropertyTagCategoryName()
 	{
 		return propertyTagCategoryName;

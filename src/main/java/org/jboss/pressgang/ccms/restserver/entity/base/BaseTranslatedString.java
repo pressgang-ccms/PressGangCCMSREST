@@ -39,7 +39,7 @@ public abstract class BaseTranslatedString<T extends AuditedEntity<T>> extends A
         this.translatedString = translatedString;
     }
 
-    @Column(name = "FuzzyTranslation", nullable = false)
+    @Column(name = "FuzzyTranslation", nullable = false, columnDefinition = "BIT", length = 1)
     @NotNull
     public Boolean getFuzzyTranslation()
     {

@@ -52,9 +52,9 @@ public class RelationshipTag extends AuditedEntity<RelationshipTag> implements j
 		this.relationshipTagId = relationshipTagId;
 	}
 
-	@Column(name = "RelationshipTagName", nullable = false, length = 512)
+	@Column(name = "RelationshipTagName", nullable = false, length = 255)
 	@NotNull
-	@Size(max = 512)
+	@Size(max = 255)
 	public String getRelationshipTagName()
 	{
 		return this.relationshipTagName;

@@ -71,9 +71,9 @@ public class PropertyTag extends AuditedEntity<PropertyTag> implements java.io.S
 		this.propertyTagId = propertyTagId;
 	}
 
-	@Column(name = "PropertyTagName", nullable = false, length = 512)
+	@Column(name = "PropertyTagName", nullable = false, length = 255)
 	@NotNull
-	@Size(max = 512)
+	@Size(max = 255)
 	public String getPropertyTagName()
 	{
 		return propertyTagName;
@@ -109,7 +109,7 @@ public class PropertyTag extends AuditedEntity<PropertyTag> implements java.io.S
 		this.propertyTagRegex = propertyTagRegex;
 	}
 
-	@Column(name = "PropertyTagCanBeNull", unique = true, nullable = false)
+	@Column(name = "PropertyTagCanBeNull", unique = true, nullable = false, columnDefinition = "BIT", length = 1)
 	@NotNull
 	public boolean isPropertyTagCanBeNull()
 	{
@@ -221,7 +221,7 @@ public class PropertyTag extends AuditedEntity<PropertyTag> implements java.io.S
 		return this.propertyTagId;
 	}
 	
-	@Column(name = "PropertyTagIsUnqiue", nullable = false)
+	@Column(name = "PropertyTagIsUnqiue", nullable = false, columnDefinition = "BIT", length = 1)
 	public Boolean getPropertyTagIsUnique()
 	{
 		return propertyTagIsUnique;

@@ -145,9 +145,9 @@ public class Tag extends ParentToPropertyTag<Tag> implements java.io.Serializabl
         this.tagId = tagId;
     }
 
-    @Column(name = "TagName", nullable = false, length = 512)
+    @Column(name = "TagName", nullable = false, length = 255)
     @NotNull
-    @Size(max = 512)
+    @Size(max = 255)
     public String getTagName() {
         return this.tagName;
     }

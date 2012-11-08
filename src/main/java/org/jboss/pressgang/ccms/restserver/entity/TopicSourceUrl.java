@@ -92,9 +92,9 @@ public class TopicSourceUrl extends AuditedEntity<TopicSourceUrl> implements jav
         this.sourceUrl = sourceUrl;
     }
 
-    @Column(name = "Title", nullable = false, length = 512)
+    @Column(name = "Title", nullable = false, length = 255)
     @NotNull
-    @Size(max = 512)
+    @Size(max = 255)
     public String getTitle() {
         return this.title;
     }

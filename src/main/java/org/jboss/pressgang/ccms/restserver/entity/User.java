@@ -82,9 +82,9 @@ public class User extends AuditedEntity<User> implements java.io.Serializable
 		this.userId = userId;
 	}
 
-	@Column(name = "UserName", nullable = false, length = 512)
+	@Column(name = "UserName", nullable = false, length = 255)
 	@NotNull
-	@Size(max = 512)
+	@Size(max = 255)
 	public String getUserName()
 	{
 		return this.userName;
@@ -95,9 +95,8 @@ public class User extends AuditedEntity<User> implements java.io.Serializable
 		this.userName = userName;
 	}
 
-	// @Column(name = "Description", length = 512)
 	@Column(name = "Description", columnDefinition = "TEXT")
-	@Size(max = 512)
+	@Size(max = 65535)
 	public String getDescription()
 	{
 		return this.description;

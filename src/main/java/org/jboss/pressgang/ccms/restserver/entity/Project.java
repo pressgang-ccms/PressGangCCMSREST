@@ -81,9 +81,9 @@ public class Project extends AuditedEntity<Project> implements java.io.Serializa
 		this.projectId = projectId;
 	}
 
-	@Column(name = "ProjectName", nullable = false, length = 512)
+	@Column(name = "ProjectName", nullable = false, length = 255)
 	@NotNull
-	@Size(max = 512)
+	@Size(max = 255)
 	public String getProjectName()
 	{
 		return this.projectName;
@@ -94,7 +94,6 @@ public class Project extends AuditedEntity<Project> implements java.io.Serializa
 		this.projectName = projectName;
 	}
 
-	// @Column(name = "ProjectDescription", length = 65535)
 	@Column(name = "ProjectDescription", columnDefinition = "TEXT")
 	@Size(max = 65535)
 	public String getProjectDescription()

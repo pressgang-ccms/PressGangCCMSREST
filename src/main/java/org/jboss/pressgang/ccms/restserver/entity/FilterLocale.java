@@ -80,9 +80,9 @@ public class FilterLocale extends AuditedEntity<FilterLocale> implements java.io
 		this.filter = filter;
 	}
 
-	@Column(name = "LocaleName", nullable = false, length = 512)
+	@Column(name = "LocaleName", nullable = false, length = 255)
 	@NotNull
-	@Size(max = 512)
+	@Size(max = 255)
 	public String getLocaleName()
 	{
 		return this.localeName;

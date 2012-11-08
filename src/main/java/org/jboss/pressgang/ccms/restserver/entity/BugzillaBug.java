@@ -69,7 +69,6 @@ public class BugzillaBug extends AuditedEntity<BugzillaBug> implements java.io.S
 		this.bugzillaBugId = bugzillaBugId;
 	}
 
-	// @Column(name = "TranslatedXML", length = 65535)
 	@Column(name = "BugzillaBugSummary", columnDefinition = "TEXT")
 	@Size(max = 65535)
 	public String getBugzillaBugSummary()
@@ -94,7 +93,7 @@ public class BugzillaBug extends AuditedEntity<BugzillaBug> implements java.io.S
 		this.bugzillaBugBugzillaId = bugzillaBugBugzillaId;
 	}
 	
-	@Column(name = "BugzillaBugOpen")
+	@Column(name = "BugzillaBugOpen", columnDefinition = "BIT", length = 1)
 	public Boolean getBugzillaBugOpen()
 	{
 		return bugzillaBugOpen;

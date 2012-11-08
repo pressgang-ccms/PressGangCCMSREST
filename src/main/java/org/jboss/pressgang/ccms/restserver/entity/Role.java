@@ -80,9 +80,9 @@ public class Role extends AuditedEntity<Role> implements java.io.Serializable
 		this.roleId = roleId;
 	}
 
-	@Column(name = "RoleName", nullable = false, length = 512)
+	@Column(name = "RoleName", nullable = false, length = 255)
 	@NotNull
-	@Size(max = 512)
+	@Size(max = 255)
 	public String getRoleName()
 	{
 		return this.roleName;
@@ -93,9 +93,8 @@ public class Role extends AuditedEntity<Role> implements java.io.Serializable
 		this.roleName = roleName;
 	}
 
-	// @Column(name = "Description", length = 512)
 	@Column(name = "Description", columnDefinition = "TEXT")
-	@Size(max = 512)
+	@Size(max = 65535)
 	public String getDescription()
 	{
 		return this.description;

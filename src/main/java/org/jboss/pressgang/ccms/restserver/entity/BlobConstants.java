@@ -81,7 +81,7 @@ public class BlobConstants extends AuditedEntity<BlobConstants> implements java.
 		this.constantName = constantName;
 	}
 
-	@Column(name = "ConstantValue")
+	@Column(name = "ConstantValue", columnDefinition = "longblob")
 	public byte[] getConstantValue()
 	{
 		return this.constantValue;

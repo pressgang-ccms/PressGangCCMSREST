@@ -91,8 +91,8 @@ public class LanguageImage extends AuditedEntity<LanguageImage> implements java.
 		this.languageImageId = languageImageId;
 	}
 
-	@Column(name = "OriginalFileName", length = 2048)
-	@Size(max = 512)
+	@Column(name = "OriginalFileName", length = 255)
+	@Size(max = 255)
 	public String getOriginalFileName()
 	{
 		return this.originalFileName;
@@ -116,7 +116,7 @@ public class LanguageImage extends AuditedEntity<LanguageImage> implements java.
 		this.imageFile = imageFile;
 	}
 
-	@Column(name = "ImageDataBase64")
+	@Column(name = "ImageDataBase64", columnDefinition = "mediumblob")
 	public byte[] getImageDataBase64()
 	{
 		return this.imageDataBase64;
@@ -133,7 +133,7 @@ public class LanguageImage extends AuditedEntity<LanguageImage> implements java.
 		return this.imageDataBase64 == null ? "" : new String(this.imageDataBase64);
 	}
 
-	@Column(name = "ImageData")
+	@Column(name = "ImageData", columnDefinition = "mediumblob")
 	public byte[] getImageData()
 	{
 		return this.imageData;
@@ -144,7 +144,7 @@ public class LanguageImage extends AuditedEntity<LanguageImage> implements java.
 		this.imageData = imageData;
 	}
 
-	@Column(name = "ThumbnailData")
+	@Column(name = "ThumbnailData", columnDefinition = "mediumblob")
 	public byte[] getThumbnailData()
 	{
 		return this.thumbnail;

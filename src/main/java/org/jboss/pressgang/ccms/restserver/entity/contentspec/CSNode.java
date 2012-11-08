@@ -92,7 +92,7 @@ public class CSNode extends AuditedEntity<CSNode> implements Serializable {
         this.csNodeId = csNodeId;
     }
 
-    @Column(name = "NodeTitle", nullable = false, length = 512)
+    @Column(name = "NodeTitle", nullable = false, length = 255)
     public String getCSNodeTitle() {
         return csNodeTitle;
     }

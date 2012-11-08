@@ -80,9 +80,9 @@ public class FilterOption extends AuditedEntity<FilterOption> implements java.io
 		this.filter = filter;
 	}
 
-	@Column(name = "FilterOptionName", nullable = false, length = 512)
+	@Column(name = "FilterOptionName", nullable = false, length = 255)
 	@NotNull
-	@Size(max = 512)
+	@Size(max = 255)
 	public String getFilterOptionName()
 	{
 		return this.filterOptionName;
@@ -93,9 +93,9 @@ public class FilterOption extends AuditedEntity<FilterOption> implements java.io
 		this.filterOptionName = filterOptionName;
 	}
 
-	@Column(name = "FilterOptionValue", nullable = false, length = 512)
+	@Column(name = "FilterOptionValue", nullable = false, length = 255)
 	@NotNull
-	@Size(max = 512)
+	@Size(max = 255)
 	public String getFilterOptionValue()
 	{
 		return this.filterOptionValue;

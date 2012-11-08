@@ -54,7 +54,6 @@ public class TopicSecondOrderData extends AuditedEntity<TopicSecondOrderData> im
 		this.topicSecondOrderDataId = topicSecondOrderDataId;
 	}
 	
-	// @Column(name = "TopicHTMLView", length = 65535)
 	@Column(name = "TopicHTMLView", columnDefinition = "MEDIUMTEXT")
 	@Size(max = 16777215)
 	public String getTopicHTMLView()
@@ -67,7 +66,6 @@ public class TopicSecondOrderData extends AuditedEntity<TopicSecondOrderData> im
 		this.topicHTMLView = topicHTMLView;
 	}
 	
-	// @Column(name = "TopicXMLErrors", length = 65535)
 	@Column(name = "TopicXMLErrors", columnDefinition = "TEXT")
 	@Size(max = 65535)
 	public String getTopicXMLErrors()

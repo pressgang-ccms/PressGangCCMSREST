@@ -27,14 +27,6 @@ public class Constants {
      * The system property that defines the STOMP message queue that skynet should send topic rendering requests to
      */
     public static final String STOMP_MESSAGE_SERVER_TRANSLATED_TOPIC_RENDER_QUEUE_SYSTEM_PROPERTY = "topicIndex.stompMessageServerRenderTranslatedTopicQueue";
-    /**
-     * The system property that defines the STOMP message queue that skynet should send docbook build requests to
-     */
-    public static final String STOMP_MESSAGE_SERVER_DOCBOOK_BUILD_QUEUE_SYSTEM_PROPERTY = "topicIndex.stompMessageServerBuildDocbookQueue";
-    /**
-     * The system property that defines the STOMP message queue that skynet should send translation docbook build requests to
-     */
-    public static final String STOMP_MESSAGE_SERVER_TRANSLATION_DOCBOOK_BUILD_QUEUE_SYSTEM_PROPERTY = "topicIndex.stompMessageServerBuildTranslationDocbookQueue";
 
     public static final String PROPERTY_TAG_SELECT_ITEM_VALUE_PREFIX = "PropertyTag";
     public static final String PROPERTY_TAG_SELECT_LABEL_PREFIX = "- ";
@@ -76,16 +68,8 @@ public class Constants {
     /** The message saved by SkynetExceptionUtilities when a precondition fails */
     public static final String PRECONDITION_CHECK_FAILED_MESSAGE = "The method failed a precondition check";
 
-    /** The initial name for a translated topic revision */
-    public static final String INITIAL_TRANSLATED_TOPIC_REVISION_NAME = "Initial Untranslated Revision";
-
     /** The generic error message to display to the user */
     public static final String GENERIC_ERROR_INSTRUCTIONS = "Please log out, log back in and try again. If the problem persists, please log a bug.";
-
-    /** The HTML returned when a Topic's XML could not be transformed */
-    public static final String XSL_ERROR_TEMPLATE = "<html><head><title>ERROR</title></head><body>The topic could not be transformed into HTML</body></html>";
-
-    public static final int HOME_LANDING_PAGE_TOPIC_ID = -1;
 
     /** The base URL from which the REST interface can be accessed */
     public static final String BASE_REST_PATH = "/rest";
@@ -137,22 +121,6 @@ public class Constants {
      */
     public static final String ROCBOOK_DTD = "rocbook.dtd";
 
-    /*
-     * TODO: These tag and category ids should probably come from a configuration file instead of being hard coded. Any changes
-     * to the tags will break the docbook compilation, and require this source code to be modified to reflect the new tag ids.
-     * 
-     * Generally speaking, tags referenced here should eventually become fields on a topic.
-     */
-    public static final Integer TYPE_CATEGORY_ID = 4;
-    public static final Integer TECHNOLOGY_CATEGORY_ID = 3;
-    public static final Integer RELEASE_CATEGORY_ID = 15;
-    public static final Integer WRITER_CATEGORY_ID = 12;
-    public static final Integer COMMON_NAME_CATEGORY_ID = 17;
-    public static final String TECHNOLOGY_CATEGORY_NAME = "Technologies";
-    public static final Integer CONCERN_CATEGORY_ID = 2;
-    public static final String CONCERN_CATEGORY_NAME = "Concerns";
-    public static final Integer LIFECYCLE_CATEGORY_ID = 5;
-
     /** The Concept tag ID */
     public static final Integer CONCEPT_TAG_ID = 5;
     /** The Concept tag name */
@@ -169,12 +137,6 @@ public class Constants {
     public static final Integer TASK_TAG_ID = 4;
     /** The Task tag name */
     public static final String TASK_TAG_NAME = "Task";
-    /** The Written tag ID */
-    public static final Integer WRITTEN_TAG_ID = 19;
-    /** The Tag Description tag ID */
-    public static final Integer TAG_DESCRIPTION_TAG_ID = 215;
-    /** The Home tag ID */
-    public static final Integer HOME_TAG_ID = 216;
     /** The Content Specification tag ID */
     public static final Integer CONTENT_SPEC_TAG_ID = 268;
     /** The Content Specification tag name */
@@ -196,11 +158,6 @@ public class Constants {
     public static final Integer DTD_PROPERTY_TAG_ID = 16;
     /** The Content Specification Type Property Tag ID */
     public static final Integer CSP_TYPE_PROPERTY_TAG_ID = 17;
-
-    /**
-     * This identifies the the tag that is assigned to a topics when it is in its final state
-     */
-    public static final Integer TOPIC_FINAL_LIFECYCLE = 19;
 
     /**
      * The ID for the inherit relationship type, as defined in the RoleToRoleRelationship table

@@ -84,7 +84,7 @@ public class ContentSpec extends AuditedEntity<ContentSpec> implements Serializa
         this.contentSpecId = contentSpecId;
     }
 
-    @Column(name = "ContentSpecTitle", nullable = false, length = 512)
+    @Column(name = "ContentSpecTitle", nullable = false, length = 255)
     public String getContentSpecTitle() {
         return contentSpecTitle;
     }
@@ -93,7 +93,7 @@ public class ContentSpec extends AuditedEntity<ContentSpec> implements Serializa
         this.contentSpecTitle = contentSpecTitle;
     }
 
-    @Column(name = "Locale", nullable = false, length = 512)
+    @Column(name = "Locale", nullable = false, length = 255)
     public String getLocale() {
         return locale;
     }
