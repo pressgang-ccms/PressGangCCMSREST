@@ -76,7 +76,7 @@ public class CSNodeV1Factory extends
 
         if (expandParentReferences && entity.getParent() != null && expand != null) {
             retValue.setParent(new CSNodeV1Factory().createRESTEntityFromDBEntity(entity.getParent(), baseUrl, dataType,
-                    expand.get(RESTCSNodeV1.PARENT_NAME)));
+                    expand.get(RESTCSNodeV1.PARENT_NAME), entityManager));
         }
 
         // CONTENT SPEC

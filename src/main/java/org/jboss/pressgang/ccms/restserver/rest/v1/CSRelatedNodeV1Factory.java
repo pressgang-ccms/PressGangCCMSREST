@@ -73,7 +73,7 @@ public class CSRelatedNodeV1Factory
         // PARENT
         if (expandParentReferences && entity.getRelatedNode().getParent() != null && expand != null) {
             retValue.setParent(new CSNodeV1Factory().createRESTEntityFromDBEntity(entity.getRelatedNode().getParent(), baseUrl,
-                    dataType, expand.get(RESTCSNodeV1.PARENT_NAME)));
+                    dataType, expand.get(RESTCSNodeV1.PARENT_NAME), entityManager));
         }
 
         // CONTENT SPEC

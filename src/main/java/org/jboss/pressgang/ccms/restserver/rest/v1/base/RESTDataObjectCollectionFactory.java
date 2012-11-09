@@ -66,17 +66,19 @@ public class RESTDataObjectCollectionFactory<T extends RESTBaseEntityV1<T, V, W>
     }
 
     /**
+     * @param clazz The Class of the Collection Object that should be returned by the method.
      * @param dataObjectFactory The factory to convert the database entity to a REST entity
      * @param entities A collection of numbers mapped to database entities. If isRevsionMap is true, these numbers are envers
      *        revision numbers. If isRevsionMap is false, these numbers have no meaning.
      * @param parent The parent from which to find previous versions
+     * @param parentRevision The revision number of the Parent entity, if it's not the latest version.
      * @param revisions A list of Envers revision numbers that we want to add to the collection
-     * @param isRevsionMap true if the entities keyset are related to envers revision numbers. false if the entities keyset have
-     *        no meaning.
      * @param expandName The name of the collection that we are working with
      * @param dataType The type of data that is returned through the REST interface
      * @param parentExpand The parent objects expansion details
      * @param baseUrl The base of the url that was used to access this collection
+     * @param expandParentReferences If any Parent references in entities should be expanded.
+     * @param entityManager The EntityManager being used to provide data for the collection.
      * @return a REST collection from a collection of database entities.
      */
     public V create(final Class<V> clazz, final RESTDataObjectFactory<T, U, V, W> dataObjectFactory, final List<U> entities,

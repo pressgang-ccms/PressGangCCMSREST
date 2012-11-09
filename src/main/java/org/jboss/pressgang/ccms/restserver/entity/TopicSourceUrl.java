@@ -103,7 +103,6 @@ public class TopicSourceUrl extends AuditedEntity<TopicSourceUrl> implements jav
         this.title = title;
     }
 
-    // @Column(name = "Description", length = 65535)
     @Column(name = "Description", columnDefinition = "TEXT")
     @Size(max = 65535)
     public String getDescription() {

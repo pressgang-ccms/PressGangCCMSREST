@@ -57,7 +57,7 @@ public class LanguageImageV1Factory
         /* Set the object references */
         if (expandParentReferences && expand != null && entity.getImageFile() != null) {
             retValue.setImage(new ImageV1Factory().createRESTEntityFromDBEntity(entity.getImageFile(), baseUrl, dataType,
-                    expand.get(RESTLanguageImageV1.IMAGE_NAME)));
+                    expand.get(RESTLanguageImageV1.IMAGE_NAME), entityManager));
         }
 
         // REVISIONS

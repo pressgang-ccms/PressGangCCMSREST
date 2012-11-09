@@ -71,6 +71,15 @@ import org.slf4j.LoggerFactory;
 public class BaseRESTv1 {
     private static final Logger log = LoggerFactory.getLogger(BaseRESTv1.class);
     protected static final String REST_DATE_FORMAT = "dd-MMM-yyyy";
+    private static EntityManagerFactory entityManagerFactory = null;
+
+    private static EntityManagerFactory lookupEntityManagerFactory() throws NamingException {
+        final InitialContext initCtx = new InitialContext();
+        final EntityManagerFactory entityManagerFactory = (EntityManagerFactory) initCtx
+                .lookup("java:jboss/EntityManagerFactory");
+
+        return entityManagerFactory;
+    }
 
     public static final String TOPICS_EXPANSION_NAME = "topics";
     public static final String IMAGES_EXPANSION_NAME = "images";
@@ -135,7 +144,7 @@ public class BaseRESTv1 {
 
     @Context
     private UriInfo uriInfo;
-    
+
     @Inject
     private EnversLoggingBean enversLoggingBean;
 
@@ -205,30 +214,11 @@ public class BaseRESTv1 {
         assert date != null : "The date parameter can not be null";
 
         EntityManager entityManager = null;
-        TransactionManager transactionManager = null;
 
         try {
             final ExpandDataTrunk expandDataTrunk = unmarshallExpand(expand);
 
-            final InitialContext initCtx = new InitialContext();
-
-            final EntityManagerFactory entityManagerFactory = (EntityManagerFactory) initCtx
-                    .lookup("java:jboss/EntityManagerFactory");
-            if (entityManagerFactory == null)
-                throw new InternalServerErrorException("Could not find the EntityManagerFactory");
-
-            transactionManager = (TransactionManager) initCtx.lookup("java:jboss/TransactionManager");
-            if (transactionManager == null)
-                throw new InternalServerErrorException("Could not find the TransactionManager");
-
-            assert transactionManager != null : "transactionManager should not be null";
-            assert entityManagerFactory != null : "entityManagerFactory should not be null";
-
-            transactionManager.begin();
-
-            entityManager = entityManagerFactory.createEntityManager();
-            if (entityManager == null)
-                throw new InternalServerErrorException("Could not create an EntityManager");
+            entityManager = getEntityManager();
 
             /*
              * get the list of topic ids that were edited after the selected date
@@ -252,25 +242,12 @@ public class BaseRESTv1 {
 
             final List<U> entities = jpaQuery.getResultList();
 
-            transactionManager.commit();
-
             final V retValue = new RESTDataObjectCollectionFactory<T, U, V, W>().create(collectionClass, dataObjectFactory,
                     entities, expandName, dataType, expandDataTrunk, getBaseUrl(), entityManager);
 
             return retValue;
-        } catch (final NamingException ex) {
-            throw new InternalServerErrorException("Could not find the EntityManagerFactory");
         } catch (final Exception ex) {
             log.error("Probably an issue querying Envers", ex);
-
-            if (transactionManager != null) {
-                try {
-                    transactionManager.rollback();
-                } catch (final Exception ex2) {
-                    log.error("There was an issue rolling back the transaction", ex2);
-                }
-            }
-
             throw new InternalServerErrorException("There was an error running the query");
         } finally {
             if (entityManager != null)
@@ -293,7 +270,8 @@ public class BaseRESTv1 {
     }
 
     protected <T extends RESTBaseEntityV1<T, V, W>, U, V extends RESTBaseCollectionV1<T, V, W>, W extends RESTBaseCollectionItemV1<T, V, W>> T deleteEntity(
-            final Class<U> type, final RESTDataObjectFactory<T, U, V, W> factory, final Integer id, final String expand, final RESTLogDetailsV1 logDetails) throws InvalidParameterException {
+            final Class<U> type, final RESTDataObjectFactory<T, U, V, W> factory, final Integer id, final String expand,
+            final RESTLogDetailsV1 logDetails) throws InvalidParameterException {
         assert id != null : "id should not be null";
 
         TransactionManager transactionManager = null;
@@ -304,25 +282,13 @@ public class BaseRESTv1 {
 
             final InitialContext initCtx = new InitialContext();
 
-            final EntityManagerFactory entityManagerFactory = (EntityManagerFactory) initCtx
-                    .lookup("java:jboss/EntityManagerFactory");
-            if (entityManagerFactory == null)
-                throw new InternalServerErrorException("Could not find the EntityManagerFactory");
-
             transactionManager = (TransactionManager) initCtx.lookup("java:jboss/TransactionManager");
             if (transactionManager == null)
                 throw new InternalServerErrorException("Could not find the TransactionManager");
 
-            assert transactionManager != null : "transactionManager should not be null";
-            assert entityManagerFactory != null : "entityManagerFactory should not be null";
-
             transactionManager.begin();
 
-            entityManager = entityManagerFactory.createEntityManager();
-            if (entityManager == null)
-                throw new InternalServerErrorException("Could not create an EntityManager");
-
-            assert entityManager != null : "entityManager should not be null";
+            entityManager = getEntityManager();
 
             setLogDetails(entityManager, logDetails);
 
@@ -335,7 +301,7 @@ public class BaseRESTv1 {
             entityManager.flush();
             transactionManager.commit();
 
-            return factory.createRESTEntityFromDBEntity(entity, this.getBaseUrl(), JSON_URL, expandDataTrunk);
+            return factory.createRESTEntityFromDBEntity(entity, this.getBaseUrl(), JSON_URL, expandDataTrunk, entityManager);
         } catch (final InvalidParameterException ex) {
             log.error("There was an error looking up the entities", ex);
             throw ex;
@@ -373,25 +339,14 @@ public class BaseRESTv1 {
 
             final InitialContext initCtx = new InitialContext();
 
-            final EntityManagerFactory entityManagerFactory = (EntityManagerFactory) initCtx
-                    .lookup("java:jboss/EntityManagerFactory");
-            if (entityManagerFactory == null)
-                throw new InternalServerErrorException("Could not find the EntityManagerFactory");
-
             transactionManager = (TransactionManager) initCtx.lookup("java:jboss/TransactionManager");
             if (transactionManager == null)
                 throw new InternalServerErrorException("Could not find the TransactionManager");
 
-            assert transactionManager != null : "transactionManager should not be null";
-            assert entityManagerFactory != null : "entityManagerFactory should not be null";
-
             transactionManager.begin();
 
-            entityManager = entityManagerFactory.createEntityManager();
-            if (entityManager == null)
-                throw new InternalServerErrorException("Could not create an EntityManager");
-
-            assert entityManager != null : "entityManager should not be null";
+            entityManager = getEntityManager();
+            entityManager.setFlushMode(FlushModeType.AUTO);
 
             setLogDetails(entityManager, logDetails);
 
@@ -491,25 +446,14 @@ public class BaseRESTv1 {
 
             final InitialContext initCtx = new InitialContext();
 
-            final EntityManagerFactory entityManagerFactory = (EntityManagerFactory) initCtx
-                    .lookup("java:jboss/EntityManagerFactory");
-            if (entityManagerFactory == null)
-                throw new InternalServerErrorException("Could not find the EntityManagerFactory");
-
             transactionManager = (TransactionManager) initCtx.lookup("java:jboss/TransactionManager");
             if (transactionManager == null)
                 throw new InternalServerErrorException("Could not find the TransactionManager");
 
-            assert transactionManager != null : "transactionManager should not be null";
-            assert entityManagerFactory != null : "entityManagerFactory should not be null";
-
             transactionManager.begin();
 
-            entityManager = entityManagerFactory.createEntityManager();
-            if (entityManager == null)
-                throw new InternalServerErrorException("Could not create an EntityManager");
-
-            assert entityManager != null : "entityManager should not be null";
+            entityManager = getEntityManager();
+            entityManager.setFlushMode(FlushModeType.AUTO);
 
             setLogDetails(entityManager, logDetails);
 
@@ -592,27 +536,14 @@ public class BaseRESTv1 {
 
             final InitialContext initCtx = new InitialContext();
 
-            final EntityManagerFactory entityManagerFactory = (EntityManagerFactory) initCtx
-                    .lookup("java:jboss/EntityManagerFactory");
-            if (entityManagerFactory == null)
-                throw new InternalServerErrorException("Could not find the EntityManagerFactory");
-
             transactionManager = (TransactionManager) initCtx.lookup("java:jboss/TransactionManager");
             if (transactionManager == null)
                 throw new InternalServerErrorException("Could not find the TransactionManager");
 
-            assert transactionManager != null : "transactionManager should not be null";
-            assert entityManagerFactory != null : "entityManagerFactory should not be null";
-
             transactionManager.begin();
 
-            entityManager = entityManagerFactory.createEntityManager();
-            if (entityManager == null)
-                throw new InternalServerErrorException("Could not create an EntityManager");
-
+            entityManager = getEntityManager();
             entityManager.setFlushMode(FlushModeType.AUTO);
-
-            assert entityManager != null : "entityManager should not be null";
 
             setLogDetails(entityManager, logDetails);
 
@@ -718,19 +649,12 @@ public class BaseRESTv1 {
         boolean usingRevisions = revision != null;
         Number closestRevision = null;
 
+        EntityManager entityManager = null;
+
         try {
             final ExpandDataTrunk expandDataTrunk = unmarshallExpand(expand);
 
-            final InitialContext initCtx = new InitialContext();
-
-            final EntityManagerFactory entityManagerFactory = (EntityManagerFactory) initCtx
-                    .lookup("java:jboss/EntityManagerFactory");
-            if (entityManagerFactory == null)
-                throw new InternalServerErrorException("Could not find the EntityManagerFactory");
-
-            final EntityManager entityManager = entityManagerFactory.createEntityManager();
-            if (entityManager == null)
-                throw new InternalServerErrorException("Could not create an EntityManager");
+            entityManager = getEntityManager();
 
             final U entity;
 
@@ -769,32 +693,22 @@ public class BaseRESTv1 {
             }
 
             return restRepresentation;
-        } catch (final NamingException ex) {
-            throw new InternalProcessingException("Could not find the EntityManagerFactory");
+        } catch (final InternalProcessingException ex) {
+            throw ex;
+        } finally {
+            if (entityManager != null)
+                entityManager.close();
         }
     }
 
-    protected <U> U getEntity(final Class<U> type, final Object id) {
-        try {
-            final InitialContext initCtx = new InitialContext();
+    protected <U> U getEntity(final Class<U> type, final Object id) throws InternalProcessingException {
+        final EntityManager entityManager = getEntityManager();
 
-            final EntityManagerFactory entityManagerFactory = (EntityManagerFactory) initCtx
-                    .lookup("java:jboss/EntityManagerFactory");
-            if (entityManagerFactory == null)
-                throw new InternalServerErrorException("Could not find the EntityManagerFactory");
+        final U entity = entityManager.find(type, id);
+        if (entity == null)
+            throw new BadRequestException("No entity was found with the primary key " + id);
 
-            final EntityManager entityManager = entityManagerFactory.createEntityManager();
-            if (entityManager == null)
-                throw new InternalServerErrorException("Could not create an EntityManager");
-
-            final U entity = entityManager.find(type, id);
-            if (entity == null)
-                throw new BadRequestException("No entity was found with the primary key " + id);
-
-            return entity;
-        } catch (final NamingException ex) {
-            throw new InternalServerErrorException("Could not find the EntityManagerFactory");
-        }
+        return entity;
     }
 
     protected <T extends RESTBaseEntityV1<T, V, W>, U extends AuditedEntity<U>, V extends RESTBaseCollectionV1<T, V, W>, W extends RESTBaseCollectionItemV1<T, V, W>> V getXMLResources(
@@ -816,19 +730,12 @@ public class BaseRESTv1 {
         assert type != null : "The type parameter can not be null";
         assert dataObjectFactory != null : "The dataObjectFactory parameter can not be null";
 
+        EntityManager entityManager = null;
+
         try {
             final ExpandDataTrunk expandDataTrunk = unmarshallExpand(expand);
 
-            final InitialContext initCtx = new InitialContext();
-
-            final EntityManagerFactory entityManagerFactory = (EntityManagerFactory) initCtx
-                    .lookup("java:jboss/EntityManagerFactory");
-            if (entityManagerFactory == null)
-                throw new InternalServerErrorException("Could not find the EntityManagerFactory");
-
-            final EntityManager entityManager = entityManagerFactory.createEntityManager();
-            if (entityManager == null)
-                throw new InternalServerErrorException("Could not create an EntityManager");
+            entityManager = getEntityManager();
 
             final CriteriaBuilder criteriaBuilder = entityManager.getCriteriaBuilder();
             final CriteriaQuery<U> criteriaQuery = criteriaBuilder.createQuery(type);
@@ -843,10 +750,13 @@ public class BaseRESTv1 {
                     result, expandName, dataType, expandDataTrunk, getBaseUrl(), true, entityManager);
 
             return retValue;
-        } catch (final NamingException ex) {
-            throw new InternalProcessingException("Could not find the EntityManagerFactory");
+        } catch (final InternalProcessingException ex) {
+            throw ex;
         } catch (final Exception ex) {
             throw new InvalidParameterException("Internal processing error");
+        } finally {
+            if (entityManager != null)
+                entityManager.close();
         }
     }
 
@@ -855,10 +765,25 @@ public class BaseRESTv1 {
             final Class<? extends IFilterQueryBuilder<U>> filterQueryBuilderClass, final IFieldFilter entityFieldFilter,
             final RESTDataObjectFactory<T, U, V, W> dataObjectFactory, final String expandName, final String expand)
             throws InternalProcessingException, InvalidParameterException {
-        return getResourcesFromQuery(collectionClass, queryParams, filterQueryBuilderClass, entityFieldFilter, dataObjectFactory,
-                expandName, expand, JSON_URL);
+        return getResourcesFromQuery(collectionClass, queryParams, filterQueryBuilderClass, entityFieldFilter,
+                dataObjectFactory, expandName, expand, JSON_URL);
     }
 
+    /**
+     * Get a set of entity resources using a URL Query Parameter Map.
+     * 
+     * @param collectionClass The Class of the collection that should be returned.
+     * @param queryParams The map of URL Query Parameters to use when searching.
+     * @param filterQueryBuilderClass The Class of the query builder to be used.
+     * @param entityFieldFilter A custom Field filter to be used by the Filter Query Builder.
+     * @param dataObjectFactory The Collection Factory object to be used to generate the contents of the collection.
+     * @param expandName The name that should be used to expand the collection.
+     * @param expand The Expand Object that contains details about what should be expanded.
+     * @param dataType The MIME data type that should be returned and used for entity URL links.
+     * @return A Collection of Entities represented as a passed collectionClass.
+     * @throws InternalProcessingException
+     * @throws InvalidParameterException
+     */
     protected <T extends RESTBaseEntityV1<T, V, W>, U extends AuditedEntity<U>, V extends RESTBaseCollectionV1<T, V, W>, W extends RESTBaseCollectionItemV1<T, V, W>> V getResourcesFromQuery(
             final Class<V> collectionClass, final MultivaluedMap<String, String> queryParams,
             final Class<? extends IFilterQueryBuilder<U>> filterQueryBuilderClass, final IFieldFilter entityFieldFilter,
@@ -867,30 +792,25 @@ public class BaseRESTv1 {
         assert dataObjectFactory != null : "The dataObjectFactory parameter can not be null";
         assert uriInfo != null : "uriInfo can not be null";
 
+        EntityManager entityManager = null;
+
         try {
             final ExpandDataTrunk expandDataTrunk = unmarshallExpand(expand);
 
-            final InitialContext initCtx = new InitialContext();
+            entityManager = getEntityManager();
 
-            final EntityManagerFactory entityManagerFactory = (EntityManagerFactory) initCtx
-                    .lookup("java:jboss/EntityManagerFactory");
-            if (entityManagerFactory == null)
-                throw new InternalProcessingException("Could not find the EntityManagerFactory");
-
-            final EntityManager entityManager = entityManagerFactory.createEntityManager();
-            if (entityManager == null)
-                throw new InternalProcessingException("Could not create an EntityManager");
-            
             // build up a Filter object from the URL variables
             final Filter filter;
-            final IFilterQueryBuilder<U> filterQueryBuilder = filterQueryBuilderClass.getConstructor(EntityManager.class).newInstance(entityManager);
+            final IFilterQueryBuilder<U> filterQueryBuilder = filterQueryBuilderClass.getConstructor(EntityManager.class)
+                    .newInstance(entityManager);
             if (filterQueryBuilder instanceof ITagFilterQueryBuilder) {
                 filter = EntityUtilities.populateFilter(entityManager, queryParams, CommonFilterConstants.FILTER_ID,
                         CommonFilterConstants.MATCH_TAG, CommonFilterConstants.GROUP_TAG,
                         CommonFilterConstants.CATEORY_INTERNAL_LOGIC, CommonFilterConstants.CATEORY_EXTERNAL_LOGIC,
                         CommonFilterConstants.MATCH_LOCALE, entityFieldFilter);
             } else {
-                filter = EntityUtilities.populateFilter(entityManager, queryParams, CommonFilterConstants.MATCH_LOCALE, entityFieldFilter);
+                filter = EntityUtilities.populateFilter(entityManager, queryParams, CommonFilterConstants.MATCH_LOCALE,
+                        entityFieldFilter);
             }
 
             final CriteriaQuery<U> query = filter.buildQuery(filterQueryBuilder);
@@ -901,13 +821,21 @@ public class BaseRESTv1 {
                     result, expandName, dataType, expandDataTrunk, getBaseUrl(), true, entityManager);
 
             return retValue;
-        } catch (final NamingException ex) {
-            throw new InternalServerErrorException("Could not find the EntityManagerFactory");
         } catch (Exception e) {
             throw new InternalServerErrorException(e.getMessage());
+        } finally {
+            if (entityManager != null)
+                entityManager.close();
         }
     }
 
+    /**
+     * Set the log details for the current request. This will use the injected EnversLoggingBean object to set the logging
+     * details for Envers.
+     * 
+     * @param entityManager An EntityManager Object that can be used to look up database entities.
+     * @param dataObject The LogDetails object that contains the details to be associted with in the log.
+     */
     private void setLogDetails(final EntityManager entityManager, final RESTLogDetailsV1 dataObject) {
         if (dataObject == null)
             return;
@@ -929,6 +857,14 @@ public class BaseRESTv1 {
         }
     }
 
+    /**
+     * Generate a RESTLogDetails object from a set of URL passed parameters.
+     * 
+     * @param message The message to be associated with the log.
+     * @param flag The Message Flags. (ie Minor or Major change).
+     * @param userId The ID of the user who has made the changes.
+     * @return A pre-populated RESTLogDetailsV1 object.
+     */
     protected RESTLogDetailsV1 generateLogDetails(final String message, final Integer flag, final Integer userId) {
         final RESTLogDetailsV1 logDetails = new RESTLogDetailsV1();
 
@@ -971,5 +907,46 @@ public class BaseRESTv1 {
         } catch (final IOException ex) {
             throw new InvalidParameterException("Could not convert expand data from JSON to an instance of ExpandDataTrunk");
         }
+    }
+
+    /**
+     * Get an EntityManager instance from the EntityManagerFactory. If the Factory hasn't been looked up yet, then perform the
+     * lookup as well.
+     * 
+     * Note: This method won't join any active Transactions.
+     * 
+     * @return An intialised EntityManager object.
+     * @throws InternalProcessingException
+     */
+    protected EntityManager getEntityManager() throws InternalProcessingException {
+        return getEntityManager(false);
+    }
+
+    /**
+     * Get an EntityManager instance from the EntityManagerFactory. If the Factory hasn't been looked up yet, then perform the
+     * lookup as well. *
+     * 
+     * @param joinTransaction Whether or not the EntityManager should attempt to join any active Transactions.
+     * @return An intialised EntityManager object.
+     * @throws InternalProcessingException
+     */
+    protected EntityManager getEntityManager(boolean joinTransaction) throws InternalProcessingException {
+        if (BaseRESTv1.entityManagerFactory == null) {
+            try {
+                BaseRESTv1.entityManagerFactory = BaseRESTv1.lookupEntityManagerFactory();
+            } catch (NamingException e) {
+                throw new InternalProcessingException("Could not find the EntityManagerFactory");
+            }
+        }
+
+        final EntityManager entityManager = entityManagerFactory.createEntityManager();
+        if (entityManager == null)
+            throw new InternalProcessingException("Could not create an EntityManager");
+
+        if (joinTransaction) {
+            entityManager.joinTransaction();
+        }
+
+        return entityManager;
     }
 }

@@ -40,7 +40,7 @@ public class LogDetailsV1Factory
         final User user = EntityUtilities.getUserFromUsername(entityManager, revisionEntity.getUserName());
         if (user != null)
         {
-            retValue.setUser(new UserV1Factory().createRESTEntityFromDBEntity(user, baseUrl, dataType, expand));
+            retValue.setUser(new UserV1Factory().createRESTEntityFromDBEntity(user, baseUrl, dataType, expand, entityManager));
         }
 
         return retValue;
