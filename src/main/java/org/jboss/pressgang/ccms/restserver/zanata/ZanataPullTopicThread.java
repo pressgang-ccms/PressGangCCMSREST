@@ -23,6 +23,7 @@ import org.jboss.pressgang.ccms.restserver.entity.TranslatedTopic;
 import org.jboss.pressgang.ccms.restserver.entity.TranslatedTopicData;
 import org.jboss.pressgang.ccms.restserver.entity.TranslatedTopicString;
 import org.jboss.pressgang.ccms.restserver.utils.EntityUtilities;
+import org.jboss.pressgang.ccms.restserver.utils.JNDIUtilities;
 import org.jboss.pressgang.ccms.restserver.utils.topicrenderer.TopicQueueRenderer;
 import org.jboss.pressgang.ccms.utils.common.XMLUtilities;
 import org.jboss.pressgang.ccms.utils.concurrency.WorkQueue;
@@ -42,6 +43,10 @@ import org.zanata.rest.dto.resource.TranslationsResource;
 
 import com.redhat.contentspec.processor.ContentSpecParser;
 
+/**
+ * A class that provides a Runnable interface to allow pulling translations from Zanata for specified topics in a background
+ * Thread.
+ */
 public class ZanataPullTopicThread implements Runnable {
     private static final Logger log = LoggerFactory.getLogger(ZanataPullTopicThread.class);
     private static final String XML_ENCODING = "UTF-8";
@@ -64,16 +69,14 @@ public class ZanataPullTopicThread implements Runnable {
             EntityManager entityManager = null;
 
             try {
-                final InitialContext initCtx = new InitialContext();
-                final EntityManagerFactory entityManagerFactory = (EntityManagerFactory) initCtx
-                        .lookup("java:jboss/EntityManagerFactory");
-                transactionManager = (TransactionManager) initCtx.lookup("java:jboss/TransactionManager");
+                final EntityManagerFactory entityManagerFactory = JNDIUtilities.lookupEntityManagerFactory();
+
+                transactionManager = JNDIUtilities.lookupTransactionManager();
+                transactionManager.begin();
 
                 entityManager = entityManagerFactory.createEntityManager();
 
-                transactionManager.begin();
-
-                /* Ensure that the Zanata Locales have been initalised */
+                // Ensure that the Zanata Locales have been initalised
                 if (zanataInterface.getZanataLocales().isEmpty()) {
                     final List<String> locales = EntityUtilities.getLocales(entityManager);
                     final List<LocaleId> localeIds = new ArrayList<LocaleId>();
@@ -85,7 +88,7 @@ public class ZanataPullTopicThread implements Runnable {
 
                 final List<Integer> processedIds = new ArrayList<Integer>();
 
-                /* for each translated topic... */
+                // for each translated topic update the translated xml and translated strings
                 for (final Integer topicId : this.translatedTopics) {
                     ++current;
                     final int progress = (int) ((float) current / (float) total * 100.0f);
@@ -103,8 +106,10 @@ public class ZanataPullTopicThread implements Runnable {
                     }
                 }
 
+                // Commit all the changes
                 transactionManager.commit();
 
+                // Render all the updated translated topics
                 for (final Integer id : processedIds) {
                     WorkQueue.getInstance()
                             .execute(TopicQueueRenderer.createNewInstance(id, TopicRendererType.TRANSLATEDTOPIC));
@@ -127,34 +132,42 @@ public class ZanataPullTopicThread implements Runnable {
         }
     }
 
+    /**
+     * Process a translated topic and pull all the translation strings from Zanata.
+     * 
+     * @param entityManager The EntityManager instance to be used to lookup information about the stored translated topic.
+     * @param translatedTopicId The ID of the Translated Topic to be processed.
+     * @param locale The locale of the translated topic to be processed.
+     * @return The ID of the TranslatedTopicData that was created or updated.
+     */
     @SuppressWarnings("deprecation")
     private Integer processTopic(final EntityManager entityManager, final Integer translatedTopicId, final String locale) {
         Integer retValue = null;
 
         final AuditReader reader = AuditReaderFactory.get(entityManager);
 
-        /* find the original TranslatedTopic */
+        // Find the original TranslatedTopic
         final TranslatedTopic topic = entityManager.find(TranslatedTopic.class, translatedTopicId);
 
         if (topic != null) {
-            /* ... find the matching historical envers topic */
+            // ... find the matching historical envers topic
             final Topic historicalTopic = reader.find(Topic.class, topic.getTopicId(), topic.getTopicRevision());
 
-            /* Don't get translations for the original locale as it won't need translating */
+            // Don't get translations for the original locale as it won't need translating
             if (historicalTopic.getTopicLocale().equals(locale)) {
                 return null;
             }
 
-            /* find a translation */
+            // find a translation
             final TranslationsResource translationsResource = zanataInterface.getTranslations(topic.getZanataId(),
                     LocaleId.fromJavaName(locale));
-            /* and find the original resource */
+            // and find the original resource
             final Resource originalTextResource = zanataInterface.getZanataResource(topic.getZanataId());
 
             if (translationsResource != null && originalTextResource != null) {
                 final Set<TranslatedTopicData> translatedTopicDataEntities = topic.getTranslatedTopicDatas();
 
-                /* attempt to find an existing TranslatedTopicData entity */
+                // attempt to find an existing TranslatedTopicData entity
                 TranslatedTopicData translatedTopicData = null;
 
                 for (final TranslatedTopicData myTranslatedTopicData : translatedTopicDataEntities) {
@@ -164,9 +177,7 @@ public class ZanataPullTopicThread implements Runnable {
                     }
                 }
 
-                /*
-                 * if an existing TranslatedTopicData entity does not exist, create one
-                 */
+                // If an existing TranslatedTopicData entity does not exist, create one
                 if (translatedTopicData == null) {
                     translatedTopicData = new TranslatedTopicData();
                     translatedTopicData.setTranslatedTopic(topic);
@@ -174,9 +185,7 @@ public class ZanataPullTopicThread implements Runnable {
                     translatedTopicDataEntities.add(translatedTopicData);
                 }
 
-                /*
-                 * a mapping of the original strings to their translations
-                 */
+                // A mapping of the original strings to their translations
                 final Map<String, ZanataTranslation> translationDetails = new HashMap<String, ZanataTranslation>();
                 final Map<String, String> translations = new HashMap<String, String>();
 
@@ -186,7 +195,7 @@ public class ZanataPullTopicThread implements Runnable {
                 double wordCount = 0;
                 double totalWordCount = 0;
 
-                /* map the translation to the original resource */
+                // map the translation to the original resource
                 for (final TextFlow textFlow : textFlows) {
                     for (final TextFlowTarget textFlowTarget : textFlowTargets) {
                         if (textFlowTarget.getResId().equals(textFlow.getId())) {
@@ -204,16 +213,15 @@ public class ZanataPullTopicThread implements Runnable {
 
                 try {
                     if (historicalTopic.isTaggedWith(CommonConstants.CONTENT_SPEC_TAG_ID)) {
-                        processContentSpec(entityManager, historicalTopic, translatedTopicData, translationDetails, translations);
+                        processContentSpec(entityManager, historicalTopic, translatedTopicData, translationDetails,
+                                translations);
                     } else {
                         processTopic(entityManager, historicalTopic, translatedTopicData, translationDetails, translations);
                     }
-                    /* persist the changes */
+                    // persist the changes
                     entityManager.persist(translatedTopicData);
-    
-                    /*
-                     * make a note of the TranslatedTopicData entities that have been changed, so we can render them
-                     */
+
+                    // Make a note of the TranslatedTopicData entities that have been changed, so we can render them
                     retValue = translatedTopicData.getTranslatedTopicDataId();
                 } catch (Exception ex) {
                     log.error("An error occurred saving or creating the translated topic", ex);
@@ -241,7 +249,7 @@ public class ZanataPullTopicThread implements Runnable {
             final Map<String, String> translations) throws SAXException {
         boolean changed = false;
 
-        /* get a Document from the stored historical XML */
+        // Get a Document from the stored historical XML
         final Document xml = XMLUtilities.convertStringToDocument(historicalTopic.getTopicXML());
         if (xml != null) {
 
@@ -250,7 +258,7 @@ public class ZanataPullTopicThread implements Runnable {
             final List<StringToNodeCollection> stringToNodeCollections = new ArrayList<StringToNodeCollection>();
             final List<StringToNodeCollection> tempStringToNodeCollection = new ArrayList<StringToNodeCollection>();
 
-            /* Add any StringToNode's that match the original translations */
+            // Add any StringToNode's that match the original translations
             for (final StringToNodeCollection stringToNodeCollectionV2 : stringToNodeCollectionsV2) {
                 for (final String originalString : translations.keySet()) {
                     if (originalString.equals(stringToNodeCollectionV2.getTranslationString())) {
@@ -260,6 +268,7 @@ public class ZanataPullTopicThread implements Runnable {
                 }
             }
 
+            // Add any StringToNode's that match original translations for the bugged v1 method
             for (final StringToNodeCollection stringToNodeCollectionV1 : stringToNodeCollectionsV1) {
                 for (final String originalString : translations.keySet()) {
                     if (originalString.equals(stringToNodeCollectionV1.getTranslationString())
@@ -308,14 +317,14 @@ public class ZanataPullTopicThread implements Runnable {
                     }
                 }
 
-                /* Remove any translation strings that no longer exist */
+                // Remove any translation strings that no longer exist
                 for (final TranslatedTopicString translatedTopicString : removeTranslationStringList) {
                     translatedTopic.getTranslatedTopicStrings().remove(translatedTopicString);
                     entityManager.remove(translatedTopicString);
                 }
             }
 
-            /* save the new strings to TranslatedTopicString entities */
+            // save the new strings to TranslatedTopicString entities
             for (final StringToNodeCollection original : tempStringToNodeCollection) {
                 final String originalText = original.getTranslationString();
                 final ZanataTranslation translation = translationDetails.get(originalText);
@@ -333,9 +342,7 @@ public class ZanataPullTopicThread implements Runnable {
                 }
             }
 
-            /*
-             * replace the translated strings, and save the result into the TranslatedTopicData entity
-             */
+            // replace the translated strings, and save the result into the TranslatedTopicData entity
             if (xml != null) {
                 XMLUtilities.replaceTranslatedStrings(xml, translations, stringToNodeCollections);
                 translatedTopic.setTranslatedXml(XMLUtilities.convertDocumentToString(xml, XML_ENCODING));
@@ -361,12 +368,11 @@ public class ZanataPullTopicThread implements Runnable {
             final Map<String, String> translations) throws Exception {
         boolean changed = false;
 
-        /* Parse the Content Spec stored in the XML Field */
+        // Parse the Content Spec stored in the XML Field
+        // TODO The URL shouldn't be hardcoded
         final ContentSpecParser parser = new ContentSpecParser("http://localhost:8080/TopicIndex/");
 
-        /*
-         * replace the translated strings, and save the result into the TranslatedTopicData entity
-         */
+        // Replace the translated strings, and save the result into the TranslatedTopicData entity
         if (parser.parse(historicalTopic.getTopicXML())) {
             final ContentSpec spec = parser.getContentSpec();
 
@@ -374,7 +380,7 @@ public class ZanataPullTopicThread implements Runnable {
                 final List<StringToCSNodeCollection> stringToNodeCollections = ContentSpecUtilities.getTranslatableStrings(
                         spec, false);
 
-                /* create a temporary collection that we can freely remove items from */
+                // Create a temporary collection that we can freely remove items from
                 final List<StringToCSNodeCollection> tempStringToNodeCollection = new ArrayList<StringToCSNodeCollection>();
                 for (final StringToCSNodeCollection stringToNodeCollection : stringToNodeCollections) {
                     tempStringToNodeCollection.add(stringToNodeCollection);
@@ -418,14 +424,14 @@ public class ZanataPullTopicThread implements Runnable {
                         }
                     }
 
-                    /* Remove any translation strings that no longer exist */
+                    // Remove any translation strings that no longer exist
                     for (final TranslatedTopicString translatedTopicString : removeTranslationStringList) {
                         translatedTopic.getTranslatedTopicStrings().remove(translatedTopicString);
                         entityManager.remove(translatedTopicString);
                     }
                 }
 
-                /* save the strings to TranslatedTopicString entities */
+                // save the strings to TranslatedTopicString entities
                 for (final StringToCSNodeCollection original : tempStringToNodeCollection) {
                     final String originalText = original.getTranslationString();
                     final ZanataTranslation translation = translationDetails.get(originalText);

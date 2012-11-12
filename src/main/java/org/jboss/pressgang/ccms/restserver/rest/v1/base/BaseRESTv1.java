@@ -9,7 +9,6 @@ import java.util.Set;
 
 import javax.enterprise.context.RequestScoped;
 import javax.inject.Inject;
-import javax.naming.InitialContext;
 import javax.naming.NamingException;
 import javax.persistence.EntityManager;
 import javax.persistence.EntityManagerFactory;
@@ -54,6 +53,7 @@ import org.jboss.pressgang.ccms.restserver.filter.base.ITagFilterQueryBuilder;
 import org.jboss.pressgang.ccms.restserver.rest.DatabaseOperation;
 import org.jboss.pressgang.ccms.restserver.utils.Constants;
 import org.jboss.pressgang.ccms.restserver.utils.EntityUtilities;
+import org.jboss.pressgang.ccms.restserver.utils.JNDIUtilities;
 import org.jboss.resteasy.plugins.providers.atom.Content;
 import org.jboss.resteasy.plugins.providers.atom.Entry;
 import org.jboss.resteasy.plugins.providers.atom.Feed;
@@ -72,37 +72,6 @@ public class BaseRESTv1 {
     private static final Logger log = LoggerFactory.getLogger(BaseRESTv1.class);
     /** The format for dates passed and returned by the REST Interface */
     protected static final String REST_DATE_FORMAT = "dd-MMM-yyyy";
-
-    /**
-     * Lookup the named "java:jboss/EntityManagerFactory" EntityManagerFactory associated with the underlying Application
-     * Server.
-     * 
-     * @return The EntityManagerFactory object.
-     * @throws NamingException Thrown if a name based error occurs looking up the EntityManagerFactory.
-     */
-    private static EntityManagerFactory lookupEntityManagerFactory() throws NamingException {
-        final InitialContext initCtx = new InitialContext();
-        final EntityManagerFactory entityManagerFactory = (EntityManagerFactory) initCtx
-                .lookup("java:jboss/EntityManagerFactory");
-
-        return entityManagerFactory;
-    }
-
-    /**
-     * Lookup the TransactionManager associated with the underlying Application Server.
-     * 
-     * @return The TransactionManager object.
-     * @throws NamingException Thrown if a name based error occurs looking up the TransactionManager.
-     */
-    private static final TransactionManager lookupTransactionManager() throws NamingException {
-        final InitialContext initCtx = new InitialContext();
-
-        final TransactionManager transactionManager = (TransactionManager) initCtx.lookup("java:jboss/TransactionManager");
-        if (transactionManager == null)
-            throw new InternalServerErrorException("Could not find the TransactionManager");
-
-        return transactionManager;
-    }
 
     /** An mapper to map Objects to JSON or vice-versa */
     private final ObjectMapper mapper = new ObjectMapper();
@@ -303,7 +272,7 @@ public class BaseRESTv1 {
             final ExpandDataTrunk expandDataTrunk = unmarshallExpand(expand);
 
             // Get the TransactionManager and start a Transaction
-            transactionManager = lookupTransactionManager();
+            transactionManager = JNDIUtilities.lookupTransactionManager();
             transactionManager.begin();
 
             // Get an EntityManager instance
@@ -402,7 +371,7 @@ public class BaseRESTv1 {
             final ExpandDataTrunk expandDataTrunk = unmarshallExpand(expand);
 
             // Get the TransactionManager and start a Transaction
-            transactionManager = lookupTransactionManager();
+            transactionManager = JNDIUtilities.lookupTransactionManager();
             transactionManager.begin();
 
             // Get an EntityManager instance
@@ -534,7 +503,7 @@ public class BaseRESTv1 {
             final ExpandDataTrunk expandDataTrunk = unmarshallExpand(expand);
 
             // Get the TransactionManager and start a Transaction
-            transactionManager = lookupTransactionManager();
+            transactionManager = JNDIUtilities.lookupTransactionManager();
             transactionManager.begin();
 
             // Get an EntityManager instance
@@ -634,7 +603,7 @@ public class BaseRESTv1 {
             final ExpandDataTrunk expandDataTrunk = unmarshallExpand(expand);
 
             // Get the TransactionManager and start a Transaction
-            transactionManager = lookupTransactionManager();
+            transactionManager = JNDIUtilities.lookupTransactionManager();
             transactionManager.begin();
 
             // Get an EntityManager instance
@@ -1141,7 +1110,7 @@ public class BaseRESTv1 {
     protected EntityManager getEntityManager(boolean joinTransaction) throws InternalProcessingException {
         EntityManagerFactory entityManagerFactory = null;
         try {
-            entityManagerFactory = lookupEntityManagerFactory();
+            entityManagerFactory = JNDIUtilities.lookupEntityManagerFactory();
         } catch (NamingException e) {
             throw new InternalProcessingException("Could not find the EntityManagerFactory");
         }
