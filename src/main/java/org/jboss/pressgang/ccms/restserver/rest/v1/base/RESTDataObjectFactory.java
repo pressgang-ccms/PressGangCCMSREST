@@ -25,10 +25,12 @@ public abstract class RESTDataObjectFactory<T extends RESTBaseEntityV1<T, V, W>,
     }
 
     /**
+     * Create a REST Entity representation from Database Entity specified by it's Primary Key.
+     * 
      * @param primaryKey The id of the database entity to use as the source for the REST entity
      * @param baseUrl The REST url that was used to access this REST entity
      * @param dataType The type of the returned data (XML or JSON)
-     * @param expand The expansion JSON string, which will be converted into a ExpandDataTrunk
+     * @param expand The Object that contains details about what fields should be expanded.
      * @return A new REST entity populated with the values in a database entity
      */
     public T createRESTEntityFromDBPK(final Object primaryKey, final String baseUrl, final String dataType,
@@ -43,6 +45,13 @@ public abstract class RESTDataObjectFactory<T extends RESTBaseEntityV1<T, V, W>,
     }
 
     /**
+     * Create a REST Entity representation from Database Entity.
+     * 
+     * @param entity The entity that is to be transformed into a REST Entity.
+     * @param baseUrl The REST url that was used to access this REST entity
+     * @param dataType The type of the returned data (XML or JSON)
+     * @param expand The Object that contains details about what fields should be expanded.
+     * @param entityManager The EntityManager object used to look up the entity and any extra information.
      * @return A new REST entity populated with the values in a database entity
      */
     public T createRESTEntityFromDBEntity(final U entity, final String baseUrl, final String dataType,
@@ -51,6 +60,14 @@ public abstract class RESTDataObjectFactory<T extends RESTBaseEntityV1<T, V, W>,
     }
 
     /**
+     * Create a REST Entity representation from Database Entity.
+     * 
+     * @param entity The entity that is to be transformed into a REST Entity.
+     * @param baseUrl The REST url that was used to access this REST entity
+     * @param dataType The type of the returned data (XML or JSON)
+     * @param expand The Object that contains details about what fields should be expanded.
+     * @param revision The revision number of the entity.
+     * @param entityManager The EntityManager object used to look up the entity and any extra information.
      * @return A new REST entity populated with the values in a database entity
      */
     public T createRESTEntityFromDBEntity(final U entity, final String baseUrl, final String dataType,
@@ -59,6 +76,15 @@ public abstract class RESTDataObjectFactory<T extends RESTBaseEntityV1<T, V, W>,
     }
 
     /**
+     * Create a REST Entity representation from Database Entity.
+     * 
+     * @param entity The entity that is to be transformed into a REST Entity.
+     * @param baseUrl The REST url that was used to access this REST entity
+     * @param dataType The type of the returned data (XML or JSON)
+     * @param expand The Object that contains details about what fields should be expanded.
+     * @param revision The revision number of the entity.
+     * @param expandParentReferences If parent entities in children entities should be expanded.
+     * @param entityManager The EntityManager object used to look up the entity and any extra information.
      * @return A new REST entity populated with the values in a database entity
      */
     public abstract T createRESTEntityFromDBEntity(final U entity, final String baseUrl, final String dataType,
@@ -68,9 +94,9 @@ public abstract class RESTDataObjectFactory<T extends RESTBaseEntityV1<T, V, W>,
     /**
      * Populates the values of a database entity from a REST entity
      * 
-     * @param entityManager
-     * @param entity The database entity
-     * @param dataObject The REST entity
+     * @param entityManager The EntityManager object used to look up the entity and any extra information.
+     * @param entity The database entity to be synced from the REST Entity.
+     * @param dataObject The REST entity object.
      */
     public abstract void syncDBEntityWithRESTEntity(final EntityManager entityManager, final U entity, final T dataObject)
             throws InvalidParameterException;
@@ -78,7 +104,7 @@ public abstract class RESTDataObjectFactory<T extends RESTBaseEntityV1<T, V, W>,
     /**
      * Creates, populates and returns a new database entity from a REST entity
      * 
-     * @param entityManager
+     * @param entityManager The EntityManager object used to look up the entity and any extra information.
      * @param dataObject The REST entity used to populate the database entity's values
      * @return A new database entity with the values supplied from the dataObject
      */

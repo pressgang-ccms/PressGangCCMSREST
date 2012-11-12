@@ -1,8 +1,8 @@
-package org.jboss.pressgang.ccms.restserver.filter.structures.field;
+package org.jboss.pressgang.ccms.restserver.filter.structures;
 
-public class UIFieldBooleanData extends UIFieldDataBase<Boolean> {
+public class FilterFieldBooleanData extends FilterFieldDataBase<Boolean> {
 
-    public UIFieldBooleanData(final String name, final String description) {
+    public FilterFieldBooleanData(final String name, final String description) {
         super(name, description);
     }
 

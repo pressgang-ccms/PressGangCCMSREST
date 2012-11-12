@@ -10,13 +10,13 @@
         <dependent-module archiveName="pressgang-ccms-contentspec-1.0-SNAPSHOT.jar" deploy-path="/WEB-INF/lib" handle="module:/resource/PressGangCCMSContentSpec/PressGangCCMSContentSpec">
             <dependency-type>uses</dependency-type>
         </dependent-module>
-        <dependent-module archiveName="pressgang-ccms-restv1-1.0-SNAPSHOT.jar" deploy-path="/WEB-INF/lib" handle="module:/resource/PressGangCCMSRESTv1Common/PressGangCCMSRESTv1Common">
-            <dependency-type>uses</dependency-type>
-        </dependent-module>
         <dependent-module archiveName="pressgang-ccms-zanata-1.0-SNAPSHOT.jar" deploy-path="/WEB-INF/lib" handle="module:/resource/PressGangCCMSZanataInterface/PressGangCCMSZanataInterface">
             <dependency-type>uses</dependency-type>
         </dependent-module>
         <dependent-module archiveName="pressgang-ccms-rest-1.0-SNAPSHOT.jar" deploy-path="/WEB-INF/lib" handle="module:/resource/PressGangCCMSRESTCommon/PressGangCCMSRESTCommon">
+            <dependency-type>uses</dependency-type>
+        </dependent-module>
+        <dependent-module archiveName="pressgang-ccms-restv1-1.0-SNAPSHOT.jar" deploy-path="/WEB-INF/lib" handle="module:/resource/PressGangCCMSRESTv1Common/PressGangCCMSRESTv1Common">
             <dependency-type>uses</dependency-type>
         </dependent-module>
         <property name="java-output-path" value="/PressGangCCMSREST/target/classes"/>

@@ -164,6 +164,11 @@
             <version>1.0-SNAPSHOT</version>
         </dependency>
         <dependency>
+            <groupId>org.jboss.pressgang.ccms</groupId>
+            <artifactId>pressgang-ccms-restv1</artifactId>
+            <version>1.0-SNAPSHOT</version>
+        </dependency>
+        <dependency>
             <groupId>org.jboss.pressgang.ccms.contentspec</groupId>
             <artifactId>csprocessor</artifactId>
             <version>0.0.4-SNAPSHOT</version>

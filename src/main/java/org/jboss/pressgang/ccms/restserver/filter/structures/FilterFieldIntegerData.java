@@ -1,12 +1,12 @@
-package org.jboss.pressgang.ccms.restserver.filter.structures.field;
+package org.jboss.pressgang.ccms.restserver.filter.structures;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class UIFieldIntegerData extends UIFieldDataBase<Integer> {
-    private static final Logger log = LoggerFactory.getLogger(UIFieldIntegerData.class);
+public class FilterFieldIntegerData extends FilterFieldDataBase<Integer> {
+    private static final Logger log = LoggerFactory.getLogger(FilterFieldIntegerData.class);
 
-    public UIFieldIntegerData(final String name, final String description) {
+    public FilterFieldIntegerData(final String name, final String description) {
         super(name, description);
     }
 

@@ -6,7 +6,7 @@ import java.util.HashMap;
 
 import org.jboss.pressgang.ccms.rest.v1.constants.CommonFilterConstants;
 import org.jboss.pressgang.ccms.restserver.filter.base.BaseFieldFilter;
-import org.jboss.pressgang.ccms.restserver.filter.structures.field.UIFieldStringData;
+import org.jboss.pressgang.ccms.restserver.filter.structures.FilterFieldStringData;
 
 
 public class PropertyTagCategoryFieldFilter extends BaseFieldFilter
@@ -26,9 +26,9 @@ public class PropertyTagCategoryFieldFilter extends BaseFieldFilter
         }
     });
     
-    private UIFieldStringData propCategoryIds;
-    private UIFieldStringData propCategoryName;
-    private UIFieldStringData propCategoryDescription;
+    private FilterFieldStringData propCategoryIds;
+    private FilterFieldStringData propCategoryName;
+    private FilterFieldStringData propCategoryDescription;
     
     public PropertyTagCategoryFieldFilter()
     {
@@ -40,9 +40,9 @@ public class PropertyTagCategoryFieldFilter extends BaseFieldFilter
     {
         super.resetAllValues();
         
-        propCategoryIds = new UIFieldStringData(CommonFilterConstants.PROP_CATEGORY_IDS_FILTER_VAR, CommonFilterConstants.PROP_CATEGORY_IDS_FILTER_VAR_DESC);
-        propCategoryName = new UIFieldStringData(CommonFilterConstants.PROP_CATEGORY_NAME_FILTER_VAR, CommonFilterConstants.PROP_CATEGORY_NAME_FILTER_VAR_DESC);
-        propCategoryDescription = new UIFieldStringData(CommonFilterConstants.PROP_CATEGORY_DESCRIPTION_FILTER_VAR, CommonFilterConstants.PROP_CATEGORY_DESCRIPTION_FILTER_VAR_DESC);
+        propCategoryIds = new FilterFieldStringData(CommonFilterConstants.PROP_CATEGORY_IDS_FILTER_VAR, CommonFilterConstants.PROP_CATEGORY_IDS_FILTER_VAR_DESC);
+        propCategoryName = new FilterFieldStringData(CommonFilterConstants.PROP_CATEGORY_NAME_FILTER_VAR, CommonFilterConstants.PROP_CATEGORY_NAME_FILTER_VAR_DESC);
+        propCategoryDescription = new FilterFieldStringData(CommonFilterConstants.PROP_CATEGORY_DESCRIPTION_FILTER_VAR, CommonFilterConstants.PROP_CATEGORY_DESCRIPTION_FILTER_VAR_DESC);
         
         addFilterVar(propCategoryIds);
         addFilterVar(propCategoryName);

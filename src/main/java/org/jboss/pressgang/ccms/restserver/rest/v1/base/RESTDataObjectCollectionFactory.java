@@ -44,6 +44,21 @@ public class RESTDataObjectCollectionFactory<T extends RESTBaseEntityV1<T, V, W>
                 true, entityManager);
     }
 
+    /**
+     * Create a Collection of REST Entities from a collection of Database Entities.
+     * 
+     * @param clazz The Class of the Collection Object that should be returned by the method.
+     * @param dataObjectFactory The factory to convert the database entity to a REST entity
+     * @param parent The parent from which to find previous versions
+     * @param revisions A list of Envers revision numbers that we want to add to the collection
+     * @param expandName The name of the collection that we are working with
+     * @param dataType The type of data that is returned through the REST interface
+     * @param parentExpand The parent objects expansion details
+     * @param baseUrl The base of the url that was used to access this collection
+     * @param revision The revision number of the Parent entity, if it's not the latest version.
+     * @param entityManager The EntityManager being used to provide data for the collection.
+     * @return A REST collection from a collection of database entities.
+     */
     public V create(final Class<V> clazz, final RESTDataObjectFactory<T, U, V, W> dataObjectFactory, final U parent,
             final List<Number> revisions, final String expandName, final String dataType, final ExpandDataTrunk parentExpand,
             final String baseUrl, final Number revision, final EntityManager entityManager) {
@@ -51,6 +66,21 @@ public class RESTDataObjectCollectionFactory<T extends RESTBaseEntityV1<T, V, W>
                 true, entityManager);
     }
 
+    /**
+     * Create a Collection of REST Entities from a collection of Database Entities.
+     * 
+     * @param clazz The Class of the Collection Object that should be returned by the method.
+     * @param dataObjectFactory The factory to convert the database entity to a REST entity
+     * @param entities A collection of numbers mapped to database entities. If isRevsionMap is true, these numbers are envers
+     *        revision numbers. If isRevsionMap is false, these numbers have no meaning.
+     * @param expandName The name of the collection that we are working with
+     * @param dataType The type of data that is returned through the REST interface
+     * @param parentExpand The parent objects expansion details
+     * @param baseUrl The base of the url that was used to access this collection
+     * @param expandParentReferences If any Parent references in entities should be expanded.
+     * @param entityManager The EntityManager being used to provide data for the collection.
+     * @return a REST collection from a collection of database entities.
+     */
     public V create(final Class<V> clazz, final RESTDataObjectFactory<T, U, V, W> dataObjectFactory, final List<U> entities,
             final String expandName, final String dataType, final ExpandDataTrunk parentExpand, final String baseUrl,
             final boolean expandParentReferences, final EntityManager entityManager) {
@@ -58,6 +88,22 @@ public class RESTDataObjectCollectionFactory<T extends RESTBaseEntityV1<T, V, W>
                 expandParentReferences, entityManager);
     }
 
+    /**
+     * Create a Collection of REST Entities from a collection of Database Entities.
+     * 
+     * @param clazz The Class of the Collection Object that should be returned by the method.
+     * @param dataObjectFactory The factory to convert the database entity to a REST entity
+     * @param entities A collection of numbers mapped to database entities. If isRevsionMap is true, these numbers are envers
+     *        revision numbers. If isRevsionMap is false, these numbers have no meaning.
+     * @param expandName The name of the collection that we are working with
+     * @param dataType The type of data that is returned through the REST interface
+     * @param parentExpand The parent objects expansion details
+     * @param baseUrl The base of the url that was used to access this collection
+     * @param revision The revision number of the Parent entity, if it's not the latest version.
+     * @param expandParentReferences If any Parent references in entities should be expanded.
+     * @param entityManager The EntityManager being used to provide data for the collection.
+     * @return a REST collection from a collection of database entities.
+     */
     public V create(final Class<V> clazz, final RESTDataObjectFactory<T, U, V, W> dataObjectFactory, final List<U> entities,
             final String expandName, final String dataType, final ExpandDataTrunk parentExpand, final String baseUrl,
             final Number revision, final boolean expandParentReferences, final EntityManager entityManager) {
@@ -66,6 +112,8 @@ public class RESTDataObjectCollectionFactory<T extends RESTBaseEntityV1<T, V, W>
     }
 
     /**
+     * Create a Collection of REST Entities from a collection of Database Entities.
+     * 
      * @param clazz The Class of the Collection Object that should be returned by the method.
      * @param dataObjectFactory The factory to convert the database entity to a REST entity
      * @param entities A collection of numbers mapped to database entities. If isRevsionMap is true, these numbers are envers
@@ -122,6 +170,7 @@ public class RESTDataObjectCollectionFactory<T extends RESTBaseEntityV1<T, V, W>
                      */
                     retValue.setSize(usingRevisions ? revisions.size() : entities.size());
 
+                    // Find the start reference for the response using the start and size of the entity list.
                     int start = 0;
                     if (indexes.getStart() != null) {
                         final int startIndex = indexes.getStart();
@@ -133,6 +182,7 @@ public class RESTDataObjectCollectionFactory<T extends RESTBaseEntityV1<T, V, W>
                         }
                     }
 
+                    // Find the end reference for the response using the start and size of the entity list.
                     int end = usingRevisions ? revisions.size() : entities.size();
                     if (indexes.getEnd() != null) {
                         final int endIndex = indexes.getEnd();
@@ -144,21 +194,18 @@ public class RESTDataObjectCollectionFactory<T extends RESTBaseEntityV1<T, V, W>
                         }
                     }
 
+                    // Fix the start and end if the two overlap
                     final int fixedStart = Math.min(start, end);
                     final int fixedEnd = Math.max(start, end);
 
                     retValue.setStartExpandIndex(fixedStart);
                     retValue.setEndExpandIndex(fixedEnd);
 
-                    /*
-                     * if (indexes.getRecursive() != null && indexes.getRecursive()) { if (expand.getBranches() == null) {
-                     * expand.setBranches(CollectionUtilities.toArrayList(expand)); } else { expand.getBranches().add(expand); }
-                     * }
-                     */
-
+                    // Get the entities requested from the entity list and create the REST Entities.
                     for (int i = fixedStart; i < fixedEnd; i++) {
                         U dbEntity = null;
 
+                        // Find the Entity to be used
                         Number revision = parentRevision;
                         if (usingRevisions) {
                             /*
@@ -178,17 +225,17 @@ public class RESTDataObjectCollectionFactory<T extends RESTBaseEntityV1<T, V, W>
                             dbEntity = entities.get(i);
                         }
 
+                        // If the entity was found then create the REST Entity
                         if (dbEntity != null) {
                             final T restEntity = dataObjectFactory.createRESTEntityFromDBEntity(dbEntity, baseUrl, dataType,
                                     expand, revision, expandParentReferences, entityManager);
 
-                            /*
-                             * if the entities keyset relates to the revision numbers, copy that data across
-                             */
+                            // If the entity relates to a revision, copy that data across
                             if (usingRevisions) {
                                 restEntity.setRevision(revisions.get(i).intValue());
                             }
 
+                            // Add the item to the return value
                             retValue.addItem(restEntity);
                         }
 

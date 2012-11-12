@@ -6,7 +6,7 @@ import java.util.HashMap;
 
 import org.jboss.pressgang.ccms.rest.v1.constants.CommonFilterConstants;
 import org.jboss.pressgang.ccms.restserver.filter.base.BaseFieldFilter;
-import org.jboss.pressgang.ccms.restserver.filter.structures.field.UIFieldStringData;
+import org.jboss.pressgang.ccms.restserver.filter.structures.FilterFieldStringData;
 
 
 public class FilterFieldFilter extends BaseFieldFilter
@@ -26,9 +26,9 @@ public class FilterFieldFilter extends BaseFieldFilter
         }
     });
     
-    private UIFieldStringData filterIds;
-    private UIFieldStringData filterName;
-    private UIFieldStringData filterDescription;
+    private FilterFieldStringData filterIds;
+    private FilterFieldStringData filterName;
+    private FilterFieldStringData filterDescription;
     
     public FilterFieldFilter()
     {
@@ -40,9 +40,9 @@ public class FilterFieldFilter extends BaseFieldFilter
     {
         super.resetAllValues();
         
-        filterIds = new UIFieldStringData(CommonFilterConstants.FILTER_IDS_FILTER_VAR, CommonFilterConstants.FILTER_IDS_FILTER_VAR_DESC);
-        filterName = new UIFieldStringData(CommonFilterConstants.FILTER_NAME_FILTER_VAR, CommonFilterConstants.FILTER_NAME_FILTER_VAR_DESC);
-        filterDescription = new UIFieldStringData(CommonFilterConstants.FILTER_DESCRIPTION_FILTER_VAR, CommonFilterConstants.FILTER_DESCRIPTION_FILTER_VAR_DESC);
+        filterIds = new FilterFieldStringData(CommonFilterConstants.FILTER_IDS_FILTER_VAR, CommonFilterConstants.FILTER_IDS_FILTER_VAR_DESC);
+        filterName = new FilterFieldStringData(CommonFilterConstants.FILTER_NAME_FILTER_VAR, CommonFilterConstants.FILTER_NAME_FILTER_VAR_DESC);
+        filterDescription = new FilterFieldStringData(CommonFilterConstants.FILTER_DESCRIPTION_FILTER_VAR, CommonFilterConstants.FILTER_DESCRIPTION_FILTER_VAR_DESC);
 
         addFilterVar(filterIds);
         addFilterVar(filterName);

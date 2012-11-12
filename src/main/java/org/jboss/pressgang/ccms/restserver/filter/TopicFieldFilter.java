@@ -11,13 +11,13 @@ import org.jboss.pressgang.ccms.rest.v1.constants.CommonFilterConstants;
 import org.jboss.pressgang.ccms.restserver.entity.Filter;
 import org.jboss.pressgang.ccms.restserver.entity.FilterField;
 import org.jboss.pressgang.ccms.restserver.filter.base.BaseFieldFilter;
-import org.jboss.pressgang.ccms.restserver.filter.structures.field.*;
+import org.jboss.pressgang.ccms.restserver.filter.structures.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
- * This class represents the options used by the objects that extend the ExtendedTopicList class to filter a query to retrieve
- * Topic entities.
+ * This class provides a mechanism to temporarily store and easily convert a set of fields for a filter until it needs to be
+ * saved to a database entity. This is also used by the Seam GUI to store the data temporarily.
  */
 public class TopicFieldFilter extends BaseFieldFilter {
     private static final Logger log = LoggerFactory.getLogger(TopicFieldFilter.class);
@@ -78,47 +78,47 @@ public class TopicFieldFilter extends BaseFieldFilter {
         }
     });
 
-    private UIFieldStringData topicIds;
-    private UIFieldStringData notTopicIds;
-    private UIFieldIntegerData topicRelatedTo;
-    private UIFieldIntegerData notTopicRelatedTo;
-    private UIFieldIntegerData topicRelatedFrom;
-    private UIFieldIntegerData notTopicRelatedFrom;
-    private UIFieldStringData topicTitle;
-    private UIFieldStringData notTopicTitle;
-    private UIFieldStringData topicDescription;
-    private UIFieldStringData notTopicDescription;
-    private UIFieldDateTimeData startCreateDate;
-    private UIFieldDateTimeData endCreateDate;
-    private UIFieldStringData topicXML;
-    private UIFieldStringData notTopicXML;
-    private UIFieldBooleanData hasRelationships;
-    private UIFieldBooleanData hasIncomingRelationships;
-    private UIFieldStringData topicTextSearch;
-    private UIFieldBooleanData hasXMLErrors;
-    private UIFieldDateTimeData startEditDate;
-    private UIFieldDateTimeData endEditDate;
-    private UIFieldIntegerData editedInLastDays;
-    private UIFieldIntegerData notEditedInLastDays;
-    private UIFieldBooleanData hasOpenBugzillaBugs;
-    private UIFieldBooleanData hasBugzillaBugs;
-    private UIFieldStringMapData propertyTags;
-    private UIFieldStringData topicIncludedInSpec;
-    private UIFieldStringData notTopicIncludedInSpec;
-    private UIFieldBooleanData latestTranslations;
-    private UIFieldBooleanData latestCompletedTranslations;
-    private UIFieldStringData zanataIds;
-    private UIFieldStringData notZanataIds;
+    private FilterFieldStringData topicIds;
+    private FilterFieldStringData notTopicIds;
+    private FilterFieldIntegerData topicRelatedTo;
+    private FilterFieldIntegerData notTopicRelatedTo;
+    private FilterFieldIntegerData topicRelatedFrom;
+    private FilterFieldIntegerData notTopicRelatedFrom;
+    private FilterFieldStringData topicTitle;
+    private FilterFieldStringData notTopicTitle;
+    private FilterFieldStringData topicDescription;
+    private FilterFieldStringData notTopicDescription;
+    private FilterFieldDateTimeData startCreateDate;
+    private FilterFieldDateTimeData endCreateDate;
+    private FilterFieldStringData topicXML;
+    private FilterFieldStringData notTopicXML;
+    private FilterFieldBooleanData hasRelationships;
+    private FilterFieldBooleanData hasIncomingRelationships;
+    private FilterFieldStringData topicTextSearch;
+    private FilterFieldBooleanData hasXMLErrors;
+    private FilterFieldDateTimeData startEditDate;
+    private FilterFieldDateTimeData endEditDate;
+    private FilterFieldIntegerData editedInLastDays;
+    private FilterFieldIntegerData notEditedInLastDays;
+    private FilterFieldBooleanData hasOpenBugzillaBugs;
+    private FilterFieldBooleanData hasBugzillaBugs;
+    private FilterFieldStringMapData propertyTags;
+    private FilterFieldStringData topicIncludedInSpec;
+    private FilterFieldStringData notTopicIncludedInSpec;
+    private FilterFieldBooleanData latestTranslations;
+    private FilterFieldBooleanData latestCompletedTranslations;
+    private FilterFieldStringData zanataIds;
+    private FilterFieldStringData notZanataIds;
 
-    private UIFieldBooleanData notHasXMLErrors;
-    private UIFieldBooleanData notHasRelationships;
-    private UIFieldBooleanData notHasIncomingRelationships;
-    private UIFieldBooleanData notHasOpenBugzillaBugs;
-    private UIFieldBooleanData notHasBugzillaBugs;
-    private UIFieldBooleanData notLatestTranslations;
-    private UIFieldBooleanData notLatestCompletedTranslations;
+    private FilterFieldBooleanData notHasXMLErrors;
+    private FilterFieldBooleanData notHasRelationships;
+    private FilterFieldBooleanData notHasIncomingRelationships;
+    private FilterFieldBooleanData notHasOpenBugzillaBugs;
+    private FilterFieldBooleanData notHasBugzillaBugs;
+    private FilterFieldBooleanData notLatestTranslations;
+    private FilterFieldBooleanData notLatestCompletedTranslations;
 
-    private List<UIFieldDataBase<?>> multipleFilterVars = new ArrayList<UIFieldDataBase<?>>();
+    private List<FilterFieldDataBase<?>> multipleFilterVars = new ArrayList<FilterFieldDataBase<?>>();
 
     public TopicFieldFilter() {
         resetAllValues();
@@ -129,114 +129,114 @@ public class TopicFieldFilter extends BaseFieldFilter {
         super.resetAllValues();
 
         /* Topic ID's */
-        topicIds = new UIFieldStringData(CommonFilterConstants.TOPIC_IDS_FILTER_VAR,
+        topicIds = new FilterFieldStringData(CommonFilterConstants.TOPIC_IDS_FILTER_VAR,
                 CommonFilterConstants.TOPIC_IDS_FILTER_VAR_DESC);
-        notTopicIds = new UIFieldStringData(CommonFilterConstants.TOPIC_IDS_NOT_FILTER_VAR,
+        notTopicIds = new FilterFieldStringData(CommonFilterConstants.TOPIC_IDS_NOT_FILTER_VAR,
                 CommonFilterConstants.TOPIC_IDS_NOT_FILTER_VAR_DESC);
 
         /* Zanata ID's */
-        zanataIds = new UIFieldStringData(CommonFilterConstants.ZANATA_IDS_FILTER_VAR,
+        zanataIds = new FilterFieldStringData(CommonFilterConstants.ZANATA_IDS_FILTER_VAR,
                 CommonFilterConstants.ZANATA_IDS_FILTER_VAR_DESC);
-        notZanataIds = new UIFieldStringData(CommonFilterConstants.ZANATA_IDS_NOT_FILTER_VAR,
+        notZanataIds = new FilterFieldStringData(CommonFilterConstants.ZANATA_IDS_NOT_FILTER_VAR,
                 CommonFilterConstants.ZANATA_IDS_NOT_FILTER_VAR_DESC);
 
         /* Topic Related To */
-        topicRelatedTo = new UIFieldIntegerData(CommonFilterConstants.TOPIC_RELATED_TO,
+        topicRelatedTo = new FilterFieldIntegerData(CommonFilterConstants.TOPIC_RELATED_TO,
                 CommonFilterConstants.TOPIC_RELATED_TO_DESC);
-        notTopicRelatedTo = new UIFieldIntegerData(CommonFilterConstants.TOPIC_NOT_RELATED_TO,
+        notTopicRelatedTo = new FilterFieldIntegerData(CommonFilterConstants.TOPIC_NOT_RELATED_TO,
                 CommonFilterConstants.TOPIC_NOT_RELATED_TO_DESC);
 
         /* Topic Related From */
-        topicRelatedFrom = new UIFieldIntegerData(CommonFilterConstants.TOPIC_RELATED_FROM,
+        topicRelatedFrom = new FilterFieldIntegerData(CommonFilterConstants.TOPIC_RELATED_FROM,
                 CommonFilterConstants.TOPIC_RELATED_FROM_DESC);
-        notTopicRelatedFrom = new UIFieldIntegerData(CommonFilterConstants.TOPIC_NOT_RELATED_FROM,
+        notTopicRelatedFrom = new FilterFieldIntegerData(CommonFilterConstants.TOPIC_NOT_RELATED_FROM,
                 CommonFilterConstants.TOPIC_NOT_RELATED_FROM_DESC);
 
         /* Topic Title */
-        topicTitle = new UIFieldStringData(CommonFilterConstants.TOPIC_TITLE_FILTER_VAR,
+        topicTitle = new FilterFieldStringData(CommonFilterConstants.TOPIC_TITLE_FILTER_VAR,
                 CommonFilterConstants.TOPIC_TITLE_FILTER_VAR_DESC);
-        notTopicTitle = new UIFieldStringData(CommonFilterConstants.TOPIC_TITLE_NOT_FILTER_VAR,
+        notTopicTitle = new FilterFieldStringData(CommonFilterConstants.TOPIC_TITLE_NOT_FILTER_VAR,
                 CommonFilterConstants.TOPIC_TITLE_NOT_FILTER_VAR_DESC);
 
         /* Topic Description */
-        topicDescription = new UIFieldStringData(CommonFilterConstants.TOPIC_DESCRIPTION_FILTER_VAR,
+        topicDescription = new FilterFieldStringData(CommonFilterConstants.TOPIC_DESCRIPTION_FILTER_VAR,
                 CommonFilterConstants.TOPIC_DESCRIPTION_FILTER_VAR_DESC);
-        notTopicDescription = new UIFieldStringData(CommonFilterConstants.TOPIC_DESCRIPTION_NOT_FILTER_VAR,
+        notTopicDescription = new FilterFieldStringData(CommonFilterConstants.TOPIC_DESCRIPTION_NOT_FILTER_VAR,
                 CommonFilterConstants.TOPIC_DESCRIPTION_NOT_FILTER_VAR_DESC);
 
         /* Topic is included in content specification */
-        topicIncludedInSpec = new UIFieldStringData(CommonFilterConstants.TOPIC_IS_INCLUDED_IN_SPEC,
+        topicIncludedInSpec = new FilterFieldStringData(CommonFilterConstants.TOPIC_IS_INCLUDED_IN_SPEC,
                 CommonFilterConstants.TOPIC_IS_INCLUDED_IN_SPEC_DESC);
-        notTopicIncludedInSpec = new UIFieldStringData(CommonFilterConstants.TOPIC_IS_NOT_INCLUDED_IN_SPEC,
+        notTopicIncludedInSpec = new FilterFieldStringData(CommonFilterConstants.TOPIC_IS_NOT_INCLUDED_IN_SPEC,
                 CommonFilterConstants.TOPIC_IS_NOT_INCLUDED_IN_SPEC_DESC);
 
         /* Topic XML */
-        topicXML = new UIFieldStringData(CommonFilterConstants.TOPIC_XML_FILTER_VAR,
+        topicXML = new FilterFieldStringData(CommonFilterConstants.TOPIC_XML_FILTER_VAR,
                 CommonFilterConstants.TOPIC_XML_FILTER_VAR_DESC);
-        notTopicXML = new UIFieldStringData(CommonFilterConstants.TOPIC_XML_NOT_FILTER_VAR,
+        notTopicXML = new FilterFieldStringData(CommonFilterConstants.TOPIC_XML_NOT_FILTER_VAR,
                 CommonFilterConstants.TOPIC_XML_NOT_FILTER_VAR_DESC);
 
         /* Topic Edited in last days */
-        editedInLastDays = new UIFieldIntegerData(CommonFilterConstants.TOPIC_EDITED_IN_LAST_DAYS,
+        editedInLastDays = new FilterFieldIntegerData(CommonFilterConstants.TOPIC_EDITED_IN_LAST_DAYS,
                 CommonFilterConstants.TOPIC_EDITED_IN_LAST_DAYS_DESC);
-        notEditedInLastDays = new UIFieldIntegerData(CommonFilterConstants.TOPIC_NOT_EDITED_IN_LAST_DAYS,
+        notEditedInLastDays = new FilterFieldIntegerData(CommonFilterConstants.TOPIC_NOT_EDITED_IN_LAST_DAYS,
                 CommonFilterConstants.TOPIC_NOT_EDITED_IN_LAST_DAYS_DESC);
 
         /* Has XML Errors */
-        hasXMLErrors = new UIFieldBooleanData(CommonFilterConstants.TOPIC_HAS_XML_ERRORS,
+        hasXMLErrors = new FilterFieldBooleanData(CommonFilterConstants.TOPIC_HAS_XML_ERRORS,
                 CommonFilterConstants.TOPIC_HAS_XML_ERRORS_DESC);
-        notHasXMLErrors = new UIFieldBooleanData(CommonFilterConstants.TOPIC_HAS_NOT_XML_ERRORS,
+        notHasXMLErrors = new FilterFieldBooleanData(CommonFilterConstants.TOPIC_HAS_NOT_XML_ERRORS,
                 CommonFilterConstants.TOPIC_HAS_NOT_XML_ERRORS_DESC);
 
         /* Has Relationships */
-        hasRelationships = new UIFieldBooleanData(CommonFilterConstants.TOPIC_HAS_RELATIONSHIPS,
+        hasRelationships = new FilterFieldBooleanData(CommonFilterConstants.TOPIC_HAS_RELATIONSHIPS,
                 CommonFilterConstants.TOPIC_HAS_RELATIONSHIPS_DESC);
-        notHasRelationships = new UIFieldBooleanData(CommonFilterConstants.TOPIC_HAS_NOT_RELATIONSHIPS,
+        notHasRelationships = new FilterFieldBooleanData(CommonFilterConstants.TOPIC_HAS_NOT_RELATIONSHIPS,
                 CommonFilterConstants.TOPIC_HAS_NOT_RELATIONSHIPS_DESC);
 
         /* Has Incoming Relationships */
-        hasIncomingRelationships = new UIFieldBooleanData(CommonFilterConstants.TOPIC_HAS_INCOMING_RELATIONSHIPS,
+        hasIncomingRelationships = new FilterFieldBooleanData(CommonFilterConstants.TOPIC_HAS_INCOMING_RELATIONSHIPS,
                 CommonFilterConstants.TOPIC_HAS_INCOMING_RELATIONSHIPS_DESC);
-        notHasIncomingRelationships = new UIFieldBooleanData(CommonFilterConstants.TOPIC_HAS_NOT_INCOMING_RELATIONSHIPS,
+        notHasIncomingRelationships = new FilterFieldBooleanData(CommonFilterConstants.TOPIC_HAS_NOT_INCOMING_RELATIONSHIPS,
                 CommonFilterConstants.TOPIC_HAS_NOT_INCOMING_RELATIONSHIPS_DESC);
 
         /* Has Open Bugzilla Bugs */
-        hasOpenBugzillaBugs = new UIFieldBooleanData(CommonFilterConstants.TOPIC_HAS_OPEN_BUGZILLA_BUGS,
+        hasOpenBugzillaBugs = new FilterFieldBooleanData(CommonFilterConstants.TOPIC_HAS_OPEN_BUGZILLA_BUGS,
                 CommonFilterConstants.TOPIC_HAS_OPEN_BUGZILLA_BUGS_DESC);
-        notHasOpenBugzillaBugs = new UIFieldBooleanData(CommonFilterConstants.TOPIC_HAS_NOT_OPEN_BUGZILLA_BUGS,
+        notHasOpenBugzillaBugs = new FilterFieldBooleanData(CommonFilterConstants.TOPIC_HAS_NOT_OPEN_BUGZILLA_BUGS,
                 CommonFilterConstants.TOPIC_HAS_NOT_OPEN_BUGZILLA_BUGS_DESC);
 
         /* Has Bugzilla Bugs */
-        hasBugzillaBugs = new UIFieldBooleanData(CommonFilterConstants.TOPIC_HAS_BUGZILLA_BUGS,
+        hasBugzillaBugs = new FilterFieldBooleanData(CommonFilterConstants.TOPIC_HAS_BUGZILLA_BUGS,
                 CommonFilterConstants.TOPIC_HAS_BUGZILLA_BUGS_DESC);
-        notHasBugzillaBugs = new UIFieldBooleanData(CommonFilterConstants.TOPIC_HAS_NOT_BUGZILLA_BUGS,
+        notHasBugzillaBugs = new FilterFieldBooleanData(CommonFilterConstants.TOPIC_HAS_NOT_BUGZILLA_BUGS,
                 CommonFilterConstants.TOPIC_HAS_NOT_BUGZILLA_BUGS_DESC);
 
         /* Latest Translations */
-        latestTranslations = new UIFieldBooleanData(CommonFilterConstants.TOPIC_LATEST_TRANSLATIONS_FILTER_VAR,
+        latestTranslations = new FilterFieldBooleanData(CommonFilterConstants.TOPIC_LATEST_TRANSLATIONS_FILTER_VAR,
                 CommonFilterConstants.TOPIC_LATEST_TRANSLATIONS_FILTER_VAR_DESC);
-        notLatestTranslations = new UIFieldBooleanData(CommonFilterConstants.TOPIC_NOT_LATEST_TRANSLATIONS_FILTER_VAR,
+        notLatestTranslations = new FilterFieldBooleanData(CommonFilterConstants.TOPIC_NOT_LATEST_TRANSLATIONS_FILTER_VAR,
                 CommonFilterConstants.TOPIC_NOT_LATEST_TRANSLATIONS_FILTER_VAR_DESC);
 
         /* Latest Completed Translations */
-        latestCompletedTranslations = new UIFieldBooleanData(
+        latestCompletedTranslations = new FilterFieldBooleanData(
                 CommonFilterConstants.TOPIC_LATEST_COMPLETED_TRANSLATIONS_FILTER_VAR,
                 CommonFilterConstants.TOPIC_LATEST_COMPLETED_TRANSLATIONS_FILTER_VAR_DESC);
-        notLatestCompletedTranslations = new UIFieldBooleanData(
+        notLatestCompletedTranslations = new FilterFieldBooleanData(
                 CommonFilterConstants.TOPIC_NOT_LATEST_COMPLETED_TRANSLATIONS_FILTER_VAR,
                 CommonFilterConstants.TOPIC_NOT_LATEST_COMPLETED_TRANSLATIONS_FILTER_VAR_DESC);
 
-        topicTextSearch = new UIFieldStringData(CommonFilterConstants.TOPIC_TEXT_SEARCH_FILTER_VAR,
+        topicTextSearch = new FilterFieldStringData(CommonFilterConstants.TOPIC_TEXT_SEARCH_FILTER_VAR,
                 CommonFilterConstants.TOPIC_TEXT_SEARCH_FILTER_VAR_DESC);
-        startCreateDate = new UIFieldDateTimeData(CommonFilterConstants.TOPIC_STARTDATE_FILTER_VAR,
+        startCreateDate = new FilterFieldDateTimeData(CommonFilterConstants.TOPIC_STARTDATE_FILTER_VAR,
                 CommonFilterConstants.TOPIC_STARTDATE_FILTER_VAR_DESC);
-        endCreateDate = new UIFieldDateTimeData(CommonFilterConstants.TOPIC_ENDDATE_FILTER_VAR,
+        endCreateDate = new FilterFieldDateTimeData(CommonFilterConstants.TOPIC_ENDDATE_FILTER_VAR,
                 CommonFilterConstants.TOPIC_ENDDATE_FILTER_VAR_DESC);
-        startEditDate = new UIFieldDateTimeData(CommonFilterConstants.TOPIC_STARTEDITDATE_FILTER_VAR,
+        startEditDate = new FilterFieldDateTimeData(CommonFilterConstants.TOPIC_STARTEDITDATE_FILTER_VAR,
                 CommonFilterConstants.TOPIC_STARTEDITDATE_FILTER_VAR_DESC);
-        endEditDate = new UIFieldDateTimeData(CommonFilterConstants.TOPIC_ENDEDITDATE_FILTER_VAR,
+        endEditDate = new FilterFieldDateTimeData(CommonFilterConstants.TOPIC_ENDEDITDATE_FILTER_VAR,
                 CommonFilterConstants.TOPIC_ENDEDITDATE_FILTER_VAR_DESC);
-        propertyTags = new UIFieldStringMapData(CommonFilterConstants.TOPIC_PROPERTY_TAG,
+        propertyTags = new FilterFieldStringMapData(CommonFilterConstants.TOPIC_PROPERTY_TAG,
                 CommonFilterConstants.TOPIC_PROPERTY_TAG_DESC);
 
         setupSingleFilterVars();
@@ -340,8 +340,8 @@ public class TopicFieldFilter extends BaseFieldFilter {
 
     public Map<String, String> getFilterValues() {
         final Map<String, String> retValue = new HashMap<String, String>();
-        final List<UIFieldDataBase<?>> filterVars = getFilterVars();
-        for (final UIFieldDataBase<?> uiField : filterVars) {
+        final List<FilterFieldDataBase<?>> filterVars = getFilterVars();
+        for (final FilterFieldDataBase<?> uiField : filterVars) {
             retValue.put(uiField.getName(), uiField.getData().toString());
         }
 
@@ -419,115 +419,115 @@ public class TopicFieldFilter extends BaseFieldFilter {
         this.propertyTags.getData().put(Integer.toString(index), propertyTag);
     }
 
-    public UIFieldStringData getTopicIds() {
+    public FilterFieldStringData getTopicIds() {
         return topicIds;
     }
 
-    public UIFieldIntegerData getTopicRelatedTo() {
+    public FilterFieldIntegerData getTopicRelatedTo() {
         return topicRelatedTo;
     }
 
-    public UIFieldIntegerData getTopicRelatedFrom() {
+    public FilterFieldIntegerData getTopicRelatedFrom() {
         return topicRelatedFrom;
     }
 
-    public UIFieldStringData getTopicTitle() {
+    public FilterFieldStringData getTopicTitle() {
         return topicTitle;
     }
 
-    public UIFieldStringData getTopicDescription() {
+    public FilterFieldStringData getTopicDescription() {
         return topicDescription;
     }
 
-    public UIFieldDateTimeData getStartCreateDate() {
+    public FilterFieldDateTimeData getStartCreateDate() {
         return startCreateDate;
     }
 
-    public UIFieldDateTimeData getEndCreateDate() {
+    public FilterFieldDateTimeData getEndCreateDate() {
         return endCreateDate;
     }
 
-    public UIFieldStringData getTopicXML() {
+    public FilterFieldStringData getTopicXML() {
         return topicXML;
     }
 
-    public UIFieldBooleanData getHasRelationships() {
+    public FilterFieldBooleanData getHasRelationships() {
         return hasRelationships;
     }
 
-    public UIFieldBooleanData getHasIncomingRelationships() {
+    public FilterFieldBooleanData getHasIncomingRelationships() {
         return hasIncomingRelationships;
     }
 
-    public UIFieldStringData getTopicTextSearch() {
+    public FilterFieldStringData getTopicTextSearch() {
         return topicTextSearch;
     }
 
-    public UIFieldBooleanData getHasXMLErrors() {
+    public FilterFieldBooleanData getHasXMLErrors() {
         return hasXMLErrors;
     }
 
-    public UIFieldDateTimeData getStartEditDate() {
+    public FilterFieldDateTimeData getStartEditDate() {
         return startEditDate;
     }
 
-    public UIFieldDateTimeData getEndEditDate() {
+    public FilterFieldDateTimeData getEndEditDate() {
         return endEditDate;
     }
 
-    public UIFieldIntegerData getEditedInLastDays() {
+    public FilterFieldIntegerData getEditedInLastDays() {
         return editedInLastDays;
     }
 
-    public UIFieldBooleanData getHasOpenBugzillaBugs() {
+    public FilterFieldBooleanData getHasOpenBugzillaBugs() {
         return hasOpenBugzillaBugs;
     }
 
-    public UIFieldBooleanData getHasBugzillaBugs() {
+    public FilterFieldBooleanData getHasBugzillaBugs() {
         return hasBugzillaBugs;
     }
 
-    public UIFieldStringData getTopicIncludedInSpec() {
+    public FilterFieldStringData getTopicIncludedInSpec() {
         return topicIncludedInSpec;
     }
 
-    public UIFieldBooleanData getLatestTranslations() {
+    public FilterFieldBooleanData getLatestTranslations() {
         return latestTranslations;
     }
 
-    public UIFieldBooleanData getLatestCompletedTranslations() {
+    public FilterFieldBooleanData getLatestCompletedTranslations() {
         return latestCompletedTranslations;
     }
 
-    public UIFieldStringData getNotTopicIds() {
+    public FilterFieldStringData getNotTopicIds() {
         return notTopicIds;
     }
 
-    public UIFieldIntegerData getNotTopicRelatedTo() {
+    public FilterFieldIntegerData getNotTopicRelatedTo() {
         return notTopicRelatedTo;
     }
 
-    public UIFieldIntegerData getNotTopicRelatedFrom() {
+    public FilterFieldIntegerData getNotTopicRelatedFrom() {
         return notTopicRelatedFrom;
     }
 
-    public UIFieldStringData getNotTopicTitle() {
+    public FilterFieldStringData getNotTopicTitle() {
         return notTopicTitle;
     }
 
-    public UIFieldStringData getNotTopicDescription() {
+    public FilterFieldStringData getNotTopicDescription() {
         return notTopicDescription;
     }
 
-    public UIFieldStringData getNotTopicXML() {
+    public FilterFieldStringData getNotTopicXML() {
         return notTopicXML;
     }
 
-    public UIFieldStringData getNotTopicIncludedInSpec() {
+    public FilterFieldStringData getNotTopicIncludedInSpec() {
         return notTopicIncludedInSpec;
     }
 
-    public UIFieldIntegerData getNotEditedInLastDays() {
+    public FilterFieldIntegerData getNotEditedInLastDays() {
         return notEditedInLastDays;
     }
 
@@ -563,31 +563,31 @@ public class TopicFieldFilter extends BaseFieldFilter {
         return this.endEditDate.getDateData();
     }
 
-    public UIFieldBooleanData getNotHasXMLErrors() {
+    public FilterFieldBooleanData getNotHasXMLErrors() {
         return notHasXMLErrors;
     }
 
-    public UIFieldBooleanData getNotHasRelationships() {
+    public FilterFieldBooleanData getNotHasRelationships() {
         return notHasRelationships;
     }
 
-    public UIFieldBooleanData getNotHasIncomingRelationships() {
+    public FilterFieldBooleanData getNotHasIncomingRelationships() {
         return notHasIncomingRelationships;
     }
 
-    public UIFieldBooleanData getNotHasOpenBugzillaBugs() {
+    public FilterFieldBooleanData getNotHasOpenBugzillaBugs() {
         return notHasOpenBugzillaBugs;
     }
 
-    public UIFieldBooleanData getNotHasBugzillaBugs() {
+    public FilterFieldBooleanData getNotHasBugzillaBugs() {
         return notHasBugzillaBugs;
     }
 
-    public UIFieldBooleanData getNotLatestTranslations() {
+    public FilterFieldBooleanData getNotLatestTranslations() {
         return notLatestTranslations;
     }
 
-    public UIFieldBooleanData getNotLatestCompletedTranslations() {
+    public FilterFieldBooleanData getNotLatestCompletedTranslations() {
         return notLatestCompletedTranslations;
     }
 }

@@ -6,7 +6,7 @@ import java.util.HashMap;
 
 import org.jboss.pressgang.ccms.rest.v1.constants.CommonFilterConstants;
 import org.jboss.pressgang.ccms.restserver.filter.base.BaseFieldFilter;
-import org.jboss.pressgang.ccms.restserver.filter.structures.field.UIFieldStringData;
+import org.jboss.pressgang.ccms.restserver.filter.structures.FilterFieldStringData;
 
 
 public class RoleFieldFilter extends BaseFieldFilter
@@ -26,9 +26,9 @@ public class RoleFieldFilter extends BaseFieldFilter
         }
     });
     
-    private UIFieldStringData roleIds;
-    private UIFieldStringData roleName;
-    private UIFieldStringData roleDescription;
+    private FilterFieldStringData roleIds;
+    private FilterFieldStringData roleName;
+    private FilterFieldStringData roleDescription;
     
     public RoleFieldFilter()
     {
@@ -40,9 +40,9 @@ public class RoleFieldFilter extends BaseFieldFilter
     {
         super.resetAllValues();
         
-        roleIds = new UIFieldStringData(CommonFilterConstants.ROLE_IDS_FILTER_VAR, CommonFilterConstants.ROLE_IDS_FILTER_VAR_DESC);
-        roleName = new UIFieldStringData(CommonFilterConstants.ROLE_NAME_FILTER_VAR, CommonFilterConstants.ROLE_NAME_FILTER_VAR_DESC);
-        roleDescription = new UIFieldStringData(CommonFilterConstants.ROLE_DESCRIPTION_FILTER_VAR, CommonFilterConstants.ROLE_DESCRIPTION_FILTER_VAR_DESC);
+        roleIds = new FilterFieldStringData(CommonFilterConstants.ROLE_IDS_FILTER_VAR, CommonFilterConstants.ROLE_IDS_FILTER_VAR_DESC);
+        roleName = new FilterFieldStringData(CommonFilterConstants.ROLE_NAME_FILTER_VAR, CommonFilterConstants.ROLE_NAME_FILTER_VAR_DESC);
+        roleDescription = new FilterFieldStringData(CommonFilterConstants.ROLE_DESCRIPTION_FILTER_VAR, CommonFilterConstants.ROLE_DESCRIPTION_FILTER_VAR_DESC);
         
         addFilterVar(roleIds);
         addFilterVar(roleName);

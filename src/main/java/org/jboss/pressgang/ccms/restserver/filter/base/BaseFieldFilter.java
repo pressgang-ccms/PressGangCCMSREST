@@ -9,10 +9,13 @@ import java.util.Map;
 import org.jboss.pressgang.ccms.rest.v1.constants.CommonFilterConstants;
 import org.jboss.pressgang.ccms.restserver.entity.Filter;
 import org.jboss.pressgang.ccms.restserver.entity.FilterField;
-import org.jboss.pressgang.ccms.restserver.filter.structures.field.UIFieldDataBase;
-import org.jboss.pressgang.ccms.restserver.filter.structures.field.UIFieldStringData;
+import org.jboss.pressgang.ccms.restserver.filter.structures.FilterFieldDataBase;
+import org.jboss.pressgang.ccms.restserver.filter.structures.FilterFieldStringData;
 
-
+/**
+ * This class provides the bases for a mechanism to temporarily store and easily convert a set of fields for a filter until it needs to be
+ * saved to a database entity.
+ */
 public abstract class BaseFieldFilter implements IFieldFilter
 {
     /**
@@ -29,16 +32,16 @@ public abstract class BaseFieldFilter implements IFieldFilter
         }
     });
     
-    private List<UIFieldDataBase<?>> filterVars = new ArrayList<UIFieldDataBase<?>>();
+    private List<FilterFieldDataBase<?>> filterVars = new ArrayList<FilterFieldDataBase<?>>();
     
-    private UIFieldStringData logic;
+    private FilterFieldStringData logic;
     
     /**
      * Reset all of the Field Variables to their default values.
      */
     protected void resetAllValues()
     {
-        logic = new UIFieldStringData(CommonFilterConstants.LOGIC_FILTER_VAR, CommonFilterConstants.LOGIC_FILTER_VAR_DESC);
+        logic = new FilterFieldStringData(CommonFilterConstants.LOGIC_FILTER_VAR, CommonFilterConstants.LOGIC_FILTER_VAR_DESC);
         
         filterVars.clear();
         filterVars.add(logic);
@@ -62,24 +65,36 @@ public abstract class BaseFieldFilter implements IFieldFilter
         return new HashMap<String, String>(filterNames);
     }
     
+    /**
+     * Check if the field filter has a property field name.
+     * 
+     * @param fieldName the name of the field to be checked.
+     * @return True if the field filter contains the field name, otherwise false.
+     */
     @Override
     public boolean hasFieldName(final String fieldName)
     {
         return getFieldNames().containsKey(fieldName);
     }
     
+    /**
+     * Get the description of a filter field for a property field name.
+     * 
+     * @param fieldName the name of the field to get the description for.
+     * @return The Field's description if the field exists, otherwise false.
+     */
     @Override
     public String getFieldDesc(final String fieldName)
     {
         return getFieldNames().get(fieldName);
     }
     
-    protected void addFilterVar(final UIFieldDataBase<?> filterVar)
+    protected void addFilterVar(final FilterFieldDataBase<?> filterVar)
     {
         this.filterVars.add(filterVar);
     }
     
-    protected List<UIFieldDataBase<?>> getFilterVars()
+    protected List<FilterFieldDataBase<?>> getFilterVars()
     {
         return Collections.unmodifiableList(filterVars);
     }
@@ -87,8 +102,8 @@ public abstract class BaseFieldFilter implements IFieldFilter
     @Override
     public String getFieldValue(final String fieldName)
     {
-        final List<UIFieldDataBase<?>> filterVars = getFilterVars();
-        for (final UIFieldDataBase<?> uiField : filterVars)
+        final List<FilterFieldDataBase<?>> filterVars = getFilterVars();
+        for (final FilterFieldDataBase<?> uiField : filterVars)
         {
             if (fieldName.equals(uiField.getName()))
             {
@@ -102,8 +117,8 @@ public abstract class BaseFieldFilter implements IFieldFilter
     @Override
     public void setFieldValue(final String fieldName, final String fieldValue)
     {
-        final List<UIFieldDataBase<?>> filterVars = getFilterVars();
-        for (final UIFieldDataBase<?> uiField : filterVars)
+        final List<FilterFieldDataBase<?>> filterVars = getFilterVars();
+        for (final FilterFieldDataBase<?> uiField : filterVars)
         {
             if (fieldName.equals(uiField.getName()))
             {
@@ -119,7 +134,7 @@ public abstract class BaseFieldFilter implements IFieldFilter
             this.setFieldValue(field.getField(), field.getValue());
     }
     
-    public UIFieldStringData getLogic()
+    public FilterFieldStringData getLogic()
     {
         return logic;
     }

@@ -18,6 +18,7 @@ import org.jboss.pressgang.ccms.rest.v1.collections.items.RESTTopicCollectionIte
 import org.jboss.pressgang.ccms.rest.v1.collections.items.RESTTopicSourceUrlCollectionItemV1;
 import org.jboss.pressgang.ccms.rest.v1.collections.items.RESTTranslatedTopicCollectionItemV1;
 import org.jboss.pressgang.ccms.rest.v1.collections.join.RESTAssignedPropertyTagCollectionV1;
+import org.jboss.pressgang.ccms.rest.v1.constants.RESTv1Constants;
 import org.jboss.pressgang.ccms.rest.v1.entities.RESTBugzillaBugV1;
 import org.jboss.pressgang.ccms.rest.v1.entities.RESTTagV1;
 import org.jboss.pressgang.ccms.rest.v1.entities.RESTTopicSourceUrlV1;
@@ -35,11 +36,9 @@ import org.jboss.pressgang.ccms.restserver.entity.TopicSourceUrl;
 import org.jboss.pressgang.ccms.restserver.entity.TopicToPropertyTag;
 import org.jboss.pressgang.ccms.restserver.entity.TranslatedTopicData;
 import org.jboss.pressgang.ccms.restserver.exceptions.CustomConstraintViolationException;
-import org.jboss.pressgang.ccms.restserver.rest.v1.base.BaseRESTv1;
 import org.jboss.pressgang.ccms.restserver.rest.v1.base.RESTDataObjectCollectionFactory;
 import org.jboss.pressgang.ccms.restserver.rest.v1.base.RESTDataObjectFactory;
 import org.jboss.resteasy.spi.BadRequestException;
-
 
 public class TopicV1Factory extends RESTDataObjectFactory<RESTTopicV1, Topic, RESTTopicCollectionV1, RESTTopicCollectionItemV1> {
     public TopicV1Factory() {
@@ -90,7 +89,7 @@ public class TopicV1Factory extends RESTDataObjectFactory<RESTTopicV1, Topic, RE
         
         // TAGS
         retValue.setTags(new RESTDataObjectCollectionFactory<RESTTagV1, Tag, RESTTagCollectionV1, RESTTagCollectionItemV1>()
-                .create(RESTTagCollectionV1.class, new TagV1Factory(), entity.getTags(), BaseRESTv1.TAGS_EXPANSION_NAME,
+                .create(RESTTagCollectionV1.class, new TagV1Factory(), entity.getTags(), RESTv1Constants.TAGS_EXPANSION_NAME,
                         dataType, expand, baseUrl, entityManager));
         
         // OUTGOING RELATIONSHIPS
@@ -125,7 +124,7 @@ public class TopicV1Factory extends RESTDataObjectFactory<RESTTopicV1, Topic, RE
                         entity.getTranslatedTopics(entityManager, revision), RESTTopicV1.TRANSLATEDTOPICS_NAME, dataType,
                         expand, baseUrl, revision, false, entityManager));
 
-        retValue.setLinks(baseUrl, BaseRESTv1.TOPIC_URL_NAME, dataType, retValue.getId());
+        retValue.setLinks(baseUrl, RESTv1Constants.TOPIC_URL_NAME, dataType, retValue.getId());
         retValue.setLogDetails(new LogDetailsV1Factory().create(entity, revision, RESTBaseEntityV1.LOG_DETAILS_NAME, expand,
                 dataType, baseUrl, entityManager));
 

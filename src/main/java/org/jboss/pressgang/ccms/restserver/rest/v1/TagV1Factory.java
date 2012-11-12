@@ -13,6 +13,7 @@ import org.jboss.pressgang.ccms.rest.v1.collections.items.join.RESTCategoryInTag
 import org.jboss.pressgang.ccms.rest.v1.collections.items.RESTProjectCollectionItemV1;
 import org.jboss.pressgang.ccms.rest.v1.collections.join.RESTAssignedPropertyTagCollectionV1;
 import org.jboss.pressgang.ccms.rest.v1.collections.join.RESTCategoryInTagCollectionV1;
+import org.jboss.pressgang.ccms.rest.v1.constants.RESTv1Constants;
 import org.jboss.pressgang.ccms.rest.v1.entities.RESTCategoryV1;
 import org.jboss.pressgang.ccms.rest.v1.entities.RESTProjectV1;
 import org.jboss.pressgang.ccms.rest.v1.entities.RESTTagV1;
@@ -27,10 +28,8 @@ import org.jboss.pressgang.ccms.restserver.entity.PropertyTag;
 import org.jboss.pressgang.ccms.restserver.entity.Tag;
 import org.jboss.pressgang.ccms.restserver.entity.TagToCategory;
 import org.jboss.pressgang.ccms.restserver.entity.TagToPropertyTag;
-import org.jboss.pressgang.ccms.restserver.rest.v1.base.BaseRESTv1;
 import org.jboss.pressgang.ccms.restserver.rest.v1.base.RESTDataObjectCollectionFactory;
 import org.jboss.pressgang.ccms.restserver.rest.v1.base.RESTDataObjectFactory;
-
 
 public class TagV1Factory extends RESTDataObjectFactory<RESTTagV1, Tag, RESTTagCollectionV1, RESTTagCollectionItemV1> {
     TagV1Factory() {
@@ -96,7 +95,7 @@ public class TagV1Factory extends RESTDataObjectFactory<RESTTagV1, Tag, RESTTagC
                 .create(RESTProjectCollectionV1.class, new ProjectV1Factory(), entity.getProjects(), RESTTagV1.PROJECTS_NAME,
                         dataType, expand, baseUrl, entityManager));
 
-        retValue.setLinks(baseUrl, BaseRESTv1.TAG_URL_NAME, dataType, retValue.getId());
+        retValue.setLinks(baseUrl, RESTv1Constants.TAG_URL_NAME, dataType, retValue.getId());
         retValue.setLogDetails(new LogDetailsV1Factory().create(entity, revision, RESTBaseEntityV1.LOG_DETAILS_NAME, expand,
                 dataType, baseUrl, entityManager));
 

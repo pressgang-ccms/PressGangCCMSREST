@@ -9,6 +9,7 @@ import org.jboss.pressgang.ccms.rest.v1.collections.contentspec.RESTCSTranslated
 import org.jboss.pressgang.ccms.rest.v1.collections.contentspec.items.RESTCSTranslatedStringCollectionItemV1;
 import org.jboss.pressgang.ccms.rest.v1.collections.contentspec.items.join.RESTAssignedCSMetaDataCollectionItemV1;
 import org.jboss.pressgang.ccms.rest.v1.collections.contentspec.join.RESTAssignedCSMetaDataCollectionV1;
+import org.jboss.pressgang.ccms.rest.v1.constants.RESTv1Constants;
 import org.jboss.pressgang.ccms.rest.v1.entities.base.RESTBaseEntityV1;
 import org.jboss.pressgang.ccms.rest.v1.entities.contentspec.RESTCSNodeV1;
 import org.jboss.pressgang.ccms.rest.v1.entities.contentspec.RESTCSTranslatedStringV1;
@@ -17,7 +18,6 @@ import org.jboss.pressgang.ccms.rest.v1.exceptions.InvalidParameterException;
 import org.jboss.pressgang.ccms.rest.v1.expansion.ExpandDataTrunk;
 import org.jboss.pressgang.ccms.restserver.entity.contentspec.CSTranslatedString;
 import org.jboss.pressgang.ccms.restserver.entity.contentspec.ContentSpecToCSMetaData;
-import org.jboss.pressgang.ccms.restserver.rest.v1.base.BaseRESTv1;
 import org.jboss.pressgang.ccms.restserver.rest.v1.base.RESTDataObjectCollectionFactory;
 import org.jboss.pressgang.ccms.restserver.rest.v1.base.RESTDataObjectFactory;
 
@@ -65,7 +65,7 @@ public class ContentSpecMetaDataV1Factory
                         entity.getCSTranslatedStringsList(), RESTAssignedCSMetaDataV1.TRANSLATED_STRINGS_NAME, dataType,
                         expand, baseUrl, false, entityManager));
 
-        retValue.setLinks(baseUrl, BaseRESTv1.CONTENT_SPEC_META_DATA_URL_NAME, dataType, retValue.getId());
+        retValue.setLinks(baseUrl, RESTv1Constants.CONTENT_SPEC_META_DATA_URL_NAME, dataType, retValue.getId());
         retValue.setLogDetails(new LogDetailsV1Factory().create(entity, revision, RESTBaseEntityV1.LOG_DETAILS_NAME, expand,
                 dataType, baseUrl, entityManager));
 

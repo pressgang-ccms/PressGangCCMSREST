@@ -1,4 +1,4 @@
-package org.jboss.pressgang.ccms.restserver.filter.structures.field;
+package org.jboss.pressgang.ccms.restserver.filter.structures;
 
 import java.util.Date;
 
@@ -7,10 +7,10 @@ import org.joda.time.format.ISODateTimeFormat;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class UIFieldDateTimeData extends UIFieldDataBase<DateTime> {
-    private static final Logger log = LoggerFactory.getLogger(UIFieldDateTimeData.class);
+public class FilterFieldDateTimeData extends FilterFieldDataBase<DateTime> {
+    private static final Logger log = LoggerFactory.getLogger(FilterFieldDateTimeData.class);
 
-    public UIFieldDateTimeData(final String name, final String description) {
+    public FilterFieldDateTimeData(final String name, final String description) {
         super(name, description);
     }
 

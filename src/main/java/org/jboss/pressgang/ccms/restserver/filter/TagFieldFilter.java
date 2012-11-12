@@ -8,9 +8,9 @@ import java.util.HashMap;
 
 import org.jboss.pressgang.ccms.rest.v1.constants.CommonFilterConstants;
 import org.jboss.pressgang.ccms.restserver.filter.base.BaseFieldFilter;
-import org.jboss.pressgang.ccms.restserver.filter.structures.field.UIFieldDataBase;
-import org.jboss.pressgang.ccms.restserver.filter.structures.field.UIFieldStringData;
-import org.jboss.pressgang.ccms.restserver.filter.structures.field.UIFieldStringListData;
+import org.jboss.pressgang.ccms.restserver.filter.structures.FilterFieldDataBase;
+import org.jboss.pressgang.ccms.restserver.filter.structures.FilterFieldStringData;
+import org.jboss.pressgang.ccms.restserver.filter.structures.FilterFieldStringListData;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -30,12 +30,12 @@ public class TagFieldFilter extends BaseFieldFilter {
         }
     });
 
-    private UIFieldStringData tagIds;
-    private UIFieldStringData tagName;
-    private UIFieldStringData tagDescription;
-    private UIFieldStringListData propertyTags;
+    private FilterFieldStringData tagIds;
+    private FilterFieldStringData tagName;
+    private FilterFieldStringData tagDescription;
+    private FilterFieldStringListData propertyTags;
 
-    private List<UIFieldDataBase<?>> multipleFilterVars = new ArrayList<UIFieldDataBase<?>>();
+    private List<FilterFieldDataBase<?>> multipleFilterVars = new ArrayList<FilterFieldDataBase<?>>();
 
     public TagFieldFilter() {
         resetAllValues();
@@ -45,12 +45,12 @@ public class TagFieldFilter extends BaseFieldFilter {
     protected void resetAllValues() {
         super.resetAllValues();
 
-        tagIds = new UIFieldStringData(CommonFilterConstants.TAG_IDS_FILTER_VAR, CommonFilterConstants.TAG_IDS_FILTER_VAR_DESC);
-        tagName = new UIFieldStringData(CommonFilterConstants.TAG_NAME_FILTER_VAR,
+        tagIds = new FilterFieldStringData(CommonFilterConstants.TAG_IDS_FILTER_VAR, CommonFilterConstants.TAG_IDS_FILTER_VAR_DESC);
+        tagName = new FilterFieldStringData(CommonFilterConstants.TAG_NAME_FILTER_VAR,
                 CommonFilterConstants.TAG_NAME_FILTER_VAR_DESC);
-        tagDescription = new UIFieldStringData(CommonFilterConstants.TAG_DESCRIPTION_FILTER_VAR,
+        tagDescription = new FilterFieldStringData(CommonFilterConstants.TAG_DESCRIPTION_FILTER_VAR,
                 CommonFilterConstants.TAG_DESCRIPTION_FILTER_VAR_DESC);
-        propertyTags = new UIFieldStringListData(CommonFilterConstants.TOPIC_PROPERTY_TAG,
+        propertyTags = new FilterFieldStringListData(CommonFilterConstants.TOPIC_PROPERTY_TAG,
                 CommonFilterConstants.TOPIC_PROPERTY_TAG_DESC);
 
         addFilterVar(tagIds);

@@ -6,8 +6,8 @@ import java.util.HashMap;
 
 import org.jboss.pressgang.ccms.rest.v1.constants.CommonFilterConstants;
 import org.jboss.pressgang.ccms.restserver.filter.base.BaseFieldFilter;
-import org.jboss.pressgang.ccms.restserver.filter.structures.field.UIFieldBooleanData;
-import org.jboss.pressgang.ccms.restserver.filter.structures.field.UIFieldStringData;
+import org.jboss.pressgang.ccms.restserver.filter.structures.FilterFieldBooleanData;
+import org.jboss.pressgang.ccms.restserver.filter.structures.FilterFieldStringData;
 
 
 public class CategoryFieldFilter extends BaseFieldFilter
@@ -29,11 +29,11 @@ public class CategoryFieldFilter extends BaseFieldFilter
         }
     });
     
-    private UIFieldStringData categoryIds;
-    private UIFieldStringData categoryName;
-    private UIFieldStringData categoryDescription;
-    private UIFieldBooleanData categoryIsMutuallyExclusive;
-    private UIFieldBooleanData categoryIsNotMutuallyExclusive;
+    private FilterFieldStringData categoryIds;
+    private FilterFieldStringData categoryName;
+    private FilterFieldStringData categoryDescription;
+    private FilterFieldBooleanData categoryIsMutuallyExclusive;
+    private FilterFieldBooleanData categoryIsNotMutuallyExclusive;
     
     public CategoryFieldFilter()
     {
@@ -43,11 +43,11 @@ public class CategoryFieldFilter extends BaseFieldFilter
     @Override
     protected void resetAllValues()
     {
-        categoryIds = new UIFieldStringData(CommonFilterConstants.CATEGORY_IDS_FILTER_VAR, CommonFilterConstants.CATEGORY_IDS_FILTER_VAR_DESC);
-        categoryName = new UIFieldStringData(CommonFilterConstants.CATEGORY_NAME_FILTER_VAR, CommonFilterConstants.CATEGORY_NAME_FILTER_VAR_DESC);
-        categoryDescription = new UIFieldStringData(CommonFilterConstants.CATEGORY_DESCRIPTION_FILTER_VAR, CommonFilterConstants.CATEGORY_DESCRIPTION_FILTER_VAR_DESC);
-        categoryIsMutuallyExclusive = new UIFieldBooleanData(CommonFilterConstants.CATEGORY_IS_MUTUALLY_EXCLUSIVE_VAR, CommonFilterConstants.CATEGORY_IS_MUTUALLY_EXCLUSIVE_VAR_DESC);
-        categoryIsNotMutuallyExclusive = new UIFieldBooleanData(CommonFilterConstants.CATEGORY_IS_NOT_MUTUALLY_EXCLUSIVE_VAR, CommonFilterConstants.CATEGORY_IS_NOT_MUTUALLY_EXCLUSIVE_VAR_DESC);
+        categoryIds = new FilterFieldStringData(CommonFilterConstants.CATEGORY_IDS_FILTER_VAR, CommonFilterConstants.CATEGORY_IDS_FILTER_VAR_DESC);
+        categoryName = new FilterFieldStringData(CommonFilterConstants.CATEGORY_NAME_FILTER_VAR, CommonFilterConstants.CATEGORY_NAME_FILTER_VAR_DESC);
+        categoryDescription = new FilterFieldStringData(CommonFilterConstants.CATEGORY_DESCRIPTION_FILTER_VAR, CommonFilterConstants.CATEGORY_DESCRIPTION_FILTER_VAR_DESC);
+        categoryIsMutuallyExclusive = new FilterFieldBooleanData(CommonFilterConstants.CATEGORY_IS_MUTUALLY_EXCLUSIVE_VAR, CommonFilterConstants.CATEGORY_IS_MUTUALLY_EXCLUSIVE_VAR_DESC);
+        categoryIsNotMutuallyExclusive = new FilterFieldBooleanData(CommonFilterConstants.CATEGORY_IS_NOT_MUTUALLY_EXCLUSIVE_VAR, CommonFilterConstants.CATEGORY_IS_NOT_MUTUALLY_EXCLUSIVE_VAR_DESC);
 
         addFilterVar(categoryIds);
         addFilterVar(categoryName);

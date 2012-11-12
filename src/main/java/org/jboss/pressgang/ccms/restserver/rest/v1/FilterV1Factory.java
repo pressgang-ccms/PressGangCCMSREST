@@ -15,6 +15,7 @@ import org.jboss.pressgang.ccms.rest.v1.collections.items.RESTFilterCollectionIt
 import org.jboss.pressgang.ccms.rest.v1.collections.items.RESTFilterFieldCollectionItemV1;
 import org.jboss.pressgang.ccms.rest.v1.collections.items.RESTFilterLocaleCollectionItemV1;
 import org.jboss.pressgang.ccms.rest.v1.collections.items.RESTFilterTagCollectionItemV1;
+import org.jboss.pressgang.ccms.rest.v1.constants.RESTv1Constants;
 import org.jboss.pressgang.ccms.rest.v1.entities.RESTFilterCategoryV1;
 import org.jboss.pressgang.ccms.rest.v1.entities.RESTFilterFieldV1;
 import org.jboss.pressgang.ccms.rest.v1.entities.RESTFilterLocaleV1;
@@ -28,10 +29,8 @@ import org.jboss.pressgang.ccms.restserver.entity.FilterCategory;
 import org.jboss.pressgang.ccms.restserver.entity.FilterField;
 import org.jboss.pressgang.ccms.restserver.entity.FilterLocale;
 import org.jboss.pressgang.ccms.restserver.entity.FilterTag;
-import org.jboss.pressgang.ccms.restserver.rest.v1.base.BaseRESTv1;
 import org.jboss.pressgang.ccms.restserver.rest.v1.base.RESTDataObjectCollectionFactory;
 import org.jboss.pressgang.ccms.restserver.rest.v1.base.RESTDataObjectFactory;
-
 
 public class FilterV1Factory extends
         RESTDataObjectFactory<RESTFilterV1, Filter, RESTFilterCollectionV1, RESTFilterCollectionItemV1> {
@@ -88,7 +87,7 @@ public class FilterV1Factory extends
                 .create(RESTFilterFieldCollectionV1.class, new FilterFieldV1Factory(), entity.getFilterFieldsList(),
                         RESTFilterV1.FILTER_FIELDS_NAME, dataType, expand, baseUrl, false, entityManager));
 
-        retValue.setLinks(baseUrl, BaseRESTv1.FILTER_URL_NAME, dataType, retValue.getId());
+        retValue.setLinks(baseUrl, RESTv1Constants.FILTER_URL_NAME, dataType, retValue.getId());
         retValue.setLogDetails(new LogDetailsV1Factory().create(entity, revision, RESTBaseEntityV1.LOG_DETAILS_NAME, expand,
                 dataType, baseUrl, entityManager));
 

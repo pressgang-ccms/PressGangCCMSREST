@@ -5,7 +5,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 import org.jboss.pressgang.ccms.rest.v1.constants.CommonFilterConstants;
-import org.jboss.pressgang.ccms.restserver.filter.structures.field.*;
+import org.jboss.pressgang.ccms.restserver.filter.structures.*;
 
 
 /**
@@ -29,8 +29,8 @@ public class TranslatedTopicFieldFilter extends TopicFieldFilter
         }
     });
     
-	private UIFieldStringData zanataIds;
-	private UIFieldStringData notZanataIds;
+	private FilterFieldStringData zanataIds;
+	private FilterFieldStringData notZanataIds;
 		
 	public TranslatedTopicFieldFilter()
 	{
@@ -43,8 +43,8 @@ public class TranslatedTopicFieldFilter extends TopicFieldFilter
 	    super.resetAllValues();
 		
 		/* Zanata ID's */
-		zanataIds = new UIFieldStringData(CommonFilterConstants.ZANATA_IDS_FILTER_VAR, CommonFilterConstants.ZANATA_IDS_FILTER_VAR_DESC);
-		notZanataIds = new UIFieldStringData(CommonFilterConstants.ZANATA_IDS_NOT_FILTER_VAR, CommonFilterConstants.ZANATA_IDS_NOT_FILTER_VAR_DESC);
+		zanataIds = new FilterFieldStringData(CommonFilterConstants.ZANATA_IDS_FILTER_VAR, CommonFilterConstants.ZANATA_IDS_FILTER_VAR_DESC);
+		notZanataIds = new FilterFieldStringData(CommonFilterConstants.ZANATA_IDS_NOT_FILTER_VAR, CommonFilterConstants.ZANATA_IDS_NOT_FILTER_VAR_DESC);
 		
 		setupSingleFilterVars();
 	}
@@ -84,12 +84,12 @@ public class TranslatedTopicFieldFilter extends TopicFieldFilter
 		return retValue;
 	}
 
-	public UIFieldStringData getZanataIds()
+	public FilterFieldStringData getZanataIds()
 	{
 		return zanataIds;
 	}
 
-	public UIFieldStringData getNotZanataIds()
+	public FilterFieldStringData getNotZanataIds()
 	{
 		return notZanataIds;
 	}

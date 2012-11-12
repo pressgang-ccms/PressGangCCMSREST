@@ -9,12 +9,12 @@ import org.jboss.pressgang.ccms.rest.v1.collections.items.join.RESTCategoryInTag
 import org.jboss.pressgang.ccms.rest.v1.collections.items.join.RESTTagInCategoryCollectionItemV1;
 import org.jboss.pressgang.ccms.rest.v1.collections.join.RESTCategoryInTagCollectionV1;
 import org.jboss.pressgang.ccms.rest.v1.collections.join.RESTTagInCategoryCollectionV1;
+import org.jboss.pressgang.ccms.rest.v1.constants.RESTv1Constants;
 import org.jboss.pressgang.ccms.rest.v1.entities.base.RESTBaseEntityV1;
 import org.jboss.pressgang.ccms.rest.v1.entities.join.RESTCategoryInTagV1;
 import org.jboss.pressgang.ccms.rest.v1.entities.join.RESTTagInCategoryV1;
 import org.jboss.pressgang.ccms.rest.v1.expansion.ExpandDataTrunk;
 import org.jboss.pressgang.ccms.restserver.entity.TagToCategory;
-import org.jboss.pressgang.ccms.restserver.rest.v1.base.BaseRESTv1;
 import org.jboss.pressgang.ccms.restserver.rest.v1.base.RESTDataObjectCollectionFactory;
 import org.jboss.pressgang.ccms.restserver.rest.v1.base.RESTDataObjectFactory;
 
@@ -36,7 +36,7 @@ public class CategoryInTagV1Factory
         final RESTCategoryInTagV1 retValue = new RESTCategoryInTagV1();
 
         final List<String> expandOptions = new ArrayList<String>();
-        expandOptions.add(BaseRESTv1.TAGS_EXPANSION_NAME);
+        expandOptions.add(RESTv1Constants.TAGS_EXPANSION_NAME);
         expandOptions.add(RESTBaseEntityV1.LOG_DETAILS_NAME);
         if (revision == null)
             expandOptions.add(RESTBaseEntityV1.REVISIONS_NAME);
@@ -61,9 +61,9 @@ public class CategoryInTagV1Factory
         // TAGS
         retValue.setTags(new RESTDataObjectCollectionFactory<RESTTagInCategoryV1, TagToCategory, RESTTagInCategoryCollectionV1, RESTTagInCategoryCollectionItemV1>()
                 .create(RESTTagInCategoryCollectionV1.class, new TagInCategoryV1Factory(), entity.getCategory()
-                        .getTagToCategoriesArray(), BaseRESTv1.TAGS_EXPANSION_NAME, dataType, expand, baseUrl, entityManager));
+                        .getTagToCategoriesArray(), RESTv1Constants.TAGS_EXPANSION_NAME, dataType, expand, baseUrl, entityManager));
 
-        retValue.setLinks(baseUrl, BaseRESTv1.CATEGORY_URL_NAME, dataType, retValue.getId());
+        retValue.setLinks(baseUrl, RESTv1Constants.CATEGORY_URL_NAME, dataType, retValue.getId());
         retValue.setLogDetails(new LogDetailsV1Factory().create(entity, revision, RESTBaseEntityV1.LOG_DETAILS_NAME, expand,
                 dataType, baseUrl, entityManager));
 

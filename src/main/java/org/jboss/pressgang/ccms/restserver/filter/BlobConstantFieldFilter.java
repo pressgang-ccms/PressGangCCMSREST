@@ -6,7 +6,7 @@ import java.util.HashMap;
 
 import org.jboss.pressgang.ccms.rest.v1.constants.CommonFilterConstants;
 import org.jboss.pressgang.ccms.restserver.filter.base.BaseFieldFilter;
-import org.jboss.pressgang.ccms.restserver.filter.structures.field.UIFieldStringData;
+import org.jboss.pressgang.ccms.restserver.filter.structures.FilterFieldStringData;
 
 
 public class BlobConstantFieldFilter extends BaseFieldFilter
@@ -25,8 +25,8 @@ public class BlobConstantFieldFilter extends BaseFieldFilter
         }
     });
     
-    private UIFieldStringData blobConstantIds;
-    private UIFieldStringData blobConstantName;
+    private FilterFieldStringData blobConstantIds;
+    private FilterFieldStringData blobConstantName;
     
     public BlobConstantFieldFilter()
     {
@@ -38,8 +38,8 @@ public class BlobConstantFieldFilter extends BaseFieldFilter
     {
         super.resetAllValues();
         
-        blobConstantIds = new UIFieldStringData(CommonFilterConstants.BLOB_CONSTANT_IDS_FILTER_VAR, CommonFilterConstants.BLOB_CONSTANT_IDS_FILTER_VAR_DESC);
-        blobConstantName = new UIFieldStringData(CommonFilterConstants.BLOB_CONSTANT_NAME_FILTER_VAR, CommonFilterConstants.BLOB_CONSTANT_NAME_FILTER_VAR_DESC);
+        blobConstantIds = new FilterFieldStringData(CommonFilterConstants.BLOB_CONSTANT_IDS_FILTER_VAR, CommonFilterConstants.BLOB_CONSTANT_IDS_FILTER_VAR_DESC);
+        blobConstantName = new FilterFieldStringData(CommonFilterConstants.BLOB_CONSTANT_NAME_FILTER_VAR, CommonFilterConstants.BLOB_CONSTANT_NAME_FILTER_VAR_DESC);
         
         addFilterVar(blobConstantIds);
         addFilterVar(blobConstantName);

@@ -1,11 +1,11 @@
-package org.jboss.pressgang.ccms.restserver.filter.structures.field;
+package org.jboss.pressgang.ccms.restserver.filter.structures;
 
 import java.util.List;
 
 import org.jboss.pressgang.ccms.utils.common.CollectionUtilities;
 
-public class UIFieldStringData extends UIFieldDataBase<String> {
-    public UIFieldStringData(final String name, final String description) {
+public class FilterFieldStringData extends FilterFieldDataBase<String> {
+    public FilterFieldStringData(final String name, final String description) {
         super(name, description);
     }
 

@@ -6,7 +6,7 @@ import java.util.HashMap;
 
 import org.jboss.pressgang.ccms.rest.v1.constants.CommonFilterConstants;
 import org.jboss.pressgang.ccms.restserver.filter.base.BaseFieldFilter;
-import org.jboss.pressgang.ccms.restserver.filter.structures.field.UIFieldStringData;
+import org.jboss.pressgang.ccms.restserver.filter.structures.FilterFieldStringData;
 
 
 public class ImageFieldFilter extends BaseFieldFilter
@@ -26,9 +26,9 @@ public class ImageFieldFilter extends BaseFieldFilter
         }
     });
     
-    private UIFieldStringData imageIds;
-    private UIFieldStringData imageOriginialFilename;
-    private UIFieldStringData imageDescription;
+    private FilterFieldStringData imageIds;
+    private FilterFieldStringData imageOriginialFilename;
+    private FilterFieldStringData imageDescription;
     
     public ImageFieldFilter()
     {
@@ -40,9 +40,9 @@ public class ImageFieldFilter extends BaseFieldFilter
     {
         super.resetAllValues();
         
-        imageIds = new UIFieldStringData(CommonFilterConstants.IMAGE_IDS_FILTER_VAR, CommonFilterConstants.IMAGE_IDS_FILTER_VAR_DESC);
-        imageOriginialFilename = new UIFieldStringData(CommonFilterConstants.IMAGE_ORIGINAL_FILENAME_FILTER_VAR, CommonFilterConstants.IMAGE_ORIGINAL_FILENAME_FILTER_VAR_DESC);
-        imageDescription = new UIFieldStringData(CommonFilterConstants.IMAGE_DESCRIPTION_FILTER_VAR, CommonFilterConstants.IMAGE_DESCRIPTION_FILTER_VAR_DESC);
+        imageIds = new FilterFieldStringData(CommonFilterConstants.IMAGE_IDS_FILTER_VAR, CommonFilterConstants.IMAGE_IDS_FILTER_VAR_DESC);
+        imageOriginialFilename = new FilterFieldStringData(CommonFilterConstants.IMAGE_ORIGINAL_FILENAME_FILTER_VAR, CommonFilterConstants.IMAGE_ORIGINAL_FILENAME_FILTER_VAR_DESC);
+        imageDescription = new FilterFieldStringData(CommonFilterConstants.IMAGE_DESCRIPTION_FILTER_VAR, CommonFilterConstants.IMAGE_DESCRIPTION_FILTER_VAR_DESC);
 
         addFilterVar(imageIds);
         addFilterVar(imageOriginialFilename);

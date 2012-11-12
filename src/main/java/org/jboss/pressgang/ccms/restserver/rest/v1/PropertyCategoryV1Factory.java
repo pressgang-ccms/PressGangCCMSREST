@@ -9,6 +9,7 @@ import org.jboss.pressgang.ccms.rest.v1.collections.RESTPropertyCategoryCollecti
 import org.jboss.pressgang.ccms.rest.v1.collections.items.RESTPropertyCategoryCollectionItemV1;
 import org.jboss.pressgang.ccms.rest.v1.collections.items.join.RESTPropertyTagInPropertyCategoryCollectionItemV1;
 import org.jboss.pressgang.ccms.rest.v1.collections.join.RESTPropertyTagInPropertyCategoryCollectionV1;
+import org.jboss.pressgang.ccms.rest.v1.constants.RESTv1Constants;
 import org.jboss.pressgang.ccms.rest.v1.entities.RESTPropertyCategoryV1;
 import org.jboss.pressgang.ccms.rest.v1.entities.base.RESTBaseEntityV1;
 import org.jboss.pressgang.ccms.rest.v1.entities.join.RESTPropertyTagInPropertyCategoryV1;
@@ -17,10 +18,8 @@ import org.jboss.pressgang.ccms.rest.v1.expansion.ExpandDataTrunk;
 import org.jboss.pressgang.ccms.restserver.entity.PropertyTag;
 import org.jboss.pressgang.ccms.restserver.entity.PropertyTagCategory;
 import org.jboss.pressgang.ccms.restserver.entity.PropertyTagToPropertyTagCategory;
-import org.jboss.pressgang.ccms.restserver.rest.v1.base.BaseRESTv1;
 import org.jboss.pressgang.ccms.restserver.rest.v1.base.RESTDataObjectCollectionFactory;
 import org.jboss.pressgang.ccms.restserver.rest.v1.base.RESTDataObjectFactory;
-
 
 public class PropertyCategoryV1Factory
         extends
@@ -62,7 +61,7 @@ public class PropertyCategoryV1Factory
                         entity.getPropertyTagToPropertyTagCategoriesList(), RESTPropertyCategoryV1.PROPERTY_TAGS_NAME,
                         dataType, expand, baseUrl, revision, false, entityManager));
 
-        retValue.setLinks(baseUrl, BaseRESTv1.PROPERTY_CATEGORY_URL_NAME, dataType, retValue.getId());
+        retValue.setLinks(baseUrl, RESTv1Constants.PROPERTY_CATEGORY_URL_NAME, dataType, retValue.getId());
         retValue.setLogDetails(new LogDetailsV1Factory().create(entity, revision, RESTBaseEntityV1.LOG_DETAILS_NAME, expand,
                 dataType, baseUrl, entityManager));
 

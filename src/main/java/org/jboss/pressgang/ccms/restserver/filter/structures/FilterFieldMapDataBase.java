@@ -1,12 +1,12 @@
-package org.jboss.pressgang.ccms.restserver.filter.structures.field;
+package org.jboss.pressgang.ccms.restserver.filter.structures;
 
-import java.util.ArrayList;
-import java.util.List;
+import java.util.HashMap;
+import java.util.Map;
 
-public abstract class UIFieldListDataBase<T> extends UIFieldDataBase<List<T>> {
+public abstract class FilterFieldMapDataBase<T, U> extends FilterFieldDataBase<Map<T, U>> {
 
     /** The data stored within this UIField */
-    protected List<T> data = new ArrayList<T>();
+    protected Map<T, U> data = new HashMap<T, U>();
     /** Whether or not this object has been "negated" */
     protected boolean negated = false;
     /** The name of the data field */
@@ -14,7 +14,7 @@ public abstract class UIFieldListDataBase<T> extends UIFieldDataBase<List<T>> {
     /** The description */
     protected String description = "";
 
-    public UIFieldListDataBase(final String name, final String description) {
+    public FilterFieldMapDataBase(final String name, final String description) {
         super(name, description);
     }
 

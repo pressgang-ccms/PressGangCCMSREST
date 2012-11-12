@@ -9,6 +9,7 @@ import org.jboss.pressgang.ccms.rest.v1.collections.RESTRoleCollectionV1;
 import org.jboss.pressgang.ccms.rest.v1.collections.RESTUserCollectionV1;
 import org.jboss.pressgang.ccms.rest.v1.collections.items.RESTRoleCollectionItemV1;
 import org.jboss.pressgang.ccms.rest.v1.collections.items.RESTUserCollectionItemV1;
+import org.jboss.pressgang.ccms.rest.v1.constants.RESTv1Constants;
 import org.jboss.pressgang.ccms.rest.v1.entities.RESTRoleV1;
 import org.jboss.pressgang.ccms.rest.v1.entities.RESTUserV1;
 import org.jboss.pressgang.ccms.rest.v1.entities.base.RESTBaseEntityV1;
@@ -16,10 +17,8 @@ import org.jboss.pressgang.ccms.rest.v1.exceptions.InvalidParameterException;
 import org.jboss.pressgang.ccms.rest.v1.expansion.ExpandDataTrunk;
 import org.jboss.pressgang.ccms.restserver.entity.Role;
 import org.jboss.pressgang.ccms.restserver.entity.User;
-import org.jboss.pressgang.ccms.restserver.rest.v1.base.BaseRESTv1;
 import org.jboss.pressgang.ccms.restserver.rest.v1.base.RESTDataObjectCollectionFactory;
 import org.jboss.pressgang.ccms.restserver.rest.v1.base.RESTDataObjectFactory;
-
 
 public class UserV1Factory extends RESTDataObjectFactory<RESTUserV1, User, RESTUserCollectionV1, RESTUserCollectionItemV1> {
     public UserV1Factory() {
@@ -58,7 +57,7 @@ public class UserV1Factory extends RESTDataObjectFactory<RESTUserV1, User, RESTU
                 .create(RESTRoleCollectionV1.class, new RoleV1Factory(), entity.getRoles(), RESTUserV1.ROLES_NAME, dataType,
                         expand, baseUrl, entityManager));
 
-        retValue.setLinks(baseUrl, BaseRESTv1.USER_URL_NAME, dataType, retValue.getId());
+        retValue.setLinks(baseUrl, RESTv1Constants.USER_URL_NAME, dataType, retValue.getId());
         retValue.setLogDetails(new LogDetailsV1Factory().create(entity, revision, RESTBaseEntityV1.LOG_DETAILS_NAME, expand,
                 dataType, baseUrl, entityManager));
 

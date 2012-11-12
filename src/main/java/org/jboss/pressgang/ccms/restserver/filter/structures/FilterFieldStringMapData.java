@@ -1,4 +1,4 @@
-package org.jboss.pressgang.ccms.restserver.filter.structures.field;
+package org.jboss.pressgang.ccms.restserver.filter.structures;
 
 import java.util.Arrays;
 import java.util.HashMap;
@@ -8,10 +8,10 @@ import java.util.Map;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class UIFieldStringMapData extends UIFieldMapDataBase<String, String> {
-    private static final Logger log = LoggerFactory.getLogger(UIFieldStringMapData.class);
+public class FilterFieldStringMapData extends FilterFieldMapDataBase<String, String> {
+    private static final Logger log = LoggerFactory.getLogger(FilterFieldStringMapData.class);
 
-    public UIFieldStringMapData(final String name, final String description) {
+    public FilterFieldStringMapData(final String name, final String description) {
         super(name, description);
     }
 

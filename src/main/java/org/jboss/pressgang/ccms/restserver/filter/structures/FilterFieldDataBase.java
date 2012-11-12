@@ -1,6 +1,6 @@
-package org.jboss.pressgang.ccms.restserver.filter.structures.field;
+package org.jboss.pressgang.ccms.restserver.filter.structures;
 
-public abstract class UIFieldDataBase<T> {
+public abstract class FilterFieldDataBase<T> {
     /** The data stored within this UIField */
     protected T data = null;
     /** The name of the data field */
@@ -8,7 +8,7 @@ public abstract class UIFieldDataBase<T> {
     /** The description */
     protected String description = "";
 
-    public UIFieldDataBase(final String name, final String description) {
+    public FilterFieldDataBase(final String name, final String description) {
         this.name = name;
         this.description = description;
     }

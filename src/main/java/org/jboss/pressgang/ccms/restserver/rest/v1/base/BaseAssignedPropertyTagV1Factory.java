@@ -7,12 +7,12 @@ import javax.persistence.EntityManager;
 
 import org.jboss.pressgang.ccms.rest.v1.collections.items.join.RESTAssignedPropertyTagCollectionItemV1;
 import org.jboss.pressgang.ccms.rest.v1.collections.join.RESTAssignedPropertyTagCollectionV1;
+import org.jboss.pressgang.ccms.rest.v1.constants.RESTv1Constants;
 import org.jboss.pressgang.ccms.rest.v1.entities.base.RESTBaseEntityV1;
 import org.jboss.pressgang.ccms.rest.v1.entities.join.RESTAssignedPropertyTagV1;
 import org.jboss.pressgang.ccms.rest.v1.expansion.ExpandDataTrunk;
 import org.jboss.pressgang.ccms.restserver.entity.base.ToPropertyTag;
 import org.jboss.pressgang.ccms.restserver.rest.v1.LogDetailsV1Factory;
-
 
 public abstract class BaseAssignedPropertyTagV1Factory<T extends ToPropertyTag<T>, U extends BaseAssignedPropertyTagV1Factory<T, U>> extends RESTDataObjectFactory<RESTAssignedPropertyTagV1, T, RESTAssignedPropertyTagCollectionV1, RESTAssignedPropertyTagCollectionItemV1>
 {
@@ -58,7 +58,7 @@ public abstract class BaseAssignedPropertyTagV1Factory<T extends ToPropertyTag<T
 			retValue.setRevisions(new RESTDataObjectCollectionFactory<RESTAssignedPropertyTagV1, T, RESTAssignedPropertyTagCollectionV1, RESTAssignedPropertyTagCollectionItemV1>().create(RESTAssignedPropertyTagCollectionV1.class, factory, entity, entity.getRevisions(entityManager), RESTBaseEntityV1.REVISIONS_NAME, dataType, expand, baseUrl, entityManager));
 		}
 		
-		retValue.setLinks(baseUrl, BaseRESTv1.PROPERTYTAG_URL_NAME, dataType, retValue.getId());
+		retValue.setLinks(baseUrl, RESTv1Constants.PROPERTYTAG_URL_NAME, dataType, retValue.getId());
 		retValue.setLogDetails(new LogDetailsV1Factory().create(entity, revision, RESTBaseEntityV1.LOG_DETAILS_NAME, expand, dataType, baseUrl, entityManager));
 		
 		return retValue;

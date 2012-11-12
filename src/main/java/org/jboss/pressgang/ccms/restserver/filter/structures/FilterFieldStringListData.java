@@ -1,4 +1,4 @@
-package org.jboss.pressgang.ccms.restserver.filter.structures.field;
+package org.jboss.pressgang.ccms.restserver.filter.structures;
 
 import java.util.Arrays;
 import java.util.List;
@@ -7,10 +7,10 @@ import org.jboss.pressgang.ccms.utils.common.CollectionUtilities;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class UIFieldStringListData extends UIFieldListDataBase<String> {
-    private static final Logger log = LoggerFactory.getLogger(UIFieldStringListData.class);
+public class FilterFieldStringListData extends FilterFieldListDataBase<String> {
+    private static final Logger log = LoggerFactory.getLogger(FilterFieldStringListData.class);
 
-    public UIFieldStringListData(final String name, final String description) {
+    public FilterFieldStringListData(final String name, final String description) {
         super(name, description);
     }
 

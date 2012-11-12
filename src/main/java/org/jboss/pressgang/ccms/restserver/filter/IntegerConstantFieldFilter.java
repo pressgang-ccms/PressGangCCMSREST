@@ -6,7 +6,7 @@ import java.util.HashMap;
 
 import org.jboss.pressgang.ccms.rest.v1.constants.CommonFilterConstants;
 import org.jboss.pressgang.ccms.restserver.filter.base.BaseFieldFilter;
-import org.jboss.pressgang.ccms.restserver.filter.structures.field.UIFieldStringData;
+import org.jboss.pressgang.ccms.restserver.filter.structures.FilterFieldStringData;
 
 
 public class IntegerConstantFieldFilter extends BaseFieldFilter
@@ -26,9 +26,9 @@ public class IntegerConstantFieldFilter extends BaseFieldFilter
         }
     });
     
-    private UIFieldStringData integerConstantIds;
-    private UIFieldStringData integerConstantName;
-    private UIFieldStringData integerConstantValue;
+    private FilterFieldStringData integerConstantIds;
+    private FilterFieldStringData integerConstantName;
+    private FilterFieldStringData integerConstantValue;
         
     public IntegerConstantFieldFilter()
     {
@@ -38,9 +38,9 @@ public class IntegerConstantFieldFilter extends BaseFieldFilter
     @Override
     protected void resetAllValues()
     {
-        integerConstantIds = new UIFieldStringData(CommonFilterConstants.INTEGER_CONSTANT_IDS_FILTER_VAR, CommonFilterConstants.INTEGER_CONSTANT_IDS_FILTER_VAR_DESC);
-        integerConstantName = new UIFieldStringData(CommonFilterConstants.INTEGER_CONSTANT_NAME_FILTER_VAR, CommonFilterConstants.INTEGER_CONSTANT_NAME_FILTER_VAR_DESC);
-        integerConstantValue = new UIFieldStringData(CommonFilterConstants.INTEGER_CONSTANT_VALUE_FILTER_VAR, CommonFilterConstants.INTEGER_CONSTANT_VALUE_FILTER_VAR_DESC);
+        integerConstantIds = new FilterFieldStringData(CommonFilterConstants.INTEGER_CONSTANT_IDS_FILTER_VAR, CommonFilterConstants.INTEGER_CONSTANT_IDS_FILTER_VAR_DESC);
+        integerConstantName = new FilterFieldStringData(CommonFilterConstants.INTEGER_CONSTANT_NAME_FILTER_VAR, CommonFilterConstants.INTEGER_CONSTANT_NAME_FILTER_VAR_DESC);
+        integerConstantValue = new FilterFieldStringData(CommonFilterConstants.INTEGER_CONSTANT_VALUE_FILTER_VAR, CommonFilterConstants.INTEGER_CONSTANT_VALUE_FILTER_VAR_DESC);
         
         addFilterVar(integerConstantIds);
         addFilterVar(integerConstantName);

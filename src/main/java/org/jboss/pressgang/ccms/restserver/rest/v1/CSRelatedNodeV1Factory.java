@@ -11,6 +11,7 @@ import org.jboss.pressgang.ccms.rest.v1.collections.contentspec.items.join.RESTC
 import org.jboss.pressgang.ccms.rest.v1.collections.contentspec.join.RESTCSRelatedNodeCollectionV1;
 import org.jboss.pressgang.ccms.rest.v1.collections.items.join.RESTAssignedPropertyTagCollectionItemV1;
 import org.jboss.pressgang.ccms.rest.v1.collections.join.RESTAssignedPropertyTagCollectionV1;
+import org.jboss.pressgang.ccms.rest.v1.constants.RESTv1Constants;
 import org.jboss.pressgang.ccms.rest.v1.entities.base.RESTBaseEntityV1;
 import org.jboss.pressgang.ccms.rest.v1.entities.contentspec.RESTCSNodeV1;
 import org.jboss.pressgang.ccms.rest.v1.entities.contentspec.RESTCSTranslatedStringV1;
@@ -20,10 +21,8 @@ import org.jboss.pressgang.ccms.rest.v1.expansion.ExpandDataTrunk;
 import org.jboss.pressgang.ccms.restserver.entity.contentspec.CSNodeToCSNode;
 import org.jboss.pressgang.ccms.restserver.entity.contentspec.CSNodeToPropertyTag;
 import org.jboss.pressgang.ccms.restserver.entity.contentspec.CSTranslatedString;
-import org.jboss.pressgang.ccms.restserver.rest.v1.base.BaseRESTv1;
 import org.jboss.pressgang.ccms.restserver.rest.v1.base.RESTDataObjectCollectionFactory;
 import org.jboss.pressgang.ccms.restserver.rest.v1.base.RESTDataObjectFactory;
-
 
 public class CSRelatedNodeV1Factory
         extends
@@ -111,7 +110,7 @@ public class CSRelatedNodeV1Factory
                         .getCSNodeToPropertyTagsList(), RESTCSRelatedNodeV1.PROPERTIES_NAME, dataType, expand, baseUrl, revision,
                         entityManager));
 
-        retValue.setLinks(baseUrl, BaseRESTv1.CONTENT_SPEC_NODE_URL_NAME, dataType, retValue.getId());
+        retValue.setLinks(baseUrl, RESTv1Constants.CONTENT_SPEC_NODE_URL_NAME, dataType, retValue.getId());
         retValue.setLogDetails(new LogDetailsV1Factory().create(entity, revision, RESTBaseEntityV1.LOG_DETAILS_NAME, expand,
                 dataType, baseUrl, entityManager));
 

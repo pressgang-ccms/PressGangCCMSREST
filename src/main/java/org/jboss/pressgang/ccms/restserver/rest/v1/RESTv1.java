@@ -12,7 +12,6 @@ import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.ResponseBuilder;
 import javax.ws.rs.ext.Provider;
 
-
 import org.jboss.pressgang.ccms.rest.v1.collections.RESTBlobConstantCollectionV1;
 import org.jboss.pressgang.ccms.rest.v1.collections.RESTCategoryCollectionV1;
 import org.jboss.pressgang.ccms.rest.v1.collections.RESTFilterCollectionV1;
@@ -224,12 +223,15 @@ public class RESTv1 extends BaseRESTv1 implements RESTInterfaceV1, RESTInterface
     }
 
     @Override
-    public String updateJSONPBlobConstant(final String expand, final RESTBlobConstantV1 dataObject, final String message, final Integer flag, final Integer userId, final String callback) throws InvalidParameterException, InternalProcessingException {
+    public String updateJSONPBlobConstant(final String expand, final RESTBlobConstantV1 dataObject, final String message,
+            final Integer flag, final Integer userId, final String callback) throws InvalidParameterException,
+            InternalProcessingException {
         if (callback == null)
             throw new InvalidParameterException("The callback parameter can not be null");
 
         try {
-            return wrapJsonInPadding(callback, convertObjectToJSON(updateJSONBlobConstant(expand, dataObject, message, flag, userId)));
+            return wrapJsonInPadding(callback,
+                    convertObjectToJSON(updateJSONBlobConstant(expand, dataObject, message, flag, userId)));
         } catch (final Exception ex) {
             throw new InternalProcessingException("Could not marshall return value into JSON");
         }
@@ -243,13 +245,14 @@ public class RESTv1 extends BaseRESTv1 implements RESTInterfaceV1, RESTInterface
 
     @Override
     public String updateJSONPBlobConstants(final String expand, final RESTBlobConstantCollectionV1 dataObjects,
-            final String message, final Integer flag, final Integer userId, final String callback) throws InvalidParameterException,
-            InternalProcessingException {
+            final String message, final Integer flag, final Integer userId, final String callback)
+            throws InvalidParameterException, InternalProcessingException {
         if (callback == null)
             throw new InvalidParameterException("The callback parameter can not be null");
 
         try {
-            return wrapJsonInPadding(callback, convertObjectToJSON(updateJSONBlobConstants(expand, dataObjects, message, flag, userId)));
+            return wrapJsonInPadding(callback,
+                    convertObjectToJSON(updateJSONBlobConstants(expand, dataObjects, message, flag, userId)));
         } catch (final Exception ex) {
             throw new InternalProcessingException("Could not marshall return value into JSON");
         }
@@ -262,12 +265,15 @@ public class RESTv1 extends BaseRESTv1 implements RESTInterfaceV1, RESTInterface
     }
 
     @Override
-    public String createJSONPBlobConstant(final String expand, final RESTBlobConstantV1 dataObject, final String message, final Integer flag, final Integer userId, final String callback) throws InvalidParameterException, InternalProcessingException {
+    public String createJSONPBlobConstant(final String expand, final RESTBlobConstantV1 dataObject, final String message,
+            final Integer flag, final Integer userId, final String callback) throws InvalidParameterException,
+            InternalProcessingException {
         if (callback == null)
             throw new InvalidParameterException("The callback parameter can not be null");
 
         try {
-            return wrapJsonInPadding(callback, convertObjectToJSON(createJSONBlobConstant(expand, dataObject, message, flag, userId)));
+            return wrapJsonInPadding(callback,
+                    convertObjectToJSON(createJSONBlobConstant(expand, dataObject, message, flag, userId)));
         } catch (final Exception ex) {
             throw new InternalProcessingException("Could not marshall return value into JSON");
         }
@@ -281,13 +287,14 @@ public class RESTv1 extends BaseRESTv1 implements RESTInterfaceV1, RESTInterface
 
     @Override
     public String createJSONPBlobConstants(final String expand, final RESTBlobConstantCollectionV1 dataObjects,
-            final String message, final Integer flag, final Integer userId, final String callback) throws InvalidParameterException,
-            InternalProcessingException {
+            final String message, final Integer flag, final Integer userId, final String callback)
+            throws InvalidParameterException, InternalProcessingException {
         if (callback == null)
             throw new InvalidParameterException("The callback parameter can not be null");
 
         try {
-            return wrapJsonInPadding(callback, convertObjectToJSON(createJSONBlobConstants(expand, dataObjects, message, flag, userId)));
+            return wrapJsonInPadding(callback,
+                    convertObjectToJSON(createJSONBlobConstants(expand, dataObjects, message, flag, userId)));
         } catch (final Exception ex) {
             throw new InternalProcessingException("Could not marshall return value into JSON");
         }
@@ -300,8 +307,8 @@ public class RESTv1 extends BaseRESTv1 implements RESTInterfaceV1, RESTInterface
     }
 
     @Override
-    public String deleteJSONPBlobConstant(final Integer id, final String message, final Integer flag, final Integer userId, final String expand,
-            final String callback) throws InvalidParameterException, InternalProcessingException {
+    public String deleteJSONPBlobConstant(final Integer id, final String message, final Integer flag, final Integer userId,
+            final String expand, final String callback) throws InvalidParameterException, InternalProcessingException {
         if (callback == null)
             throw new InvalidParameterException("The callback parameter can not be null");
 
@@ -319,8 +326,9 @@ public class RESTv1 extends BaseRESTv1 implements RESTInterfaceV1, RESTInterface
     }
 
     @Override
-    public String deleteJSONPBlobConstants(final PathSegment ids, final String message, final Integer flag, final Integer userId,
-            final String expand, final String callback) throws InvalidParameterException, InternalProcessingException {
+    public String deleteJSONPBlobConstants(final PathSegment ids, final String message, final Integer flag,
+            final Integer userId, final String expand, final String callback) throws InvalidParameterException,
+            InternalProcessingException {
         if (callback == null)
             throw new InvalidParameterException("The callback parameter can not be null");
 
@@ -345,7 +353,7 @@ public class RESTv1 extends BaseRESTv1 implements RESTInterfaceV1, RESTInterface
     public RESTBlobConstantCollectionV1 getJSONBlobConstants(final String expand) throws InvalidParameterException,
             InternalProcessingException {
         return getJSONResources(RESTBlobConstantCollectionV1.class, BlobConstants.class, new BlobConstantV1Factory(),
-                BaseRESTv1.BLOBCONSTANTS_EXPANSION_NAME, expand);
+                RESTv1Constants.BLOBCONSTANTS_EXPANSION_NAME, expand);
     }
 
     @Override
@@ -353,7 +361,7 @@ public class RESTv1 extends BaseRESTv1 implements RESTInterfaceV1, RESTInterface
             throws InvalidParameterException, InternalProcessingException {
         return getJSONResourcesFromQuery(RESTBlobConstantCollectionV1.class, query.getMatrixParameters(),
                 BlobConstantFilterQueryBuilder.class, new BlobConstantFieldFilter(), new BlobConstantV1Factory(),
-                BaseRESTv1.BLOBCONSTANTS_EXPANSION_NAME, expand);
+                RESTv1Constants.BLOBCONSTANTS_EXPANSION_NAME, expand);
     }
 
     @Override
@@ -364,7 +372,8 @@ public class RESTv1 extends BaseRESTv1 implements RESTInterfaceV1, RESTInterface
 
     @Override
     public RESTBlobConstantV1 updateJSONBlobConstant(final String expand, final RESTBlobConstantV1 dataObject,
-            final String message, final Integer flag, final Integer userId) throws InvalidParameterException, InternalProcessingException {
+            final String message, final Integer flag, final Integer userId) throws InvalidParameterException,
+            InternalProcessingException {
         if (dataObject == null)
             throw new InvalidParameterException("The dataObject parameter can not be null");
 
@@ -374,7 +383,7 @@ public class RESTv1 extends BaseRESTv1 implements RESTInterfaceV1, RESTInterface
         final BlobConstantV1Factory factory = new BlobConstantV1Factory();
         final RESTLogDetailsV1 logDetails = generateLogDetails(message, flag, userId);
 
-        return updateEntity(BlobConstants.class, dataObject, factory, this.getBaseUrl(), JSON_URL, expand, logDetails);
+        return updateJSONEntity(BlobConstants.class, dataObject, factory, expand, logDetails);
     }
 
     @Override
@@ -395,8 +404,8 @@ public class RESTv1 extends BaseRESTv1 implements RESTInterfaceV1, RESTInterface
         final BlobConstantV1Factory factory = new BlobConstantV1Factory();
         final RESTLogDetailsV1 logDetails = generateLogDetails(message, flag, userId);
 
-        return updateEntities(RESTBlobConstantCollectionV1.class, BlobConstants.class, dataObjects, factory,
-                BaseRESTv1.BLOBCONSTANTS_EXPANSION_NAME, JSON_URL, expand, getBaseUrl(), logDetails);
+        return updateJSONEntities(RESTBlobConstantCollectionV1.class, BlobConstants.class, dataObjects, factory,
+                RESTv1Constants.BLOBCONSTANTS_EXPANSION_NAME, expand, logDetails);
     }
 
     @Override
@@ -407,14 +416,15 @@ public class RESTv1 extends BaseRESTv1 implements RESTInterfaceV1, RESTInterface
 
     @Override
     public RESTBlobConstantV1 createJSONBlobConstant(final String expand, final RESTBlobConstantV1 dataObject,
-            final String message, final Integer flag, final Integer userId) throws InvalidParameterException, InternalProcessingException {
+            final String message, final Integer flag, final Integer userId) throws InvalidParameterException,
+            InternalProcessingException {
         if (dataObject == null)
             throw new InvalidParameterException("The dataObject parameter can not be null");
 
         final BlobConstantV1Factory factory = new BlobConstantV1Factory();
         final RESTLogDetailsV1 logDetails = generateLogDetails(message, flag, userId);
 
-        return createEntity(BlobConstants.class, dataObject, factory, this.getBaseUrl(), JSON_URL, expand, logDetails);
+        return createJSONEntity(BlobConstants.class, dataObject, factory, expand, logDetails);
     }
 
     @Override
@@ -436,8 +446,8 @@ public class RESTv1 extends BaseRESTv1 implements RESTInterfaceV1, RESTInterface
         final BlobConstantV1Factory factory = new BlobConstantV1Factory();
         final RESTLogDetailsV1 logDetails = generateLogDetails(message, flag, userId);
 
-        return createEntities(RESTBlobConstantCollectionV1.class, BlobConstants.class, dataObjects, factory,
-                BaseRESTv1.BLOBCONSTANTS_EXPANSION_NAME, JSON_URL, expand, getBaseUrl(), logDetails);
+        return createJSONEntities(RESTBlobConstantCollectionV1.class, BlobConstants.class, dataObjects, factory,
+                RESTv1Constants.BLOBCONSTANTS_EXPANSION_NAME, expand, logDetails);
     }
 
     @Override
@@ -447,15 +457,15 @@ public class RESTv1 extends BaseRESTv1 implements RESTInterfaceV1, RESTInterface
     }
 
     @Override
-    public RESTBlobConstantV1 deleteJSONBlobConstant(final Integer id, final String message, final Integer flag, final Integer userId,
-            final String expand) throws InvalidParameterException, InternalProcessingException {
+    public RESTBlobConstantV1 deleteJSONBlobConstant(final Integer id, final String message, final Integer flag,
+            final Integer userId, final String expand) throws InvalidParameterException, InternalProcessingException {
         if (id == null)
             throw new InvalidParameterException("The dataObject parameter can not be null");
 
         final BlobConstantV1Factory factory = new BlobConstantV1Factory();
         final RESTLogDetailsV1 logDetails = generateLogDetails(message, flag, userId);
 
-        return deleteEntity(BlobConstants.class, factory, id, expand, logDetails);
+        return deleteJSONEntity(BlobConstants.class, factory, id, expand, logDetails);
     }
 
     @Override
@@ -465,7 +475,9 @@ public class RESTv1 extends BaseRESTv1 implements RESTInterfaceV1, RESTInterface
     }
 
     @Override
-    public RESTBlobConstantCollectionV1 deleteJSONBlobConstants(final PathSegment ids, final String message, final Integer flag, final Integer userId, final String expand) throws InvalidParameterException, InternalProcessingException {
+    public RESTBlobConstantCollectionV1 deleteJSONBlobConstants(final PathSegment ids, final String message,
+            final Integer flag, final Integer userId, final String expand) throws InvalidParameterException,
+            InternalProcessingException {
         if (ids == null)
             throw new InvalidParameterException("The dataObjects parameter can not be null");
 
@@ -473,8 +485,8 @@ public class RESTv1 extends BaseRESTv1 implements RESTInterfaceV1, RESTInterface
         final BlobConstantV1Factory factory = new BlobConstantV1Factory();
         final RESTLogDetailsV1 logDetails = generateLogDetails(message, flag, userId);
 
-        return deleteEntities(RESTBlobConstantCollectionV1.class, BlobConstants.class, factory, dbEntityIds,
-                BaseRESTv1.BLOBCONSTANTS_EXPANSION_NAME, JSON_URL, expand, getBaseUrl(), logDetails);
+        return deleteJSONEntities(RESTBlobConstantCollectionV1.class, BlobConstants.class, factory, dbEntityIds,
+                RESTv1Constants.BLOBCONSTANTS_EXPANSION_NAME, expand, logDetails);
     }
 
     /* PROJECT FUNCTIONS */
@@ -525,12 +537,15 @@ public class RESTv1 extends BaseRESTv1 implements RESTInterfaceV1, RESTInterface
     }
 
     @Override
-    public String updateJSONPProject(final String expand, final RESTProjectV1 dataObject, final String message, final Integer flag, final Integer userId, final String callback) throws InvalidParameterException, InternalProcessingException {
+    public String updateJSONPProject(final String expand, final RESTProjectV1 dataObject, final String message,
+            final Integer flag, final Integer userId, final String callback) throws InvalidParameterException,
+            InternalProcessingException {
         if (callback == null)
             throw new InvalidParameterException("The callback parameter can not be null");
 
         try {
-            return wrapJsonInPadding(callback, convertObjectToJSON(updateJSONProject(expand, dataObject, message, flag, userId)));
+            return wrapJsonInPadding(callback,
+                    convertObjectToJSON(updateJSONProject(expand, dataObject, message, flag, userId)));
         } catch (final Exception ex) {
             throw new InternalProcessingException("Could not marshall return value into JSON");
         }
@@ -543,12 +558,15 @@ public class RESTv1 extends BaseRESTv1 implements RESTInterfaceV1, RESTInterface
     }
 
     @Override
-    public String updateJSONPProjects(final String expand, final RESTProjectCollectionV1 dataObjects, final String message, final Integer flag, final Integer userId, final String callback) throws InvalidParameterException, InternalProcessingException {
+    public String updateJSONPProjects(final String expand, final RESTProjectCollectionV1 dataObjects, final String message,
+            final Integer flag, final Integer userId, final String callback) throws InvalidParameterException,
+            InternalProcessingException {
         if (callback == null)
             throw new InvalidParameterException("The callback parameter can not be null");
 
         try {
-            return wrapJsonInPadding(callback, convertObjectToJSON(updateJSONProjects(expand, dataObjects, message, flag, userId)));
+            return wrapJsonInPadding(callback,
+                    convertObjectToJSON(updateJSONProjects(expand, dataObjects, message, flag, userId)));
         } catch (final Exception ex) {
             throw new InternalProcessingException("Could not marshall return value into JSON");
         }
@@ -561,12 +579,15 @@ public class RESTv1 extends BaseRESTv1 implements RESTInterfaceV1, RESTInterface
     }
 
     @Override
-    public String createJSONPProject(final String expand, final RESTProjectV1 dataObject, final String message, final Integer flag, final Integer userId, final String callback) throws InvalidParameterException, InternalProcessingException {
+    public String createJSONPProject(final String expand, final RESTProjectV1 dataObject, final String message,
+            final Integer flag, final Integer userId, final String callback) throws InvalidParameterException,
+            InternalProcessingException {
         if (callback == null)
             throw new InvalidParameterException("The callback parameter can not be null");
 
         try {
-            return wrapJsonInPadding(callback, convertObjectToJSON(createJSONProject(expand, dataObject, message, flag, userId)));
+            return wrapJsonInPadding(callback,
+                    convertObjectToJSON(createJSONProject(expand, dataObject, message, flag, userId)));
         } catch (final Exception ex) {
             throw new InternalProcessingException("Could not marshall return value into JSON");
         }
@@ -579,12 +600,15 @@ public class RESTv1 extends BaseRESTv1 implements RESTInterfaceV1, RESTInterface
     }
 
     @Override
-    public String createJSONPProjects(final String expand, final RESTProjectCollectionV1 dataObjects, final String message, final Integer flag, final Integer userId, final String callback) throws InvalidParameterException, InternalProcessingException {
+    public String createJSONPProjects(final String expand, final RESTProjectCollectionV1 dataObjects, final String message,
+            final Integer flag, final Integer userId, final String callback) throws InvalidParameterException,
+            InternalProcessingException {
         if (callback == null)
             throw new InvalidParameterException("The callback parameter can not be null");
 
         try {
-            return wrapJsonInPadding(callback, convertObjectToJSON(createJSONProjects(expand, dataObjects, message, flag, userId)));
+            return wrapJsonInPadding(callback,
+                    convertObjectToJSON(createJSONProjects(expand, dataObjects, message, flag, userId)));
         } catch (final Exception ex) {
             throw new InternalProcessingException("Could not marshall return value into JSON");
         }
@@ -597,8 +621,8 @@ public class RESTv1 extends BaseRESTv1 implements RESTInterfaceV1, RESTInterface
     }
 
     @Override
-    public String deleteJSONPProject(final Integer id, final String message, final Integer flag, final Integer userId, final String expand,
-            final String callback) throws InvalidParameterException, InternalProcessingException {
+    public String deleteJSONPProject(final Integer id, final String message, final Integer flag, final Integer userId,
+            final String expand, final String callback) throws InvalidParameterException, InternalProcessingException {
         if (callback == null)
             throw new InvalidParameterException("The callback parameter can not be null");
 
@@ -616,8 +640,8 @@ public class RESTv1 extends BaseRESTv1 implements RESTInterfaceV1, RESTInterface
     }
 
     @Override
-    public String deleteJSONPProjects(final PathSegment ids, final String message, final Integer flag, final Integer userId, final String expand,
-            final String callback) throws InvalidParameterException, InternalProcessingException {
+    public String deleteJSONPProjects(final PathSegment ids, final String message, final Integer flag, final Integer userId,
+            final String expand, final String callback) throws InvalidParameterException, InternalProcessingException {
         if (callback == null)
             throw new InvalidParameterException("The callback parameter can not be null");
 
@@ -642,15 +666,15 @@ public class RESTv1 extends BaseRESTv1 implements RESTInterfaceV1, RESTInterface
     public RESTProjectCollectionV1 getJSONProjects(final String expand) throws InvalidParameterException,
             InternalProcessingException {
         return getJSONResources(RESTProjectCollectionV1.class, Project.class, new ProjectV1Factory(),
-                BaseRESTv1.PROJECTS_EXPANSION_NAME, expand);
+                RESTv1Constants.PROJECTS_EXPANSION_NAME, expand);
     }
 
     @Override
     public RESTProjectCollectionV1 getJSONProjectsWithQuery(final PathSegment query, final String expand)
             throws InvalidParameterException, InternalProcessingException {
         return getJSONResourcesFromQuery(RESTProjectCollectionV1.class, query.getMatrixParameters(),
-                ProjectFilterQueryBuilder.class, new ProjectFieldFilter(), new ProjectV1Factory(), PROJECTS_EXPANSION_NAME,
-                expand);
+                ProjectFilterQueryBuilder.class, new ProjectFieldFilter(), new ProjectV1Factory(),
+                RESTv1Constants.PROJECTS_EXPANSION_NAME, expand);
     }
 
     @Override
@@ -660,7 +684,8 @@ public class RESTv1 extends BaseRESTv1 implements RESTInterfaceV1, RESTInterface
     }
 
     @Override
-    public RESTProjectV1 updateJSONProject(final String expand, final RESTProjectV1 dataObject, final String message, final Integer flag, final Integer userId) throws InvalidParameterException, InternalProcessingException {
+    public RESTProjectV1 updateJSONProject(final String expand, final RESTProjectV1 dataObject, final String message,
+            final Integer flag, final Integer userId) throws InvalidParameterException, InternalProcessingException {
         if (dataObject == null)
             throw new InvalidParameterException("The dataObject parameter can not be null");
 
@@ -670,7 +695,7 @@ public class RESTv1 extends BaseRESTv1 implements RESTInterfaceV1, RESTInterface
         final ProjectV1Factory factory = new ProjectV1Factory();
         final RESTLogDetailsV1 logDetails = generateLogDetails(message, flag, userId);
 
-        return updateEntity(Project.class, dataObject, factory, this.getBaseUrl(), JSON_URL, expand, logDetails);
+        return updateJSONEntity(Project.class, dataObject, factory, expand, logDetails);
     }
 
     @Override
@@ -681,7 +706,8 @@ public class RESTv1 extends BaseRESTv1 implements RESTInterfaceV1, RESTInterface
 
     @Override
     public RESTProjectCollectionV1 updateJSONProjects(final String expand, final RESTProjectCollectionV1 dataObjects,
-            final String message, final Integer flag, final Integer userId) throws InvalidParameterException, InternalProcessingException {
+            final String message, final Integer flag, final Integer userId) throws InvalidParameterException,
+            InternalProcessingException {
         if (dataObjects == null)
             throw new InvalidParameterException("The dataObjects parameter can not be null");
 
@@ -691,8 +717,8 @@ public class RESTv1 extends BaseRESTv1 implements RESTInterfaceV1, RESTInterface
         final ProjectV1Factory factory = new ProjectV1Factory();
         final RESTLogDetailsV1 logDetails = generateLogDetails(message, flag, userId);
 
-        return updateEntities(RESTProjectCollectionV1.class, Project.class, dataObjects, factory,
-                BaseRESTv1.PROJECTS_EXPANSION_NAME, JSON_URL, expand, getBaseUrl(), logDetails);
+        return updateJSONEntities(RESTProjectCollectionV1.class, Project.class, dataObjects, factory,
+                RESTv1Constants.PROJECTS_EXPANSION_NAME, expand, logDetails);
     }
 
     @Override
@@ -702,14 +728,15 @@ public class RESTv1 extends BaseRESTv1 implements RESTInterfaceV1, RESTInterface
     }
 
     @Override
-    public RESTProjectV1 createJSONProject(final String expand, final RESTProjectV1 dataObject, final String message, final Integer flag, final Integer userId) throws InvalidParameterException, InternalProcessingException {
+    public RESTProjectV1 createJSONProject(final String expand, final RESTProjectV1 dataObject, final String message,
+            final Integer flag, final Integer userId) throws InvalidParameterException, InternalProcessingException {
         if (dataObject == null)
             throw new InvalidParameterException("The dataObject parameter can not be null");
 
         final ProjectV1Factory factory = new ProjectV1Factory();
         final RESTLogDetailsV1 logDetails = generateLogDetails(message, flag, userId);
 
-        return createEntity(Project.class, dataObject, factory, this.getBaseUrl(), JSON_URL, expand, logDetails);
+        return createJSONEntity(Project.class, dataObject, factory, expand, logDetails);
     }
 
     @Override
@@ -720,7 +747,8 @@ public class RESTv1 extends BaseRESTv1 implements RESTInterfaceV1, RESTInterface
 
     @Override
     public RESTProjectCollectionV1 createJSONProjects(final String expand, final RESTProjectCollectionV1 dataObjects,
-            final String message, final Integer flag, final Integer userId) throws InvalidParameterException, InternalProcessingException {
+            final String message, final Integer flag, final Integer userId) throws InvalidParameterException,
+            InternalProcessingException {
         if (dataObjects == null)
             throw new InvalidParameterException("The dataObjects parameter can not be null");
 
@@ -730,8 +758,8 @@ public class RESTv1 extends BaseRESTv1 implements RESTInterfaceV1, RESTInterface
         final ProjectV1Factory factory = new ProjectV1Factory();
         final RESTLogDetailsV1 logDetails = generateLogDetails(message, flag, userId);
 
-        return createEntities(RESTProjectCollectionV1.class, Project.class, dataObjects, factory,
-                BaseRESTv1.PROJECTS_EXPANSION_NAME, JSON_URL, expand, getBaseUrl(), logDetails);
+        return createJSONEntities(RESTProjectCollectionV1.class, Project.class, dataObjects, factory,
+                RESTv1Constants.PROJECTS_EXPANSION_NAME, expand, logDetails);
     }
 
     @Override
@@ -741,15 +769,15 @@ public class RESTv1 extends BaseRESTv1 implements RESTInterfaceV1, RESTInterface
     }
 
     @Override
-    public RESTProjectV1 deleteJSONProject(final Integer id, final String message, final Integer flag, final Integer userId, final String expand)
-            throws InvalidParameterException, InternalProcessingException {
+    public RESTProjectV1 deleteJSONProject(final Integer id, final String message, final Integer flag, final Integer userId,
+            final String expand) throws InvalidParameterException, InternalProcessingException {
         if (id == null)
             throw new InvalidParameterException("The dataObject parameter can not be null");
 
         final ProjectV1Factory factory = new ProjectV1Factory();
         final RESTLogDetailsV1 logDetails = generateLogDetails(message, flag, userId);
 
-        return deleteEntity(Project.class, factory, id, expand, logDetails);
+        return deleteJSONEntity(Project.class, factory, id, expand, logDetails);
     }
 
     @Override
@@ -759,8 +787,8 @@ public class RESTv1 extends BaseRESTv1 implements RESTInterfaceV1, RESTInterface
     }
 
     @Override
-    public RESTProjectCollectionV1 deleteJSONProjects(final PathSegment ids, final String message, final Integer flag, final Integer userId,
-            final String expand) throws InvalidParameterException, InternalProcessingException {
+    public RESTProjectCollectionV1 deleteJSONProjects(final PathSegment ids, final String message, final Integer flag,
+            final Integer userId, final String expand) throws InvalidParameterException, InternalProcessingException {
         if (ids == null)
             throw new InvalidParameterException("The dataObjects parameter can not be null");
 
@@ -768,8 +796,8 @@ public class RESTv1 extends BaseRESTv1 implements RESTInterfaceV1, RESTInterface
         final ProjectV1Factory factory = new ProjectV1Factory();
         final RESTLogDetailsV1 logDetails = generateLogDetails(message, flag, userId);
 
-        return deleteEntities(RESTProjectCollectionV1.class, Project.class, factory, dbEntityIds,
-                BaseRESTv1.PROJECTS_EXPANSION_NAME, JSON_URL, expand, getBaseUrl(), logDetails);
+        return deleteJSONEntities(RESTProjectCollectionV1.class, Project.class, factory, dbEntityIds,
+                RESTv1Constants.PROJECTS_EXPANSION_NAME, expand, logDetails);
     }
 
     /* PROPERYTAG FUNCTIONS */
@@ -820,12 +848,15 @@ public class RESTv1 extends BaseRESTv1 implements RESTInterfaceV1, RESTInterface
     }
 
     @Override
-    public String updateJSONPPropertyTag(final String expand, final RESTPropertyTagV1 dataObject, final String message, final Integer flag, final Integer userId, final String callback) throws InvalidParameterException, InternalProcessingException {
+    public String updateJSONPPropertyTag(final String expand, final RESTPropertyTagV1 dataObject, final String message,
+            final Integer flag, final Integer userId, final String callback) throws InvalidParameterException,
+            InternalProcessingException {
         if (callback == null)
             throw new InvalidParameterException("The callback parameter can not be null");
 
         try {
-            return wrapJsonInPadding(callback, convertObjectToJSON(updateJSONPropertyTag(expand, dataObject, message, flag, userId)));
+            return wrapJsonInPadding(callback,
+                    convertObjectToJSON(updateJSONPropertyTag(expand, dataObject, message, flag, userId)));
         } catch (final Exception ex) {
             throw new InternalProcessingException("Could not marshall return value into JSON");
         }
@@ -839,13 +870,14 @@ public class RESTv1 extends BaseRESTv1 implements RESTInterfaceV1, RESTInterface
 
     @Override
     public String updateJSONPPropertyTags(final String expand, final RESTPropertyTagCollectionV1 dataObjects,
-            final String message, final Integer flag, final Integer userId, final String callback) throws InvalidParameterException,
-            InternalProcessingException {
+            final String message, final Integer flag, final Integer userId, final String callback)
+            throws InvalidParameterException, InternalProcessingException {
         if (callback == null)
             throw new InvalidParameterException("The callback parameter can not be null");
 
         try {
-            return wrapJsonInPadding(callback, convertObjectToJSON(updateJSONPropertyTags(expand, dataObjects, message, flag, userId)));
+            return wrapJsonInPadding(callback,
+                    convertObjectToJSON(updateJSONPropertyTags(expand, dataObjects, message, flag, userId)));
         } catch (final Exception ex) {
             throw new InternalProcessingException("Could not marshall return value into JSON");
         }
@@ -858,12 +890,15 @@ public class RESTv1 extends BaseRESTv1 implements RESTInterfaceV1, RESTInterface
     }
 
     @Override
-    public String createJSONPPropertyTag(final String expand, final RESTPropertyTagV1 dataObject, final String message, final Integer flag, final Integer userId, final String callback) throws InvalidParameterException, InternalProcessingException {
+    public String createJSONPPropertyTag(final String expand, final RESTPropertyTagV1 dataObject, final String message,
+            final Integer flag, final Integer userId, final String callback) throws InvalidParameterException,
+            InternalProcessingException {
         if (callback == null)
             throw new InvalidParameterException("The callback parameter can not be null");
 
         try {
-            return wrapJsonInPadding(callback, convertObjectToJSON(createJSONPropertyTag(expand, dataObject, message, flag, userId)));
+            return wrapJsonInPadding(callback,
+                    convertObjectToJSON(createJSONPropertyTag(expand, dataObject, message, flag, userId)));
         } catch (final Exception ex) {
             throw new InternalProcessingException("Could not marshall return value into JSON");
         }
@@ -877,13 +912,14 @@ public class RESTv1 extends BaseRESTv1 implements RESTInterfaceV1, RESTInterface
 
     @Override
     public String createJSONPPropertyTags(final String expand, final RESTPropertyTagCollectionV1 dataObjects,
-            final String message, final Integer flag, final Integer userId, final String callback) throws InvalidParameterException,
-            InternalProcessingException {
+            final String message, final Integer flag, final Integer userId, final String callback)
+            throws InvalidParameterException, InternalProcessingException {
         if (callback == null)
             throw new InvalidParameterException("The callback parameter can not be null");
 
         try {
-            return wrapJsonInPadding(callback, convertObjectToJSON(createJSONPropertyTags(expand, dataObjects, message, flag, userId)));
+            return wrapJsonInPadding(callback,
+                    convertObjectToJSON(createJSONPropertyTags(expand, dataObjects, message, flag, userId)));
         } catch (final Exception ex) {
             throw new InternalProcessingException("Could not marshall return value into JSON");
         }
@@ -896,8 +932,8 @@ public class RESTv1 extends BaseRESTv1 implements RESTInterfaceV1, RESTInterface
     }
 
     @Override
-    public String deleteJSONPPropertyTag(final Integer id, final String message, final Integer flag, final Integer userId, final String expand,
-            final String callback) throws InvalidParameterException, InternalProcessingException {
+    public String deleteJSONPPropertyTag(final Integer id, final String message, final Integer flag, final Integer userId,
+            final String expand, final String callback) throws InvalidParameterException, InternalProcessingException {
         if (callback == null)
             throw new InvalidParameterException("The callback parameter can not be null");
 
@@ -915,8 +951,9 @@ public class RESTv1 extends BaseRESTv1 implements RESTInterfaceV1, RESTInterface
     }
 
     @Override
-    public String deleteJSONPPropertyTags(final PathSegment ids, final String message, final Integer flag, final Integer userId, final String expand,
-            final String callback) throws InvalidParameterException, InternalProcessingException {
+    public String deleteJSONPPropertyTags(final PathSegment ids, final String message, final Integer flag,
+            final Integer userId, final String expand, final String callback) throws InvalidParameterException,
+            InternalProcessingException {
         if (callback == null)
             throw new InvalidParameterException("The callback parameter can not be null");
 
@@ -941,7 +978,7 @@ public class RESTv1 extends BaseRESTv1 implements RESTInterfaceV1, RESTInterface
     public RESTPropertyTagCollectionV1 getJSONPropertyTags(final String expand) throws InvalidParameterException,
             InternalProcessingException {
         return getJSONResources(RESTPropertyTagCollectionV1.class, PropertyTag.class, new PropertyTagV1Factory(),
-                BaseRESTv1.PROPERTYTAGS_EXPANSION_NAME, expand);
+                RESTv1Constants.PROPERTYTAGS_EXPANSION_NAME, expand);
     }
 
     @Override
@@ -949,7 +986,7 @@ public class RESTv1 extends BaseRESTv1 implements RESTInterfaceV1, RESTInterface
             throws InvalidParameterException, InternalProcessingException {
         return this.getJSONResourcesFromQuery(RESTPropertyTagCollectionV1.class, query.getMatrixParameters(),
                 PropertyTagFilterQueryBuilder.class, new PropertyTagFieldFilter(), new PropertyTagV1Factory(),
-                PROPERTYTAGS_EXPANSION_NAME, expand);
+                RESTv1Constants.PROPERTYTAGS_EXPANSION_NAME, expand);
     }
 
     @Override
@@ -960,7 +997,8 @@ public class RESTv1 extends BaseRESTv1 implements RESTInterfaceV1, RESTInterface
 
     @Override
     public RESTPropertyTagV1 updateJSONPropertyTag(final String expand, final RESTPropertyTagV1 dataObject,
-            final String message, final Integer flag, final Integer userId) throws InvalidParameterException, InternalProcessingException {
+            final String message, final Integer flag, final Integer userId) throws InvalidParameterException,
+            InternalProcessingException {
         if (dataObject == null)
             throw new InvalidParameterException("The dataObject parameter can not be null");
 
@@ -970,7 +1008,7 @@ public class RESTv1 extends BaseRESTv1 implements RESTInterfaceV1, RESTInterface
         final PropertyTagV1Factory factory = new PropertyTagV1Factory();
         final RESTLogDetailsV1 logDetails = generateLogDetails(message, flag, userId);
 
-        return updateEntity(PropertyTag.class, dataObject, factory, this.getBaseUrl(), JSON_URL, expand, logDetails);
+        return updateJSONEntity(PropertyTag.class, dataObject, factory, expand, logDetails);
     }
 
     @Override
@@ -992,8 +1030,8 @@ public class RESTv1 extends BaseRESTv1 implements RESTInterfaceV1, RESTInterface
         final PropertyTagV1Factory factory = new PropertyTagV1Factory();
         final RESTLogDetailsV1 logDetails = generateLogDetails(message, flag, userId);
 
-        return updateEntities(RESTPropertyTagCollectionV1.class, PropertyTag.class, dataObjects, factory,
-                BaseRESTv1.PROPERTYTAGS_EXPANSION_NAME, JSON_URL, expand, getBaseUrl(), logDetails);
+        return updateJSONEntities(RESTPropertyTagCollectionV1.class, PropertyTag.class, dataObjects, factory,
+                RESTv1Constants.PROPERTYTAGS_EXPANSION_NAME, expand, logDetails);
     }
 
     @Override
@@ -1004,14 +1042,15 @@ public class RESTv1 extends BaseRESTv1 implements RESTInterfaceV1, RESTInterface
 
     @Override
     public RESTPropertyTagV1 createJSONPropertyTag(final String expand, final RESTPropertyTagV1 dataObject,
-            final String message, final Integer flag, final Integer userId) throws InvalidParameterException, InternalProcessingException {
+            final String message, final Integer flag, final Integer userId) throws InvalidParameterException,
+            InternalProcessingException {
         if (dataObject == null)
             throw new InvalidParameterException("The dataObject parameter can not be null");
 
         final PropertyTagV1Factory factory = new PropertyTagV1Factory();
         final RESTLogDetailsV1 logDetails = generateLogDetails(message, flag, userId);
 
-        return createEntity(PropertyTag.class, dataObject, factory, this.getBaseUrl(), JSON_URL, expand, logDetails);
+        return createJSONEntity(PropertyTag.class, dataObject, factory, expand, logDetails);
     }
 
     @Override
@@ -1033,8 +1072,8 @@ public class RESTv1 extends BaseRESTv1 implements RESTInterfaceV1, RESTInterface
         final PropertyTagV1Factory factory = new PropertyTagV1Factory();
         final RESTLogDetailsV1 logDetails = generateLogDetails(message, flag, userId);
 
-        return createEntities(RESTPropertyTagCollectionV1.class, PropertyTag.class, dataObjects, factory,
-                BaseRESTv1.PROPERTYTAGS_EXPANSION_NAME, JSON_URL, expand, getBaseUrl(), logDetails);
+        return createJSONEntities(RESTPropertyTagCollectionV1.class, PropertyTag.class, dataObjects, factory,
+                RESTv1Constants.PROPERTYTAGS_EXPANSION_NAME, expand, logDetails);
     }
 
     @Override
@@ -1044,15 +1083,15 @@ public class RESTv1 extends BaseRESTv1 implements RESTInterfaceV1, RESTInterface
     }
 
     @Override
-    public RESTPropertyTagV1 deleteJSONPropertyTag(final Integer id, final String message, final Integer flag, final Integer userId,
-            final String expand) throws InvalidParameterException, InternalProcessingException {
+    public RESTPropertyTagV1 deleteJSONPropertyTag(final Integer id, final String message, final Integer flag,
+            final Integer userId, final String expand) throws InvalidParameterException, InternalProcessingException {
         if (id == null)
             throw new InvalidParameterException("The dataObject parameter can not be null");
 
         final PropertyTagV1Factory factory = new PropertyTagV1Factory();
         final RESTLogDetailsV1 logDetails = generateLogDetails(message, flag, userId);
 
-        return deleteEntity(PropertyTag.class, factory, id, expand, logDetails);
+        return deleteJSONEntity(PropertyTag.class, factory, id, expand, logDetails);
     }
 
     @Override
@@ -1062,8 +1101,8 @@ public class RESTv1 extends BaseRESTv1 implements RESTInterfaceV1, RESTInterface
     }
 
     @Override
-    public RESTPropertyTagCollectionV1 deleteJSONPropertyTags(final PathSegment ids, final String message, final Integer flag, final Integer userId,
-            final String expand) throws InvalidParameterException, InternalProcessingException {
+    public RESTPropertyTagCollectionV1 deleteJSONPropertyTags(final PathSegment ids, final String message, final Integer flag,
+            final Integer userId, final String expand) throws InvalidParameterException, InternalProcessingException {
         if (ids == null)
             throw new InvalidParameterException("The dataObjects parameter can not be null");
 
@@ -1072,8 +1111,8 @@ public class RESTv1 extends BaseRESTv1 implements RESTInterfaceV1, RESTInterface
         final PropertyTagV1Factory factory = new PropertyTagV1Factory();
         final RESTLogDetailsV1 logDetails = generateLogDetails(message, flag, userId);
 
-        return deleteEntities(RESTPropertyTagCollectionV1.class, PropertyTag.class, factory, dbEntityIds,
-                BaseRESTv1.PROPERTYTAGS_EXPANSION_NAME, JSON_URL, expand, getBaseUrl(), logDetails);
+        return deleteJSONEntities(RESTPropertyTagCollectionV1.class, PropertyTag.class, factory, dbEntityIds,
+                RESTv1Constants.PROPERTYTAGS_EXPANSION_NAME, expand, logDetails);
     }
 
     /* PROPERYCATEGORY FUNCTIONS */
@@ -1125,8 +1164,8 @@ public class RESTv1 extends BaseRESTv1 implements RESTInterfaceV1, RESTInterface
 
     @Override
     public String updateJSONPPropertyCategory(final String expand, final RESTPropertyCategoryV1 dataObject,
-            final String message, final Integer flag, final Integer userId, final String callback) throws InvalidParameterException,
-            InternalProcessingException {
+            final String message, final Integer flag, final Integer userId, final String callback)
+            throws InvalidParameterException, InternalProcessingException {
         if (callback == null)
             throw new InvalidParameterException("The callback parameter can not be null");
 
@@ -1146,8 +1185,8 @@ public class RESTv1 extends BaseRESTv1 implements RESTInterfaceV1, RESTInterface
 
     @Override
     public String updateJSONPPropertyCategories(final String expand, final RESTPropertyCategoryCollectionV1 dataObjects,
-            final String message, final Integer flag, final Integer userId, final String callback) throws InvalidParameterException,
-            InternalProcessingException {
+            final String message, final Integer flag, final Integer userId, final String callback)
+            throws InvalidParameterException, InternalProcessingException {
         if (callback == null)
             throw new InvalidParameterException("The callback parameter can not be null");
 
@@ -1167,8 +1206,8 @@ public class RESTv1 extends BaseRESTv1 implements RESTInterfaceV1, RESTInterface
 
     @Override
     public String createJSONPPropertyCategory(final String expand, final RESTPropertyCategoryV1 dataObject,
-            final String message, final Integer flag, final Integer userId, final String callback) throws InvalidParameterException,
-            InternalProcessingException {
+            final String message, final Integer flag, final Integer userId, final String callback)
+            throws InvalidParameterException, InternalProcessingException {
         if (callback == null)
             throw new InvalidParameterException("The callback parameter can not be null");
 
@@ -1188,8 +1227,8 @@ public class RESTv1 extends BaseRESTv1 implements RESTInterfaceV1, RESTInterface
 
     @Override
     public String createJSONPPropertyCategories(final String expand, final RESTPropertyCategoryCollectionV1 dataObjects,
-            final String message, final Integer flag, final Integer userId, final String callback) throws InvalidParameterException,
-            InternalProcessingException {
+            final String message, final Integer flag, final Integer userId, final String callback)
+            throws InvalidParameterException, InternalProcessingException {
         if (callback == null)
             throw new InvalidParameterException("The callback parameter can not be null");
 
@@ -1208,13 +1247,14 @@ public class RESTv1 extends BaseRESTv1 implements RESTInterfaceV1, RESTInterface
     }
 
     @Override
-    public String deleteJSONPPropertyCategory(final Integer id, final String message, final Integer flag, final Integer userId, final String expand,
-            final String callback) throws InvalidParameterException, InternalProcessingException {
+    public String deleteJSONPPropertyCategory(final Integer id, final String message, final Integer flag, final Integer userId,
+            final String expand, final String callback) throws InvalidParameterException, InternalProcessingException {
         if (callback == null)
             throw new InvalidParameterException("The callback parameter can not be null");
 
         try {
-            return wrapJsonInPadding(callback, convertObjectToJSON(deleteJSONPropertyCategory(id, message, flag, userId, expand)));
+            return wrapJsonInPadding(callback,
+                    convertObjectToJSON(deleteJSONPropertyCategory(id, message, flag, userId, expand)));
         } catch (final Exception ex) {
             throw new InternalProcessingException("Could not marshall return value into JSON");
         }
@@ -1227,13 +1267,15 @@ public class RESTv1 extends BaseRESTv1 implements RESTInterfaceV1, RESTInterface
     }
 
     @Override
-    public String deleteJSONPPropertyCategories(final PathSegment ids, final String message, final Integer flag, final Integer userId,
-            final String expand, final String callback) throws InvalidParameterException, InternalProcessingException {
+    public String deleteJSONPPropertyCategories(final PathSegment ids, final String message, final Integer flag,
+            final Integer userId, final String expand, final String callback) throws InvalidParameterException,
+            InternalProcessingException {
         if (callback == null)
             throw new InvalidParameterException("The callback parameter can not be null");
 
         try {
-            return wrapJsonInPadding(callback, convertObjectToJSON(deleteJSONPropertyCategories(ids, message, flag, userId, expand)));
+            return wrapJsonInPadding(callback,
+                    convertObjectToJSON(deleteJSONPropertyCategories(ids, message, flag, userId, expand)));
         } catch (final Exception ex) {
             throw new InternalProcessingException("Could not marshall return value into JSON");
         }
@@ -1253,7 +1295,7 @@ public class RESTv1 extends BaseRESTv1 implements RESTInterfaceV1, RESTInterface
     public RESTPropertyCategoryCollectionV1 getJSONPropertyCategories(final String expand) throws InvalidParameterException,
             InternalProcessingException {
         return getJSONResources(RESTPropertyCategoryCollectionV1.class, PropertyTagCategory.class,
-                new PropertyCategoryV1Factory(), BaseRESTv1.PROPERTY_CATEGORIES_EXPANSION_NAME, expand);
+                new PropertyCategoryV1Factory(), RESTv1Constants.PROPERTY_CATEGORIES_EXPANSION_NAME, expand);
     }
 
     @Override
@@ -1261,7 +1303,7 @@ public class RESTv1 extends BaseRESTv1 implements RESTInterfaceV1, RESTInterface
             throws InvalidParameterException, InternalProcessingException {
         return this.getJSONResourcesFromQuery(RESTPropertyCategoryCollectionV1.class, query.getMatrixParameters(),
                 PropertyTagCategoryFilterQueryBuilder.class, new PropertyTagCategoryFieldFilter(),
-                new PropertyCategoryV1Factory(), PROPERTY_CATEGORIES_EXPANSION_NAME, expand);
+                new PropertyCategoryV1Factory(), RESTv1Constants.PROPERTY_CATEGORIES_EXPANSION_NAME, expand);
     }
 
     @Override
@@ -1272,7 +1314,8 @@ public class RESTv1 extends BaseRESTv1 implements RESTInterfaceV1, RESTInterface
 
     @Override
     public RESTPropertyCategoryV1 updateJSONPropertyCategory(final String expand, final RESTPropertyCategoryV1 dataObject,
-            final String message, final Integer flag, final Integer userId) throws InvalidParameterException, InternalProcessingException {
+            final String message, final Integer flag, final Integer userId) throws InvalidParameterException,
+            InternalProcessingException {
         if (dataObject == null)
             throw new InvalidParameterException("The dataObject parameter can not be null");
 
@@ -1282,7 +1325,7 @@ public class RESTv1 extends BaseRESTv1 implements RESTInterfaceV1, RESTInterface
         final PropertyCategoryV1Factory factory = new PropertyCategoryV1Factory();
         final RESTLogDetailsV1 logDetails = generateLogDetails(message, flag, userId);
 
-        return updateEntity(PropertyTagCategory.class, dataObject, factory, this.getBaseUrl(), JSON_URL, expand, logDetails);
+        return updateJSONEntity(PropertyTagCategory.class, dataObject, factory, expand, logDetails);
     }
 
     @Override
@@ -1304,8 +1347,8 @@ public class RESTv1 extends BaseRESTv1 implements RESTInterfaceV1, RESTInterface
         final PropertyCategoryV1Factory factory = new PropertyCategoryV1Factory();
         final RESTLogDetailsV1 logDetails = generateLogDetails(message, flag, userId);
 
-        return updateEntities(RESTPropertyCategoryCollectionV1.class, PropertyTagCategory.class, dataObjects, factory,
-                BaseRESTv1.PROPERTY_CATEGORIES_EXPANSION_NAME, JSON_URL, expand, getBaseUrl(), logDetails);
+        return updateJSONEntities(RESTPropertyCategoryCollectionV1.class, PropertyTagCategory.class, dataObjects, factory,
+                RESTv1Constants.PROPERTY_CATEGORIES_EXPANSION_NAME, expand, logDetails);
     }
 
     @Override
@@ -1316,14 +1359,15 @@ public class RESTv1 extends BaseRESTv1 implements RESTInterfaceV1, RESTInterface
 
     @Override
     public RESTPropertyCategoryV1 createJSONPropertyCategory(final String expand, final RESTPropertyCategoryV1 dataObject,
-            final String message, final Integer flag, final Integer userId) throws InvalidParameterException, InternalProcessingException {
+            final String message, final Integer flag, final Integer userId) throws InvalidParameterException,
+            InternalProcessingException {
         if (dataObject == null)
             throw new InvalidParameterException("The dataObject parameter can not be null");
 
         final PropertyCategoryV1Factory factory = new PropertyCategoryV1Factory();
         final RESTLogDetailsV1 logDetails = generateLogDetails(message, flag, userId);
 
-        return createEntity(PropertyTagCategory.class, dataObject, factory, this.getBaseUrl(), JSON_URL, expand, logDetails);
+        return createJSONEntity(PropertyTagCategory.class, dataObject, factory, expand, logDetails);
     }
 
     @Override
@@ -1345,8 +1389,8 @@ public class RESTv1 extends BaseRESTv1 implements RESTInterfaceV1, RESTInterface
         final PropertyCategoryV1Factory factory = new PropertyCategoryV1Factory();
         final RESTLogDetailsV1 logDetails = generateLogDetails(message, flag, userId);
 
-        return createEntities(RESTPropertyCategoryCollectionV1.class, PropertyTagCategory.class, dataObjects, factory,
-                BaseRESTv1.PROPERTY_CATEGORIES_EXPANSION_NAME, JSON_URL, expand, getBaseUrl(), logDetails);
+        return createJSONEntities(RESTPropertyCategoryCollectionV1.class, PropertyTagCategory.class, dataObjects, factory,
+                RESTv1Constants.PROPERTY_CATEGORIES_EXPANSION_NAME, expand, logDetails);
     }
 
     @Override
@@ -1356,15 +1400,15 @@ public class RESTv1 extends BaseRESTv1 implements RESTInterfaceV1, RESTInterface
     }
 
     @Override
-    public RESTPropertyCategoryV1 deleteJSONPropertyCategory(final Integer id, final String message, final Integer flag, final Integer userId,
-            final String expand) throws InvalidParameterException, InternalProcessingException {
+    public RESTPropertyCategoryV1 deleteJSONPropertyCategory(final Integer id, final String message, final Integer flag,
+            final Integer userId, final String expand) throws InvalidParameterException, InternalProcessingException {
         if (id == null)
             throw new InvalidParameterException("The dataObject parameter can not be null");
 
         final PropertyCategoryV1Factory factory = new PropertyCategoryV1Factory();
         final RESTLogDetailsV1 logDetails = generateLogDetails(message, flag, userId);
 
-        return deleteEntity(PropertyTagCategory.class, factory, id, expand, logDetails);
+        return deleteJSONEntity(PropertyTagCategory.class, factory, id, expand, logDetails);
     }
 
     @Override
@@ -1374,7 +1418,9 @@ public class RESTv1 extends BaseRESTv1 implements RESTInterfaceV1, RESTInterface
     }
 
     @Override
-    public RESTPropertyCategoryCollectionV1 deleteJSONPropertyCategories(final PathSegment ids, final String message, final Integer flag, final Integer userId, final String expand) throws InvalidParameterException, InternalProcessingException {
+    public RESTPropertyCategoryCollectionV1 deleteJSONPropertyCategories(final PathSegment ids, final String message,
+            final Integer flag, final Integer userId, final String expand) throws InvalidParameterException,
+            InternalProcessingException {
         if (ids == null)
             throw new InvalidParameterException("The dataObjects parameter can not be null");
 
@@ -1383,8 +1429,8 @@ public class RESTv1 extends BaseRESTv1 implements RESTInterfaceV1, RESTInterface
         final PropertyCategoryV1Factory factory = new PropertyCategoryV1Factory();
         final RESTLogDetailsV1 logDetails = generateLogDetails(message, flag, userId);
 
-        return deleteEntities(RESTPropertyCategoryCollectionV1.class, PropertyTagCategory.class, factory, dbEntityIds,
-                BaseRESTv1.PROPERTY_CATEGORIES_EXPANSION_NAME, JSON_URL, expand, getBaseUrl(), logDetails);
+        return deleteJSONEntities(RESTPropertyCategoryCollectionV1.class, PropertyTagCategory.class, factory, dbEntityIds,
+                RESTv1Constants.PROPERTY_CATEGORIES_EXPANSION_NAME, expand, logDetails);
     }
 
     /* ROLE FUNCTIONS */
@@ -1435,8 +1481,8 @@ public class RESTv1 extends BaseRESTv1 implements RESTInterfaceV1, RESTInterface
     }
 
     @Override
-    public String updateJSONPRole(final String expand, final RESTRoleV1 dataObject, final String message, final Integer flag, final Integer userId,
-            final String callback) throws InvalidParameterException, InternalProcessingException {
+    public String updateJSONPRole(final String expand, final RESTRoleV1 dataObject, final String message, final Integer flag,
+            final Integer userId, final String callback) throws InvalidParameterException, InternalProcessingException {
         if (callback == null)
             throw new InvalidParameterException("The callback parameter can not be null");
 
@@ -1454,7 +1500,9 @@ public class RESTv1 extends BaseRESTv1 implements RESTInterfaceV1, RESTInterface
     }
 
     @Override
-    public String updateJSONPRoles(final String expand, final RESTRoleCollectionV1 dataObjects, final String message, final Integer flag, final Integer userId, final String callback) throws InvalidParameterException, InternalProcessingException {
+    public String updateJSONPRoles(final String expand, final RESTRoleCollectionV1 dataObjects, final String message,
+            final Integer flag, final Integer userId, final String callback) throws InvalidParameterException,
+            InternalProcessingException {
         if (callback == null)
             throw new InvalidParameterException("The callback parameter can not be null");
 
@@ -1472,8 +1520,8 @@ public class RESTv1 extends BaseRESTv1 implements RESTInterfaceV1, RESTInterface
     }
 
     @Override
-    public String createJSONPRole(final String expand, final RESTRoleV1 dataObject, final String message, final Integer flag, final Integer userId,
-            final String callback) throws InvalidParameterException, InternalProcessingException {
+    public String createJSONPRole(final String expand, final RESTRoleV1 dataObject, final String message, final Integer flag,
+            final Integer userId, final String callback) throws InvalidParameterException, InternalProcessingException {
         if (callback == null)
             throw new InvalidParameterException("The callback parameter can not be null");
 
@@ -1491,7 +1539,9 @@ public class RESTv1 extends BaseRESTv1 implements RESTInterfaceV1, RESTInterface
     }
 
     @Override
-    public String createJSONPRoles(final String expand, final RESTRoleCollectionV1 dataObjects, final String message, final Integer flag, final Integer userId, final String callback) throws InvalidParameterException, InternalProcessingException {
+    public String createJSONPRoles(final String expand, final RESTRoleCollectionV1 dataObjects, final String message,
+            final Integer flag, final Integer userId, final String callback) throws InvalidParameterException,
+            InternalProcessingException {
         if (callback == null)
             throw new InvalidParameterException("The callback parameter can not be null");
 
@@ -1509,8 +1559,8 @@ public class RESTv1 extends BaseRESTv1 implements RESTInterfaceV1, RESTInterface
     }
 
     @Override
-    public String deleteJSONPRole(final Integer id, final String message, final Integer flag, final Integer userId, final String expand,
-            final String callback) throws InvalidParameterException, InternalProcessingException {
+    public String deleteJSONPRole(final Integer id, final String message, final Integer flag, final Integer userId,
+            final String expand, final String callback) throws InvalidParameterException, InternalProcessingException {
         if (callback == null)
             throw new InvalidParameterException("The callback parameter can not be null");
 
@@ -1528,8 +1578,8 @@ public class RESTv1 extends BaseRESTv1 implements RESTInterfaceV1, RESTInterface
     }
 
     @Override
-    public String deleteJSONPRoles(final PathSegment ids, final String message, final Integer flag, final Integer userId, final String expand,
-            final String callback) throws InvalidParameterException, InternalProcessingException {
+    public String deleteJSONPRoles(final PathSegment ids, final String message, final Integer flag, final Integer userId,
+            final String expand, final String callback) throws InvalidParameterException, InternalProcessingException {
         if (callback == null)
             throw new InvalidParameterException("The callback parameter can not be null");
 
@@ -1552,15 +1602,15 @@ public class RESTv1 extends BaseRESTv1 implements RESTInterfaceV1, RESTInterface
 
     @Override
     public RESTRoleCollectionV1 getJSONRoles(final String expand) throws InvalidParameterException, InternalProcessingException {
-        return getJSONResources(RESTRoleCollectionV1.class, Role.class, new RoleV1Factory(), BaseRESTv1.ROLES_EXPANSION_NAME,
-                expand);
+        return getJSONResources(RESTRoleCollectionV1.class, Role.class, new RoleV1Factory(),
+                RESTv1Constants.ROLES_EXPANSION_NAME, expand);
     }
 
     @Override
     public RESTRoleCollectionV1 getJSONRolesWithQuery(final PathSegment query, final String expand)
             throws InvalidParameterException, InternalProcessingException {
         return getJSONResourcesFromQuery(RESTRoleCollectionV1.class, query.getMatrixParameters(), RoleFilterQueryBuilder.class,
-                new RoleFieldFilter(), new RoleV1Factory(), BaseRESTv1.ROLES_EXPANSION_NAME, expand);
+                new RoleFieldFilter(), new RoleV1Factory(), RESTv1Constants.ROLES_EXPANSION_NAME, expand);
     }
 
     @Override
@@ -1570,8 +1620,8 @@ public class RESTv1 extends BaseRESTv1 implements RESTInterfaceV1, RESTInterface
     }
 
     @Override
-    public RESTRoleV1 updateJSONRole(final String expand, final RESTRoleV1 dataObject, final String message, final Integer flag, final Integer userId)
-            throws InvalidParameterException, InternalProcessingException {
+    public RESTRoleV1 updateJSONRole(final String expand, final RESTRoleV1 dataObject, final String message,
+            final Integer flag, final Integer userId) throws InvalidParameterException, InternalProcessingException {
         if (dataObject == null)
             throw new InvalidParameterException("The dataObject parameter can not be null");
 
@@ -1581,7 +1631,7 @@ public class RESTv1 extends BaseRESTv1 implements RESTInterfaceV1, RESTInterface
         final RoleV1Factory factory = new RoleV1Factory();
         final RESTLogDetailsV1 logDetails = generateLogDetails(message, flag, userId);
 
-        return updateEntity(Role.class, dataObject, factory, this.getBaseUrl(), JSON_URL, expand, logDetails);
+        return updateJSONEntity(Role.class, dataObject, factory, expand, logDetails);
     }
 
     @Override
@@ -1592,7 +1642,8 @@ public class RESTv1 extends BaseRESTv1 implements RESTInterfaceV1, RESTInterface
 
     @Override
     public RESTRoleCollectionV1 updateJSONRoles(final String expand, final RESTRoleCollectionV1 dataObjects,
-            final String message, final Integer flag, final Integer userId) throws InvalidParameterException, InternalProcessingException {
+            final String message, final Integer flag, final Integer userId) throws InvalidParameterException,
+            InternalProcessingException {
         if (dataObjects == null)
             throw new InvalidParameterException("The dataObjects parameter can not be null");
 
@@ -1602,8 +1653,8 @@ public class RESTv1 extends BaseRESTv1 implements RESTInterfaceV1, RESTInterface
         final RoleV1Factory factory = new RoleV1Factory();
         final RESTLogDetailsV1 logDetails = generateLogDetails(message, flag, userId);
 
-        return updateEntities(RESTRoleCollectionV1.class, Role.class, dataObjects, factory, BaseRESTv1.ROLES_EXPANSION_NAME,
-                JSON_URL, expand, getBaseUrl(), logDetails);
+        return updateJSONEntities(RESTRoleCollectionV1.class, Role.class, dataObjects, factory,
+                RESTv1Constants.ROLES_EXPANSION_NAME, expand, logDetails);
     }
 
     @Override
@@ -1613,15 +1664,15 @@ public class RESTv1 extends BaseRESTv1 implements RESTInterfaceV1, RESTInterface
     }
 
     @Override
-    public RESTRoleV1 createJSONRole(final String expand, final RESTRoleV1 dataObject, final String message, final Integer flag, final Integer userId)
-            throws InvalidParameterException, InternalProcessingException {
+    public RESTRoleV1 createJSONRole(final String expand, final RESTRoleV1 dataObject, final String message,
+            final Integer flag, final Integer userId) throws InvalidParameterException, InternalProcessingException {
         if (dataObject == null)
             throw new InvalidParameterException("The dataObject parameter can not be null");
 
         final RoleV1Factory factory = new RoleV1Factory();
         final RESTLogDetailsV1 logDetails = generateLogDetails(message, flag, userId);
 
-        return createEntity(Role.class, dataObject, factory, this.getBaseUrl(), JSON_URL, expand, logDetails);
+        return createJSONEntity(Role.class, dataObject, factory, expand, logDetails);
     }
 
     @Override
@@ -1632,7 +1683,8 @@ public class RESTv1 extends BaseRESTv1 implements RESTInterfaceV1, RESTInterface
 
     @Override
     public RESTRoleCollectionV1 createJSONRoles(final String expand, final RESTRoleCollectionV1 dataObjects,
-            final String message, final Integer flag, final Integer userId) throws InvalidParameterException, InternalProcessingException {
+            final String message, final Integer flag, final Integer userId) throws InvalidParameterException,
+            InternalProcessingException {
         if (dataObjects == null)
             throw new InvalidParameterException("The dataObjects parameter can not be null");
 
@@ -1642,8 +1694,8 @@ public class RESTv1 extends BaseRESTv1 implements RESTInterfaceV1, RESTInterface
         final RoleV1Factory factory = new RoleV1Factory();
         final RESTLogDetailsV1 logDetails = generateLogDetails(message, flag, userId);
 
-        return createEntities(RESTRoleCollectionV1.class, Role.class, dataObjects, factory, BaseRESTv1.ROLES_EXPANSION_NAME,
-                JSON_URL, expand, getBaseUrl(), logDetails);
+        return createJSONEntities(RESTRoleCollectionV1.class, Role.class, dataObjects, factory,
+                RESTv1Constants.ROLES_EXPANSION_NAME, expand, logDetails);
     }
 
     @Override
@@ -1653,15 +1705,15 @@ public class RESTv1 extends BaseRESTv1 implements RESTInterfaceV1, RESTInterface
     }
 
     @Override
-    public RESTRoleV1 deleteJSONRole(final Integer id, final String message, final Integer flag, final Integer userId, final String expand)
-            throws InvalidParameterException, InternalProcessingException {
+    public RESTRoleV1 deleteJSONRole(final Integer id, final String message, final Integer flag, final Integer userId,
+            final String expand) throws InvalidParameterException, InternalProcessingException {
         if (id == null)
             throw new InvalidParameterException("The dataObject parameter can not be null");
 
         final RoleV1Factory factory = new RoleV1Factory();
         final RESTLogDetailsV1 logDetails = generateLogDetails(message, flag, userId);
 
-        return deleteEntity(Role.class, factory, id, expand, logDetails);
+        return deleteJSONEntity(Role.class, factory, id, expand, logDetails);
     }
 
     @Override
@@ -1671,8 +1723,8 @@ public class RESTv1 extends BaseRESTv1 implements RESTInterfaceV1, RESTInterface
     }
 
     @Override
-    public RESTRoleCollectionV1 deleteJSONRoles(final PathSegment ids, final String message, final Integer flag, final Integer userId,
-            final String expand) throws InvalidParameterException, InternalProcessingException {
+    public RESTRoleCollectionV1 deleteJSONRoles(final PathSegment ids, final String message, final Integer flag,
+            final Integer userId, final String expand) throws InvalidParameterException, InternalProcessingException {
         if (ids == null)
             throw new InvalidParameterException("The dataObjects parameter can not be null");
 
@@ -1681,8 +1733,8 @@ public class RESTv1 extends BaseRESTv1 implements RESTInterfaceV1, RESTInterface
         final RoleV1Factory factory = new RoleV1Factory();
         final RESTLogDetailsV1 logDetails = generateLogDetails(message, flag, userId);
 
-        return deleteEntities(RESTRoleCollectionV1.class, Role.class, factory, dbEntityIds, BaseRESTv1.ROLES_EXPANSION_NAME,
-                JSON_URL, expand, getBaseUrl(), logDetails);
+        return deleteJSONEntities(RESTRoleCollectionV1.class, Role.class, factory, dbEntityIds,
+                RESTv1Constants.ROLES_EXPANSION_NAME, expand, logDetails);
     }
 
     /* TRANSLATEDTOPIC FUNCTIONS */
@@ -1733,7 +1785,9 @@ public class RESTv1 extends BaseRESTv1 implements RESTInterfaceV1, RESTInterface
     }
 
     @Override
-    public String updateJSONPTranslatedTopic(final String expand, final RESTTranslatedTopicV1 dataObject, final String message, final Integer flag, final Integer userId, final String callback) throws InvalidParameterException, InternalProcessingException {
+    public String updateJSONPTranslatedTopic(final String expand, final RESTTranslatedTopicV1 dataObject, final String message,
+            final Integer flag, final Integer userId, final String callback) throws InvalidParameterException,
+            InternalProcessingException {
         if (callback == null)
             throw new InvalidParameterException("The callback parameter can not be null");
 
@@ -1753,8 +1807,8 @@ public class RESTv1 extends BaseRESTv1 implements RESTInterfaceV1, RESTInterface
 
     @Override
     public String updateJSONPTranslatedTopics(final String expand, final RESTTranslatedTopicCollectionV1 dataObjects,
-            final String message, final Integer flag, final Integer userId, final String callback) throws InvalidParameterException,
-            InternalProcessingException {
+            final String message, final Integer flag, final Integer userId, final String callback)
+            throws InvalidParameterException, InternalProcessingException {
         if (callback == null)
             throw new InvalidParameterException("The callback parameter can not be null");
 
@@ -1767,7 +1821,9 @@ public class RESTv1 extends BaseRESTv1 implements RESTInterfaceV1, RESTInterface
     }
 
     @Override
-    public String createJSONPTranslatedTopic(final String expand, final RESTTranslatedTopicV1 dataObject, final String message, final Integer flag, final Integer userId, final String callback) throws InvalidParameterException, InternalProcessingException {
+    public String createJSONPTranslatedTopic(final String expand, final RESTTranslatedTopicV1 dataObject, final String message,
+            final Integer flag, final Integer userId, final String callback) throws InvalidParameterException,
+            InternalProcessingException {
         if (callback == null)
             throw new InvalidParameterException("The callback parameter can not be null");
 
@@ -1793,8 +1849,8 @@ public class RESTv1 extends BaseRESTv1 implements RESTInterfaceV1, RESTInterface
 
     @Override
     public String createJSONPTranslatedTopics(final String expand, final RESTTranslatedTopicCollectionV1 dataObjects,
-            final String message, final Integer flag, final Integer userId, final String callback) throws InvalidParameterException,
-            InternalProcessingException {
+            final String message, final Integer flag, final Integer userId, final String callback)
+            throws InvalidParameterException, InternalProcessingException {
         if (callback == null)
             throw new InvalidParameterException("The callback parameter can not be null");
 
@@ -1813,13 +1869,14 @@ public class RESTv1 extends BaseRESTv1 implements RESTInterfaceV1, RESTInterface
     }
 
     @Override
-    public String deleteJSONPTranslatedTopic(final Integer id, final String message, final Integer flag, final Integer userId, final String expand,
-            final String callback) throws InvalidParameterException, InternalProcessingException {
+    public String deleteJSONPTranslatedTopic(final Integer id, final String message, final Integer flag, final Integer userId,
+            final String expand, final String callback) throws InvalidParameterException, InternalProcessingException {
         if (callback == null)
             throw new InvalidParameterException("The callback parameter can not be null");
 
         try {
-            return wrapJsonInPadding(callback, convertObjectToJSON(deleteJSONTranslatedTopic(id, message, flag, userId, expand)));
+            return wrapJsonInPadding(callback,
+                    convertObjectToJSON(deleteJSONTranslatedTopic(id, message, flag, userId, expand)));
         } catch (final Exception ex) {
             throw new InternalProcessingException("Could not marshall return value into JSON");
         }
@@ -1832,13 +1889,15 @@ public class RESTv1 extends BaseRESTv1 implements RESTInterfaceV1, RESTInterface
     }
 
     @Override
-    public String deleteJSONPTranslatedTopics(final PathSegment ids, final String message, final Integer flag, final Integer userId,
-            final String expand, final String callback) throws InvalidParameterException, InternalProcessingException {
+    public String deleteJSONPTranslatedTopics(final PathSegment ids, final String message, final Integer flag,
+            final Integer userId, final String expand, final String callback) throws InvalidParameterException,
+            InternalProcessingException {
         if (callback == null)
             throw new InvalidParameterException("The callback parameter can not be null");
 
         try {
-            return wrapJsonInPadding(callback, convertObjectToJSON(deleteJSONTranslatedTopics(ids, message, flag, userId, expand)));
+            return wrapJsonInPadding(callback,
+                    convertObjectToJSON(deleteJSONTranslatedTopics(ids, message, flag, userId, expand)));
         } catch (final Exception ex) {
             throw new InternalProcessingException("Could not marshall return value into JSON");
         }
@@ -1859,14 +1918,14 @@ public class RESTv1 extends BaseRESTv1 implements RESTInterfaceV1, RESTInterface
             throws InvalidParameterException, InternalProcessingException {
         return getJSONResourcesFromQuery(RESTTranslatedTopicCollectionV1.class, query.getMatrixParameters(),
                 TranslatedTopicDataFilterQueryBuilder.class, new TopicFieldFilter(), new TranslatedTopicV1Factory(),
-                TRANSLATEDTOPICS_EXPANSION_NAME, expand);
+                RESTv1Constants.TRANSLATEDTOPICS_EXPANSION_NAME, expand);
     }
 
     @Override
     public RESTTranslatedTopicCollectionV1 getJSONTranslatedTopics(final String expand) throws InvalidParameterException,
             InternalProcessingException {
         return getJSONResources(RESTTranslatedTopicCollectionV1.class, TranslatedTopicData.class,
-                new TranslatedTopicV1Factory(), BaseRESTv1.TRANSLATEDTOPICS_EXPANSION_NAME, expand);
+                new TranslatedTopicV1Factory(), RESTv1Constants.TRANSLATEDTOPICS_EXPANSION_NAME, expand);
     }
 
     @Override
@@ -1877,7 +1936,8 @@ public class RESTv1 extends BaseRESTv1 implements RESTInterfaceV1, RESTInterface
 
     @Override
     public RESTTranslatedTopicV1 updateJSONTranslatedTopic(final String expand, final RESTTranslatedTopicV1 dataObject,
-            final String message, final Integer flag, final Integer userId) throws InvalidParameterException, InternalProcessingException {
+            final String message, final Integer flag, final Integer userId) throws InvalidParameterException,
+            InternalProcessingException {
         if (dataObject == null)
             throw new InvalidParameterException("The dataObject parameter can not be null");
 
@@ -1887,7 +1947,7 @@ public class RESTv1 extends BaseRESTv1 implements RESTInterfaceV1, RESTInterface
         final TranslatedTopicV1Factory factory = new TranslatedTopicV1Factory();
         final RESTLogDetailsV1 logDetails = generateLogDetails(message, flag, userId);
 
-        return updateEntity(TranslatedTopicData.class, dataObject, factory, this.getBaseUrl(), JSON_URL, expand, logDetails);
+        return updateJSONEntity(TranslatedTopicData.class, dataObject, factory, expand, logDetails);
     }
 
     @Override
@@ -1909,8 +1969,8 @@ public class RESTv1 extends BaseRESTv1 implements RESTInterfaceV1, RESTInterface
         final TranslatedTopicV1Factory factory = new TranslatedTopicV1Factory();
         final RESTLogDetailsV1 logDetails = generateLogDetails(message, flag, userId);
 
-        return updateEntities(RESTTranslatedTopicCollectionV1.class, TranslatedTopicData.class, dataObjects, factory,
-                BaseRESTv1.TRANSLATEDTOPICS_EXPANSION_NAME, JSON_URL, expand, getBaseUrl(), logDetails);
+        return updateJSONEntities(RESTTranslatedTopicCollectionV1.class, TranslatedTopicData.class, dataObjects, factory,
+                RESTv1Constants.TRANSLATEDTOPICS_EXPANSION_NAME, expand, logDetails);
     }
 
     @Override
@@ -1921,14 +1981,15 @@ public class RESTv1 extends BaseRESTv1 implements RESTInterfaceV1, RESTInterface
 
     @Override
     public RESTTranslatedTopicV1 createJSONTranslatedTopic(final String expand, final RESTTranslatedTopicV1 dataObject,
-            final String message, final Integer flag, final Integer userId) throws InvalidParameterException, InternalProcessingException {
+            final String message, final Integer flag, final Integer userId) throws InvalidParameterException,
+            InternalProcessingException {
         if (dataObject == null)
             throw new InvalidParameterException("The dataObject parameter can not be null");
 
         final TranslatedTopicV1Factory factory = new TranslatedTopicV1Factory();
         final RESTLogDetailsV1 logDetails = generateLogDetails(message, flag, userId);
 
-        return createEntity(TranslatedTopicData.class, dataObject, factory, this.getBaseUrl(), JSON_URL, expand, logDetails);
+        return createJSONEntity(TranslatedTopicData.class, dataObject, factory, expand, logDetails);
     }
 
     @Override
@@ -1950,8 +2011,8 @@ public class RESTv1 extends BaseRESTv1 implements RESTInterfaceV1, RESTInterface
         final TranslatedTopicV1Factory factory = new TranslatedTopicV1Factory();
         final RESTLogDetailsV1 logDetails = generateLogDetails(message, flag, userId);
 
-        return createEntities(RESTTranslatedTopicCollectionV1.class, TranslatedTopicData.class, dataObjects, factory,
-                BaseRESTv1.TRANSLATEDTOPICS_EXPANSION_NAME, JSON_URL, expand, getBaseUrl(), logDetails);
+        return createJSONEntities(RESTTranslatedTopicCollectionV1.class, TranslatedTopicData.class, dataObjects, factory,
+                RESTv1Constants.TRANSLATEDTOPICS_EXPANSION_NAME, expand, logDetails);
     }
 
     @Override
@@ -1961,15 +2022,15 @@ public class RESTv1 extends BaseRESTv1 implements RESTInterfaceV1, RESTInterface
     }
 
     @Override
-    public RESTTranslatedTopicV1 deleteJSONTranslatedTopic(final Integer id, final String message, final Integer flag, final Integer userId,
-            final String expand) throws InvalidParameterException, InternalProcessingException {
+    public RESTTranslatedTopicV1 deleteJSONTranslatedTopic(final Integer id, final String message, final Integer flag,
+            final Integer userId, final String expand) throws InvalidParameterException, InternalProcessingException {
         if (id == null)
             throw new InvalidParameterException("The dataObject parameter can not be null");
 
         final TranslatedTopicV1Factory factory = new TranslatedTopicV1Factory();
         final RESTLogDetailsV1 logDetails = generateLogDetails(message, flag, userId);
 
-        return deleteEntity(TranslatedTopicData.class, factory, id, expand, logDetails);
+        return deleteJSONEntity(TranslatedTopicData.class, factory, id, expand, logDetails);
     }
 
     @Override
@@ -1979,7 +2040,9 @@ public class RESTv1 extends BaseRESTv1 implements RESTInterfaceV1, RESTInterface
     }
 
     @Override
-    public RESTTranslatedTopicCollectionV1 deleteJSONTranslatedTopics(final PathSegment ids, final String message, final Integer flag, final Integer userId, final String expand) throws InvalidParameterException, InternalProcessingException {
+    public RESTTranslatedTopicCollectionV1 deleteJSONTranslatedTopics(final PathSegment ids, final String message,
+            final Integer flag, final Integer userId, final String expand) throws InvalidParameterException,
+            InternalProcessingException {
         if (ids == null)
             throw new InvalidParameterException("The dataObjects parameter can not be null");
 
@@ -1988,8 +2051,8 @@ public class RESTv1 extends BaseRESTv1 implements RESTInterfaceV1, RESTInterface
         final TranslatedTopicV1Factory factory = new TranslatedTopicV1Factory();
         final RESTLogDetailsV1 logDetails = generateLogDetails(message, flag, userId);
 
-        return deleteEntities(RESTTranslatedTopicCollectionV1.class, TranslatedTopicData.class, factory, dbEntityIds,
-                BaseRESTv1.TRANSLATEDTOPICS_EXPANSION_NAME, JSON_URL, expand, getBaseUrl(), logDetails);
+        return deleteJSONEntities(RESTTranslatedTopicCollectionV1.class, TranslatedTopicData.class, factory, dbEntityIds,
+                RESTv1Constants.TRANSLATEDTOPICS_EXPANSION_NAME, expand, logDetails);
     }
 
     /* STRINGCONSTANT FUNCTIONS */
@@ -2040,12 +2103,15 @@ public class RESTv1 extends BaseRESTv1 implements RESTInterfaceV1, RESTInterface
     }
 
     @Override
-    public String updateJSONPStringConstant(final String expand, final RESTStringConstantV1 dataObject, final String message, final Integer flag, final Integer userId, final String callback) throws InvalidParameterException, InternalProcessingException {
+    public String updateJSONPStringConstant(final String expand, final RESTStringConstantV1 dataObject, final String message,
+            final Integer flag, final Integer userId, final String callback) throws InvalidParameterException,
+            InternalProcessingException {
         if (callback == null)
             throw new InvalidParameterException("The callback parameter can not be null");
 
         try {
-            return wrapJsonInPadding(callback, convertObjectToJSON(updateJSONStringConstant(expand, dataObject, message, flag, userId)));
+            return wrapJsonInPadding(callback,
+                    convertObjectToJSON(updateJSONStringConstant(expand, dataObject, message, flag, userId)));
         } catch (final Exception ex) {
             throw new InternalProcessingException("Could not marshall return value into JSON");
         }
@@ -2059,8 +2125,8 @@ public class RESTv1 extends BaseRESTv1 implements RESTInterfaceV1, RESTInterface
 
     @Override
     public String updateJSONPStringConstants(final String expand, final RESTStringConstantCollectionV1 dataObjects,
-            final String message, final Integer flag, final Integer userId, final String callback) throws InvalidParameterException,
-            InternalProcessingException {
+            final String message, final Integer flag, final Integer userId, final String callback)
+            throws InvalidParameterException, InternalProcessingException {
         if (callback == null)
             throw new InvalidParameterException("The callback parameter can not be null");
 
@@ -2079,12 +2145,15 @@ public class RESTv1 extends BaseRESTv1 implements RESTInterfaceV1, RESTInterface
     }
 
     @Override
-    public String createJSONPStringConstant(final String expand, final RESTStringConstantV1 dataObject, final String message, final Integer flag, final Integer userId, final String callback) throws InvalidParameterException, InternalProcessingException {
+    public String createJSONPStringConstant(final String expand, final RESTStringConstantV1 dataObject, final String message,
+            final Integer flag, final Integer userId, final String callback) throws InvalidParameterException,
+            InternalProcessingException {
         if (callback == null)
             throw new InvalidParameterException("The callback parameter can not be null");
 
         try {
-            return wrapJsonInPadding(callback, convertObjectToJSON(createJSONStringConstant(expand, dataObject, message, flag, userId)));
+            return wrapJsonInPadding(callback,
+                    convertObjectToJSON(createJSONStringConstant(expand, dataObject, message, flag, userId)));
         } catch (final Exception ex) {
             throw new InternalProcessingException("Could not marshall return value into JSON");
         }
@@ -2098,8 +2167,8 @@ public class RESTv1 extends BaseRESTv1 implements RESTInterfaceV1, RESTInterface
 
     @Override
     public String createJSONPStringConstants(final String expand, final RESTStringConstantCollectionV1 dataObjects,
-            final String message, final Integer flag, final Integer userId, final String callback) throws InvalidParameterException,
-            InternalProcessingException {
+            final String message, final Integer flag, final Integer userId, final String callback)
+            throws InvalidParameterException, InternalProcessingException {
         if (callback == null)
             throw new InvalidParameterException("The callback parameter can not be null");
 
@@ -2118,8 +2187,8 @@ public class RESTv1 extends BaseRESTv1 implements RESTInterfaceV1, RESTInterface
     }
 
     @Override
-    public String deleteJSONPStringConstant(final Integer id, final String message, final Integer flag, final Integer userId, final String expand,
-            final String callback) throws InvalidParameterException, InternalProcessingException {
+    public String deleteJSONPStringConstant(final Integer id, final String message, final Integer flag, final Integer userId,
+            final String expand, final String callback) throws InvalidParameterException, InternalProcessingException {
         if (callback == null)
             throw new InvalidParameterException("The callback parameter can not be null");
 
@@ -2137,13 +2206,15 @@ public class RESTv1 extends BaseRESTv1 implements RESTInterfaceV1, RESTInterface
     }
 
     @Override
-    public String deleteJSONPStringConstants(final PathSegment ids, final String message, final Integer flag, final Integer userId,
-            final String expand, final String callback) throws InvalidParameterException, InternalProcessingException {
+    public String deleteJSONPStringConstants(final PathSegment ids, final String message, final Integer flag,
+            final Integer userId, final String expand, final String callback) throws InvalidParameterException,
+            InternalProcessingException {
         if (callback == null)
             throw new InvalidParameterException("The callback parameter can not be null");
 
         try {
-            return wrapJsonInPadding(callback, convertObjectToJSON(deleteJSONStringConstants(ids, message, flag, userId, expand)));
+            return wrapJsonInPadding(callback,
+                    convertObjectToJSON(deleteJSONStringConstants(ids, message, flag, userId, expand)));
         } catch (final Exception ex) {
             throw new InternalProcessingException("Could not marshall return value into JSON");
         }
@@ -2163,7 +2234,7 @@ public class RESTv1 extends BaseRESTv1 implements RESTInterfaceV1, RESTInterface
     public RESTStringConstantCollectionV1 getJSONStringConstants(final String expand) throws InvalidParameterException,
             InternalProcessingException {
         return getJSONResources(RESTStringConstantCollectionV1.class, StringConstants.class, new StringConstantV1Factory(),
-                BaseRESTv1.STRINGCONSTANTS_EXPANSION_NAME, expand);
+                RESTv1Constants.STRINGCONSTANTS_EXPANSION_NAME, expand);
     }
 
     @Override
@@ -2171,7 +2242,7 @@ public class RESTv1 extends BaseRESTv1 implements RESTInterfaceV1, RESTInterface
             throws InvalidParameterException, InternalProcessingException {
         return getJSONResourcesFromQuery(RESTStringConstantCollectionV1.class, query.getMatrixParameters(),
                 StringConstantFilterQueryBuilder.class, new StringConstantFieldFilter(), new StringConstantV1Factory(),
-                BaseRESTv1.STRINGCONSTANTS_EXPANSION_NAME, expand);
+                RESTv1Constants.STRINGCONSTANTS_EXPANSION_NAME, expand);
     }
 
     @Override
@@ -2182,7 +2253,8 @@ public class RESTv1 extends BaseRESTv1 implements RESTInterfaceV1, RESTInterface
 
     @Override
     public RESTStringConstantV1 updateJSONStringConstant(final String expand, final RESTStringConstantV1 dataObject,
-            final String message, final Integer flag, final Integer userId) throws InvalidParameterException, InternalProcessingException {
+            final String message, final Integer flag, final Integer userId) throws InvalidParameterException,
+            InternalProcessingException {
         if (dataObject == null)
             throw new InvalidParameterException("The dataObject parameter can not be null");
 
@@ -2192,7 +2264,7 @@ public class RESTv1 extends BaseRESTv1 implements RESTInterfaceV1, RESTInterface
         final StringConstantV1Factory factory = new StringConstantV1Factory();
         final RESTLogDetailsV1 logDetails = generateLogDetails(message, flag, userId);
 
-        return updateEntity(StringConstants.class, dataObject, factory, this.getBaseUrl(), JSON_URL, expand, logDetails);
+        return updateJSONEntity(StringConstants.class, dataObject, factory, expand, logDetails);
     }
 
     @Override
@@ -2214,8 +2286,8 @@ public class RESTv1 extends BaseRESTv1 implements RESTInterfaceV1, RESTInterface
         final StringConstantV1Factory factory = new StringConstantV1Factory();
         final RESTLogDetailsV1 logDetails = generateLogDetails(message, flag, userId);
 
-        return updateEntities(RESTStringConstantCollectionV1.class, StringConstants.class, dataObjects, factory,
-                BaseRESTv1.STRINGCONSTANTS_EXPANSION_NAME, JSON_URL, expand, getBaseUrl(), logDetails);
+        return updateJSONEntities(RESTStringConstantCollectionV1.class, StringConstants.class, dataObjects, factory,
+                RESTv1Constants.STRINGCONSTANTS_EXPANSION_NAME, expand, logDetails);
     }
 
     @Override
@@ -2226,14 +2298,15 @@ public class RESTv1 extends BaseRESTv1 implements RESTInterfaceV1, RESTInterface
 
     @Override
     public RESTStringConstantV1 createJSONStringConstant(final String expand, final RESTStringConstantV1 dataObject,
-            final String message, final Integer flag, final Integer userId) throws InvalidParameterException, InternalProcessingException {
+            final String message, final Integer flag, final Integer userId) throws InvalidParameterException,
+            InternalProcessingException {
         if (dataObject == null)
             throw new InvalidParameterException("The dataObject parameter can not be null");
 
         final StringConstantV1Factory factory = new StringConstantV1Factory();
         final RESTLogDetailsV1 logDetails = generateLogDetails(message, flag, userId);
 
-        return createEntity(StringConstants.class, dataObject, factory, this.getBaseUrl(), JSON_URL, expand, logDetails);
+        return createJSONEntity(StringConstants.class, dataObject, factory, expand, logDetails);
     }
 
     @Override
@@ -2255,8 +2328,8 @@ public class RESTv1 extends BaseRESTv1 implements RESTInterfaceV1, RESTInterface
         final StringConstantV1Factory factory = new StringConstantV1Factory();
         final RESTLogDetailsV1 logDetails = generateLogDetails(message, flag, userId);
 
-        return createEntities(RESTStringConstantCollectionV1.class, StringConstants.class, dataObjects, factory,
-                BaseRESTv1.STRINGCONSTANTS_EXPANSION_NAME, JSON_URL, expand, getBaseUrl(), logDetails);
+        return createJSONEntities(RESTStringConstantCollectionV1.class, StringConstants.class, dataObjects, factory,
+                RESTv1Constants.STRINGCONSTANTS_EXPANSION_NAME, expand, logDetails);
     }
 
     @Override
@@ -2266,15 +2339,15 @@ public class RESTv1 extends BaseRESTv1 implements RESTInterfaceV1, RESTInterface
     }
 
     @Override
-    public RESTStringConstantV1 deleteJSONStringConstant(final Integer id, final String message, final Integer flag, final Integer userId,
-            final String expand) throws InvalidParameterException, InternalProcessingException {
+    public RESTStringConstantV1 deleteJSONStringConstant(final Integer id, final String message, final Integer flag,
+            final Integer userId, final String expand) throws InvalidParameterException, InternalProcessingException {
         if (id == null)
             throw new InvalidParameterException("The id parameter can not be null");
 
         final StringConstantV1Factory factory = new StringConstantV1Factory();
         final RESTLogDetailsV1 logDetails = generateLogDetails(message, flag, userId);
 
-        return deleteEntity(StringConstants.class, factory, id, expand, logDetails);
+        return deleteJSONEntity(StringConstants.class, factory, id, expand, logDetails);
     }
 
     @Override
@@ -2284,7 +2357,9 @@ public class RESTv1 extends BaseRESTv1 implements RESTInterfaceV1, RESTInterface
     }
 
     @Override
-    public RESTStringConstantCollectionV1 deleteJSONStringConstants(final PathSegment ids, final String message, final Integer flag, final Integer userId, final String expand) throws InvalidParameterException, InternalProcessingException {
+    public RESTStringConstantCollectionV1 deleteJSONStringConstants(final PathSegment ids, final String message,
+            final Integer flag, final Integer userId, final String expand) throws InvalidParameterException,
+            InternalProcessingException {
         if (ids == null)
             throw new InvalidParameterException("The ids parameter can not be null");
 
@@ -2292,8 +2367,8 @@ public class RESTv1 extends BaseRESTv1 implements RESTInterfaceV1, RESTInterface
         final StringConstantV1Factory factory = new StringConstantV1Factory();
         final RESTLogDetailsV1 logDetails = generateLogDetails(message, flag, userId);
 
-        return deleteEntities(RESTStringConstantCollectionV1.class, StringConstants.class, factory, dbEntityIds,
-                BaseRESTv1.STRINGCONSTANTS_EXPANSION_NAME, JSON_URL, expand, getBaseUrl(), logDetails);
+        return deleteJSONEntities(RESTStringConstantCollectionV1.class, StringConstants.class, factory, dbEntityIds,
+                RESTv1Constants.STRINGCONSTANTS_EXPANSION_NAME, expand, logDetails);
     }
 
     /* USER FUNCTIONS */
@@ -2344,8 +2419,8 @@ public class RESTv1 extends BaseRESTv1 implements RESTInterfaceV1, RESTInterface
     }
 
     @Override
-    public String updateJSONPUser(final String expand, final RESTUserV1 dataObject, final String message, final Integer flag, final Integer userId,
-            final String callback) throws InvalidParameterException, InternalProcessingException {
+    public String updateJSONPUser(final String expand, final RESTUserV1 dataObject, final String message, final Integer flag,
+            final Integer userId, final String callback) throws InvalidParameterException, InternalProcessingException {
         if (callback == null)
             throw new InvalidParameterException("The callback parameter can not be null");
 
@@ -2363,7 +2438,9 @@ public class RESTv1 extends BaseRESTv1 implements RESTInterfaceV1, RESTInterface
     }
 
     @Override
-    public String updateJSONPUsers(final String expand, final RESTUserCollectionV1 dataObjects, final String message, final Integer flag, final Integer userId, final String callback) throws InvalidParameterException, InternalProcessingException {
+    public String updateJSONPUsers(final String expand, final RESTUserCollectionV1 dataObjects, final String message,
+            final Integer flag, final Integer userId, final String callback) throws InvalidParameterException,
+            InternalProcessingException {
         if (callback == null)
             throw new InvalidParameterException("The callback parameter can not be null");
 
@@ -2381,8 +2458,8 @@ public class RESTv1 extends BaseRESTv1 implements RESTInterfaceV1, RESTInterface
     }
 
     @Override
-    public String createJSONPUser(final String expand, final RESTUserV1 dataObject, final String message, final Integer flag, final Integer userId,
-            final String callback) throws InvalidParameterException, InternalProcessingException {
+    public String createJSONPUser(final String expand, final RESTUserV1 dataObject, final String message, final Integer flag,
+            final Integer userId, final String callback) throws InvalidParameterException, InternalProcessingException {
         if (callback == null)
             throw new InvalidParameterException("The callback parameter can not be null");
 
@@ -2400,7 +2477,9 @@ public class RESTv1 extends BaseRESTv1 implements RESTInterfaceV1, RESTInterface
     }
 
     @Override
-    public String createJSONPUsers(final String expand, final RESTUserCollectionV1 dataObjects, final String message, final Integer flag, final Integer userId, final String callback) throws InvalidParameterException, InternalProcessingException {
+    public String createJSONPUsers(final String expand, final RESTUserCollectionV1 dataObjects, final String message,
+            final Integer flag, final Integer userId, final String callback) throws InvalidParameterException,
+            InternalProcessingException {
         if (callback == null)
             throw new InvalidParameterException("The callback parameter can not be null");
 
@@ -2418,8 +2497,8 @@ public class RESTv1 extends BaseRESTv1 implements RESTInterfaceV1, RESTInterface
     }
 
     @Override
-    public String deleteJSONPUser(final Integer id, final String message, final Integer flag, final Integer userId, final String expand,
-            final String callback) throws InvalidParameterException, InternalProcessingException {
+    public String deleteJSONPUser(final Integer id, final String message, final Integer flag, final Integer userId,
+            final String expand, final String callback) throws InvalidParameterException, InternalProcessingException {
         if (callback == null)
             throw new InvalidParameterException("The callback parameter can not be null");
 
@@ -2437,8 +2516,8 @@ public class RESTv1 extends BaseRESTv1 implements RESTInterfaceV1, RESTInterface
     }
 
     @Override
-    public String deleteJSONPUsers(final PathSegment ids, final String message, final Integer flag, final Integer userId, final String expand,
-            final String callback) throws InvalidParameterException, InternalProcessingException {
+    public String deleteJSONPUsers(final PathSegment ids, final String message, final Integer flag, final Integer userId,
+            final String expand, final String callback) throws InvalidParameterException, InternalProcessingException {
         if (callback == null)
             throw new InvalidParameterException("The callback parameter can not be null");
 
@@ -2461,15 +2540,16 @@ public class RESTv1 extends BaseRESTv1 implements RESTInterfaceV1, RESTInterface
 
     @Override
     public RESTUserCollectionV1 getJSONUsers(final String expand) throws InvalidParameterException, InternalProcessingException {
-        return getJSONResources(RESTUserCollectionV1.class, User.class, new UserV1Factory(), BaseRESTv1.USERS_EXPANSION_NAME,
-                expand);
+        return getJSONResources(RESTUserCollectionV1.class, User.class, new UserV1Factory(),
+                RESTv1Constants.USERS_EXPANSION_NAME, expand);
     }
 
     @Override
     public RESTUserCollectionV1 getJSONUsersWithQuery(final PathSegment query, final String expand)
             throws InvalidParameterException, InternalProcessingException {
         return this.getJSONResourcesFromQuery(RESTUserCollectionV1.class, query.getMatrixParameters(),
-                UserFilterQueryBuilder.class, new UserFieldFilter(), new UserV1Factory(), USERS_EXPANSION_NAME, expand);
+                UserFilterQueryBuilder.class, new UserFieldFilter(), new UserV1Factory(), RESTv1Constants.USERS_EXPANSION_NAME,
+                expand);
     }
 
     @Override
@@ -2479,8 +2559,8 @@ public class RESTv1 extends BaseRESTv1 implements RESTInterfaceV1, RESTInterface
     }
 
     @Override
-    public RESTUserV1 updateJSONUser(final String expand, final RESTUserV1 dataObject, final String message, final Integer flag, final Integer userId)
-            throws InvalidParameterException, InternalProcessingException {
+    public RESTUserV1 updateJSONUser(final String expand, final RESTUserV1 dataObject, final String message,
+            final Integer flag, final Integer userId) throws InvalidParameterException, InternalProcessingException {
         if (dataObject == null)
             throw new InvalidParameterException("The dataObject parameter can not be null");
 
@@ -2490,7 +2570,7 @@ public class RESTv1 extends BaseRESTv1 implements RESTInterfaceV1, RESTInterface
         final UserV1Factory factory = new UserV1Factory();
         final RESTLogDetailsV1 logDetails = generateLogDetails(message, flag, userId);
 
-        return updateEntity(User.class, dataObject, factory, this.getBaseUrl(), JSON_URL, expand, logDetails);
+        return updateJSONEntity(User.class, dataObject, factory, expand, logDetails);
     }
 
     @Override
@@ -2501,7 +2581,8 @@ public class RESTv1 extends BaseRESTv1 implements RESTInterfaceV1, RESTInterface
 
     @Override
     public RESTUserCollectionV1 updateJSONUsers(final String expand, final RESTUserCollectionV1 dataObjects,
-            final String message, final Integer flag, final Integer userId) throws InvalidParameterException, InternalProcessingException {
+            final String message, final Integer flag, final Integer userId) throws InvalidParameterException,
+            InternalProcessingException {
         if (dataObjects == null)
             throw new InvalidParameterException("The dataObjects parameter can not be null");
 
@@ -2511,8 +2592,8 @@ public class RESTv1 extends BaseRESTv1 implements RESTInterfaceV1, RESTInterface
         final UserV1Factory factory = new UserV1Factory();
         final RESTLogDetailsV1 logDetails = generateLogDetails(message, flag, userId);
 
-        return updateEntities(RESTUserCollectionV1.class, User.class, dataObjects, factory, BaseRESTv1.USERS_EXPANSION_NAME,
-                JSON_URL, expand, getBaseUrl(), logDetails);
+        return updateJSONEntities(RESTUserCollectionV1.class, User.class, dataObjects, factory,
+                RESTv1Constants.USERS_EXPANSION_NAME, expand, logDetails);
     }
 
     @Override
@@ -2522,15 +2603,15 @@ public class RESTv1 extends BaseRESTv1 implements RESTInterfaceV1, RESTInterface
     }
 
     @Override
-    public RESTUserV1 createJSONUser(final String expand, final RESTUserV1 dataObject, final String message, final Integer flag, final Integer userId)
-            throws InvalidParameterException, InternalProcessingException {
+    public RESTUserV1 createJSONUser(final String expand, final RESTUserV1 dataObject, final String message,
+            final Integer flag, final Integer userId) throws InvalidParameterException, InternalProcessingException {
         if (dataObject == null)
             throw new InvalidParameterException("The dataObject parameter can not be null");
 
         final UserV1Factory factory = new UserV1Factory();
         final RESTLogDetailsV1 logDetails = generateLogDetails(message, flag, userId);
 
-        return createEntity(User.class, dataObject, factory, this.getBaseUrl(), JSON_URL, expand, logDetails);
+        return createJSONEntity(User.class, dataObject, factory, expand, logDetails);
     }
 
     @Override
@@ -2541,7 +2622,8 @@ public class RESTv1 extends BaseRESTv1 implements RESTInterfaceV1, RESTInterface
 
     @Override
     public RESTUserCollectionV1 createJSONUsers(final String expand, final RESTUserCollectionV1 dataObjects,
-            final String message, final Integer flag, final Integer userId) throws InvalidParameterException, InternalProcessingException {
+            final String message, final Integer flag, final Integer userId) throws InvalidParameterException,
+            InternalProcessingException {
         if (dataObjects == null)
             throw new InvalidParameterException("The dataObjects parameter can not be null");
 
@@ -2551,8 +2633,8 @@ public class RESTv1 extends BaseRESTv1 implements RESTInterfaceV1, RESTInterface
         final UserV1Factory factory = new UserV1Factory();
         final RESTLogDetailsV1 logDetails = generateLogDetails(message, flag, userId);
 
-        return createEntities(RESTUserCollectionV1.class, User.class, dataObjects, factory, BaseRESTv1.USERS_EXPANSION_NAME,
-                JSON_URL, expand, getBaseUrl(), logDetails);
+        return createJSONEntities(RESTUserCollectionV1.class, User.class, dataObjects, factory,
+                RESTv1Constants.USERS_EXPANSION_NAME, expand, logDetails);
     }
 
     @Override
@@ -2562,15 +2644,15 @@ public class RESTv1 extends BaseRESTv1 implements RESTInterfaceV1, RESTInterface
     }
 
     @Override
-    public RESTUserV1 deleteJSONUser(final Integer id, final String message, final Integer flag, final Integer userId, final String expand)
-            throws InvalidParameterException, InternalProcessingException {
+    public RESTUserV1 deleteJSONUser(final Integer id, final String message, final Integer flag, final Integer userId,
+            final String expand) throws InvalidParameterException, InternalProcessingException {
         if (id == null)
             throw new InvalidParameterException("The id parameter can not be null");
 
         final UserV1Factory factory = new UserV1Factory();
         final RESTLogDetailsV1 logDetails = generateLogDetails(message, flag, userId);
 
-        return deleteEntity(User.class, factory, id, expand, logDetails);
+        return deleteJSONEntity(User.class, factory, id, expand, logDetails);
     }
 
     @Override
@@ -2580,8 +2662,8 @@ public class RESTv1 extends BaseRESTv1 implements RESTInterfaceV1, RESTInterface
     }
 
     @Override
-    public RESTUserCollectionV1 deleteJSONUsers(final PathSegment ids, final String message, final Integer flag, final Integer userId,
-            final String expand) throws InvalidParameterException, InternalProcessingException {
+    public RESTUserCollectionV1 deleteJSONUsers(final PathSegment ids, final String message, final Integer flag,
+            final Integer userId, final String expand) throws InvalidParameterException, InternalProcessingException {
         if (ids == null)
             throw new InvalidParameterException("The ids parameter can not be null");
 
@@ -2590,8 +2672,8 @@ public class RESTv1 extends BaseRESTv1 implements RESTInterfaceV1, RESTInterface
         final UserV1Factory factory = new UserV1Factory();
         final RESTLogDetailsV1 logDetails = generateLogDetails(message, flag, userId);
 
-        return deleteEntities(RESTUserCollectionV1.class, User.class, factory, dbEntityIds, BaseRESTv1.USERS_EXPANSION_NAME,
-                JSON_URL, expand, getBaseUrl(), logDetails);
+        return deleteJSONEntities(RESTUserCollectionV1.class, User.class, factory, dbEntityIds,
+                RESTv1Constants.USERS_EXPANSION_NAME, expand, logDetails);
     }
 
     /* TAG FUNCTIONS */
@@ -2642,8 +2724,8 @@ public class RESTv1 extends BaseRESTv1 implements RESTInterfaceV1, RESTInterface
     }
 
     @Override
-    public String updateJSONPTag(final String expand, final RESTTagV1 dataObject, final String message, final Integer flag, final Integer userId,
-            final String callback) throws InvalidParameterException, InternalProcessingException {
+    public String updateJSONPTag(final String expand, final RESTTagV1 dataObject, final String message, final Integer flag,
+            final Integer userId, final String callback) throws InvalidParameterException, InternalProcessingException {
         if (callback == null)
             throw new InvalidParameterException("The callback parameter can not be null");
 
@@ -2661,7 +2743,9 @@ public class RESTv1 extends BaseRESTv1 implements RESTInterfaceV1, RESTInterface
     }
 
     @Override
-    public String updateJSONPTags(final String expand, final RESTTagCollectionV1 dataObjects, final String message, final Integer flag, final Integer userId, final String callback) throws InvalidParameterException, InternalProcessingException {
+    public String updateJSONPTags(final String expand, final RESTTagCollectionV1 dataObjects, final String message,
+            final Integer flag, final Integer userId, final String callback) throws InvalidParameterException,
+            InternalProcessingException {
         if (callback == null)
             throw new InvalidParameterException("The callback parameter can not be null");
 
@@ -2679,8 +2763,8 @@ public class RESTv1 extends BaseRESTv1 implements RESTInterfaceV1, RESTInterface
     }
 
     @Override
-    public String createJSONPTag(final String expand, final RESTTagV1 dataObject, final String message, final Integer flag, final Integer userId,
-            final String callback) throws InvalidParameterException, InternalProcessingException {
+    public String createJSONPTag(final String expand, final RESTTagV1 dataObject, final String message, final Integer flag,
+            final Integer userId, final String callback) throws InvalidParameterException, InternalProcessingException {
         if (callback == null)
             throw new InvalidParameterException("The callback parameter can not be null");
 
@@ -2698,7 +2782,9 @@ public class RESTv1 extends BaseRESTv1 implements RESTInterfaceV1, RESTInterface
     }
 
     @Override
-    public String createJSONPTags(final String expand, final RESTTagCollectionV1 dataObjects, final String message, final Integer flag, final Integer userId, final String callback) throws InvalidParameterException, InternalProcessingException {
+    public String createJSONPTags(final String expand, final RESTTagCollectionV1 dataObjects, final String message,
+            final Integer flag, final Integer userId, final String callback) throws InvalidParameterException,
+            InternalProcessingException {
         if (callback == null)
             throw new InvalidParameterException("The callback parameter can not be null");
 
@@ -2716,8 +2802,8 @@ public class RESTv1 extends BaseRESTv1 implements RESTInterfaceV1, RESTInterface
     }
 
     @Override
-    public String deleteJSONPTag(final Integer id, final String message, final Integer flag, final Integer userId, final String expand,
-            final String callback) throws InvalidParameterException, InternalProcessingException {
+    public String deleteJSONPTag(final Integer id, final String message, final Integer flag, final Integer userId,
+            final String expand, final String callback) throws InvalidParameterException, InternalProcessingException {
         if (callback == null)
             throw new InvalidParameterException("The callback parameter can not be null");
 
@@ -2735,8 +2821,8 @@ public class RESTv1 extends BaseRESTv1 implements RESTInterfaceV1, RESTInterface
     }
 
     @Override
-    public String deleteJSONPTags(final PathSegment ids, final String message, final Integer flag, final Integer userId, final String expand,
-            final String callback) throws InvalidParameterException, InternalProcessingException {
+    public String deleteJSONPTags(final PathSegment ids, final String message, final Integer flag, final Integer userId,
+            final String expand, final String callback) throws InvalidParameterException, InternalProcessingException {
         if (callback == null)
             throw new InvalidParameterException("The callback parameter can not be null");
 
@@ -2759,7 +2845,7 @@ public class RESTv1 extends BaseRESTv1 implements RESTInterfaceV1, RESTInterface
 
     @Override
     public RESTTagCollectionV1 getJSONTags(final String expand) throws InvalidParameterException, InternalProcessingException {
-        return getJSONResources(RESTTagCollectionV1.class, Tag.class, new TagV1Factory(), BaseRESTv1.TAGS_EXPANSION_NAME,
+        return getJSONResources(RESTTagCollectionV1.class, Tag.class, new TagV1Factory(), RESTv1Constants.TAGS_EXPANSION_NAME,
                 expand);
     }
 
@@ -2767,7 +2853,7 @@ public class RESTv1 extends BaseRESTv1 implements RESTInterfaceV1, RESTInterface
     public RESTTagCollectionV1 getJSONTagsWithQuery(final PathSegment query, final String expand)
             throws InvalidParameterException, InternalProcessingException {
         return getJSONResourcesFromQuery(RESTTagCollectionV1.class, query.getMatrixParameters(), TagFilterQueryBuilder.class,
-                new TagFieldFilter(), new TagV1Factory(), TAGS_EXPANSION_NAME, expand);
+                new TagFieldFilter(), new TagV1Factory(), RESTv1Constants.TAGS_EXPANSION_NAME, expand);
     }
 
     @Override
@@ -2777,8 +2863,8 @@ public class RESTv1 extends BaseRESTv1 implements RESTInterfaceV1, RESTInterface
     }
 
     @Override
-    public RESTTagV1 updateJSONTag(final String expand, final RESTTagV1 dataObject, final String message, final Integer flag, final Integer userId)
-            throws InvalidParameterException, InternalProcessingException {
+    public RESTTagV1 updateJSONTag(final String expand, final RESTTagV1 dataObject, final String message, final Integer flag,
+            final Integer userId) throws InvalidParameterException, InternalProcessingException {
         if (dataObject == null)
             throw new InvalidParameterException("The dataObject parameter can not be null");
 
@@ -2788,7 +2874,7 @@ public class RESTv1 extends BaseRESTv1 implements RESTInterfaceV1, RESTInterface
         final TagV1Factory factory = new TagV1Factory();
         final RESTLogDetailsV1 logDetails = generateLogDetails(message, flag, userId);
 
-        return updateEntity(Tag.class, dataObject, factory, this.getBaseUrl(), JSON_URL, expand, logDetails);
+        return updateJSONEntity(Tag.class, dataObject, factory, expand, logDetails);
     }
 
     @Override
@@ -2798,7 +2884,8 @@ public class RESTv1 extends BaseRESTv1 implements RESTInterfaceV1, RESTInterface
     }
 
     @Override
-    public RESTTagCollectionV1 updateJSONTags(final String expand, final RESTTagCollectionV1 dataObjects, final String message, final Integer flag, final Integer userId) throws InvalidParameterException, InternalProcessingException {
+    public RESTTagCollectionV1 updateJSONTags(final String expand, final RESTTagCollectionV1 dataObjects, final String message,
+            final Integer flag, final Integer userId) throws InvalidParameterException, InternalProcessingException {
         if (dataObjects == null)
             throw new InvalidParameterException("The dataObjects parameter can not be null");
 
@@ -2808,8 +2895,8 @@ public class RESTv1 extends BaseRESTv1 implements RESTInterfaceV1, RESTInterface
         final TagV1Factory factory = new TagV1Factory();
         final RESTLogDetailsV1 logDetails = generateLogDetails(message, flag, userId);
 
-        return updateEntities(RESTTagCollectionV1.class, Tag.class, dataObjects, factory, BaseRESTv1.TAGS_EXPANSION_NAME,
-                JSON_URL, expand, getBaseUrl(), logDetails);
+        return updateJSONEntities(RESTTagCollectionV1.class, Tag.class, dataObjects, factory,
+                RESTv1Constants.TAGS_EXPANSION_NAME, expand, logDetails);
     }
 
     @Override
@@ -2819,15 +2906,15 @@ public class RESTv1 extends BaseRESTv1 implements RESTInterfaceV1, RESTInterface
     }
 
     @Override
-    public RESTTagV1 createJSONTag(final String expand, final RESTTagV1 dataObject, final String message, final Integer flag, final Integer userId)
-            throws InvalidParameterException, InternalProcessingException {
+    public RESTTagV1 createJSONTag(final String expand, final RESTTagV1 dataObject, final String message, final Integer flag,
+            final Integer userId) throws InvalidParameterException, InternalProcessingException {
         if (dataObject == null)
             throw new InvalidParameterException("The dataObject parameter can not be null");
 
         final TagV1Factory factory = new TagV1Factory();
         final RESTLogDetailsV1 logDetails = generateLogDetails(message, flag, userId);
 
-        return createEntity(Tag.class, dataObject, factory, this.getBaseUrl(), JSON_URL, expand, logDetails);
+        return createJSONEntity(Tag.class, dataObject, factory, expand, logDetails);
     }
 
     @Override
@@ -2837,7 +2924,8 @@ public class RESTv1 extends BaseRESTv1 implements RESTInterfaceV1, RESTInterface
     }
 
     @Override
-    public RESTTagCollectionV1 createJSONTags(final String expand, final RESTTagCollectionV1 dataObjects, final String message, final Integer flag, final Integer userId) throws InvalidParameterException, InternalProcessingException {
+    public RESTTagCollectionV1 createJSONTags(final String expand, final RESTTagCollectionV1 dataObjects, final String message,
+            final Integer flag, final Integer userId) throws InvalidParameterException, InternalProcessingException {
         if (dataObjects == null)
             throw new InvalidParameterException("The dataObjects parameter can not be null");
 
@@ -2847,8 +2935,8 @@ public class RESTv1 extends BaseRESTv1 implements RESTInterfaceV1, RESTInterface
         final TagV1Factory factory = new TagV1Factory();
         final RESTLogDetailsV1 logDetails = generateLogDetails(message, flag, userId);
 
-        return createEntities(RESTTagCollectionV1.class, Tag.class, dataObjects, factory, BaseRESTv1.TAGS_EXPANSION_NAME,
-                JSON_URL, expand, getBaseUrl(), logDetails);
+        return createJSONEntities(RESTTagCollectionV1.class, Tag.class, dataObjects, factory,
+                RESTv1Constants.TAGS_EXPANSION_NAME, expand, logDetails);
     }
 
     @Override
@@ -2858,15 +2946,15 @@ public class RESTv1 extends BaseRESTv1 implements RESTInterfaceV1, RESTInterface
     }
 
     @Override
-    public RESTTagV1 deleteJSONTag(final Integer id, final String message, final Integer flag, final Integer userId, final String expand)
-            throws InvalidParameterException, InternalProcessingException {
+    public RESTTagV1 deleteJSONTag(final Integer id, final String message, final Integer flag, final Integer userId,
+            final String expand) throws InvalidParameterException, InternalProcessingException {
         if (id == null)
             throw new InvalidParameterException("The id parameter can not be null");
 
         final TagV1Factory factory = new TagV1Factory();
         final RESTLogDetailsV1 logDetails = generateLogDetails(message, flag, userId);
 
-        return deleteEntity(Tag.class, factory, id, expand, logDetails);
+        return deleteJSONEntity(Tag.class, factory, id, expand, logDetails);
     }
 
     @Override
@@ -2876,8 +2964,8 @@ public class RESTv1 extends BaseRESTv1 implements RESTInterfaceV1, RESTInterface
     }
 
     @Override
-    public RESTTagCollectionV1 deleteJSONTags(final PathSegment ids, final String message, final Integer flag, final Integer userId,
-            final String expand) throws InvalidParameterException, InternalProcessingException {
+    public RESTTagCollectionV1 deleteJSONTags(final PathSegment ids, final String message, final Integer flag,
+            final Integer userId, final String expand) throws InvalidParameterException, InternalProcessingException {
         if (ids == null)
             throw new InvalidParameterException("The ids parameter can not be null");
 
@@ -2885,8 +2973,8 @@ public class RESTv1 extends BaseRESTv1 implements RESTInterfaceV1, RESTInterface
         final TagV1Factory factory = new TagV1Factory();
         final RESTLogDetailsV1 logDetails = generateLogDetails(message, flag, userId);
 
-        return deleteEntities(RESTTagCollectionV1.class, Tag.class, factory, dbEntityIds, BaseRESTv1.TAGS_EXPANSION_NAME,
-                JSON_URL, expand, getBaseUrl(), logDetails);
+        return deleteJSONEntities(RESTTagCollectionV1.class, Tag.class, factory, dbEntityIds,
+                RESTv1Constants.TAGS_EXPANSION_NAME, expand, logDetails);
     }
 
     /* CATEGORY FUNCTIONS */
@@ -2937,12 +3025,15 @@ public class RESTv1 extends BaseRESTv1 implements RESTInterfaceV1, RESTInterface
     }
 
     @Override
-    public String updateJSONPCategory(final String expand, final RESTCategoryV1 dataObject, final String message, final Integer flag, final Integer userId, final String callback) throws InvalidParameterException, InternalProcessingException {
+    public String updateJSONPCategory(final String expand, final RESTCategoryV1 dataObject, final String message,
+            final Integer flag, final Integer userId, final String callback) throws InvalidParameterException,
+            InternalProcessingException {
         if (callback == null)
             throw new InvalidParameterException("The callback parameter can not be null");
 
         try {
-            return wrapJsonInPadding(callback, convertObjectToJSON(updateJSONCategory(expand, dataObject, message, flag, userId)));
+            return wrapJsonInPadding(callback,
+                    convertObjectToJSON(updateJSONCategory(expand, dataObject, message, flag, userId)));
         } catch (final Exception ex) {
             throw new InternalProcessingException("Could not marshall return value into JSON");
         }
@@ -2955,12 +3046,15 @@ public class RESTv1 extends BaseRESTv1 implements RESTInterfaceV1, RESTInterface
     }
 
     @Override
-    public String updateJSONPCategories(final String expand, final RESTCategoryCollectionV1 dataObjects, final String message, final Integer flag, final Integer userId, final String callback) throws InvalidParameterException, InternalProcessingException {
+    public String updateJSONPCategories(final String expand, final RESTCategoryCollectionV1 dataObjects, final String message,
+            final Integer flag, final Integer userId, final String callback) throws InvalidParameterException,
+            InternalProcessingException {
         if (callback == null)
             throw new InvalidParameterException("The callback parameter can not be null");
 
         try {
-            return wrapJsonInPadding(callback, convertObjectToJSON(updateJSONCategories(expand, dataObjects, message, flag, userId)));
+            return wrapJsonInPadding(callback,
+                    convertObjectToJSON(updateJSONCategories(expand, dataObjects, message, flag, userId)));
         } catch (final Exception ex) {
             throw new InternalProcessingException("Could not marshall return value into JSON");
         }
@@ -2973,12 +3067,15 @@ public class RESTv1 extends BaseRESTv1 implements RESTInterfaceV1, RESTInterface
     }
 
     @Override
-    public String createJSONPCategory(final String expand, final RESTCategoryV1 dataObject, final String message, final Integer flag, final Integer userId, final String callback) throws InvalidParameterException, InternalProcessingException {
+    public String createJSONPCategory(final String expand, final RESTCategoryV1 dataObject, final String message,
+            final Integer flag, final Integer userId, final String callback) throws InvalidParameterException,
+            InternalProcessingException {
         if (callback == null)
             throw new InvalidParameterException("The callback parameter can not be null");
 
         try {
-            return wrapJsonInPadding(callback, convertObjectToJSON(createJSONCategory(expand, dataObject, message, flag, userId)));
+            return wrapJsonInPadding(callback,
+                    convertObjectToJSON(createJSONCategory(expand, dataObject, message, flag, userId)));
         } catch (final Exception ex) {
             throw new InternalProcessingException("Could not marshall return value into JSON");
         }
@@ -2991,12 +3088,15 @@ public class RESTv1 extends BaseRESTv1 implements RESTInterfaceV1, RESTInterface
     }
 
     @Override
-    public String createJSONPCategories(final String expand, final RESTCategoryCollectionV1 dataObjects, final String message, final Integer flag, final Integer userId, final String callback) throws InvalidParameterException, InternalProcessingException {
+    public String createJSONPCategories(final String expand, final RESTCategoryCollectionV1 dataObjects, final String message,
+            final Integer flag, final Integer userId, final String callback) throws InvalidParameterException,
+            InternalProcessingException {
         if (callback == null)
             throw new InvalidParameterException("The callback parameter can not be null");
 
         try {
-            return wrapJsonInPadding(callback, convertObjectToJSON(createJSONCategories(expand, dataObjects, message, flag, userId)));
+            return wrapJsonInPadding(callback,
+                    convertObjectToJSON(createJSONCategories(expand, dataObjects, message, flag, userId)));
         } catch (final Exception ex) {
             throw new InternalProcessingException("Could not marshall return value into JSON");
         }
@@ -3009,8 +3109,8 @@ public class RESTv1 extends BaseRESTv1 implements RESTInterfaceV1, RESTInterface
     }
 
     @Override
-    public String deleteJSONPCategory(final Integer id, final String message, final Integer flag, final Integer userId, final String expand,
-            final String callback) throws InvalidParameterException, InternalProcessingException {
+    public String deleteJSONPCategory(final Integer id, final String message, final Integer flag, final Integer userId,
+            final String expand, final String callback) throws InvalidParameterException, InternalProcessingException {
         if (callback == null)
             throw new InvalidParameterException("The callback parameter can not be null");
 
@@ -3028,8 +3128,8 @@ public class RESTv1 extends BaseRESTv1 implements RESTInterfaceV1, RESTInterface
     }
 
     @Override
-    public String deleteJSONPCategories(final PathSegment ids, final String message, final Integer flag, final Integer userId, final String expand,
-            final String callback) throws InvalidParameterException, InternalProcessingException {
+    public String deleteJSONPCategories(final PathSegment ids, final String message, final Integer flag, final Integer userId,
+            final String expand, final String callback) throws InvalidParameterException, InternalProcessingException {
         if (callback == null)
             throw new InvalidParameterException("The callback parameter can not be null");
 
@@ -3045,7 +3145,7 @@ public class RESTv1 extends BaseRESTv1 implements RESTInterfaceV1, RESTInterface
     public RESTCategoryCollectionV1 getJSONCategories(final String expand) throws InvalidParameterException,
             InternalProcessingException {
         return getJSONResources(RESTCategoryCollectionV1.class, Category.class, new CategoryV1Factory(),
-                CATEGORIES_EXPANSION_NAME, expand);
+                RESTv1Constants.CATEGORIES_EXPANSION_NAME, expand);
     }
 
     @Override
@@ -3056,13 +3156,13 @@ public class RESTv1 extends BaseRESTv1 implements RESTInterfaceV1, RESTInterface
 
         return getJSONResource(Category.class, new CategoryV1Factory(), id, expand);
     }
-    
+
     @Override
     public RESTCategoryCollectionV1 getJSONCategoriesWithQuery(final PathSegment query, final String expand)
             throws InvalidParameterException, InternalProcessingException {
         return getJSONResourcesFromQuery(RESTCategoryCollectionV1.class, query.getMatrixParameters(),
                 CategoryFilterQueryBuilder.class, new CategoryFieldFilter(), new CategoryV1Factory(),
-                CATEGORIES_EXPANSION_NAME, expand);
+                RESTv1Constants.CATEGORIES_EXPANSION_NAME, expand);
     }
 
     @Override
@@ -3072,7 +3172,8 @@ public class RESTv1 extends BaseRESTv1 implements RESTInterfaceV1, RESTInterface
     }
 
     @Override
-    public RESTCategoryV1 updateJSONCategory(final String expand, final RESTCategoryV1 dataObject, final String message, final Integer flag, final Integer userId) throws InvalidParameterException, InternalProcessingException {
+    public RESTCategoryV1 updateJSONCategory(final String expand, final RESTCategoryV1 dataObject, final String message,
+            final Integer flag, final Integer userId) throws InvalidParameterException, InternalProcessingException {
         if (dataObject == null)
             throw new InvalidParameterException("The dataObject parameter can not be null");
 
@@ -3082,7 +3183,7 @@ public class RESTv1 extends BaseRESTv1 implements RESTInterfaceV1, RESTInterface
         final CategoryV1Factory factory = new CategoryV1Factory();
         final RESTLogDetailsV1 logDetails = generateLogDetails(message, flag, userId);
 
-        return updateEntity(Category.class, dataObject, factory, this.getBaseUrl(), JSON_URL, expand, logDetails);
+        return updateJSONEntity(Category.class, dataObject, factory, expand, logDetails);
     }
 
     @Override
@@ -3093,7 +3194,8 @@ public class RESTv1 extends BaseRESTv1 implements RESTInterfaceV1, RESTInterface
 
     @Override
     public RESTCategoryCollectionV1 updateJSONCategories(final String expand, final RESTCategoryCollectionV1 dataObjects,
-            final String message, final Integer flag, final Integer userId) throws InvalidParameterException, InternalProcessingException {
+            final String message, final Integer flag, final Integer userId) throws InvalidParameterException,
+            InternalProcessingException {
         if (dataObjects == null)
             throw new InvalidParameterException("The dataObjects parameter can not be null");
 
@@ -3103,8 +3205,8 @@ public class RESTv1 extends BaseRESTv1 implements RESTInterfaceV1, RESTInterface
         final CategoryV1Factory factory = new CategoryV1Factory();
         final RESTLogDetailsV1 logDetails = generateLogDetails(message, flag, userId);
 
-        return updateEntities(RESTCategoryCollectionV1.class, Category.class, dataObjects, factory,
-                BaseRESTv1.CATEGORIES_EXPANSION_NAME, JSON_URL, expand, getBaseUrl(), logDetails);
+        return updateJSONEntities(RESTCategoryCollectionV1.class, Category.class, dataObjects, factory,
+                RESTv1Constants.CATEGORIES_EXPANSION_NAME, expand, logDetails);
     }
 
     @Override
@@ -3114,14 +3216,15 @@ public class RESTv1 extends BaseRESTv1 implements RESTInterfaceV1, RESTInterface
     }
 
     @Override
-    public RESTCategoryV1 createJSONCategory(final String expand, final RESTCategoryV1 dataObject, final String message, final Integer flag, final Integer userId) throws InvalidParameterException, InternalProcessingException {
+    public RESTCategoryV1 createJSONCategory(final String expand, final RESTCategoryV1 dataObject, final String message,
+            final Integer flag, final Integer userId) throws InvalidParameterException, InternalProcessingException {
         if (dataObject == null)
             throw new InvalidParameterException("The dataObject parameter can not be null");
 
         final CategoryV1Factory factory = new CategoryV1Factory();
         final RESTLogDetailsV1 logDetails = generateLogDetails(message, flag, userId);
 
-        return createEntity(Category.class, dataObject, factory, this.getBaseUrl(), JSON_URL, expand, logDetails);
+        return createJSONEntity(Category.class, dataObject, factory, expand, logDetails);
     }
 
     @Override
@@ -3132,7 +3235,8 @@ public class RESTv1 extends BaseRESTv1 implements RESTInterfaceV1, RESTInterface
 
     @Override
     public RESTCategoryCollectionV1 createJSONCategories(final String expand, final RESTCategoryCollectionV1 dataObjects,
-            final String message, final Integer flag, final Integer userId) throws InvalidParameterException, InternalProcessingException {
+            final String message, final Integer flag, final Integer userId) throws InvalidParameterException,
+            InternalProcessingException {
         if (dataObjects == null)
             throw new InvalidParameterException("The dataObjects parameter can not be null");
 
@@ -3142,8 +3246,8 @@ public class RESTv1 extends BaseRESTv1 implements RESTInterfaceV1, RESTInterface
         final CategoryV1Factory factory = new CategoryV1Factory();
         final RESTLogDetailsV1 logDetails = generateLogDetails(message, flag, userId);
 
-        return createEntities(RESTCategoryCollectionV1.class, Category.class, dataObjects, factory,
-                BaseRESTv1.CATEGORIES_EXPANSION_NAME, JSON_URL, expand, getBaseUrl(), logDetails);
+        return createJSONEntities(RESTCategoryCollectionV1.class, Category.class, dataObjects, factory,
+                RESTv1Constants.CATEGORIES_EXPANSION_NAME, expand, logDetails);
     }
 
     @Override
@@ -3153,15 +3257,15 @@ public class RESTv1 extends BaseRESTv1 implements RESTInterfaceV1, RESTInterface
     }
 
     @Override
-    public RESTCategoryV1 deleteJSONCategory(final Integer id, final String message, final Integer flag, final Integer userId, final String expand)
-            throws InvalidParameterException, InternalProcessingException {
+    public RESTCategoryV1 deleteJSONCategory(final Integer id, final String message, final Integer flag, final Integer userId,
+            final String expand) throws InvalidParameterException, InternalProcessingException {
         if (id == null)
             throw new InvalidParameterException("The id parameter can not be null");
 
         final CategoryV1Factory factory = new CategoryV1Factory();
         final RESTLogDetailsV1 logDetails = generateLogDetails(message, flag, userId);
 
-        return deleteEntity(Category.class, factory, id, expand, logDetails);
+        return deleteJSONEntity(Category.class, factory, id, expand, logDetails);
     }
 
     @Override
@@ -3171,8 +3275,8 @@ public class RESTv1 extends BaseRESTv1 implements RESTInterfaceV1, RESTInterface
     }
 
     @Override
-    public RESTCategoryCollectionV1 deleteJSONCategories(final PathSegment ids, final String message, final Integer flag, final Integer userId,
-            final String expand) throws InvalidParameterException, InternalProcessingException {
+    public RESTCategoryCollectionV1 deleteJSONCategories(final PathSegment ids, final String message, final Integer flag,
+            final Integer userId, final String expand) throws InvalidParameterException, InternalProcessingException {
         if (ids == null)
             throw new InvalidParameterException("The ids parameter can not be null");
 
@@ -3181,8 +3285,8 @@ public class RESTv1 extends BaseRESTv1 implements RESTInterfaceV1, RESTInterface
         final CategoryV1Factory factory = new CategoryV1Factory();
         final RESTLogDetailsV1 logDetails = generateLogDetails(message, flag, userId);
 
-        return deleteEntities(RESTCategoryCollectionV1.class, Category.class, factory, dbEntityIds,
-                BaseRESTv1.CATEGORIES_EXPANSION_NAME, JSON_URL, expand, getBaseUrl(), logDetails);
+        return deleteJSONEntities(RESTCategoryCollectionV1.class, Category.class, factory, dbEntityIds,
+                RESTv1Constants.CATEGORIES_EXPANSION_NAME, expand, logDetails);
     }
 
     /* IMAGE FUNCTIONS */
@@ -3233,8 +3337,8 @@ public class RESTv1 extends BaseRESTv1 implements RESTInterfaceV1, RESTInterface
     }
 
     @Override
-    public String updateJSONPImage(final String expand, final RESTImageV1 dataObject, final String message, final Integer flag, final Integer userId,
-            final String callback) throws InvalidParameterException, InternalProcessingException {
+    public String updateJSONPImage(final String expand, final RESTImageV1 dataObject, final String message, final Integer flag,
+            final Integer userId, final String callback) throws InvalidParameterException, InternalProcessingException {
         if (callback == null)
             throw new InvalidParameterException("The callback parameter can not be null");
 
@@ -3252,12 +3356,15 @@ public class RESTv1 extends BaseRESTv1 implements RESTInterfaceV1, RESTInterface
     }
 
     @Override
-    public String updateJSONPImages(final String expand, final RESTImageCollectionV1 dataObjects, final String message, final Integer flag, final Integer userId, final String callback) throws InvalidParameterException, InternalProcessingException {
+    public String updateJSONPImages(final String expand, final RESTImageCollectionV1 dataObjects, final String message,
+            final Integer flag, final Integer userId, final String callback) throws InvalidParameterException,
+            InternalProcessingException {
         if (callback == null)
             throw new InvalidParameterException("The callback parameter can not be null");
 
         try {
-            return wrapJsonInPadding(callback, convertObjectToJSON(updateJSONImages(expand, dataObjects, message, flag, userId)));
+            return wrapJsonInPadding(callback,
+                    convertObjectToJSON(updateJSONImages(expand, dataObjects, message, flag, userId)));
         } catch (final Exception ex) {
             throw new InternalProcessingException("Could not marshall return value into JSON");
         }
@@ -3270,8 +3377,8 @@ public class RESTv1 extends BaseRESTv1 implements RESTInterfaceV1, RESTInterface
     }
 
     @Override
-    public String createJSONPImage(final String expand, final RESTImageV1 dataObject, final String message, final Integer flag, final Integer userId,
-            final String callback) throws InvalidParameterException, InternalProcessingException {
+    public String createJSONPImage(final String expand, final RESTImageV1 dataObject, final String message, final Integer flag,
+            final Integer userId, final String callback) throws InvalidParameterException, InternalProcessingException {
         if (callback == null)
             throw new InvalidParameterException("The callback parameter can not be null");
 
@@ -3289,12 +3396,15 @@ public class RESTv1 extends BaseRESTv1 implements RESTInterfaceV1, RESTInterface
     }
 
     @Override
-    public String createJSONPImages(final String expand, final RESTImageCollectionV1 dataObjects, final String message, final Integer flag, final Integer userId, final String callback) throws InvalidParameterException, InternalProcessingException {
+    public String createJSONPImages(final String expand, final RESTImageCollectionV1 dataObjects, final String message,
+            final Integer flag, final Integer userId, final String callback) throws InvalidParameterException,
+            InternalProcessingException {
         if (callback == null)
             throw new InvalidParameterException("The callback parameter can not be null");
 
         try {
-            return wrapJsonInPadding(callback, convertObjectToJSON(createJSONImages(expand, dataObjects, message, flag, userId)));
+            return wrapJsonInPadding(callback,
+                    convertObjectToJSON(createJSONImages(expand, dataObjects, message, flag, userId)));
         } catch (final Exception ex) {
             throw new InternalProcessingException("Could not marshall return value into JSON");
         }
@@ -3307,8 +3417,8 @@ public class RESTv1 extends BaseRESTv1 implements RESTInterfaceV1, RESTInterface
     }
 
     @Override
-    public String deleteJSONPImage(final Integer id, final String message, final Integer flag, final Integer userId, final String expand,
-            final String callback) throws InvalidParameterException, InternalProcessingException {
+    public String deleteJSONPImage(final Integer id, final String message, final Integer flag, final Integer userId,
+            final String expand, final String callback) throws InvalidParameterException, InternalProcessingException {
         if (callback == null)
             throw new InvalidParameterException("The callback parameter can not be null");
 
@@ -3326,8 +3436,8 @@ public class RESTv1 extends BaseRESTv1 implements RESTInterfaceV1, RESTInterface
     }
 
     @Override
-    public String deleteJSONPImages(final PathSegment ids, final String message, final Integer flag, final Integer userId, final String expand,
-            final String callback) throws InvalidParameterException, InternalProcessingException {
+    public String deleteJSONPImages(final PathSegment ids, final String message, final Integer flag, final Integer userId,
+            final String expand, final String callback) throws InvalidParameterException, InternalProcessingException {
         if (callback == null)
             throw new InvalidParameterException("The callback parameter can not be null");
 
@@ -3367,15 +3477,16 @@ public class RESTv1 extends BaseRESTv1 implements RESTInterfaceV1, RESTInterface
          * Construct a collection with the given expansion name. The user will have to expand the collection to get the details
          * of the items in it.
          */
-        return getJSONResources(RESTImageCollectionV1.class, ImageFile.class, new ImageV1Factory(), IMAGES_EXPANSION_NAME,
-                expand);
+        return getJSONResources(RESTImageCollectionV1.class, ImageFile.class, new ImageV1Factory(),
+                RESTv1Constants.IMAGES_EXPANSION_NAME, expand);
     }
 
     @Override
     public RESTImageCollectionV1 getJSONImagesWithQuery(final PathSegment query, final String expand)
             throws InvalidParameterException, InternalProcessingException {
         return this.getJSONResourcesFromQuery(RESTImageCollectionV1.class, query.getMatrixParameters(),
-                ImageFilterQueryBuilder.class, new ImageFieldFilter(), new ImageV1Factory(), IMAGES_EXPANSION_NAME, expand);
+                ImageFilterQueryBuilder.class, new ImageFieldFilter(), new ImageV1Factory(),
+                RESTv1Constants.IMAGES_EXPANSION_NAME, expand);
     }
 
     @Override
@@ -3385,7 +3496,8 @@ public class RESTv1 extends BaseRESTv1 implements RESTInterfaceV1, RESTInterface
     }
 
     @Override
-    public RESTImageV1 updateJSONImage(final String expand, final RESTImageV1 dataObject, final String message, final Integer flag, final Integer userId) throws InvalidParameterException, InternalProcessingException {
+    public RESTImageV1 updateJSONImage(final String expand, final RESTImageV1 dataObject, final String message,
+            final Integer flag, final Integer userId) throws InvalidParameterException, InternalProcessingException {
         if (dataObject == null)
             throw new InvalidParameterException("The dataObject parameter can not be null");
 
@@ -3395,7 +3507,7 @@ public class RESTv1 extends BaseRESTv1 implements RESTInterfaceV1, RESTInterface
         final ImageV1Factory factory = new ImageV1Factory();
         final RESTLogDetailsV1 logDetails = generateLogDetails(message, flag, userId);
 
-        return updateEntity(ImageFile.class, dataObject, factory, this.getBaseUrl(), JSON_URL, expand, logDetails);
+        return updateJSONEntity(ImageFile.class, dataObject, factory, expand, logDetails);
     }
 
     @Override
@@ -3406,7 +3518,8 @@ public class RESTv1 extends BaseRESTv1 implements RESTInterfaceV1, RESTInterface
 
     @Override
     public RESTImageCollectionV1 updateJSONImages(final String expand, final RESTImageCollectionV1 dataObjects,
-            final String message, final Integer flag, final Integer userId) throws InvalidParameterException, InternalProcessingException {
+            final String message, final Integer flag, final Integer userId) throws InvalidParameterException,
+            InternalProcessingException {
         if (dataObjects == null)
             throw new InvalidParameterException("The dataObjects parameter can not be null");
 
@@ -3416,8 +3529,8 @@ public class RESTv1 extends BaseRESTv1 implements RESTInterfaceV1, RESTInterface
         final ImageV1Factory factory = new ImageV1Factory();
         final RESTLogDetailsV1 logDetails = generateLogDetails(message, flag, userId);
 
-        return updateEntities(RESTImageCollectionV1.class, ImageFile.class, dataObjects, factory,
-                BaseRESTv1.IMAGES_EXPANSION_NAME, JSON_URL, expand, getBaseUrl(), logDetails);
+        return updateJSONEntities(RESTImageCollectionV1.class, ImageFile.class, dataObjects, factory,
+                RESTv1Constants.IMAGES_EXPANSION_NAME, expand, logDetails);
     }
 
     @Override
@@ -3427,14 +3540,15 @@ public class RESTv1 extends BaseRESTv1 implements RESTInterfaceV1, RESTInterface
     }
 
     @Override
-    public RESTImageV1 createJSONImage(final String expand, final RESTImageV1 dataObject, final String message, final Integer flag, final Integer userId) throws InvalidParameterException, InternalProcessingException {
+    public RESTImageV1 createJSONImage(final String expand, final RESTImageV1 dataObject, final String message,
+            final Integer flag, final Integer userId) throws InvalidParameterException, InternalProcessingException {
         if (dataObject == null)
             throw new InvalidParameterException("The dataObject parameter can not be null");
 
         final ImageV1Factory factory = new ImageV1Factory();
         final RESTLogDetailsV1 logDetails = generateLogDetails(message, flag, userId);
 
-        return createEntity(ImageFile.class, dataObject, factory, this.getBaseUrl(), JSON_URL, expand, logDetails);
+        return createJSONEntity(ImageFile.class, dataObject, factory, expand, logDetails);
     }
 
     @Override
@@ -3445,7 +3559,8 @@ public class RESTv1 extends BaseRESTv1 implements RESTInterfaceV1, RESTInterface
 
     @Override
     public RESTImageCollectionV1 createJSONImages(final String expand, final RESTImageCollectionV1 dataObjects,
-            final String message, final Integer flag, final Integer userId) throws InvalidParameterException, InternalProcessingException {
+            final String message, final Integer flag, final Integer userId) throws InvalidParameterException,
+            InternalProcessingException {
         if (dataObjects == null)
             throw new InvalidParameterException("The dataObjects parameter can not be null");
 
@@ -3455,8 +3570,8 @@ public class RESTv1 extends BaseRESTv1 implements RESTInterfaceV1, RESTInterface
         final ImageV1Factory factory = new ImageV1Factory();
         final RESTLogDetailsV1 logDetails = generateLogDetails(message, flag, userId);
 
-        return createEntities(RESTImageCollectionV1.class, ImageFile.class, dataObjects, factory,
-                BaseRESTv1.IMAGES_EXPANSION_NAME, JSON_URL, expand, getBaseUrl(), logDetails);
+        return createJSONEntities(RESTImageCollectionV1.class, ImageFile.class, dataObjects, factory,
+                RESTv1Constants.IMAGES_EXPANSION_NAME, expand, logDetails);
     }
 
     @Override
@@ -3466,15 +3581,15 @@ public class RESTv1 extends BaseRESTv1 implements RESTInterfaceV1, RESTInterface
     }
 
     @Override
-    public RESTImageV1 deleteJSONImage(final Integer id, final String message, final Integer flag, final Integer userId, final String expand)
-            throws InvalidParameterException, InternalProcessingException {
+    public RESTImageV1 deleteJSONImage(final Integer id, final String message, final Integer flag, final Integer userId,
+            final String expand) throws InvalidParameterException, InternalProcessingException {
         if (id == null)
             throw new InvalidParameterException("The id parameter can not be null");
 
         final ImageV1Factory factory = new ImageV1Factory();
         final RESTLogDetailsV1 logDetails = generateLogDetails(message, flag, userId);
 
-        return deleteEntity(ImageFile.class, factory, id, expand, logDetails);
+        return deleteJSONEntity(ImageFile.class, factory, id, expand, logDetails);
     }
 
     @Override
@@ -3484,8 +3599,8 @@ public class RESTv1 extends BaseRESTv1 implements RESTInterfaceV1, RESTInterface
     }
 
     @Override
-    public RESTImageCollectionV1 deleteJSONImages(final PathSegment ids, final String message, final Integer flag, final Integer userId,
-            final String expand) throws InvalidParameterException, InternalProcessingException {
+    public RESTImageCollectionV1 deleteJSONImages(final PathSegment ids, final String message, final Integer flag,
+            final Integer userId, final String expand) throws InvalidParameterException, InternalProcessingException {
         if (ids == null)
             throw new InvalidParameterException("The ids parameter can not be null");
 
@@ -3493,8 +3608,8 @@ public class RESTv1 extends BaseRESTv1 implements RESTInterfaceV1, RESTInterface
         final ImageV1Factory factory = new ImageV1Factory();
         final RESTLogDetailsV1 logDetails = generateLogDetails(message, flag, userId);
 
-        return deleteEntities(RESTImageCollectionV1.class, ImageFile.class, factory, dbEntityIds,
-                BaseRESTv1.IMAGES_EXPANSION_NAME, JSON_URL, expand, getBaseUrl(), logDetails);
+        return deleteJSONEntities(RESTImageCollectionV1.class, ImageFile.class, factory, dbEntityIds,
+                RESTv1Constants.IMAGES_EXPANSION_NAME, expand, logDetails);
     }
 
     /* TOPIC FUNCTIONS */
@@ -3545,8 +3660,8 @@ public class RESTv1 extends BaseRESTv1 implements RESTInterfaceV1, RESTInterface
     }
 
     @Override
-    public String updateJSONPTopic(final String expand, final RESTTopicV1 dataObject, final String message, final Integer flag, final Integer userId,
-            final String callback) throws InvalidParameterException, InternalProcessingException {
+    public String updateJSONPTopic(final String expand, final RESTTopicV1 dataObject, final String message, final Integer flag,
+            final Integer userId, final String callback) throws InvalidParameterException, InternalProcessingException {
         if (callback == null)
             throw new InvalidParameterException("The callback parameter can not be null");
 
@@ -3564,12 +3679,15 @@ public class RESTv1 extends BaseRESTv1 implements RESTInterfaceV1, RESTInterface
     }
 
     @Override
-    public String updateJSONPTopics(final String expand, final RESTTopicCollectionV1 dataObjects, final String message, final Integer flag, final Integer userId, final String callback) throws InvalidParameterException, InternalProcessingException {
+    public String updateJSONPTopics(final String expand, final RESTTopicCollectionV1 dataObjects, final String message,
+            final Integer flag, final Integer userId, final String callback) throws InvalidParameterException,
+            InternalProcessingException {
         if (callback == null)
             throw new InvalidParameterException("The callback parameter can not be null");
 
         try {
-            return wrapJsonInPadding(callback, convertObjectToJSON(updateJSONTopics(expand, dataObjects, message, flag, userId)));
+            return wrapJsonInPadding(callback,
+                    convertObjectToJSON(updateJSONTopics(expand, dataObjects, message, flag, userId)));
         } catch (final Exception ex) {
             throw new InternalProcessingException("Could not marshall return value into JSON");
         }
@@ -3582,8 +3700,8 @@ public class RESTv1 extends BaseRESTv1 implements RESTInterfaceV1, RESTInterface
     }
 
     @Override
-    public String createJSONPTopic(final String expand, final RESTTopicV1 dataObject, final String message, final Integer flag, final Integer userId,
-            final String callback) throws InvalidParameterException, InternalProcessingException {
+    public String createJSONPTopic(final String expand, final RESTTopicV1 dataObject, final String message, final Integer flag,
+            final Integer userId, final String callback) throws InvalidParameterException, InternalProcessingException {
         if (callback == null)
             throw new InvalidParameterException("The callback parameter can not be null");
 
@@ -3601,12 +3719,15 @@ public class RESTv1 extends BaseRESTv1 implements RESTInterfaceV1, RESTInterface
     }
 
     @Override
-    public String createJSONPTopics(final String expand, final RESTTopicCollectionV1 dataObjects, final String message, final Integer flag, final Integer userId, final String callback) throws InvalidParameterException, InternalProcessingException {
+    public String createJSONPTopics(final String expand, final RESTTopicCollectionV1 dataObjects, final String message,
+            final Integer flag, final Integer userId, final String callback) throws InvalidParameterException,
+            InternalProcessingException {
         if (callback == null)
             throw new InvalidParameterException("The callback parameter can not be null");
 
         try {
-            return wrapJsonInPadding(callback, convertObjectToJSON(createJSONTopics(expand, dataObjects, message, flag, userId)));
+            return wrapJsonInPadding(callback,
+                    convertObjectToJSON(createJSONTopics(expand, dataObjects, message, flag, userId)));
         } catch (final Exception ex) {
             throw new InternalProcessingException("Could not marshall return value into JSON");
         }
@@ -3619,8 +3740,8 @@ public class RESTv1 extends BaseRESTv1 implements RESTInterfaceV1, RESTInterface
     }
 
     @Override
-    public String deleteJSONPTopic(final Integer id, final String message, final Integer flag, final Integer userId, final String expand,
-            final String callback) throws InvalidParameterException, InternalProcessingException {
+    public String deleteJSONPTopic(final Integer id, final String message, final Integer flag, final Integer userId,
+            final String expand, final String callback) throws InvalidParameterException, InternalProcessingException {
         if (callback == null)
             throw new InvalidParameterException("The callback parameter can not be null");
 
@@ -3638,8 +3759,8 @@ public class RESTv1 extends BaseRESTv1 implements RESTInterfaceV1, RESTInterface
     }
 
     @Override
-    public String deleteJSONPTopics(final PathSegment ids, final String message, final Integer flag, final Integer userId, final String expand,
-            final String callback) throws InvalidParameterException, InternalProcessingException {
+    public String deleteJSONPTopics(final PathSegment ids, final String message, final Integer flag, final Integer userId,
+            final String expand, final String callback) throws InvalidParameterException, InternalProcessingException {
         if (callback == null)
             throw new InvalidParameterException("The callback parameter can not be null");
 
@@ -3654,14 +3775,16 @@ public class RESTv1 extends BaseRESTv1 implements RESTInterfaceV1, RESTInterface
     @Override
     public RESTTopicCollectionV1 getJSONTopics(final String expand) throws InvalidParameterException,
             InternalProcessingException {
-        return getJSONResources(RESTTopicCollectionV1.class, Topic.class, new TopicV1Factory(), TOPICS_EXPANSION_NAME, expand);
+        return getJSONResources(RESTTopicCollectionV1.class, Topic.class, new TopicV1Factory(),
+                RESTv1Constants.TOPICS_EXPANSION_NAME, expand);
     }
 
     @Override
     public RESTTopicCollectionV1 getJSONTopicsWithQuery(PathSegment query, final String expand)
             throws InvalidParameterException, InternalProcessingException {
         return getJSONResourcesFromQuery(RESTTopicCollectionV1.class, query.getMatrixParameters(),
-                TopicFilterQueryBuilder.class, new TopicFieldFilter(), new TopicV1Factory(), TOPICS_EXPANSION_NAME, expand);
+                TopicFilterQueryBuilder.class, new TopicFieldFilter(), new TopicV1Factory(),
+                RESTv1Constants.TOPICS_EXPANSION_NAME, expand);
     }
 
     @Override
@@ -3674,7 +3797,8 @@ public class RESTv1 extends BaseRESTv1 implements RESTInterfaceV1, RESTInterface
     @Override
     public RESTTopicCollectionV1 getXMLTopics(final String expand) throws InvalidParameterException,
             InternalProcessingException {
-        return getXMLResources(RESTTopicCollectionV1.class, Topic.class, new TopicV1Factory(), TOPICS_EXPANSION_NAME, expand);
+        return getXMLResources(RESTTopicCollectionV1.class, Topic.class, new TopicV1Factory(),
+                RESTv1Constants.TOPICS_EXPANSION_NAME, expand);
     }
 
     @Override
@@ -3710,36 +3834,38 @@ public class RESTv1 extends BaseRESTv1 implements RESTInterfaceV1, RESTInterface
     }
 
     @Override
-    public String getXMLTopicXML(final Integer id, final String doctype) throws InvalidParameterException, InternalProcessingException
-    {
+    public String getXMLTopicXML(final Integer id, final String doctype) throws InvalidParameterException,
+            InternalProcessingException {
         assert id != null : "The id parameter can not be null";
-        
+
         if (doctype != null) {
-            if (doctype.equalsIgnoreCase(RESTv1Constants.DOCBOOK_45_DOCTYPE_NAME))
-            {
-                return DocBookUtilities.addDocbook45XMLDoctype(getXMLResource(Topic.class, new TopicV1Factory(), id, null).getXml(), null, "section");
+            if (doctype.equalsIgnoreCase(RESTv1Constants.DOCBOOK_45_DOCTYPE_NAME)) {
+                return DocBookUtilities.addDocbook45XMLDoctype(getXMLResource(Topic.class, new TopicV1Factory(), id, null)
+                        .getXml(), null, "section");
             } else if (doctype.equalsIgnoreCase(RESTv1Constants.DOCBOOK_50_DOCTYPE_NAME)) {
-                return DocBookUtilities.addDocbook50XMLDoctype(getXMLResource(Topic.class, new TopicV1Factory(), id, null).getXml(), null, "section");
+                return DocBookUtilities.addDocbook50XMLDoctype(getXMLResource(Topic.class, new TopicV1Factory(), id, null)
+                        .getXml(), null, "section");
             }
         }
-        
+
         return getXMLResource(Topic.class, new TopicV1Factory(), id, null).getXml();
     }
 
     @Override
-    public String getXMLTopicRevisionXML(final Integer id, final Integer revision, final String doctype) throws InvalidParameterException, InternalProcessingException
-    {
+    public String getXMLTopicRevisionXML(final Integer id, final Integer revision, final String doctype)
+            throws InvalidParameterException, InternalProcessingException {
         assert id != null : "The id parameter can not be null";
-        
+
         if (doctype != null) {
-            if (doctype.equalsIgnoreCase(RESTv1Constants.DOCBOOK_45_DOCTYPE_NAME))
-            {
-                return DocBookUtilities.addDocbook45XMLDoctype(getXMLResource(Topic.class, new TopicV1Factory(), id, revision, null).getXml(), null, "section");
+            if (doctype.equalsIgnoreCase(RESTv1Constants.DOCBOOK_45_DOCTYPE_NAME)) {
+                return DocBookUtilities.addDocbook45XMLDoctype(
+                        getXMLResource(Topic.class, new TopicV1Factory(), id, revision, null).getXml(), null, "section");
             } else if (doctype.equalsIgnoreCase(RESTv1Constants.DOCBOOK_50_DOCTYPE_NAME)) {
-                return DocBookUtilities.addDocbook50XMLDoctype(getXMLResource(Topic.class, new TopicV1Factory(), id, revision, null).getXml(), null, "section");
+                return DocBookUtilities.addDocbook50XMLDoctype(
+                        getXMLResource(Topic.class, new TopicV1Factory(), id, revision, null).getXml(), null, "section");
             }
         }
-        
+
         return getXMLResource(Topic.class, new TopicV1Factory(), id, revision, null).getXml();
     }
 
@@ -3785,7 +3911,8 @@ public class RESTv1 extends BaseRESTv1 implements RESTInterfaceV1, RESTInterface
     }
 
     @Override
-    public RESTTopicV1 updateJSONTopic(final String expand, final RESTTopicV1 dataObject, final String message, final Integer flag, final Integer userId) throws InvalidParameterException, InternalProcessingException {
+    public RESTTopicV1 updateJSONTopic(final String expand, final RESTTopicV1 dataObject, final String message,
+            final Integer flag, final Integer userId) throws InvalidParameterException, InternalProcessingException {
         if (dataObject == null)
             throw new InvalidParameterException("The dataObject parameter can not be null");
 
@@ -3795,7 +3922,7 @@ public class RESTv1 extends BaseRESTv1 implements RESTInterfaceV1, RESTInterface
         final TopicV1Factory factory = new TopicV1Factory();
         final RESTLogDetailsV1 logDetails = generateLogDetails(message, flag, userId);
 
-        return updateEntity(Topic.class, dataObject, factory, this.getBaseUrl(), JSON_URL, expand, logDetails);
+        return updateJSONEntity(Topic.class, dataObject, factory, expand, logDetails);
     }
 
     @Override
@@ -3806,7 +3933,8 @@ public class RESTv1 extends BaseRESTv1 implements RESTInterfaceV1, RESTInterface
 
     @Override
     public RESTTopicCollectionV1 updateJSONTopics(final String expand, final RESTTopicCollectionV1 dataObjects,
-            final String message, final Integer flag, final Integer userId) throws InvalidParameterException, InternalProcessingException {
+            final String message, final Integer flag, final Integer userId) throws InvalidParameterException,
+            InternalProcessingException {
         if (dataObjects == null)
             throw new InvalidParameterException("The dataObjects parameter can not be null");
 
@@ -3816,8 +3944,8 @@ public class RESTv1 extends BaseRESTv1 implements RESTInterfaceV1, RESTInterface
         final TopicV1Factory factory = new TopicV1Factory();
         final RESTLogDetailsV1 logDetails = generateLogDetails(message, flag, userId);
 
-        return updateEntities(RESTTopicCollectionV1.class, Topic.class, dataObjects, factory, BaseRESTv1.TOPICS_EXPANSION_NAME,
-                JSON_URL, expand, getBaseUrl(), logDetails);
+        return updateJSONEntities(RESTTopicCollectionV1.class, Topic.class, dataObjects, factory,
+                RESTv1Constants.TOPICS_EXPANSION_NAME, expand, logDetails);
     }
 
     @Override
@@ -3827,14 +3955,15 @@ public class RESTv1 extends BaseRESTv1 implements RESTInterfaceV1, RESTInterface
     }
 
     @Override
-    public RESTTopicV1 createJSONTopic(final String expand, final RESTTopicV1 dataObject, final String message, final Integer flag, final Integer userId) throws InvalidParameterException, InternalProcessingException {
+    public RESTTopicV1 createJSONTopic(final String expand, final RESTTopicV1 dataObject, final String message,
+            final Integer flag, final Integer userId) throws InvalidParameterException, InternalProcessingException {
         if (dataObject == null)
             throw new InvalidParameterException("The dataObject parameter can not be null");
 
         final TopicV1Factory factory = new TopicV1Factory();
         final RESTLogDetailsV1 logDetails = generateLogDetails(message, flag, userId);
 
-        return createEntity(Topic.class, dataObject, factory, this.getBaseUrl(), JSON_URL, expand, logDetails);
+        return createJSONEntity(Topic.class, dataObject, factory, expand, logDetails);
     }
 
     @Override
@@ -3845,7 +3974,8 @@ public class RESTv1 extends BaseRESTv1 implements RESTInterfaceV1, RESTInterface
 
     @Override
     public RESTTopicCollectionV1 createJSONTopics(final String expand, final RESTTopicCollectionV1 dataObjects,
-            final String message, final Integer flag, final Integer userId) throws InvalidParameterException, InternalProcessingException {
+            final String message, final Integer flag, final Integer userId) throws InvalidParameterException,
+            InternalProcessingException {
         if (dataObjects == null)
             throw new InvalidParameterException("The dataObjects parameter can not be null");
 
@@ -3855,8 +3985,8 @@ public class RESTv1 extends BaseRESTv1 implements RESTInterfaceV1, RESTInterface
         final TopicV1Factory factory = new TopicV1Factory();
         final RESTLogDetailsV1 logDetails = generateLogDetails(message, flag, userId);
 
-        return createEntities(RESTTopicCollectionV1.class, Topic.class, dataObjects, factory, BaseRESTv1.TOPICS_EXPANSION_NAME,
-                JSON_URL, expand, getBaseUrl(), logDetails);
+        return createJSONEntities(RESTTopicCollectionV1.class, Topic.class, dataObjects, factory,
+                RESTv1Constants.TOPICS_EXPANSION_NAME, expand, logDetails);
     }
 
     @Override
@@ -3866,15 +3996,15 @@ public class RESTv1 extends BaseRESTv1 implements RESTInterfaceV1, RESTInterface
     }
 
     @Override
-    public RESTTopicV1 deleteJSONTopic(final Integer id, final String message, final Integer flag, final Integer userId, final String expand)
-            throws InvalidParameterException, InternalProcessingException {
+    public RESTTopicV1 deleteJSONTopic(final Integer id, final String message, final Integer flag, final Integer userId,
+            final String expand) throws InvalidParameterException, InternalProcessingException {
         if (id == null)
             throw new InvalidParameterException("The id parameter can not be null");
 
         final TopicV1Factory factory = new TopicV1Factory();
         final RESTLogDetailsV1 logDetails = generateLogDetails(message, flag, userId);
 
-        return deleteEntity(Topic.class, factory, id, expand, logDetails);
+        return deleteJSONEntity(Topic.class, factory, id, expand, logDetails);
     }
 
     @Override
@@ -3884,8 +4014,8 @@ public class RESTv1 extends BaseRESTv1 implements RESTInterfaceV1, RESTInterface
     }
 
     @Override
-    public RESTTopicCollectionV1 deleteJSONTopics(final PathSegment ids, final String message, final Integer flag, final Integer userId,
-            final String expand) throws InvalidParameterException, InternalProcessingException {
+    public RESTTopicCollectionV1 deleteJSONTopics(final PathSegment ids, final String message, final Integer flag,
+            final Integer userId, final String expand) throws InvalidParameterException, InternalProcessingException {
         if (ids == null)
             throw new InvalidParameterException("The ids parameter can not be null");
 
@@ -3894,8 +4024,8 @@ public class RESTv1 extends BaseRESTv1 implements RESTInterfaceV1, RESTInterface
         final TopicV1Factory factory = new TopicV1Factory();
         final RESTLogDetailsV1 logDetails = generateLogDetails(message, flag, userId);
 
-        return deleteEntities(RESTTopicCollectionV1.class, Topic.class, factory, dbEntityIds, BaseRESTv1.TOPICS_EXPANSION_NAME,
-                JSON_URL, expand, getBaseUrl(), logDetails);
+        return deleteJSONEntities(RESTTopicCollectionV1.class, Topic.class, factory, dbEntityIds,
+                RESTv1Constants.TOPICS_EXPANSION_NAME, expand, logDetails);
     }
 
     /* FILTERS FUNCTIONS */
@@ -3946,7 +4076,9 @@ public class RESTv1 extends BaseRESTv1 implements RESTInterfaceV1, RESTInterface
     }
 
     @Override
-    public String updateJSONPFilter(final String expand, final RESTFilterV1 dataObject, final String message, final Integer flag, final Integer userId, final String callback) throws InvalidParameterException, InternalProcessingException {
+    public String updateJSONPFilter(final String expand, final RESTFilterV1 dataObject, final String message,
+            final Integer flag, final Integer userId, final String callback) throws InvalidParameterException,
+            InternalProcessingException {
         if (callback == null)
             throw new InvalidParameterException("The callback parameter can not be null");
 
@@ -3964,12 +4096,15 @@ public class RESTv1 extends BaseRESTv1 implements RESTInterfaceV1, RESTInterface
     }
 
     @Override
-    public String updateJSONPFilters(final String expand, final RESTFilterCollectionV1 dataObjects, final String message, final Integer flag, final Integer userId, final String callback) throws InvalidParameterException, InternalProcessingException {
+    public String updateJSONPFilters(final String expand, final RESTFilterCollectionV1 dataObjects, final String message,
+            final Integer flag, final Integer userId, final String callback) throws InvalidParameterException,
+            InternalProcessingException {
         if (callback == null)
             throw new InvalidParameterException("The callback parameter can not be null");
 
         try {
-            return wrapJsonInPadding(callback, convertObjectToJSON(updateJSONFilters(expand, dataObjects, message, flag, userId)));
+            return wrapJsonInPadding(callback,
+                    convertObjectToJSON(updateJSONFilters(expand, dataObjects, message, flag, userId)));
         } catch (final Exception ex) {
             throw new InternalProcessingException("Could not marshall return value into JSON");
         }
@@ -3982,7 +4117,9 @@ public class RESTv1 extends BaseRESTv1 implements RESTInterfaceV1, RESTInterface
     }
 
     @Override
-    public String createJSONPFilter(final String expand, final RESTFilterV1 dataObject, final String message, final Integer flag, final Integer userId, final String callback) throws InvalidParameterException, InternalProcessingException {
+    public String createJSONPFilter(final String expand, final RESTFilterV1 dataObject, final String message,
+            final Integer flag, final Integer userId, final String callback) throws InvalidParameterException,
+            InternalProcessingException {
         if (callback == null)
             throw new InvalidParameterException("The callback parameter can not be null");
 
@@ -4000,12 +4137,15 @@ public class RESTv1 extends BaseRESTv1 implements RESTInterfaceV1, RESTInterface
     }
 
     @Override
-    public String createJSONPFilters(final String expand, final RESTFilterCollectionV1 dataObjects, final String message, final Integer flag, final Integer userId, final String callback) throws InvalidParameterException, InternalProcessingException {
+    public String createJSONPFilters(final String expand, final RESTFilterCollectionV1 dataObjects, final String message,
+            final Integer flag, final Integer userId, final String callback) throws InvalidParameterException,
+            InternalProcessingException {
         if (callback == null)
             throw new InvalidParameterException("The callback parameter can not be null");
 
         try {
-            return wrapJsonInPadding(callback, convertObjectToJSON(createJSONFilters(expand, dataObjects, message, flag, userId)));
+            return wrapJsonInPadding(callback,
+                    convertObjectToJSON(createJSONFilters(expand, dataObjects, message, flag, userId)));
         } catch (final Exception ex) {
             throw new InternalProcessingException("Could not marshall return value into JSON");
         }
@@ -4018,8 +4158,8 @@ public class RESTv1 extends BaseRESTv1 implements RESTInterfaceV1, RESTInterface
     }
 
     @Override
-    public String deleteJSONPFilter(final Integer id, final String message, final Integer flag, final Integer userId, final String expand,
-            final String callback) throws InvalidParameterException, InternalProcessingException {
+    public String deleteJSONPFilter(final Integer id, final String message, final Integer flag, final Integer userId,
+            final String expand, final String callback) throws InvalidParameterException, InternalProcessingException {
         if (callback == null)
             throw new InvalidParameterException("The callback parameter can not be null");
 
@@ -4037,8 +4177,8 @@ public class RESTv1 extends BaseRESTv1 implements RESTInterfaceV1, RESTInterface
     }
 
     @Override
-    public String deleteJSONPFilters(final PathSegment ids, final String message, final Integer flag, final Integer userId, final String expand,
-            final String callback) throws InvalidParameterException, InternalProcessingException {
+    public String deleteJSONPFilters(final PathSegment ids, final String message, final Integer flag, final Integer userId,
+            final String expand, final String callback) throws InvalidParameterException, InternalProcessingException {
         if (callback == null)
             throw new InvalidParameterException("The callback parameter can not be null");
 
@@ -4078,15 +4218,16 @@ public class RESTv1 extends BaseRESTv1 implements RESTInterfaceV1, RESTInterface
          * Construct a collection with the given expansion name. The user will have to expand the collection to get the details
          * of the items in it.
          */
-        return getJSONResources(RESTFilterCollectionV1.class, Filter.class, new FilterV1Factory(), FILTERS_EXPANSION_NAME,
-                expand);
+        return getJSONResources(RESTFilterCollectionV1.class, Filter.class, new FilterV1Factory(),
+                RESTv1Constants.FILTERS_EXPANSION_NAME, expand);
     }
 
     @Override
     public RESTFilterCollectionV1 getJSONFiltersWithQuery(final PathSegment query, final String expand)
             throws InvalidParameterException, InternalProcessingException {
         return getJSONResourcesFromQuery(RESTFilterCollectionV1.class, query.getMatrixParameters(),
-                FilterFilterQueryBuilder.class, new FilterFieldFilter(), new FilterV1Factory(), FILTERS_EXPANSION_NAME, expand);
+                FilterFilterQueryBuilder.class, new FilterFieldFilter(), new FilterV1Factory(),
+                RESTv1Constants.FILTERS_EXPANSION_NAME, expand);
     }
 
     @Override
@@ -4096,7 +4237,8 @@ public class RESTv1 extends BaseRESTv1 implements RESTInterfaceV1, RESTInterface
     }
 
     @Override
-    public RESTFilterV1 updateJSONFilter(final String expand, final RESTFilterV1 dataObject, final String message, final Integer flag, final Integer userId) throws InvalidParameterException, InternalProcessingException {
+    public RESTFilterV1 updateJSONFilter(final String expand, final RESTFilterV1 dataObject, final String message,
+            final Integer flag, final Integer userId) throws InvalidParameterException, InternalProcessingException {
         if (dataObject == null)
             throw new InvalidParameterException("The dataObject parameter can not be null");
 
@@ -4106,7 +4248,7 @@ public class RESTv1 extends BaseRESTv1 implements RESTInterfaceV1, RESTInterface
         final FilterV1Factory factory = new FilterV1Factory();
         final RESTLogDetailsV1 logDetails = generateLogDetails(message, flag, userId);
 
-        return updateEntity(Filter.class, dataObject, factory, this.getBaseUrl(), JSON_URL, expand, logDetails);
+        return updateJSONEntity(Filter.class, dataObject, factory, expand, logDetails);
     }
 
     @Override
@@ -4117,7 +4259,8 @@ public class RESTv1 extends BaseRESTv1 implements RESTInterfaceV1, RESTInterface
 
     @Override
     public RESTFilterCollectionV1 updateJSONFilters(final String expand, final RESTFilterCollectionV1 dataObjects,
-            final String message, final Integer flag, final Integer userId) throws InvalidParameterException, InternalProcessingException {
+            final String message, final Integer flag, final Integer userId) throws InvalidParameterException,
+            InternalProcessingException {
         if (dataObjects == null)
             throw new InvalidParameterException("The dataObjects parameter can not be null");
 
@@ -4127,8 +4270,8 @@ public class RESTv1 extends BaseRESTv1 implements RESTInterfaceV1, RESTInterface
         final FilterV1Factory factory = new FilterV1Factory();
         final RESTLogDetailsV1 logDetails = generateLogDetails(message, flag, userId);
 
-        return updateEntities(RESTFilterCollectionV1.class, Filter.class, dataObjects, factory,
-                BaseRESTv1.FILTERS_EXPANSION_NAME, JSON_URL, expand, getBaseUrl(), logDetails);
+        return updateJSONEntities(RESTFilterCollectionV1.class, Filter.class, dataObjects, factory,
+                RESTv1Constants.FILTERS_EXPANSION_NAME, expand, logDetails);
     }
 
     @Override
@@ -4138,14 +4281,15 @@ public class RESTv1 extends BaseRESTv1 implements RESTInterfaceV1, RESTInterface
     }
 
     @Override
-    public RESTFilterV1 createJSONFilter(final String expand, final RESTFilterV1 dataObject, final String message, final Integer flag, final Integer userId) throws InvalidParameterException, InternalProcessingException {
+    public RESTFilterV1 createJSONFilter(final String expand, final RESTFilterV1 dataObject, final String message,
+            final Integer flag, final Integer userId) throws InvalidParameterException, InternalProcessingException {
         if (dataObject == null)
             throw new InvalidParameterException("The dataObject parameter can not be null");
 
         final FilterV1Factory factory = new FilterV1Factory();
         final RESTLogDetailsV1 logDetails = generateLogDetails(message, flag, userId);
 
-        return createEntity(Filter.class, dataObject, factory, this.getBaseUrl(), JSON_URL, expand, logDetails);
+        return createJSONEntity(Filter.class, dataObject, factory, expand, logDetails);
     }
 
     @Override
@@ -4156,7 +4300,8 @@ public class RESTv1 extends BaseRESTv1 implements RESTInterfaceV1, RESTInterface
 
     @Override
     public RESTFilterCollectionV1 createJSONFilters(final String expand, final RESTFilterCollectionV1 dataObjects,
-            final String message, final Integer flag, final Integer userId) throws InvalidParameterException, InternalProcessingException {
+            final String message, final Integer flag, final Integer userId) throws InvalidParameterException,
+            InternalProcessingException {
         if (dataObjects == null)
             throw new InvalidParameterException("The dataObjects parameter can not be null");
 
@@ -4166,8 +4311,8 @@ public class RESTv1 extends BaseRESTv1 implements RESTInterfaceV1, RESTInterface
         final FilterV1Factory factory = new FilterV1Factory();
         final RESTLogDetailsV1 logDetails = generateLogDetails(message, flag, userId);
 
-        return createEntities(RESTFilterCollectionV1.class, Filter.class, dataObjects, factory,
-                BaseRESTv1.FILTERS_EXPANSION_NAME, JSON_URL, expand, getBaseUrl(), logDetails);
+        return createJSONEntities(RESTFilterCollectionV1.class, Filter.class, dataObjects, factory,
+                RESTv1Constants.FILTERS_EXPANSION_NAME, expand, logDetails);
     }
 
     @Override
@@ -4177,15 +4322,15 @@ public class RESTv1 extends BaseRESTv1 implements RESTInterfaceV1, RESTInterface
     }
 
     @Override
-    public RESTFilterV1 deleteJSONFilter(final Integer id, final String message, final Integer flag, final Integer userId, final String expand)
-            throws InvalidParameterException, InternalProcessingException {
+    public RESTFilterV1 deleteJSONFilter(final Integer id, final String message, final Integer flag, final Integer userId,
+            final String expand) throws InvalidParameterException, InternalProcessingException {
         if (id == null)
             throw new InvalidParameterException("The id parameter can not be null");
 
         final FilterV1Factory factory = new FilterV1Factory();
         final RESTLogDetailsV1 logDetails = generateLogDetails(message, flag, userId);
 
-        return deleteEntity(Filter.class, factory, id, expand, logDetails);
+        return deleteJSONEntity(Filter.class, factory, id, expand, logDetails);
     }
 
     @Override
@@ -4195,8 +4340,8 @@ public class RESTv1 extends BaseRESTv1 implements RESTInterfaceV1, RESTInterface
     }
 
     @Override
-    public RESTFilterCollectionV1 deleteJSONFilters(final PathSegment ids, final String message, final Integer flag, final Integer userId,
-            final String expand) throws InvalidParameterException, InternalProcessingException {
+    public RESTFilterCollectionV1 deleteJSONFilters(final PathSegment ids, final String message, final Integer flag,
+            final Integer userId, final String expand) throws InvalidParameterException, InternalProcessingException {
         if (ids == null)
             throw new InvalidParameterException("The ids parameter can not be null");
 
@@ -4204,8 +4349,8 @@ public class RESTv1 extends BaseRESTv1 implements RESTInterfaceV1, RESTInterface
         final FilterV1Factory factory = new FilterV1Factory();
         final RESTLogDetailsV1 logDetails = generateLogDetails(message, flag, userId);
 
-        return deleteEntities(RESTFilterCollectionV1.class, Filter.class, factory, dbEntityIds,
-                BaseRESTv1.FILTERS_EXPANSION_NAME, JSON_URL, expand, getBaseUrl(), logDetails);
+        return deleteJSONEntities(RESTFilterCollectionV1.class, Filter.class, factory, dbEntityIds,
+                RESTv1Constants.FILTERS_EXPANSION_NAME, expand, logDetails);
     }
 
     /* INTEGERCONSTANT FUNCTIONS */
@@ -4256,7 +4401,9 @@ public class RESTv1 extends BaseRESTv1 implements RESTInterfaceV1, RESTInterface
     }
 
     @Override
-    public String updateJSONPIntegerConstant(final String expand, final RESTIntegerConstantV1 dataObject, final String message, final Integer flag, final Integer userId, final String callback) throws InvalidParameterException, InternalProcessingException {
+    public String updateJSONPIntegerConstant(final String expand, final RESTIntegerConstantV1 dataObject, final String message,
+            final Integer flag, final Integer userId, final String callback) throws InvalidParameterException,
+            InternalProcessingException {
         if (callback == null)
             throw new InvalidParameterException("The callback parameter can not be null");
 
@@ -4276,8 +4423,8 @@ public class RESTv1 extends BaseRESTv1 implements RESTInterfaceV1, RESTInterface
 
     @Override
     public String updateJSONPIntegerConstants(final String expand, final RESTIntegerConstantCollectionV1 dataObjects,
-            final String message, final Integer flag, final Integer userId, final String callback) throws InvalidParameterException,
-            InternalProcessingException {
+            final String message, final Integer flag, final Integer userId, final String callback)
+            throws InvalidParameterException, InternalProcessingException {
         if (callback == null)
             throw new InvalidParameterException("The callback parameter can not be null");
 
@@ -4296,7 +4443,9 @@ public class RESTv1 extends BaseRESTv1 implements RESTInterfaceV1, RESTInterface
     }
 
     @Override
-    public String createJSONPIntegerConstant(final String expand, final RESTIntegerConstantV1 dataObject, final String message, final Integer flag, final Integer userId, final String callback) throws InvalidParameterException, InternalProcessingException {
+    public String createJSONPIntegerConstant(final String expand, final RESTIntegerConstantV1 dataObject, final String message,
+            final Integer flag, final Integer userId, final String callback) throws InvalidParameterException,
+            InternalProcessingException {
         if (callback == null)
             throw new InvalidParameterException("The callback parameter can not be null");
 
@@ -4316,8 +4465,8 @@ public class RESTv1 extends BaseRESTv1 implements RESTInterfaceV1, RESTInterface
 
     @Override
     public String createJSONPIntegerConstants(final String expand, final RESTIntegerConstantCollectionV1 dataObjects,
-            final String message, final Integer flag, final Integer userId, final String callback) throws InvalidParameterException,
-            InternalProcessingException {
+            final String message, final Integer flag, final Integer userId, final String callback)
+            throws InvalidParameterException, InternalProcessingException {
         if (callback == null)
             throw new InvalidParameterException("The callback parameter can not be null");
 
@@ -4336,13 +4485,14 @@ public class RESTv1 extends BaseRESTv1 implements RESTInterfaceV1, RESTInterface
     }
 
     @Override
-    public String deleteJSONPIntegerConstant(final Integer id, final String message, final Integer flag, final Integer userId, final String expand,
-            final String callback) throws InvalidParameterException, InternalProcessingException {
+    public String deleteJSONPIntegerConstant(final Integer id, final String message, final Integer flag, final Integer userId,
+            final String expand, final String callback) throws InvalidParameterException, InternalProcessingException {
         if (callback == null)
             throw new InvalidParameterException("The callback parameter can not be null");
 
         try {
-            return wrapJsonInPadding(callback, convertObjectToJSON(deleteJSONIntegerConstant(id, message, flag, userId, expand)));
+            return wrapJsonInPadding(callback,
+                    convertObjectToJSON(deleteJSONIntegerConstant(id, message, flag, userId, expand)));
         } catch (final Exception ex) {
             throw new InternalProcessingException("Could not marshall return value into JSON");
         }
@@ -4355,13 +4505,15 @@ public class RESTv1 extends BaseRESTv1 implements RESTInterfaceV1, RESTInterface
     }
 
     @Override
-    public String deleteJSONPIntegerConstants(final PathSegment ids, final String message, final Integer flag, final Integer userId,
-            final String expand, final String callback) throws InvalidParameterException, InternalProcessingException {
+    public String deleteJSONPIntegerConstants(final PathSegment ids, final String message, final Integer flag,
+            final Integer userId, final String expand, final String callback) throws InvalidParameterException,
+            InternalProcessingException {
         if (callback == null)
             throw new InvalidParameterException("The callback parameter can not be null");
 
         try {
-            return wrapJsonInPadding(callback, convertObjectToJSON(deleteJSONIntegerConstants(ids, message, flag, userId, expand)));
+            return wrapJsonInPadding(callback,
+                    convertObjectToJSON(deleteJSONIntegerConstants(ids, message, flag, userId, expand)));
         } catch (final Exception ex) {
             throw new InternalProcessingException("Could not marshall return value into JSON");
         }
@@ -4381,7 +4533,7 @@ public class RESTv1 extends BaseRESTv1 implements RESTInterfaceV1, RESTInterface
     public RESTIntegerConstantCollectionV1 getJSONIntegerConstants(final String expand) throws InvalidParameterException,
             InternalProcessingException {
         return getJSONResources(RESTIntegerConstantCollectionV1.class, IntegerConstants.class, new IntegerConstantV1Factory(),
-                BaseRESTv1.INTEGERCONSTANTS_EXPANSION_NAME, expand);
+                RESTv1Constants.INTEGERCONSTANTS_EXPANSION_NAME, expand);
     }
 
     @Override
@@ -4389,7 +4541,7 @@ public class RESTv1 extends BaseRESTv1 implements RESTInterfaceV1, RESTInterface
             throws InvalidParameterException, InternalProcessingException {
         return getJSONResourcesFromQuery(RESTIntegerConstantCollectionV1.class, query.getMatrixParameters(),
                 IntegerConstantFilterQueryBuilder.class, new IntegerConstantFieldFilter(), new IntegerConstantV1Factory(),
-                BaseRESTv1.INTEGERCONSTANTS_EXPANSION_NAME, expand);
+                RESTv1Constants.INTEGERCONSTANTS_EXPANSION_NAME, expand);
     }
 
     @Override
@@ -4400,7 +4552,8 @@ public class RESTv1 extends BaseRESTv1 implements RESTInterfaceV1, RESTInterface
 
     @Override
     public RESTIntegerConstantV1 updateJSONIntegerConstant(final String expand, final RESTIntegerConstantV1 dataObject,
-            final String message, final Integer flag, final Integer userId) throws InvalidParameterException, InternalProcessingException {
+            final String message, final Integer flag, final Integer userId) throws InvalidParameterException,
+            InternalProcessingException {
         if (dataObject == null)
             throw new InvalidParameterException("The dataObject parameter can not be null");
 
@@ -4410,7 +4563,7 @@ public class RESTv1 extends BaseRESTv1 implements RESTInterfaceV1, RESTInterface
         final IntegerConstantV1Factory factory = new IntegerConstantV1Factory();
         final RESTLogDetailsV1 logDetails = generateLogDetails(message, flag, userId);
 
-        return updateEntity(IntegerConstants.class, dataObject, factory, this.getBaseUrl(), JSON_URL, expand, logDetails);
+        return updateJSONEntity(IntegerConstants.class, dataObject, factory, expand, logDetails);
     }
 
     @Override
@@ -4432,8 +4585,8 @@ public class RESTv1 extends BaseRESTv1 implements RESTInterfaceV1, RESTInterface
         final IntegerConstantV1Factory factory = new IntegerConstantV1Factory();
         final RESTLogDetailsV1 logDetails = generateLogDetails(message, flag, userId);
 
-        return updateEntities(RESTIntegerConstantCollectionV1.class, IntegerConstants.class, dataObjects, factory,
-                BaseRESTv1.INTEGERCONSTANTS_EXPANSION_NAME, JSON_URL, expand, getBaseUrl(), logDetails);
+        return updateJSONEntities(RESTIntegerConstantCollectionV1.class, IntegerConstants.class, dataObjects, factory,
+                RESTv1Constants.INTEGERCONSTANTS_EXPANSION_NAME, expand, logDetails);
     }
 
     @Override
@@ -4444,14 +4597,15 @@ public class RESTv1 extends BaseRESTv1 implements RESTInterfaceV1, RESTInterface
 
     @Override
     public RESTIntegerConstantV1 createJSONIntegerConstant(final String expand, final RESTIntegerConstantV1 dataObject,
-            final String message, final Integer flag, final Integer userId) throws InvalidParameterException, InternalProcessingException {
+            final String message, final Integer flag, final Integer userId) throws InvalidParameterException,
+            InternalProcessingException {
         if (dataObject == null)
             throw new InvalidParameterException("The dataObject parameter can not be null");
 
         final IntegerConstantV1Factory factory = new IntegerConstantV1Factory();
         final RESTLogDetailsV1 logDetails = generateLogDetails(message, flag, userId);
 
-        return createEntity(IntegerConstants.class, dataObject, factory, this.getBaseUrl(), JSON_URL, expand, logDetails);
+        return createJSONEntity(IntegerConstants.class, dataObject, factory, expand, logDetails);
     }
 
     @Override
@@ -4473,8 +4627,8 @@ public class RESTv1 extends BaseRESTv1 implements RESTInterfaceV1, RESTInterface
         final IntegerConstantV1Factory factory = new IntegerConstantV1Factory();
         final RESTLogDetailsV1 logDetails = generateLogDetails(message, flag, userId);
 
-        return createEntities(RESTIntegerConstantCollectionV1.class, IntegerConstants.class, dataObjects, factory,
-                BaseRESTv1.INTEGERCONSTANTS_EXPANSION_NAME, JSON_URL, expand, getBaseUrl(), logDetails);
+        return createJSONEntities(RESTIntegerConstantCollectionV1.class, IntegerConstants.class, dataObjects, factory,
+                RESTv1Constants.INTEGERCONSTANTS_EXPANSION_NAME, expand, logDetails);
     }
 
     @Override
@@ -4484,15 +4638,15 @@ public class RESTv1 extends BaseRESTv1 implements RESTInterfaceV1, RESTInterface
     }
 
     @Override
-    public RESTIntegerConstantV1 deleteJSONIntegerConstant(final Integer id, final String message, final Integer flag, final Integer userId,
-            final String expand) throws InvalidParameterException, InternalProcessingException {
+    public RESTIntegerConstantV1 deleteJSONIntegerConstant(final Integer id, final String message, final Integer flag,
+            final Integer userId, final String expand) throws InvalidParameterException, InternalProcessingException {
         if (id == null)
             throw new InvalidParameterException("The id parameter can not be null");
 
         final IntegerConstantV1Factory factory = new IntegerConstantV1Factory();
         final RESTLogDetailsV1 logDetails = generateLogDetails(message, flag, userId);
 
-        return deleteEntity(IntegerConstants.class, factory, id, expand, logDetails);
+        return deleteJSONEntity(IntegerConstants.class, factory, id, expand, logDetails);
     }
 
     @Override
@@ -4502,7 +4656,9 @@ public class RESTv1 extends BaseRESTv1 implements RESTInterfaceV1, RESTInterface
     }
 
     @Override
-    public RESTIntegerConstantCollectionV1 deleteJSONIntegerConstants(final PathSegment ids, final String message, final Integer flag, final Integer userId, final String expand) throws InvalidParameterException, InternalProcessingException {
+    public RESTIntegerConstantCollectionV1 deleteJSONIntegerConstants(final PathSegment ids, final String message,
+            final Integer flag, final Integer userId, final String expand) throws InvalidParameterException,
+            InternalProcessingException {
         if (ids == null)
             throw new InvalidParameterException("The ids parameter can not be null");
 
@@ -4510,8 +4666,8 @@ public class RESTv1 extends BaseRESTv1 implements RESTInterfaceV1, RESTInterface
         final IntegerConstantV1Factory factory = new IntegerConstantV1Factory();
         final RESTLogDetailsV1 logDetails = generateLogDetails(message, flag, userId);
 
-        return deleteEntities(RESTIntegerConstantCollectionV1.class, IntegerConstants.class, factory, dbEntityIds,
-                BaseRESTv1.INTEGERCONSTANTS_EXPANSION_NAME, JSON_URL, expand, getBaseUrl(), logDetails);
+        return deleteJSONEntities(RESTIntegerConstantCollectionV1.class, IntegerConstants.class, factory, dbEntityIds,
+                RESTv1Constants.INTEGERCONSTANTS_EXPANSION_NAME, expand, logDetails);
     }
 
     /* CONTENT SPEC FUNCTIONS */
@@ -4563,12 +4719,14 @@ public class RESTv1 extends BaseRESTv1 implements RESTInterfaceV1, RESTInterface
 
     @Override
     public String updateJSONPContentSpec(final String expand, final RESTContentSpecV1 dataObject, final String message,
-            final Integer flag, final Integer userId, final String callback) throws InvalidParameterException, InternalProcessingException {
+            final Integer flag, final Integer userId, final String callback) throws InvalidParameterException,
+            InternalProcessingException {
         if (callback == null)
             throw new InvalidParameterException("The callback parameter can not be null");
 
         try {
-            return wrapJsonInPadding(callback, convertObjectToJSON(updateJSONContentSpec(expand, dataObject, message, flag, userId)));
+            return wrapJsonInPadding(callback,
+                    convertObjectToJSON(updateJSONContentSpec(expand, dataObject, message, flag, userId)));
         } catch (final Exception ex) {
             throw new InternalProcessingException("Could not marshall return value into JSON");
         }
@@ -4582,13 +4740,14 @@ public class RESTv1 extends BaseRESTv1 implements RESTInterfaceV1, RESTInterface
 
     @Override
     public String updateJSONPContentSpecs(final String expand, final RESTContentSpecCollectionV1 dataObjects,
-            final String message, final Integer flag, final Integer userId, final String callback) throws InvalidParameterException,
-            InternalProcessingException {
+            final String message, final Integer flag, final Integer userId, final String callback)
+            throws InvalidParameterException, InternalProcessingException {
         if (callback == null)
             throw new InvalidParameterException("The callback parameter can not be null");
 
         try {
-            return wrapJsonInPadding(callback, convertObjectToJSON(updateJSONContentSpecs(expand, dataObjects, message, flag, userId)));
+            return wrapJsonInPadding(callback,
+                    convertObjectToJSON(updateJSONContentSpecs(expand, dataObjects, message, flag, userId)));
         } catch (final Exception ex) {
             throw new InternalProcessingException("Could not marshall return value into JSON");
         }
@@ -4602,12 +4761,14 @@ public class RESTv1 extends BaseRESTv1 implements RESTInterfaceV1, RESTInterface
 
     @Override
     public String createJSONPContentSpec(final String expand, final RESTContentSpecV1 dataObject, final String message,
-            final Integer flag, final Integer userId, final String callback) throws InvalidParameterException, InternalProcessingException {
+            final Integer flag, final Integer userId, final String callback) throws InvalidParameterException,
+            InternalProcessingException {
         if (callback == null)
             throw new InvalidParameterException("The callback parameter can not be null");
 
         try {
-            return wrapJsonInPadding(callback, convertObjectToJSON(createJSONContentSpec(expand, dataObject, message, flag, userId)));
+            return wrapJsonInPadding(callback,
+                    convertObjectToJSON(createJSONContentSpec(expand, dataObject, message, flag, userId)));
         } catch (final Exception ex) {
             throw new InternalProcessingException("Could not marshall return value into JSON");
         }
@@ -4621,13 +4782,14 @@ public class RESTv1 extends BaseRESTv1 implements RESTInterfaceV1, RESTInterface
 
     @Override
     public String createJSONPContentSpecs(final String expand, final RESTContentSpecCollectionV1 dataObjects,
-            final String message, final Integer flag, final Integer userId, final String callback) throws InvalidParameterException,
-            InternalProcessingException {
+            final String message, final Integer flag, final Integer userId, final String callback)
+            throws InvalidParameterException, InternalProcessingException {
         if (callback == null)
             throw new InvalidParameterException("The callback parameter can not be null");
 
         try {
-            return wrapJsonInPadding(callback, convertObjectToJSON(createJSONContentSpecs(expand, dataObjects, message, flag, userId)));
+            return wrapJsonInPadding(callback,
+                    convertObjectToJSON(createJSONContentSpecs(expand, dataObjects, message, flag, userId)));
         } catch (final Exception ex) {
             throw new InternalProcessingException("Could not marshall return value into JSON");
         }
@@ -4640,8 +4802,8 @@ public class RESTv1 extends BaseRESTv1 implements RESTInterfaceV1, RESTInterface
     }
 
     @Override
-    public String deleteJSONPContentSpec(final Integer id, final String message, final Integer flag, final Integer userId, final String expand,
-            final String callback) throws InvalidParameterException, InternalProcessingException {
+    public String deleteJSONPContentSpec(final Integer id, final String message, final Integer flag, final Integer userId,
+            final String expand, final String callback) throws InvalidParameterException, InternalProcessingException {
         if (callback == null)
             throw new InvalidParameterException("The callback parameter can not be null");
 
@@ -4659,8 +4821,9 @@ public class RESTv1 extends BaseRESTv1 implements RESTInterfaceV1, RESTInterface
     }
 
     @Override
-    public String deleteJSONPContentSpecs(final PathSegment ids, final String message, final Integer flag, final Integer userId, final String expand,
-            final String callback) throws InvalidParameterException, InternalProcessingException {
+    public String deleteJSONPContentSpecs(final PathSegment ids, final String message, final Integer flag,
+            final Integer userId, final String expand, final String callback) throws InvalidParameterException,
+            InternalProcessingException {
         if (callback == null)
             throw new InvalidParameterException("The callback parameter can not be null");
 
@@ -4685,7 +4848,7 @@ public class RESTv1 extends BaseRESTv1 implements RESTInterfaceV1, RESTInterface
     public RESTContentSpecCollectionV1 getJSONContentSpecs(final String expand) throws InvalidParameterException,
             InternalProcessingException {
         return getJSONResources(RESTContentSpecCollectionV1.class, ContentSpec.class, new ContentSpecV1Factory(),
-                BaseRESTv1.INTEGERCONSTANTS_EXPANSION_NAME, expand);
+                RESTv1Constants.INTEGERCONSTANTS_EXPANSION_NAME, expand);
     }
 
     @Override
@@ -4693,7 +4856,7 @@ public class RESTv1 extends BaseRESTv1 implements RESTInterfaceV1, RESTInterface
             throws InvalidParameterException, InternalProcessingException {
         return getJSONResourcesFromQuery(RESTContentSpecCollectionV1.class, query.getMatrixParameters(),
                 ContentSpecFilterQueryBuilder.class, new ContentSpecFieldFilter(), new ContentSpecV1Factory(),
-                BaseRESTv1.CONTENT_SPEC_EXPANSION_NAME, expand);
+                RESTv1Constants.CONTENT_SPEC_EXPANSION_NAME, expand);
     }
 
     @Override
@@ -4704,7 +4867,8 @@ public class RESTv1 extends BaseRESTv1 implements RESTInterfaceV1, RESTInterface
 
     @Override
     public RESTContentSpecV1 updateJSONContentSpec(final String expand, final RESTContentSpecV1 dataObject,
-            final String message, final Integer flag, final Integer userId) throws InvalidParameterException, InternalProcessingException {
+            final String message, final Integer flag, final Integer userId) throws InvalidParameterException,
+            InternalProcessingException {
         if (dataObject == null)
             throw new InvalidParameterException("The dataObject parameter can not be null");
 
@@ -4713,8 +4877,8 @@ public class RESTv1 extends BaseRESTv1 implements RESTInterfaceV1, RESTInterface
 
         final ContentSpecV1Factory factory = new ContentSpecV1Factory();
         final RESTLogDetailsV1 logDetails = generateLogDetails(message, flag, userId);
-        
-        return updateEntity(ContentSpec.class, dataObject, factory, this.getBaseUrl(), JSON_URL, expand, logDetails);
+
+        return updateJSONEntity(ContentSpec.class, dataObject, factory, expand, logDetails);
     }
 
     @Override
@@ -4735,9 +4899,9 @@ public class RESTv1 extends BaseRESTv1 implements RESTInterfaceV1, RESTInterface
 
         final ContentSpecV1Factory factory = new ContentSpecV1Factory();
         final RESTLogDetailsV1 logDetails = generateLogDetails(message, flag, userId);
-        
-        return updateEntities(RESTContentSpecCollectionV1.class, ContentSpec.class, dataObjects, factory,
-                BaseRESTv1.CONTENT_SPEC_EXPANSION_NAME, JSON_URL, expand, getBaseUrl(), logDetails);
+
+        return updateJSONEntities(RESTContentSpecCollectionV1.class, ContentSpec.class, dataObjects, factory,
+                RESTv1Constants.CONTENT_SPEC_EXPANSION_NAME, expand, logDetails);
     }
 
     @Override
@@ -4748,14 +4912,15 @@ public class RESTv1 extends BaseRESTv1 implements RESTInterfaceV1, RESTInterface
 
     @Override
     public RESTContentSpecV1 createJSONContentSpec(final String expand, final RESTContentSpecV1 dataObject,
-            final String message, final Integer flag, final Integer userId) throws InvalidParameterException, InternalProcessingException {
+            final String message, final Integer flag, final Integer userId) throws InvalidParameterException,
+            InternalProcessingException {
         if (dataObject == null)
             throw new InvalidParameterException("The dataObject parameter can not be null");
 
         final ContentSpecV1Factory factory = new ContentSpecV1Factory();
         final RESTLogDetailsV1 logDetails = generateLogDetails(message, flag, userId);
-        
-        return createEntity(ContentSpec.class, dataObject, factory, this.getBaseUrl(), JSON_URL, expand, logDetails);
+
+        return createJSONEntity(ContentSpec.class, dataObject, factory, expand, logDetails);
     }
 
     @Override
@@ -4776,9 +4941,9 @@ public class RESTv1 extends BaseRESTv1 implements RESTInterfaceV1, RESTInterface
 
         final ContentSpecV1Factory factory = new ContentSpecV1Factory();
         final RESTLogDetailsV1 logDetails = generateLogDetails(message, flag, userId);
-        
-        return createEntities(RESTContentSpecCollectionV1.class, ContentSpec.class, dataObjects, factory,
-                BaseRESTv1.CONTENT_SPEC_EXPANSION_NAME, JSON_URL, expand, getBaseUrl(), logDetails);
+
+        return createJSONEntities(RESTContentSpecCollectionV1.class, ContentSpec.class, dataObjects, factory,
+                RESTv1Constants.CONTENT_SPEC_EXPANSION_NAME, expand, logDetails);
     }
 
     @Override
@@ -4788,15 +4953,15 @@ public class RESTv1 extends BaseRESTv1 implements RESTInterfaceV1, RESTInterface
     }
 
     @Override
-    public RESTContentSpecV1 deleteJSONContentSpec(final Integer id, final String message, final Integer flag, final Integer userId,
-            final String expand) throws InvalidParameterException, InternalProcessingException {
+    public RESTContentSpecV1 deleteJSONContentSpec(final Integer id, final String message, final Integer flag,
+            final Integer userId, final String expand) throws InvalidParameterException, InternalProcessingException {
         if (id == null)
             throw new InvalidParameterException("The dataObject parameter can not be null");
 
         final ContentSpecV1Factory factory = new ContentSpecV1Factory();
         final RESTLogDetailsV1 logDetails = generateLogDetails(message, flag, userId);
-        
-        return deleteEntity(ContentSpec.class, factory, id, expand, logDetails);
+
+        return deleteJSONEntity(ContentSpec.class, factory, id, expand, logDetails);
     }
 
     @Override
@@ -4806,8 +4971,8 @@ public class RESTv1 extends BaseRESTv1 implements RESTInterfaceV1, RESTInterface
     }
 
     @Override
-    public RESTContentSpecCollectionV1 deleteJSONContentSpecs(final PathSegment ids, final String message, final Integer flag, final Integer userId,
-            final String expand) throws InvalidParameterException, InternalProcessingException {
+    public RESTContentSpecCollectionV1 deleteJSONContentSpecs(final PathSegment ids, final String message, final Integer flag,
+            final Integer userId, final String expand) throws InvalidParameterException, InternalProcessingException {
         if (ids == null)
             throw new InvalidParameterException("The dataObjects parameter can not be null");
 
@@ -4815,9 +4980,9 @@ public class RESTv1 extends BaseRESTv1 implements RESTInterfaceV1, RESTInterface
 
         final ContentSpecV1Factory factory = new ContentSpecV1Factory();
         final RESTLogDetailsV1 logDetails = generateLogDetails(message, flag, userId);
-        
-        return deleteEntities(RESTContentSpecCollectionV1.class, ContentSpec.class, factory, dbEntityIds,
-                BaseRESTv1.CONTENT_SPEC_EXPANSION_NAME, JSON_URL, expand, getBaseUrl(), logDetails);
+
+        return deleteJSONEntities(RESTContentSpecCollectionV1.class, ContentSpec.class, factory, dbEntityIds,
+                RESTv1Constants.CONTENT_SPEC_EXPANSION_NAME, expand, logDetails);
     }
 
     /* CONTENT SPEC NODE FUNCTIONS */
@@ -4869,7 +5034,8 @@ public class RESTv1 extends BaseRESTv1 implements RESTInterfaceV1, RESTInterface
 
     @Override
     public String updateJSONPContentSpecNode(final String expand, final RESTCSNodeV1 dataObject, final String message,
-            final Integer flag, final Integer userId, final String callback) throws InvalidParameterException, InternalProcessingException {
+            final Integer flag, final Integer userId, final String callback) throws InvalidParameterException,
+            InternalProcessingException {
         if (callback == null)
             throw new InvalidParameterException("The callback parameter can not be null");
 
@@ -4889,8 +5055,8 @@ public class RESTv1 extends BaseRESTv1 implements RESTInterfaceV1, RESTInterface
 
     @Override
     public String updateJSONPContentSpecNodes(final String expand, final RESTCSNodeCollectionV1 dataObjects,
-            final String message, final Integer flag, final Integer userId, final String callback) throws InvalidParameterException,
-            InternalProcessingException {
+            final String message, final Integer flag, final Integer userId, final String callback)
+            throws InvalidParameterException, InternalProcessingException {
         if (callback == null)
             throw new InvalidParameterException("The callback parameter can not be null");
 
@@ -4910,7 +5076,8 @@ public class RESTv1 extends BaseRESTv1 implements RESTInterfaceV1, RESTInterface
 
     @Override
     public String createJSONPContentSpecNode(final String expand, final RESTCSNodeV1 dataObject, final String message,
-            final Integer flag, final Integer userId, final String callback) throws InvalidParameterException, InternalProcessingException {
+            final Integer flag, final Integer userId, final String callback) throws InvalidParameterException,
+            InternalProcessingException {
         if (callback == null)
             throw new InvalidParameterException("The callback parameter can not be null");
 
@@ -4930,8 +5097,8 @@ public class RESTv1 extends BaseRESTv1 implements RESTInterfaceV1, RESTInterface
 
     @Override
     public String createJSONPContentSpecNodes(final String expand, final RESTCSNodeCollectionV1 dataObjects,
-            final String message, final Integer flag, final Integer userId, final String callback) throws InvalidParameterException,
-            InternalProcessingException {
+            final String message, final Integer flag, final Integer userId, final String callback)
+            throws InvalidParameterException, InternalProcessingException {
         if (callback == null)
             throw new InvalidParameterException("The callback parameter can not be null");
 
@@ -4950,13 +5117,14 @@ public class RESTv1 extends BaseRESTv1 implements RESTInterfaceV1, RESTInterface
     }
 
     @Override
-    public String deleteJSONPContentSpecNode(final Integer id, final String message, final Integer flag, final Integer userId, final String expand,
-            final String callback) throws InvalidParameterException, InternalProcessingException {
+    public String deleteJSONPContentSpecNode(final Integer id, final String message, final Integer flag, final Integer userId,
+            final String expand, final String callback) throws InvalidParameterException, InternalProcessingException {
         if (callback == null)
             throw new InvalidParameterException("The callback parameter can not be null");
 
         try {
-            return wrapJsonInPadding(callback, convertObjectToJSON(deleteJSONContentSpecNode(id, message, flag, userId, expand)));
+            return wrapJsonInPadding(callback,
+                    convertObjectToJSON(deleteJSONContentSpecNode(id, message, flag, userId, expand)));
         } catch (final Exception ex) {
             throw new InternalProcessingException("Could not marshall return value into JSON");
         }
@@ -4969,13 +5137,15 @@ public class RESTv1 extends BaseRESTv1 implements RESTInterfaceV1, RESTInterface
     }
 
     @Override
-    public String deleteJSONPContentSpecNodes(final PathSegment ids, final String message, final Integer flag, final Integer userId,
-            final String expand, final String callback) throws InvalidParameterException, InternalProcessingException {
+    public String deleteJSONPContentSpecNodes(final PathSegment ids, final String message, final Integer flag,
+            final Integer userId, final String expand, final String callback) throws InvalidParameterException,
+            InternalProcessingException {
         if (callback == null)
             throw new InvalidParameterException("The callback parameter can not be null");
 
         try {
-            return wrapJsonInPadding(callback, convertObjectToJSON(deleteJSONContentSpecNodes(ids, message, flag, userId, expand)));
+            return wrapJsonInPadding(callback,
+                    convertObjectToJSON(deleteJSONContentSpecNodes(ids, message, flag, userId, expand)));
         } catch (final Exception ex) {
             throw new InternalProcessingException("Could not marshall return value into JSON");
         }
@@ -4995,7 +5165,7 @@ public class RESTv1 extends BaseRESTv1 implements RESTInterfaceV1, RESTInterface
     public RESTCSNodeCollectionV1 getJSONContentSpecNodes(final String expand) throws InvalidParameterException,
             InternalProcessingException {
         return getJSONResources(RESTCSNodeCollectionV1.class, CSNode.class, new CSNodeV1Factory(),
-                BaseRESTv1.CONTENT_SPEC_NODE_EXPANSION_NAME, expand);
+                RESTv1Constants.CONTENT_SPEC_NODE_EXPANSION_NAME, expand);
     }
 
     @Override
@@ -5003,7 +5173,7 @@ public class RESTv1 extends BaseRESTv1 implements RESTInterfaceV1, RESTInterface
             throws InvalidParameterException, InternalProcessingException {
         return getJSONResourcesFromQuery(RESTCSNodeCollectionV1.class, query.getMatrixParameters(),
                 ContentSpecNodeFilterQueryBuilder.class, new ContentSpecNodeFieldFilter(), new CSNodeV1Factory(),
-                BaseRESTv1.CONTENT_SPEC_NODE_EXPANSION_NAME, expand);
+                RESTv1Constants.CONTENT_SPEC_NODE_EXPANSION_NAME, expand);
     }
 
     @Override
@@ -5023,8 +5193,8 @@ public class RESTv1 extends BaseRESTv1 implements RESTInterfaceV1, RESTInterface
 
         final CSNodeV1Factory factory = new CSNodeV1Factory();
         final RESTLogDetailsV1 logDetails = generateLogDetails(message, flag, userId);
-        
-        return updateEntity(CSNode.class, dataObject, factory, this.getBaseUrl(), JSON_URL, expand, logDetails);
+
+        return updateJSONEntity(CSNode.class, dataObject, factory, expand, logDetails);
     }
 
     @Override
@@ -5035,7 +5205,8 @@ public class RESTv1 extends BaseRESTv1 implements RESTInterfaceV1, RESTInterface
 
     @Override
     public RESTCSNodeCollectionV1 updateJSONContentSpecNodes(final String expand, final RESTCSNodeCollectionV1 dataObjects,
-            final String message, final Integer flag, final Integer userId) throws InvalidParameterException, InternalProcessingException {
+            final String message, final Integer flag, final Integer userId) throws InvalidParameterException,
+            InternalProcessingException {
         if (dataObjects == null)
             throw new InvalidParameterException("The dataObjects parameter can not be null");
 
@@ -5044,9 +5215,9 @@ public class RESTv1 extends BaseRESTv1 implements RESTInterfaceV1, RESTInterface
 
         final CSNodeV1Factory factory = new CSNodeV1Factory();
         final RESTLogDetailsV1 logDetails = generateLogDetails(message, flag, userId);
-        
-        return updateEntities(RESTCSNodeCollectionV1.class, CSNode.class, dataObjects, factory,
-                BaseRESTv1.CONTENT_SPEC_NODE_EXPANSION_NAME, JSON_URL, expand, getBaseUrl(), logDetails);
+
+        return updateJSONEntities(RESTCSNodeCollectionV1.class, CSNode.class, dataObjects, factory,
+                RESTv1Constants.CONTENT_SPEC_NODE_EXPANSION_NAME, expand, logDetails);
     }
 
     @Override
@@ -5063,8 +5234,8 @@ public class RESTv1 extends BaseRESTv1 implements RESTInterfaceV1, RESTInterface
 
         final CSNodeV1Factory factory = new CSNodeV1Factory();
         final RESTLogDetailsV1 logDetails = generateLogDetails(message, flag, userId);
-        
-        return createEntity(CSNode.class, dataObject, factory, this.getBaseUrl(), JSON_URL, expand, logDetails);
+
+        return createJSONEntity(CSNode.class, dataObject, factory, expand, logDetails);
     }
 
     @Override
@@ -5075,7 +5246,8 @@ public class RESTv1 extends BaseRESTv1 implements RESTInterfaceV1, RESTInterface
 
     @Override
     public RESTCSNodeCollectionV1 createJSONContentSpecNodes(final String expand, final RESTCSNodeCollectionV1 dataObjects,
-            final String message, final Integer flag, final Integer userId) throws InvalidParameterException, InternalProcessingException {
+            final String message, final Integer flag, final Integer userId) throws InvalidParameterException,
+            InternalProcessingException {
         if (dataObjects == null)
             throw new InvalidParameterException("The dataObjects parameter can not be null");
 
@@ -5084,9 +5256,9 @@ public class RESTv1 extends BaseRESTv1 implements RESTInterfaceV1, RESTInterface
 
         final CSNodeV1Factory factory = new CSNodeV1Factory();
         final RESTLogDetailsV1 logDetails = generateLogDetails(message, flag, userId);
-        
-        return createEntities(RESTCSNodeCollectionV1.class, CSNode.class, dataObjects, factory,
-                BaseRESTv1.CONTENT_SPEC_NODE_EXPANSION_NAME, JSON_URL, expand, getBaseUrl(), logDetails);
+
+        return createJSONEntities(RESTCSNodeCollectionV1.class, CSNode.class, dataObjects, factory,
+                RESTv1Constants.CONTENT_SPEC_NODE_EXPANSION_NAME, expand, logDetails);
     }
 
     @Override
@@ -5096,15 +5268,15 @@ public class RESTv1 extends BaseRESTv1 implements RESTInterfaceV1, RESTInterface
     }
 
     @Override
-    public RESTCSNodeV1 deleteJSONContentSpecNode(final Integer id, final String message, final Integer flag, final Integer userId,
-            final String expand) throws InvalidParameterException, InternalProcessingException {
+    public RESTCSNodeV1 deleteJSONContentSpecNode(final Integer id, final String message, final Integer flag,
+            final Integer userId, final String expand) throws InvalidParameterException, InternalProcessingException {
         if (id == null)
             throw new InvalidParameterException("The dataObject parameter can not be null");
 
         final CSNodeV1Factory factory = new CSNodeV1Factory();
         final RESTLogDetailsV1 logDetails = generateLogDetails(message, flag, userId);
-        
-        return deleteEntity(CSNode.class, factory, id, expand, logDetails);
+
+        return deleteJSONEntity(CSNode.class, factory, id, expand, logDetails);
     }
 
     @Override
@@ -5114,8 +5286,8 @@ public class RESTv1 extends BaseRESTv1 implements RESTInterfaceV1, RESTInterface
     }
 
     @Override
-    public RESTCSNodeCollectionV1 deleteJSONContentSpecNodes(final PathSegment ids, final String message, final Integer flag, final Integer userId,
-            final String expand) throws InvalidParameterException, InternalProcessingException {
+    public RESTCSNodeCollectionV1 deleteJSONContentSpecNodes(final PathSegment ids, final String message, final Integer flag,
+            final Integer userId, final String expand) throws InvalidParameterException, InternalProcessingException {
         if (ids == null)
             throw new InvalidParameterException("The dataObjects parameter can not be null");
 
@@ -5123,11 +5295,11 @@ public class RESTv1 extends BaseRESTv1 implements RESTInterfaceV1, RESTInterface
 
         final CSNodeV1Factory factory = new CSNodeV1Factory();
         final RESTLogDetailsV1 logDetails = generateLogDetails(message, flag, userId);
-        
-        return deleteEntities(RESTCSNodeCollectionV1.class, CSNode.class, factory, dbEntityIds,
-                BaseRESTv1.CONTENT_SPEC_NODE_EXPANSION_NAME, JSON_URL, expand, getBaseUrl(), logDetails);
+
+        return deleteJSONEntities(RESTCSNodeCollectionV1.class, CSNode.class, factory, dbEntityIds,
+                RESTv1Constants.CONTENT_SPEC_NODE_EXPANSION_NAME, expand, logDetails);
     }
-    
+
     /* CONTENT SPEC NODE FUNCTIONS */
     /* JSONP FUNCTIONS */
     @Override
@@ -5177,7 +5349,8 @@ public class RESTv1 extends BaseRESTv1 implements RESTInterfaceV1, RESTInterface
 
     @Override
     public String updateJSONPContentSpecMetaData(final String expand, final RESTCSMetaDataV1 dataObject, final String message,
-            final Integer flag, final Integer userId, final String callback) throws InvalidParameterException, InternalProcessingException {
+            final Integer flag, final Integer userId, final String callback) throws InvalidParameterException,
+            InternalProcessingException {
         if (callback == null)
             throw new InvalidParameterException("The callback parameter can not be null");
 
@@ -5197,8 +5370,8 @@ public class RESTv1 extends BaseRESTv1 implements RESTInterfaceV1, RESTInterface
 
     @Override
     public String updateJSONPContentSpecMetaDatas(final String expand, final RESTCSMetaDataCollectionV1 dataObjects,
-            final String message, final Integer flag, final Integer userId, final String callback) throws InvalidParameterException,
-            InternalProcessingException {
+            final String message, final Integer flag, final Integer userId, final String callback)
+            throws InvalidParameterException, InternalProcessingException {
         if (callback == null)
             throw new InvalidParameterException("The callback parameter can not be null");
 
@@ -5218,7 +5391,8 @@ public class RESTv1 extends BaseRESTv1 implements RESTInterfaceV1, RESTInterface
 
     @Override
     public String createJSONPContentSpecMetaData(final String expand, final RESTCSMetaDataV1 dataObject, final String message,
-            final Integer flag, final Integer userId, final String callback) throws InvalidParameterException, InternalProcessingException {
+            final Integer flag, final Integer userId, final String callback) throws InvalidParameterException,
+            InternalProcessingException {
         if (callback == null)
             throw new InvalidParameterException("The callback parameter can not be null");
 
@@ -5238,8 +5412,8 @@ public class RESTv1 extends BaseRESTv1 implements RESTInterfaceV1, RESTInterface
 
     @Override
     public String createJSONPContentSpecMetaDatas(final String expand, final RESTCSMetaDataCollectionV1 dataObjects,
-            final String message, final Integer flag, final Integer userId, final String callback) throws InvalidParameterException,
-            InternalProcessingException {
+            final String message, final Integer flag, final Integer userId, final String callback)
+            throws InvalidParameterException, InternalProcessingException {
         if (callback == null)
             throw new InvalidParameterException("The callback parameter can not be null");
 
@@ -5258,13 +5432,15 @@ public class RESTv1 extends BaseRESTv1 implements RESTInterfaceV1, RESTInterface
     }
 
     @Override
-    public String deleteJSONPContentSpecMetaData(final Integer id, final String message, final Integer flag, final Integer userId, final String expand,
-            final String callback) throws InvalidParameterException, InternalProcessingException {
+    public String deleteJSONPContentSpecMetaData(final Integer id, final String message, final Integer flag,
+            final Integer userId, final String expand, final String callback) throws InvalidParameterException,
+            InternalProcessingException {
         if (callback == null)
             throw new InvalidParameterException("The callback parameter can not be null");
 
         try {
-            return wrapJsonInPadding(callback, convertObjectToJSON(deleteJSONContentSpecMetaData(id, message, flag, userId, expand)));
+            return wrapJsonInPadding(callback,
+                    convertObjectToJSON(deleteJSONContentSpecMetaData(id, message, flag, userId, expand)));
         } catch (final Exception ex) {
             throw new InternalProcessingException("Could not marshall return value into JSON");
         }
@@ -5277,13 +5453,15 @@ public class RESTv1 extends BaseRESTv1 implements RESTInterfaceV1, RESTInterface
     }
 
     @Override
-    public String deleteJSONPContentSpecMetaDatas(final PathSegment ids, final String message, final Integer flag, final Integer userId,
-            final String expand, final String callback) throws InvalidParameterException, InternalProcessingException {
+    public String deleteJSONPContentSpecMetaDatas(final PathSegment ids, final String message, final Integer flag,
+            final Integer userId, final String expand, final String callback) throws InvalidParameterException,
+            InternalProcessingException {
         if (callback == null)
             throw new InvalidParameterException("The callback parameter can not be null");
 
         try {
-            return wrapJsonInPadding(callback, convertObjectToJSON(deleteJSONContentSpecMetaDatas(ids, message, flag, userId, expand)));
+            return wrapJsonInPadding(callback,
+                    convertObjectToJSON(deleteJSONContentSpecMetaDatas(ids, message, flag, userId, expand)));
         } catch (final Exception ex) {
             throw new InternalProcessingException("Could not marshall return value into JSON");
         }
@@ -5303,7 +5481,7 @@ public class RESTv1 extends BaseRESTv1 implements RESTInterfaceV1, RESTInterface
     public RESTCSMetaDataCollectionV1 getJSONContentSpecMetaDatas(final String expand) throws InvalidParameterException,
             InternalProcessingException {
         return getJSONResources(RESTCSMetaDataCollectionV1.class, CSMetaData.class, new CSMetaDataV1Factory(),
-                BaseRESTv1.CONTENT_SPEC_META_DATA_EXPANSION_NAME, expand);
+                RESTv1Constants.CONTENT_SPEC_META_DATA_EXPANSION_NAME, expand);
     }
 
     @Override
@@ -5311,7 +5489,7 @@ public class RESTv1 extends BaseRESTv1 implements RESTInterfaceV1, RESTInterface
             throws InvalidParameterException, InternalProcessingException {
         return getJSONResourcesFromQuery(RESTCSMetaDataCollectionV1.class, query.getMatrixParameters(),
                 ContentSpecMetaDataFilterQueryBuilder.class, new ContentSpecMetaDataFieldFilter(), new CSMetaDataV1Factory(),
-                BaseRESTv1.CONTENT_SPEC_META_DATA_EXPANSION_NAME, expand);
+                RESTv1Constants.CONTENT_SPEC_META_DATA_EXPANSION_NAME, expand);
     }
 
     @Override
@@ -5321,8 +5499,9 @@ public class RESTv1 extends BaseRESTv1 implements RESTInterfaceV1, RESTInterface
     }
 
     @Override
-    public RESTCSMetaDataV1 updateJSONContentSpecMetaData(final String expand, final RESTCSMetaDataV1 dataObject, final String message,
-            final Integer flag, final Integer userId) throws InvalidParameterException, InternalProcessingException {
+    public RESTCSMetaDataV1 updateJSONContentSpecMetaData(final String expand, final RESTCSMetaDataV1 dataObject,
+            final String message, final Integer flag, final Integer userId) throws InvalidParameterException,
+            InternalProcessingException {
         if (dataObject == null)
             throw new InvalidParameterException("The dataObject parameter can not be null");
 
@@ -5331,19 +5510,20 @@ public class RESTv1 extends BaseRESTv1 implements RESTInterfaceV1, RESTInterface
 
         final CSMetaDataV1Factory factory = new CSMetaDataV1Factory();
         final RESTLogDetailsV1 logDetails = generateLogDetails(message, flag, userId);
-        
-        return updateEntity(CSMetaData.class, dataObject, factory, this.getBaseUrl(), JSON_URL, expand, logDetails);
+
+        return updateJSONEntity(CSMetaData.class, dataObject, factory, expand, logDetails);
     }
 
     @Override
-    public RESTCSMetaDataCollectionV1 updateJSONContentSpecMetaDatas(final String expand, final RESTCSMetaDataCollectionV1 dataObjects)
-            throws InvalidParameterException, InternalProcessingException {
+    public RESTCSMetaDataCollectionV1 updateJSONContentSpecMetaDatas(final String expand,
+            final RESTCSMetaDataCollectionV1 dataObjects) throws InvalidParameterException, InternalProcessingException {
         return updateJSONContentSpecMetaDatas(expand, dataObjects, null, null, null);
     }
 
     @Override
-    public RESTCSMetaDataCollectionV1 updateJSONContentSpecMetaDatas(final String expand, final RESTCSMetaDataCollectionV1 dataObjects,
-            final String message, final Integer flag, final Integer userId) throws InvalidParameterException, InternalProcessingException {
+    public RESTCSMetaDataCollectionV1 updateJSONContentSpecMetaDatas(final String expand,
+            final RESTCSMetaDataCollectionV1 dataObjects, final String message, final Integer flag, final Integer userId)
+            throws InvalidParameterException, InternalProcessingException {
         if (dataObjects == null)
             throw new InvalidParameterException("The dataObjects parameter can not be null");
 
@@ -5352,9 +5532,9 @@ public class RESTv1 extends BaseRESTv1 implements RESTInterfaceV1, RESTInterface
 
         final CSMetaDataV1Factory factory = new CSMetaDataV1Factory();
         final RESTLogDetailsV1 logDetails = generateLogDetails(message, flag, userId);
-        
-        return updateEntities(RESTCSMetaDataCollectionV1.class, CSMetaData.class, dataObjects, factory,
-                BaseRESTv1.CONTENT_SPEC_META_DATA_EXPANSION_NAME, JSON_URL, expand, getBaseUrl(), logDetails);
+
+        return updateJSONEntities(RESTCSMetaDataCollectionV1.class, CSMetaData.class, dataObjects, factory,
+                RESTv1Constants.CONTENT_SPEC_META_DATA_EXPANSION_NAME, expand, logDetails);
     }
 
     @Override
@@ -5364,26 +5544,28 @@ public class RESTv1 extends BaseRESTv1 implements RESTInterfaceV1, RESTInterface
     }
 
     @Override
-    public RESTCSMetaDataV1 createJSONContentSpecMetaData(final String expand, final RESTCSMetaDataV1 dataObject, final String message,
-            final Integer flag, final Integer userId) throws InvalidParameterException, InternalProcessingException {
+    public RESTCSMetaDataV1 createJSONContentSpecMetaData(final String expand, final RESTCSMetaDataV1 dataObject,
+            final String message, final Integer flag, final Integer userId) throws InvalidParameterException,
+            InternalProcessingException {
         if (dataObject == null)
             throw new InvalidParameterException("The dataObject parameter can not be null");
 
         final CSMetaDataV1Factory factory = new CSMetaDataV1Factory();
         final RESTLogDetailsV1 logDetails = generateLogDetails(message, flag, userId);
-        
-        return createEntity(CSMetaData.class, dataObject, factory, this.getBaseUrl(), JSON_URL, expand, logDetails);
+
+        return createJSONEntity(CSMetaData.class, dataObject, factory, expand, logDetails);
     }
 
     @Override
-    public RESTCSMetaDataCollectionV1 createJSONContentSpecMetaDatas(final String expand, final RESTCSMetaDataCollectionV1 dataObjects)
-            throws InvalidParameterException, InternalProcessingException {
+    public RESTCSMetaDataCollectionV1 createJSONContentSpecMetaDatas(final String expand,
+            final RESTCSMetaDataCollectionV1 dataObjects) throws InvalidParameterException, InternalProcessingException {
         return createJSONContentSpecMetaDatas(expand, dataObjects, null, null, null);
     }
 
     @Override
-    public RESTCSMetaDataCollectionV1 createJSONContentSpecMetaDatas(final String expand, final RESTCSMetaDataCollectionV1 dataObjects,
-            final String message, final Integer flag, final Integer userId) throws InvalidParameterException, InternalProcessingException {
+    public RESTCSMetaDataCollectionV1 createJSONContentSpecMetaDatas(final String expand,
+            final RESTCSMetaDataCollectionV1 dataObjects, final String message, final Integer flag, final Integer userId)
+            throws InvalidParameterException, InternalProcessingException {
         if (dataObjects == null)
             throw new InvalidParameterException("The dataObjects parameter can not be null");
 
@@ -5392,27 +5574,27 @@ public class RESTv1 extends BaseRESTv1 implements RESTInterfaceV1, RESTInterface
 
         final CSMetaDataV1Factory factory = new CSMetaDataV1Factory();
         final RESTLogDetailsV1 logDetails = generateLogDetails(message, flag, userId);
-        
-        return createEntities(RESTCSMetaDataCollectionV1.class, CSMetaData.class, dataObjects, factory,
-                BaseRESTv1.CONTENT_SPEC_META_DATA_EXPANSION_NAME, JSON_URL, expand, getBaseUrl(), logDetails);
+
+        return createJSONEntities(RESTCSMetaDataCollectionV1.class, CSMetaData.class, dataObjects, factory,
+                RESTv1Constants.CONTENT_SPEC_META_DATA_EXPANSION_NAME, expand, logDetails);
     }
 
     @Override
-    public RESTCSMetaDataV1 deleteJSONContentSpecMetaData(final Integer id, final String expand) throws InvalidParameterException,
-            InternalProcessingException {
+    public RESTCSMetaDataV1 deleteJSONContentSpecMetaData(final Integer id, final String expand)
+            throws InvalidParameterException, InternalProcessingException {
         return deleteJSONContentSpecMetaData(id, null, null, null, expand);
     }
 
     @Override
-    public RESTCSMetaDataV1 deleteJSONContentSpecMetaData(final Integer id, final String message, final Integer flag, final Integer userId,
-            final String expand) throws InvalidParameterException, InternalProcessingException {
+    public RESTCSMetaDataV1 deleteJSONContentSpecMetaData(final Integer id, final String message, final Integer flag,
+            final Integer userId, final String expand) throws InvalidParameterException, InternalProcessingException {
         if (id == null)
             throw new InvalidParameterException("The dataObject parameter can not be null");
 
         final CSMetaDataV1Factory factory = new CSMetaDataV1Factory();
         final RESTLogDetailsV1 logDetails = generateLogDetails(message, flag, userId);
-        
-        return deleteEntity(CSMetaData.class, factory, id, expand, logDetails);
+
+        return deleteJSONEntity(CSMetaData.class, factory, id, expand, logDetails);
     }
 
     @Override
@@ -5422,8 +5604,9 @@ public class RESTv1 extends BaseRESTv1 implements RESTInterfaceV1, RESTInterface
     }
 
     @Override
-    public RESTCSMetaDataCollectionV1 deleteJSONContentSpecMetaDatas(final PathSegment ids, final String message, final Integer flag, final Integer userId,
-            final String expand) throws InvalidParameterException, InternalProcessingException {
+    public RESTCSMetaDataCollectionV1 deleteJSONContentSpecMetaDatas(final PathSegment ids, final String message,
+            final Integer flag, final Integer userId, final String expand) throws InvalidParameterException,
+            InternalProcessingException {
         if (ids == null)
             throw new InvalidParameterException("The dataObjects parameter can not be null");
 
@@ -5431,8 +5614,8 @@ public class RESTv1 extends BaseRESTv1 implements RESTInterfaceV1, RESTInterface
 
         final CSMetaDataV1Factory factory = new CSMetaDataV1Factory();
         final RESTLogDetailsV1 logDetails = generateLogDetails(message, flag, userId);
-        
-        return deleteEntities(RESTCSMetaDataCollectionV1.class, CSMetaData.class, factory, dbEntityIds,
-                BaseRESTv1.CONTENT_SPEC_META_DATA_EXPANSION_NAME, JSON_URL, expand, getBaseUrl(), logDetails);
+
+        return deleteJSONEntities(RESTCSMetaDataCollectionV1.class, CSMetaData.class, factory, dbEntityIds,
+                RESTv1Constants.CONTENT_SPEC_META_DATA_EXPANSION_NAME, expand, logDetails);
     }
 }

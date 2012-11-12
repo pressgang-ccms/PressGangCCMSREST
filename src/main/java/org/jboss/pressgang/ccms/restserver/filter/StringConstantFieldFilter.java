@@ -6,7 +6,7 @@ import java.util.HashMap;
 
 import org.jboss.pressgang.ccms.rest.v1.constants.CommonFilterConstants;
 import org.jboss.pressgang.ccms.restserver.filter.base.BaseFieldFilter;
-import org.jboss.pressgang.ccms.restserver.filter.structures.field.UIFieldStringData;
+import org.jboss.pressgang.ccms.restserver.filter.structures.FilterFieldStringData;
 
 
 public class StringConstantFieldFilter extends BaseFieldFilter
@@ -26,9 +26,9 @@ public class StringConstantFieldFilter extends BaseFieldFilter
         }
     });
     
-    private UIFieldStringData stringConstantIds;
-    private UIFieldStringData stringConstantName;
-    private UIFieldStringData stringConstantValue;
+    private FilterFieldStringData stringConstantIds;
+    private FilterFieldStringData stringConstantName;
+    private FilterFieldStringData stringConstantValue;
         
     public StringConstantFieldFilter()
     {
@@ -38,9 +38,9 @@ public class StringConstantFieldFilter extends BaseFieldFilter
     @Override
     protected void resetAllValues()
     {
-        stringConstantIds = new UIFieldStringData(CommonFilterConstants.STRING_CONSTANT_IDS_FILTER_VAR, CommonFilterConstants.STRING_CONSTANT_IDS_FILTER_VAR_DESC);
-        stringConstantName = new UIFieldStringData(CommonFilterConstants.STRING_CONSTANT_NAME_FILTER_VAR, CommonFilterConstants.STRING_CONSTANT_NAME_FILTER_VAR_DESC);
-        stringConstantValue = new UIFieldStringData(CommonFilterConstants.STRING_CONSTANT_VALUE_FILTER_VAR, CommonFilterConstants.STRING_CONSTANT_VALUE_FILTER_VAR_DESC);
+        stringConstantIds = new FilterFieldStringData(CommonFilterConstants.STRING_CONSTANT_IDS_FILTER_VAR, CommonFilterConstants.STRING_CONSTANT_IDS_FILTER_VAR_DESC);
+        stringConstantName = new FilterFieldStringData(CommonFilterConstants.STRING_CONSTANT_NAME_FILTER_VAR, CommonFilterConstants.STRING_CONSTANT_NAME_FILTER_VAR_DESC);
+        stringConstantValue = new FilterFieldStringData(CommonFilterConstants.STRING_CONSTANT_VALUE_FILTER_VAR, CommonFilterConstants.STRING_CONSTANT_VALUE_FILTER_VAR_DESC);
         
         addFilterVar(stringConstantIds);
         addFilterVar(stringConstantName);

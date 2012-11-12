@@ -9,6 +9,7 @@ import org.jboss.pressgang.ccms.rest.v1.collections.RESTRoleCollectionV1;
 import org.jboss.pressgang.ccms.rest.v1.collections.RESTUserCollectionV1;
 import org.jboss.pressgang.ccms.rest.v1.collections.items.RESTRoleCollectionItemV1;
 import org.jboss.pressgang.ccms.rest.v1.collections.items.RESTUserCollectionItemV1;
+import org.jboss.pressgang.ccms.rest.v1.constants.RESTv1Constants;
 import org.jboss.pressgang.ccms.rest.v1.entities.RESTRoleV1;
 import org.jboss.pressgang.ccms.rest.v1.entities.RESTUserV1;
 import org.jboss.pressgang.ccms.rest.v1.entities.base.RESTBaseEntityV1;
@@ -17,10 +18,8 @@ import org.jboss.pressgang.ccms.rest.v1.expansion.ExpandDataTrunk;
 import org.jboss.pressgang.ccms.restserver.entity.Role;
 import org.jboss.pressgang.ccms.restserver.entity.RoleToRoleRelationship;
 import org.jboss.pressgang.ccms.restserver.entity.User;
-import org.jboss.pressgang.ccms.restserver.rest.v1.base.BaseRESTv1;
 import org.jboss.pressgang.ccms.restserver.rest.v1.base.RESTDataObjectCollectionFactory;
 import org.jboss.pressgang.ccms.restserver.rest.v1.base.RESTDataObjectFactory;
-
 
 /*
  * Note: Since roles and users are going to be re-done soon using Katie's OAuth Library, I've left out the ability to update the RoleToRoleRelationship information
@@ -80,7 +79,7 @@ public class RoleV1Factory extends RESTDataObjectFactory<RESTRoleV1, Role, RESTR
                 .create(RESTRoleCollectionV1.class, new RoleV1Factory(), entity.getChildRoles(), RESTRoleV1.CHILDROLES_NAME,
                         dataType, expand, baseUrl, entityManager));
 
-        retValue.setLinks(baseUrl, BaseRESTv1.ROLE_URL_NAME, dataType, retValue.getId());
+        retValue.setLinks(baseUrl, RESTv1Constants.ROLE_URL_NAME, dataType, retValue.getId());
         retValue.setLogDetails(new LogDetailsV1Factory().create(entity, revision, RESTBaseEntityV1.LOG_DETAILS_NAME, expand,
                 dataType, baseUrl, entityManager));
 

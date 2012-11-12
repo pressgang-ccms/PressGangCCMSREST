@@ -6,7 +6,7 @@ import java.util.HashMap;
 
 import org.jboss.pressgang.ccms.rest.v1.constants.CommonFilterConstants;
 import org.jboss.pressgang.ccms.restserver.filter.base.BaseFieldFilter;
-import org.jboss.pressgang.ccms.restserver.filter.structures.field.UIFieldStringData;
+import org.jboss.pressgang.ccms.restserver.filter.structures.FilterFieldStringData;
 
 
 public class ProjectFieldFilter extends BaseFieldFilter
@@ -26,9 +26,9 @@ public class ProjectFieldFilter extends BaseFieldFilter
         }
     });
     
-    private UIFieldStringData projectIds;
-    private UIFieldStringData projectName;
-    private UIFieldStringData projectDescription;
+    private FilterFieldStringData projectIds;
+    private FilterFieldStringData projectName;
+    private FilterFieldStringData projectDescription;
 
     public ProjectFieldFilter()
     {
@@ -40,9 +40,9 @@ public class ProjectFieldFilter extends BaseFieldFilter
     {
         super.resetAllValues();
         
-        projectIds = new UIFieldStringData(CommonFilterConstants.PROJECT_IDS_FILTER_VAR, CommonFilterConstants.PROJECT_IDS_FILTER_VAR_DESC);
-        projectName = new UIFieldStringData(CommonFilterConstants.PROJECT_NAME_FILTER_VAR, CommonFilterConstants.PROJECT_NAME_FILTER_VAR_DESC);
-        projectDescription = new UIFieldStringData(CommonFilterConstants.PROJECT_DESCRIPTION_FILTER_VAR, CommonFilterConstants.PROJECT_DESCRIPTION_FILTER_VAR_DESC);
+        projectIds = new FilterFieldStringData(CommonFilterConstants.PROJECT_IDS_FILTER_VAR, CommonFilterConstants.PROJECT_IDS_FILTER_VAR_DESC);
+        projectName = new FilterFieldStringData(CommonFilterConstants.PROJECT_NAME_FILTER_VAR, CommonFilterConstants.PROJECT_NAME_FILTER_VAR_DESC);
+        projectDescription = new FilterFieldStringData(CommonFilterConstants.PROJECT_DESCRIPTION_FILTER_VAR, CommonFilterConstants.PROJECT_DESCRIPTION_FILTER_VAR_DESC);
         
         addFilterVar(projectIds);
         addFilterVar(projectName);
