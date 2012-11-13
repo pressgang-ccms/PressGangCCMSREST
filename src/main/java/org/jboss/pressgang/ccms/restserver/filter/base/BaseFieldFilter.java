@@ -47,42 +47,24 @@ public abstract class BaseFieldFilter implements IFieldFilter
         filterVars.add(logic);
     }
     
-    /**
-     * Get the Regex value of the Field Names that exist for the filter.
-     */
     @Override
     public Map<String, String> getFieldNames()
     {
         return new HashMap<String, String>(filterNames);
     }
 
-    /**
-     * Get the unaltered Field names that exist for the filter.
-     */
     @Override
     public Map<String, String> getBaseFieldNames()
     {
         return new HashMap<String, String>(filterNames);
     }
     
-    /**
-     * Check if the field filter has a property field name.
-     * 
-     * @param fieldName the name of the field to be checked.
-     * @return True if the field filter contains the field name, otherwise false.
-     */
     @Override
     public boolean hasFieldName(final String fieldName)
     {
         return getFieldNames().containsKey(fieldName);
     }
     
-    /**
-     * Get the description of a filter field for a property field name.
-     * 
-     * @param fieldName the name of the field to get the description for.
-     * @return The Field's description if the field exists, otherwise false.
-     */
     @Override
     public String getFieldDesc(final String fieldName)
     {
