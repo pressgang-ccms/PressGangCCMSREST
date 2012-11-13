@@ -16,6 +16,7 @@ import org.jboss.resteasy.spi.BadRequestException;
  * @param <T> The REST object type
  * @param <U> The database object type
  * @param <V> The REST object collection type
+ * @param <W> The REST object collection item type
  */
 public abstract class RESTDataObjectFactory<T extends RESTBaseEntityV1<T, V, W>, U, V extends RESTBaseCollectionV1<T, V, W>, W extends RESTBaseCollectionItemV1<T, V, W>> {
     final Class<U> databaseClass;

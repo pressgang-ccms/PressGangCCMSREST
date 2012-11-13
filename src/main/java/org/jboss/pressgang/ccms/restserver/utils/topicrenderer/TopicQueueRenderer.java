@@ -1,6 +1,5 @@
 package org.jboss.pressgang.ccms.restserver.utils.topicrenderer;
 
-import javax.naming.InitialContext;
 import javax.persistence.EntityManager;
 import javax.persistence.EntityManagerFactory;
 import javax.transaction.Transaction;
@@ -17,6 +16,7 @@ import org.jboss.pressgang.ccms.restserver.entity.Topic;
 import org.jboss.pressgang.ccms.restserver.entity.TranslatedTopic;
 import org.jboss.pressgang.ccms.restserver.entity.TranslatedTopicData;
 import org.jboss.pressgang.ccms.restserver.utils.Constants;
+import org.jboss.pressgang.ccms.restserver.utils.JNDIUtilities;
 import org.jboss.pressgang.ccms.utils.constants.CommonConstants;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -58,10 +58,8 @@ public class TopicQueueRenderer extends BaseRenderingThread implements Runnable 
     public static TopicQueueRenderer createNewInstance(final Integer topicId, final int topicType,
             final boolean rerenderIncoming, final Transaction transaction) {
         try {
-            final InitialContext initCtx = new InitialContext();
-            final EntityManagerFactory entityManagerFactory = (EntityManagerFactory) initCtx
-                    .lookup("java:jboss/EntityManagerFactory");
-            final TransactionManager transactionManager = (TransactionManager) initCtx.lookup("java:jboss/TransactionManager");
+            final EntityManagerFactory entityManagerFactory = JNDIUtilities.lookupEntityManagerFactory();
+            final TransactionManager transactionManager = JNDIUtilities.lookupTransactionManager();
             return new TopicQueueRenderer(topicId, topicType, rerenderIncoming, entityManagerFactory, transactionManager,
                     transaction);
         } catch (final Exception ex) {

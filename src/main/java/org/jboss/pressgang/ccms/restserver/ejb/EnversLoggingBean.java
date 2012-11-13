@@ -7,6 +7,12 @@ import javax.inject.Named;
 
 import org.jboss.pressgang.ccms.restserver.entity.base.LoggingRevisionEntity;
 
+/**
+ * This java bean provides a mechanism to provide information to a 
+ * 
+ * @author lnewson
+ *
+ */
 @RequestScoped
 @Named("enversLoggingBean")
 public class EnversLoggingBean implements Serializable {

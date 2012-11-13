@@ -4,7 +4,6 @@ import java.security.MessageDigest;
 import java.util.Collections;
 import java.util.List;
 
-import javax.naming.InitialContext;
 import javax.persistence.EntityManager;
 import javax.persistence.EntityManagerFactory;
 import javax.transaction.TransactionManager;
@@ -15,13 +14,17 @@ import org.hibernate.envers.AuditReaderFactory;
 import org.jboss.pressgang.ccms.contentspec.structures.StringToCSNodeCollection;
 import org.jboss.pressgang.ccms.contentspec.utils.ContentSpecUtilities;
 import org.jboss.pressgang.ccms.restserver.entity.Topic;
+import org.jboss.pressgang.ccms.restserver.entity.TranslatedTopic;
 import org.jboss.pressgang.ccms.restserver.utils.Constants;
+import org.jboss.pressgang.ccms.restserver.utils.JNDIUtilities;
+import org.jboss.pressgang.ccms.restserver.utils.TopicUtilities;
 import org.jboss.pressgang.ccms.utils.common.XMLUtilities;
 import org.jboss.pressgang.ccms.utils.structures.Pair;
 import org.jboss.pressgang.ccms.utils.structures.StringToNodeCollection;
 import org.jboss.pressgang.ccms.zanata.ZanataInterface;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.w3c.dom.Document;
 import org.zanata.common.ContentType;
 import org.zanata.common.LocaleId;
 import org.zanata.common.ResourceType;
@@ -30,6 +33,10 @@ import org.zanata.rest.dto.resource.TextFlow;
 
 import com.redhat.contentspec.processor.ContentSpecParser;
 
+/**
+ * A Runnable class that will Push topics to Zanata in a background thread.
+ */
+// TODO We really should have a way to retrieve or save details about what topics succeeded or failed.
 public class ZanataPushTopicThread implements Runnable {
     private static final Logger log = LoggerFactory.getLogger(ZanataPushTopicThread.class);
     private static final double ZANATA_MIN_CALL_INTERVAL = 0.2;
@@ -55,11 +62,13 @@ public class ZanataPushTopicThread implements Runnable {
             EntityManager entityManager = null;
 
             try {
-                final InitialContext initCtx = new InitialContext();
-                final EntityManagerFactory entityManagerFactory = (EntityManagerFactory) initCtx
-                        .lookup("java:jboss/EntityManagerFactory");
-                transactionManager = (TransactionManager) initCtx.lookup("java:jboss/TransactionManager");
+                final EntityManagerFactory entityManagerFactory = JNDIUtilities.lookupEntityManagerFactory();
+
+                // Get the TransactionManager and start a transaction.
+                transactionManager = JNDIUtilities.lookupTransactionManager();
                 transactionManager.begin();
+
+                // Get an EntityManager instance and Envers audit reader.
                 entityManager = entityManagerFactory.createEntityManager();
                 final AuditReader reader = AuditReaderFactory.get(entityManager);
 
@@ -75,9 +84,8 @@ public class ZanataPushTopicThread implements Runnable {
                     final Topic topic = reader.find(Topic.class, topicDetails.getFirst(), topicDetails.getSecond());
 
                     if (topic != null) {
-                        topic.setTempRevisionNumber(topicDetails.getSecond());
-
-                        final String zanataId = topic.getZanataId();
+                        final Number topicRevision = topicDetails.getSecond();
+                        final String zanataId = topic.getTopicId() + "-" + topicRevision;
 
                         /*
                          * deleting existing resources is useful for debugging, but not for production
@@ -87,21 +95,24 @@ public class ZanataPushTopicThread implements Runnable {
                         if (zanataFileExists) {
                             if (overwrite) {
                                 log.info("Topic ID {} revision {} already exists - Deleting.", topic.getTopicId(),
-                                        topic.getTempRevisionNumber());
+                                        topicRevision);
                                 zanataInterface.deleteResource(zanataId);
                             } else {
                                 log.info("Topic ID {} revision {} already exists - Skipping.", topic.getTopicId(),
-                                        topic.getTempRevisionNumber());
+                                        topicRevision);
                                 continue;
                             }
                         }
 
                         /* Content Specs are parsed differently then XML */
                         if (topic.isTaggedWith(Constants.CONTENT_SPEC_TAG_ID)) {
+                            // TODO the URL shouldn't be statically coded
                             final ContentSpecParser parser = new ContentSpecParser("http://localhost:8080/TopicIndex/");
 
                             try {
                                 if (parser.parse(topic.getTopicXML())) {
+
+                                    // Create a Zanata Resource Object and populate it with the base data
                                     final Resource resource = new Resource();
 
                                     resource.setContentType(ContentType.TextPlain);
@@ -110,9 +121,11 @@ public class ZanataPushTopicThread implements Runnable {
                                     resource.setRevision(1);
                                     resource.setType(ResourceType.FILE);
 
+                                    // Get the translation strings from the Content Spec.
                                     final List<StringToCSNodeCollection> translatableStrings = ContentSpecUtilities
                                             .getTranslatableStrings(parser.getContentSpec(), false);
 
+                                    // Populate the Zanata Resource with the translation strings
                                     for (final StringToCSNodeCollection translatableStringData : translatableStrings) {
                                         final String translatableString = translatableStringData.getTranslationString();
                                         if (!translatableString.trim().isEmpty()) {
@@ -129,11 +142,18 @@ public class ZanataPushTopicThread implements Runnable {
                                     // Create the file in Zanata
                                     if (zanataInterface.createFile(resource)) {
                                         // Create a translation in TopicIndex
-                                        topic.createTranslatedTopic(entityManager, topicDetails.getSecond());
+                                        final TranslatedTopic translatedTopic = TopicUtilities.createTranslatedTopic(
+                                                entityManager, topic.getTopicId(), topicDetails.getSecond());
+                                        if (translatedTopic != null) {
+                                            /* Persist the new Translated Topic */
+                                            entityManager.persist(translatedTopic);
+                                        }
+                                    } else {
+                                        log.error("Failed to create the Document in Zanata");
                                     }
                                 } else {
                                     log.info("Content Spec ID {} revision {} does not have valid syntax - Skipping.",
-                                            topic.getTopicId(), topic.getTempRevisionNumber());
+                                            topic.getTopicId(), topicRevision);
                                 }
 
                             } catch (Exception ex) {
@@ -141,11 +161,12 @@ public class ZanataPushTopicThread implements Runnable {
                             }
                         } else {
                             try {
-                                topic.initializeTempTopicXMLDoc();
+                                final Document doc = XMLUtilities.convertStringToDocument(topic.getTopicXML());
 
                                 /* the historical object may have invalid xml */
-                                if (topic.getTempTopicXMLDoc() != null) {
+                                if (doc != null) {
 
+                                    // Create a Zanata Resource Object and populate it with the base data
                                     final Resource resource = new Resource();
 
                                     resource.setContentType(ContentType.TextPlain);
@@ -154,9 +175,11 @@ public class ZanataPushTopicThread implements Runnable {
                                     resource.setRevision(1);
                                     resource.setType(ResourceType.FILE);
 
+                                    // Get the Translation Strings from the XML
                                     final List<StringToNodeCollection> translatableStrings = XMLUtilities
-                                            .getTranslatableStringsV2(topic.getTempTopicXMLDoc(), false);
+                                            .getTranslatableStringsV2(doc, false);
 
+                                    // Populate the Zanata Resource with the translation strings
                                     for (final StringToNodeCollection translatableStringData : translatableStrings) {
                                         final String translatableString = translatableStringData.getTranslationString();
                                         if (!translatableString.trim().isEmpty()) {
@@ -171,28 +194,39 @@ public class ZanataPushTopicThread implements Runnable {
                                     }
 
                                     // Create the file in Zanata
-                                    zanataInterface.createFile(resource);
-
-                                    // Create a translation in TopicIndex
-                                    topic.createTranslatedTopic(entityManager, topicDetails.getSecond());
+                                    if (zanataInterface.createFile(resource)) {
+                                        // Create a translation in TopicIndex
+                                        final TranslatedTopic translatedTopic = TopicUtilities.createTranslatedTopic(
+                                                entityManager, topic.getTopicId(), topicDetails.getSecond());
+                                        if (translatedTopic != null) {
+                                            /* Persist the new Translated Topic */
+                                            entityManager.persist(translatedTopic);
+                                        }
+                                    } else {
+                                        log.error("Failed to create the Document in Zanata");
+                                    }
                                 } else {
                                     log.info("Topic ID {} revision {} does not have valid XML - Skipping.", topic.getTopicId(),
-                                            topic.getTempRevisionNumber());
+                                            topicRevision);
                                 }
                             } catch (final Exception ex) {
-                                log.error("Probably an error saving the Topic entity", ex);
+                                log.error("Probably an error saving the Topic entity or creating the DOM Document", ex);
                             }
                         }
                     }
                 }
 
+                // Save the changes.
                 transactionManager.commit();
             } catch (final Exception ex) {
                 log.error("Probably an error retrieveing the Topic entity", ex);
-                try {
-                    transactionManager.rollback();
-                } catch (final Exception ex2) {
-                    log.error("There was an issue rolling back the transaction", ex);
+
+                if (transactionManager != null) {
+                    try {
+                        transactionManager.rollback();
+                    } catch (final Exception ex2) {
+                        log.error("There was an issue rolling back the transaction", ex);
+                    }
                 }
             } finally {
                 if (entityManager != null)

@@ -38,6 +38,7 @@ import org.jboss.pressgang.ccms.restserver.entity.TranslatedTopicData;
 import org.jboss.pressgang.ccms.restserver.exceptions.CustomConstraintViolationException;
 import org.jboss.pressgang.ccms.restserver.rest.v1.base.RESTDataObjectCollectionFactory;
 import org.jboss.pressgang.ccms.restserver.rest.v1.base.RESTDataObjectFactory;
+import org.jboss.pressgang.ccms.restserver.utils.TopicUtilities;
 import org.jboss.resteasy.spi.BadRequestException;
 
 public class TopicV1Factory extends RESTDataObjectFactory<RESTTopicV1, Topic, RESTTopicCollectionV1, RESTTopicCollectionItemV1> {
@@ -222,8 +223,8 @@ public class TopicV1Factory extends RESTDataObjectFactory<RESTTopicV1, Topic, RE
         }
 
         /* This method will set the XML errors field */
-        entity.syncXML(entityManager);
-        entity.validateXML(entityManager, DocbookBuilderConstants.ROCBOOK_DTD_BLOB_ID);
+        TopicUtilities.syncXML(entityManager, entity);
+        TopicUtilities.validateXML(entityManager, entity, DocbookBuilderConstants.ROCBOOK_DTD_BLOB_ID);
 
         /*
          * Persist the entity before adding anything else as they require an id for the topic

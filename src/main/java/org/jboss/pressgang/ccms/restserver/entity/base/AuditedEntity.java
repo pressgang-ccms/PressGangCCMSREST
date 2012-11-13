@@ -82,6 +82,12 @@ public abstract class AuditedEntity<T extends AuditedEntity<T>> {
         return retValue;
     }
 
+    /**
+     * 
+     * @param entityManager
+     * @param revision
+     * @return
+     */
     @Transient
     public T getRevision(final EntityManager entityManager, final Number revision) {
         final AuditReader reader = AuditReaderFactory.get(entityManager);

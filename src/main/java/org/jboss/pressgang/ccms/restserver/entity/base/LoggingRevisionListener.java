@@ -5,11 +5,11 @@ import java.util.Set;
 import javax.enterprise.context.spi.CreationalContext;
 import javax.enterprise.inject.spi.Bean;
 import javax.enterprise.inject.spi.BeanManager;
-import javax.naming.InitialContext;
 import javax.naming.NamingException;
 
 import org.hibernate.envers.RevisionListener;
 import org.jboss.pressgang.ccms.restserver.ejb.EnversLoggingBean;
+import org.jboss.pressgang.ccms.restserver.utils.JNDIUtilities;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -50,11 +50,8 @@ public class LoggingRevisionListener implements RevisionListener {
          * Note: We would normally be able to get this using CDI. However since we can't make this class managed by the
          * Container, we have to manually look it up.
          */
-        InitialContext initCtx;
         try {
-            initCtx = new InitialContext();
-
-            final BeanManager beanManager = (BeanManager) initCtx.lookup("java:comp/BeanManager");
+            final BeanManager beanManager = JNDIUtilities.lookupBeanManager();
             final Set<Bean<?>> loggingBeans = beanManager.getBeans(EnversLoggingBean.class);
             if (loggingBeans != null) {
                 final Bean<?> bean = loggingBeans.iterator().next();

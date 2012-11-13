@@ -7,7 +7,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-import javax.naming.InitialContext;
 import javax.persistence.EntityManager;
 import javax.persistence.EntityManagerFactory;
 import javax.transaction.TransactionManager;
@@ -49,10 +48,11 @@ import com.redhat.contentspec.processor.ContentSpecParser;
  */
 public class ZanataPullTopicThread implements Runnable {
     private static final Logger log = LoggerFactory.getLogger(ZanataPullTopicThread.class);
+    private static final double ZANATA_MIN_CALL_INTERVAL = 0.2;
     private static final String XML_ENCODING = "UTF-8";
 
     private List<Integer> translatedTopics;
-    private final ZanataInterface zanataInterface = new ZanataInterface();
+    private final ZanataInterface zanataInterface = new ZanataInterface(ZANATA_MIN_CALL_INTERVAL);
 
     public ZanataPullTopicThread(final List<Integer> translatedTopics) {
         this.translatedTopics = Collections.unmodifiableList(translatedTopics);
@@ -71,9 +71,11 @@ public class ZanataPullTopicThread implements Runnable {
             try {
                 final EntityManagerFactory entityManagerFactory = JNDIUtilities.lookupEntityManagerFactory();
 
+                // Get the TransactionManager and start a transaction.
                 transactionManager = JNDIUtilities.lookupTransactionManager();
                 transactionManager.begin();
 
+                // Get an EntityManager instance
                 entityManager = entityManagerFactory.createEntityManager();
 
                 // Ensure that the Zanata Locales have been initalised
