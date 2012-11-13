@@ -53,6 +53,7 @@ import org.jboss.pressgang.ccms.restserver.filter.base.ITagFilterQueryBuilder;
 import org.jboss.pressgang.ccms.restserver.rest.DatabaseOperation;
 import org.jboss.pressgang.ccms.restserver.utils.Constants;
 import org.jboss.pressgang.ccms.restserver.utils.EntityUtilities;
+import org.jboss.pressgang.ccms.restserver.utils.FilterUtilities;
 import org.jboss.pressgang.ccms.restserver.utils.JNDIUtilities;
 import org.jboss.resteasy.plugins.providers.atom.Content;
 import org.jboss.resteasy.plugins.providers.atom.Entry;
@@ -984,7 +985,7 @@ public class BaseRESTv1 {
             }
 
             // Build the query to be used to get the resources
-            final CriteriaQuery<U> query = filter.buildQuery(filterQueryBuilder);
+            final CriteriaQuery<U> query = FilterUtilities.buildQuery(filter, filterQueryBuilder);
 
             /*
              * TODO This really should be constrained to the data that we need using the setMaxResults() and setFirstResult()

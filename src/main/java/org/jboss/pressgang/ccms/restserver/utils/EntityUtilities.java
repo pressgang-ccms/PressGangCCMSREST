@@ -635,7 +635,7 @@ public class EntityUtilities {
 
     public static List<Topic> getTopicsFromFilter(final EntityManager entityManager, final Filter filter) {
         // build the query that will be used to get the topics
-        final CriteriaQuery<Topic> query = filter.buildQuery(new TopicFilterQueryBuilder(entityManager));
+        final CriteriaQuery<Topic> query = FilterUtilities.buildQuery(filter, new TopicFilterQueryBuilder(entityManager));
 
         // get the base topic list
         final List<Topic> topicList = entityManager.createQuery(query).getResultList();

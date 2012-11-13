@@ -4,10 +4,6 @@ import org.jboss.pressgang.ccms.rest.v1.constants.CommonFilterConstants;
 
 public class Constants {
     /**
-     * The Skynet build number, displayed on the top bar of all Skynet pages. Is in the format yyyymmdd-hhmm
-     */
-    public static final String BUILD = "20121031-0749";
-    /**
      * The system property that defines the login message
      */
     public static final String LOGIN_MESSAGE_SYSTEM_PROPERTY = "topicIndex.loginMessage";
@@ -35,7 +31,7 @@ public class Constants {
     public static final String UNCATEGORISED_PROPERTY_TAG_CATEGORY_SELECT_ITEM_VALUE = "UncategorisedPropertyTagCategory";
 
     /**
-     * When bulk adding property tags that are unique, a GUID will be preceeded by this meassage to ensure that the value of the
+     * When bulk adding property tags that are unique, a GUID will be proceeded by this message to ensure that the value of the
      * tag is initially unique.
      */
     public static final String UNIQUE_PROPERTY_TAG_PREFIX = "Unique Property Tag";
