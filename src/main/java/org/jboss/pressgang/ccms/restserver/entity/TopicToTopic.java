@@ -1,33 +1,26 @@
 package org.jboss.pressgang.ccms.restserver.entity;
 
-import javax.naming.InitialContext;
+import static javax.persistence.GenerationType.IDENTITY;
+
 import javax.persistence.Cacheable;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
+import javax.persistence.Id;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.PostPersist;
 import javax.persistence.PostRemove;
+import javax.persistence.Table;
 import javax.persistence.Transient;
 import javax.persistence.UniqueConstraint;
-
-import static javax.persistence.GenerationType.IDENTITY;
-import javax.persistence.Id;
-import javax.persistence.Table;
-import javax.transaction.Transaction;
-import javax.transaction.TransactionManager;
+import javax.validation.constraints.NotNull;
 
 import org.hibernate.annotations.Cache;
 import org.hibernate.annotations.CacheConcurrencyStrategy;
 import org.hibernate.envers.Audited;
-import javax.validation.constraints.NotNull;
-import org.jboss.pressgang.ccms.docbook.messaging.TopicRendererType;
 import org.jboss.pressgang.ccms.restserver.entity.base.AuditedEntity;
-import org.jboss.pressgang.ccms.restserver.utils.topicrenderer.TopicQueueRenderer;
-import org.jboss.pressgang.ccms.utils.concurrency.WorkQueue;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import org.jboss.pressgang.ccms.restserver.utils.TopicUtilities;
 
 @Audited
 @Entity
@@ -35,7 +28,6 @@ import org.slf4j.LoggerFactory;
 @Cache(usage = CacheConcurrencyStrategy.TRANSACTIONAL)
 @Table(name = "TopicToTopic", uniqueConstraints = @UniqueConstraint(columnNames = { "MainTopicID", "RelatedTopicID" }))
 public class TopicToTopic extends AuditedEntity<TopicToTopic> implements java.io.Serializable {
-    private static final Logger log = LoggerFactory.getLogger(TopicToTopic.class);
     private static final long serialVersionUID = -589601408520832737L;
     private Integer topicToTopicId;
     private Topic mainTopic;
@@ -93,22 +85,7 @@ public class TopicToTopic extends AuditedEntity<TopicToTopic> implements java.io
     @PostPersist
     @PostRemove
     private void reRender() {
-        /*
-         * Send a message to the queue that this topic, and all those that have inbound relationships, need to be rerendered. We
-         * use the TopicQueueRenderer to send the topic id once the transaction has finished.
-         */
-        try {
-            if (this.mainTopic != null) {
-                final InitialContext initCtx = new InitialContext();
-                final TransactionManager transactionManager = (TransactionManager) initCtx
-                        .lookup("java:jboss/TransactionManager");
-                final Transaction transaction = transactionManager.getTransaction();
-                WorkQueue.getInstance().execute(
-                        TopicQueueRenderer.createNewInstance(mainTopic.getTopicId(), TopicRendererType.TOPIC, transaction));
-            }
-        } catch (final Exception ex) {
-            log.error("An error occurred trying to render a topic, probably a STOMP messaging problem", ex);
-        }
+        TopicUtilities.render(mainTopic);
     }
 
     @ManyToOne

@@ -14,7 +14,6 @@ import org.jboss.pressgang.ccms.rest.v1.collections.items.RESTProjectCollectionI
 import org.jboss.pressgang.ccms.rest.v1.collections.join.RESTAssignedPropertyTagCollectionV1;
 import org.jboss.pressgang.ccms.rest.v1.collections.join.RESTCategoryInTagCollectionV1;
 import org.jboss.pressgang.ccms.rest.v1.constants.RESTv1Constants;
-import org.jboss.pressgang.ccms.rest.v1.entities.RESTCategoryV1;
 import org.jboss.pressgang.ccms.rest.v1.entities.RESTProjectV1;
 import org.jboss.pressgang.ccms.rest.v1.entities.RESTTagV1;
 import org.jboss.pressgang.ccms.rest.v1.entities.base.RESTBaseEntityV1;
@@ -126,8 +125,8 @@ public class TagV1Factory extends RESTDataObjectFactory<RESTTagV1, Tag, RESTTagC
                                 + restEntity.getId());
 
                     if (restEntityItem.returnIsAddItem()) {
-                        if (restEntity.hasParameterSet(RESTCategoryV1.SORT_NAME))
-                            dbEntity.addTagRelationship(entity, restEntity.getSort());
+                        if (restEntity.hasParameterSet(RESTCategoryInTagV1.RELATIONSHIP_SORT_NAME))
+                            dbEntity.addTagRelationship(entity, restEntity.getRelationshipSort());
                         else
                             dbEntity.addTagRelationship(entity);
                     } else if (restEntityItem.returnIsRemoveItem()) {

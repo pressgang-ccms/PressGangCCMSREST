@@ -12,6 +12,7 @@ import org.jboss.pressgang.ccms.rest.v1.collections.join.RESTTagInCategoryCollec
 import org.jboss.pressgang.ccms.rest.v1.constants.RESTv1Constants;
 import org.jboss.pressgang.ccms.rest.v1.entities.RESTCategoryV1;
 import org.jboss.pressgang.ccms.rest.v1.entities.base.RESTBaseEntityV1;
+import org.jboss.pressgang.ccms.rest.v1.entities.join.RESTCategoryInTagV1;
 import org.jboss.pressgang.ccms.rest.v1.entities.join.RESTTagInCategoryV1;
 import org.jboss.pressgang.ccms.rest.v1.exceptions.InvalidParameterException;
 import org.jboss.pressgang.ccms.rest.v1.expansion.ExpandDataTrunk;
@@ -96,7 +97,10 @@ class CategoryV1Factory extends
                                 + restEntity.getId());
 
                     if (restEntityItem.returnIsAddItem()) {
-                        entity.addTagRelationship(dbEntity);
+                        if (restEntity.hasParameterSet(RESTCategoryInTagV1.RELATIONSHIP_SORT_NAME))
+                            entity.addTagRelationship(dbEntity, restEntity.getRelationshipSort());
+                        else
+                            entity.addTagRelationship(dbEntity);
                     } else if (restEntityItem.returnIsRemoveItem()) {
                         entity.removeTagRelationship(dbEntity);
                     }

@@ -249,14 +249,6 @@ public class Category extends AuditedEntity<Category> implements java.io.Seriali
 			childTag.getTagToCategories().add(tagToCategory);
 			return true;
 		}
-		/* otherwise update the sorting order */
-		else
-		{
-			for (final TagToCategory child : children)
-			{
-				child.setSorting(sort);
-			}
-		}
 
 		return false;
 	}
