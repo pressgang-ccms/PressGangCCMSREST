@@ -1,0 +1,88 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<persistence xmlns="http://java.sun.com/xml/ns/persistence"
+             xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+             xsi:schemaLocation="http://java.sun.com/xml/ns/persistence http://java.sun.com/xml/ns/persistence/persistence_2_0.xsd"
+             version="2.0">
+
+    <persistence-unit name="restservertest" transaction-type="JTA">
+        <jta-data-source>java:jboss/restservertest</jta-data-source>
+        <jar-file>resource-server-provider-1.0-SNAPSHOT.jar</jar-file>
+        <class>org.jboss.pressgang.ccms.restserver.entity.base.LoggingRevisionEntity</class>
+        <class>org.jboss.pressgang.ccms.restserver.entity.BlobConstants</class>
+        <class>org.jboss.pressgang.ccms.restserver.entity.BugzillaBug</class>
+        <class>org.jboss.pressgang.ccms.restserver.entity.Category</class>
+        <class>org.jboss.pressgang.ccms.restserver.entity.contentspec.ContentSpec</class>
+        <class>org.jboss.pressgang.ccms.restserver.entity.contentspec.ContentSpecToCSMetaData</class>
+        <class>org.jboss.pressgang.ccms.restserver.entity.contentspec.ContentSpecToProject</class>
+        <class>org.jboss.pressgang.ccms.restserver.entity.contentspec.ContentSpecToPropertyTag</class>
+        <class>org.jboss.pressgang.ccms.restserver.entity.contentspec.ContentSpecToTag</class>
+        <class>org.jboss.pressgang.ccms.restserver.entity.contentspec.CSMetaData</class>
+        <class>org.jboss.pressgang.ccms.restserver.entity.contentspec.CSMetaDataToCSTranslatedString</class>
+        <class>org.jboss.pressgang.ccms.restserver.entity.contentspec.CSNode</class>
+        <class>org.jboss.pressgang.ccms.restserver.entity.contentspec.CSNodeToCSNode</class>
+        <class>org.jboss.pressgang.ccms.restserver.entity.contentspec.CSNodeToCSTranslatedString</class>
+        <class>org.jboss.pressgang.ccms.restserver.entity.contentspec.CSNodeToPropertyTag</class>
+        <class>org.jboss.pressgang.ccms.restserver.entity.contentspec.CSTranslatedString</class>
+        <class>org.jboss.pressgang.ccms.restserver.entity.Filter</class>
+        <class>org.jboss.pressgang.ccms.restserver.entity.FilterCategory</class>
+        <class>org.jboss.pressgang.ccms.restserver.entity.FilterField</class>
+        <class>org.jboss.pressgang.ccms.restserver.entity.FilterLocale</class>
+        <class>org.jboss.pressgang.ccms.restserver.entity.FilterOption</class>
+        <class>org.jboss.pressgang.ccms.restserver.entity.FilterTag</class>
+        <class>org.jboss.pressgang.ccms.restserver.entity.ImageFile</class>
+        <class>org.jboss.pressgang.ccms.restserver.entity.IntegerConstants</class>
+        <class>org.jboss.pressgang.ccms.restserver.entity.LanguageImage</class>
+        <class>org.jboss.pressgang.ccms.restserver.entity.Project</class>
+        <class>org.jboss.pressgang.ccms.restserver.entity.PropertyTag</class>
+        <class>org.jboss.pressgang.ccms.restserver.entity.PropertyTagCategory</class>
+        <class>org.jboss.pressgang.ccms.restserver.entity.PropertyTagToPropertyTagCategory</class>
+        <class>org.jboss.pressgang.ccms.restserver.entity.RelationshipTag</class>
+        <class>org.jboss.pressgang.ccms.restserver.entity.Role</class>
+        <class>org.jboss.pressgang.ccms.restserver.entity.RoleToRole</class>
+        <class>org.jboss.pressgang.ccms.restserver.entity.RoleToRoleRelationship</class>
+        <class>org.jboss.pressgang.ccms.restserver.entity.StringConstants</class>
+        <class>org.jboss.pressgang.ccms.restserver.entity.Tag</class>
+        <class>org.jboss.pressgang.ccms.restserver.entity.TagToCategory</class>
+        <class>org.jboss.pressgang.ccms.restserver.entity.TagToProject</class>
+        <class>org.jboss.pressgang.ccms.restserver.entity.TagToPropertyTag</class>
+        <class>org.jboss.pressgang.ccms.restserver.entity.TagToTag</class>
+        <class>org.jboss.pressgang.ccms.restserver.entity.TagToTagRelationship</class>
+        <class>org.jboss.pressgang.ccms.restserver.entity.Topic</class>
+        <class>org.jboss.pressgang.ccms.restserver.entity.TopicSecondOrderData</class>
+        <class>org.jboss.pressgang.ccms.restserver.entity.TopicSourceUrl</class>
+        <class>org.jboss.pressgang.ccms.restserver.entity.TopicToBugzillaBug</class>
+        <class>org.jboss.pressgang.ccms.restserver.entity.TopicToPropertyTag</class>
+        <class>org.jboss.pressgang.ccms.restserver.entity.TopicToTag</class>
+        <class>org.jboss.pressgang.ccms.restserver.entity.TopicToTopic</class>
+        <class>org.jboss.pressgang.ccms.restserver.entity.TopicToTopicSourceUrl</class>
+        <class>org.jboss.pressgang.ccms.restserver.entity.TranslatedTopic</class>
+        <class>org.jboss.pressgang.ccms.restserver.entity.TranslatedTopicData</class>
+        <class>org.jboss.pressgang.ccms.restserver.entity.TranslatedTopicString</class>
+        <class>org.jboss.pressgang.ccms.restserver.entity.User</class>
+        <class>org.jboss.pressgang.ccms.restserver.entity.UserRole</class>
+        <class>org.jboss.pressgang.belay.oauth2.resourceserver.data.model.OAuth2RSScope</class>
+        <class>org.jboss.pressgang.belay.oauth2.resourceserver.data.model.OAuth2RSEndpoint</class>
+        <exclude-unlisted-classes>true</exclude-unlisted-classes>
+
+        <properties>
+            <!--<property name="hibernate.dialect" value="org.hibernate.dialect.MySQL5InnoDBDialect"/>-->
+            <property name="hibernate.hbm2ddl.auto" value="create-drop"/>
+            <property name="hibernate.show_sql" value="false"/>
+            <property name="hibernate.format_sql" value="false"/>
+            <property name="jboss.entity.manager.factory.jndi.name" value="java:jboss/RestServerTestManagerFactory"/>
+            <property name="hibernate.jdbc.batch_size" value="20"/>
+            <property name="hibernate.cache.use_second_level_cache" value="true"/>
+            <property name="hibernate.cache.use_query_cache" value="false"/>
+            <property name="hibernate.cache.use_minimal_puts" value="true"/>
+
+            <!-- Hibernate Search Properties -->
+            <!--<property name="hibernate.search.default.directory_provider" value="filesystem"/>-->
+            <!--<property name="hibernate.search.default.indexBase" value="/var/lucene/indexes"/>-->
+
+            <!-- Envers events -->
+            <property name="org.hibernate.envers.audit_strategy"
+                      value="org.hibernate.envers.strategy.ValidityAuditStrategy"/>
+        </properties>
+
+    </persistence-unit>
+</persistence>

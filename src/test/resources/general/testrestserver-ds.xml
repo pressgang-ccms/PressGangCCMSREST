@@ -1,0 +1,42 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<datasources xmlns="http://www.jboss.org/ironjacamar/schema"
+             xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+             xsi:schemaLocation="
+        http://www.jboss.org/ironjacamar/schema
+        http://docs.jboss.org/ironjacamar/schema/datasources_1_0.xsd">
+    <datasource enabled="true"
+                jta="true"
+                jndi-name="java:jboss/restservertest"
+                pool-name="testpool"
+                use-java-context="true"
+                use-ccm="true">
+        <connection-url>
+            jdbc:h2:mem:restservertest;DB_CLOSE_ON_EXIT=FALSE
+        </connection-url>
+        <driver>h2</driver>
+        <transaction-isolation>TRANSACTION_READ_COMMITTED</transaction-isolation>
+        <pool>
+            <min-pool-size>20</min-pool-size>
+            <max-pool-size>151</max-pool-size>
+            <prefill>true</prefill>
+            <use-strict-min>false</use-strict-min>
+            <flush-strategy>FailingConnectionOnly</flush-strategy>
+        </pool>
+        <security>
+            <user-name>sa</user-name>
+            <password>sa</password>
+        </security>
+        <validation>
+            <validate-on-match>false</validate-on-match>
+            <background-validation>false</background-validation>
+            <use-fast-fail>false</use-fast-fail>
+        </validation>
+        <timeout>
+            <idle-timeout-minutes>99999999</idle-timeout-minutes>
+        </timeout>
+        <statement>
+            <prepared-statement-cache-size>50</prepared-statement-cache-size>
+            <share-prepared-statements/>
+        </statement>
+    </datasource>
+</datasources>

@@ -109,7 +109,7 @@ public class PropertyTag extends AuditedEntity<PropertyTag> implements java.io.S
 		this.propertyTagRegex = propertyTagRegex;
 	}
 
-	@Column(name = "PropertyTagCanBeNull", unique = true, nullable = false, columnDefinition = "BIT", length = 1)
+	@Column(name = "PropertyTagCanBeNull", nullable = false, columnDefinition = "BIT", length = 1)
 	@NotNull
 	public boolean isPropertyTagCanBeNull()
 	{

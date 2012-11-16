@@ -7,6 +7,7 @@
 	<persistence-unit name="PressGangCCMS" transaction-type="JTA">
 		<!-- <provider>org.hibernate.ejb.HibernatePersistence</provider> -->
 		<jta-data-source>java:/PressGangCCMSDatasource</jta-data-source>
+        <jar-file>resource-server-provider-1.0-SNAPSHOT.jar</jar-file>
         <class>org.jboss.pressgang.ccms.restserver.entity.base.LoggingRevisionEntity</class>
 		<class>org.jboss.pressgang.ccms.restserver.entity.BlobConstants</class>
 		<class>org.jboss.pressgang.ccms.restserver.entity.BugzillaBug</class>
@@ -60,6 +61,9 @@
         <class>org.jboss.pressgang.ccms.restserver.entity.TranslatedTopicString</class>
         <class>org.jboss.pressgang.ccms.restserver.entity.User</class>
         <class>org.jboss.pressgang.ccms.restserver.entity.UserRole</class>
+        <class>org.jboss.pressgang.belay.oauth2.resourceserver.data.model.OAuth2RSScope</class>
+        <class>org.jboss.pressgang.belay.oauth2.resourceserver.data.model.OAuth2RSEndpoint</class>
+
 		<properties>
 	        <property name="hibernate.dialect" value="org.hibernate.dialect.MySQL5InnoDBDialect"/>
 	        <property name="hibernate.hbm2ddl.auto" value="validate"/>
@@ -72,7 +76,6 @@
 	        <property name="hibernate.cache.use_minimal_puts" value="true"/>
 	        
 	        <!-- Hibernate Search Properties -->
-	        
 	        <property name="hibernate.search.default.directory_provider" value="filesystem"/>
 	        <property name="hibernate.search.default.indexBase" value="/var/lucene/indexes"/> 
 	        
