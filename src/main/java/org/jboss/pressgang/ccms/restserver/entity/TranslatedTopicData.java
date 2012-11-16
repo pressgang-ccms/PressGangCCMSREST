@@ -59,7 +59,6 @@ import org.slf4j.LoggerFactory;
 @Table(name = "TranslatedTopicData", uniqueConstraints = @UniqueConstraint(columnNames = { "TranslatedTopicID",
         "TranslationLocale" }))
 public class TranslatedTopicData extends AuditedEntity<TranslatedTopicData> implements java.io.Serializable {
-    private static final Logger log = LoggerFactory.getLogger(TranslatedTopicData.class);
     private static final long serialVersionUID = 7470594104954257672L;
 
     public static final String SELECT_ALL_QUERY = "select translatedTopicData from TranslatedTopicData translatedTopicData";
@@ -73,7 +72,6 @@ public class TranslatedTopicData extends AuditedEntity<TranslatedTopicData> impl
     private Set<TranslatedTopicString> translatedTopicStrings = new HashSet<TranslatedTopicString>(0);
     private Date translatedXmlRenderedUpdated;
     private Integer translationPercentage = 0;
-    private String preUpdatedXml;
 
     public TranslatedTopicData() {
         super(TranslatedTopicData.class);
@@ -181,15 +179,6 @@ public class TranslatedTopicData extends AuditedEntity<TranslatedTopicData> impl
     }
 
     @Transient
-    protected String getPreUpdatedXml() {
-        return preUpdatedXml;
-    }
-
-    protected void setPreUpdatedXml(String preUpdatedXml) {
-        this.preUpdatedXml = preUpdatedXml;
-    }
-
-    @Transient
     public String getFormattedTranslatedXmlRenderedUpdated() {
         if (this.translatedXmlRenderedUpdated != null) {
             final SimpleDateFormat formatter = new SimpleDateFormat(CommonConstants.FILTER_DISPLAY_DATE_FORMAT);
@@ -197,37 +186,6 @@ public class TranslatedTopicData extends AuditedEntity<TranslatedTopicData> impl
         }
 
         return new String();
-    }
-
-    @SuppressWarnings("unused")
-    @PreUpdate
-    private void preUpdate() {
-        this.preUpdatedXml = this.translatedXml;
-    }
-
-    @SuppressWarnings("unused")
-    @PostPersist
-    @PostUpdate
-    private void render() {
-        /* don't do anything if the XML hasn't changed */
-        if (preUpdatedXml != null && preUpdatedXml.equals(translatedXml))
-            return;
-
-        try {
-            /* create the threads to rerender the TranslatedTopicData objects */
-            final InitialContext initCtx = new InitialContext();
-            final TransactionManager transactionManager = (TransactionManager) initCtx.lookup("java:jboss/TransactionManager");
-            final Transaction transaction = transactionManager.getTransaction();
-
-            WorkQueue.getInstance()
-                    .execute(
-                            TopicQueueRenderer.createNewInstance(translatedTopicDataId, TopicRendererType.TRANSLATEDTOPIC,
-                                    transaction));
-        } catch (final NamingException ex) {
-            log.error("Probably an issue getting the transaction manager", ex);
-        } catch (final Exception ex) {
-            log.error("Probably an issue getting a transaction", ex);
-        }
     }
 
     @Transient

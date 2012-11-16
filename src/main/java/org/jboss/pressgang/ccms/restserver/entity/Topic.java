@@ -280,18 +280,6 @@ public class Topic extends ParentToPropertyTag<Topic> implements java.io.Seriali
 
         this.topicSecondOrderData.setTopicXMLErrors(value);
     }
-    
-    @SuppressWarnings("unused")
-    @PostPersist
-    private void onPostPersist() {
-        TopicUtilities.render(this);
-    }
-
-    @SuppressWarnings("unused")
-    @PostUpdate
-    private void onPostUpdate() {
-        TopicUtilities.render(this);
-    }
 
     @SuppressWarnings("unused")
     @PrePersist

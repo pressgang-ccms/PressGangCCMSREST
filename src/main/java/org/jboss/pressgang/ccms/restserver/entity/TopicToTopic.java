@@ -78,16 +78,6 @@ public class TopicToTopic extends AuditedEntity<TopicToTopic> implements java.io
         this.relatedTopic = relatedTopic;
     }
 
-    /**
-     * When a TopicToTopic mapping is created or destroyed, we rerender the main topic to update the generic injection lists.
-     */
-    @SuppressWarnings("unused")
-    @PostPersist
-    @PostRemove
-    private void reRender() {
-        TopicUtilities.render(mainTopic);
-    }
-
     @ManyToOne
     @JoinColumn(name = "RelationshipTagID", nullable = false)
     @NotNull
