@@ -180,6 +180,9 @@ public class FilterUtilities {
     {
         if (filterQueryBuilder == null)
             return null;
+        
+        // Reset the query builder to ensure it hasn't got any conditions set
+        filterQueryBuilder.reset();
 
         // the categories to be ANDed will be added to this string
         final List<Predicate> andQueryBlock = new ArrayList<Predicate>();
@@ -289,7 +292,7 @@ public class FilterUtilities {
                         final Predicate categoryBlock;
                         if (categoryBlocks.size() > 1) {
                             final Predicate[] catBlockArray = categoryBlocks.toArray(new Predicate[categoryBlocks.size()]);
-                            if (catInternalLogic.equals(Constants.OR_LOGIC))
+                            if (catInternalLogic.equalsIgnoreCase(Constants.OR_LOGIC))
                             {
                                 categoryBlock = queryBuilder.or(catBlockArray);
                             }
@@ -302,7 +305,7 @@ public class FilterUtilities {
                         }
     
                         // append this clause to the appropriate block
-                        if (catExternalLogic.equals(Constants.AND_LOGIC))
+                        if (catExternalLogic.equalsIgnoreCase(Constants.AND_LOGIC))
                         {
                             andQueryBlock.add(categoryBlock);
                         }

@@ -9,8 +9,6 @@ import javax.persistence.GeneratedValue;
 import javax.persistence.Id;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
-import javax.persistence.PostPersist;
-import javax.persistence.PostRemove;
 import javax.persistence.Table;
 import javax.persistence.Transient;
 import javax.persistence.UniqueConstraint;
@@ -20,7 +18,6 @@ import org.hibernate.annotations.Cache;
 import org.hibernate.annotations.CacheConcurrencyStrategy;
 import org.hibernate.envers.Audited;
 import org.jboss.pressgang.ccms.restserver.entity.base.AuditedEntity;
-import org.jboss.pressgang.ccms.restserver.utils.TopicUtilities;
 
 @Audited
 @Entity

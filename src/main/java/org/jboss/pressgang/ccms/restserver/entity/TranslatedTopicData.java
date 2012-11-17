@@ -11,8 +11,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-import javax.naming.InitialContext;
-import javax.naming.NamingException;
 import javax.persistence.Cacheable;
 import javax.persistence.CascadeType;
 import javax.persistence.Column;
@@ -24,17 +22,11 @@ import javax.persistence.Id;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.OneToMany;
-import javax.persistence.PostPersist;
-import javax.persistence.PostUpdate;
-import javax.persistence.PreUpdate;
 import javax.persistence.Table;
 import javax.persistence.Temporal;
 import javax.persistence.TemporalType;
 import javax.persistence.Transient;
 import javax.persistence.UniqueConstraint;
-
-import javax.transaction.Transaction;
-import javax.transaction.TransactionManager;
 
 import org.hibernate.annotations.BatchSize;
 import org.hibernate.annotations.Cache;
@@ -42,15 +34,10 @@ import org.hibernate.annotations.CacheConcurrencyStrategy;
 import org.hibernate.envers.Audited;
 import javax.validation.constraints.Size;
 import javax.validation.constraints.NotNull;
-import org.jboss.pressgang.ccms.docbook.messaging.TopicRendererType;
 import org.jboss.pressgang.ccms.restserver.entity.base.AuditedEntity;
 import org.jboss.pressgang.ccms.restserver.utils.Constants;
-import org.jboss.pressgang.ccms.restserver.utils.topicrenderer.TopicQueueRenderer;
 import org.jboss.pressgang.ccms.utils.common.CollectionUtilities;
-import org.jboss.pressgang.ccms.utils.concurrency.WorkQueue;
 import org.jboss.pressgang.ccms.utils.constants.CommonConstants;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 @Entity
 @Audited

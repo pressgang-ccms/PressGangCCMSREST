@@ -15,6 +15,8 @@ import javax.persistence.criteria.Subquery;
 import org.jboss.pressgang.ccms.utils.constants.CommonConstants;
 import org.jboss.pressgang.ccms.rest.v1.constants.CommonFilterConstants;
 import org.jboss.pressgang.ccms.restserver.entity.Topic;
+import org.jboss.pressgang.ccms.restserver.entity.TopicToBugzillaBug;
+import org.jboss.pressgang.ccms.restserver.entity.TopicToPropertyTag;
 import org.jboss.pressgang.ccms.restserver.filter.base.BaseFilterQueryBuilder;
 import org.jboss.pressgang.ccms.restserver.filter.base.ILocaleFilterQueryBuilder;
 import org.jboss.pressgang.ccms.restserver.filter.base.ITagFilterQueryBuilder;
@@ -277,14 +279,12 @@ public abstract class BaseTopicFilterQueryBuilder<T> extends BaseFilterQueryBuil
         } else if (fieldName.equals(CommonFilterConstants.TOPIC_HAS_OPEN_BUGZILLA_BUGS)) {
             final Boolean fieldValueBoolean = Boolean.parseBoolean(fieldValue);
             if (fieldValueBoolean) {
-                final List<Integer> topicIds = EntityUtilities.getTopicsWithOpenBugs(getEntityManager());
-                addIdInCollectionCondition("topicId", topicIds);
+                addFieldCondition(getCriteriaBuilder().exists(getOpenBugzillaSubquery()));
             }
         } else if (fieldName.equals(CommonFilterConstants.TOPIC_HAS_NOT_OPEN_BUGZILLA_BUGS)) {
             final Boolean fieldValueBoolean = Boolean.parseBoolean(fieldValue);
             if (fieldValueBoolean) {
-                final List<Integer> topicIds = EntityUtilities.getTopicsWithOpenBugs(getEntityManager());
-                addIdNotInCollectionCondition("topicId", topicIds);
+                addFieldCondition(getCriteriaBuilder().not(getCriteriaBuilder().exists(getOpenBugzillaSubquery())));
             }
         } else if (fieldName.equals(CommonFilterConstants.TOPIC_HAS_BUGZILLA_BUGS)) {
             final Boolean fieldValueBoolean = Boolean.parseBoolean(fieldValue);
@@ -306,8 +306,8 @@ public abstract class BaseTopicFilterQueryBuilder<T> extends BaseFilterQueryBuil
 
                     if (propertyTagIdString != null && fieldValue != null) {
                         final Integer propertyTagIdInt = Integer.parseInt(propertyTagIdString);
-                        final List<Integer> topicIds = EntityUtilities.getTopicsWithPropertyTag(getEntityManager(), propertyTagIdInt, fieldValue);
-                        addIdInCollectionCondition("topicId", topicIds);
+                        final Subquery<TopicToPropertyTag> subquery = getPropertyTagSubquery(propertyTagIdInt, fieldValue);                       
+                        this.addFieldCondition(getCriteriaBuilder().exists(subquery));
                     }
 
                     /* should only match once */
@@ -324,5 +324,46 @@ public abstract class BaseTopicFilterQueryBuilder<T> extends BaseFilterQueryBuil
         } else {
             super.processFilterString(fieldName, fieldValue);
         }
+    }
+    
+    /**
+     * Create a Subquery to check if a topic has a property tag with a specific value.
+     * 
+     * @param propertyTagId The ID of the property tag to be checked.
+     * @param propertyTagValue The Value that the property tag should have.
+     * @return A subquery that can be used in an exists statement to see if a topic has a property tag with the specified value.
+     */
+    private Subquery<TopicToPropertyTag> getPropertyTagSubquery(final Integer propertyTagId, final String propertyTagValue) {
+        final CriteriaBuilder criteriaBuilder = getCriteriaBuilder();
+        final Subquery<TopicToPropertyTag> subQuery = getCriteriaQuery().subquery(TopicToPropertyTag.class);
+        final Root<TopicToPropertyTag> root = subQuery.from(TopicToPropertyTag.class);
+        subQuery.select(root);
+
+        // Create the Condition for the subquery
+        final Predicate topicIdMatch = criteriaBuilder.equal(getRootPath(), root.get("topic"));
+        final Predicate propertyTagIdMatch = criteriaBuilder.equal(getRootPath().get("propertyTag").get("propertyTagId"), propertyTagId);
+        final Predicate propertyTagValueMatch = criteriaBuilder.equal(getRootPath().get("value"), propertyTagValue);
+        subQuery.where(criteriaBuilder.and(topicIdMatch, propertyTagIdMatch, propertyTagValueMatch));
+        
+        return subQuery;
+    }
+    
+    /**
+     * Create a Subquery to check if a topic has open bugs.
+     * 
+     * @return A subquery that can be used in an exists statement to see if a topic has open bugs.
+     */
+    private Subquery<TopicToBugzillaBug> getOpenBugzillaSubquery() {
+        final CriteriaBuilder criteriaBuilder = getCriteriaBuilder();
+        final Subquery<TopicToBugzillaBug> subQuery = getCriteriaQuery().subquery(TopicToBugzillaBug.class);
+        final Root<TopicToBugzillaBug> root = subQuery.from(TopicToBugzillaBug.class);
+        subQuery.select(root);
+        
+        // Create the Condition for the subquery
+        final Predicate topicIdMatch = criteriaBuilder.equal(getRootPath(), root.get("topic"));
+        final Predicate bugOpenMatch = criteriaBuilder.isTrue(root.get("bugzillaBug").get("bugzillaBugOpen").as(Boolean.class));
+        subQuery.where(criteriaBuilder.and(topicIdMatch, bugOpenMatch));
+        
+        return subQuery;
     }
 }
