@@ -159,8 +159,4 @@ public class Constants {
      * The ID for the inherit relationship type, as defined in the RoleToRoleRelationship table
      */
     public static final Integer INHERIT_ROLE_RELATIONSHIP_TYPE = 1;
-    /**
-     * The default size to use for batch fetching.
-     */
-    public static final int DEFAULT_BATCH_SIZE = 15;
 }

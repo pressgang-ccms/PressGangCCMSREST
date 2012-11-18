@@ -6,6 +6,12 @@ import java.util.List;
 import javax.persistence.EntityManager;
 import javax.persistence.Query;
 
+import org.jboss.pressgang.ccms.model.Tag;
+import org.jboss.pressgang.ccms.model.TopicSourceUrl;
+import org.jboss.pressgang.ccms.model.TopicToPropertyTag;
+import org.jboss.pressgang.ccms.model.TranslatedTopic;
+import org.jboss.pressgang.ccms.model.TranslatedTopicData;
+import org.jboss.pressgang.ccms.model.TranslatedTopicString;
 import org.jboss.pressgang.ccms.rest.v1.collections.RESTTagCollectionV1;
 import org.jboss.pressgang.ccms.rest.v1.collections.RESTTopicSourceUrlCollectionV1;
 import org.jboss.pressgang.ccms.rest.v1.collections.RESTTranslatedTopicCollectionV1;
@@ -25,14 +31,9 @@ import org.jboss.pressgang.ccms.rest.v1.entities.base.RESTBaseEntityV1;
 import org.jboss.pressgang.ccms.rest.v1.entities.join.RESTAssignedPropertyTagV1;
 import org.jboss.pressgang.ccms.rest.v1.exceptions.InvalidParameterException;
 import org.jboss.pressgang.ccms.rest.v1.expansion.ExpandDataTrunk;
-import org.jboss.pressgang.ccms.restserver.entity.Tag;
-import org.jboss.pressgang.ccms.restserver.entity.TopicSourceUrl;
-import org.jboss.pressgang.ccms.restserver.entity.TopicToPropertyTag;
-import org.jboss.pressgang.ccms.restserver.entity.TranslatedTopic;
-import org.jboss.pressgang.ccms.restserver.entity.TranslatedTopicData;
-import org.jboss.pressgang.ccms.restserver.entity.TranslatedTopicString;
 import org.jboss.pressgang.ccms.restserver.rest.v1.base.RESTDataObjectCollectionFactory;
 import org.jboss.pressgang.ccms.restserver.rest.v1.base.RESTDataObjectFactory;
+import org.jboss.pressgang.ccms.restserver.utils.EnversUtilities;
 import org.jboss.pressgang.ccms.utils.common.DocBookUtilities;
 
 public class TranslatedTopicV1Factory
@@ -109,7 +110,7 @@ public class TranslatedTopicV1Factory
         if (revision == null) {
             retValue.setRevisions(new RESTDataObjectCollectionFactory<RESTTranslatedTopicV1, TranslatedTopicData, RESTTranslatedTopicCollectionV1, RESTTranslatedTopicCollectionItemV1>()
                     .create(RESTTranslatedTopicCollectionV1.class, new TranslatedTopicV1Factory(), entity,
-                            entity.getRevisions(entityManager), RESTBaseEntityV1.REVISIONS_NAME, dataType, expand, baseUrl,
+                            EnversUtilities.getRevisions(entityManager, entity), RESTBaseEntityV1.REVISIONS_NAME, dataType, expand, baseUrl,
                             entityManager));
         }
 

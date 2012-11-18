@@ -5,15 +5,16 @@ import java.util.List;
 
 import javax.persistence.EntityManager;
 
+import org.jboss.pressgang.ccms.model.BlobConstants;
 import org.jboss.pressgang.ccms.rest.v1.collections.RESTBlobConstantCollectionV1;
 import org.jboss.pressgang.ccms.rest.v1.collections.items.RESTBlobConstantCollectionItemV1;
 import org.jboss.pressgang.ccms.rest.v1.constants.RESTv1Constants;
 import org.jboss.pressgang.ccms.rest.v1.entities.RESTBlobConstantV1;
 import org.jboss.pressgang.ccms.rest.v1.entities.base.RESTBaseEntityV1;
 import org.jboss.pressgang.ccms.rest.v1.expansion.ExpandDataTrunk;
-import org.jboss.pressgang.ccms.restserver.entity.BlobConstants;
 import org.jboss.pressgang.ccms.restserver.rest.v1.base.RESTDataObjectCollectionFactory;
 import org.jboss.pressgang.ccms.restserver.rest.v1.base.RESTDataObjectFactory;
+import org.jboss.pressgang.ccms.restserver.utils.EnversUtilities;
 
 
 public class BlobConstantV1Factory
@@ -46,7 +47,7 @@ public class BlobConstantV1Factory
         // REVISIONS
         if (revision == null) {
             retValue.setRevisions(new RESTDataObjectCollectionFactory<RESTBlobConstantV1, BlobConstants, RESTBlobConstantCollectionV1, RESTBlobConstantCollectionItemV1>()
-                    .create(RESTBlobConstantCollectionV1.class, new BlobConstantV1Factory(), entity, entity.getRevisions(entityManager),
+                    .create(RESTBlobConstantCollectionV1.class, new BlobConstantV1Factory(), entity, EnversUtilities.getRevisions(entityManager, entity),
                             RESTBaseEntityV1.REVISIONS_NAME, dataType, expand, baseUrl, entityManager));
         }
 

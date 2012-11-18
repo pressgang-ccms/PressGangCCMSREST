@@ -5,7 +5,7 @@ import java.io.Serializable;
 import javax.enterprise.context.RequestScoped;
 import javax.inject.Named;
 
-import org.jboss.pressgang.ccms.restserver.entity.base.LoggingRevisionEntity;
+import org.jboss.pressgang.ccms.restserver.envers.LoggingRevisionEntity;
 
 /**
  * This java bean provides a mechanism to provide information to a 

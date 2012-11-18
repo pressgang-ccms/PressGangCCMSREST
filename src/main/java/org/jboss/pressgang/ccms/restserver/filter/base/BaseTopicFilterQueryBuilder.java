@@ -13,10 +13,10 @@ import javax.persistence.criteria.Root;
 import javax.persistence.criteria.Subquery;
 
 import org.jboss.pressgang.ccms.utils.constants.CommonConstants;
+import org.jboss.pressgang.ccms.model.Topic;
+import org.jboss.pressgang.ccms.model.TopicToBugzillaBug;
+import org.jboss.pressgang.ccms.model.TopicToPropertyTag;
 import org.jboss.pressgang.ccms.rest.v1.constants.CommonFilterConstants;
-import org.jboss.pressgang.ccms.restserver.entity.Topic;
-import org.jboss.pressgang.ccms.restserver.entity.TopicToBugzillaBug;
-import org.jboss.pressgang.ccms.restserver.entity.TopicToPropertyTag;
 import org.jboss.pressgang.ccms.restserver.filter.base.BaseFilterQueryBuilder;
 import org.jboss.pressgang.ccms.restserver.filter.base.ILocaleFilterQueryBuilder;
 import org.jboss.pressgang.ccms.restserver.filter.base.ITagFilterQueryBuilder;

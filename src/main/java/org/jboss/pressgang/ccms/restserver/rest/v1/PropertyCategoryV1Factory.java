@@ -5,6 +5,9 @@ import java.util.List;
 
 import javax.persistence.EntityManager;
 
+import org.jboss.pressgang.ccms.model.PropertyTag;
+import org.jboss.pressgang.ccms.model.PropertyTagCategory;
+import org.jboss.pressgang.ccms.model.PropertyTagToPropertyTagCategory;
 import org.jboss.pressgang.ccms.rest.v1.collections.RESTPropertyCategoryCollectionV1;
 import org.jboss.pressgang.ccms.rest.v1.collections.items.RESTPropertyCategoryCollectionItemV1;
 import org.jboss.pressgang.ccms.rest.v1.collections.items.join.RESTPropertyTagInPropertyCategoryCollectionItemV1;
@@ -15,11 +18,9 @@ import org.jboss.pressgang.ccms.rest.v1.entities.base.RESTBaseEntityV1;
 import org.jboss.pressgang.ccms.rest.v1.entities.join.RESTPropertyTagInPropertyCategoryV1;
 import org.jboss.pressgang.ccms.rest.v1.exceptions.InvalidParameterException;
 import org.jboss.pressgang.ccms.rest.v1.expansion.ExpandDataTrunk;
-import org.jboss.pressgang.ccms.restserver.entity.PropertyTag;
-import org.jboss.pressgang.ccms.restserver.entity.PropertyTagCategory;
-import org.jboss.pressgang.ccms.restserver.entity.PropertyTagToPropertyTagCategory;
 import org.jboss.pressgang.ccms.restserver.rest.v1.base.RESTDataObjectCollectionFactory;
 import org.jboss.pressgang.ccms.restserver.rest.v1.base.RESTDataObjectFactory;
+import org.jboss.pressgang.ccms.restserver.utils.EnversUtilities;
 
 public class PropertyCategoryV1Factory
         extends
@@ -52,7 +53,7 @@ public class PropertyCategoryV1Factory
         if (revision == null) {
             retValue.setRevisions(new RESTDataObjectCollectionFactory<RESTPropertyCategoryV1, PropertyTagCategory, RESTPropertyCategoryCollectionV1, RESTPropertyCategoryCollectionItemV1>()
                     .create(RESTPropertyCategoryCollectionV1.class, new PropertyCategoryV1Factory(), entity,
-                            entity.getRevisions(entityManager), RESTBaseEntityV1.REVISIONS_NAME, dataType, expand, baseUrl, entityManager));
+                            EnversUtilities.getRevisions(entityManager, entity), RESTBaseEntityV1.REVISIONS_NAME, dataType, expand, baseUrl, entityManager));
         }
 
         // PROPERTY TAGS

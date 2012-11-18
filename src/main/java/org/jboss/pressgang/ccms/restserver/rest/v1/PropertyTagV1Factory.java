@@ -5,6 +5,9 @@ import java.util.List;
 
 import javax.persistence.EntityManager;
 
+import org.jboss.pressgang.ccms.model.PropertyTag;
+import org.jboss.pressgang.ccms.model.PropertyTagCategory;
+import org.jboss.pressgang.ccms.model.PropertyTagToPropertyTagCategory;
 import org.jboss.pressgang.ccms.rest.v1.collections.RESTPropertyTagCollectionV1;
 import org.jboss.pressgang.ccms.rest.v1.collections.items.RESTPropertyTagCollectionItemV1;
 import org.jboss.pressgang.ccms.rest.v1.collections.items.join.RESTPropertyCategoryInPropertyTagCollectionItemV1;
@@ -16,11 +19,9 @@ import org.jboss.pressgang.ccms.rest.v1.entities.join.RESTPropertyCategoryInProp
 import org.jboss.pressgang.ccms.rest.v1.entities.join.RESTPropertyTagInPropertyCategoryV1;
 import org.jboss.pressgang.ccms.rest.v1.exceptions.InvalidParameterException;
 import org.jboss.pressgang.ccms.rest.v1.expansion.ExpandDataTrunk;
-import org.jboss.pressgang.ccms.restserver.entity.PropertyTag;
-import org.jboss.pressgang.ccms.restserver.entity.PropertyTagCategory;
-import org.jboss.pressgang.ccms.restserver.entity.PropertyTagToPropertyTagCategory;
 import org.jboss.pressgang.ccms.restserver.rest.v1.base.RESTDataObjectCollectionFactory;
 import org.jboss.pressgang.ccms.restserver.rest.v1.base.RESTDataObjectFactory;
+import org.jboss.pressgang.ccms.restserver.utils.EnversUtilities;
 
 public class PropertyTagV1Factory extends
         RESTDataObjectFactory<RESTPropertyTagV1, PropertyTag, RESTPropertyTagCollectionV1, RESTPropertyTagCollectionItemV1> {
@@ -52,7 +53,7 @@ public class PropertyTagV1Factory extends
         // REVISIONS
         if (revision == null) {
             retValue.setRevisions(new RESTDataObjectCollectionFactory<RESTPropertyTagV1, PropertyTag, RESTPropertyTagCollectionV1, RESTPropertyTagCollectionItemV1>()
-                    .create(RESTPropertyTagCollectionV1.class, new PropertyTagV1Factory(), entity, entity.getRevisions(entityManager),
+                    .create(RESTPropertyTagCollectionV1.class, new PropertyTagV1Factory(), entity, EnversUtilities.getRevisions(entityManager, entity),
                             RESTBaseEntityV1.REVISIONS_NAME, dataType, expand, baseUrl, entityManager));
         }
 

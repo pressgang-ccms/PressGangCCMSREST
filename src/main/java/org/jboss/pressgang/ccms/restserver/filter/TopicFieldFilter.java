@@ -7,9 +7,9 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import org.jboss.pressgang.ccms.model.Filter;
+import org.jboss.pressgang.ccms.model.FilterField;
 import org.jboss.pressgang.ccms.rest.v1.constants.CommonFilterConstants;
-import org.jboss.pressgang.ccms.restserver.entity.Filter;
-import org.jboss.pressgang.ccms.restserver.entity.FilterField;
 import org.jboss.pressgang.ccms.restserver.filter.base.BaseFieldFilter;
 import org.jboss.pressgang.ccms.restserver.filter.structures.*;
 import org.slf4j.Logger;

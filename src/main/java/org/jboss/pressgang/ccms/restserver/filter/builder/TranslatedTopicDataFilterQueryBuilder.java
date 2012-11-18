@@ -11,11 +11,11 @@ import javax.persistence.criteria.Root;
 import javax.persistence.criteria.Subquery;
 
 import org.jboss.pressgang.ccms.utils.constants.CommonConstants;
+import org.jboss.pressgang.ccms.model.Topic;
+import org.jboss.pressgang.ccms.model.TopicToTag;
+import org.jboss.pressgang.ccms.model.TranslatedTopic;
+import org.jboss.pressgang.ccms.model.TranslatedTopicData;
 import org.jboss.pressgang.ccms.rest.v1.constants.CommonFilterConstants;
-import org.jboss.pressgang.ccms.restserver.entity.Topic;
-import org.jboss.pressgang.ccms.restserver.entity.TopicToTag;
-import org.jboss.pressgang.ccms.restserver.entity.TranslatedTopic;
-import org.jboss.pressgang.ccms.restserver.entity.TranslatedTopicData;
 import org.jboss.pressgang.ccms.restserver.filter.base.BaseTopicFilterQueryBuilder;
 import org.jboss.pressgang.ccms.restserver.utils.Constants;
 import org.slf4j.Logger;

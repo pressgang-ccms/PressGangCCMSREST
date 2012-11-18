@@ -8,7 +8,7 @@
     </parent>
     <groupId>org.jboss.pressgang.ccms</groupId>
     <artifactId>pressgang-ccms-restserver</artifactId>
-    <version>1.0-SNAPSHOT</version>
+    <version>1.1-SNAPSHOT</version>
     <name>PressGang CCMS REST Server</name>
     <packaging>war</packaging>
 
@@ -22,13 +22,8 @@
         <xalan.version>2.7.1</xalan.version>
         <xerces.version>2.9.1</xerces.version>
         <resteasy.version>2.3.2.Final</resteasy.version>
-        <batik.version>1.6-1</batik.version>
-        <htmlcleaner.version>2.2</htmlcleaner.version>
-        <jericho.version>3.2</jericho.version>
         <jodatime.version>2.1</jodatime.version>
         <jdal.core.version>1.2.0</jdal.core.version>
-        <lambdaj.version>2.3.3</lambdaj.version>
-        <log4j.version>1.2.16</log4j.version>
         <slf4j.version>1.6.4</slf4j.version>
         <arquillian.version>1.0.3.Final</arquillian.version>
         <jbossarquillian.version>7.1.1.Final</jbossarquillian.version>
@@ -38,9 +33,6 @@
         <shrinkwrapresolver.version>2.0.0-alpha-4</shrinkwrapresolver.version>
         <xmlplugin.version>1.0</xmlplugin.version>
         <antrunplugin.version>1.7</antrunplugin.version>
-        <jbossjavaeeweb.version>3.0.0.Final</jbossjavaeeweb.version>
-        <jbossjavaee.version>1.0.0.Final</jbossjavaee.version>
-        <jboss.jaxrs.api.version>1.0.0.Final</jboss.jaxrs.api.version>
     </properties>
 
     <dependencyManagement>
@@ -135,11 +127,6 @@
             <artifactId>xercesImpl</artifactId>
             <version>${xerces.version}</version>
         </dependency>
-        <dependency>
-            <groupId>org.jboss.spec.javax.ws.rs</groupId>
-            <artifactId>jboss-jaxrs-api_1.1_spec</artifactId>
-            <version>${jboss.jaxrs.api.version}</version>
-        </dependency>
 
         <!-- RestEASY Dependencies -->
         <dependency>
@@ -200,8 +187,18 @@
             <artifactId>hibernate-search</artifactId>
             <scope>provided</scope>
         </dependency>
+        <dependency>
+            <groupId>org.hibernate</groupId>
+            <artifactId>hibernate-validator</artifactId>
+            <scope>provided</scope>
+        </dependency>
 
         <!-- PressGangCCMS Libraries -->
+        <dependency>
+            <groupId>org.jboss.pressgang.ccms</groupId>
+            <artifactId>pressgang-ccms-model</artifactId>
+            <version>1.1-SNAPSHOT</version>
+        </dependency>
         <dependency>
             <groupId>org.jboss.pressgang.ccms</groupId>
             <artifactId>pressgang-ccms-utils</artifactId>
@@ -246,26 +243,6 @@
         </dependency>
 
         <!-- Other Library Dependencies -->
-        <dependency>
-            <groupId>batik</groupId>
-            <artifactId>batik-transcoder</artifactId>
-            <version>${batik.version}</version>
-        </dependency>
-        <dependency>
-            <groupId>com.googlecode.lambdaj</groupId>
-            <artifactId>lambdaj</artifactId>
-            <version>${lambdaj.version}</version>
-        </dependency>
-        <dependency>
-            <groupId>net.sourceforge.htmlcleaner</groupId>
-            <artifactId>htmlcleaner</artifactId>
-            <version>${htmlcleaner.version}</version>
-        </dependency>
-        <dependency>
-            <groupId>net.htmlparser.jericho</groupId>
-            <artifactId>jericho-html</artifactId>
-            <version>${jericho.version}</version>
-        </dependency>
         <dependency>
             <groupId>joda-time</groupId>
             <artifactId>joda-time</artifactId>
@@ -425,11 +402,6 @@
 
         <!-- Logging Libraries -->
         <dependency>
-            <groupId>log4j</groupId>
-            <artifactId>log4j</artifactId>
-            <version>${log4j.version}</version>
-        </dependency>
-        <dependency>
             <groupId>org.slf4j</groupId>
             <artifactId>slf4j-log4j12</artifactId>
             <version>${slf4j.version}</version>
@@ -470,13 +442,6 @@
             <scope>test</scope>
         </dependency>
         <dependency>
-            <groupId>org.jboss.spec</groupId>
-            <artifactId>jboss-javaee-6.0</artifactId>
-            <version>${jbossjavaee.version}</version>
-            <type>pom</type>
-            <scope>provided</scope>
-        </dependency>
-        <dependency>
             <groupId>org.jboss.as</groupId>
             <artifactId>jboss-as-arquillian-container-managed</artifactId>
             <version>${jbossarquillian.version}</version>
@@ -512,19 +477,6 @@
             <artifactId>junit</artifactId>
             <version>${junit.version}</version>
             <scope>test</scope>
-        </dependency>
-        <dependency>
-            <groupId>org.jboss.spec</groupId>
-            <artifactId>jboss-javaee-web-6.0</artifactId>
-            <version>${jbossjavaeeweb.version}</version>
-            <type>pom</type>
-            <scope>provided</scope>
-            <exclusions>
-                <exclusion>
-                    <groupId>xalan</groupId>
-                    <artifactId>xalan</artifactId>
-                </exclusion>
-            </exclusions>
         </dependency>
         <!-- <dependency>
             <groupId>com.h2database</groupId>

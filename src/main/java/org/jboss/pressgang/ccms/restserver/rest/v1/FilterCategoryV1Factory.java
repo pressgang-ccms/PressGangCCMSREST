@@ -5,6 +5,9 @@ import java.util.List;
 
 import javax.persistence.EntityManager;
 
+import org.jboss.pressgang.ccms.model.Category;
+import org.jboss.pressgang.ccms.model.FilterCategory;
+import org.jboss.pressgang.ccms.model.Project;
 import org.jboss.pressgang.ccms.rest.v1.collections.RESTFilterCategoryCollectionV1;
 import org.jboss.pressgang.ccms.rest.v1.collections.items.RESTFilterCategoryCollectionItemV1;
 import org.jboss.pressgang.ccms.rest.v1.entities.RESTCategoryV1;
@@ -13,12 +16,9 @@ import org.jboss.pressgang.ccms.rest.v1.entities.RESTProjectV1;
 import org.jboss.pressgang.ccms.rest.v1.entities.base.RESTBaseEntityV1;
 import org.jboss.pressgang.ccms.rest.v1.exceptions.InvalidParameterException;
 import org.jboss.pressgang.ccms.rest.v1.expansion.ExpandDataTrunk;
-import org.jboss.pressgang.ccms.restserver.entity.Category;
-import org.jboss.pressgang.ccms.restserver.entity.FilterCategory;
-import org.jboss.pressgang.ccms.restserver.entity.Project;
 import org.jboss.pressgang.ccms.restserver.rest.v1.base.RESTDataObjectCollectionFactory;
 import org.jboss.pressgang.ccms.restserver.rest.v1.base.RESTDataObjectFactory;
-
+import org.jboss.pressgang.ccms.restserver.utils.EnversUtilities;
 
 public class FilterCategoryV1Factory
         extends
@@ -52,7 +52,7 @@ public class FilterCategoryV1Factory
         // REVISIONS
         if (revision == null) {
             retValue.setRevisions(new RESTDataObjectCollectionFactory<RESTFilterCategoryV1, FilterCategory, RESTFilterCategoryCollectionV1, RESTFilterCategoryCollectionItemV1>()
-                    .create(RESTFilterCategoryCollectionV1.class, new FilterCategoryV1Factory(), entity, entity.getRevisions(entityManager),
+                    .create(RESTFilterCategoryCollectionV1.class, new FilterCategoryV1Factory(), entity, EnversUtilities.getRevisions(entityManager, entity),
                             RESTBaseEntityV1.REVISIONS_NAME, dataType, expand, baseUrl, entityManager));
         }
 

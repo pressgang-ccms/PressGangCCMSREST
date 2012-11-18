@@ -5,6 +5,9 @@ import java.util.List;
 
 import javax.persistence.EntityManager;
 
+import org.jboss.pressgang.ccms.model.contentspec.CSNodeToCSNode;
+import org.jboss.pressgang.ccms.model.contentspec.CSNodeToPropertyTag;
+import org.jboss.pressgang.ccms.model.contentspec.CSTranslatedString;
 import org.jboss.pressgang.ccms.rest.v1.collections.contentspec.RESTCSTranslatedStringCollectionV1;
 import org.jboss.pressgang.ccms.rest.v1.collections.contentspec.items.RESTCSTranslatedStringCollectionItemV1;
 import org.jboss.pressgang.ccms.rest.v1.collections.contentspec.items.join.RESTCSRelatedNodeCollectionItemV1;
@@ -15,14 +18,14 @@ import org.jboss.pressgang.ccms.rest.v1.constants.RESTv1Constants;
 import org.jboss.pressgang.ccms.rest.v1.entities.base.RESTBaseEntityV1;
 import org.jboss.pressgang.ccms.rest.v1.entities.contentspec.RESTCSNodeV1;
 import org.jboss.pressgang.ccms.rest.v1.entities.contentspec.RESTCSTranslatedStringV1;
+import org.jboss.pressgang.ccms.rest.v1.entities.contentspec.enums.RESTCSNodeRelationshipTypeV1;
+import org.jboss.pressgang.ccms.rest.v1.entities.contentspec.enums.RESTCSNodeTypeV1;
 import org.jboss.pressgang.ccms.rest.v1.entities.contentspec.join.RESTCSRelatedNodeV1;
 import org.jboss.pressgang.ccms.rest.v1.entities.join.RESTAssignedPropertyTagV1;
 import org.jboss.pressgang.ccms.rest.v1.expansion.ExpandDataTrunk;
-import org.jboss.pressgang.ccms.restserver.entity.contentspec.CSNodeToCSNode;
-import org.jboss.pressgang.ccms.restserver.entity.contentspec.CSNodeToPropertyTag;
-import org.jboss.pressgang.ccms.restserver.entity.contentspec.CSTranslatedString;
 import org.jboss.pressgang.ccms.restserver.rest.v1.base.RESTDataObjectCollectionFactory;
 import org.jboss.pressgang.ccms.restserver.rest.v1.base.RESTDataObjectFactory;
+import org.jboss.pressgang.ccms.restserver.utils.EnversUtilities;
 
 public class CSRelatedNodeV1Factory
         extends
@@ -55,17 +58,17 @@ public class CSRelatedNodeV1Factory
         retValue.setId(entity.getRelatedNode().getId());
         retValue.setRelationshipId(entity.getId());
         retValue.setTitle(entity.getRelatedNode().getCSNodeTitle());
-        retValue.setRelationshipType(entity.getRelationshipType());
+        retValue.setRelationshipType(RESTCSNodeRelationshipTypeV1.getRelationshipType(entity.getRelationshipType()));
         retValue.setCondition(entity.getRelatedNode().getCondition());
         retValue.setFlag(entity.getRelatedNode().getFlag());
-        retValue.setNodeType(entity.getRelatedNode().getCSNodeType());
+        retValue.setNodeType(RESTCSNodeTypeV1.getNodeType(entity.getRelatedNode().getCSNodeType()));
         retValue.setTopicId(entity.getRelatedNode().getTopicId());
         retValue.setTopicRevision(entity.getRelatedNode().getTopicRevision());
 
         // REVISIONS
         if (revision == null) {
             retValue.setRevisions(new RESTDataObjectCollectionFactory<RESTCSRelatedNodeV1, CSNodeToCSNode, RESTCSRelatedNodeCollectionV1, RESTCSRelatedNodeCollectionItemV1>()
-                    .create(RESTCSRelatedNodeCollectionV1.class, new CSRelatedNodeV1Factory(), entity, entity.getRevisions(entityManager),
+                    .create(RESTCSRelatedNodeCollectionV1.class, new CSRelatedNodeV1Factory(), entity, EnversUtilities.getRevisions(entityManager, entity),
                             RESTBaseEntityV1.REVISIONS_NAME, dataType, expand, baseUrl, entityManager));
         }
 
@@ -122,7 +125,7 @@ public class CSRelatedNodeV1Factory
             final RESTCSRelatedNodeV1 dataObject) {
 
         if (dataObject.hasParameterSet(RESTCSRelatedNodeV1.RELATIONSHIP_TYPE_NAME))
-            entity.setRelationshipType(dataObject.getRelationshipType());
+            entity.setRelationshipType(RESTCSNodeRelationshipTypeV1.getRelationshipTypeId(dataObject.getRelationshipType()));
 
         entityManager.persist(entity);
     }

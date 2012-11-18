@@ -5,6 +5,12 @@ import java.util.List;
 
 import javax.persistence.EntityManager;
 
+import org.jboss.pressgang.ccms.model.PropertyTag;
+import org.jboss.pressgang.ccms.model.contentspec.CSNode;
+import org.jboss.pressgang.ccms.model.contentspec.CSNodeToCSNode;
+import org.jboss.pressgang.ccms.model.contentspec.CSNodeToPropertyTag;
+import org.jboss.pressgang.ccms.model.contentspec.CSTranslatedString;
+import org.jboss.pressgang.ccms.model.contentspec.ContentSpec;
 import org.jboss.pressgang.ccms.rest.v1.collections.contentspec.RESTCSNodeCollectionV1;
 import org.jboss.pressgang.ccms.rest.v1.collections.contentspec.RESTCSTranslatedStringCollectionV1;
 import org.jboss.pressgang.ccms.rest.v1.collections.contentspec.items.RESTCSNodeCollectionItemV1;
@@ -18,18 +24,14 @@ import org.jboss.pressgang.ccms.rest.v1.entities.base.RESTBaseEntityV1;
 import org.jboss.pressgang.ccms.rest.v1.entities.contentspec.RESTCSNodeV1;
 import org.jboss.pressgang.ccms.rest.v1.entities.contentspec.RESTCSTranslatedStringV1;
 import org.jboss.pressgang.ccms.rest.v1.entities.contentspec.RESTContentSpecV1;
+import org.jboss.pressgang.ccms.rest.v1.entities.contentspec.enums.RESTCSNodeTypeV1;
 import org.jboss.pressgang.ccms.rest.v1.entities.contentspec.join.RESTCSRelatedNodeV1;
 import org.jboss.pressgang.ccms.rest.v1.entities.join.RESTAssignedPropertyTagV1;
 import org.jboss.pressgang.ccms.rest.v1.exceptions.InvalidParameterException;
 import org.jboss.pressgang.ccms.rest.v1.expansion.ExpandDataTrunk;
-import org.jboss.pressgang.ccms.restserver.entity.PropertyTag;
-import org.jboss.pressgang.ccms.restserver.entity.contentspec.CSNode;
-import org.jboss.pressgang.ccms.restserver.entity.contentspec.CSNodeToCSNode;
-import org.jboss.pressgang.ccms.restserver.entity.contentspec.CSNodeToPropertyTag;
-import org.jboss.pressgang.ccms.restserver.entity.contentspec.CSTranslatedString;
-import org.jboss.pressgang.ccms.restserver.entity.contentspec.ContentSpec;
 import org.jboss.pressgang.ccms.restserver.rest.v1.base.RESTDataObjectCollectionFactory;
 import org.jboss.pressgang.ccms.restserver.rest.v1.base.RESTDataObjectFactory;
+import org.jboss.pressgang.ccms.restserver.utils.EnversUtilities;
 
 public class CSNodeV1Factory extends
         RESTDataObjectFactory<RESTCSNodeV1, CSNode, RESTCSNodeCollectionV1, RESTCSNodeCollectionItemV1> {
@@ -62,14 +64,14 @@ public class CSNodeV1Factory extends
         retValue.setTitle(entity.getCSNodeTitle());
         retValue.setCondition(entity.getCondition());
         retValue.setFlag(entity.getFlag());
-        retValue.setNodeType(entity.getCSNodeType());
+        retValue.setNodeType(RESTCSNodeTypeV1.getNodeType(entity.getCSNodeType()));
         retValue.setTopicId(entity.getTopicId());
         retValue.setTopicRevision(entity.getTopicRevision());
 
         // REVISIONS
         if (revision == null) {
             retValue.setRevisions(new RESTDataObjectCollectionFactory<RESTCSNodeV1, CSNode, RESTCSNodeCollectionV1, RESTCSNodeCollectionItemV1>()
-                    .create(RESTCSNodeCollectionV1.class, new CSNodeV1Factory(), entity, entity.getRevisions(entityManager),
+                    .create(RESTCSNodeCollectionV1.class, new CSNodeV1Factory(), entity, EnversUtilities.getRevisions(entityManager, entity),
                             RESTBaseEntityV1.REVISIONS_NAME, dataType, expand, baseUrl, entityManager));
         }
 
@@ -129,7 +131,7 @@ public class CSNodeV1Factory extends
             entity.setCondition(dataObject.getCondition());
 
         if (dataObject.hasParameterSet(RESTCSNodeV1.NODE_TYPE_NAME))
-            entity.setCSNodeType(dataObject.getNodeType());
+            entity.setCSNodeType(RESTCSNodeTypeV1.getNodeTypeId(dataObject.getNodeType()));
         
         if (dataObject.hasParameterSet(RESTCSNodeV1.TOPIC_ID_NAME))
             entity.setTopicId(dataObject.getTopicId());

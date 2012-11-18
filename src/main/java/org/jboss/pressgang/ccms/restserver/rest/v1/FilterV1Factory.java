@@ -5,6 +5,11 @@ import java.util.List;
 
 import javax.persistence.EntityManager;
 
+import org.jboss.pressgang.ccms.model.Filter;
+import org.jboss.pressgang.ccms.model.FilterCategory;
+import org.jboss.pressgang.ccms.model.FilterField;
+import org.jboss.pressgang.ccms.model.FilterLocale;
+import org.jboss.pressgang.ccms.model.FilterTag;
 import org.jboss.pressgang.ccms.rest.v1.collections.RESTFilterCategoryCollectionV1;
 import org.jboss.pressgang.ccms.rest.v1.collections.RESTFilterCollectionV1;
 import org.jboss.pressgang.ccms.rest.v1.collections.RESTFilterFieldCollectionV1;
@@ -24,13 +29,9 @@ import org.jboss.pressgang.ccms.rest.v1.entities.RESTFilterV1;
 import org.jboss.pressgang.ccms.rest.v1.entities.base.RESTBaseEntityV1;
 import org.jboss.pressgang.ccms.rest.v1.exceptions.InvalidParameterException;
 import org.jboss.pressgang.ccms.rest.v1.expansion.ExpandDataTrunk;
-import org.jboss.pressgang.ccms.restserver.entity.Filter;
-import org.jboss.pressgang.ccms.restserver.entity.FilterCategory;
-import org.jboss.pressgang.ccms.restserver.entity.FilterField;
-import org.jboss.pressgang.ccms.restserver.entity.FilterLocale;
-import org.jboss.pressgang.ccms.restserver.entity.FilterTag;
 import org.jboss.pressgang.ccms.restserver.rest.v1.base.RESTDataObjectCollectionFactory;
 import org.jboss.pressgang.ccms.restserver.rest.v1.base.RESTDataObjectFactory;
+import org.jboss.pressgang.ccms.restserver.utils.EnversUtilities;
 
 public class FilterV1Factory extends
         RESTDataObjectFactory<RESTFilterV1, Filter, RESTFilterCollectionV1, RESTFilterCollectionItemV1> {
@@ -63,7 +64,7 @@ public class FilterV1Factory extends
         // REVISIONS
         if (revision == null) {
             retValue.setRevisions(new RESTDataObjectCollectionFactory<RESTFilterV1, Filter, RESTFilterCollectionV1, RESTFilterCollectionItemV1>()
-                    .create(RESTFilterCollectionV1.class, new FilterV1Factory(), entity, entity.getRevisions(entityManager),
+                    .create(RESTFilterCollectionV1.class, new FilterV1Factory(), entity, EnversUtilities.getRevisions(entityManager, entity),
                             RESTBaseEntityV1.REVISIONS_NAME, dataType, expand, baseUrl, entityManager));
         }
 

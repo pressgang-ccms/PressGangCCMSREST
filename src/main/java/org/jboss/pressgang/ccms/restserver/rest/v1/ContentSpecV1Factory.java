@@ -5,6 +5,14 @@ import java.util.List;
 
 import javax.persistence.EntityManager;
 
+import org.jboss.pressgang.ccms.model.PropertyTag;
+import org.jboss.pressgang.ccms.model.Tag;
+import org.jboss.pressgang.ccms.model.contentspec.CSMetaData;
+import org.jboss.pressgang.ccms.model.contentspec.CSNode;
+import org.jboss.pressgang.ccms.model.contentspec.ContentSpec;
+import org.jboss.pressgang.ccms.model.contentspec.ContentSpecToCSMetaData;
+import org.jboss.pressgang.ccms.model.contentspec.ContentSpecToPropertyTag;
+import org.jboss.pressgang.ccms.model.exceptions.CustomConstraintViolationException;
 import org.jboss.pressgang.ccms.rest.v1.collections.RESTTagCollectionV1;
 import org.jboss.pressgang.ccms.rest.v1.collections.contentspec.RESTCSNodeCollectionV1;
 import org.jboss.pressgang.ccms.rest.v1.collections.contentspec.RESTContentSpecCollectionV1;
@@ -20,20 +28,14 @@ import org.jboss.pressgang.ccms.rest.v1.entities.RESTTagV1;
 import org.jboss.pressgang.ccms.rest.v1.entities.base.RESTBaseEntityV1;
 import org.jboss.pressgang.ccms.rest.v1.entities.contentspec.RESTCSNodeV1;
 import org.jboss.pressgang.ccms.rest.v1.entities.contentspec.RESTContentSpecV1;
+import org.jboss.pressgang.ccms.rest.v1.entities.contentspec.enums.RESTContentSpecTypeV1;
 import org.jboss.pressgang.ccms.rest.v1.entities.contentspec.join.RESTAssignedCSMetaDataV1;
 import org.jboss.pressgang.ccms.rest.v1.entities.join.RESTAssignedPropertyTagV1;
 import org.jboss.pressgang.ccms.rest.v1.exceptions.InvalidParameterException;
 import org.jboss.pressgang.ccms.rest.v1.expansion.ExpandDataTrunk;
-import org.jboss.pressgang.ccms.restserver.entity.PropertyTag;
-import org.jboss.pressgang.ccms.restserver.entity.Tag;
-import org.jboss.pressgang.ccms.restserver.entity.contentspec.CSMetaData;
-import org.jboss.pressgang.ccms.restserver.entity.contentspec.CSNode;
-import org.jboss.pressgang.ccms.restserver.entity.contentspec.ContentSpec;
-import org.jboss.pressgang.ccms.restserver.entity.contentspec.ContentSpecToCSMetaData;
-import org.jboss.pressgang.ccms.restserver.entity.contentspec.ContentSpecToPropertyTag;
-import org.jboss.pressgang.ccms.restserver.exceptions.CustomConstraintViolationException;
 import org.jboss.pressgang.ccms.restserver.rest.v1.base.RESTDataObjectCollectionFactory;
 import org.jboss.pressgang.ccms.restserver.rest.v1.base.RESTDataObjectFactory;
+import org.jboss.pressgang.ccms.restserver.utils.EnversUtilities;
 import org.jboss.resteasy.spi.BadRequestException;
 
 public class ContentSpecV1Factory extends
@@ -65,11 +67,12 @@ public class ContentSpecV1Factory extends
         retValue.setId(entity.getId());
         retValue.setTitle(entity.getContentSpecTitle());
         retValue.setLocale(entity.getLocale());
+        retValue.setType(RESTContentSpecTypeV1.getContentSpecType(entity.getContentSpecType()));
 
         // REVISIONS
         if (revision == null) {
             retValue.setRevisions(new RESTDataObjectCollectionFactory<RESTContentSpecV1, ContentSpec, RESTContentSpecCollectionV1, RESTContentSpecCollectionItemV1>()
-                    .create(RESTContentSpecCollectionV1.class, new ContentSpecV1Factory(), entity, entity.getRevisions(entityManager),
+                    .create(RESTContentSpecCollectionV1.class, new ContentSpecV1Factory(), entity, EnversUtilities.getRevisions(entityManager, entity),
                             RESTBaseEntityV1.REVISIONS_NAME, dataType, expand, baseUrl, entityManager));
         }
 
@@ -113,6 +116,9 @@ public class ContentSpecV1Factory extends
 
         if (dataObject.hasParameterSet(RESTContentSpecV1.LAST_PUBLISHED_NAME))
             entity.setLastPublished(dataObject.getLastPublished());
+        
+        if (dataObject.hasParameterSet(RESTContentSpecV1.TYPE_NAME))
+            entity.setContentSpecType(RESTContentSpecTypeV1.getContentSpecTypeId(dataObject.getType()));
 
         entityManager.persist(entity);
         

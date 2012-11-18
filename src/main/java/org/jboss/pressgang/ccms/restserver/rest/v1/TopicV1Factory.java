@@ -6,6 +6,14 @@ import java.util.List;
 import javax.persistence.EntityManager;
 
 import org.jboss.pressgang.ccms.docbook.constants.DocbookBuilderConstants;
+import org.jboss.pressgang.ccms.model.BugzillaBug;
+import org.jboss.pressgang.ccms.model.PropertyTag;
+import org.jboss.pressgang.ccms.model.Tag;
+import org.jboss.pressgang.ccms.model.Topic;
+import org.jboss.pressgang.ccms.model.TopicSourceUrl;
+import org.jboss.pressgang.ccms.model.TopicToPropertyTag;
+import org.jboss.pressgang.ccms.model.TranslatedTopicData;
+import org.jboss.pressgang.ccms.model.exceptions.CustomConstraintViolationException;
 import org.jboss.pressgang.ccms.rest.v1.collections.RESTBugzillaBugCollectionV1;
 import org.jboss.pressgang.ccms.rest.v1.collections.RESTTagCollectionV1;
 import org.jboss.pressgang.ccms.rest.v1.collections.RESTTopicCollectionV1;
@@ -28,16 +36,9 @@ import org.jboss.pressgang.ccms.rest.v1.entities.base.RESTBaseEntityV1;
 import org.jboss.pressgang.ccms.rest.v1.entities.join.RESTAssignedPropertyTagV1;
 import org.jboss.pressgang.ccms.rest.v1.exceptions.InvalidParameterException;
 import org.jboss.pressgang.ccms.rest.v1.expansion.ExpandDataTrunk;
-import org.jboss.pressgang.ccms.restserver.entity.BugzillaBug;
-import org.jboss.pressgang.ccms.restserver.entity.PropertyTag;
-import org.jboss.pressgang.ccms.restserver.entity.Tag;
-import org.jboss.pressgang.ccms.restserver.entity.Topic;
-import org.jboss.pressgang.ccms.restserver.entity.TopicSourceUrl;
-import org.jboss.pressgang.ccms.restserver.entity.TopicToPropertyTag;
-import org.jboss.pressgang.ccms.restserver.entity.TranslatedTopicData;
-import org.jboss.pressgang.ccms.restserver.exceptions.CustomConstraintViolationException;
 import org.jboss.pressgang.ccms.restserver.rest.v1.base.RESTDataObjectCollectionFactory;
 import org.jboss.pressgang.ccms.restserver.rest.v1.base.RESTDataObjectFactory;
+import org.jboss.pressgang.ccms.restserver.utils.EnversUtilities;
 import org.jboss.pressgang.ccms.restserver.utils.TopicUtilities;
 import org.jboss.resteasy.spi.BadRequestException;
 
@@ -75,8 +76,8 @@ public class TopicV1Factory extends RESTDataObjectFactory<RESTTopicV1, Topic, RE
         retValue.setDescription(entity.getTopicText());
         retValue.setXml(entity.getTopicXML());
         retValue.setHtml(entity.getTopicRendered());
-        retValue.setLastModified(entity.getFixedLastModifiedDate(entityManager));
-        retValue.setRevision(entity.getLatestRevision(entityManager).intValue());
+        retValue.setLastModified(EnversUtilities.getFixedLastModifiedDate(entityManager, entity));
+        retValue.setRevision(EnversUtilities.getLatestRevision(entityManager, entity).intValue());
         retValue.setCreated(entity.getTopicTimeStamp());
         retValue.setLocale(entity.getTopicLocale());
         retValue.setXmlErrors(entity.getTopicXMLErrors());
@@ -84,7 +85,7 @@ public class TopicV1Factory extends RESTDataObjectFactory<RESTTopicV1, Topic, RE
         // REVISIONS
         if (revision == null) {
             retValue.setRevisions(new RESTDataObjectCollectionFactory<RESTTopicV1, Topic, RESTTopicCollectionV1, RESTTopicCollectionItemV1>()
-                    .create(RESTTopicCollectionV1.class, new TopicV1Factory(), entity, entity.getRevisions(entityManager),
+                    .create(RESTTopicCollectionV1.class, new TopicV1Factory(), entity, EnversUtilities.getRevisions(entityManager, entity),
                             RESTBaseEntityV1.REVISIONS_NAME, dataType, expand, baseUrl, entityManager));
         }
         
