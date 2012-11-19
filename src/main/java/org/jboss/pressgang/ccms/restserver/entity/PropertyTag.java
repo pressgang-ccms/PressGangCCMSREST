@@ -221,7 +221,7 @@ public class PropertyTag extends AuditedEntity<PropertyTag> implements java.io.S
 		return this.propertyTagId;
 	}
 	
-	@Column(name = "PropertyTagIsUnqiue", nullable = false, columnDefinition = "BIT", length = 1)
+	@Column(name = "PropertyTagIsUnique", nullable = false, columnDefinition = "BIT", length = 1)
 	public Boolean getPropertyTagIsUnique()
 	{
 		return propertyTagIsUnique;

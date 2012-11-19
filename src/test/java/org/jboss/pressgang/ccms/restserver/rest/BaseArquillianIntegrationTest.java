@@ -17,6 +17,13 @@ import java.io.File;
  */
 public class BaseArquillianIntegrationTest {
 
+    @Deployment(name = "authServer")
+    public static WebArchive createAuthServerDeployment() {
+        return ShrinkWrap.create(ZipImporter.class, "testauthserver.war")
+                .importFrom(new File("target/OAuth2AuthServer.war"))
+                .as(WebArchive.class);
+    }
+
     @Deployment(name = "restServer")
     public static WebArchive createDeployment() {
         return ShrinkWrap.create(WebArchive.class, "testrestserver.war")
@@ -31,13 +38,6 @@ public class BaseArquillianIntegrationTest {
                 .addAsLibraries(DependencyResolvers.use(MavenDependencyResolver.class)
                         .includeDependenciesFromPom("src/test/resources/general/test-pom.xml")
                         .resolveAs(JavaArchive.class));
-    }
-
-    @Deployment(name = "authServer")
-    public static WebArchive createAuthServerDeployment() {
-        return ShrinkWrap.create(ZipImporter.class, "testauthserver.war")
-                .importFrom(new File("target/OAuth2AuthServer.war"))
-                .as(WebArchive.class);
     }
 
     public static String getBaseTestUrl() {

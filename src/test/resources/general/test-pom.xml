@@ -50,8 +50,6 @@
         <jbossjavaeeweb.version>3.0.0.Final</jbossjavaeeweb.version>
         <jbossjavaee.version>1.0.0.Final</jbossjavaee.version>
         <jboss.jaxrs.api.version>1.0.0.Final</jboss.jaxrs.api.version>
-        <jacoco.version>0.5.10.201208310627</jacoco.version>
-        <junit.version>4.9</junit.version>
         <maven.test.failure.ignore>false</maven.test.failure.ignore>
     </properties>
 
@@ -73,6 +71,11 @@
             <groupId>xerces</groupId>
             <artifactId>xercesImpl</artifactId>
             <version>${xerces.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.jboss.spec.javax.ws.rs</groupId>
+            <artifactId>jboss-jaxrs-api_1.1_spec</artifactId>
+            <version>${jboss.jaxrs.api.version}</version>
         </dependency>
 
         <!-- RestEASY Dependencies -->
@@ -374,29 +377,26 @@
             <groupId>com.jayway.restassured</groupId>
             <artifactId>rest-assured</artifactId>
             <version>${restassured.version}</version>
-            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.jboss.spec</groupId>
+            <artifactId>jboss-javaee-web-6.0</artifactId>
+            <version>${jbossjavaeeweb.version}</version>
+            <type>pom</type>
+            <scope>provided</scope>
             <exclusions>
                 <exclusion>
-                    <groupId>asm</groupId>
-                    <artifactId>asm</artifactId>
-                </exclusion>
-                <exclusion>
-                    <groupId>asm</groupId>
-                    <artifactId>asm-commons</artifactId>
-                </exclusion>
-                <exclusion>
-                    <groupId>asm</groupId>
-                    <artifactId>asm-util</artifactId>
-                </exclusion>
-                <exclusion>
-                    <groupId>asm</groupId>
-                    <artifactId>asm-analysis</artifactId>
-                </exclusion>
-                <exclusion>
-                    <groupId>asm</groupId>
-                    <artifactId>asm-tree</artifactId>
+                    <groupId>xalan</groupId>
+                    <artifactId>xalan</artifactId>
                 </exclusion>
             </exclusions>
+        </dependency>
+        <dependency>
+            <groupId>org.jboss.spec</groupId>
+            <artifactId>jboss-javaee-6.0</artifactId>
+            <version>${jbossjavaee.version}</version>
+            <type>pom</type>
+            <scope>provided</scope>
         </dependency>
     </dependencies>
 
@@ -418,6 +418,5 @@
             </dependency>
         </dependencies>
     </dependencyManagement>
-
 
 </project>
