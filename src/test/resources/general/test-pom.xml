@@ -47,9 +47,6 @@
         <shrinkwrapresolver.version>2.0.0-alpha-4</shrinkwrapresolver.version>
         <xmlplugin.version>1.0</xmlplugin.version>
         <antrunplugin.version>1.7</antrunplugin.version>
-        <jbossjavaeeweb.version>3.0.0.Final</jbossjavaeeweb.version>
-        <jbossjavaee.version>1.0.0.Final</jbossjavaee.version>
-        <jboss.jaxrs.api.version>1.0.0.Final</jboss.jaxrs.api.version>
         <maven.test.failure.ignore>false</maven.test.failure.ignore>
     </properties>
 

@@ -38,9 +38,6 @@
         <shrinkwrapresolver.version>2.0.0-alpha-4</shrinkwrapresolver.version>
         <xmlplugin.version>1.0</xmlplugin.version>
         <antrunplugin.version>1.7</antrunplugin.version>
-        <jbossjavaeeweb.version>3.0.0.Final</jbossjavaeeweb.version>
-        <jbossjavaee.version>1.0.0.Final</jbossjavaee.version>
-        <jboss.jaxrs.api.version>1.0.0.Final</jboss.jaxrs.api.version>
     </properties>
 
     <dependencyManagement>
@@ -134,11 +131,6 @@
             <groupId>xerces</groupId>
             <artifactId>xercesImpl</artifactId>
             <version>${xerces.version}</version>
-        </dependency>
-        <dependency>
-            <groupId>org.jboss.spec.javax.ws.rs</groupId>
-            <artifactId>jboss-jaxrs-api_1.1_spec</artifactId>
-            <version>${jboss.jaxrs.api.version}</version>
         </dependency>
 
         <!-- RestEASY Dependencies -->
@@ -471,26 +463,6 @@
             <scope>test</scope>
         </dependency>
         <dependency>
-            <groupId>org.jboss.spec</groupId>
-            <artifactId>jboss-javaee-web-6.0</artifactId>
-            <version>${jbossjavaeeweb.version}</version>
-            <type>pom</type>
-            <scope>provided</scope>
-            <exclusions>
-                <exclusion>
-                    <groupId>xalan</groupId>
-                    <artifactId>xalan</artifactId>
-                </exclusion>
-            </exclusions>
-        </dependency>
-        <dependency>
-            <groupId>org.jboss.spec</groupId>
-            <artifactId>jboss-javaee-6.0</artifactId>
-            <version>${jbossjavaee.version}</version>
-            <type>pom</type>
-            <scope>provided</scope>
-        </dependency>
-        <dependency>
             <groupId>org.jboss.as</groupId>
             <artifactId>jboss-as-arquillian-container-managed</artifactId>
             <version>${jbossarquillian.version}</version>
@@ -541,7 +513,7 @@
     </dependencies>
 
     <profiles>
-        <!-- A Separate Profile to allow compiling, installing and deploying 
+        <!-- A Separate Profile to allow compiling, installing and deploying
             the rest server with a JAR file so that the server could be used as a library. -->
         <profile>
             <id>include-jar</id>

@@ -65,7 +65,7 @@
         <class>org.jboss.pressgang.belay.oauth2.resourceserver.data.model.OAuth2RSEndpoint</class>
 
 		<properties>
-	        <property name="hibernate.dialect" value="org.hibernate.dialect.MySQL5InnoDBDialect"/>
+	        <property name="hibernate.dialect" value="org.jboss.pressgang.ccms.restserver.entity.dialect.MySql5BitBooleanDialect"/>
 	        <property name="hibernate.hbm2ddl.auto" value="validate"/>
 	        <property name="hibernate.show_sql" value="false"/>
 	        <property name="hibernate.format_sql" value="false"/>
