@@ -26,7 +26,7 @@ public class BlobConstantV1Factory
     }
 
     @Override
-    public RESTBlobConstantV1 createRESTEntityFromDBEntity(final BlobConstants entity, final String baseUrl,
+    public RESTBlobConstantV1 createRESTEntityFromDBEntityInternal(final BlobConstants entity, final String baseUrl,
             final String dataType, final ExpandDataTrunk expand, final Number revision, final boolean expandParentReferences,
             final EntityManager entityManager) {
         assert entity != null : "Parameter entity can not be null";
@@ -52,8 +52,6 @@ public class BlobConstantV1Factory
         }
 
         retValue.setLinks(baseUrl, RESTv1Constants.BLOBCONSTANT_URL_NAME, dataType, retValue.getId());
-        retValue.setLogDetails(new LogDetailsV1Factory().create(entity, revision, RESTBaseEntityV1.LOG_DETAILS_NAME, expand,
-                dataType, baseUrl, entityManager));
 
         return retValue;
     }

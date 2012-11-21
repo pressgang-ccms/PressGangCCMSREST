@@ -25,7 +25,7 @@ public class FilterTagV1Factory extends
     }
 
     @Override
-    public RESTFilterTagV1 createRESTEntityFromDBEntity(final FilterTag entity, final String baseUrl, final String dataType,
+    public RESTFilterTagV1 createRESTEntityFromDBEntityInternal(final FilterTag entity, final String baseUrl, final String dataType,
             final ExpandDataTrunk expand, final Number revision, boolean expandParentReferences,
             final EntityManager entityManager) {
         assert entity != null : "Parameter filterTag can not be null";
@@ -60,9 +60,6 @@ public class FilterTagV1Factory extends
         if (expand != null && expand.contains(RESTFilterTagV1.TAG_NAME) && entity.getTag() != null)
             retValue.setTag(new TagV1Factory().createRESTEntityFromDBEntity(entity.getTag(), baseUrl, dataType,
                     expand.get(RESTFilterTagV1.TAG_NAME), revision, expandParentReferences, entityManager));
-
-        retValue.setLogDetails(new LogDetailsV1Factory().create(entity, revision, RESTBaseEntityV1.LOG_DETAILS_NAME, expand,
-                dataType, baseUrl, entityManager));
 
         return retValue;
     }

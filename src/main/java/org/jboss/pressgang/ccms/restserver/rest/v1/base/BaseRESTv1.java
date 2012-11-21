@@ -242,7 +242,7 @@ public class BaseRESTv1 {
 
     }
 
-    protected <T extends RESTBaseEntityV1<T, V, W>, U, V extends RESTBaseCollectionV1<T, V, W>, W extends RESTBaseCollectionItemV1<T, V, W>> T deleteJSONEntity(
+    protected <T extends RESTBaseEntityV1<T, V, W>, U extends AuditedEntity<U>, V extends RESTBaseCollectionV1<T, V, W>, W extends RESTBaseCollectionItemV1<T, V, W>> T deleteJSONEntity(
             final Class<U> type, final RESTDataObjectFactory<T, U, V, W> factory, final Integer id, final String expand,
             final RESTLogDetailsV1 logDetails) throws InvalidParameterException {
         return deleteEntity(type, factory, id, RESTv1Constants.JSON_URL, expand, logDetails);
@@ -260,7 +260,7 @@ public class BaseRESTv1 {
      * @return
      * @throws InvalidParameterException
      */
-    protected <T extends RESTBaseEntityV1<T, V, W>, U, V extends RESTBaseCollectionV1<T, V, W>, W extends RESTBaseCollectionItemV1<T, V, W>> T deleteEntity(
+    protected <T extends RESTBaseEntityV1<T, V, W>, U extends AuditedEntity<U>, V extends RESTBaseCollectionV1<T, V, W>, W extends RESTBaseCollectionItemV1<T, V, W>> T deleteEntity(
             final Class<U> type, final RESTDataObjectFactory<T, U, V, W> factory, final Integer id, final String dataType,
             final String expand, final RESTLogDetailsV1 logDetails) throws InvalidParameterException {
         assert id != null : "id should not be null";
@@ -319,26 +319,26 @@ public class BaseRESTv1 {
         }
     }
 
-    protected <T extends RESTBaseEntityV1<T, V, W>, U, V extends RESTBaseCollectionV1<T, V, W>, W extends RESTBaseCollectionItemV1<T, V, W>> T createJSONEntity(
+    protected <T extends RESTBaseEntityV1<T, V, W>, U extends AuditedEntity<U>, V extends RESTBaseCollectionV1<T, V, W>, W extends RESTBaseCollectionItemV1<T, V, W>> T createJSONEntity(
             final Class<U> type, final T restEntity, final RESTDataObjectFactory<T, U, V, W> factory, final String expand,
             final RESTLogDetailsV1 logDetails) throws InternalProcessingException, InvalidParameterException {
         return createEntity(type, restEntity, factory, RESTv1Constants.JSON_URL, expand, logDetails);
     }
 
-    protected <T extends RESTBaseEntityV1<T, V, W>, U, V extends RESTBaseCollectionV1<T, V, W>, W extends RESTBaseCollectionItemV1<T, V, W>> T updateJSONEntity(
+    protected <T extends RESTBaseEntityV1<T, V, W>, U extends AuditedEntity<U>, V extends RESTBaseCollectionV1<T, V, W>, W extends RESTBaseCollectionItemV1<T, V, W>> T updateJSONEntity(
             final Class<U> type, final T restEntity, final RESTDataObjectFactory<T, U, V, W> factory, final String expand,
             final RESTLogDetailsV1 logDetails) throws InvalidParameterException {
         return updateEntity(type, restEntity, factory, RESTv1Constants.JSON_URL, expand, logDetails);
     }
 
-    protected <T extends RESTBaseEntityV1<T, V, W>, U, V extends RESTBaseCollectionV1<T, V, W>, W extends RESTBaseCollectionItemV1<T, V, W>> T createEntity(
+    protected <T extends RESTBaseEntityV1<T, V, W>, U extends AuditedEntity<U>, V extends RESTBaseCollectionV1<T, V, W>, W extends RESTBaseCollectionItemV1<T, V, W>> T createEntity(
             final Class<U> type, final T restEntity, final RESTDataObjectFactory<T, U, V, W> factory, final String dataType,
             final String expand, final RESTLogDetailsV1 logDetails) throws InternalProcessingException,
             InvalidParameterException {
         return createOrUpdateEntity(type, restEntity, factory, DatabaseOperation.CREATE, dataType, expand, logDetails);
     }
 
-    protected <T extends RESTBaseEntityV1<T, V, W>, U, V extends RESTBaseCollectionV1<T, V, W>, W extends RESTBaseCollectionItemV1<T, V, W>> T updateEntity(
+    protected <T extends RESTBaseEntityV1<T, V, W>, U extends AuditedEntity<U>, V extends RESTBaseCollectionV1<T, V, W>, W extends RESTBaseCollectionItemV1<T, V, W>> T updateEntity(
             final Class<U> type, final T restEntity, final RESTDataObjectFactory<T, U, V, W> factory, final String dataType,
             final String expand, final RESTLogDetailsV1 logDetails) throws InvalidParameterException {
         return createOrUpdateEntity(type, restEntity, factory, DatabaseOperation.UPDATE, dataType, expand, logDetails);
@@ -357,7 +357,7 @@ public class BaseRESTv1 {
      * @return The updated/created REST Entity representation of the database entity.
      * @throws InvalidParameterException
      */
-    private <T extends RESTBaseEntityV1<T, V, W>, U, V extends RESTBaseCollectionV1<T, V, W>, W extends RESTBaseCollectionItemV1<T, V, W>> T createOrUpdateEntity(
+    private <T extends RESTBaseEntityV1<T, V, W>, U extends AuditedEntity<U>, V extends RESTBaseCollectionV1<T, V, W>, W extends RESTBaseCollectionItemV1<T, V, W>> T createOrUpdateEntity(
             final Class<U> type, final T restEntity, final RESTDataObjectFactory<T, U, V, W> factory,
             final DatabaseOperation operation, final String dataType, final String expand, final RESTLogDetailsV1 logDetails)
             throws InvalidParameterException {
@@ -821,6 +821,9 @@ public class BaseRESTv1 {
 
                 // Get the Revision Entity using an envers lookup.
                 entity = reader.find(type, id, closestRevision);
+                
+                if (entity == null)
+                    throw new BadRequestException("No entity was found with the primary key " + id);
 
                 // Set the entities last modified date to the information assoicated with the revision.
                 final Date revisionLastModified = reader.getRevisionDate(closestRevision);
@@ -828,17 +831,13 @@ public class BaseRESTv1 {
             } else {
                 entity = entityManager.find(type, id);
             }
+            
             if (entity == null)
                 throw new BadRequestException("No entity was found with the primary key " + id);
 
             // Create the REST representation of the topic
             final T restRepresentation = dataObjectFactory.createRESTEntityFromDBEntity(entity, this.getBaseUrl(), dataType,
                     expandDataTrunk, closestRevision, true, entityManager);
-
-            // If the entity relates to the revision numbers, copy that data across
-            if (usingRevisions && closestRevision != null) {
-                restRepresentation.setRevision(closestRevision.intValue());
-            }
 
             return restRepresentation;
         } catch (final InternalProcessingException ex) {

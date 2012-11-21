@@ -30,7 +30,7 @@ public class PropertyTagV1Factory extends
     }
 
     @Override
-    public RESTPropertyTagV1 createRESTEntityFromDBEntity(final PropertyTag entity, final String baseUrl,
+    public RESTPropertyTagV1 createRESTEntityFromDBEntityInternal(final PropertyTag entity, final String baseUrl,
             final String dataType, final ExpandDataTrunk expand, final Number revision, final boolean expandParentReferences,
             final EntityManager entityManager) {
         assert entity != null : "Parameter topic can not be null";
@@ -64,8 +64,6 @@ public class PropertyTagV1Factory extends
                         dataType, expand, baseUrl, revision, false, entityManager));
 
         retValue.setLinks(baseUrl, RESTv1Constants.PROPERTYTAG_URL_NAME, dataType, retValue.getId());
-        retValue.setLogDetails(new LogDetailsV1Factory().create(entity, revision, RESTBaseEntityV1.LOG_DETAILS_NAME, expand,
-                dataType, baseUrl, entityManager));
 
         return retValue;
     }

@@ -28,7 +28,7 @@ public class CategoryInTagV1Factory
     }
 
     @Override
-    public RESTCategoryInTagV1 createRESTEntityFromDBEntity(final TagToCategory entity, final String baseUrl,
+    public RESTCategoryInTagV1 createRESTEntityFromDBEntityInternal(final TagToCategory entity, final String baseUrl,
             final String dataType, final ExpandDataTrunk expand, final Number revision, final boolean expandParentReferences,
             final EntityManager entityManager) {
         assert entity != null : "Parameter entity can not be null";
@@ -65,8 +65,6 @@ public class CategoryInTagV1Factory
                         .getTagToCategoriesArray(), RESTv1Constants.TAGS_EXPANSION_NAME, dataType, expand, baseUrl, entityManager));
 
         retValue.setLinks(baseUrl, RESTv1Constants.CATEGORY_URL_NAME, dataType, retValue.getId());
-        retValue.setLogDetails(new LogDetailsV1Factory().create(entity, revision, RESTBaseEntityV1.LOG_DETAILS_NAME, expand,
-                dataType, baseUrl, entityManager));
 
         return retValue;
     }

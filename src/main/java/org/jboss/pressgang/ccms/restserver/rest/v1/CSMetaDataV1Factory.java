@@ -24,7 +24,7 @@ public class CSMetaDataV1Factory extends
     }
 
     @Override
-    public RESTCSMetaDataV1 createRESTEntityFromDBEntity(final CSMetaData entity, final String baseUrl, final String dataType,
+    public RESTCSMetaDataV1 createRESTEntityFromDBEntityInternal(final CSMetaData entity, final String baseUrl, final String dataType,
             final ExpandDataTrunk expand, final Number revision, final boolean expandParentReferences,
             final EntityManager entityManager) {
         assert entity != null : "Parameter entity can not be null";
@@ -50,8 +50,6 @@ public class CSMetaDataV1Factory extends
         }
 
         retValue.setLinks(baseUrl, RESTv1Constants.CONTENT_SPEC_META_DATA_URL_NAME, dataType, retValue.getId());
-        retValue.setLogDetails(new LogDetailsV1Factory().create(entity, revision, RESTBaseEntityV1.LOG_DETAILS_NAME, expand,
-                dataType, baseUrl, entityManager));
 
         return retValue;
     }

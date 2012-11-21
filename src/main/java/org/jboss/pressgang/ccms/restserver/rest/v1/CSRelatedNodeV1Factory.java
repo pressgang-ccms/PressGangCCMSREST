@@ -36,7 +36,7 @@ public class CSRelatedNodeV1Factory
     }
 
     @Override
-    public RESTCSRelatedNodeV1 createRESTEntityFromDBEntity(final CSNodeToCSNode entity, final String baseUrl,
+    public RESTCSRelatedNodeV1 createRESTEntityFromDBEntityInternal(final CSNodeToCSNode entity, final String baseUrl,
             final String dataType, final ExpandDataTrunk expand, final Number revision, final boolean expandParentReferences,
             final EntityManager entityManager) {
         assert entity != null : "Parameter entity can not be null";
@@ -80,7 +80,7 @@ public class CSRelatedNodeV1Factory
 
         // CONTENT SPEC
         if (entity.getRelatedNode().getContentSpec() != null && expand != null && expand.contains(RESTCSRelatedNodeV1.CONTENT_SPEC_NAME))
-            retValue.setContentSpec(new ContentSpecV1Factory().createRESTEntityFromDBEntity(entity.getRelatedNode()
+            retValue.setContentSpec(new ContentSpecV1Factory().createRESTEntityFromDBEntityInternal(entity.getRelatedNode()
                     .getContentSpec(), baseUrl, dataType, expand.get(RESTCSRelatedNodeV1.CONTENT_SPEC_NAME), revision,
                     expandParentReferences, entityManager));
 
@@ -114,8 +114,6 @@ public class CSRelatedNodeV1Factory
                         entityManager));
 
         retValue.setLinks(baseUrl, RESTv1Constants.CONTENT_SPEC_NODE_URL_NAME, dataType, retValue.getId());
-        retValue.setLogDetails(new LogDetailsV1Factory().create(entity, revision, RESTBaseEntityV1.LOG_DETAILS_NAME, expand,
-                dataType, baseUrl, entityManager));
 
         return retValue;
     }

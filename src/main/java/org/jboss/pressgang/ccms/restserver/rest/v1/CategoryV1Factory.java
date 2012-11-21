@@ -31,7 +31,7 @@ class CategoryV1Factory extends
     }
 
     @Override
-    public RESTCategoryV1 createRESTEntityFromDBEntity(final Category entity, final String baseUrl, final String dataType,
+    public RESTCategoryV1 createRESTEntityFromDBEntityInternal(final Category entity, final String baseUrl, final String dataType,
             final ExpandDataTrunk expand, final Number revision, final boolean expandParentReferences,
             final EntityManager entityManager) {
         assert entity != null : "Parameter topic can not be null";
@@ -63,8 +63,6 @@ class CategoryV1Factory extends
                         RESTv1Constants.TAGS_EXPANSION_NAME, dataType, expand, baseUrl, entityManager));
 
         retValue.setLinks(baseUrl, RESTv1Constants.CATEGORY_URL_NAME, dataType, retValue.getId());
-        retValue.setLogDetails(new LogDetailsV1Factory().create(entity, revision, RESTBaseEntityV1.LOG_DETAILS_NAME, expand,
-                dataType, baseUrl, entityManager));
 
         return retValue;
     }

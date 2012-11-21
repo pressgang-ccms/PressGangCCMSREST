@@ -29,7 +29,7 @@ public class FilterCategoryV1Factory
     }
 
     @Override
-    public RESTFilterCategoryV1 createRESTEntityFromDBEntity(final FilterCategory entity, final String baseUrl,
+    public RESTFilterCategoryV1 createRESTEntityFromDBEntityInternal(final FilterCategory entity, final String baseUrl,
             final String dataType, final ExpandDataTrunk expand, final Number revision, boolean expandParentReferences,
             final EntityManager entityManager) {
         assert entity != null : "Parameter filterCategory can not be null";
@@ -70,9 +70,6 @@ public class FilterCategoryV1Factory
         if (expand != null && expand.contains(RESTFilterCategoryV1.PROJECT_NAME) && entity.getProject() != null)
             retValue.setProject(new ProjectV1Factory().createRESTEntityFromDBEntity(entity.getProject(), baseUrl, dataType,
                     expand.get(RESTFilterCategoryV1.PROJECT_NAME), revision, expandParentReferences, entityManager));
-
-        retValue.setLogDetails(new LogDetailsV1Factory().create(entity, revision, RESTBaseEntityV1.LOG_DETAILS_NAME, expand,
-                dataType, baseUrl, entityManager));
 
         return retValue;
     }

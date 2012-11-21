@@ -46,7 +46,7 @@ public class ContentSpecV1Factory extends
     }
 
     @Override
-    public RESTContentSpecV1 createRESTEntityFromDBEntity(final ContentSpec entity, final String baseUrl,
+    public RESTContentSpecV1 createRESTEntityFromDBEntityInternal(final ContentSpec entity, final String baseUrl,
             final String dataType, final ExpandDataTrunk expand, final Number revision, final boolean expandParentReferences,
             final EntityManager entityManager) {
         assert entity != null : "Parameter contentSpec can not be null";
@@ -99,8 +99,6 @@ public class ContentSpecV1Factory extends
                         dataType, expand, baseUrl, entityManager));
 
         retValue.setLinks(baseUrl, RESTv1Constants.CONTENT_SPEC_URL_NAME, dataType, retValue.getId());
-        retValue.setLogDetails(new LogDetailsV1Factory().create(entity, revision, RESTBaseEntityV1.LOG_DETAILS_NAME, expand,
-                dataType, baseUrl, entityManager));
 
         return retValue;
     }

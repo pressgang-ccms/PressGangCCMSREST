@@ -27,7 +27,7 @@ public class UserV1Factory extends RESTDataObjectFactory<RESTUserV1, User, RESTU
     }
 
     @Override
-    public RESTUserV1 createRESTEntityFromDBEntity(final User entity, final String baseUrl, final String dataType,
+    public RESTUserV1 createRESTEntityFromDBEntityInternal(final User entity, final String baseUrl, final String dataType,
             final ExpandDataTrunk expand, final Number revision, final boolean expandParentReferences,
             final EntityManager entityManager) {
         assert entity != null : "Parameter topic can not be null";
@@ -59,8 +59,6 @@ public class UserV1Factory extends RESTDataObjectFactory<RESTUserV1, User, RESTU
                         expand, baseUrl, entityManager));
 
         retValue.setLinks(baseUrl, RESTv1Constants.USER_URL_NAME, dataType, retValue.getId());
-        retValue.setLogDetails(new LogDetailsV1Factory().create(entity, revision, RESTBaseEntityV1.LOG_DETAILS_NAME, expand,
-                dataType, baseUrl, entityManager));
 
         return retValue;
     }

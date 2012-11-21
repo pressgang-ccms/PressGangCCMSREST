@@ -15,6 +15,7 @@ import org.jboss.pressgang.ccms.restserver.rest.v1.base.RESTDataObjectCollection
 import org.jboss.pressgang.ccms.restserver.rest.v1.base.RESTDataObjectFactory;
 import org.jboss.pressgang.ccms.restserver.utils.EnversUtilities;
 
+
 public class CSTranslatedStringV1Factory
         extends
         RESTDataObjectFactory<RESTCSTranslatedStringV1, CSTranslatedString, RESTCSTranslatedStringCollectionV1, RESTCSTranslatedStringCollectionItemV1> {
@@ -24,7 +25,7 @@ public class CSTranslatedStringV1Factory
     }
 
     @Override
-    public RESTCSTranslatedStringV1 createRESTEntityFromDBEntity(final CSTranslatedString entity, final String baseUrl,
+    public RESTCSTranslatedStringV1 createRESTEntityFromDBEntityInternal(final CSTranslatedString entity, final String baseUrl,
             final String dataType, final ExpandDataTrunk expand, final Number revision, final boolean expandParentReferences,
             final EntityManager entityManager) {
         assert entity != null : "Parameter entity can not be null";
@@ -49,9 +50,6 @@ public class CSTranslatedStringV1Factory
                     .create(RESTCSTranslatedStringCollectionV1.class, new CSTranslatedStringV1Factory(), entity,
                             EnversUtilities.getRevisions(entityManager, entity), RESTBaseEntityV1.REVISIONS_NAME, dataType, expand, baseUrl, entityManager));
         }
-
-        retValue.setLogDetails(new LogDetailsV1Factory().create(entity, revision, RESTBaseEntityV1.LOG_DETAILS_NAME, expand,
-                dataType, baseUrl, entityManager));
 
         return retValue;
     }

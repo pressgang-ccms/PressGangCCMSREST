@@ -48,7 +48,7 @@ public class TopicV1Factory extends RESTDataObjectFactory<RESTTopicV1, Topic, RE
     }
 
     @Override
-    public RESTTopicV1 createRESTEntityFromDBEntity(final Topic entity, final String baseUrl, final String dataType,
+    public RESTTopicV1 createRESTEntityFromDBEntityInternal(final Topic entity, final String baseUrl, final String dataType,
             final ExpandDataTrunk expand, final Number revision, final boolean expandParentReferences,
             final EntityManager entityManager) {
         assert entity != null : "Parameter topic can not be null";
@@ -77,7 +77,6 @@ public class TopicV1Factory extends RESTDataObjectFactory<RESTTopicV1, Topic, RE
         retValue.setXml(entity.getTopicXML());
         retValue.setHtml(entity.getTopicRendered());
         retValue.setLastModified(EnversUtilities.getFixedLastModifiedDate(entityManager, entity));
-        retValue.setRevision(EnversUtilities.getLatestRevision(entityManager, entity).intValue());
         retValue.setCreated(entity.getTopicTimeStamp());
         retValue.setLocale(entity.getTopicLocale());
         retValue.setXmlErrors(entity.getTopicXMLErrors());
@@ -127,8 +126,6 @@ public class TopicV1Factory extends RESTDataObjectFactory<RESTTopicV1, Topic, RE
                         expand, baseUrl, revision, false, entityManager));
 
         retValue.setLinks(baseUrl, RESTv1Constants.TOPIC_URL_NAME, dataType, retValue.getId());
-        retValue.setLogDetails(new LogDetailsV1Factory().create(entity, revision, RESTBaseEntityV1.LOG_DETAILS_NAME, expand,
-                dataType, baseUrl, entityManager));
 
         return retValue;
     }

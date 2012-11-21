@@ -26,7 +26,7 @@ public class FilterLocaleV1Factory extends
     }
 
     @Override
-    public RESTFilterLocaleV1 createRESTEntityFromDBEntity(final FilterLocale entity, final String baseUrl,
+    public RESTFilterLocaleV1 createRESTEntityFromDBEntityInternal(final FilterLocale entity, final String baseUrl,
             final String dataType, final ExpandDataTrunk expand, final Number revision, boolean expandParentReferences,
             final EntityManager entityManager) {
         assert entity != null : "Parameter filterLocale can not be null";
@@ -56,9 +56,6 @@ public class FilterLocaleV1Factory extends
             retValue.setFilter(new FilterV1Factory().createRESTEntityFromDBEntity(entity.getFilter(), baseUrl, dataType,
                     expand.get(RESTFilterLocaleV1.FILTER_NAME), revision, expandParentReferences, entityManager));
         }
-
-        retValue.setLogDetails(new LogDetailsV1Factory().create(entity, revision, RESTBaseEntityV1.LOG_DETAILS_NAME, expand,
-                dataType, baseUrl, entityManager));
 
         return retValue;
     }

@@ -24,7 +24,7 @@ public class LanguageImageV1Factory
     }
 
     @Override
-    public RESTLanguageImageV1 createRESTEntityFromDBEntity(final LanguageImage entity, final String baseUrl,
+    public RESTLanguageImageV1 createRESTEntityFromDBEntityInternal(final LanguageImage entity, final String baseUrl,
             final String dataType, final ExpandDataTrunk expand, final Number revision, final boolean expandParentReferences,
             final EntityManager entityManager) {
         assert entity != null : "Parameter topic can not be null";
@@ -67,9 +67,6 @@ public class LanguageImageV1Factory
                     .create(RESTLanguageImageCollectionV1.class, new LanguageImageV1Factory(), entity, EnversUtilities.getRevisions(entityManager, entity),
                             RESTBaseEntityV1.REVISIONS_NAME, dataType, expand, baseUrl, entityManager));
         }
-
-        retValue.setLogDetails(new LogDetailsV1Factory().create(entity, revision, RESTBaseEntityV1.LOG_DETAILS_NAME, expand,
-                dataType, baseUrl, entityManager));
 
         return retValue;
     }

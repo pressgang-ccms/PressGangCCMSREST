@@ -230,11 +230,6 @@ public class RESTDataObjectCollectionFactory<T extends RESTBaseEntityV1<T, V, W>
                             final T restEntity = dataObjectFactory.createRESTEntityFromDBEntity(dbEntity, baseUrl, dataType,
                                     expand, revision, expandParentReferences, entityManager);
 
-                            // If the entity relates to a revision, copy that data across
-                            if (usingRevisions) {
-                                restEntity.setRevision(revisions.get(i).intValue());
-                            }
-
                             // Add the item to the return value
                             retValue.addItem(restEntity);
                         }

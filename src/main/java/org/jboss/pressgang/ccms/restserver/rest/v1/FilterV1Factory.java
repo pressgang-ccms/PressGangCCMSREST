@@ -40,7 +40,7 @@ public class FilterV1Factory extends
     }
 
     @Override
-    public RESTFilterV1 createRESTEntityFromDBEntity(final Filter entity, final String baseUrl, final String dataType,
+    public RESTFilterV1 createRESTEntityFromDBEntityInternal(final Filter entity, final String baseUrl, final String dataType,
             final ExpandDataTrunk expand, final Number revision, boolean expandParentReferences,
             final EntityManager entityManager) {
         assert entity != null : "Parameter filterTag can not be null";
@@ -89,8 +89,6 @@ public class FilterV1Factory extends
                         RESTFilterV1.FILTER_FIELDS_NAME, dataType, expand, baseUrl, false, entityManager));
 
         retValue.setLinks(baseUrl, RESTv1Constants.FILTER_URL_NAME, dataType, retValue.getId());
-        retValue.setLogDetails(new LogDetailsV1Factory().create(entity, revision, RESTBaseEntityV1.LOG_DETAILS_NAME, expand,
-                dataType, baseUrl, entityManager));
 
         return retValue;
     }

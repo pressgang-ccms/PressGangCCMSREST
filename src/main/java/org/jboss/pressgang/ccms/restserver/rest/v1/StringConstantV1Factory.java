@@ -25,7 +25,7 @@ public class StringConstantV1Factory
     }
 
     @Override
-    public RESTStringConstantV1 createRESTEntityFromDBEntity(final StringConstants entity, final String baseUrl,
+    public RESTStringConstantV1 createRESTEntityFromDBEntityInternal(final StringConstants entity, final String baseUrl,
             final String dataType, final ExpandDataTrunk expand, final Number revision, final boolean expandParentReferences,
             final EntityManager entityManager) {
         assert entity != null : "Parameter topic can not be null";
@@ -51,8 +51,6 @@ public class StringConstantV1Factory
         }
 
         retValue.setLinks(baseUrl, RESTv1Constants.STRINGCONSTANT_URL_NAME, dataType, retValue.getId());
-        retValue.setLogDetails(new LogDetailsV1Factory().create(entity, revision, RESTBaseEntityV1.LOG_DETAILS_NAME, expand,
-                dataType, baseUrl, entityManager));
 
         return retValue;
     }

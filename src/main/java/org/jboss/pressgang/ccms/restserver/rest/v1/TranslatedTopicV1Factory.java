@@ -44,7 +44,7 @@ public class TranslatedTopicV1Factory
     }
 
     @Override
-    public RESTTranslatedTopicV1 createRESTEntityFromDBEntity(final TranslatedTopicData entity, final String baseUrl,
+    public RESTTranslatedTopicV1 createRESTEntityFromDBEntityInternal(final TranslatedTopicData entity, final String baseUrl,
             final String dataType, final ExpandDataTrunk expand, final Number revision, final boolean expandParentReferences,
             final EntityManager entityManager) {
         assert entity != null : "Parameter entity can not be null";
@@ -164,8 +164,6 @@ public class TranslatedTopicV1Factory
                         dataType, expand, baseUrl, entityManager));
 
         retValue.setLinks(baseUrl, RESTv1Constants.TRANSLATEDTOPIC_URL_NAME, dataType, retValue.getId());
-        retValue.setLogDetails(new LogDetailsV1Factory().create(entity, revision, RESTBaseEntityV1.LOG_DETAILS_NAME, expand,
-                dataType, baseUrl, entityManager));
 
         return retValue;
     }

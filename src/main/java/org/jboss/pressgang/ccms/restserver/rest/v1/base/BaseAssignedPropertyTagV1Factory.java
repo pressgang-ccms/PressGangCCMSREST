@@ -12,7 +12,6 @@ import org.jboss.pressgang.ccms.rest.v1.constants.RESTv1Constants;
 import org.jboss.pressgang.ccms.rest.v1.entities.base.RESTBaseEntityV1;
 import org.jboss.pressgang.ccms.rest.v1.entities.join.RESTAssignedPropertyTagV1;
 import org.jboss.pressgang.ccms.rest.v1.expansion.ExpandDataTrunk;
-import org.jboss.pressgang.ccms.restserver.rest.v1.LogDetailsV1Factory;
 import org.jboss.pressgang.ccms.restserver.utils.EnversUtilities;
 
 public abstract class BaseAssignedPropertyTagV1Factory<T extends ToPropertyTag<T>, U extends BaseAssignedPropertyTagV1Factory<T, U>>
@@ -26,7 +25,7 @@ public abstract class BaseAssignedPropertyTagV1Factory<T extends ToPropertyTag<T
     }
 
     @Override
-    public RESTAssignedPropertyTagV1 createRESTEntityFromDBEntity(final T entity, final String baseUrl, String dataType,
+    public RESTAssignedPropertyTagV1 createRESTEntityFromDBEntityInternal(final T entity, final String baseUrl, String dataType,
             final ExpandDataTrunk expand, final Number revision, final boolean expandParentReferences,
             final EntityManager entityManager) {
         assert entity != null : "Parameter topic can not be null";
@@ -64,8 +63,6 @@ public abstract class BaseAssignedPropertyTagV1Factory<T extends ToPropertyTag<T
         }
 
         retValue.setLinks(baseUrl, RESTv1Constants.PROPERTYTAG_URL_NAME, dataType, retValue.getId());
-        retValue.setLogDetails(new LogDetailsV1Factory().create(entity, revision, RESTBaseEntityV1.LOG_DETAILS_NAME, expand,
-                dataType, baseUrl, entityManager));
 
         return retValue;
     }

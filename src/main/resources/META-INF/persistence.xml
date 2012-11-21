@@ -8,7 +8,58 @@
 		<!-- <provider>org.hibernate.ejb.HibernatePersistence</provider> -->
 		<jta-data-source>java:/PressGangCCMSDatasource</jta-data-source>
         <jar-file>resource-server-provider-1.0-SNAPSHOT.jar</jar-file>
-        <jar-file>pressgang-ccms-model-1.1-SNAPSHOT.jar</jar-file>
+        <class>org.jboss.pressgang.ccms.model.BlobConstants</class>
+        <class>org.jboss.pressgang.ccms.model.BugzillaBug</class>
+        <class>org.jboss.pressgang.ccms.model.Category</class>
+        <class>org.jboss.pressgang.ccms.model.contentspec.ContentSpec</class>
+        <class>org.jboss.pressgang.ccms.model.contentspec.ContentSpecToCSMetaData</class>
+        <class>org.jboss.pressgang.ccms.model.contentspec.ContentSpecToProject</class>
+        <class>org.jboss.pressgang.ccms.model.contentspec.ContentSpecToPropertyTag</class>
+        <class>org.jboss.pressgang.ccms.model.contentspec.ContentSpecToTag</class>
+        <class>org.jboss.pressgang.ccms.model.contentspec.CSMetaData</class>
+        <class>org.jboss.pressgang.ccms.model.contentspec.CSMetaDataToCSTranslatedString</class>
+        <class>org.jboss.pressgang.ccms.model.contentspec.CSNode</class>
+        <class>org.jboss.pressgang.ccms.model.contentspec.CSNodeToCSNode</class>
+        <class>org.jboss.pressgang.ccms.model.contentspec.CSNodeToCSTranslatedString</class>
+        <class>org.jboss.pressgang.ccms.model.contentspec.CSNodeToPropertyTag</class>
+        <class>org.jboss.pressgang.ccms.model.contentspec.CSTranslatedString</class>
+        <class>org.jboss.pressgang.ccms.model.Filter</class>
+        <class>org.jboss.pressgang.ccms.model.FilterCategory</class>
+        <class>org.jboss.pressgang.ccms.model.FilterField</class>
+        <class>org.jboss.pressgang.ccms.model.FilterLocale</class>
+        <class>org.jboss.pressgang.ccms.model.FilterOption</class>
+        <class>org.jboss.pressgang.ccms.model.FilterTag</class>
+        <class>org.jboss.pressgang.ccms.model.ImageFile</class>
+        <class>org.jboss.pressgang.ccms.model.IntegerConstants</class>
+        <class>org.jboss.pressgang.ccms.model.LanguageImage</class>
+        <class>org.jboss.pressgang.ccms.model.Project</class>
+        <class>org.jboss.pressgang.ccms.model.PropertyTag</class>
+        <class>org.jboss.pressgang.ccms.model.PropertyTagCategory</class>
+        <class>org.jboss.pressgang.ccms.model.PropertyTagToPropertyTagCategory</class>
+        <class>org.jboss.pressgang.ccms.model.RelationshipTag</class>
+        <class>org.jboss.pressgang.ccms.model.Role</class>
+        <class>org.jboss.pressgang.ccms.model.RoleToRole</class>
+        <class>org.jboss.pressgang.ccms.model.RoleToRoleRelationship</class>
+        <class>org.jboss.pressgang.ccms.model.StringConstants</class>
+        <class>org.jboss.pressgang.ccms.model.Tag</class>
+        <class>org.jboss.pressgang.ccms.model.TagToCategory</class>
+        <class>org.jboss.pressgang.ccms.model.TagToProject</class>
+        <class>org.jboss.pressgang.ccms.model.TagToPropertyTag</class>
+        <class>org.jboss.pressgang.ccms.model.TagToTag</class>
+        <class>org.jboss.pressgang.ccms.model.TagToTagRelationship</class>
+        <class>org.jboss.pressgang.ccms.model.Topic</class>
+        <class>org.jboss.pressgang.ccms.model.TopicSecondOrderData</class>
+        <class>org.jboss.pressgang.ccms.model.TopicSourceUrl</class>
+        <class>org.jboss.pressgang.ccms.model.TopicToBugzillaBug</class>
+        <class>org.jboss.pressgang.ccms.model.TopicToPropertyTag</class>
+        <class>org.jboss.pressgang.ccms.model.TopicToTag</class>
+        <class>org.jboss.pressgang.ccms.model.TopicToTopic</class>
+        <class>org.jboss.pressgang.ccms.model.TopicToTopicSourceUrl</class>
+        <class>org.jboss.pressgang.ccms.model.TranslatedTopic</class>
+        <class>org.jboss.pressgang.ccms.model.TranslatedTopicData</class>
+        <class>org.jboss.pressgang.ccms.model.TranslatedTopicString</class>
+        <class>org.jboss.pressgang.ccms.model.User</class>
+        <class>org.jboss.pressgang.ccms.model.UserRole</class>
         <class>org.jboss.pressgang.ccms.restserver.envers.LoggingRevisionEntity</class>
         <class>org.jboss.pressgang.belay.oauth2.resourceserver.data.model.OAuth2RSScope</class>
         <class>org.jboss.pressgang.belay.oauth2.resourceserver.data.model.OAuth2RSEndpoint</class>
