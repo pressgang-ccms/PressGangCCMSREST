@@ -1,3 +1,5 @@
+The PressGang CCMS REST Server project provides a RESTful web interface for the PressGang CCMS (Component Content Management System). It offers create, update, get and delete endpoints for the system's primary entities. These endpoints produce both JSON and JSONP, which adds cross-domain functionality. Topic entities also have ATOM, XML and HTML get endpoints.
+
 PressGang CCMS REST Server
 ==========================
 

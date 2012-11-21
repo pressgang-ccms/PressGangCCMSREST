@@ -56,43 +56,16 @@
     </xsl:template>
 
     <xsl:template match="node()[name(.)='extensions']">
-        <xsl:copy-of select="."/>
+        <xsl:copy>
+            <xsl:apply-templates select="@*|node()"/>
+            <extension module="org.jboss.as.messaging"/>
+        </xsl:copy>
         <system-properties>
             <!--<property name="javax.net.debug" value="ssl"/>-->
             <property name="javax.net.ssl.trustStore" value="${jboss.config.dir}/client.truststore"/>
             <property name="javax.net.ssl.trustStorePassword" value="${truststore.password}"/>
             <property name="javax.net.ssl.trustStoreType" value="jks"/>
-            <property name="topicIndex.bugzillaUrl" value="bugzilla.redhat.com"/>
-            <property name="topicIndex.bugzillaUsername" value="${bugzilla.user}"/>
-            <property name="topicIndex.bugzillaPassword" value="${bugzilla.password}"/>
-            <property name="topicIndex.stompMessageServer" value="localhost"/>
-            <property name="topicIndex.stompMessageServerPort" value="${stomp.port}"/>
-            <property name="topicIndex.stompMessageServerUser" value="${stomp.user}"/>
-            <property name="topicIndex.stompMessageServerPass" value="${stomp.pass}"/>
-            <property name="topicIndex.stompMessageServerRenderTopicQueue"
-                      value="jms.queue.PressGangCCMSTopicRenderQueue"/>
-            <property name="topicIndex.stompMessageServerRenderTranslatedTopicQueue"
-                      value="jms.queue.PressGangCCMSTopicRenderQueue"/>
-            <property name="NumberOfWorkerThreads" value="1"/>
-            <property name="topicIndex.kerberosEnabled" value="false"/>
-            <property name="topicindex.rerenderTopic" value="false"/>
-            <property name="java.security.krb5.kdc" value="${krb5.kdc}"/>
-            <property name="java.security.krb5.realm" value="${krb5.realm}"/>
-            <property name="topicIndex.instanceName" value="${krb5.kdc}"/>
-            <property name="topicIndex.zanataServer" value="${topicindex.instance}"/>
-            <property name="topicIndex.zanataProject" value="${zanata.project}"/>
-            <property name="topicIndex.zanataUsername" value="${zanata.user}"/>
-            <property name="topicIndex.zanataProjectVersion" value="1"/>
-            <property name="topicIndex.zanataToken" value="${zanata.token}"/>
-            <property name="topicIndex.defaultLocale" value="en-US"/>
         </system-properties>
-    </xsl:template>
-
-    <xsl:template match="node()[name(.)='extensions']">
-        <xsl:copy>
-            <xsl:apply-templates select="@*|node()"/>
-            <extension module="org.jboss.as.messaging"/>
-        </xsl:copy>
     </xsl:template>
 
     <xsl:template match="node()[name(.)='profile']">
@@ -198,11 +171,11 @@
     </xsl:template>
 
     <!--<xsl:template match="*[@name='INFO']">-->
-    <!--<xsl:copy>-->
-    <!--<xsl:attribute name="name">-->
-    <!--<xsl:value-of select="'DEBUG'"/>-->
-    <!--</xsl:attribute>-->
-    <!--</xsl:copy>-->
+        <!--<xsl:copy>-->
+            <!--<xsl:attribute name="name">-->
+                <!--<xsl:value-of select="'DEBUG'"/>-->
+            <!--</xsl:attribute>-->
+        <!--</xsl:copy>-->
     <!--</xsl:template>-->
 
 </xsl:stylesheet>

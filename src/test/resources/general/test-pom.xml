@@ -47,58 +47,14 @@
         <shrinkwrapresolver.version>2.0.0-alpha-4</shrinkwrapresolver.version>
         <xmlplugin.version>1.0</xmlplugin.version>
         <antrunplugin.version>1.7</antrunplugin.version>
-        <jbossjavaeeweb.version>3.0.0.Final</jbossjavaeeweb.version>
-        <jbossjavaee.version>1.0.0.Final</jbossjavaee.version>
-        <jboss.jaxrs.api.version>1.0.0.Final</jboss.jaxrs.api.version>
-        <jacoco.version>0.5.10.201208310627</jacoco.version>
-        <junit.version>4.9</junit.version>
         <maven.test.failure.ignore>false</maven.test.failure.ignore>
     </properties>
 
     <dependencies>
         <dependency>
-            <groupId>org.jboss.spec</groupId>
-            <artifactId>jboss-javaee-all-6.0</artifactId>
-            <version>${jboss.spec.verison}</version>
-            <type>pom</type>
-            <scope>provided</scope>
-        </dependency>
-        <dependency>
-            <groupId>xalan</groupId>
-            <artifactId>xalan</artifactId>
-            <version>${xalan.version}</version>
-            <scope>provided</scope>
-        </dependency>
-        <dependency>
             <groupId>xerces</groupId>
             <artifactId>xercesImpl</artifactId>
             <version>${xerces.version}</version>
-        </dependency>
-
-        <!-- RestEASY Dependencies -->
-        <dependency>
-            <groupId>org.jboss.resteasy</groupId>
-            <artifactId>resteasy-jaxrs</artifactId>
-            <version>${resteasy.version}</version>
-            <scope>provided</scope>
-        </dependency>
-        <dependency>
-            <groupId>org.jboss.resteasy</groupId>
-            <artifactId>resteasy-atom-provider</artifactId>
-            <version>${resteasy.version}</version>
-            <scope>provided</scope>
-        </dependency>
-        <dependency>
-            <groupId>org.jboss.resteasy</groupId>
-            <artifactId>resteasy-jackson-provider</artifactId>
-            <version>${resteasy.version}</version>
-            <scope>provided</scope>
-        </dependency>
-        <dependency>
-            <groupId>org.jboss.resteasy</groupId>
-            <artifactId>resteasy-jaxb-provider</artifactId>
-            <version>${resteasy.version}</version>
-            <scope>provided</scope>
         </dependency>
 
         <!-- Jackson Libraries -->
@@ -113,28 +69,6 @@
             <version>${jackson.version}</version>
         </dependency>
 
-        <!-- Hibernate Dependencies -->
-        <dependency>
-            <groupId>org.hibernate</groupId>
-            <artifactId>hibernate-envers</artifactId>
-            <scope>provided</scope>
-        </dependency>
-        <dependency>
-            <groupId>org.hibernate</groupId>
-            <artifactId>hibernate-entitymanager</artifactId>
-            <scope>provided</scope>
-        </dependency>
-        <dependency>
-            <groupId>org.hibernate</groupId>
-            <artifactId>hibernate-core</artifactId>
-            <scope>provided</scope>
-        </dependency>
-        <dependency>
-            <groupId>org.hibernate</groupId>
-            <artifactId>hibernate-search</artifactId>
-            <scope>provided</scope>
-        </dependency>
-
         <!-- PressGangCCMS Libraries -->
         <dependency>
             <groupId>org.jboss.pressgang.ccms</groupId>
@@ -145,21 +79,85 @@
             <groupId>org.jboss.pressgang.ccms</groupId>
             <artifactId>pressgang-ccms-contentspec</artifactId>
             <version>1.0-SNAPSHOT</version>
+            <exclusions>
+                <exclusion>
+                    <artifactId>resteasy-jackson-provider</artifactId>
+                    <groupId>org.jboss.resteasy</groupId>
+                </exclusion>
+                <exclusion>
+                    <artifactId>resteasy-atom-provider</artifactId>
+                    <groupId>org.jboss.resteasy</groupId>
+                </exclusion>
+                <exclusion>
+                    <artifactId>resteasy-jaxrs</artifactId>
+                    <groupId>org.jboss.resteasy</groupId>
+                </exclusion>
+            </exclusions>
         </dependency>
         <dependency>
             <groupId>org.jboss.pressgang.ccms</groupId>
             <artifactId>pressgang-ccms-zanata</artifactId>
             <version>1.0-SNAPSHOT</version>
+            <exclusions>
+                <exclusion>
+                    <artifactId>jaxrs-api</artifactId>
+                    <groupId>org.jboss.resteasy</groupId>
+                </exclusion>
+                <exclusion>
+                    <artifactId>resteasy-jaxb-provider</artifactId>
+                    <groupId>org.jboss.resteasy</groupId>
+                </exclusion>
+                <exclusion>
+                    <artifactId>resteasy-jaxrs</artifactId>
+                    <groupId>org.jboss.resteasy</groupId>
+                </exclusion>
+                <exclusion>
+                    <artifactId>resteasy-multipart-provider</artifactId>
+                    <groupId>org.jboss.resteasy</groupId>
+                </exclusion>
+                <exclusion>
+                    <artifactId>resteasy-atom-provider</artifactId>
+                    <groupId>org.jboss.resteasy</groupId>
+                </exclusion>
+            </exclusions>
         </dependency>
         <dependency>
             <groupId>org.jboss.pressgang.ccms</groupId>
             <artifactId>pressgang-ccms-rest</artifactId>
             <version>1.0-SNAPSHOT</version>
+            <exclusions>
+                <exclusion>
+                    <artifactId>resteasy-jackson-provider</artifactId>
+                    <groupId>org.jboss.resteasy</groupId>
+                </exclusion>
+                <exclusion>
+                    <artifactId>resteasy-atom-provider</artifactId>
+                    <groupId>org.jboss.resteasy</groupId>
+                </exclusion>
+                <exclusion>
+                    <artifactId>resteasy-jaxrs</artifactId>
+                    <groupId>org.jboss.resteasy</groupId>
+                </exclusion>
+            </exclusions>
         </dependency>
         <dependency>
             <groupId>org.jboss.pressgang.ccms</groupId>
             <artifactId>pressgang-ccms-restv1</artifactId>
             <version>1.0-SNAPSHOT</version>
+            <exclusions>
+                <exclusion>
+                    <artifactId>resteasy-atom-provider</artifactId>
+                    <groupId>org.jboss.resteasy</groupId>
+                </exclusion>
+                <exclusion>
+                    <artifactId>resteasy-jackson-provider</artifactId>
+                    <groupId>org.jboss.resteasy</groupId>
+                </exclusion>
+                <exclusion>
+                    <artifactId>resteasy-jaxrs</artifactId>
+                    <groupId>org.jboss.resteasy</groupId>
+                </exclusion>
+            </exclusions>
         </dependency>
         <dependency>
             <groupId>org.jboss.pressgang.ccms.contentspec</groupId>
@@ -374,29 +372,6 @@
             <groupId>com.jayway.restassured</groupId>
             <artifactId>rest-assured</artifactId>
             <version>${restassured.version}</version>
-            <scope>test</scope>
-            <exclusions>
-                <exclusion>
-                    <groupId>asm</groupId>
-                    <artifactId>asm</artifactId>
-                </exclusion>
-                <exclusion>
-                    <groupId>asm</groupId>
-                    <artifactId>asm-commons</artifactId>
-                </exclusion>
-                <exclusion>
-                    <groupId>asm</groupId>
-                    <artifactId>asm-util</artifactId>
-                </exclusion>
-                <exclusion>
-                    <groupId>asm</groupId>
-                    <artifactId>asm-analysis</artifactId>
-                </exclusion>
-                <exclusion>
-                    <groupId>asm</groupId>
-                    <artifactId>asm-tree</artifactId>
-                </exclusion>
-            </exclusions>
         </dependency>
     </dependencies>
 
@@ -418,6 +393,5 @@
             </dependency>
         </dependencies>
     </dependencyManagement>
-
 
 </project>

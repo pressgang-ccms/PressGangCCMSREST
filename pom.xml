@@ -437,8 +437,9 @@
             </exclusions>
         </dependency>
         <dependency>
-            <groupId>org.jboss.arquillian.junit</groupId>
-            <artifactId>arquillian-junit-container</artifactId>
+            <groupId>org.jacoco</groupId>
+            <artifactId>org.jacoco.core</artifactId>
+            <version>${jacoco.version}</version>
             <scope>test</scope>
         </dependency>
         <dependency>
@@ -467,9 +468,8 @@
             <scope>test</scope>
         </dependency>
         <dependency>
-            <groupId>org.jacoco</groupId>
-            <artifactId>org.jacoco.core</artifactId>
-            <version>${jacoco.version}</version>
+            <groupId>org.jboss.arquillian.junit</groupId>
+            <artifactId>arquillian-junit-container</artifactId>
             <scope>test</scope>
         </dependency>
         <dependency>
@@ -493,7 +493,7 @@
     </dependencies>
 
     <profiles>
-        <!-- A Separate Profile to allow compiling, installing and deploying 
+        <!-- A Separate Profile to allow compiling, installing and deploying
             the rest server with a JAR file so that the server could be used as a library. -->
         <profile>
             <id>include-jar</id>
