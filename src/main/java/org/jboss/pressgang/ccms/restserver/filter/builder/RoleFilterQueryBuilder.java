@@ -2,8 +2,8 @@ package org.jboss.pressgang.ccms.restserver.filter.builder;
 
 import javax.persistence.EntityManager;
 
+import org.jboss.pressgang.ccms.model.Role;
 import org.jboss.pressgang.ccms.rest.v1.constants.CommonFilterConstants;
-import org.jboss.pressgang.ccms.restserver.entity.Role;
 import org.jboss.pressgang.ccms.restserver.filter.base.BaseFilterQueryBuilder;
 
 public class RoleFilterQueryBuilder extends BaseFilterQueryBuilder<Role>

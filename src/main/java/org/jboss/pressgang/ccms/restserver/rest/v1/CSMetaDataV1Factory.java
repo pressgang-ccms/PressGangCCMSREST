@@ -5,15 +5,16 @@ import java.util.List;
 
 import javax.persistence.EntityManager;
 
+import org.jboss.pressgang.ccms.model.contentspec.CSMetaData;
 import org.jboss.pressgang.ccms.rest.v1.collections.contentspec.RESTCSMetaDataCollectionV1;
 import org.jboss.pressgang.ccms.rest.v1.collections.contentspec.items.RESTCSMetaDataCollectionItemV1;
 import org.jboss.pressgang.ccms.rest.v1.constants.RESTv1Constants;
 import org.jboss.pressgang.ccms.rest.v1.entities.base.RESTBaseEntityV1;
 import org.jboss.pressgang.ccms.rest.v1.entities.contentspec.RESTCSMetaDataV1;
 import org.jboss.pressgang.ccms.rest.v1.expansion.ExpandDataTrunk;
-import org.jboss.pressgang.ccms.restserver.entity.contentspec.CSMetaData;
 import org.jboss.pressgang.ccms.restserver.rest.v1.base.RESTDataObjectCollectionFactory;
 import org.jboss.pressgang.ccms.restserver.rest.v1.base.RESTDataObjectFactory;
+import org.jboss.pressgang.ccms.restserver.utils.EnversUtilities;
 
 public class CSMetaDataV1Factory extends
         RESTDataObjectFactory<RESTCSMetaDataV1, CSMetaData, RESTCSMetaDataCollectionV1, RESTCSMetaDataCollectionItemV1> {
@@ -23,7 +24,7 @@ public class CSMetaDataV1Factory extends
     }
 
     @Override
-    public RESTCSMetaDataV1 createRESTEntityFromDBEntity(final CSMetaData entity, final String baseUrl, final String dataType,
+    public RESTCSMetaDataV1 createRESTEntityFromDBEntityInternal(final CSMetaData entity, final String baseUrl, final String dataType,
             final ExpandDataTrunk expand, final Number revision, final boolean expandParentReferences,
             final EntityManager entityManager) {
         assert entity != null : "Parameter entity can not be null";
@@ -44,13 +45,11 @@ public class CSMetaDataV1Factory extends
         // REVISIONS
         if (revision == null) {
             retValue.setRevisions(new RESTDataObjectCollectionFactory<RESTCSMetaDataV1, CSMetaData, RESTCSMetaDataCollectionV1, RESTCSMetaDataCollectionItemV1>()
-                    .create(RESTCSMetaDataCollectionV1.class, new CSMetaDataV1Factory(), entity, entity.getRevisions(entityManager),
+                    .create(RESTCSMetaDataCollectionV1.class, new CSMetaDataV1Factory(), entity, EnversUtilities.getRevisions(entityManager, entity),
                             RESTBaseEntityV1.REVISIONS_NAME, dataType, expand, baseUrl, entityManager));
         }
 
         retValue.setLinks(baseUrl, RESTv1Constants.CONTENT_SPEC_META_DATA_URL_NAME, dataType, retValue.getId());
-        retValue.setLogDetails(new LogDetailsV1Factory().create(entity, revision, RESTBaseEntityV1.LOG_DETAILS_NAME, expand,
-                dataType, baseUrl, entityManager));
 
         return retValue;
     }

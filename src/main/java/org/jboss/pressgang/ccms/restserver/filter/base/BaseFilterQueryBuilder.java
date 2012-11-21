@@ -58,7 +58,7 @@ public abstract class BaseFilterQueryBuilder<T> implements IFilterQueryBuilder<T
 
         if (fieldConditions.size() > 1) {
             final Predicate[] predicates = fieldConditions.toArray(new Predicate[fieldConditions.size()]);
-            if (this.filterFieldsLogic.equals(Constants.OR_LOGIC)) {
+            if (this.filterFieldsLogic.equalsIgnoreCase(Constants.OR_LOGIC)) {
                 return criteriaBuilder.or(predicates);
             } else {
                 return criteriaBuilder.and(predicates);
@@ -88,9 +88,13 @@ public abstract class BaseFilterQueryBuilder<T> implements IFilterQueryBuilder<T
         return entityManager;
     }
 
-    @Override
-    public Root<T> getCriteriaRoot() {
+    protected Root<T> getCriteriaRoot() {
         return from;
+    }
+    
+    @Override
+    public void reset() {
+        this.fieldConditions.clear();
     }
 
     protected Path<?> getRootPath() {

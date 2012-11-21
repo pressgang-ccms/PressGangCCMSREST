@@ -2,7 +2,7 @@ package org.jboss.pressgang.ccms.restserver.filter.base;
 
 import java.util.Map;
 
-import org.jboss.pressgang.ccms.restserver.entity.Filter;
+import org.jboss.pressgang.ccms.model.Filter;
 
 /**
  * A Field Filter provides a mechanism to find what fields are valid for a filter and a place to temporarily store the data.

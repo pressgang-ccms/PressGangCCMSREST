@@ -11,14 +11,13 @@ import javax.persistence.criteria.Root;
 import javax.persistence.criteria.Subquery;
 
 import org.jboss.pressgang.ccms.utils.constants.CommonConstants;
+import org.jboss.pressgang.ccms.model.Topic;
+import org.jboss.pressgang.ccms.model.TopicToTag;
+import org.jboss.pressgang.ccms.model.TranslatedTopic;
+import org.jboss.pressgang.ccms.model.TranslatedTopicData;
 import org.jboss.pressgang.ccms.rest.v1.constants.CommonFilterConstants;
-import org.jboss.pressgang.ccms.restserver.entity.Topic;
-import org.jboss.pressgang.ccms.restserver.entity.TopicToTag;
-import org.jboss.pressgang.ccms.restserver.entity.TranslatedTopic;
-import org.jboss.pressgang.ccms.restserver.entity.TranslatedTopicData;
 import org.jboss.pressgang.ccms.restserver.filter.base.BaseTopicFilterQueryBuilder;
 import org.jboss.pressgang.ccms.restserver.utils.Constants;
-import org.jboss.pressgang.ccms.restserver.utils.EntityUtilities;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -123,7 +122,7 @@ public class TranslatedTopicDataFilterQueryBuilder extends BaseTopicFilterQueryB
         // Generate the final Predicate condition
         if (fieldConditions.size() > 1) {
             final Predicate[] predicates = fieldConditions.toArray(new Predicate[fieldConditions.size()]);
-            if (this.filterFieldsLogic.equals(Constants.OR_LOGIC)) {
+            if (this.filterFieldsLogic.equalsIgnoreCase(Constants.OR_LOGIC)) {
                 return criteriaBuilder.or(predicates);
             } else {
                 return criteriaBuilder.and(predicates);
@@ -138,42 +137,26 @@ public class TranslatedTopicDataFilterQueryBuilder extends BaseTopicFilterQueryB
         if (fieldName.equals(CommonFilterConstants.TOPIC_LATEST_TRANSLATIONS_FILTER_VAR)) {
             final Boolean fieldValueBoolean = Boolean.parseBoolean(fieldValue);
             if (fieldValueBoolean) {
-                /* Limit to fully translated topics */
-                final List<Integer> topicIds = EntityUtilities.getLatestTranslatedTopics(getEntityManager());
-                if (topicIds == null || topicIds.isEmpty()) {
-                    fieldConditions.add(getCriteriaBuilder().equal(getOriginalRootPath().get("translatedTopicDataId"), Constants.NULL_TOPIC_ID));
-                } else {
-                    fieldConditions.add(getOriginalRootPath().get("translatedTopicDataId").in(topicIds));
-                }
+                final Subquery<Integer> lastestRevisionQuery = getLastestRevisionSubquery();
+                fieldConditions.add(this.getCriteriaBuilder().equal(translatedTopic.get("topicRevision"), lastestRevisionQuery));
             }
         } else if (fieldName.equals(CommonFilterConstants.TOPIC_NOT_LATEST_TRANSLATIONS_FILTER_VAR)) {
             final Boolean fieldValueBoolean = Boolean.parseBoolean(fieldValue);
             if (fieldValueBoolean) {
-                /* Limit to fully translated topics */
-                final List<Integer> topicIds = EntityUtilities.getLatestTranslatedTopics(getEntityManager());
-                if (topicIds != null && !topicIds.isEmpty()) {
-                    fieldConditions.add(getCriteriaBuilder().not(getOriginalRootPath().get("translatedTopicDataId").in(topicIds)));
-                }
+                final Subquery<Integer> lastestRevisionQuery = getLastestRevisionSubquery();
+                fieldConditions.add(this.getCriteriaBuilder().notEqual(translatedTopic.get("topicRevision"), lastestRevisionQuery));
             }
         } else if (fieldName.equals(CommonFilterConstants.TOPIC_LATEST_COMPLETED_TRANSLATIONS_FILTER_VAR)) {
             final Boolean fieldValueBoolean = Boolean.parseBoolean(fieldValue);
             if (fieldValueBoolean) {
-                /* Limit to the latest completed translated topics */
-                final List<Integer> topicIds = EntityUtilities.getLatestCompletedTranslatedTopics(getEntityManager());
-                if (topicIds == null || topicIds.isEmpty()) {
-                    fieldConditions.add(getCriteriaBuilder().equal(getOriginalRootPath().get("translatedTopicDataId"), Constants.NULL_TOPIC_ID));
-                } else {
-                    fieldConditions.add(getOriginalRootPath().get("translatedTopicDataId").in(topicIds));
-                }
+                final Subquery<Integer> lastestRevisionQuery = getLastestCompleteRevisionSubquery();
+                fieldConditions.add(this.getCriteriaBuilder().equal(translatedTopic.get("topicRevision"), lastestRevisionQuery));
             }
         } else if (fieldName.equals(CommonFilterConstants.TOPIC_NOT_LATEST_COMPLETED_TRANSLATIONS_FILTER_VAR)) {
             final Boolean fieldValueBoolean = Boolean.parseBoolean(fieldValue);
             if (fieldValueBoolean) {
-                /* Limit to the latest completed translated topics */
-                final List<Integer> topicIds = EntityUtilities.getLatestCompletedTranslatedTopics(getEntityManager());
-                if (topicIds != null && !topicIds.isEmpty()) {
-                    fieldConditions.add(getCriteriaBuilder().not(getOriginalRootPath().get("translatedTopicDataId").in(topicIds)));
-                }
+                final Subquery<Integer> lastestRevisionQuery = getLastestCompleteRevisionSubquery();
+                fieldConditions.add(this.getCriteriaBuilder().notEqual(translatedTopic.get("topicRevision"), lastestRevisionQuery));
             }
         } else if (fieldName.equals(CommonFilterConstants.ZANATA_IDS_FILTER_VAR)) {
             if (fieldValue.trim().length() != 0) {
@@ -240,5 +223,47 @@ public class TranslatedTopicDataFilterQueryBuilder extends BaseTopicFilterQueryB
         } else {
             super.processFilterString(fieldName, fieldValue);
         }
+    }
+    
+    @Override
+    public void reset() {
+        super.reset();
+        this.fieldConditions.clear();
+    }
+    
+    /**
+     * Create a Subquery to get the latest revision for a translated topic and locale.
+     * 
+     * @return A subquery that will return the maximum revision for a translated topic and locale.
+     */
+    protected Subquery<Integer> getLastestRevisionSubquery() {
+        final CriteriaBuilder criteriaBuilder = getCriteriaBuilder();
+        final Subquery<Integer> subQuery = getCriteriaQuery().subquery(Integer.class);
+        final Root<TranslatedTopicData> root = subQuery.from(TranslatedTopicData.class);
+        subQuery.select(criteriaBuilder.max(root.get("translatedTopic").get("topicRevision").as(Integer.class)));
+        
+        final Predicate topicIdMatch = criteriaBuilder.equal(root.get("translatedTopic").get("topicId"), translatedTopic.get("topicId"));
+        final Predicate localeMatch = criteriaBuilder.equal(this.getOriginalRootPath().get("translationLocale"), root.get("translationLocale"));
+        subQuery.where(criteriaBuilder.and(topicIdMatch, localeMatch));
+        
+        subQuery.groupBy(root.get("translatedTopic").get("topicId"));
+        
+        return subQuery;
+    }
+    
+    protected Subquery<Integer> getLastestCompleteRevisionSubquery() {
+        final CriteriaBuilder criteriaBuilder = getCriteriaBuilder();
+        final Subquery<Integer> subQuery = getCriteriaQuery().subquery(Integer.class);
+        final Root<TranslatedTopicData> root = subQuery.from(TranslatedTopicData.class);
+        subQuery.select(criteriaBuilder.max(root.get("translatedTopic").get("topicRevision").as(Integer.class)));
+        
+        final Predicate topicIdMatch = criteriaBuilder.equal(root.get("translatedTopic").get("topicId"), translatedTopic.get("topicId"));
+        final Predicate localeMatch = criteriaBuilder.equal(this.getOriginalRootPath().get("translationLocale"), root.get("translationLocale"));
+        final Predicate complete = criteriaBuilder.ge(root.get("translationPercentage").as(Integer.class), 100);
+        subQuery.where(criteriaBuilder.and(topicIdMatch, localeMatch, complete));
+        
+        subQuery.groupBy(root.get("translatedTopic").get("topicId"));
+        
+        return subQuery;
     }
 }

@@ -5,6 +5,7 @@ import java.util.List;
 
 import javax.persistence.EntityManager;
 
+import org.jboss.pressgang.ccms.model.IntegerConstants;
 import org.jboss.pressgang.ccms.rest.v1.collections.RESTIntegerConstantCollectionV1;
 import org.jboss.pressgang.ccms.rest.v1.collections.items.RESTIntegerConstantCollectionItemV1;
 import org.jboss.pressgang.ccms.rest.v1.constants.RESTv1Constants;
@@ -12,9 +13,9 @@ import org.jboss.pressgang.ccms.rest.v1.entities.RESTIntegerConstantV1;
 import org.jboss.pressgang.ccms.rest.v1.entities.RESTStringConstantV1;
 import org.jboss.pressgang.ccms.rest.v1.entities.base.RESTBaseEntityV1;
 import org.jboss.pressgang.ccms.rest.v1.expansion.ExpandDataTrunk;
-import org.jboss.pressgang.ccms.restserver.entity.IntegerConstants;
 import org.jboss.pressgang.ccms.restserver.rest.v1.base.RESTDataObjectCollectionFactory;
 import org.jboss.pressgang.ccms.restserver.rest.v1.base.RESTDataObjectFactory;
+import org.jboss.pressgang.ccms.restserver.utils.EnversUtilities;
 
 public class IntegerConstantV1Factory
         extends
@@ -24,7 +25,7 @@ public class IntegerConstantV1Factory
     }
 
     @Override
-    public RESTIntegerConstantV1 createRESTEntityFromDBEntity(final IntegerConstants entity, final String baseUrl,
+    public RESTIntegerConstantV1 createRESTEntityFromDBEntityInternal(final IntegerConstants entity, final String baseUrl,
             final String dataType, final ExpandDataTrunk expand, final Number revision, final boolean expandParentReferences,
             final EntityManager entityManager) {
         assert entity != null : "Parameter topic can not be null";
@@ -46,12 +47,10 @@ public class IntegerConstantV1Factory
         if (revision == null) {
             retValue.setRevisions(new RESTDataObjectCollectionFactory<RESTIntegerConstantV1, IntegerConstants, RESTIntegerConstantCollectionV1, RESTIntegerConstantCollectionItemV1>()
                     .create(RESTIntegerConstantCollectionV1.class, new IntegerConstantV1Factory(), entity,
-                            entity.getRevisions(entityManager), RESTBaseEntityV1.REVISIONS_NAME, dataType, expand, baseUrl, entityManager));
+                            EnversUtilities.getRevisions(entityManager, entity), RESTBaseEntityV1.REVISIONS_NAME, dataType, expand, baseUrl, entityManager));
         }
 
         retValue.setLinks(baseUrl, RESTv1Constants.INTEGERCONSTANT_URL_NAME, dataType, retValue.getId());
-        retValue.setLogDetails(new LogDetailsV1Factory().create(entity, revision, RESTBaseEntityV1.LOG_DETAILS_NAME, expand,
-                dataType, baseUrl, entityManager));
 
         return retValue;
     }

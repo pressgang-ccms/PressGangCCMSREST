@@ -6,8 +6,8 @@ import javax.persistence.criteria.Predicate;
 import javax.persistence.criteria.Root;
 import javax.persistence.criteria.Subquery;
 
-import org.jboss.pressgang.ccms.restserver.entity.Topic;
-import org.jboss.pressgang.ccms.restserver.entity.TopicToTag;
+import org.jboss.pressgang.ccms.model.Topic;
+import org.jboss.pressgang.ccms.model.TopicToTag;
 import org.jboss.pressgang.ccms.restserver.filter.base.BaseTopicFilterQueryBuilder;
 import org.jboss.pressgang.ccms.utils.constants.CommonConstants;
 

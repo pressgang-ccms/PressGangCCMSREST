@@ -8,9 +8,9 @@ import javax.persistence.criteria.Predicate;
 import javax.persistence.criteria.Root;
 import javax.persistence.criteria.Subquery;
 
+import org.jboss.pressgang.ccms.model.ImageFile;
+import org.jboss.pressgang.ccms.model.LanguageImage;
 import org.jboss.pressgang.ccms.rest.v1.constants.CommonFilterConstants;
-import org.jboss.pressgang.ccms.restserver.entity.ImageFile;
-import org.jboss.pressgang.ccms.restserver.entity.LanguageImage;
 import org.jboss.pressgang.ccms.restserver.filter.base.BaseFilterQueryBuilder;
 import org.jboss.pressgang.ccms.restserver.filter.base.ILocaleFilterQueryBuilder;
 import org.jboss.pressgang.ccms.restserver.utils.EntityUtilities;
