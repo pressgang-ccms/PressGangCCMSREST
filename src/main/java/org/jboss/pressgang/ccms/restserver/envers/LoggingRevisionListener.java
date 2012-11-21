@@ -1,4 +1,4 @@
-package org.jboss.pressgang.ccms.restserver.entity.base;
+package org.jboss.pressgang.ccms.restserver.envers;
 
 import java.util.Set;
 

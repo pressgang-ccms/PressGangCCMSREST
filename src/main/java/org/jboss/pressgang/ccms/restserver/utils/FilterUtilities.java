@@ -9,15 +9,15 @@ import javax.persistence.criteria.CriteriaBuilder;
 import javax.persistence.criteria.CriteriaQuery;
 import javax.persistence.criteria.Predicate;
 
+import org.jboss.pressgang.ccms.model.Category;
+import org.jboss.pressgang.ccms.model.Filter;
+import org.jboss.pressgang.ccms.model.FilterCategory;
+import org.jboss.pressgang.ccms.model.FilterField;
+import org.jboss.pressgang.ccms.model.FilterLocale;
+import org.jboss.pressgang.ccms.model.FilterTag;
+import org.jboss.pressgang.ccms.model.Project;
+import org.jboss.pressgang.ccms.model.Tag;
 import org.jboss.pressgang.ccms.rest.v1.constants.CommonFilterConstants;
-import org.jboss.pressgang.ccms.restserver.entity.Category;
-import org.jboss.pressgang.ccms.restserver.entity.Filter;
-import org.jboss.pressgang.ccms.restserver.entity.FilterCategory;
-import org.jboss.pressgang.ccms.restserver.entity.FilterField;
-import org.jboss.pressgang.ccms.restserver.entity.FilterLocale;
-import org.jboss.pressgang.ccms.restserver.entity.FilterTag;
-import org.jboss.pressgang.ccms.restserver.entity.Project;
-import org.jboss.pressgang.ccms.restserver.entity.Tag;
 import org.jboss.pressgang.ccms.restserver.filter.base.IFilterQueryBuilder;
 import org.jboss.pressgang.ccms.restserver.filter.base.ILocaleFilterQueryBuilder;
 import org.jboss.pressgang.ccms.restserver.filter.base.ITagFilterQueryBuilder;
@@ -180,6 +180,9 @@ public class FilterUtilities {
     {
         if (filterQueryBuilder == null)
             return null;
+        
+        // Reset the query builder to ensure it hasn't got any conditions set
+        filterQueryBuilder.reset();
 
         // the categories to be ANDed will be added to this string
         final List<Predicate> andQueryBlock = new ArrayList<Predicate>();
@@ -289,7 +292,7 @@ public class FilterUtilities {
                         final Predicate categoryBlock;
                         if (categoryBlocks.size() > 1) {
                             final Predicate[] catBlockArray = categoryBlocks.toArray(new Predicate[categoryBlocks.size()]);
-                            if (catInternalLogic.equals(Constants.OR_LOGIC))
+                            if (catInternalLogic.equalsIgnoreCase(Constants.OR_LOGIC))
                             {
                                 categoryBlock = queryBuilder.or(catBlockArray);
                             }
@@ -302,7 +305,7 @@ public class FilterUtilities {
                         }
     
                         // append this clause to the appropriate block
-                        if (catExternalLogic.equals(Constants.AND_LOGIC))
+                        if (catExternalLogic.equalsIgnoreCase(Constants.AND_LOGIC))
                         {
                             andQueryBlock.add(categoryBlock);
                         }

@@ -1,6 +1,6 @@
 package org.jboss.pressgang.ccms.restserver.rest.v1;
 
-import org.jboss.pressgang.ccms.restserver.entity.contentspec.CSNodeToPropertyTag;
+import org.jboss.pressgang.ccms.model.contentspec.CSNodeToPropertyTag;
 import org.jboss.pressgang.ccms.restserver.rest.v1.base.BaseAssignedPropertyTagV1Factory;
 
 public class CSNodePropertyTagV1Factory extends

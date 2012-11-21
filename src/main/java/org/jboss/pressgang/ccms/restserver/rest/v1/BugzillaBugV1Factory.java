@@ -5,14 +5,15 @@ import java.util.List;
 
 import javax.persistence.EntityManager;
 
+import org.jboss.pressgang.ccms.model.BugzillaBug;
 import org.jboss.pressgang.ccms.rest.v1.collections.RESTBugzillaBugCollectionV1;
 import org.jboss.pressgang.ccms.rest.v1.collections.items.RESTBugzillaBugCollectionItemV1;
 import org.jboss.pressgang.ccms.rest.v1.entities.RESTBugzillaBugV1;
 import org.jboss.pressgang.ccms.rest.v1.entities.base.RESTBaseEntityV1;
 import org.jboss.pressgang.ccms.rest.v1.expansion.ExpandDataTrunk;
-import org.jboss.pressgang.ccms.restserver.entity.BugzillaBug;
 import org.jboss.pressgang.ccms.restserver.rest.v1.base.RESTDataObjectCollectionFactory;
 import org.jboss.pressgang.ccms.restserver.rest.v1.base.RESTDataObjectFactory;
+import org.jboss.pressgang.ccms.restserver.utils.EnversUtilities;
 
 
 class BugzillaBugV1Factory extends
@@ -23,7 +24,7 @@ class BugzillaBugV1Factory extends
     }
 
     @Override
-    public RESTBugzillaBugV1 createRESTEntityFromDBEntity(final BugzillaBug entity, final String baseUrl, String dataType,
+    public RESTBugzillaBugV1 createRESTEntityFromDBEntityInternal(final BugzillaBug entity, final String baseUrl, String dataType,
             final ExpandDataTrunk expand, final Number revision, final boolean expandParentReferences,
             final EntityManager entityManager) {
         assert entity != null : "Parameter entity can not be null";
@@ -45,12 +46,9 @@ class BugzillaBugV1Factory extends
         // REVISIONS
         if (revision == null) {
             retValue.setRevisions(new RESTDataObjectCollectionFactory<RESTBugzillaBugV1, BugzillaBug, RESTBugzillaBugCollectionV1, RESTBugzillaBugCollectionItemV1>()
-                    .create(RESTBugzillaBugCollectionV1.class, new BugzillaBugV1Factory(), entity, entity.getRevisions(entityManager),
+                    .create(RESTBugzillaBugCollectionV1.class, new BugzillaBugV1Factory(), entity, EnversUtilities.getRevisions(entityManager, entity),
                             RESTBaseEntityV1.REVISIONS_NAME, dataType, expand, baseUrl, entityManager));
         }
-
-        retValue.setLogDetails(new LogDetailsV1Factory().create(entity, revision, RESTBaseEntityV1.LOG_DETAILS_NAME, expand,
-                dataType, baseUrl, entityManager));
 
         return retValue;
     }

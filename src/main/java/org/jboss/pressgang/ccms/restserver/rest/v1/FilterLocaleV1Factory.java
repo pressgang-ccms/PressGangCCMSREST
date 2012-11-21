@@ -5,6 +5,8 @@ import java.util.List;
 
 import javax.persistence.EntityManager;
 
+import org.jboss.pressgang.ccms.model.Filter;
+import org.jboss.pressgang.ccms.model.FilterLocale;
 import org.jboss.pressgang.ccms.rest.v1.collections.RESTFilterLocaleCollectionV1;
 import org.jboss.pressgang.ccms.rest.v1.collections.items.RESTFilterLocaleCollectionItemV1;
 import org.jboss.pressgang.ccms.rest.v1.entities.RESTFilterLocaleV1;
@@ -12,11 +14,9 @@ import org.jboss.pressgang.ccms.rest.v1.entities.RESTFilterV1;
 import org.jboss.pressgang.ccms.rest.v1.entities.base.RESTBaseEntityV1;
 import org.jboss.pressgang.ccms.rest.v1.exceptions.InvalidParameterException;
 import org.jboss.pressgang.ccms.rest.v1.expansion.ExpandDataTrunk;
-import org.jboss.pressgang.ccms.restserver.entity.Filter;
-import org.jboss.pressgang.ccms.restserver.entity.FilterLocale;
 import org.jboss.pressgang.ccms.restserver.rest.v1.base.RESTDataObjectCollectionFactory;
 import org.jboss.pressgang.ccms.restserver.rest.v1.base.RESTDataObjectFactory;
-
+import org.jboss.pressgang.ccms.restserver.utils.EnversUtilities;
 
 public class FilterLocaleV1Factory extends
         RESTDataObjectFactory<RESTFilterLocaleV1, FilterLocale, RESTFilterLocaleCollectionV1, RESTFilterLocaleCollectionItemV1> {
@@ -26,7 +26,7 @@ public class FilterLocaleV1Factory extends
     }
 
     @Override
-    public RESTFilterLocaleV1 createRESTEntityFromDBEntity(final FilterLocale entity, final String baseUrl,
+    public RESTFilterLocaleV1 createRESTEntityFromDBEntityInternal(final FilterLocale entity, final String baseUrl,
             final String dataType, final ExpandDataTrunk expand, final Number revision, boolean expandParentReferences,
             final EntityManager entityManager) {
         assert entity != null : "Parameter filterLocale can not be null";
@@ -48,7 +48,7 @@ public class FilterLocaleV1Factory extends
         // REVISIONS
         if (revision == null) {
             retValue.setRevisions(new RESTDataObjectCollectionFactory<RESTFilterLocaleV1, FilterLocale, RESTFilterLocaleCollectionV1, RESTFilterLocaleCollectionItemV1>()
-                    .create(RESTFilterLocaleCollectionV1.class, new FilterLocaleV1Factory(), entity, entity.getRevisions(entityManager),
+                    .create(RESTFilterLocaleCollectionV1.class, new FilterLocaleV1Factory(), entity, EnversUtilities.getRevisions(entityManager, entity),
                             RESTBaseEntityV1.REVISIONS_NAME, dataType, expand, baseUrl, entityManager));
         }
 
@@ -56,9 +56,6 @@ public class FilterLocaleV1Factory extends
             retValue.setFilter(new FilterV1Factory().createRESTEntityFromDBEntity(entity.getFilter(), baseUrl, dataType,
                     expand.get(RESTFilterLocaleV1.FILTER_NAME), revision, expandParentReferences, entityManager));
         }
-
-        retValue.setLogDetails(new LogDetailsV1Factory().create(entity, revision, RESTBaseEntityV1.LOG_DETAILS_NAME, expand,
-                dataType, baseUrl, entityManager));
 
         return retValue;
     }

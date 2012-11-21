@@ -5,6 +5,9 @@ import java.util.List;
 
 import javax.persistence.EntityManager;
 
+import org.jboss.pressgang.ccms.model.Category;
+import org.jboss.pressgang.ccms.model.FilterCategory;
+import org.jboss.pressgang.ccms.model.Project;
 import org.jboss.pressgang.ccms.rest.v1.collections.RESTFilterCategoryCollectionV1;
 import org.jboss.pressgang.ccms.rest.v1.collections.items.RESTFilterCategoryCollectionItemV1;
 import org.jboss.pressgang.ccms.rest.v1.entities.RESTCategoryV1;
@@ -13,12 +16,9 @@ import org.jboss.pressgang.ccms.rest.v1.entities.RESTProjectV1;
 import org.jboss.pressgang.ccms.rest.v1.entities.base.RESTBaseEntityV1;
 import org.jboss.pressgang.ccms.rest.v1.exceptions.InvalidParameterException;
 import org.jboss.pressgang.ccms.rest.v1.expansion.ExpandDataTrunk;
-import org.jboss.pressgang.ccms.restserver.entity.Category;
-import org.jboss.pressgang.ccms.restserver.entity.FilterCategory;
-import org.jboss.pressgang.ccms.restserver.entity.Project;
 import org.jboss.pressgang.ccms.restserver.rest.v1.base.RESTDataObjectCollectionFactory;
 import org.jboss.pressgang.ccms.restserver.rest.v1.base.RESTDataObjectFactory;
-
+import org.jboss.pressgang.ccms.restserver.utils.EnversUtilities;
 
 public class FilterCategoryV1Factory
         extends
@@ -29,7 +29,7 @@ public class FilterCategoryV1Factory
     }
 
     @Override
-    public RESTFilterCategoryV1 createRESTEntityFromDBEntity(final FilterCategory entity, final String baseUrl,
+    public RESTFilterCategoryV1 createRESTEntityFromDBEntityInternal(final FilterCategory entity, final String baseUrl,
             final String dataType, final ExpandDataTrunk expand, final Number revision, boolean expandParentReferences,
             final EntityManager entityManager) {
         assert entity != null : "Parameter filterCategory can not be null";
@@ -52,7 +52,7 @@ public class FilterCategoryV1Factory
         // REVISIONS
         if (revision == null) {
             retValue.setRevisions(new RESTDataObjectCollectionFactory<RESTFilterCategoryV1, FilterCategory, RESTFilterCategoryCollectionV1, RESTFilterCategoryCollectionItemV1>()
-                    .create(RESTFilterCategoryCollectionV1.class, new FilterCategoryV1Factory(), entity, entity.getRevisions(entityManager),
+                    .create(RESTFilterCategoryCollectionV1.class, new FilterCategoryV1Factory(), entity, EnversUtilities.getRevisions(entityManager, entity),
                             RESTBaseEntityV1.REVISIONS_NAME, dataType, expand, baseUrl, entityManager));
         }
 
@@ -70,9 +70,6 @@ public class FilterCategoryV1Factory
         if (expand != null && expand.contains(RESTFilterCategoryV1.PROJECT_NAME) && entity.getProject() != null)
             retValue.setProject(new ProjectV1Factory().createRESTEntityFromDBEntity(entity.getProject(), baseUrl, dataType,
                     expand.get(RESTFilterCategoryV1.PROJECT_NAME), revision, expandParentReferences, entityManager));
-
-        retValue.setLogDetails(new LogDetailsV1Factory().create(entity, revision, RESTBaseEntityV1.LOG_DETAILS_NAME, expand,
-                dataType, baseUrl, entityManager));
 
         return retValue;
     }

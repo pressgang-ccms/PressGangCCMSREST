@@ -20,7 +20,8 @@ import org.apache.commons.lang.StringUtils;
 /**
  * Utility class for dealing with JPA API.
  * 
- * Edited to fix an issue with copying CriteriaQuery's where no where clause exists.
+ * Edited to fix an issue with copying CriteriaQuery's where no where clause exists. And for using the wring method in the
+ * getJoinedType() method.
  * 
  * @author Jose Luis Martin
  * @since 1.1
@@ -118,12 +119,25 @@ public abstract class JPAUtils {
      * @param joinClass the join class
      * @return the Join
      */
-    @SuppressWarnings("unchecked")
     public static <T, K> Join<T, K> findJoinedType(CriteriaQuery<T> query, Class<T> rootClass, Class<K> joinClass) {
         Root<T> root = findRoot(query, rootClass);
+        return findJoinedType(root, rootClass, joinClass);
+    }
+    
+    /**
+     * Find Joined Root of type clazz
+     * 
+     * @param <T>
+     * @param query the criteria query
+     * @param rootClass the root class
+     * @param joinClass the join class
+     * @return the Join
+     */
+    @SuppressWarnings("unchecked")
+    public static <T, K> Join<T, K> findJoinedType(Root<T> root, Class<T> rootClass, Class<K> joinClass) {
         Join<T, K> join = null;
         for (Join<T, ?> j : root.getJoins()) {
-            if (j.getJoinType().equals(joinClass)) {
+            if (j.getJavaType().equals(joinClass)) {
                 join = (Join<T, K>) j;
             }
         }
