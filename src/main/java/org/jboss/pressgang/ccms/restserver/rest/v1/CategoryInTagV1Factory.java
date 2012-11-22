@@ -5,6 +5,7 @@ import java.util.List;
 
 import javax.persistence.EntityManager;
 
+import org.jboss.pressgang.ccms.model.TagToCategory;
 import org.jboss.pressgang.ccms.rest.v1.collections.items.join.RESTCategoryInTagCollectionItemV1;
 import org.jboss.pressgang.ccms.rest.v1.collections.items.join.RESTTagInCategoryCollectionItemV1;
 import org.jboss.pressgang.ccms.rest.v1.collections.join.RESTCategoryInTagCollectionV1;
@@ -14,9 +15,9 @@ import org.jboss.pressgang.ccms.rest.v1.entities.base.RESTBaseEntityV1;
 import org.jboss.pressgang.ccms.rest.v1.entities.join.RESTCategoryInTagV1;
 import org.jboss.pressgang.ccms.rest.v1.entities.join.RESTTagInCategoryV1;
 import org.jboss.pressgang.ccms.rest.v1.expansion.ExpandDataTrunk;
-import org.jboss.pressgang.ccms.restserver.entity.TagToCategory;
 import org.jboss.pressgang.ccms.restserver.rest.v1.base.RESTDataObjectCollectionFactory;
 import org.jboss.pressgang.ccms.restserver.rest.v1.base.RESTDataObjectFactory;
+import org.jboss.pressgang.ccms.restserver.utils.EnversUtilities;
 
 public class CategoryInTagV1Factory
         extends
@@ -27,7 +28,7 @@ public class CategoryInTagV1Factory
     }
 
     @Override
-    public RESTCategoryInTagV1 createRESTEntityFromDBEntity(final TagToCategory entity, final String baseUrl,
+    public RESTCategoryInTagV1 createRESTEntityFromDBEntityInternal(final TagToCategory entity, final String baseUrl,
             final String dataType, final ExpandDataTrunk expand, final Number revision, final boolean expandParentReferences,
             final EntityManager entityManager) {
         assert entity != null : "Parameter entity can not be null";
@@ -54,7 +55,7 @@ public class CategoryInTagV1Factory
         // REVISIONS
         if (revision == null) {
             retValue.setRevisions(new RESTDataObjectCollectionFactory<RESTCategoryInTagV1, TagToCategory, RESTCategoryInTagCollectionV1, RESTCategoryInTagCollectionItemV1>()
-                    .create(RESTCategoryInTagCollectionV1.class, new CategoryInTagV1Factory(), entity, entity.getRevisions(entityManager),
+                    .create(RESTCategoryInTagCollectionV1.class, new CategoryInTagV1Factory(), entity, EnversUtilities.getRevisions(entityManager, entity),
                             RESTBaseEntityV1.REVISIONS_NAME, dataType, expand, baseUrl, entityManager));
         }
         
@@ -64,8 +65,6 @@ public class CategoryInTagV1Factory
                         .getTagToCategoriesArray(), RESTv1Constants.TAGS_EXPANSION_NAME, dataType, expand, baseUrl, entityManager));
 
         retValue.setLinks(baseUrl, RESTv1Constants.CATEGORY_URL_NAME, dataType, retValue.getId());
-        retValue.setLogDetails(new LogDetailsV1Factory().create(entity, revision, RESTBaseEntityV1.LOG_DETAILS_NAME, expand,
-                dataType, baseUrl, entityManager));
 
         return retValue;
     }

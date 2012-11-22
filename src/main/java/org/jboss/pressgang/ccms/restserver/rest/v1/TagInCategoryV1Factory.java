@@ -5,6 +5,10 @@ import java.util.List;
 
 import javax.persistence.EntityManager;
 
+import org.jboss.pressgang.ccms.model.Project;
+import org.jboss.pressgang.ccms.model.Tag;
+import org.jboss.pressgang.ccms.model.TagToCategory;
+import org.jboss.pressgang.ccms.model.TagToPropertyTag;
 import org.jboss.pressgang.ccms.rest.v1.collections.RESTProjectCollectionV1;
 import org.jboss.pressgang.ccms.rest.v1.collections.RESTTagCollectionV1;
 import org.jboss.pressgang.ccms.rest.v1.collections.items.RESTProjectCollectionItemV1;
@@ -23,12 +27,9 @@ import org.jboss.pressgang.ccms.rest.v1.entities.join.RESTAssignedPropertyTagV1;
 import org.jboss.pressgang.ccms.rest.v1.entities.join.RESTCategoryInTagV1;
 import org.jboss.pressgang.ccms.rest.v1.entities.join.RESTTagInCategoryV1;
 import org.jboss.pressgang.ccms.rest.v1.expansion.ExpandDataTrunk;
-import org.jboss.pressgang.ccms.restserver.entity.Project;
-import org.jboss.pressgang.ccms.restserver.entity.Tag;
-import org.jboss.pressgang.ccms.restserver.entity.TagToCategory;
-import org.jboss.pressgang.ccms.restserver.entity.TagToPropertyTag;
 import org.jboss.pressgang.ccms.restserver.rest.v1.base.RESTDataObjectCollectionFactory;
 import org.jboss.pressgang.ccms.restserver.rest.v1.base.RESTDataObjectFactory;
+import org.jboss.pressgang.ccms.restserver.utils.EnversUtilities;
 
 /**
  * This factory is used when creating a collection of Categories for a Tag. It will populate the sort property, which is left
@@ -43,7 +44,7 @@ public class TagInCategoryV1Factory
     }
 
     @Override
-    public RESTTagInCategoryV1 createRESTEntityFromDBEntity(final TagToCategory entity, final String baseUrl, String dataType,
+    public RESTTagInCategoryV1 createRESTEntityFromDBEntityInternal(final TagToCategory entity, final String baseUrl, String dataType,
             final ExpandDataTrunk expand, final Number revision, final boolean expandParentReferences,
             final EntityManager entityManager) {
         assert entity != null : "Parameter entity can not be null";
@@ -73,7 +74,7 @@ public class TagInCategoryV1Factory
         // REVISIONS
         if (revision == null) {
             retValue.setRevisions(new RESTDataObjectCollectionFactory<RESTTagInCategoryV1, TagToCategory, RESTTagInCategoryCollectionV1, RESTTagInCategoryCollectionItemV1>()
-                    .create(RESTTagInCategoryCollectionV1.class, new TagInCategoryV1Factory(), entity, entity.getRevisions(entityManager),
+                    .create(RESTTagInCategoryCollectionV1.class, new TagInCategoryV1Factory(), entity, EnversUtilities.getRevisions(entityManager, entity),
                             RESTBaseEntityV1.REVISIONS_NAME, dataType, expand, baseUrl, entityManager));
         }
 
@@ -103,8 +104,6 @@ public class TagInCategoryV1Factory
                         RESTTagV1.PROJECTS_NAME, dataType, expand, baseUrl, entityManager));
 
         retValue.setLinks(baseUrl, RESTv1Constants.TAG_URL_NAME, dataType, retValue.getId());
-        retValue.setLogDetails(new LogDetailsV1Factory().create(entity, revision, RESTBaseEntityV1.LOG_DETAILS_NAME, expand,
-                dataType, baseUrl, entityManager));
 
         return retValue;
     }

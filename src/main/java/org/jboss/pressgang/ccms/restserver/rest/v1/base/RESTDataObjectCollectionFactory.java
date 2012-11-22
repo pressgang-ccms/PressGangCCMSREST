@@ -4,12 +4,13 @@ import java.util.List;
 
 import javax.persistence.EntityManager;
 
+import org.jboss.pressgang.ccms.model.base.AuditedEntity;
 import org.jboss.pressgang.ccms.rest.v1.collections.base.RESTBaseCollectionItemV1;
 import org.jboss.pressgang.ccms.rest.v1.collections.base.RESTBaseCollectionV1;
 import org.jboss.pressgang.ccms.rest.v1.entities.base.RESTBaseEntityV1;
 import org.jboss.pressgang.ccms.rest.v1.expansion.ExpandDataDetails;
 import org.jboss.pressgang.ccms.rest.v1.expansion.ExpandDataTrunk;
-import org.jboss.pressgang.ccms.restserver.entity.base.AuditedEntity;
+import org.jboss.pressgang.ccms.restserver.utils.EnversUtilities;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -217,9 +218,8 @@ public class RESTDataObjectCollectionFactory<T extends RESTBaseEntityV1<T, V, W>
                              * This means that we only have to request the list of revision numbers (supplied to us via the
                              * revisions parameter) instead of having to request every revision.
                              */
-                            final AuditedEntity<U> parentAuditedEntity = (AuditedEntity<U>) parent;
                             revision = revisions.get(i);
-                            dbEntity = parentAuditedEntity.getRevision(entityManager, revision);
+                            dbEntity = EnversUtilities.getRevision(entityManager, parent, revision);
 
                         } else {
                             dbEntity = entities.get(i);
@@ -229,11 +229,6 @@ public class RESTDataObjectCollectionFactory<T extends RESTBaseEntityV1<T, V, W>
                         if (dbEntity != null) {
                             final T restEntity = dataObjectFactory.createRESTEntityFromDBEntity(dbEntity, baseUrl, dataType,
                                     expand, revision, expandParentReferences, entityManager);
-
-                            // If the entity relates to a revision, copy that data across
-                            if (usingRevisions) {
-                                restEntity.setRevision(revisions.get(i).intValue());
-                            }
 
                             // Add the item to the return value
                             retValue.addItem(restEntity);

@@ -7,9 +7,9 @@ import javax.persistence.criteria.Root;
 import javax.persistence.criteria.Subquery;
 
 import org.jboss.pressgang.ccms.utils.constants.CommonConstants;
+import org.jboss.pressgang.ccms.model.TopicToTag;
+import org.jboss.pressgang.ccms.model.contentspec.ContentSpec;
 import org.jboss.pressgang.ccms.rest.v1.constants.CommonFilterConstants;
-import org.jboss.pressgang.ccms.restserver.entity.TopicToTag;
-import org.jboss.pressgang.ccms.restserver.entity.contentspec.ContentSpec;
 import org.jboss.pressgang.ccms.restserver.filter.base.BaseFilterQueryBuilder;
 import org.jboss.pressgang.ccms.restserver.filter.base.ILocaleFilterQueryBuilder;
 import org.jboss.pressgang.ccms.restserver.filter.base.ITagFilterQueryBuilder;

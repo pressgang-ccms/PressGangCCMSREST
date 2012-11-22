@@ -5,6 +5,8 @@ import java.util.List;
 
 import javax.persistence.EntityManager;
 
+import org.jboss.pressgang.ccms.model.contentspec.CSTranslatedString;
+import org.jboss.pressgang.ccms.model.contentspec.ContentSpecToCSMetaData;
 import org.jboss.pressgang.ccms.rest.v1.collections.contentspec.RESTCSTranslatedStringCollectionV1;
 import org.jboss.pressgang.ccms.rest.v1.collections.contentspec.items.RESTCSTranslatedStringCollectionItemV1;
 import org.jboss.pressgang.ccms.rest.v1.collections.contentspec.items.join.RESTAssignedCSMetaDataCollectionItemV1;
@@ -16,10 +18,9 @@ import org.jboss.pressgang.ccms.rest.v1.entities.contentspec.RESTCSTranslatedStr
 import org.jboss.pressgang.ccms.rest.v1.entities.contentspec.join.RESTAssignedCSMetaDataV1;
 import org.jboss.pressgang.ccms.rest.v1.exceptions.InvalidParameterException;
 import org.jboss.pressgang.ccms.rest.v1.expansion.ExpandDataTrunk;
-import org.jboss.pressgang.ccms.restserver.entity.contentspec.CSTranslatedString;
-import org.jboss.pressgang.ccms.restserver.entity.contentspec.ContentSpecToCSMetaData;
 import org.jboss.pressgang.ccms.restserver.rest.v1.base.RESTDataObjectCollectionFactory;
 import org.jboss.pressgang.ccms.restserver.rest.v1.base.RESTDataObjectFactory;
+import org.jboss.pressgang.ccms.restserver.utils.EnversUtilities;
 
 public class ContentSpecMetaDataV1Factory
         extends
@@ -30,7 +31,7 @@ public class ContentSpecMetaDataV1Factory
     }
 
     @Override
-    public RESTAssignedCSMetaDataV1 createRESTEntityFromDBEntity(final ContentSpecToCSMetaData entity, final String baseUrl,
+    public RESTAssignedCSMetaDataV1 createRESTEntityFromDBEntityInternal(final ContentSpecToCSMetaData entity, final String baseUrl,
             final String dataType, final ExpandDataTrunk expand, final Number revision, final boolean expandParentReferences,
             final EntityManager entityManager) {
         assert entity != null : "Parameter entity can not be null";
@@ -55,7 +56,7 @@ public class ContentSpecMetaDataV1Factory
         if (revision == null) {
             retValue.setRevisions(new RESTDataObjectCollectionFactory<RESTAssignedCSMetaDataV1, ContentSpecToCSMetaData, RESTAssignedCSMetaDataCollectionV1, RESTAssignedCSMetaDataCollectionItemV1>()
                     .create(RESTAssignedCSMetaDataCollectionV1.class, new ContentSpecMetaDataV1Factory(), entity,
-                            entity.getRevisions(entityManager), RESTBaseEntityV1.REVISIONS_NAME, dataType, expand, baseUrl,
+                            EnversUtilities.getRevisions(entityManager, entity), RESTBaseEntityV1.REVISIONS_NAME, dataType, expand, baseUrl,
                             entityManager));
         }
 
@@ -66,8 +67,6 @@ public class ContentSpecMetaDataV1Factory
                         expand, baseUrl, false, entityManager));
 
         retValue.setLinks(baseUrl, RESTv1Constants.CONTENT_SPEC_META_DATA_URL_NAME, dataType, retValue.getId());
-        retValue.setLogDetails(new LogDetailsV1Factory().create(entity, revision, RESTBaseEntityV1.LOG_DETAILS_NAME, expand,
-                dataType, baseUrl, entityManager));
 
         return retValue;
     }

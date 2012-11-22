@@ -4,8 +4,8 @@ import java.util.List;
 
 import javax.persistence.EntityManager;
 import org.jboss.pressgang.ccms.utils.constants.CommonConstants;
+import org.jboss.pressgang.ccms.model.Tag;
 import org.jboss.pressgang.ccms.rest.v1.constants.CommonFilterConstants;
-import org.jboss.pressgang.ccms.restserver.entity.Tag;
 import org.jboss.pressgang.ccms.restserver.filter.base.BaseFilterQueryBuilder;
 import org.jboss.pressgang.ccms.restserver.utils.EntityUtilities;
 import org.slf4j.Logger;

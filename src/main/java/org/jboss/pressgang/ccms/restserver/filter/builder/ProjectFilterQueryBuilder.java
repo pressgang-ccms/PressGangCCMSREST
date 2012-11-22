@@ -2,8 +2,8 @@ package org.jboss.pressgang.ccms.restserver.filter.builder;
 
 import javax.persistence.EntityManager;
 
+import org.jboss.pressgang.ccms.model.Project;
 import org.jboss.pressgang.ccms.rest.v1.constants.CommonFilterConstants;
-import org.jboss.pressgang.ccms.restserver.entity.Project;
 import org.jboss.pressgang.ccms.restserver.filter.base.BaseFilterQueryBuilder;
 
 public class ProjectFilterQueryBuilder extends BaseFilterQueryBuilder<Project>
