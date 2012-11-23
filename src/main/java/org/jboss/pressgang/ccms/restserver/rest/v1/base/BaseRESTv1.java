@@ -1045,9 +1045,9 @@ public class BaseRESTv1 {
     protected RESTLogDetailsV1 generateLogDetails(final String message, final Integer flag, final Integer userId) {
         final RESTLogDetailsV1 logDetails = new RESTLogDetailsV1();
 
-        if (message != null)
-            logDetails.explicitSetFlag(flag);
         if (flag != null)
+            logDetails.explicitSetFlag(flag);
+        if (message != null)
             logDetails.explicitSetMessage(message);
         if (userId != null) {
             final RESTUserV1 user = new RESTUserV1();
