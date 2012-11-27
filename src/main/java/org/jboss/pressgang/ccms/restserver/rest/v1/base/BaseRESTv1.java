@@ -857,6 +857,34 @@ public class BaseRESTv1 {
 
         return entity;
     }
+    
+    protected <U extends AuditedEntity<U>> U getEntity(final Class<U> type, final Object id, final Integer revision) throws InternalProcessingException {
+        final EntityManager entityManager = getEntityManager();
+        final U entity;
+        
+        if (revision != null) {
+            // Find the closest revision that is less then the revision specified.
+            final AuditReader reader = AuditReaderFactory.get(entityManager);
+            final Number closestRevision = (Number) reader.createQuery().forRevisionsOfEntity(type, false, true)
+                    .addProjection(AuditEntity.revisionNumber().max()).add(AuditEntity.id().eq(id))
+                    .add(AuditEntity.revisionNumber().le(revision)).getSingleResult();
+
+            // Get the Revision Entity using an envers lookup.
+            entity = reader.find(type, id, closestRevision);
+            
+            if (entity == null)
+                throw new BadRequestException("No entity was found with the primary key " + id);
+
+            // Set the entities last modified date to the information assoicated with the revision.
+            final Date revisionLastModified = reader.getRevisionDate(closestRevision);
+            entity.setLastModifiedDate(revisionLastModified);
+        } else {
+            entity = entityManager.find(type, id);
+            if (entity == null)
+                throw new BadRequestException("No entity was found with the primary key " + id);
+        }
+        return entity;
+    }
 
     protected <T extends RESTBaseEntityV1<T, V, W>, U extends AuditedEntity<U>, V extends RESTBaseCollectionV1<T, V, W>, W extends RESTBaseCollectionItemV1<T, V, W>> V getXMLResources(
             final Class<V> collectionClass, final Class<U> type, final RESTDataObjectFactory<T, U, V, W> dataObjectFactory,
@@ -1042,7 +1070,7 @@ public class BaseRESTv1 {
      * @param userId The ID of the user who has made the changes.
      * @return A pre-populated RESTLogDetailsV1 object.
      */
-    protected RESTLogDetailsV1 generateLogDetails(final String message, final Integer flag, final Integer userId) {
+    protected RESTLogDetailsV1 generateLogDetails(final String message, final Integer flag, final String userId) {
         final RESTLogDetailsV1 logDetails = new RESTLogDetailsV1();
 
         if (flag != null)
@@ -1050,9 +1078,27 @@ public class BaseRESTv1 {
         if (message != null)
             logDetails.explicitSetMessage(message);
         if (userId != null) {
-            final RESTUserV1 user = new RESTUserV1();
-            user.setId(userId);
-            logDetails.explicitSetUser(user);
+            
+            if (userId.matches("^\\d+$")) {
+                final RESTUserV1 user = new RESTUserV1();
+                user.setId(Integer.parseInt(userId));
+                logDetails.explicitSetUser(user);
+            } else {
+                EntityManager entityManager = null;
+                try {
+                    entityManager = getEntityManager();
+                    final RESTUserV1 user = new RESTUserV1();
+                    final User userEntity = EntityUtilities.getUserFromUsername(entityManager, userId);
+                    user.setId(userEntity.getId());
+                    logDetails.explicitSetUser(user);
+                } catch (InternalProcessingException e) {
+                    
+                } finally {
+                    if (entityManager != null) {
+                        entityManager.close();
+                    }
+                }
+            }
         }
 
         return logDetails;

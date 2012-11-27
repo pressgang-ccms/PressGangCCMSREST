@@ -528,6 +528,9 @@ CREATE TABLE IF NOT EXISTS `ContentSpecToTag_AUD` (
 CREATE TABLE IF NOT EXISTS `ContentSpecTranslatedString` (
   `ContentSpecTranslatedStringID` int(11) NOT NULL AUTO_INCREMENT,
   `Locale` varchar(255) NOT NULL,
+  `FuzzyTranslation` bit(1) DEFAULT NULL,
+  `OriginalString` text,
+  `TranslatedString` text,
   PRIMARY KEY (`ContentSpecTranslatedStringID`),
   UNIQUE KEY `ContentSpecTranslatedStringID` (`ContentSpecTranslatedStringID`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
@@ -544,6 +547,9 @@ CREATE TABLE IF NOT EXISTS `ContentSpecTranslatedString_AUD` (
   `REVTYPE` tinyint(4) DEFAULT NULL,
   `REVEND` int(11) DEFAULT NULL,
   `Locale` varchar(255) DEFAULT NULL,
+  `FuzzyTranslation` bit(1) DEFAULT NULL,
+  `OriginalString` text,
+  `TranslatedString` text,
   PRIMARY KEY (`ContentSpecTranslatedStringID`,`REV`),
   KEY `FKF97154ACD25E3A3B` (`REVEND`),
   KEY `FKF97154ACA110986` (`REV`)
@@ -1875,6 +1881,7 @@ CREATE TABLE IF NOT EXISTS `Topic` (
   `TopicTimeStamp` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
   `TopicXML` mediumtext,
   `TopicLocale` varchar(255) NOT NULL,
+  `TopicXMLDoctype` int(11) DEFAULT NULL,
   PRIMARY KEY (`TopicID`),
   KEY `fk_Topic_1` (`TopicID`),
   KEY `FK4D3DD0FE2436E96` (`TopicID`)
@@ -2154,6 +2161,7 @@ CREATE TABLE IF NOT EXISTS `Topic_AUD` (
   `TopicTitle` varchar(255) DEFAULT NULL,
   `TopicXML` mediumtext,
   `TopicLocale` varchar(255) DEFAULT NULL,
+  `TopicXMLDoctype` int(11) DEFAULT NULL,
   PRIMARY KEY (`TopicID`,`REV`),
   KEY `FK8E9CEB60DF74E053` (`REV`),
   KEY `FK8E9CEB60A7C21108` (`REVEND`)
