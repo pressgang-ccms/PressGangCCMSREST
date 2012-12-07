@@ -86,10 +86,6 @@
             <version>1.0-SNAPSHOT</version>
             <exclusions>
                 <exclusion>
-                    <artifactId>resteasy-jackson-provider</artifactId>
-                    <groupId>org.jboss.resteasy</groupId>
-                </exclusion>
-                <exclusion>
                     <artifactId>resteasy-atom-provider</artifactId>
                     <groupId>org.jboss.resteasy</groupId>
                 </exclusion>
@@ -132,10 +128,6 @@
             <version>1.0-SNAPSHOT</version>
             <exclusions>
                 <exclusion>
-                    <artifactId>resteasy-jackson-provider</artifactId>
-                    <groupId>org.jboss.resteasy</groupId>
-                </exclusion>
-                <exclusion>
                     <artifactId>resteasy-atom-provider</artifactId>
                     <groupId>org.jboss.resteasy</groupId>
                 </exclusion>
@@ -152,10 +144,6 @@
             <exclusions>
                 <exclusion>
                     <artifactId>resteasy-atom-provider</artifactId>
-                    <groupId>org.jboss.resteasy</groupId>
-                </exclusion>
-                <exclusion>
-                    <artifactId>resteasy-jackson-provider</artifactId>
                     <groupId>org.jboss.resteasy</groupId>
                 </exclusion>
                 <exclusion>
