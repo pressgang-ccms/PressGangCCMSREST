@@ -16,4 +16,14 @@
         <param-name>oauth.rs.provider-class</param-name>
         <param-value>org.jboss.pressgang.belay.oauth2.resourceserver.filter.OAuth2RSProvider</param-value>
     </context-param>
+
+    <filter>
+        <filter-name>compression</filter-name>
+        <filter-class>org.jboss.pressgang.ccms.restserver.servlet.filter.GZIPCompressionFilter</filter-class>
+    </filter>
+
+    <filter-mapping>
+        <filter-name>compression</filter-name>
+        <url-pattern>/seam/resource/rest/*</url-pattern>
+    </filter-mapping>
 </web-app>

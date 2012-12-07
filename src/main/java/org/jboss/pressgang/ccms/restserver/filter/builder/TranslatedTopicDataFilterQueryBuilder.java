@@ -114,7 +114,7 @@ public class TranslatedTopicDataFilterQueryBuilder extends BaseTopicFilterQueryB
     
             // Add the condition to the field conditions
             final Predicate topicExistsCondition = criteriaBuilder.exists(topicSubquery);
-            fieldConditions.add(topicExistsCondition);
+            fieldConditions.add(0, topicExistsCondition);
         }
         
         if (fieldConditions.isEmpty()) return null;

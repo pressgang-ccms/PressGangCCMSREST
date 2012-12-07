@@ -43,7 +43,7 @@ public class CSMetaDataV1Factory extends
         retValue.setDescription(entity.getCSMetaDataDescription());
 
         // REVISIONS
-        if (revision == null) {
+        if (revision == null && expand != null && expand.contains(RESTBaseEntityV1.REVISIONS_NAME)) {
             retValue.setRevisions(new RESTDataObjectCollectionFactory<RESTCSMetaDataV1, CSMetaData, RESTCSMetaDataCollectionV1, RESTCSMetaDataCollectionItemV1>()
                     .create(RESTCSMetaDataCollectionV1.class, new CSMetaDataV1Factory(), entity, EnversUtilities.getRevisions(entityManager, entity),
                             RESTBaseEntityV1.REVISIONS_NAME, dataType, expand, baseUrl, entityManager));

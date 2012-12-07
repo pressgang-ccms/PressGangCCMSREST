@@ -28,8 +28,8 @@ public class ImageV1Factory extends
     }
 
     @Override
-    public RESTImageV1 createRESTEntityFromDBEntityInternal(final ImageFile entity, final String baseUrl, final String dataType,
-            final ExpandDataTrunk expand, final Number revision, final boolean expandParentReferences,
+    public RESTImageV1 createRESTEntityFromDBEntityInternal(final ImageFile entity, final String baseUrl,
+            final String dataType, final ExpandDataTrunk expand, final Number revision, final boolean expandParentReferences,
             final EntityManager entityManager) {
         assert entity != null : "Parameter topic can not be null";
         assert baseUrl != null : "Parameter baseUrl can not be null";
@@ -48,16 +48,19 @@ public class ImageV1Factory extends
         retValue.setDescription(entity.getDescription());
 
         // REVISIONS
-        if (revision == null) {
+        if (revision == null && expand != null && expand.contains(RESTBaseEntityV1.REVISIONS_NAME)) {
             retValue.setRevisions(new RESTDataObjectCollectionFactory<RESTImageV1, ImageFile, RESTImageCollectionV1, RESTImageCollectionItemV1>()
-                    .create(RESTImageCollectionV1.class, new ImageV1Factory(), entity, EnversUtilities.getRevisions(entityManager, entity),
-                            RESTBaseEntityV1.REVISIONS_NAME, dataType, expand, baseUrl, entityManager));
+                    .create(RESTImageCollectionV1.class, new ImageV1Factory(), entity,
+                            EnversUtilities.getRevisions(entityManager, entity), RESTBaseEntityV1.REVISIONS_NAME, dataType,
+                            expand, baseUrl, entityManager));
         }
-        
+
         // LANGUAGE IMAGES
-        retValue.setLanguageImages_OTM(new RESTDataObjectCollectionFactory<RESTLanguageImageV1, LanguageImage, RESTLanguageImageCollectionV1, RESTLanguageImageCollectionItemV1>()
-                .create(RESTLanguageImageCollectionV1.class, new LanguageImageV1Factory(), entity.getLanguageImagesArray(),
-                        RESTImageV1.LANGUAGEIMAGES_NAME, dataType, expand, baseUrl, false, entityManager));
+        if (expand != null && expand.contains(RESTImageV1.LANGUAGEIMAGES_NAME)) {
+            retValue.setLanguageImages_OTM(new RESTDataObjectCollectionFactory<RESTLanguageImageV1, LanguageImage, RESTLanguageImageCollectionV1, RESTLanguageImageCollectionItemV1>()
+                    .create(RESTLanguageImageCollectionV1.class, new LanguageImageV1Factory(), entity.getLanguageImagesArray(),
+                            RESTImageV1.LANGUAGEIMAGES_NAME, dataType, expand, baseUrl, false, entityManager));
+        }
 
         retValue.setLinks(baseUrl, RESTv1Constants.IMAGE_URL_NAME, dataType, retValue.getId());
 

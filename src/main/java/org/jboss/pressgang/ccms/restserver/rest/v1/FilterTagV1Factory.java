@@ -25,8 +25,8 @@ public class FilterTagV1Factory extends
     }
 
     @Override
-    public RESTFilterTagV1 createRESTEntityFromDBEntityInternal(final FilterTag entity, final String baseUrl, final String dataType,
-            final ExpandDataTrunk expand, final Number revision, boolean expandParentReferences,
+    public RESTFilterTagV1 createRESTEntityFromDBEntityInternal(final FilterTag entity, final String baseUrl,
+            final String dataType, final ExpandDataTrunk expand, final Number revision, boolean expandParentReferences,
             final EntityManager entityManager) {
         assert entity != null : "Parameter filterTag can not be null";
         assert baseUrl != null : "Parameter baseUrl can not be null";
@@ -45,21 +45,25 @@ public class FilterTagV1Factory extends
         retValue.setState(entity.getTagState());
 
         // REVISIONS
-        if (revision == null) {
+        if (revision == null && expand != null && expand.contains(RESTBaseEntityV1.REVISIONS_NAME)) {
             retValue.setRevisions(new RESTDataObjectCollectionFactory<RESTFilterTagV1, FilterTag, RESTFilterTagCollectionV1, RESTFilterTagCollectionItemV1>()
-                    .create(RESTFilterTagCollectionV1.class, new FilterTagV1Factory(), entity, EnversUtilities.getRevisions(entityManager, entity),
-                            RESTBaseEntityV1.REVISIONS_NAME, dataType, expand, baseUrl, entityManager));
+                    .create(RESTFilterTagCollectionV1.class, new FilterTagV1Factory(), entity,
+                            EnversUtilities.getRevisions(entityManager, entity), RESTBaseEntityV1.REVISIONS_NAME, dataType,
+                            expand, baseUrl, entityManager));
         }
 
-        if (expandParentReferences && expand != null && entity.getFilter() != null) {
+        // PARENT
+        if (expandParentReferences && expand != null && expand.contains(RESTFilterTagV1.FILTER_NAME)
+                && entity.getFilter() != null) {
             retValue.setFilter(new FilterV1Factory().createRESTEntityFromDBEntity(entity.getFilter(), baseUrl, dataType,
                     expand.get(RESTFilterTagV1.FILTER_NAME), revision, expandParentReferences, entityManager));
         }
 
         // FILTER TAG
-        if (expand != null && expand.contains(RESTFilterTagV1.TAG_NAME) && entity.getTag() != null)
+        if (expand != null && expand.contains(RESTFilterTagV1.TAG_NAME) && entity.getTag() != null) {
             retValue.setTag(new TagV1Factory().createRESTEntityFromDBEntity(entity.getTag(), baseUrl, dataType,
                     expand.get(RESTFilterTagV1.TAG_NAME), revision, expandParentReferences, entityManager));
+        }
 
         return retValue;
     }

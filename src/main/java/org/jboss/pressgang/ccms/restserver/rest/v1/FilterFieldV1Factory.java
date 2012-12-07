@@ -44,13 +44,16 @@ public class FilterFieldV1Factory extends
         retValue.setValue(entity.getValue());
 
         // REVISIONS
-        if (revision == null) {
+        if (revision == null && expand != null && expand.contains(RESTBaseEntityV1.REVISIONS_NAME)) {
             retValue.setRevisions(new RESTDataObjectCollectionFactory<RESTFilterFieldV1, FilterField, RESTFilterFieldCollectionV1, RESTFilterFieldCollectionItemV1>()
-                    .create(RESTFilterFieldCollectionV1.class, new FilterFieldV1Factory(), entity, EnversUtilities.getRevisions(entityManager, entity),
-                            RESTBaseEntityV1.REVISIONS_NAME, dataType, expand, baseUrl, entityManager));
+                    .create(RESTFilterFieldCollectionV1.class, new FilterFieldV1Factory(), entity,
+                            EnversUtilities.getRevisions(entityManager, entity), RESTBaseEntityV1.REVISIONS_NAME, dataType,
+                            expand, baseUrl, entityManager));
         }
 
-        if (expandParentReferences && expand != null && entity.getFilter() != null) {
+        // PARENT
+        if (expandParentReferences && expand != null && expand.contains(RESTFilterFieldV1.FILTER_NAME)
+                && entity.getFilter() != null) {
             retValue.setFilter(new FilterV1Factory().createRESTEntityFromDBEntity(entity.getFilter(), baseUrl, dataType,
                     expand.get(RESTFilterFieldV1.FILTER_NAME), revision, expandParentReferences, entityManager));
         }

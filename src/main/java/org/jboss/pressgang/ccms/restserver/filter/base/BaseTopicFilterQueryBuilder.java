@@ -341,8 +341,8 @@ public abstract class BaseTopicFilterQueryBuilder<T> extends BaseFilterQueryBuil
 
         // Create the Condition for the subquery
         final Predicate topicIdMatch = criteriaBuilder.equal(getRootPath(), root.get("topic"));
-        final Predicate propertyTagIdMatch = criteriaBuilder.equal(getRootPath().get("propertyTag").get("propertyTagId"), propertyTagId);
-        final Predicate propertyTagValueMatch = criteriaBuilder.equal(getRootPath().get("value"), propertyTagValue);
+        final Predicate propertyTagIdMatch = criteriaBuilder.equal(root.get("propertyTag").get("propertyTagId"), propertyTagId);
+        final Predicate propertyTagValueMatch = criteriaBuilder.equal(root.get("value"), propertyTagValue);
         subQuery.where(criteriaBuilder.and(topicIdMatch, propertyTagIdMatch, propertyTagValueMatch));
         
         return subQuery;

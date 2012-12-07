@@ -44,10 +44,11 @@ public class IntegerConstantV1Factory
         retValue.setValue(entity.getConstantValue());
 
         // REVISIONS
-        if (revision == null) {
+        if (revision == null && expand != null && expand.contains(RESTBaseEntityV1.REVISIONS_NAME)) {
             retValue.setRevisions(new RESTDataObjectCollectionFactory<RESTIntegerConstantV1, IntegerConstants, RESTIntegerConstantCollectionV1, RESTIntegerConstantCollectionItemV1>()
                     .create(RESTIntegerConstantCollectionV1.class, new IntegerConstantV1Factory(), entity,
-                            EnversUtilities.getRevisions(entityManager, entity), RESTBaseEntityV1.REVISIONS_NAME, dataType, expand, baseUrl, entityManager));
+                            EnversUtilities.getRevisions(entityManager, entity), RESTBaseEntityV1.REVISIONS_NAME, dataType,
+                            expand, baseUrl, entityManager));
         }
 
         retValue.setLinks(baseUrl, RESTv1Constants.INTEGERCONSTANT_URL_NAME, dataType, retValue.getId());

@@ -15,11 +15,10 @@ import org.jboss.pressgang.ccms.restserver.rest.v1.base.RESTDataObjectCollection
 import org.jboss.pressgang.ccms.restserver.rest.v1.base.RESTDataObjectFactory;
 import org.jboss.pressgang.ccms.restserver.utils.EnversUtilities;
 
-
 public class CSTranslatedStringV1Factory
         extends
         RESTDataObjectFactory<RESTCSTranslatedStringV1, CSTranslatedString, RESTCSTranslatedStringCollectionV1, RESTCSTranslatedStringCollectionItemV1> {
-    
+
     public CSTranslatedStringV1Factory() {
         super(CSTranslatedString.class);
     }
@@ -45,10 +44,12 @@ public class CSTranslatedStringV1Factory
         retValue.setFuzzyTranslation(entity.getFuzzyTranslation());
         retValue.setLocale(entity.getLocale());
 
-        if (revision == null) {
+        // REVISIONS
+        if (revision == null && expand != null && expand.contains(RESTBaseEntityV1.REVISIONS_NAME)) {
             retValue.setRevisions(new RESTDataObjectCollectionFactory<RESTCSTranslatedStringV1, CSTranslatedString, RESTCSTranslatedStringCollectionV1, RESTCSTranslatedStringCollectionItemV1>()
                     .create(RESTCSTranslatedStringCollectionV1.class, new CSTranslatedStringV1Factory(), entity,
-                            EnversUtilities.getRevisions(entityManager, entity), RESTBaseEntityV1.REVISIONS_NAME, dataType, expand, baseUrl, entityManager));
+                            EnversUtilities.getRevisions(entityManager, entity), RESTBaseEntityV1.REVISIONS_NAME, dataType,
+                            expand, baseUrl, entityManager));
         }
 
         return retValue;

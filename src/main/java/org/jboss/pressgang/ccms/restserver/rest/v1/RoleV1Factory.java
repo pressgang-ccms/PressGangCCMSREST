@@ -59,26 +59,33 @@ public class RoleV1Factory extends RESTDataObjectFactory<RESTRoleV1, Role, RESTR
         retValue.setDescription(entity.getDescription());
 
         // REVISIONS
-        if (revision == null) {
+        if (revision == null && expand != null && expand.contains(RESTBaseEntityV1.REVISIONS_NAME)) {
             retValue.setRevisions(new RESTDataObjectCollectionFactory<RESTRoleV1, Role, RESTRoleCollectionV1, RESTRoleCollectionItemV1>()
-                    .create(RESTRoleCollectionV1.class, new RoleV1Factory(), entity, EnversUtilities.getRevisions(entityManager, entity),
-                            RESTBaseEntityV1.REVISIONS_NAME, dataType, expand, baseUrl, entityManager));
+                    .create(RESTRoleCollectionV1.class, new RoleV1Factory(), entity,
+                            EnversUtilities.getRevisions(entityManager, entity), RESTBaseEntityV1.REVISIONS_NAME, dataType,
+                            expand, baseUrl, entityManager));
         }
-        
+
         // USERS
-        retValue.setUsers(new RESTDataObjectCollectionFactory<RESTUserV1, User, RESTUserCollectionV1, RESTUserCollectionItemV1>()
-                .create(RESTUserCollectionV1.class, new UserV1Factory(), entity.getUsers(), RESTRoleV1.USERS_NAME, dataType,
-                        expand, baseUrl, entityManager));
-        
+        if (expand != null && expand.contains(RESTRoleV1.USERS_NAME)) {
+            retValue.setUsers(new RESTDataObjectCollectionFactory<RESTUserV1, User, RESTUserCollectionV1, RESTUserCollectionItemV1>()
+                    .create(RESTUserCollectionV1.class, new UserV1Factory(), entity.getUsers(), RESTRoleV1.USERS_NAME,
+                            dataType, expand, baseUrl, entityManager));
+        }
+
         // PARENT ROLES
-        retValue.setParentRoles(new RESTDataObjectCollectionFactory<RESTRoleV1, Role, RESTRoleCollectionV1, RESTRoleCollectionItemV1>()
-                .create(RESTRoleCollectionV1.class, new RoleV1Factory(), entity.getParentRoles(), RESTRoleV1.PARENTROLES_NAME,
-                        dataType, expand, baseUrl, entityManager));
-        
+        if (expand != null && expand.contains(RESTRoleV1.PARENTROLES_NAME)) {
+            retValue.setParentRoles(new RESTDataObjectCollectionFactory<RESTRoleV1, Role, RESTRoleCollectionV1, RESTRoleCollectionItemV1>()
+                    .create(RESTRoleCollectionV1.class, new RoleV1Factory(), entity.getParentRoles(),
+                            RESTRoleV1.PARENTROLES_NAME, dataType, expand, baseUrl, entityManager));
+        }
+
         // CHILD ROLES
-        retValue.setChildRoles(new RESTDataObjectCollectionFactory<RESTRoleV1, Role, RESTRoleCollectionV1, RESTRoleCollectionItemV1>()
-                .create(RESTRoleCollectionV1.class, new RoleV1Factory(), entity.getChildRoles(), RESTRoleV1.CHILDROLES_NAME,
-                        dataType, expand, baseUrl, entityManager));
+        if (expand != null && expand.contains(RESTRoleV1.CHILDROLES_NAME)) {
+            retValue.setChildRoles(new RESTDataObjectCollectionFactory<RESTRoleV1, Role, RESTRoleCollectionV1, RESTRoleCollectionItemV1>()
+                    .create(RESTRoleCollectionV1.class, new RoleV1Factory(), entity.getChildRoles(),
+                            RESTRoleV1.CHILDROLES_NAME, dataType, expand, baseUrl, entityManager));
+        }
 
         retValue.setLinks(baseUrl, RESTv1Constants.ROLE_URL_NAME, dataType, retValue.getId());
 
