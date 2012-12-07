@@ -214,8 +214,8 @@ CREATE TABLE IF NOT EXISTS `ContentSpec` (
   `ContentSpecID` int(11) NOT NULL AUTO_INCREMENT,
   `ContentSpecTitle` varchar(255) NOT NULL,
   `ContentSpecType` int(11) NOT NULL,
-  `Locale` varchar(512) NOT NULL,
   `lastPublished` datetime DEFAULT NULL,
+  `Locale` varchar(255) NOT NULL,
   PRIMARY KEY (`ContentSpecID`),
   UNIQUE KEY `ContentSpecID` (`ContentSpecID`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 AUTO_INCREMENT=1 ;
@@ -228,8 +228,8 @@ CREATE TABLE IF NOT EXISTS `ContentSpec` (
 
 CREATE TABLE IF NOT EXISTS `ContentSpecMetaData` (
   `ContentSpecMetaDataID` int(11) NOT NULL AUTO_INCREMENT,
-  `ContentSpecMetaDataTitle` varchar(255) NOT NULL,
-  `ContentSpecMetaDataDescription` text,
+  `MetaDataDescription` text,
+  `MetaDataTitle` varchar(255) NOT NULL,
   PRIMARY KEY (`ContentSpecMetaDataID`),
   UNIQUE KEY `ContentSpecMetaDataID` (`ContentSpecMetaDataID`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 AUTO_INCREMENT=1 ;
@@ -245,11 +245,11 @@ CREATE TABLE IF NOT EXISTS `ContentSpecMetaData_AUD` (
   `REV` int(11) NOT NULL,
   `REVTYPE` tinyint(4) DEFAULT NULL,
   `REVEND` int(11) DEFAULT NULL,
-  `ContentSpecMetaDataTitle` varchar(255) DEFAULT NULL,
-  `ContentSpecMetaDataDescription` text,
+  `MetaDataDescription` text,
+  `MetaDataTitle` varchar(255) DEFAULT NULL,
   PRIMARY KEY (`ContentSpecMetaDataID`,`REV`),
-  KEY `FK6DBBA77416D0EC8F` (`REVEND`),
-  KEY `FK6DBBA7744E83BBDA` (`REV`)
+  KEY `FK6DBBA774DE0FB5A8` (`REVEND`),
+  KEY `FK6DBBA77415C284F3` (`REV`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
 -- --------------------------------------------------------
@@ -274,83 +274,11 @@ CREATE TABLE IF NOT EXISTS `ContentSpecNode` (
   UNIQUE KEY `ContentSpecNodeID` (`ContentSpecNodeID`),
   UNIQUE KEY `ContentSpecID` (`ContentSpecID`,`PreviousNodeID`),
   UNIQUE KEY `ContentSpecID_2` (`ContentSpecID`,`NextNodeID`),
-  KEY `FKD5DB8BD6ED197BA6` (`ContentSpecID`),
-  KEY `FKD5DB8BD6367D70E3` (`PreviousNodeID`),
-  KEY `FKD5DB8BD6EBE853DF` (`NextNodeID`),
-  KEY `FKD5DB8BD64F855BD4` (`ParentID`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8;
-
--- --------------------------------------------------------
-
---
--- Table structure for table `ContentSpecNodeToContentSpecNode`
---
-
-CREATE TABLE IF NOT EXISTS `ContentSpecNodeToContentSpecNode` (
-  `ContentSpecNodeToContentSpecNodeID` int(11) NOT NULL AUTO_INCREMENT,
-  `RelationshipType` int(11) NOT NULL,
-  `MainNodeID` int(11) NOT NULL,
-  `RelatedNodeID` int(11) NOT NULL,
-  PRIMARY KEY (`ContentSpecNodeToContentSpecNodeID`),
-  UNIQUE KEY `ContentSpecNodeToContentSpecNodeID` (`ContentSpecNodeToContentSpecNodeID`),
-  KEY `FKDF1672C540009B17` (`RelatedNodeID`),
-  KEY `FKDF1672C552F62225` (`MainNodeID`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8;
-
--- --------------------------------------------------------
-
---
--- Table structure for table `ContentSpecNodeToContentSpecNode_AUD`
---
-
-CREATE TABLE IF NOT EXISTS `ContentSpecNodeToContentSpecNode_AUD` (
-  `ContentSpecNodeToContentSpecNodeID` int(11) NOT NULL,
-  `REV` int(11) NOT NULL,
-  `REVTYPE` tinyint(4) DEFAULT NULL,
-  `REVEND` int(11) DEFAULT NULL,
-  `RelationshipType` int(11) DEFAULT NULL,
-  `MainNodeID` int(11) DEFAULT NULL,
-  `RelatedNodeID` int(11) DEFAULT NULL,
-  PRIMARY KEY (`ContentSpecNodeToContentSpecNodeID`,`REV`),
-  KEY `FKB591B61616D0EC8F` (`REVEND`),
-  KEY `FKB591B6164E83BBDA` (`REV`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8;
-
--- --------------------------------------------------------
-
---
--- Table structure for table `ContentSpecNodeToPropertyTag`
---
-
-CREATE TABLE IF NOT EXISTS `ContentSpecNodeToPropertyTag` (
-  `ContentSpecNodeToPropertyTagID` int(11) NOT NULL AUTO_INCREMENT,
-  `Value` text,
-  `ContentSpecNodeID` int(11) NOT NULL,
-  `PropertyTagID` int(11) NOT NULL,
-  PRIMARY KEY (`ContentSpecNodeToPropertyTagID`),
-  UNIQUE KEY `ContentSpecNodeToPropertyTagID` (`ContentSpecNodeToPropertyTagID`),
-  KEY `FK4F3E7BD4ABA6BBE0` (`ContentSpecNodeID`),
-  KEY `FK4F3E7BD49612C5C2` (`PropertyTagID`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8 ;
-
--- --------------------------------------------------------
-
---
--- Table structure for table `ContentSpecNodeToPropertyTag_AUD`
---
-
-CREATE TABLE IF NOT EXISTS `ContentSpecNodeToPropertyTag_AUD` (
-  `ContentSpecNodeToPropertyTagID` int(11) NOT NULL,
-  `REV` int(11) NOT NULL,
-  `REVTYPE` tinyint(4) DEFAULT NULL,
-  `REVEND` int(11) DEFAULT NULL,
-  `Value` text,
-  `ContentSpecNodeID` int(11) DEFAULT NULL,
-  `PropertyTagID` int(11) DEFAULT NULL,
-  PRIMARY KEY (`ContentSpecNodeToPropertyTagID`,`REV`),
-  KEY `FK51609FA5D25E3A3B` (`REVEND`),
-  KEY `FK51609FA5A110986` (`REV`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+  KEY `FKD5DB8BD6FBF105B5` (`ContentSpecID`),
+  KEY `FKD5DB8BD626ED9974` (`PreviousNodeID`),
+  KEY `FKD5DB8BD6DC587C70` (`NextNodeID`),
+  KEY `FKD5DB8BD63FF58465` (`ParentID`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8 AUTO_INCREMENT=1 ;
 
 -- --------------------------------------------------------
 
@@ -374,44 +302,44 @@ CREATE TABLE IF NOT EXISTS `ContentSpecNode_AUD` (
   `ParentID` int(11) DEFAULT NULL,
   `PreviousNodeID` int(11) DEFAULT NULL,
   PRIMARY KEY (`ContentSpecNodeID`,`REV`),
-  KEY `FK2311DEA7D25E3A3B` (`REVEND`),
-  KEY `FK2311DEA7A110986` (`REV`)
+  KEY `FK2311DEA7DE0FB5A8` (`REVEND`),
+  KEY `FK2311DEA715C284F3` (`REV`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
 -- --------------------------------------------------------
 
 --
--- Table structure for table `ContentSpecToContentSpecMetaData`
+-- Table structure for table `ContentSpecToCSMetaData`
 --
 
-CREATE TABLE IF NOT EXISTS `ContentSpecToContentSpecMetaData` (
-  `ContentSpecToContentSpecMetaDataID` int(11) NOT NULL AUTO_INCREMENT,
+CREATE TABLE IF NOT EXISTS `ContentSpecToCSMetaData` (
+  `ContentSpecToCSMetaDataID` int(11) NOT NULL AUTO_INCREMENT,
   `Value` text,
   `ContentSpecMetaDataID` int(11) NOT NULL,
   `ContentSpecID` int(11) NOT NULL,
-  PRIMARY KEY (`ContentSpecToContentSpecMetaDataID`),
-  UNIQUE KEY `ContentSpecToContentSpecMetaDataID` (`ContentSpecToContentSpecMetaDataID`),
-  KEY `FKEFF3F974CA8809D2` (`ContentSpecID`),
-  KEY `FKEFF3F9747E34A6EE` (`ContentSpecMetaDataID`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+  PRIMARY KEY (`ContentSpecToCSMetaDataID`),
+  UNIQUE KEY `ContentSpecToCSMetaDataID` (`ContentSpecToCSMetaDataID`),
+  KEY `FK1131266EFBF105B5` (`ContentSpecID`),
+  KEY `FK1131266EB99B22AB` (`ContentSpecMetaDataID`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8 AUTO_INCREMENT=1 ;
 
 -- --------------------------------------------------------
 
 --
--- Table structure for table `ContentSpecToContentSpecMetaData_AUD`
+-- Table structure for table `ContentSpecToCSMetaData_AUD`
 --
 
-CREATE TABLE IF NOT EXISTS `ContentSpecToContentSpecMetaData_AUD` (
-  `ContentSpecToContentSpecMetaDataID` int(11) NOT NULL,
+CREATE TABLE IF NOT EXISTS `ContentSpecToCSMetaData_AUD` (
+  `ContentSpecToCSMetaDataID` int(11) NOT NULL,
   `REV` int(11) NOT NULL,
   `REVTYPE` tinyint(4) DEFAULT NULL,
   `REVEND` int(11) DEFAULT NULL,
   `Value` text,
   `ContentSpecMetaDataID` int(11) DEFAULT NULL,
   `ContentSpecID` int(11) DEFAULT NULL,
-  PRIMARY KEY (`ContentSpecToContentSpecMetaDataID`,`REV`),
-  KEY `FK79DE4D4516D0EC8F` (`REVEND`),
-  KEY `FK79DE4D454E83BBDA` (`REV`)
+  PRIMARY KEY (`ContentSpecToCSMetaDataID`,`REV`),
+  KEY `FK2E686D3FDE0FB5A8` (`REVEND`),
+  KEY `FK2E686D3F15C284F3` (`REV`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
 -- --------------------------------------------------------
@@ -426,9 +354,9 @@ CREATE TABLE IF NOT EXISTS `ContentSpecToProject` (
   `ProjectID` int(11) NOT NULL,
   PRIMARY KEY (`ContentSpecToProjectID`),
   UNIQUE KEY `ContentSpecToProjectID` (`ContentSpecToProjectID`),
-  KEY `FKADEB4ACACA8809D2` (`ContentSpecID`),
-  KEY `FKADEB4ACAEB3A6876` (`ProjectID`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+  KEY `FKADEB4ACAFBF105B5` (`ContentSpecID`),
+  KEY `FKADEB4ACA66658A59` (`ProjectID`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8 AUTO_INCREMENT=1 ;
 
 -- --------------------------------------------------------
 
@@ -444,8 +372,8 @@ CREATE TABLE IF NOT EXISTS `ContentSpecToProject_AUD` (
   `ContentSpecID` int(11) DEFAULT NULL,
   `ProjectID` int(11) DEFAULT NULL,
   PRIMARY KEY (`ContentSpecToProjectID`,`REV`),
-  KEY `FKDE81039B16D0EC8F` (`REVEND`),
-  KEY `FKDE81039B4E83BBDA` (`REV`)
+  KEY `FKDE81039BDE0FB5A8` (`REVEND`),
+  KEY `FKDE81039B15C284F3` (`REV`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
 -- --------------------------------------------------------
@@ -461,9 +389,9 @@ CREATE TABLE IF NOT EXISTS `ContentSpecToPropertyTag` (
   `PropertyTagID` int(11) NOT NULL,
   PRIMARY KEY (`ContentSpecToPropertyTagID`),
   UNIQUE KEY `ContentSpecToPropertyTagID` (`ContentSpecToPropertyTagID`),
-  KEY `FK676CDCB6CA8809D2` (`ContentSpecID`),
-  KEY `FK676CDCB6F3A435EE` (`PropertyTagID`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+  KEY `FK676CDCB6FBF105B5` (`ContentSpecID`),
+  KEY `FK676CDCB6BED5AE51` (`PropertyTagID`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8 AUTO_INCREMENT=1 ;
 
 -- --------------------------------------------------------
 
@@ -480,8 +408,8 @@ CREATE TABLE IF NOT EXISTS `ContentSpecToPropertyTag_AUD` (
   `ContentSpecID` int(11) DEFAULT NULL,
   `PropertyTagID` int(11) DEFAULT NULL,
   PRIMARY KEY (`ContentSpecToPropertyTagID`,`REV`),
-  KEY `FKF7CFBF8716D0EC8F` (`REVEND`),
-  KEY `FKF7CFBF874E83BBDA` (`REV`)
+  KEY `FKF7CFBF87DE0FB5A8` (`REVEND`),
+  KEY `FKF7CFBF8715C284F3` (`REV`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
 -- --------------------------------------------------------
@@ -497,9 +425,9 @@ CREATE TABLE IF NOT EXISTS `ContentSpecToTag` (
   PRIMARY KEY (`ContentSpecToTagID`),
   UNIQUE KEY `ContentSpecToTagID` (`ContentSpecToTagID`),
   UNIQUE KEY `ContentSpecID` (`ContentSpecID`,`TagID`),
-  KEY `FKE5EA3FCBED197BA6` (`ContentSpecID`),
-  KEY `FKE5EA3FCB9BADF58C` (`TagID`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+  KEY `FKE5EA3FCBFBF105B5` (`ContentSpecID`),
+  KEY `FKE5EA3FCB10DDD1B` (`TagID`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8 AUTO_INCREMENT=1 ;
 
 -- --------------------------------------------------------
 
@@ -515,38 +443,8 @@ CREATE TABLE IF NOT EXISTS `ContentSpecToTag_AUD` (
   `ContentSpecID` int(11) DEFAULT NULL,
   `TagID` int(11) DEFAULT NULL,
   PRIMARY KEY (`ContentSpecToTagID`,`REV`),
-  KEY `FK640B901CD25E3A3B` (`REVEND`),
-  KEY `FK640B901CA110986` (`REV`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8;
-
--- --------------------------------------------------------
-
---
--- Table structure for table `ContentSpecTranslatedString`
---
-
-CREATE TABLE IF NOT EXISTS `ContentSpecTranslatedString` (
-  `ContentSpecTranslatedStringID` int(11) NOT NULL AUTO_INCREMENT,
-  `Locale` varchar(255) NOT NULL,
-  PRIMARY KEY (`ContentSpecTranslatedStringID`),
-  UNIQUE KEY `ContentSpecTranslatedStringID` (`ContentSpecTranslatedStringID`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8;
-
--- --------------------------------------------------------
-
---
--- Table structure for table `ContentSpecTranslatedString_AUD`
---
-
-CREATE TABLE IF NOT EXISTS `ContentSpecTranslatedString_AUD` (
-  `ContentSpecTranslatedStringID` int(11) NOT NULL,
-  `REV` int(11) NOT NULL,
-  `REVTYPE` tinyint(4) DEFAULT NULL,
-  `REVEND` int(11) DEFAULT NULL,
-  `Locale` varchar(255) DEFAULT NULL,
-  PRIMARY KEY (`ContentSpecTranslatedStringID`,`REV`),
-  KEY `FKF97154ACD25E3A3B` (`REVEND`),
-  KEY `FKF97154ACA110986` (`REV`)
+  KEY `FK640B901CDE0FB5A8` (`REVEND`),
+  KEY `FK640B901C15C284F3` (`REV`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
 -- --------------------------------------------------------
@@ -562,11 +460,11 @@ CREATE TABLE IF NOT EXISTS `ContentSpec_AUD` (
   `REVEND` int(11) DEFAULT NULL,
   `ContentSpecTitle` varchar(255) DEFAULT NULL,
   `ContentSpecType` int(11) DEFAULT NULL,
-  `Locale` varchar(255) DEFAULT NULL,
   `lastPublished` datetime DEFAULT NULL,
+  `Locale` varchar(255) DEFAULT NULL,
   PRIMARY KEY (`ContentSpecID`,`REV`),
-  KEY `FKD5E2978516D0EC8F` (`REVEND`),
-  KEY `FKD5E297854E83BBDA` (`REV`)
+  KEY `FKD5E29785DE0FB5A8` (`REVEND`),
+  KEY `FKD5E2978515C284F3` (`REV`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
 -- --------------------------------------------------------
@@ -576,15 +474,15 @@ CREATE TABLE IF NOT EXISTS `ContentSpec_AUD` (
 --
 
 CREATE TABLE IF NOT EXISTS `CSMetaDataToCSTranslatedString` (
-  `ContentSpecMetaDataID` int(11) NOT NULL AUTO_INCREMENT,
-  `ContentSpecTranslatedStringID` int(11) NOT NULL,
+  `CSMetaDataToCSTranslatedStringID` int(11) NOT NULL AUTO_INCREMENT,
+  `CSTranslatedStringID` int(11) NOT NULL,
   `ContentSpecToCSMetaDataID` int(11) NOT NULL,
-  PRIMARY KEY (`ContentSpecMetaDataID`),
-  UNIQUE KEY `ContentSpecMetaDataID` (`ContentSpecMetaDataID`),
-  UNIQUE KEY `ContentSpecMetaDataID_2` (`ContentSpecMetaDataID`,`ContentSpecTranslatedStringID`),
-  KEY `FK70BF79518DF9AE0A` (`ContentSpecTranslatedStringID`),
-  KEY `FK70BF7951CCD88DBA` (`ContentSpecToCSMetaDataID`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+  PRIMARY KEY (`CSMetaDataToCSTranslatedStringID`),
+  UNIQUE KEY `CSMetaDataToCSTranslatedStringID` (`CSMetaDataToCSTranslatedStringID`),
+  UNIQUE KEY `ContentSpecToCSMetaDataID` (`ContentSpecToCSMetaDataID`,`CSTranslatedStringID`),
+  KEY `FK70BF795117FF12D7` (`CSTranslatedStringID`),
+  KEY `FK70BF7951EC5E7949` (`ContentSpecToCSMetaDataID`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8 AUTO_INCREMENT=1 ;
 
 -- --------------------------------------------------------
 
@@ -593,15 +491,51 @@ CREATE TABLE IF NOT EXISTS `CSMetaDataToCSTranslatedString` (
 --
 
 CREATE TABLE IF NOT EXISTS `CSMetaDataToCSTranslatedString_AUD` (
-  `ContentSpecMetaDataID` int(11) NOT NULL,
+  `CSMetaDataToCSTranslatedStringID` int(11) NOT NULL,
   `REV` int(11) NOT NULL,
   `REVTYPE` tinyint(4) DEFAULT NULL,
   `REVEND` int(11) DEFAULT NULL,
-  `ContentSpecTranslatedStringID` int(11) DEFAULT NULL,
+  `CSTranslatedStringID` int(11) DEFAULT NULL,
   `ContentSpecToCSMetaDataID` int(11) DEFAULT NULL,
-  PRIMARY KEY (`ContentSpecMetaDataID`,`REV`),
-  KEY `FKA6FC96A2D25E3A3B` (`REVEND`),
-  KEY `FKA6FC96A2A110986` (`REV`)
+  PRIMARY KEY (`CSMetaDataToCSTranslatedStringID`,`REV`),
+  KEY `FKA6FC96A2DE0FB5A8` (`REVEND`),
+  KEY `FKA6FC96A215C284F3` (`REV`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `CSNodeToCSNode`
+--
+
+CREATE TABLE IF NOT EXISTS `CSNodeToCSNode` (
+  `CSNodeToCSNodeID` int(11) NOT NULL AUTO_INCREMENT,
+  `RelationshipType` int(11) NOT NULL,
+  `MainNodeID` int(11) NOT NULL,
+  `RelatedNodeID` int(11) NOT NULL,
+  PRIMARY KEY (`CSNodeToCSNodeID`),
+  UNIQUE KEY `CSNodeToCSNodeID` (`CSNodeToCSNodeID`),
+  KEY `FKC1429D7F3070C3A8` (`RelatedNodeID`),
+  KEY `FKC1429D7F43664AB6` (`MainNodeID`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8 AUTO_INCREMENT=1 ;
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `CSNodeToCSNode_AUD`
+--
+
+CREATE TABLE IF NOT EXISTS `CSNodeToCSNode_AUD` (
+  `CSNodeToCSNodeID` int(11) NOT NULL,
+  `REV` int(11) NOT NULL,
+  `REVTYPE` tinyint(4) DEFAULT NULL,
+  `REVEND` int(11) DEFAULT NULL,
+  `RelationshipType` int(11) DEFAULT NULL,
+  `MainNodeID` int(11) DEFAULT NULL,
+  `RelatedNodeID` int(11) DEFAULT NULL,
+  PRIMARY KEY (`CSNodeToCSNodeID`,`REV`),
+  KEY `FKFBD5F3D0DE0FB5A8` (`REVEND`),
+  KEY `FKFBD5F3D015C284F3` (`REV`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
 -- --------------------------------------------------------
@@ -611,15 +545,15 @@ CREATE TABLE IF NOT EXISTS `CSMetaDataToCSTranslatedString_AUD` (
 --
 
 CREATE TABLE IF NOT EXISTS `CSNodeToCSTranslatedString` (
-  `TopicToTagID` int(11) NOT NULL AUTO_INCREMENT,
-  `ContentSpecNodeID` int(11) NOT NULL,
-  `ContentSpecTranslatedStringID` int(11) NOT NULL,
-  PRIMARY KEY (`TopicToTagID`),
-  UNIQUE KEY `TopicToTagID` (`TopicToTagID`),
-  UNIQUE KEY `ContentSpecNodeID` (`ContentSpecNodeID`,`ContentSpecTranslatedStringID`),
-  KEY `FKEE5DA884ABA6BBE0` (`ContentSpecNodeID`),
-  KEY `FKEE5DA8848DF9AE0A` (`ContentSpecTranslatedStringID`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+  `CSNodeToCSTranslatedStringID` int(11) NOT NULL AUTO_INCREMENT,
+  `CSNodeID` int(11) NOT NULL,
+  `CSTranslatedStringID` int(11) NOT NULL,
+  PRIMARY KEY (`CSNodeToCSTranslatedStringID`),
+  UNIQUE KEY `CSNodeToCSTranslatedStringID` (`CSNodeToCSTranslatedStringID`),
+  UNIQUE KEY `CSNodeID` (`CSNodeID`,`CSTranslatedStringID`),
+  KEY `FKEE5DA884AB6B2C2D` (`CSNodeID`),
+  KEY `FKEE5DA88417FF12D7` (`CSTranslatedStringID`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8 AUTO_INCREMENT=1 ;
 
 -- --------------------------------------------------------
 
@@ -628,15 +562,87 @@ CREATE TABLE IF NOT EXISTS `CSNodeToCSTranslatedString` (
 --
 
 CREATE TABLE IF NOT EXISTS `CSNodeToCSTranslatedString_AUD` (
-  `TopicToTagID` int(11) NOT NULL,
+  `CSNodeToCSTranslatedStringID` int(11) NOT NULL,
   `REV` int(11) NOT NULL,
   `REVTYPE` tinyint(4) DEFAULT NULL,
   `REVEND` int(11) DEFAULT NULL,
-  `ContentSpecNodeID` int(11) DEFAULT NULL,
-  `ContentSpecTranslatedStringID` int(11) DEFAULT NULL,
-  PRIMARY KEY (`TopicToTagID`,`REV`),
-  KEY `FKBEB9F455D25E3A3B` (`REVEND`),
-  KEY `FKBEB9F455A110986` (`REV`)
+  `CSNodeID` int(11) DEFAULT NULL,
+  `CSTranslatedStringID` int(11) DEFAULT NULL,
+  PRIMARY KEY (`CSNodeToCSTranslatedStringID`,`REV`),
+  KEY `FKBEB9F455DE0FB5A8` (`REVEND`),
+  KEY `FKBEB9F45515C284F3` (`REV`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `CSNodeToPropertyTag`
+--
+
+CREATE TABLE IF NOT EXISTS `CSNodeToPropertyTag` (
+  `CSNodeToPropertyTagID` int(11) NOT NULL AUTO_INCREMENT,
+  `Value` text,
+  `CSNodeID` int(11) NOT NULL,
+  `PropertyTagID` int(11) NOT NULL,
+  PRIMARY KEY (`CSNodeToPropertyTagID`),
+  UNIQUE KEY `CSNodeToPropertyTagID` (`CSNodeToPropertyTagID`),
+  KEY `FK74746698BED5AE51` (`PropertyTagID`),
+  KEY `FK74746698AB6B2C2D` (`CSNodeID`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8 AUTO_INCREMENT=1 ;
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `CSNodeToPropertyTag_AUD`
+--
+
+CREATE TABLE IF NOT EXISTS `CSNodeToPropertyTag_AUD` (
+  `CSNodeToPropertyTagID` int(11) NOT NULL,
+  `REV` int(11) NOT NULL,
+  `REVTYPE` tinyint(4) DEFAULT NULL,
+  `REVEND` int(11) DEFAULT NULL,
+  `Value` text,
+  `CSNodeID` int(11) DEFAULT NULL,
+  `PropertyTagID` int(11) DEFAULT NULL,
+  PRIMARY KEY (`CSNodeToPropertyTagID`,`REV`),
+  KEY `FKC05B8869DE0FB5A8` (`REVEND`),
+  KEY `FKC05B886915C284F3` (`REV`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `CSTranslatedString`
+--
+
+CREATE TABLE IF NOT EXISTS `CSTranslatedString` (
+  `CSTranslatedStringID` int(11) NOT NULL AUTO_INCREMENT,
+  `FuzzyTranslation` bit(1) NOT NULL,
+  `Locale` varchar(255) NOT NULL,
+  `OriginalString` text,
+  `TranslatedString` text,
+  PRIMARY KEY (`CSTranslatedStringID`),
+  UNIQUE KEY `CSTranslatedStringID` (`CSTranslatedStringID`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8 AUTO_INCREMENT=1 ;
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `CSTranslatedString_AUD`
+--
+
+CREATE TABLE IF NOT EXISTS `CSTranslatedString_AUD` (
+  `CSTranslatedStringID` int(11) NOT NULL,
+  `REV` int(11) NOT NULL,
+  `REVTYPE` tinyint(4) DEFAULT NULL,
+  `REVEND` int(11) DEFAULT NULL,
+  `FuzzyTranslation` bit(1) DEFAULT NULL,
+  `Locale` varchar(255) DEFAULT NULL,
+  `OriginalString` text,
+  `TranslatedString` text,
+  PRIMARY KEY (`CSTranslatedStringID`,`REV`),
+  KEY `FK36D44368DE0FB5A8` (`REVEND`),
+  KEY `FK36D4436815C284F3` (`REV`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
 -- --------------------------------------------------------
@@ -1875,6 +1881,7 @@ CREATE TABLE IF NOT EXISTS `Topic` (
   `TopicTimeStamp` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
   `TopicXML` mediumtext,
   `TopicLocale` varchar(255) NOT NULL,
+  `TopicXMLDoctype` int(11) DEFAULT NULL,
   PRIMARY KEY (`TopicID`),
   KEY `fk_Topic_1` (`TopicID`),
   KEY `FK4D3DD0FE2436E96` (`TopicID`)
@@ -2154,6 +2161,7 @@ CREATE TABLE IF NOT EXISTS `Topic_AUD` (
   `TopicTitle` varchar(255) DEFAULT NULL,
   `TopicXML` mediumtext,
   `TopicLocale` varchar(255) DEFAULT NULL,
+  `TopicXMLDoctype` int(11) DEFAULT NULL,
   PRIMARY KEY (`TopicID`,`REV`),
   KEY `FK8E9CEB60DF74E053` (`REV`),
   KEY `FK8E9CEB60A7C21108` (`REVEND`)
@@ -2368,150 +2376,150 @@ ALTER TABLE `Category_AUD`
 -- Constraints for table `ContentSpecMetaData_AUD`
 --
 ALTER TABLE `ContentSpecMetaData_AUD`
-  ADD CONSTRAINT `FK6DBBA77416D0EC8F` FOREIGN KEY (`REVEND`) REFERENCES `REVINFO` (`REV`),
-  ADD CONSTRAINT `FK6DBBA7744E83BBDA` FOREIGN KEY (`REV`) REFERENCES `REVINFO` (`REV`);
+  ADD CONSTRAINT `FK6DBBA77415C284F3` FOREIGN KEY (`REV`) REFERENCES `REVINFO` (`REV`),
+  ADD CONSTRAINT `FK6DBBA774DE0FB5A8` FOREIGN KEY (`REVEND`) REFERENCES `REVINFO` (`REV`);
 
 --
 -- Constraints for table `ContentSpecNode`
 --
 ALTER TABLE `ContentSpecNode`
-  ADD CONSTRAINT `FKD5DB8BD64F855BD4` FOREIGN KEY (`ParentID`) REFERENCES `ContentSpecNode` (`ContentSpecNodeID`),
-  ADD CONSTRAINT `FKD5DB8BD6367D70E3` FOREIGN KEY (`PreviousNodeID`) REFERENCES `ContentSpecNode` (`ContentSpecNodeID`),
-  ADD CONSTRAINT `FKD5DB8BD6EBE853DF` FOREIGN KEY (`NextNodeID`) REFERENCES `ContentSpecNode` (`ContentSpecNodeID`),
-  ADD CONSTRAINT `FKD5DB8BD6ED197BA6` FOREIGN KEY (`ContentSpecID`) REFERENCES `ContentSpec` (`ContentSpecID`);
-
---
--- Constraints for table `ContentSpecNodeToContentSpecNode`
---
-ALTER TABLE `ContentSpecNodeToContentSpecNode`
-  ADD CONSTRAINT `FKDF1672C552F62225` FOREIGN KEY (`MainNodeID`) REFERENCES `ContentSpecNode` (`ContentSpecNodeID`),
-  ADD CONSTRAINT `FKDF1672C540009B17` FOREIGN KEY (`RelatedNodeID`) REFERENCES `ContentSpecNode` (`ContentSpecNodeID`);
-
---
--- Constraints for table `ContentSpecNodeToContentSpecNode_AUD`
---
-ALTER TABLE `ContentSpecNodeToContentSpecNode_AUD`
-  ADD CONSTRAINT `FKB591B61616D0EC8F` FOREIGN KEY (`REVEND`) REFERENCES `REVINFO` (`REV`),
-  ADD CONSTRAINT `FKB591B6164E83BBDA` FOREIGN KEY (`REV`) REFERENCES `REVINFO` (`REV`);
-
---
--- Constraints for table `ContentSpecNodeToPropertyTag`
---
-ALTER TABLE `ContentSpecNodeToPropertyTag`
-  ADD CONSTRAINT `FK4F3E7BD49612C5C2` FOREIGN KEY (`PropertyTagID`) REFERENCES `PropertyTag` (`PropertyTagID`),
-  ADD CONSTRAINT `FK4F3E7BD4ABA6BBE0` FOREIGN KEY (`ContentSpecNodeID`) REFERENCES `ContentSpecNode` (`ContentSpecNodeID`);
-
---
--- Constraints for table `ContentSpecNodeToPropertyTag_AUD`
---
-ALTER TABLE `ContentSpecNodeToPropertyTag_AUD`
-  ADD CONSTRAINT `FK51609FA5A110986` FOREIGN KEY (`REV`) REFERENCES `REVINFO` (`REV`),
-  ADD CONSTRAINT `FK51609FA5D25E3A3B` FOREIGN KEY (`REVEND`) REFERENCES `REVINFO` (`REV`);
+  ADD CONSTRAINT `FKD5DB8BD63FF58465` FOREIGN KEY (`ParentID`) REFERENCES `ContentSpecNode` (`ContentSpecNodeID`),
+  ADD CONSTRAINT `FKD5DB8BD626ED9974` FOREIGN KEY (`PreviousNodeID`) REFERENCES `ContentSpecNode` (`ContentSpecNodeID`),
+  ADD CONSTRAINT `FKD5DB8BD6DC587C70` FOREIGN KEY (`NextNodeID`) REFERENCES `ContentSpecNode` (`ContentSpecNodeID`),
+  ADD CONSTRAINT `FKD5DB8BD6FBF105B5` FOREIGN KEY (`ContentSpecID`) REFERENCES `ContentSpec` (`ContentSpecID`);
 
 --
 -- Constraints for table `ContentSpecNode_AUD`
 --
 ALTER TABLE `ContentSpecNode_AUD`
-  ADD CONSTRAINT `FK2311DEA7A110986` FOREIGN KEY (`REV`) REFERENCES `REVINFO` (`REV`),
-  ADD CONSTRAINT `FK2311DEA7D25E3A3B` FOREIGN KEY (`REVEND`) REFERENCES `REVINFO` (`REV`);
+  ADD CONSTRAINT `FK2311DEA715C284F3` FOREIGN KEY (`REV`) REFERENCES `REVINFO` (`REV`),
+  ADD CONSTRAINT `FK2311DEA7DE0FB5A8` FOREIGN KEY (`REVEND`) REFERENCES `REVINFO` (`REV`);
 
 --
--- Constraints for table `ContentSpecToContentSpecMetaData`
+-- Constraints for table `ContentSpecToCSMetaData`
 --
-ALTER TABLE `ContentSpecToContentSpecMetaData`
-  ADD CONSTRAINT `FKEFF3F9747E34A6EE` FOREIGN KEY (`ContentSpecMetaDataID`) REFERENCES `ContentSpecMetaData` (`ContentSpecMetaDataID`),
-  ADD CONSTRAINT `FKEFF3F974CA8809D2` FOREIGN KEY (`ContentSpecID`) REFERENCES `ContentSpec` (`ContentSpecID`);
+ALTER TABLE `ContentSpecToCSMetaData`
+  ADD CONSTRAINT `FK1131266EB99B22AB` FOREIGN KEY (`ContentSpecMetaDataID`) REFERENCES `ContentSpecMetaData` (`ContentSpecMetaDataID`),
+  ADD CONSTRAINT `FK1131266EFBF105B5` FOREIGN KEY (`ContentSpecID`) REFERENCES `ContentSpec` (`ContentSpecID`);
 
 --
--- Constraints for table `ContentSpecToContentSpecMetaData_AUD`
+-- Constraints for table `ContentSpecToCSMetaData_AUD`
 --
-ALTER TABLE `ContentSpecToContentSpecMetaData_AUD`
-  ADD CONSTRAINT `FK79DE4D4516D0EC8F` FOREIGN KEY (`REVEND`) REFERENCES `REVINFO` (`REV`),
-  ADD CONSTRAINT `FK79DE4D454E83BBDA` FOREIGN KEY (`REV`) REFERENCES `REVINFO` (`REV`);
+ALTER TABLE `ContentSpecToCSMetaData_AUD`
+  ADD CONSTRAINT `FK2E686D3F15C284F3` FOREIGN KEY (`REV`) REFERENCES `REVINFO` (`REV`),
+  ADD CONSTRAINT `FK2E686D3FDE0FB5A8` FOREIGN KEY (`REVEND`) REFERENCES `REVINFO` (`REV`);
 
 --
 -- Constraints for table `ContentSpecToProject`
 --
 ALTER TABLE `ContentSpecToProject`
-  ADD CONSTRAINT `FKADEB4ACACA8809D2` FOREIGN KEY (`ContentSpecID`) REFERENCES `ContentSpec` (`ContentSpecID`),
-  ADD CONSTRAINT `FKADEB4ACAEB3A6876` FOREIGN KEY (`ProjectID`) REFERENCES `Project` (`ProjectID`);
+  ADD CONSTRAINT `FKADEB4ACA66658A59` FOREIGN KEY (`ProjectID`) REFERENCES `Project` (`ProjectID`),
+  ADD CONSTRAINT `FKADEB4ACAFBF105B5` FOREIGN KEY (`ContentSpecID`) REFERENCES `ContentSpec` (`ContentSpecID`);
 
 --
 -- Constraints for table `ContentSpecToProject_AUD`
 --
 ALTER TABLE `ContentSpecToProject_AUD`
-  ADD CONSTRAINT `FKDE81039B16D0EC8F` FOREIGN KEY (`REVEND`) REFERENCES `REVINFO` (`REV`),
-  ADD CONSTRAINT `FKDE81039B4E83BBDA` FOREIGN KEY (`REV`) REFERENCES `REVINFO` (`REV`);
+  ADD CONSTRAINT `FKDE81039B15C284F3` FOREIGN KEY (`REV`) REFERENCES `REVINFO` (`REV`),
+  ADD CONSTRAINT `FKDE81039BDE0FB5A8` FOREIGN KEY (`REVEND`) REFERENCES `REVINFO` (`REV`);
 
 --
 -- Constraints for table `ContentSpecToPropertyTag`
 --
 ALTER TABLE `ContentSpecToPropertyTag`
-  ADD CONSTRAINT `FK676CDCB6CA8809D2` FOREIGN KEY (`ContentSpecID`) REFERENCES `ContentSpec` (`ContentSpecID`),
-  ADD CONSTRAINT `FK676CDCB6F3A435EE` FOREIGN KEY (`PropertyTagID`) REFERENCES `PropertyTag` (`PropertyTagID`);
+  ADD CONSTRAINT `FK676CDCB6BED5AE51` FOREIGN KEY (`PropertyTagID`) REFERENCES `PropertyTag` (`PropertyTagID`),
+  ADD CONSTRAINT `FK676CDCB6FBF105B5` FOREIGN KEY (`ContentSpecID`) REFERENCES `ContentSpec` (`ContentSpecID`);
 
 --
 -- Constraints for table `ContentSpecToPropertyTag_AUD`
 --
 ALTER TABLE `ContentSpecToPropertyTag_AUD`
-  ADD CONSTRAINT `FKF7CFBF8716D0EC8F` FOREIGN KEY (`REVEND`) REFERENCES `REVINFO` (`REV`),
-  ADD CONSTRAINT `FKF7CFBF874E83BBDA` FOREIGN KEY (`REV`) REFERENCES `REVINFO` (`REV`);
+  ADD CONSTRAINT `FKF7CFBF8715C284F3` FOREIGN KEY (`REV`) REFERENCES `REVINFO` (`REV`),
+  ADD CONSTRAINT `FKF7CFBF87DE0FB5A8` FOREIGN KEY (`REVEND`) REFERENCES `REVINFO` (`REV`);
 
 --
 -- Constraints for table `ContentSpecToTag`
 --
 ALTER TABLE `ContentSpecToTag`
-  ADD CONSTRAINT `FKE5EA3FCB9BADF58C` FOREIGN KEY (`TagID`) REFERENCES `Tag` (`TagID`),
-  ADD CONSTRAINT `FKE5EA3FCBED197BA6` FOREIGN KEY (`ContentSpecID`) REFERENCES `ContentSpec` (`ContentSpecID`);
+  ADD CONSTRAINT `FKE5EA3FCB10DDD1B` FOREIGN KEY (`TagID`) REFERENCES `Tag` (`TagID`),
+  ADD CONSTRAINT `FKE5EA3FCBFBF105B5` FOREIGN KEY (`ContentSpecID`) REFERENCES `ContentSpec` (`ContentSpecID`);
 
 --
 -- Constraints for table `ContentSpecToTag_AUD`
 --
 ALTER TABLE `ContentSpecToTag_AUD`
-  ADD CONSTRAINT `FK640B901CA110986` FOREIGN KEY (`REV`) REFERENCES `REVINFO` (`REV`),
-  ADD CONSTRAINT `FK640B901CD25E3A3B` FOREIGN KEY (`REVEND`) REFERENCES `REVINFO` (`REV`);
-
---
--- Constraints for table `ContentSpecTranslatedString_AUD`
---
-ALTER TABLE `ContentSpecTranslatedString_AUD`
-  ADD CONSTRAINT `FKF97154ACA110986` FOREIGN KEY (`REV`) REFERENCES `REVINFO` (`REV`),
-  ADD CONSTRAINT `FKF97154ACD25E3A3B` FOREIGN KEY (`REVEND`) REFERENCES `REVINFO` (`REV`);
+  ADD CONSTRAINT `FK640B901C15C284F3` FOREIGN KEY (`REV`) REFERENCES `REVINFO` (`REV`),
+  ADD CONSTRAINT `FK640B901CDE0FB5A8` FOREIGN KEY (`REVEND`) REFERENCES `REVINFO` (`REV`);
 
 --
 -- Constraints for table `ContentSpec_AUD`
 --
 ALTER TABLE `ContentSpec_AUD`
-  ADD CONSTRAINT `FKD5E2978516D0EC8F` FOREIGN KEY (`REVEND`) REFERENCES `REVINFO` (`REV`),
-  ADD CONSTRAINT `FKD5E297854E83BBDA` FOREIGN KEY (`REV`) REFERENCES `REVINFO` (`REV`);
+  ADD CONSTRAINT `FKD5E2978515C284F3` FOREIGN KEY (`REV`) REFERENCES `REVINFO` (`REV`),
+  ADD CONSTRAINT `FKD5E29785DE0FB5A8` FOREIGN KEY (`REVEND`) REFERENCES `REVINFO` (`REV`);
 
 --
 -- Constraints for table `CSMetaDataToCSTranslatedString`
 --
 ALTER TABLE `CSMetaDataToCSTranslatedString`
-  ADD CONSTRAINT `FK70BF7951CCD88DBA` FOREIGN KEY (`ContentSpecToCSMetaDataID`) REFERENCES `ContentSpecToContentSpecMetaData` (`ContentSpecToContentSpecMetaDataID`),
-  ADD CONSTRAINT `FK70BF79518DF9AE0A` FOREIGN KEY (`ContentSpecTranslatedStringID`) REFERENCES `ContentSpecTranslatedString` (`ContentSpecTranslatedStringID`);
+  ADD CONSTRAINT `FK70BF7951EC5E7949` FOREIGN KEY (`ContentSpecToCSMetaDataID`) REFERENCES `ContentSpecToCSMetaData` (`ContentSpecToCSMetaDataID`),
+  ADD CONSTRAINT `FK70BF795117FF12D7` FOREIGN KEY (`CSTranslatedStringID`) REFERENCES `CSTranslatedString` (`CSTranslatedStringID`);
 
 --
 -- Constraints for table `CSMetaDataToCSTranslatedString_AUD`
 --
 ALTER TABLE `CSMetaDataToCSTranslatedString_AUD`
-  ADD CONSTRAINT `FKA6FC96A2A110986` FOREIGN KEY (`REV`) REFERENCES `REVINFO` (`REV`),
-  ADD CONSTRAINT `FKA6FC96A2D25E3A3B` FOREIGN KEY (`REVEND`) REFERENCES `REVINFO` (`REV`);
+  ADD CONSTRAINT `FKA6FC96A215C284F3` FOREIGN KEY (`REV`) REFERENCES `REVINFO` (`REV`),
+  ADD CONSTRAINT `FKA6FC96A2DE0FB5A8` FOREIGN KEY (`REVEND`) REFERENCES `REVINFO` (`REV`);
+
+--
+-- Constraints for table `CSNodeToCSNode`
+--
+ALTER TABLE `CSNodeToCSNode`
+  ADD CONSTRAINT `FKC1429D7F43664AB6` FOREIGN KEY (`MainNodeID`) REFERENCES `ContentSpecNode` (`ContentSpecNodeID`),
+  ADD CONSTRAINT `FKC1429D7F3070C3A8` FOREIGN KEY (`RelatedNodeID`) REFERENCES `ContentSpecNode` (`ContentSpecNodeID`);
+
+--
+-- Constraints for table `CSNodeToCSNode_AUD`
+--
+ALTER TABLE `CSNodeToCSNode_AUD`
+  ADD CONSTRAINT `FKFBD5F3D015C284F3` FOREIGN KEY (`REV`) REFERENCES `REVINFO` (`REV`),
+  ADD CONSTRAINT `FKFBD5F3D0DE0FB5A8` FOREIGN KEY (`REVEND`) REFERENCES `REVINFO` (`REV`);
 
 --
 -- Constraints for table `CSNodeToCSTranslatedString`
 --
 ALTER TABLE `CSNodeToCSTranslatedString`
-  ADD CONSTRAINT `FKEE5DA8848DF9AE0A` FOREIGN KEY (`ContentSpecTranslatedStringID`) REFERENCES `ContentSpecTranslatedString` (`ContentSpecTranslatedStringID`),
-  ADD CONSTRAINT `FKEE5DA884ABA6BBE0` FOREIGN KEY (`ContentSpecNodeID`) REFERENCES `ContentSpecNode` (`ContentSpecNodeID`);
+  ADD CONSTRAINT `FKEE5DA88417FF12D7` FOREIGN KEY (`CSTranslatedStringID`) REFERENCES `CSTranslatedString` (`CSTranslatedStringID`),
+  ADD CONSTRAINT `FKEE5DA884AB6B2C2D` FOREIGN KEY (`CSNodeID`) REFERENCES `ContentSpecNode` (`ContentSpecNodeID`);
 
 --
 -- Constraints for table `CSNodeToCSTranslatedString_AUD`
 --
 ALTER TABLE `CSNodeToCSTranslatedString_AUD`
-  ADD CONSTRAINT `FKBEB9F455A110986` FOREIGN KEY (`REV`) REFERENCES `REVINFO` (`REV`),
-  ADD CONSTRAINT `FKBEB9F455D25E3A3B` FOREIGN KEY (`REVEND`) REFERENCES `REVINFO` (`REV`);
+  ADD CONSTRAINT `FKBEB9F45515C284F3` FOREIGN KEY (`REV`) REFERENCES `REVINFO` (`REV`),
+  ADD CONSTRAINT `FKBEB9F455DE0FB5A8` FOREIGN KEY (`REVEND`) REFERENCES `REVINFO` (`REV`);
+
+--
+-- Constraints for table `CSNodeToPropertyTag`
+--
+ALTER TABLE `CSNodeToPropertyTag`
+  ADD CONSTRAINT `FK74746698AB6B2C2D` FOREIGN KEY (`CSNodeID`) REFERENCES `ContentSpecNode` (`ContentSpecNodeID`),
+  ADD CONSTRAINT `FK74746698BED5AE51` FOREIGN KEY (`PropertyTagID`) REFERENCES `PropertyTag` (`PropertyTagID`);
+
+--
+-- Constraints for table `CSNodeToPropertyTag_AUD`
+--
+ALTER TABLE `CSNodeToPropertyTag_AUD`
+  ADD CONSTRAINT `FKC05B886915C284F3` FOREIGN KEY (`REV`) REFERENCES `REVINFO` (`REV`),
+  ADD CONSTRAINT `FKC05B8869DE0FB5A8` FOREIGN KEY (`REVEND`) REFERENCES `REVINFO` (`REV`);
+
+--
+-- Constraints for table `CSTranslatedString_AUD`
+--
+ALTER TABLE `CSTranslatedString_AUD`
+  ADD CONSTRAINT `FK36D4436815C284F3` FOREIGN KEY (`REV`) REFERENCES `REVINFO` (`REV`),
+  ADD CONSTRAINT `FK36D44368DE0FB5A8` FOREIGN KEY (`REVEND`) REFERENCES `REVINFO` (`REV`);
 
 --
 -- Constraints for table `FilterCategory`
