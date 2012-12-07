@@ -24,6 +24,6 @@
 
     <filter-mapping>
         <filter-name>compression</filter-name>
-        <url-pattern>/seam/resource/rest/*</url-pattern>
+        <url-pattern>/rest/*</url-pattern>
     </filter-mapping>
 </web-app>
