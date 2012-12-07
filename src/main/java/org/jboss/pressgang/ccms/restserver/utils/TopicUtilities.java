@@ -483,4 +483,16 @@ public class TopicUtilities extends org.jboss.pressgang.ccms.model.utils.TopicUt
             log.error("Probably an error searching Bugzilla", ex);
         }
     }
+    
+    public static String getXMLDoctypeString(final Topic topic) {
+        if (topic.getXmlDoctype() == null) {
+            return "None";
+        } else if (topic.getXmlDoctype() == org.jboss.pressgang.ccms.model.constants.Constants.DOCBOOK_45) {
+            return "Docbook 4.5";
+        } else if (topic.getXmlDoctype() == org.jboss.pressgang.ccms.model.constants.Constants.DOCBOOK_50) {
+            return "Docbook 5.0";
+        }
+        
+        return "Unknown";
+    }
 }

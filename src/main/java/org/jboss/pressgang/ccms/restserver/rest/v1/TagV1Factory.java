@@ -22,6 +22,7 @@ import org.jboss.pressgang.ccms.rest.v1.collections.join.RESTCategoryInTagCollec
 import org.jboss.pressgang.ccms.rest.v1.constants.RESTv1Constants;
 import org.jboss.pressgang.ccms.rest.v1.entities.RESTProjectV1;
 import org.jboss.pressgang.ccms.rest.v1.entities.RESTTagV1;
+import org.jboss.pressgang.ccms.rest.v1.entities.RESTTopicV1;
 import org.jboss.pressgang.ccms.rest.v1.entities.base.RESTBaseEntityV1;
 import org.jboss.pressgang.ccms.rest.v1.entities.join.RESTAssignedPropertyTagV1;
 import org.jboss.pressgang.ccms.rest.v1.entities.join.RESTCategoryInTagV1;
@@ -64,36 +65,49 @@ public class TagV1Factory extends RESTDataObjectFactory<RESTTagV1, Tag, RESTTagC
         retValue.setDescription(entity.getTagDescription());
 
         // REVISIONS
-        if (revision == null) {
+        if (revision == null && expand != null && expand.contains(RESTTopicV1.REVISIONS_NAME)) {
             retValue.setRevisions(new RESTDataObjectCollectionFactory<RESTTagV1, Tag, RESTTagCollectionV1, RESTTagCollectionItemV1>()
-                    .create(RESTTagCollectionV1.class, new TagV1Factory(), entity, EnversUtilities.getRevisions(entityManager, entity),
-                            RESTBaseEntityV1.REVISIONS_NAME, dataType, expand, baseUrl, entityManager));
+                    .create(RESTTagCollectionV1.class, new TagV1Factory(), entity,
+                            EnversUtilities.getRevisions(entityManager, entity), RESTBaseEntityV1.REVISIONS_NAME, dataType,
+                            expand, baseUrl, entityManager));
         }
-        
+
         // CATEGORIES
-        retValue.setCategories(new RESTDataObjectCollectionFactory<RESTCategoryInTagV1, TagToCategory, RESTCategoryInTagCollectionV1, RESTCategoryInTagCollectionItemV1>()
-                .create(RESTCategoryInTagCollectionV1.class, new CategoryInTagV1Factory(), entity.getTagToCategoriesArray(),
-                        RESTTagV1.CATEGORIES_NAME, dataType, expand, baseUrl, entityManager));
-        
+        if (expand != null && expand.contains(RESTTagV1.CATEGORIES_NAME)) {
+            retValue.setCategories(new RESTDataObjectCollectionFactory<RESTCategoryInTagV1, TagToCategory, RESTCategoryInTagCollectionV1, RESTCategoryInTagCollectionItemV1>()
+                    .create(RESTCategoryInTagCollectionV1.class, new CategoryInTagV1Factory(),
+                            entity.getTagToCategoriesArray(), RESTTagV1.CATEGORIES_NAME, dataType, expand, baseUrl,
+                            entityManager));
+        }
+
         // PARENT TAGS
-        retValue.setParentTags(new RESTDataObjectCollectionFactory<RESTTagV1, Tag, RESTTagCollectionV1, RESTTagCollectionItemV1>()
-                .create(RESTTagCollectionV1.class, new TagV1Factory(), entity.getParentTags(), RESTTagV1.PARENT_TAGS_NAME,
-                        dataType, expand, baseUrl, entityManager));
-        
+        if (expand != null && expand.contains(RESTTagV1.PARENT_TAGS_NAME)) {
+            retValue.setParentTags(new RESTDataObjectCollectionFactory<RESTTagV1, Tag, RESTTagCollectionV1, RESTTagCollectionItemV1>()
+                    .create(RESTTagCollectionV1.class, new TagV1Factory(), entity.getParentTags(), RESTTagV1.PARENT_TAGS_NAME,
+                            dataType, expand, baseUrl, entityManager));
+        }
+
         // CHILD TAGS
-        retValue.setChildTags(new RESTDataObjectCollectionFactory<RESTTagV1, Tag, RESTTagCollectionV1, RESTTagCollectionItemV1>()
-                .create(RESTTagCollectionV1.class, new TagV1Factory(), entity.getChildTags(), RESTTagV1.CHILD_TAGS_NAME,
-                        dataType, expand, baseUrl, entityManager));
-        
+        if (expand != null && expand.contains(RESTTagV1.CHILD_TAGS_NAME)) {
+            retValue.setChildTags(new RESTDataObjectCollectionFactory<RESTTagV1, Tag, RESTTagCollectionV1, RESTTagCollectionItemV1>()
+                    .create(RESTTagCollectionV1.class, new TagV1Factory(), entity.getChildTags(), RESTTagV1.CHILD_TAGS_NAME,
+                            dataType, expand, baseUrl, entityManager));
+        }
+
         // PROPERTY TAGS
-        retValue.setProperties(new RESTDataObjectCollectionFactory<RESTAssignedPropertyTagV1, TagToPropertyTag, RESTAssignedPropertyTagCollectionV1, RESTAssignedPropertyTagCollectionItemV1>()
-                .create(RESTAssignedPropertyTagCollectionV1.class, new TagPropertyTagV1Factory(),
-                        entity.getTagToPropertyTagsArray(), RESTTagV1.PROPERTIES_NAME, dataType, expand, baseUrl, entityManager));
-        
+        if (expand != null && expand.contains(RESTTagV1.PROPERTIES_NAME)) {
+            retValue.setProperties(new RESTDataObjectCollectionFactory<RESTAssignedPropertyTagV1, TagToPropertyTag, RESTAssignedPropertyTagCollectionV1, RESTAssignedPropertyTagCollectionItemV1>()
+                    .create(RESTAssignedPropertyTagCollectionV1.class, new TagPropertyTagV1Factory(),
+                            entity.getTagToPropertyTagsArray(), RESTTagV1.PROPERTIES_NAME, dataType, expand, baseUrl,
+                            entityManager));
+        }
+
         // PROJECTS
-        retValue.setProjects(new RESTDataObjectCollectionFactory<RESTProjectV1, Project, RESTProjectCollectionV1, RESTProjectCollectionItemV1>()
-                .create(RESTProjectCollectionV1.class, new ProjectV1Factory(), entity.getProjects(), RESTTagV1.PROJECTS_NAME,
-                        dataType, expand, baseUrl, entityManager));
+        if (expand != null && expand.contains(RESTTagV1.PROJECTS_NAME)) {
+            retValue.setProjects(new RESTDataObjectCollectionFactory<RESTProjectV1, Project, RESTProjectCollectionV1, RESTProjectCollectionItemV1>()
+                    .create(RESTProjectCollectionV1.class, new ProjectV1Factory(), entity.getProjects(),
+                            RESTTagV1.PROJECTS_NAME, dataType, expand, baseUrl, entityManager));
+        }
 
         retValue.setLinks(baseUrl, RESTv1Constants.TAG_URL_NAME, dataType, retValue.getId());
 

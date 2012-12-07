@@ -15,8 +15,7 @@ import org.jboss.pressgang.ccms.restserver.rest.v1.base.RESTDataObjectCollection
 import org.jboss.pressgang.ccms.restserver.rest.v1.base.RESTDataObjectFactory;
 import org.jboss.pressgang.ccms.restserver.utils.EnversUtilities;
 
-
-class BugzillaBugV1Factory extends
+public class BugzillaBugV1Factory extends
         RESTDataObjectFactory<RESTBugzillaBugV1, BugzillaBug, RESTBugzillaBugCollectionV1, RESTBugzillaBugCollectionItemV1> {
 
     public BugzillaBugV1Factory() {
@@ -44,7 +43,7 @@ class BugzillaBugV1Factory extends
         retValue.setSummary(entity.getBugzillaBugSummary());
 
         // REVISIONS
-        if (revision == null) {
+        if (revision == null && expand != null && expand.contains(RESTBaseEntityV1.REVISIONS_NAME)) {
             retValue.setRevisions(new RESTDataObjectCollectionFactory<RESTBugzillaBugV1, BugzillaBug, RESTBugzillaBugCollectionV1, RESTBugzillaBugCollectionItemV1>()
                     .create(RESTBugzillaBugCollectionV1.class, new BugzillaBugV1Factory(), entity, EnversUtilities.getRevisions(entityManager, entity),
                             RESTBaseEntityV1.REVISIONS_NAME, dataType, expand, baseUrl, entityManager));

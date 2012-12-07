@@ -3079,7 +3079,7 @@ public class RESTv1 extends BaseRESTv1 implements RESTBaseInterfaceV1, RESTInter
 
     /* RAW FUNCTIONS */
     @Override
-    public byte[] getRAWImage(final Integer id, final String locale) throws InvalidParameterException,
+    public Response getRAWImage(final Integer id, final String locale) throws InvalidParameterException,
             InternalProcessingException {
         if (id == null)
             throw new InvalidParameterException("The id parameter can not be null");
@@ -3090,14 +3090,14 @@ public class RESTv1 extends BaseRESTv1 implements RESTBaseInterfaceV1, RESTInter
         /* Try and find the locale specified first */
         for (final LanguageImage languageImage : entity.getLanguageImages()) {
             if (fixedLocale.equalsIgnoreCase(languageImage.getLocale())) {
-                return languageImage.getImageData();
+                return Response.ok(languageImage.getImageData(), languageImage.getMimeType()).build();
             }
         }
 
         /* If the specified locale can't be found then use the default */
         for (final LanguageImage languageImage : entity.getLanguageImages()) {
             if (CommonConstants.DEFAULT_LOCALE.equalsIgnoreCase(languageImage.getLocale())) {
-                return languageImage.getImageData();
+                return Response.ok(languageImage.getImageData(), languageImage.getMimeType()).build();
             }
         }
 
@@ -3105,7 +3105,7 @@ public class RESTv1 extends BaseRESTv1 implements RESTBaseInterfaceV1, RESTInter
     }
 
     @Override
-    public byte[] getRAWImageRevision(final Integer id, final Integer revision, final String locale)
+    public Response getRAWImageRevision(final Integer id, final Integer revision, final String locale)
             throws InvalidParameterException, InternalProcessingException {
         if (id == null)
             throw new InvalidParameterException("The id parameter can not be null");
@@ -3118,14 +3118,14 @@ public class RESTv1 extends BaseRESTv1 implements RESTBaseInterfaceV1, RESTInter
         /* Try and find the locale specified first */
         for (final LanguageImage languageImage : entity.getLanguageImages()) {
             if (fixedLocale.equalsIgnoreCase(languageImage.getLocale())) {
-                return languageImage.getImageData();
+                return Response.ok(languageImage.getImageData(), languageImage.getMimeType()).build();
             }
         }
 
         /* If the specified locale can't be found then use the default */
         for (final LanguageImage languageImage : entity.getLanguageImages()) {
             if (CommonConstants.DEFAULT_LOCALE.equalsIgnoreCase(languageImage.getLocale())) {
-                return languageImage.getImageData();
+                return Response.ok(languageImage.getImageData(), languageImage.getMimeType()).build();
             }
         }
 
@@ -3133,7 +3133,7 @@ public class RESTv1 extends BaseRESTv1 implements RESTBaseInterfaceV1, RESTInter
     }
 
     @Override
-    public byte[] getRAWImageThumbnail(final Integer id, final String locale) throws InvalidParameterException,
+    public Response getRAWImageThumbnail(final Integer id, final String locale) throws InvalidParameterException,
             InternalProcessingException {
         if (id == null)
             throw new InvalidParameterException("The id parameter can not be null");
@@ -3144,14 +3144,14 @@ public class RESTv1 extends BaseRESTv1 implements RESTBaseInterfaceV1, RESTInter
         /* Try and find the locale specified first */
         for (final LanguageImage languageImage : entity.getLanguageImages()) {
             if (fixedLocale.equalsIgnoreCase(languageImage.getLocale())) {
-                return languageImage.getThumbnailData();
+                return Response.ok(languageImage.getThumbnailData(), languageImage.getMimeType()).build();
             }
         }
 
         /* If the specified locale can't be found then use the default */
         for (final LanguageImage languageImage : entity.getLanguageImages()) {
             if (CommonConstants.DEFAULT_LOCALE.equalsIgnoreCase(languageImage.getLocale())) {
-                return languageImage.getThumbnailData();
+                return Response.ok(languageImage.getThumbnailData(), languageImage.getMimeType()).build();
             }
         }
 

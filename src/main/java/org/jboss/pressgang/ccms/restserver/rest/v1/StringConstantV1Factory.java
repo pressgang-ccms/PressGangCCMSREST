@@ -44,7 +44,7 @@ public class StringConstantV1Factory
         retValue.setValue(entity.getConstantValue());
 
         // REVISIONS
-        if (revision == null) {
+        if (revision == null && expand != null && expand.contains(RESTBaseEntityV1.REVISIONS_NAME)) {
             retValue.setRevisions(new RESTDataObjectCollectionFactory<RESTStringConstantV1, StringConstants, RESTStringConstantCollectionV1, RESTStringConstantCollectionItemV1>()
                     .create(RESTStringConstantCollectionV1.class, new StringConstantV1Factory(), entity, EnversUtilities.getRevisions(entityManager, entity),
                             RESTBaseEntityV1.REVISIONS_NAME, dataType, expand, baseUrl, entityManager));

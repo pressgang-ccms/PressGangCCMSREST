@@ -50,17 +50,20 @@ public class PropertyCategoryV1Factory
         retValue.setDescription(entity.getPropertyTagCategoryDescription());
 
         // REVISIONS
-        if (revision == null) {
+        if (revision == null && expand != null && expand.contains(RESTBaseEntityV1.REVISIONS_NAME)) {
             retValue.setRevisions(new RESTDataObjectCollectionFactory<RESTPropertyCategoryV1, PropertyTagCategory, RESTPropertyCategoryCollectionV1, RESTPropertyCategoryCollectionItemV1>()
                     .create(RESTPropertyCategoryCollectionV1.class, new PropertyCategoryV1Factory(), entity,
-                            EnversUtilities.getRevisions(entityManager, entity), RESTBaseEntityV1.REVISIONS_NAME, dataType, expand, baseUrl, entityManager));
+                            EnversUtilities.getRevisions(entityManager, entity), RESTBaseEntityV1.REVISIONS_NAME, dataType,
+                            expand, baseUrl, entityManager));
         }
 
         // PROPERTY TAGS
-        retValue.setPropertyTags(new RESTDataObjectCollectionFactory<RESTPropertyTagInPropertyCategoryV1, PropertyTagToPropertyTagCategory, RESTPropertyTagInPropertyCategoryCollectionV1, RESTPropertyTagInPropertyCategoryCollectionItemV1>()
-                .create(RESTPropertyTagInPropertyCategoryCollectionV1.class, new PropertyTagInPropertyCategoryV1Factory(),
-                        entity.getPropertyTagToPropertyTagCategoriesList(), RESTPropertyCategoryV1.PROPERTY_TAGS_NAME,
-                        dataType, expand, baseUrl, revision, false, entityManager));
+        if (expand != null && expand.contains(RESTPropertyCategoryV1.PROPERTY_TAGS_NAME)) {
+            retValue.setPropertyTags(new RESTDataObjectCollectionFactory<RESTPropertyTagInPropertyCategoryV1, PropertyTagToPropertyTagCategory, RESTPropertyTagInPropertyCategoryCollectionV1, RESTPropertyTagInPropertyCategoryCollectionItemV1>()
+                    .create(RESTPropertyTagInPropertyCategoryCollectionV1.class, new PropertyTagInPropertyCategoryV1Factory(),
+                            entity.getPropertyTagToPropertyTagCategoriesList(), RESTPropertyCategoryV1.PROPERTY_TAGS_NAME,
+                            dataType, expand, baseUrl, revision, false, entityManager));
+        }
 
         retValue.setLinks(baseUrl, RESTv1Constants.PROPERTY_CATEGORY_URL_NAME, dataType, retValue.getId());
 

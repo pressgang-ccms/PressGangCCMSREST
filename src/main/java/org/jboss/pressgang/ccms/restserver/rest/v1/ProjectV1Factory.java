@@ -28,8 +28,8 @@ public class ProjectV1Factory extends
     }
 
     @Override
-    public RESTProjectV1 createRESTEntityFromDBEntityInternal(final Project entity, final String baseUrl, final String dataType,
-            final ExpandDataTrunk expand, final Number revision, final boolean expandParentReferences,
+    public RESTProjectV1 createRESTEntityFromDBEntityInternal(final Project entity, final String baseUrl,
+            final String dataType, final ExpandDataTrunk expand, final Number revision, final boolean expandParentReferences,
             final EntityManager entityManager) {
         assert entity != null : "Parameter topic can not be null";
         assert baseUrl != null : "Parameter baseUrl can not be null";
@@ -49,16 +49,19 @@ public class ProjectV1Factory extends
         retValue.setExpand(expandOptions);
 
         // REVISIONS
-        if (revision == null) {
+        if (revision == null && expand != null && expand.contains(RESTBaseEntityV1.REVISIONS_NAME)) {
             retValue.setRevisions(new RESTDataObjectCollectionFactory<RESTProjectV1, Project, RESTProjectCollectionV1, RESTProjectCollectionItemV1>()
-                    .create(RESTProjectCollectionV1.class, new ProjectV1Factory(), entity, EnversUtilities.getRevisions(entityManager, entity),
-                            RESTBaseEntityV1.REVISIONS_NAME, dataType, expand, baseUrl, entityManager));
+                    .create(RESTProjectCollectionV1.class, new ProjectV1Factory(), entity,
+                            EnversUtilities.getRevisions(entityManager, entity), RESTBaseEntityV1.REVISIONS_NAME, dataType,
+                            expand, baseUrl, entityManager));
         }
-        
+
         // TAGS
-        retValue.setTags(new RESTDataObjectCollectionFactory<RESTTagV1, Tag, RESTTagCollectionV1, RESTTagCollectionItemV1>()
-                .create(RESTTagCollectionV1.class, new TagV1Factory(), entity.getTags(), RESTv1Constants.TAGS_EXPANSION_NAME,
-                        dataType, expand, baseUrl, entityManager));
+        if (expand != null && expand.contains(RESTProjectV1.TAGS_NAME)) {
+            retValue.setTags(new RESTDataObjectCollectionFactory<RESTTagV1, Tag, RESTTagCollectionV1, RESTTagCollectionItemV1>()
+                    .create(RESTTagCollectionV1.class, new TagV1Factory(), entity.getTags(), RESTProjectV1.TAGS_NAME, dataType,
+                            expand, baseUrl, entityManager));
+        }
 
         retValue.setLinks(baseUrl, RESTv1Constants.PROJECT_URL_NAME, dataType, retValue.getId());
 

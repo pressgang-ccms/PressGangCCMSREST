@@ -8,6 +8,7 @@ import javax.persistence.EntityManager;
 import org.jboss.pressgang.ccms.model.TranslatedTopicString;
 import org.jboss.pressgang.ccms.rest.v1.collections.RESTTranslatedTopicStringCollectionV1;
 import org.jboss.pressgang.ccms.rest.v1.collections.items.RESTTranslatedTopicStringCollectionItemV1;
+import org.jboss.pressgang.ccms.rest.v1.entities.RESTTopicV1;
 import org.jboss.pressgang.ccms.rest.v1.entities.RESTTranslatedTopicStringV1;
 import org.jboss.pressgang.ccms.rest.v1.entities.base.RESTBaseEntityV1;
 import org.jboss.pressgang.ccms.rest.v1.expansion.ExpandDataTrunk;
@@ -23,9 +24,9 @@ public class TranslatedTopicStringV1Factory
     }
 
     @Override
-    public RESTTranslatedTopicStringV1 createRESTEntityFromDBEntityInternal(final TranslatedTopicString entity, final String baseUrl,
-            final String dataType, final ExpandDataTrunk expand, final Number revision, final boolean expandParentReferences,
-            final EntityManager entityManager) {
+    public RESTTranslatedTopicStringV1 createRESTEntityFromDBEntityInternal(final TranslatedTopicString entity,
+            final String baseUrl, final String dataType, final ExpandDataTrunk expand, final Number revision,
+            final boolean expandParentReferences, final EntityManager entityManager) {
         assert entity != null : "Parameter topic can not be null";
         assert baseUrl != null : "Parameter baseUrl can not be null";
         assert expand != null : "Parameter expand can not be null";
@@ -48,7 +49,8 @@ public class TranslatedTopicStringV1Factory
         retValue.setFuzzyTranslation(entity.getFuzzyTranslation());
 
         /* Set the object references */
-        if (expandParentReferences && expand != null && entity.getTranslatedTopicData() != null) {
+        if (expandParentReferences && expand != null && expand.contains(RESTTranslatedTopicStringV1.TRANSLATEDTOPIC_NAME)
+                && entity.getTranslatedTopicData() != null) {
             retValue.setTranslatedTopic(new TranslatedTopicV1Factory().createRESTEntityFromDBEntity(
                     entity.getTranslatedTopicData(), baseUrl, dataType,
                     expand.get(RESTTranslatedTopicStringV1.TRANSLATEDTOPIC_NAME), revision, expandParentReferences,
@@ -56,10 +58,11 @@ public class TranslatedTopicStringV1Factory
         }
 
         // REVISIONS
-        if (revision == null) {
+        if (revision == null && expand != null && expand.contains(RESTTopicV1.REVISIONS_NAME)) {
             retValue.setRevisions(new RESTDataObjectCollectionFactory<RESTTranslatedTopicStringV1, TranslatedTopicString, RESTTranslatedTopicStringCollectionV1, RESTTranslatedTopicStringCollectionItemV1>()
                     .create(RESTTranslatedTopicStringCollectionV1.class, new TranslatedTopicStringV1Factory(), entity,
-                            EnversUtilities.getRevisions(entityManager, entity), RESTBaseEntityV1.REVISIONS_NAME, dataType, expand, baseUrl, entityManager));
+                            EnversUtilities.getRevisions(entityManager, entity), RESTBaseEntityV1.REVISIONS_NAME, dataType,
+                            expand, baseUrl, entityManager));
         }
 
         return retValue;

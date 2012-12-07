@@ -5,13 +5,19 @@ import java.util.List;
 
 import javax.persistence.EntityManager;
 
+import org.jboss.pressgang.ccms.model.PropertyTagToPropertyTagCategory;
 import org.jboss.pressgang.ccms.model.base.ToPropertyTag;
 import org.jboss.pressgang.ccms.rest.v1.collections.items.join.RESTAssignedPropertyTagCollectionItemV1;
+import org.jboss.pressgang.ccms.rest.v1.collections.items.join.RESTPropertyCategoryInPropertyTagCollectionItemV1;
 import org.jboss.pressgang.ccms.rest.v1.collections.join.RESTAssignedPropertyTagCollectionV1;
+import org.jboss.pressgang.ccms.rest.v1.collections.join.RESTPropertyCategoryInPropertyTagCollectionV1;
 import org.jboss.pressgang.ccms.rest.v1.constants.RESTv1Constants;
 import org.jboss.pressgang.ccms.rest.v1.entities.base.RESTBaseEntityV1;
+import org.jboss.pressgang.ccms.rest.v1.entities.base.RESTBasePropertyTagV1;
 import org.jboss.pressgang.ccms.rest.v1.entities.join.RESTAssignedPropertyTagV1;
+import org.jboss.pressgang.ccms.rest.v1.entities.join.RESTPropertyCategoryInPropertyTagV1;
 import org.jboss.pressgang.ccms.rest.v1.expansion.ExpandDataTrunk;
+import org.jboss.pressgang.ccms.restserver.rest.v1.PropertyCategoryInPropertyTagV1Factory;
 import org.jboss.pressgang.ccms.restserver.utils.EnversUtilities;
 
 public abstract class BaseAssignedPropertyTagV1Factory<T extends ToPropertyTag<T>, U extends BaseAssignedPropertyTagV1Factory<T, U>>
@@ -49,7 +55,7 @@ public abstract class BaseAssignedPropertyTagV1Factory<T extends ToPropertyTag<T
         retValue.setIsUnique(entity.getPropertyTag().getPropertyTagIsUnique());
 
         // REVISIONS
-        if (revision == null) {
+        if (revision == null && expand != null && expand.contains(RESTBaseEntityV1.REVISIONS_NAME)) {
             U factory = null;
             try {
                 factory = factoryClass.newInstance();
@@ -60,6 +66,14 @@ public abstract class BaseAssignedPropertyTagV1Factory<T extends ToPropertyTag<T
                     .create(RESTAssignedPropertyTagCollectionV1.class, factory, entity,
                             EnversUtilities.getRevisions(entityManager, entity), RESTBaseEntityV1.REVISIONS_NAME, dataType,
                             expand, baseUrl, entityManager));
+        }
+        
+        // PROPERTY CATEGORIES
+        if (expand != null && expand.contains(RESTBasePropertyTagV1.PROPERTY_CATEGORIES_NAME)) {
+            retValue.setPropertyCategories(new RESTDataObjectCollectionFactory<RESTPropertyCategoryInPropertyTagV1, PropertyTagToPropertyTagCategory, RESTPropertyCategoryInPropertyTagCollectionV1, RESTPropertyCategoryInPropertyTagCollectionItemV1>()
+                    .create(RESTPropertyCategoryInPropertyTagCollectionV1.class, new PropertyCategoryInPropertyTagV1Factory(),
+                            entity.getPropertyTag().getPropertyTagToPropertyTagCategoriesList(), RESTBasePropertyTagV1.PROPERTY_CATEGORIES_NAME,
+                            dataType, expand, baseUrl, revision, false, entityManager));
         }
 
         retValue.setLinks(baseUrl, RESTv1Constants.PROPERTYTAG_URL_NAME, dataType, retValue.getId());

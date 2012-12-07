@@ -35,6 +35,7 @@ public class BaseArquillianIntegrationTest {
                 .addAsWebInfResource("testrestserver-ds.xml")
                 .addAsWebInfResource(EmptyAsset.INSTANCE, "beans.xml")
                 .addAsWebInfResource("test-web.xml", "web.xml")
+                .addAsWebInfResource("test-jboss-deployment-structure.xml", "jboss-deployment-structure.xml")
                 .addAsLibraries(DependencyResolvers.use(MavenDependencyResolver.class)
                         .includeDependenciesFromPom("src/test/resources/general/test-pom.xml")
                         .resolveAs(JavaArchive.class));

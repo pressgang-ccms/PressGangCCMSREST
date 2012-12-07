@@ -15,7 +15,6 @@ import org.jboss.pressgang.ccms.restserver.rest.v1.base.RESTDataObjectCollection
 import org.jboss.pressgang.ccms.restserver.rest.v1.base.RESTDataObjectFactory;
 import org.jboss.pressgang.ccms.restserver.utils.EnversUtilities;
 
-
 public class LanguageImageV1Factory
         extends
         RESTDataObjectFactory<RESTLanguageImageV1, LanguageImage, RESTLanguageImageCollectionV1, RESTLanguageImageCollectionItemV1> {
@@ -56,16 +55,18 @@ public class LanguageImageV1Factory
             retValue.setThumbnail(entity.getThumbnailData());
 
         /* Set the object references */
-        if (expandParentReferences && expand != null && entity.getImageFile() != null) {
+        if (expandParentReferences && expand != null && expand.contains(RESTLanguageImageV1.IMAGE_NAME)
+                && entity.getImageFile() != null) {
             retValue.setImage(new ImageV1Factory().createRESTEntityFromDBEntity(entity.getImageFile(), baseUrl, dataType,
                     expand.get(RESTLanguageImageV1.IMAGE_NAME), entityManager));
         }
 
         // REVISIONS
-        if (revision == null) {
+        if (revision == null && expand != null && expand.contains(RESTBaseEntityV1.REVISIONS_NAME)) {
             retValue.setRevisions(new RESTDataObjectCollectionFactory<RESTLanguageImageV1, LanguageImage, RESTLanguageImageCollectionV1, RESTLanguageImageCollectionItemV1>()
-                    .create(RESTLanguageImageCollectionV1.class, new LanguageImageV1Factory(), entity, EnversUtilities.getRevisions(entityManager, entity),
-                            RESTBaseEntityV1.REVISIONS_NAME, dataType, expand, baseUrl, entityManager));
+                    .create(RESTLanguageImageCollectionV1.class, new LanguageImageV1Factory(), entity,
+                            EnversUtilities.getRevisions(entityManager, entity), RESTBaseEntityV1.REVISIONS_NAME, dataType,
+                            expand, baseUrl, entityManager));
         }
 
         return retValue;
