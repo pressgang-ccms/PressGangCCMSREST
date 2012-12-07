@@ -31,9 +31,9 @@ public class ContentSpecMetaDataV1Factory
     }
 
     @Override
-    public RESTAssignedCSMetaDataV1 createRESTEntityFromDBEntityInternal(final ContentSpecToCSMetaData entity, final String baseUrl,
-            final String dataType, final ExpandDataTrunk expand, final Number revision, final boolean expandParentReferences,
-            final EntityManager entityManager) {
+    public RESTAssignedCSMetaDataV1 createRESTEntityFromDBEntityInternal(final ContentSpecToCSMetaData entity,
+            final String baseUrl, final String dataType, final ExpandDataTrunk expand, final Number revision,
+            final boolean expandParentReferences, final EntityManager entityManager) {
         assert entity != null : "Parameter entity can not be null";
         assert baseUrl != null : "Parameter baseUrl can not be null";
 
@@ -53,18 +53,20 @@ public class ContentSpecMetaDataV1Factory
         retValue.setValue(entity.getValue());
 
         // REVISIONS
-        if (revision == null) {
+        if (revision == null && expand != null && expand.contains(RESTBaseEntityV1.REVISIONS_NAME)) {
             retValue.setRevisions(new RESTDataObjectCollectionFactory<RESTAssignedCSMetaDataV1, ContentSpecToCSMetaData, RESTAssignedCSMetaDataCollectionV1, RESTAssignedCSMetaDataCollectionItemV1>()
                     .create(RESTAssignedCSMetaDataCollectionV1.class, new ContentSpecMetaDataV1Factory(), entity,
-                            EnversUtilities.getRevisions(entityManager, entity), RESTBaseEntityV1.REVISIONS_NAME, dataType, expand, baseUrl,
-                            entityManager));
+                            EnversUtilities.getRevisions(entityManager, entity), RESTBaseEntityV1.REVISIONS_NAME, dataType,
+                            expand, baseUrl, entityManager));
         }
 
         // TRANSLATED STRINGS
-        retValue.setTranslatedStrings_OTM(new RESTDataObjectCollectionFactory<RESTCSTranslatedStringV1, CSTranslatedString, RESTCSTranslatedStringCollectionV1, RESTCSTranslatedStringCollectionItemV1>()
-                .create(RESTCSTranslatedStringCollectionV1.class, new CSTranslatedStringV1Factory(),
-                        entity.getCSTranslatedStringsList(), RESTAssignedCSMetaDataV1.TRANSLATED_STRINGS_NAME, dataType,
-                        expand, baseUrl, false, entityManager));
+        if (expand != null && expand.contains(RESTAssignedCSMetaDataV1.TRANSLATED_STRINGS_NAME)) {
+            retValue.setTranslatedStrings_OTM(new RESTDataObjectCollectionFactory<RESTCSTranslatedStringV1, CSTranslatedString, RESTCSTranslatedStringCollectionV1, RESTCSTranslatedStringCollectionItemV1>()
+                    .create(RESTCSTranslatedStringCollectionV1.class, new CSTranslatedStringV1Factory(),
+                            entity.getCSTranslatedStringsList(), RESTAssignedCSMetaDataV1.TRANSLATED_STRINGS_NAME, dataType,
+                            expand, baseUrl, false, entityManager));
+        }
 
         retValue.setLinks(baseUrl, RESTv1Constants.CONTENT_SPEC_META_DATA_URL_NAME, dataType, retValue.getId());
 

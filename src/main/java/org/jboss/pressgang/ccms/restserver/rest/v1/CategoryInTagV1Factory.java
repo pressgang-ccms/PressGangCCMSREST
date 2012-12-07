@@ -53,16 +53,20 @@ public class CategoryInTagV1Factory
         retValue.setRelationshipSort(entity.getSorting());
 
         // REVISIONS
-        if (revision == null) {
+        if (revision == null && expand != null && expand.contains(RESTBaseEntityV1.REVISIONS_NAME)) {
             retValue.setRevisions(new RESTDataObjectCollectionFactory<RESTCategoryInTagV1, TagToCategory, RESTCategoryInTagCollectionV1, RESTCategoryInTagCollectionItemV1>()
-                    .create(RESTCategoryInTagCollectionV1.class, new CategoryInTagV1Factory(), entity, EnversUtilities.getRevisions(entityManager, entity),
-                            RESTBaseEntityV1.REVISIONS_NAME, dataType, expand, baseUrl, entityManager));
+                    .create(RESTCategoryInTagCollectionV1.class, new CategoryInTagV1Factory(), entity,
+                            EnversUtilities.getRevisions(entityManager, entity), RESTBaseEntityV1.REVISIONS_NAME, dataType,
+                            expand, baseUrl, entityManager));
         }
-        
+
         // TAGS
-        retValue.setTags(new RESTDataObjectCollectionFactory<RESTTagInCategoryV1, TagToCategory, RESTTagInCategoryCollectionV1, RESTTagInCategoryCollectionItemV1>()
-                .create(RESTTagInCategoryCollectionV1.class, new TagInCategoryV1Factory(), entity.getCategory()
-                        .getTagToCategoriesArray(), RESTv1Constants.TAGS_EXPANSION_NAME, dataType, expand, baseUrl, entityManager));
+        if (expand != null && expand.contains(RESTCategoryInTagV1.TAGS_NAME)) {
+            retValue.setTags(new RESTDataObjectCollectionFactory<RESTTagInCategoryV1, TagToCategory, RESTTagInCategoryCollectionV1, RESTTagInCategoryCollectionItemV1>()
+                    .create(RESTTagInCategoryCollectionV1.class, new TagInCategoryV1Factory(), entity.getCategory()
+                            .getTagToCategoriesArray(), RESTCategoryInTagV1.TAGS_NAME, dataType, expand, baseUrl,
+                            entityManager));
+        }
 
         retValue.setLinks(baseUrl, RESTv1Constants.CATEGORY_URL_NAME, dataType, retValue.getId());
 

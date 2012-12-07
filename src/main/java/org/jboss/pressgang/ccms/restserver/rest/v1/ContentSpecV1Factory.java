@@ -70,33 +70,42 @@ public class ContentSpecV1Factory extends
         retValue.setType(RESTContentSpecTypeV1.getContentSpecType(entity.getContentSpecType()));
 
         // REVISIONS
-        if (revision == null) {
+        if (revision == null && expand != null && expand.contains(RESTBaseEntityV1.REVISIONS_NAME)) {
             retValue.setRevisions(new RESTDataObjectCollectionFactory<RESTContentSpecV1, ContentSpec, RESTContentSpecCollectionV1, RESTContentSpecCollectionItemV1>()
-                    .create(RESTContentSpecCollectionV1.class, new ContentSpecV1Factory(), entity, EnversUtilities.getRevisions(entityManager, entity),
-                            RESTBaseEntityV1.REVISIONS_NAME, dataType, expand, baseUrl, entityManager));
+                    .create(RESTContentSpecCollectionV1.class, new ContentSpecV1Factory(), entity,
+                            EnversUtilities.getRevisions(entityManager, entity), RESTBaseEntityV1.REVISIONS_NAME, dataType,
+                            expand, baseUrl, entityManager));
         }
 
         // CHILDREN NODES
-        retValue.setChildren_OTM(new RESTDataObjectCollectionFactory<RESTCSNodeV1, CSNode, RESTCSNodeCollectionV1, RESTCSNodeCollectionItemV1>()
-                .create(RESTCSNodeCollectionV1.class, new CSNodeV1Factory(), entity.getTopCSNodes(),
-                        RESTContentSpecV1.NODES_NAME, dataType, expand, baseUrl, expandParentReferences, entityManager));
+        if (expand != null && expand.contains(RESTContentSpecV1.NODES_NAME)) {
+            retValue.setChildren_OTM(new RESTDataObjectCollectionFactory<RESTCSNodeV1, CSNode, RESTCSNodeCollectionV1, RESTCSNodeCollectionItemV1>()
+                    .create(RESTCSNodeCollectionV1.class, new CSNodeV1Factory(), entity.getTopCSNodes(),
+                            RESTContentSpecV1.NODES_NAME, dataType, expand, baseUrl, expandParentReferences, entityManager));
+        }
 
         // META DATA
-        retValue.setMetaData(new RESTDataObjectCollectionFactory<RESTAssignedCSMetaDataV1, ContentSpecToCSMetaData, RESTAssignedCSMetaDataCollectionV1, RESTAssignedCSMetaDataCollectionItemV1>()
-                .create(RESTAssignedCSMetaDataCollectionV1.class, new ContentSpecMetaDataV1Factory(),
-                        entity.getContentSpecMetaDataList(), RESTContentSpecV1.META_DATA_NAME, dataType, expand, baseUrl,
-                        expandParentReferences, entityManager));
+        if (expand != null && expand.contains(RESTContentSpecV1.META_DATA_NAME)) {
+            retValue.setMetaData(new RESTDataObjectCollectionFactory<RESTAssignedCSMetaDataV1, ContentSpecToCSMetaData, RESTAssignedCSMetaDataCollectionV1, RESTAssignedCSMetaDataCollectionItemV1>()
+                    .create(RESTAssignedCSMetaDataCollectionV1.class, new ContentSpecMetaDataV1Factory(),
+                            entity.getContentSpecMetaDataList(), RESTContentSpecV1.META_DATA_NAME, dataType, expand, baseUrl,
+                            expandParentReferences, entityManager));
+        }
 
         // PROPERTY TAGS
-        retValue.setProperties(new RESTDataObjectCollectionFactory<RESTAssignedPropertyTagV1, ContentSpecToPropertyTag, RESTAssignedPropertyTagCollectionV1, RESTAssignedPropertyTagCollectionItemV1>()
-                .create(RESTAssignedPropertyTagCollectionV1.class, new ContentSpecPropertyTagV1Factory(),
-                        entity.getContentSpecToPropertyTagsList(), RESTContentSpecV1.PROPERTIES_NAME, dataType, expand,
-                        baseUrl, revision, entityManager));
-        
+        if (expand != null && expand.contains(RESTContentSpecV1.PROPERTIES_NAME)) {
+            retValue.setProperties(new RESTDataObjectCollectionFactory<RESTAssignedPropertyTagV1, ContentSpecToPropertyTag, RESTAssignedPropertyTagCollectionV1, RESTAssignedPropertyTagCollectionItemV1>()
+                    .create(RESTAssignedPropertyTagCollectionV1.class, new ContentSpecPropertyTagV1Factory(),
+                            entity.getContentSpecToPropertyTagsList(), RESTContentSpecV1.PROPERTIES_NAME, dataType, expand,
+                            baseUrl, revision, entityManager));
+        }
+
         // TAGS
-        retValue.setTags(new RESTDataObjectCollectionFactory<RESTTagV1, Tag, RESTTagCollectionV1, RESTTagCollectionItemV1>()
-                .create(RESTTagCollectionV1.class, new TagV1Factory(), entity.getTags(), RESTContentSpecV1.TAGS_NAME,
-                        dataType, expand, baseUrl, entityManager));
+        if (expand != null && expand.contains(RESTContentSpecV1.TAGS_NAME)) {
+            retValue.setTags(new RESTDataObjectCollectionFactory<RESTTagV1, Tag, RESTTagCollectionV1, RESTTagCollectionItemV1>()
+                    .create(RESTTagCollectionV1.class, new TagV1Factory(), entity.getTags(), RESTContentSpecV1.TAGS_NAME,
+                            dataType, expand, baseUrl, entityManager));
+        }
 
         retValue.setLinks(baseUrl, RESTv1Constants.CONTENT_SPEC_URL_NAME, dataType, retValue.getId());
 
@@ -114,12 +123,12 @@ public class ContentSpecV1Factory extends
 
         if (dataObject.hasParameterSet(RESTContentSpecV1.LAST_PUBLISHED_NAME))
             entity.setLastPublished(dataObject.getLastPublished());
-        
+
         if (dataObject.hasParameterSet(RESTContentSpecV1.TYPE_NAME))
             entity.setContentSpecType(RESTContentSpecTypeV1.getContentSpecTypeId(dataObject.getType()));
 
         entityManager.persist(entity);
-        
+
         /* Many To Many */
         if (dataObject.hasParameterSet(RESTContentSpecV1.PROPERTIES_NAME) && dataObject.getProperties() != null
                 && dataObject.getProperties().getItems() != null) {
@@ -147,14 +156,15 @@ public class ContentSpecV1Factory extends
                     final ContentSpecToPropertyTag dbEntity = entityManager.find(ContentSpecToPropertyTag.class,
                             restEntity.getRelationshipId());
                     if (dbEntity == null)
-                        throw new InvalidParameterException("No ContentSpecToPropertyTag entity was found with the primary key "
-                                + restEntity.getRelationshipId());
+                        throw new InvalidParameterException(
+                                "No ContentSpecToPropertyTag entity was found with the primary key "
+                                        + restEntity.getRelationshipId());
 
                     new ContentSpecPropertyTagV1Factory().syncDBEntityWithRESTEntity(entityManager, dbEntity, restEntity);
                 }
             }
         }
-        
+
         if (dataObject.hasParameterSet(RESTContentSpecV1.TAGS_NAME) && dataObject.getTags() != null
                 && dataObject.getTags().getItems() != null) {
             dataObject.getTags().removeInvalidChangeItemRequests();
@@ -190,7 +200,7 @@ public class ContentSpecV1Factory extends
                 }
             }
         }
-        
+
         if (dataObject.hasParameterSet(RESTContentSpecV1.META_DATA_NAME) && dataObject.getMetaData() != null
                 && dataObject.getMetaData().getItems() != null) {
             dataObject.getMetaData().removeInvalidChangeItemRequests();

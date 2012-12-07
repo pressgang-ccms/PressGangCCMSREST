@@ -4,7 +4,7 @@ import javax.ws.rs.Path;
 
 import org.jboss.pressgang.ccms.rest.collections.RESTVersionDetailsCollection;
 import org.jboss.pressgang.ccms.rest.entities.RESTVersionDetails;
-import org.jboss.pressgang.ccms.rest.v1.jaxrsinterfaces.RESTInterfaceV1;
+import org.jboss.pressgang.ccms.rest.v1.jaxrsinterfaces.RESTBaseInterfaceV1;
 import org.jboss.pressgang.ccms.utils.common.VersionUtilities;
 
 public class VersionDetailsFactory
@@ -13,7 +13,7 @@ public class VersionDetailsFactory
     {
         final RESTVersionDetailsCollection versions = new RESTVersionDetailsCollection();
         
-        versions.addItem(getRESTVersionDetails(baseUrl, RESTInterfaceV1.class, RESTVersionDetails.DEV_STATE));
+        versions.addItem(getRESTVersionDetails(baseUrl, RESTBaseInterfaceV1.class, RESTVersionDetails.DEV_STATE));
         
         return versions;
     }

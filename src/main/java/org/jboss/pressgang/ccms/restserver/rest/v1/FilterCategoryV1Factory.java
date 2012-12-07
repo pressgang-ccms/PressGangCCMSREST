@@ -50,13 +50,16 @@ public class FilterCategoryV1Factory
         retValue.setState(entity.getCategoryState());
 
         // REVISIONS
-        if (revision == null) {
+        if (revision == null && expand != null && expand.contains(RESTBaseEntityV1.REVISIONS_NAME)) {
             retValue.setRevisions(new RESTDataObjectCollectionFactory<RESTFilterCategoryV1, FilterCategory, RESTFilterCategoryCollectionV1, RESTFilterCategoryCollectionItemV1>()
-                    .create(RESTFilterCategoryCollectionV1.class, new FilterCategoryV1Factory(), entity, EnversUtilities.getRevisions(entityManager, entity),
-                            RESTBaseEntityV1.REVISIONS_NAME, dataType, expand, baseUrl, entityManager));
+                    .create(RESTFilterCategoryCollectionV1.class, new FilterCategoryV1Factory(), entity,
+                            EnversUtilities.getRevisions(entityManager, entity), RESTBaseEntityV1.REVISIONS_NAME, dataType,
+                            expand, baseUrl, entityManager));
         }
 
-        if (expandParentReferences && entity.getFilter() != null && expand != null && entity.getFilter() != null) {
+        // PARENT
+        if (expandParentReferences && expand != null && expand.contains(RESTFilterCategoryV1.FILTER_NAME)
+                && entity.getFilter() != null) {
             retValue.setFilter(new FilterV1Factory().createRESTEntityFromDBEntity(entity.getFilter(), baseUrl, dataType,
                     expand.get(RESTFilterCategoryV1.FILTER_NAME), revision, expandParentReferences, entityManager));
         }
@@ -65,7 +68,7 @@ public class FilterCategoryV1Factory
         if (expand != null && expand.contains(RESTFilterCategoryV1.CATEGORY_NAME) && entity.getCategory() != null)
             retValue.setCategory(new CategoryV1Factory().createRESTEntityFromDBEntity(entity.getCategory(), baseUrl, dataType,
                     expand.get(RESTFilterCategoryV1.CATEGORY_NAME), revision, expandParentReferences, entityManager));
-        
+
         // FILTER PROJECT
         if (expand != null && expand.contains(RESTFilterCategoryV1.PROJECT_NAME) && entity.getProject() != null)
             retValue.setProject(new ProjectV1Factory().createRESTEntityFromDBEntity(entity.getProject(), baseUrl, dataType,
