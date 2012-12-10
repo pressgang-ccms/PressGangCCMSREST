@@ -111,7 +111,7 @@ public class EntityUtilities {
         final Map<String, String> newParamMap = new HashMap<String, String>();
         for (final String key : paramMap.keySet()) {
             try {
-                newParamMap.put(key, URLDecoder.decode(paramMap.getFirst(key), "UTF-8"));
+                newParamMap.put(key, URLDecoder.decode(paramMap.getFirst(key), "UTF-8").replace("%3B", ";"));
             } catch (final Exception ex) {
                 log.warn("The URL query parameter " + key + " with value " + paramMap.getFirst(key)
                         + " could not be URLDecoded", ex);
