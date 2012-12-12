@@ -1019,7 +1019,7 @@ CREATE TABLE IF NOT EXISTS `PropertyTag` (
   `PropertyTagDescription` text,
   `PropertyTagRegex` text NOT NULL,
   `PropertyTagCanBeNull` bit(1) NOT NULL,
-  `PropertyTagIsUnqiue` bit(1) NOT NULL DEFAULT b'0',
+  `PropertyTagIsUnique` bit(1) NOT NULL DEFAULT b'0',
   PRIMARY KEY (`PropertyTagID`),
   UNIQUE KEY `PropertyTagUnique` (`PropertyTagName`)
 ) ENGINE=InnoDB  DEFAULT CHARSET=utf8;
@@ -1198,7 +1198,7 @@ CREATE TABLE IF NOT EXISTS `PropertyTag_AUD` (
   `PropertyTagDescription` text,
   `PropertyTagName` varchar(255) DEFAULT NULL,
   `PropertyTagRegex` text,
-  `PropertyTagIsUnqiue` bit(1) DEFAULT NULL,
+  `PropertyTagIsUnique` bit(1) DEFAULT NULL,
   PRIMARY KEY (`PropertyTagID`,`REV`),
   KEY `FK4825B8B6DF74E053` (`REV`),
   KEY `FK4825B8B6A7C21108` (`REVEND`)
