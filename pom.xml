@@ -253,7 +253,7 @@
         <dependency>
             <groupId>com.thoughtworks.xstream</groupId>
             <artifactId>xstream</artifactId>
-            <version>{xstream.version}</version>
+            <version>${xstream.version}</version>
         </dependency>
         <!-- itext, option to add PDF export -->
         <dependency>
