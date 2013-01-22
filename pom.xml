@@ -34,6 +34,7 @@
         <xmlplugin.version>1.0</xmlplugin.version>
         <antrunplugin.version>1.7</antrunplugin.version>
         <javamelody.version>1.41.0</javamelody.version>
+        <xstream.version>1.4.2</xstream.version>
         <itext.version>2.1.7</itext.version>
     </properties>
 
@@ -248,6 +249,11 @@
             <groupId>net.bull.javamelody</groupId>
             <artifactId>javamelody-core</artifactId>
             <version>${javamelody.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>com.thoughtworks.xstream</groupId>
+            <artifactId>xstream</artifactId>
+            <version>{xstream.version}</version>
         </dependency>
         <!-- itext, option to add PDF export -->
         <dependency>
