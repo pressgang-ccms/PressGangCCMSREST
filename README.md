@@ -19,7 +19,7 @@ Configure JBoss AS 7.1.1
 ------------------------
 
 1. Open the Standalone Configuration located at `<JBOSS_DIR>/standalone/configuration/standalone.xml`
-2. Add the following System Properties and populate it with relavent data.
+2. Add the following System Properties and populate it with relevant data.
 
         <system-properties>
             <property name="topicIndex.bugzillaUrl" value="bugzilla.redhat.com"/>
