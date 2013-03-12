@@ -1,9 +1,8 @@
 package org.jboss.pressgang.ccms.restserver.rest.v1;
 
+import javax.persistence.EntityManager;
 import java.util.ArrayList;
 import java.util.List;
-
-import javax.persistence.EntityManager;
 
 import org.jboss.pressgang.ccms.model.ImageFile;
 import org.jboss.pressgang.ccms.model.LanguageImage;
@@ -21,16 +20,14 @@ import org.jboss.pressgang.ccms.restserver.rest.v1.base.RESTDataObjectCollection
 import org.jboss.pressgang.ccms.restserver.rest.v1.base.RESTDataObjectFactory;
 import org.jboss.pressgang.ccms.restserver.utils.EnversUtilities;
 
-public class ImageV1Factory extends
-        RESTDataObjectFactory<RESTImageV1, ImageFile, RESTImageCollectionV1, RESTImageCollectionItemV1> {
+public class ImageV1Factory extends RESTDataObjectFactory<RESTImageV1, ImageFile, RESTImageCollectionV1, RESTImageCollectionItemV1> {
     ImageV1Factory() {
         super(ImageFile.class);
     }
 
     @Override
-    public RESTImageV1 createRESTEntityFromDBEntityInternal(final ImageFile entity, final String baseUrl,
-            final String dataType, final ExpandDataTrunk expand, final Number revision, final boolean expandParentReferences,
-            final EntityManager entityManager) {
+    public RESTImageV1 createRESTEntityFromDBEntityInternal(final ImageFile entity, final String baseUrl, final String dataType,
+            final ExpandDataTrunk expand, final Number revision, final boolean expandParentReferences, final EntityManager entityManager) {
         assert entity != null : "Parameter topic can not be null";
         assert baseUrl != null : "Parameter baseUrl can not be null";
 
@@ -49,16 +46,18 @@ public class ImageV1Factory extends
 
         // REVISIONS
         if (revision == null && expand != null && expand.contains(RESTBaseEntityV1.REVISIONS_NAME)) {
-            retValue.setRevisions(new RESTDataObjectCollectionFactory<RESTImageV1, ImageFile, RESTImageCollectionV1, RESTImageCollectionItemV1>()
-                    .create(RESTImageCollectionV1.class, new ImageV1Factory(), entity,
-                            EnversUtilities.getRevisions(entityManager, entity), RESTBaseEntityV1.REVISIONS_NAME, dataType,
-                            expand, baseUrl, entityManager));
+            retValue.setRevisions(
+                    new RESTDataObjectCollectionFactory<RESTImageV1, ImageFile, RESTImageCollectionV1, RESTImageCollectionItemV1>().create(
+                            RESTImageCollectionV1.class, new ImageV1Factory(), entity, EnversUtilities.getRevisions(entityManager, entity),
+                            RESTBaseEntityV1.REVISIONS_NAME, dataType, expand, baseUrl, entityManager));
         }
 
         // LANGUAGE IMAGES
         if (expand != null && expand.contains(RESTImageV1.LANGUAGEIMAGES_NAME)) {
-            retValue.setLanguageImages_OTM(new RESTDataObjectCollectionFactory<RESTLanguageImageV1, LanguageImage, RESTLanguageImageCollectionV1, RESTLanguageImageCollectionItemV1>()
-                    .create(RESTLanguageImageCollectionV1.class, new LanguageImageV1Factory(), entity.getLanguageImagesArray(),
+            retValue.setLanguageImages_OTM(
+                    new RESTDataObjectCollectionFactory<RESTLanguageImageV1, LanguageImage, RESTLanguageImageCollectionV1,
+                            RESTLanguageImageCollectionItemV1>().create(
+                            RESTLanguageImageCollectionV1.class, new LanguageImageV1Factory(), entity.getLanguageImagesArray(),
                             RESTImageV1.LANGUAGEIMAGES_NAME, dataType, expand, baseUrl, false, entityManager));
         }
 
@@ -70,12 +69,12 @@ public class ImageV1Factory extends
     @Override
     public void syncDBEntityWithRESTEntity(final EntityManager entityManager, final ImageFile entity,
             final RESTImageV1 dataObject) throws InvalidParameterException {
-        if (dataObject.hasParameterSet(RESTImageV1.DESCRIPTION_NAME))
-            entity.setDescription(dataObject.getDescription());
+        if (dataObject.hasParameterSet(RESTImageV1.DESCRIPTION_NAME)) entity.setDescription(dataObject.getDescription());
 
         /* One To Many - Add will create a child entity */
-        if (dataObject.hasParameterSet(RESTImageV1.LANGUAGEIMAGES_NAME) && dataObject.getLanguageImages_OTM() != null
-                && dataObject.getLanguageImages_OTM().getItems() != null) {
+        if (dataObject.hasParameterSet(
+                RESTImageV1.LANGUAGEIMAGES_NAME) && dataObject.getLanguageImages_OTM() != null && dataObject.getLanguageImages_OTM()
+                .getItems() != null) {
             dataObject.getLanguageImages_OTM().removeInvalidChangeItemRequests();
 
             for (final RESTLanguageImageCollectionItemV1 restEntityItem : dataObject.getLanguageImages_OTM().getItems()) {
@@ -89,9 +88,8 @@ public class ImageV1Factory extends
                         entity.getLanguageImages().add(dbEntity);
                     } else if (restEntityItem.returnIsRemoveItem()) {
                         final LanguageImage dbEntity = entityManager.find(LanguageImage.class, restEntity.getId());
-                        if (dbEntity == null)
-                            throw new InvalidParameterException("No LanguageImage entity was found with the primary key "
-                                    + restEntity.getId());
+                        if (dbEntity == null) throw new InvalidParameterException(
+                                "No LanguageImage entity was found with the primary key " + restEntity.getId());
 
                         entity.getLanguageImages().remove(dbEntity);
                         entityManager.remove(dbEntity);
@@ -99,8 +97,7 @@ public class ImageV1Factory extends
                 } else if (restEntityItem.returnIsUpdateItem()) {
                     final LanguageImage dbEntity = entityManager.find(LanguageImage.class, restEntity.getId());
                     if (dbEntity == null)
-                        throw new InvalidParameterException("No LanguageImage entity was found with the primary key "
-                                + restEntity.getId());
+                        throw new InvalidParameterException("No LanguageImage entity was found with the primary key " + restEntity.getId());
 
                     new LanguageImageV1Factory().syncDBEntityWithRESTEntity(entityManager, dbEntity, restEntity);
                 }

@@ -5,6 +5,7 @@ import javax.persistence.EntityManagerFactory;
 import javax.transaction.Transaction;
 import javax.transaction.TransactionManager;
 
+import net.ser1.stomp.Client;
 import org.codehaus.jackson.JsonGenerationException;
 import org.codehaus.jackson.map.JsonMappingException;
 import org.codehaus.jackson.map.ObjectMapper;
@@ -21,21 +22,24 @@ import org.jboss.pressgang.ccms.utils.constants.CommonConstants;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import net.ser1.stomp.Client;
-
 public class TopicQueueRenderer extends BaseRenderingThread implements Runnable {
     private static final Logger log = LoggerFactory.getLogger(TopicQueueRenderer.class);
 
-    /** The ID of the topic to rerender */
+    /**
+     * The ID of the topic to rerender
+     */
     private final Integer topicId;
-    /** The type of topic we are rendering */
+    /**
+     * The type of topic we are rendering
+     */
     private final int topicType;
-    /** true if topics with incoming relationships should also be rerendered */
+    /**
+     * true if topics with incoming relationships should also be rerendered
+     */
     private final boolean rerenderIncoming;
 
     protected TopicQueueRenderer(final Integer topicId, final int topicType, final boolean rerenderIncoming,
-            final EntityManagerFactory entityManagerFactory, final TransactionManager transactionManager,
-            final Transaction transaction) {
+            final EntityManagerFactory entityManagerFactory, final TransactionManager transactionManager, final Transaction transaction) {
         super(entityManagerFactory, transactionManager, transaction);
         this.topicId = topicId;
         this.topicType = topicType;
@@ -46,8 +50,7 @@ public class TopicQueueRenderer extends BaseRenderingThread implements Runnable 
         return createNewInstance(topicId, topicType, true, null);
     }
 
-    public static TopicQueueRenderer createNewInstance(final Integer topicId, final int topicType,
-            final boolean rerenderIncoming) {
+    public static TopicQueueRenderer createNewInstance(final Integer topicId, final int topicType, final boolean rerenderIncoming) {
         return createNewInstance(topicId, topicType, rerenderIncoming, null);
     }
 
@@ -55,13 +58,12 @@ public class TopicQueueRenderer extends BaseRenderingThread implements Runnable 
         return createNewInstance(topicId, topicType, true, transaction);
     }
 
-    public static TopicQueueRenderer createNewInstance(final Integer topicId, final int topicType,
-            final boolean rerenderIncoming, final Transaction transaction) {
+    public static TopicQueueRenderer createNewInstance(final Integer topicId, final int topicType, final boolean rerenderIncoming,
+            final Transaction transaction) {
         try {
             final EntityManagerFactory entityManagerFactory = JNDIUtilities.lookupEntityManagerFactory();
             final TransactionManager transactionManager = JNDIUtilities.lookupTransactionManager();
-            return new TopicQueueRenderer(topicId, topicType, rerenderIncoming, entityManagerFactory, transactionManager,
-                    transaction);
+            return new TopicQueueRenderer(topicId, topicType, rerenderIncoming, entityManagerFactory, transactionManager, transaction);
         } catch (final Exception ex) {
             log.error("Probably an error looking up the manager objects", ex);
         }
@@ -74,8 +76,7 @@ public class TopicQueueRenderer extends BaseRenderingThread implements Runnable 
         /*
          * wait for the transaction associated with the entity that was just saved to finish, or fail
          */
-        if (!this.waitForTransaction())
-            return;
+        if (!this.waitForTransaction()) return;
 
         EntityManager entityManager = null;
 
@@ -99,14 +100,11 @@ public class TopicQueueRenderer extends BaseRenderingThread implements Runnable 
                 final String messageServerQueue;
                 if (this.topicType == TopicRendererType.TOPIC)
                     messageServerQueue = System.getProperty(Constants.STOMP_MESSAGE_SERVER_TOPIC_RENDER_QUEUE_SYSTEM_PROPERTY);
-                else
-                    messageServerQueue = System
-                            .getProperty(Constants.STOMP_MESSAGE_SERVER_TRANSLATED_TOPIC_RENDER_QUEUE_SYSTEM_PROPERTY);
+                else messageServerQueue = System.getProperty(Constants.STOMP_MESSAGE_SERVER_TRANSLATED_TOPIC_RENDER_QUEUE_SYSTEM_PROPERTY);
 
-                if (messageServer != null && messageServerPort != null && messageServerUser != null
-                        && messageServerPass != null && messageServerQueue != null) {
-                    client = new Client(messageServer, Integer.parseInt(messageServerPort), messageServerUser,
-                            messageServerPass);
+                if (messageServer != null && messageServerPort != null && messageServerUser != null && messageServerPass != null &&
+                        messageServerQueue != null) {
+                    client = new Client(messageServer, Integer.parseInt(messageServerPort), messageServerUser, messageServerPass);
 
                     if (this.topicType == TopicRendererType.TOPIC) {
                         /* get the state of the topic now */
@@ -116,25 +114,23 @@ public class TopicQueueRenderer extends BaseRenderingThread implements Runnable 
 
                             if (initialTopic.getTopicId() != null) {
                                 log.info("Requesting external rendering component transform Topic {}", initialTopic.getTopicId());
-                                client.send(messageServerQueue, mapper.writeValueAsString(new DocbookRendererMessage(
-                                        initialTopic.getTopicId(), TopicRendererType.TOPIC)));
+                                client.send(messageServerQueue, mapper.writeValueAsString(
+                                        new DocbookRendererMessage(initialTopic.getTopicId(), TopicRendererType.TOPIC)));
                             }
 
                             if (rerenderIncoming) {
                                 for (final Topic relatedTopic : initialTopic.getIncomingRelatedTopicsArray()) {
                                     if (relatedTopic != null && relatedTopic.getTopicId() != null) {
-                                        log.info("Requesting external rendering component transform Topic {}",
-                                                relatedTopic.getTopicId());
-                                        client.send(messageServerQueue, mapper.writeValueAsString(new DocbookRendererMessage(
-                                                relatedTopic.getTopicId(), TopicRendererType.TOPIC)));
+                                        log.info("Requesting external rendering component transform Topic {}", relatedTopic.getTopicId());
+                                        client.send(messageServerQueue, mapper.writeValueAsString(
+                                                new DocbookRendererMessage(relatedTopic.getTopicId(), TopicRendererType.TOPIC)));
                                     }
                                 }
                             }
                         }
                     } else if (this.topicType == TopicRendererType.TRANSLATEDTOPIC) {
                         entityManager = this.entityManagerFactory.createEntityManager();
-                        final TranslatedTopicData translatedTopicData = entityManager.find(TranslatedTopicData.class,
-                                this.topicId);
+                        final TranslatedTopicData translatedTopicData = entityManager.find(TranslatedTopicData.class, this.topicId);
 
                         if (translatedTopicData != null) {
                             final TranslatedTopic translatedTopic = translatedTopicData.getTranslatedTopic();
@@ -142,8 +138,8 @@ public class TopicQueueRenderer extends BaseRenderingThread implements Runnable 
                             if (translatedTopic != null && translatedTopic.getTopicId() != null) {
                                 log.info("Requesting external rendering component transform TranslatedTopic {} - {}",
                                         translatedTopic.getId(), translatedTopicData.getTranslationLocale());
-                                client.send(messageServerQueue, mapper.writeValueAsString(new DocbookRendererMessage(topicId,
-                                        TopicRendererType.TRANSLATEDTOPIC)));
+                                client.send(messageServerQueue,
+                                        mapper.writeValueAsString(new DocbookRendererMessage(topicId, TopicRendererType.TRANSLATEDTOPIC)));
 
                                 /*
                                  * We also need to rerender those TranslatedTopics that relate back to this one, in case the
@@ -167,23 +163,21 @@ public class TopicQueueRenderer extends BaseRenderingThread implements Runnable 
                                     for (final Topic relatedTopic : topic.getIncomingRelatedTopicsArray()) {
                                         if (relatedTopic != null && relatedTopic.getTopicId() != null) {
                                             TranslatedTopicData relatedTranslatedTopicData = translatedTopicData
-                                                    .getLatestRelatedTranslationDataByTopicID(entityManager,
-                                                            relatedTopic.getId());
+                                                    .getLatestRelatedTranslationDataByTopicID(
+                                                    entityManager, relatedTopic.getId());
 
                                             /*
                                              * Check that a related TranslatedTopicData was found. If not then continue on the
                                              * the next related topic.
                                              */
-                                            if (relatedTranslatedTopicData == null)
-                                                continue;
+                                            if (relatedTranslatedTopicData == null) continue;
 
-                                            log.info(
-                                                    "Requesting external rendering component transform TranslatedTopic {} - {}",
+                                            log.info("Requesting external rendering component transform TranslatedTopic {} - {}",
                                                     relatedTranslatedTopicData.getTranslatedTopic().getId(),
                                                     relatedTranslatedTopicData.getTranslationLocale());
-                                            client.send(messageServerQueue, mapper
-                                                    .writeValueAsString(new DocbookRendererMessage(relatedTranslatedTopicData
-                                                            .getId(), TopicRendererType.TRANSLATEDTOPIC)));
+                                            client.send(messageServerQueue, mapper.writeValueAsString(
+                                                    new DocbookRendererMessage(relatedTranslatedTopicData.getId(),
+                                                            TopicRendererType.TRANSLATEDTOPIC)));
 
                                         }
                                     }
@@ -203,8 +197,7 @@ public class TopicQueueRenderer extends BaseRenderingThread implements Runnable 
             } catch (final Exception ex) {
                 log.error("Probably a STOMP messaging problem", ex);
             } finally {
-                if (client != null)
-                    client.disconnect();
+                if (client != null) client.disconnect();
             }
 
             transactionManager.commit();

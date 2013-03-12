@@ -1,5 +1,8 @@
 package org.jboss.pressgang.ccms.restserver.servlet.filter;
 
+import javax.servlet.ServletOutputStream;
+import javax.servlet.http.HttpServletResponse;
+import javax.servlet.http.HttpServletResponseWrapper;
 import java.io.IOException;
 import java.io.OutputStreamWriter;
 import java.io.PrintWriter;
@@ -8,17 +11,6 @@ import java.util.Set;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import javax.servlet.ServletOutputStream;
-import javax.servlet.http.HttpServletResponse;
-import javax.servlet.http.HttpServletResponseWrapper;
-
-/**
- * A wrapper class to handle ServetResponse and compress the output.
- * <br /><br />
- * See: <a href="http://stackoverflow.com/questions/4755302/which-compression-is-gzip-the-most-popular-servlet-filter-would-you-suggest/11068672#11068672">which-compression-is-gzip-the-most-popular-servlet-filter-would-you-suggest</a>
- * and <a href="https://github.com/geoserver/geoserver/tree/master/src/main/src/main/java/org/geoserver/filters">https://github.com/geoserver/geoserver/</a>
- * for details on where this implementation came from.
- */
 public class GZIPResponseWrapper extends HttpServletResponseWrapper {
 
     private GZIPServletOutputStream GZIPStream = null;
@@ -60,8 +52,7 @@ public class GZIPResponseWrapper extends HttpServletResponseWrapper {
         // Check if the response should be compressed based on the mime-type
         if (isCompressible(contentType)) {
 
-            if (this.printWriter != null)
-                throw new IllegalStateException("Print Writer already defined");
+            if (this.printWriter != null) throw new IllegalStateException("Print Writer already defined");
             if (this.outputStream == null) {
                 initGZIPStream();
                 this.outputStream = this.GZIPStream;
@@ -79,8 +70,7 @@ public class GZIPResponseWrapper extends HttpServletResponseWrapper {
 
         // Check if the response should be compressed based on the mime-type
         if (isCompressible(contentType)) {
-            if (this.outputStream != null)
-                throw new IllegalStateException("Print Writer already defined");
+            if (this.outputStream != null) throw new IllegalStateException("Print Writer already defined");
             if (this.printWriter == null) {
                 initGZIPStream();
                 this.printWriter = new PrintWriter(new OutputStreamWriter(this.GZIPStream, getResponse().getCharacterEncoding()));
@@ -93,7 +83,7 @@ public class GZIPResponseWrapper extends HttpServletResponseWrapper {
 
     /**
      * Initialise the GZIP Stream to be used to encode the data, if it hasn't already been initialised.
-     * 
+     *
      * @throws IOException
      */
     private void initGZIPStream() throws IOException {
@@ -104,7 +94,7 @@ public class GZIPResponseWrapper extends HttpServletResponseWrapper {
 
     /**
      * Check if the response should be compressed based on the MIME type.
-     * 
+     *
      * @param contentType The content type of the response.
      * @return True if the response should be compressed otherwise false.
      */
@@ -120,8 +110,7 @@ public class GZIPResponseWrapper extends HttpServletResponseWrapper {
         while (it.hasNext()) {
             final Pattern mimeTypePattern = it.next();
             final Matcher matcher = mimeTypePattern.matcher(stripped);
-            if (matcher.matches())
-                return true;
+            if (matcher.matches()) return true;
         }
 
         return false;
@@ -129,7 +118,7 @@ public class GZIPResponseWrapper extends HttpServletResponseWrapper {
 
     /**
      * String away any extra parameters from a response Content-Type to find the MIME type.
-     * 
+     *
      * @param contentType The content type of the response.
      * @return The MIME type of the response stripped of any extra variables.
      */

@@ -18,10 +18,11 @@ public class TranslatedTopicUtilities {
     }
 
     public static void pushToZanata(final TranslatedTopic translatedTopic) {
-        final Pair<Integer, Integer> topicIdRevisionPair = new Pair<Integer, Integer>(translatedTopic.getTopicId(), translatedTopic.getTopicRevision());
+        final Pair<Integer, Integer> topicIdRevisionPair = new Pair<Integer, Integer>(translatedTopic.getTopicId(),
+                translatedTopic.getTopicRevision());
         final List<Pair<Integer, Integer>> topicIdRevisionPairs = new ArrayList<Pair<Integer, Integer>>();
         topicIdRevisionPairs.add(topicIdRevisionPair);
-        
+
         final ZanataPushTopicThread zanataPushTopicThread = new ZanataPushTopicThread(topicIdRevisionPairs, false);
         final Thread thread = new Thread(zanataPushTopicThread);
         thread.start();
