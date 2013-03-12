@@ -1,9 +1,8 @@
 package org.jboss.pressgang.ccms.restserver.rest.v1;
 
+import javax.persistence.EntityManager;
 import java.util.ArrayList;
 import java.util.List;
-
-import javax.persistence.EntityManager;
 
 import org.jboss.pressgang.ccms.model.LanguageImage;
 import org.jboss.pressgang.ccms.rest.v1.collections.RESTLanguageImageCollectionV1;
@@ -15,17 +14,15 @@ import org.jboss.pressgang.ccms.restserver.rest.v1.base.RESTDataObjectCollection
 import org.jboss.pressgang.ccms.restserver.rest.v1.base.RESTDataObjectFactory;
 import org.jboss.pressgang.ccms.restserver.utils.EnversUtilities;
 
-public class LanguageImageV1Factory
-        extends
-        RESTDataObjectFactory<RESTLanguageImageV1, LanguageImage, RESTLanguageImageCollectionV1, RESTLanguageImageCollectionItemV1> {
+public class LanguageImageV1Factory extends RESTDataObjectFactory<RESTLanguageImageV1, LanguageImage, RESTLanguageImageCollectionV1,
+        RESTLanguageImageCollectionItemV1> {
     public LanguageImageV1Factory() {
         super(LanguageImage.class);
     }
 
     @Override
-    public RESTLanguageImageV1 createRESTEntityFromDBEntityInternal(final LanguageImage entity, final String baseUrl,
-            final String dataType, final ExpandDataTrunk expand, final Number revision, final boolean expandParentReferences,
-            final EntityManager entityManager) {
+    public RESTLanguageImageV1 createRESTEntityFromDBEntityInternal(final LanguageImage entity, final String baseUrl, final String dataType,
+            final ExpandDataTrunk expand, final Number revision, final boolean expandParentReferences, final EntityManager entityManager) {
         assert entity != null : "Parameter topic can not be null";
         assert baseUrl != null : "Parameter baseUrl can not be null";
 
@@ -37,8 +34,7 @@ public class LanguageImageV1Factory
         expandOptions.add(RESTLanguageImageV1.IMAGEDATABASE64_NAME);
         expandOptions.add(RESTBaseEntityV1.LOG_DETAILS_NAME);
 
-        if (revision == null)
-            expandOptions.add(RESTBaseEntityV1.REVISIONS_NAME);
+        if (revision == null) expandOptions.add(RESTBaseEntityV1.REVISIONS_NAME);
 
         retValue.setExpand(expandOptions);
 
@@ -47,26 +43,25 @@ public class LanguageImageV1Factory
         retValue.setFilename(entity.getOriginalFileName());
 
         /* potentially large fields need to be expanded manually */
-        if (expand != null && expand.contains(RESTLanguageImageV1.IMAGEDATA_NAME))
-            retValue.setImageData(entity.getImageData());
+        if (expand != null && expand.contains(RESTLanguageImageV1.IMAGEDATA_NAME)) retValue.setImageData(entity.getImageData());
         if (expand != null && expand.contains(RESTLanguageImageV1.IMAGEDATABASE64_NAME))
             retValue.setImageDataBase64(entity.getImageDataBase64());
-        if (expand != null && expand.contains(RESTLanguageImageV1.THUMBNAIL_NAME))
-            retValue.setThumbnail(entity.getThumbnailData());
+        if (expand != null && expand.contains(RESTLanguageImageV1.THUMBNAIL_NAME)) retValue.setThumbnail(entity.getThumbnailData());
 
         /* Set the object references */
-        if (expandParentReferences && expand != null && expand.contains(RESTLanguageImageV1.IMAGE_NAME)
-                && entity.getImageFile() != null) {
+        if (expandParentReferences && expand != null && expand.contains(RESTLanguageImageV1.IMAGE_NAME) && entity.getImageFile() != null) {
             retValue.setImage(new ImageV1Factory().createRESTEntityFromDBEntity(entity.getImageFile(), baseUrl, dataType,
                     expand.get(RESTLanguageImageV1.IMAGE_NAME), entityManager));
         }
 
         // REVISIONS
         if (revision == null && expand != null && expand.contains(RESTBaseEntityV1.REVISIONS_NAME)) {
-            retValue.setRevisions(new RESTDataObjectCollectionFactory<RESTLanguageImageV1, LanguageImage, RESTLanguageImageCollectionV1, RESTLanguageImageCollectionItemV1>()
-                    .create(RESTLanguageImageCollectionV1.class, new LanguageImageV1Factory(), entity,
-                            EnversUtilities.getRevisions(entityManager, entity), RESTBaseEntityV1.REVISIONS_NAME, dataType,
-                            expand, baseUrl, entityManager));
+            retValue.setRevisions(
+                    new RESTDataObjectCollectionFactory<RESTLanguageImageV1, LanguageImage, RESTLanguageImageCollectionV1,
+                            RESTLanguageImageCollectionItemV1>().create(
+                            RESTLanguageImageCollectionV1.class, new LanguageImageV1Factory(), entity,
+                            EnversUtilities.getRevisions(entityManager, entity), RESTBaseEntityV1.REVISIONS_NAME, dataType, expand, baseUrl,
+                            entityManager));
         }
 
         return retValue;
@@ -75,12 +70,9 @@ public class LanguageImageV1Factory
     @Override
     public void syncDBEntityWithRESTEntity(final EntityManager entityManager, final LanguageImage entity,
             final RESTLanguageImageV1 dataObject) {
-        if (dataObject.hasParameterSet(RESTLanguageImageV1.LOCALE_NAME))
-            entity.setLocale(dataObject.getLocale());
-        if (dataObject.hasParameterSet(RESTLanguageImageV1.IMAGEDATA_NAME))
-            entity.setImageData(dataObject.getImageData());
-        if (dataObject.hasParameterSet(RESTLanguageImageV1.FILENAME_NAME))
-            entity.setOriginalFileName(dataObject.getFilename());
+        if (dataObject.hasParameterSet(RESTLanguageImageV1.LOCALE_NAME)) entity.setLocale(dataObject.getLocale());
+        if (dataObject.hasParameterSet(RESTLanguageImageV1.IMAGEDATA_NAME)) entity.setImageData(dataObject.getImageData());
+        if (dataObject.hasParameterSet(RESTLanguageImageV1.FILENAME_NAME)) entity.setOriginalFileName(dataObject.getFilename());
     }
 
 }

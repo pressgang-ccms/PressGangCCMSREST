@@ -1,9 +1,8 @@
 package org.jboss.pressgang.ccms.restserver.rest.v1;
 
+import javax.persistence.EntityManager;
 import java.util.ArrayList;
 import java.util.List;
-
-import javax.persistence.EntityManager;
 
 import org.jboss.pressgang.ccms.model.Filter;
 import org.jboss.pressgang.ccms.model.FilterLocale;
@@ -18,17 +17,16 @@ import org.jboss.pressgang.ccms.restserver.rest.v1.base.RESTDataObjectCollection
 import org.jboss.pressgang.ccms.restserver.rest.v1.base.RESTDataObjectFactory;
 import org.jboss.pressgang.ccms.restserver.utils.EnversUtilities;
 
-public class FilterLocaleV1Factory extends
-        RESTDataObjectFactory<RESTFilterLocaleV1, FilterLocale, RESTFilterLocaleCollectionV1, RESTFilterLocaleCollectionItemV1> {
+public class FilterLocaleV1Factory extends RESTDataObjectFactory<RESTFilterLocaleV1, FilterLocale, RESTFilterLocaleCollectionV1,
+        RESTFilterLocaleCollectionItemV1> {
 
     public FilterLocaleV1Factory() {
         super(FilterLocale.class);
     }
 
     @Override
-    public RESTFilterLocaleV1 createRESTEntityFromDBEntityInternal(final FilterLocale entity, final String baseUrl,
-            final String dataType, final ExpandDataTrunk expand, final Number revision, boolean expandParentReferences,
-            final EntityManager entityManager) {
+    public RESTFilterLocaleV1 createRESTEntityFromDBEntityInternal(final FilterLocale entity, final String baseUrl, final String dataType,
+            final ExpandDataTrunk expand, final Number revision, boolean expandParentReferences, final EntityManager entityManager) {
         assert entity != null : "Parameter filterLocale can not be null";
         assert baseUrl != null : "Parameter baseUrl can not be null";
 
@@ -36,8 +34,7 @@ public class FilterLocaleV1Factory extends
 
         final List<String> expandOptions = new ArrayList<String>();
         expandOptions.add(RESTBaseEntityV1.LOG_DETAILS_NAME);
-        if (revision == null)
-            expandOptions.add(RESTBaseEntityV1.REVISIONS_NAME);
+        if (revision == null) expandOptions.add(RESTBaseEntityV1.REVISIONS_NAME);
 
         retValue.setExpand(expandOptions);
 
@@ -47,15 +44,16 @@ public class FilterLocaleV1Factory extends
 
         // REVISIONS
         if (revision == null && expand != null && expand.contains(RESTBaseEntityV1.REVISIONS_NAME)) {
-            retValue.setRevisions(new RESTDataObjectCollectionFactory<RESTFilterLocaleV1, FilterLocale, RESTFilterLocaleCollectionV1, RESTFilterLocaleCollectionItemV1>()
-                    .create(RESTFilterLocaleCollectionV1.class, new FilterLocaleV1Factory(), entity,
-                            EnversUtilities.getRevisions(entityManager, entity), RESTBaseEntityV1.REVISIONS_NAME, dataType,
-                            expand, baseUrl, entityManager));
+            retValue.setRevisions(
+                    new RESTDataObjectCollectionFactory<RESTFilterLocaleV1, FilterLocale, RESTFilterLocaleCollectionV1,
+                            RESTFilterLocaleCollectionItemV1>().create(
+                            RESTFilterLocaleCollectionV1.class, new FilterLocaleV1Factory(), entity,
+                            EnversUtilities.getRevisions(entityManager, entity), RESTBaseEntityV1.REVISIONS_NAME, dataType, expand, baseUrl,
+                            entityManager));
         }
 
         // PARENT
-        if (expandParentReferences && expand != null && expand.contains(RESTFilterLocaleV1.FILTER_NAME)
-                && entity.getFilter() != null) {
+        if (expandParentReferences && expand != null && expand.contains(RESTFilterLocaleV1.FILTER_NAME) && entity.getFilter() != null) {
             retValue.setFilter(new FilterV1Factory().createRESTEntityFromDBEntity(entity.getFilter(), baseUrl, dataType,
                     expand.get(RESTFilterLocaleV1.FILTER_NAME), revision, expandParentReferences, entityManager));
         }
@@ -66,10 +64,8 @@ public class FilterLocaleV1Factory extends
     @Override
     public void syncDBEntityWithRESTEntity(final EntityManager entityManager, final FilterLocale entity,
             final RESTFilterLocaleV1 dataObject) throws InvalidParameterException {
-        if (dataObject.hasParameterSet(RESTFilterLocaleV1.LOCALE_NAME))
-            entity.setLocaleName(dataObject.getLocale());
-        if (dataObject.hasParameterSet(RESTFilterLocaleV1.STATE_NAME))
-            entity.setLocaleState(dataObject.getState());
+        if (dataObject.hasParameterSet(RESTFilterLocaleV1.LOCALE_NAME)) entity.setLocaleName(dataObject.getLocale());
+        if (dataObject.hasParameterSet(RESTFilterLocaleV1.STATE_NAME)) entity.setLocaleState(dataObject.getState());
 
         if (dataObject.hasParameterSet(RESTFilterLocaleV1.FILTER_NAME)) {
             final RESTFilterV1 restEntity = dataObject.getFilter();

@@ -1,12 +1,5 @@
 package org.jboss.pressgang.ccms.restserver.servlet.filter;
 
-import java.io.IOException;
-import java.util.Enumeration;
-import java.util.HashSet;
-import java.util.Set;
-import java.util.concurrent.atomic.AtomicBoolean;
-import java.util.regex.Pattern;
-
 import javax.servlet.Filter;
 import javax.servlet.FilterChain;
 import javax.servlet.FilterConfig;
@@ -15,28 +8,34 @@ import javax.servlet.ServletRequest;
 import javax.servlet.ServletResponse;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import java.io.IOException;
+import java.util.Enumeration;
+import java.util.HashSet;
+import java.util.Set;
+import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.regex.Pattern;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
  * A Servlet Filter to Compress the response of a HTTP Request using the GZIP compression algorithm.
- * 
+ * <p/>
  * It allows to you specify what MIME types should be compressed using the "mime-types" init parameter.
  * <br><br>
  * Sample web.xml config:
  * <pre>{@code<filter>
-    <filter-name>compression</filter-name>
-    <filter-class>org.jboss.pressgang.ccms.restserver.servlet.filter.GZIPCompressionFilter</filter-class>
-    <init-param>
-        <param-name>mime-types</param-name>
-        <param-value>application/json, application/svg+xml, text/*</param-value>
-    </init-param>
-</filter>
-<filter-mapping>
-    <filter-name>compression</filter-name>
-    <url-pattern>/*</url-pattern>
-</filter-mapping>}</pre>
+ * <filter-name>compression</filter-name>
+ * <filter-class>org.jboss.pressgang.ccms.restserver.servlet.filter.GZIPCompressionFilter</filter-class>
+ * <init-param>
+ * <param-name>mime-types</param-name>
+ * <param-value>application/json, application/svg+xml, text/*</param-value>
+ * </init-param>
+ * </filter>
+ * <filter-mapping>
+ * <filter-name>compression</filter-name>
+ * <url-pattern>/*</url-pattern>
+ * </filter-mapping>}</pre>
  */
 public class GZIPCompressionFilter implements Filter {
     private static Logger log = LoggerFactory.getLogger(GZIPCompressionFilter.class);
@@ -56,10 +55,10 @@ public class GZIPCompressionFilter implements Filter {
     }
 
     @Override
-    public void doFilter(ServletRequest request, ServletResponse response, FilterChain chain) throws IOException,
-            ServletException {
+    public void doFilter(ServletRequest request, ServletResponse response, FilterChain chain) throws IOException, ServletException {
         // If the filter wasn't initialised then forward the request
-        if (!enabled || !(request instanceof HttpServletRequest) || !(response instanceof HttpServletResponse) || isIncluded((HttpServletRequest) request)) {
+        if (!enabled || !(request instanceof HttpServletRequest) || !(response instanceof HttpServletResponse) || isIncluded(
+                (HttpServletRequest) request)) {
             chain.doFilter(request, response);
             return;
         }
@@ -84,7 +83,7 @@ public class GZIPCompressionFilter implements Filter {
             responseWrapper.finish();
         }
     }
-    
+
     /**
      * Checks if the request uri is an include. These cannot be gzipped.
      */

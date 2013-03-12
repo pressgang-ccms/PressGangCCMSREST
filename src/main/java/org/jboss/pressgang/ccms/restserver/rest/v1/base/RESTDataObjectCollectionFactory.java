@@ -1,8 +1,7 @@
 package org.jboss.pressgang.ccms.restserver.rest.v1.base;
 
-import java.util.List;
-
 import javax.persistence.EntityManager;
+import java.util.List;
 
 import org.jboss.pressgang.ccms.model.base.AuditedEntity;
 import org.jboss.pressgang.ccms.rest.v1.collections.base.RESTBaseCollectionItemV1;
@@ -16,12 +15,13 @@ import org.slf4j.LoggerFactory;
 
 /**
  * A factory used to create collections of REST entity objects
- * 
+ *
  * @param <T> The type of REST entity to work with
  * @param <U> The type of database entity to work with
  * @param <V> The type of REST collection to work with
  */
-public class RESTDataObjectCollectionFactory<T extends RESTBaseEntityV1<T, V, W>, U extends AuditedEntity<U>, V extends RESTBaseCollectionV1<T, V, W>, W extends RESTBaseCollectionItemV1<T, V, W>> {
+public class RESTDataObjectCollectionFactory<T extends RESTBaseEntityV1<T, V, W>, U extends AuditedEntity,
+        V extends RESTBaseCollectionV1<T, V, W>, W extends RESTBaseCollectionItemV1<T, V, W>> {
     private static final Logger log = LoggerFactory.getLogger(RESTDataObjectCollectionFactory.class);
 
     public V create(final Class<V> clazz, final RESTDataObjectFactory<T, U, V, W> dataObjectFactory, final List<U> entities,
@@ -32,54 +32,54 @@ public class RESTDataObjectCollectionFactory<T extends RESTBaseEntityV1<T, V, W>
     }
 
     public V create(final Class<V> clazz, final RESTDataObjectFactory<T, U, V, W> dataObjectFactory, final List<U> entities,
-            final String expandName, final String dataType, final ExpandDataTrunk parentExpand, final String baseUrl,
-            final Number revision, final EntityManager entityManager) {
-        return create(clazz, dataObjectFactory, entities, null, revision, null, expandName, dataType, parentExpand, baseUrl,
-                true, entityManager);
+            final String expandName, final String dataType, final ExpandDataTrunk parentExpand, final String baseUrl, final Number revision,
+            final EntityManager entityManager) {
+        return create(clazz, dataObjectFactory, entities, null, revision, null, expandName, dataType, parentExpand, baseUrl, true,
+                entityManager);
     }
 
     public V create(final Class<V> clazz, final RESTDataObjectFactory<T, U, V, W> dataObjectFactory, final U parent,
             final List<Number> revisions, final String expandName, final String dataType, final ExpandDataTrunk parentExpand,
             final String baseUrl, final EntityManager entityManager) {
-        return create(clazz, dataObjectFactory, null, parent, null, revisions, expandName, dataType, parentExpand, baseUrl,
-                true, entityManager);
+        return create(clazz, dataObjectFactory, null, parent, null, revisions, expandName, dataType, parentExpand, baseUrl, true,
+                entityManager);
     }
 
     /**
      * Create a Collection of REST Entities from a collection of Database Entities.
-     * 
-     * @param clazz The Class of the Collection Object that should be returned by the method.
+     *
+     * @param clazz             The Class of the Collection Object that should be returned by the method.
      * @param dataObjectFactory The factory to convert the database entity to a REST entity
-     * @param parent The parent from which to find previous versions
-     * @param revisions A list of Envers revision numbers that we want to add to the collection
-     * @param expandName The name of the collection that we are working with
-     * @param dataType The type of data that is returned through the REST interface
-     * @param parentExpand The parent objects expansion details
-     * @param baseUrl The base of the url that was used to access this collection
-     * @param revision The revision number of the Parent entity, if it's not the latest version.
-     * @param entityManager The EntityManager being used to provide data for the collection.
+     * @param parent            The parent from which to find previous versions
+     * @param revisions         A list of Envers revision numbers that we want to add to the collection
+     * @param expandName        The name of the collection that we are working with
+     * @param dataType          The type of data that is returned through the REST interface
+     * @param parentExpand      The parent objects expansion details
+     * @param baseUrl           The base of the url that was used to access this collection
+     * @param revision          The revision number of the Parent entity, if it's not the latest version.
+     * @param entityManager     The EntityManager being used to provide data for the collection.
      * @return A REST collection from a collection of database entities.
      */
     public V create(final Class<V> clazz, final RESTDataObjectFactory<T, U, V, W> dataObjectFactory, final U parent,
             final List<Number> revisions, final String expandName, final String dataType, final ExpandDataTrunk parentExpand,
             final String baseUrl, final Number revision, final EntityManager entityManager) {
-        return create(clazz, dataObjectFactory, null, parent, revision, revisions, expandName, dataType, parentExpand, baseUrl,
-                true, entityManager);
+        return create(clazz, dataObjectFactory, null, parent, revision, revisions, expandName, dataType, parentExpand, baseUrl, true,
+                entityManager);
     }
 
     /**
      * Create a Collection of REST Entities from a collection of Database Entities.
-     * 
-     * @param clazz The Class of the Collection Object that should be returned by the method.
-     * @param dataObjectFactory The factory to convert the database entity to a REST entity
-     * @param entities A collection of numbers mapped to database entities. If isRevsionMap is true, these numbers are envers
-     *        revision numbers. If isRevsionMap is false, these numbers have no meaning.
-     * @param expandName The name of the collection that we are working with
-     * @param dataType The type of data that is returned through the REST interface
-     * @param parentExpand The parent objects expansion details
-     * @param baseUrl The base of the url that was used to access this collection
+     *
+     * @param clazz                  The Class of the Collection Object that should be returned by the method.
+     * @param dataObjectFactory      The factory to convert the database entity to a REST entity
+     * @param entities               A collection of numbers mapped to database entities. If isRevsionMap is true, these numbers are envers
+     *                               revision numbers. If isRevsionMap is false, these numbers have no meaning.
+     * @param expandName             The name of the collection that we are working with
+     * @param dataType               The type of data that is returned through the REST interface
+     * @param parentExpand           The parent objects expansion details
+     * @param baseUrl                The base of the url that was used to access this collection
      * @param expandParentReferences If any Parent references in entities should be expanded.
-     * @param entityManager The EntityManager being used to provide data for the collection.
+     * @param entityManager          The EntityManager being used to provide data for the collection.
      * @return a REST collection from a collection of database entities.
      */
     public V create(final Class<V> clazz, final RESTDataObjectFactory<T, U, V, W> dataObjectFactory, final List<U> entities,
@@ -91,49 +91,49 @@ public class RESTDataObjectCollectionFactory<T extends RESTBaseEntityV1<T, V, W>
 
     /**
      * Create a Collection of REST Entities from a collection of Database Entities.
-     * 
-     * @param clazz The Class of the Collection Object that should be returned by the method.
-     * @param dataObjectFactory The factory to convert the database entity to a REST entity
-     * @param entities A collection of numbers mapped to database entities. If isRevsionMap is true, these numbers are envers
-     *        revision numbers. If isRevsionMap is false, these numbers have no meaning.
-     * @param expandName The name of the collection that we are working with
-     * @param dataType The type of data that is returned through the REST interface
-     * @param parentExpand The parent objects expansion details
-     * @param baseUrl The base of the url that was used to access this collection
-     * @param revision The revision number of the Parent entity, if it's not the latest version.
+     *
+     * @param clazz                  The Class of the Collection Object that should be returned by the method.
+     * @param dataObjectFactory      The factory to convert the database entity to a REST entity
+     * @param entities               A collection of numbers mapped to database entities. If isRevsionMap is true, these numbers are envers
+     *                               revision numbers. If isRevsionMap is false, these numbers have no meaning.
+     * @param expandName             The name of the collection that we are working with
+     * @param dataType               The type of data that is returned through the REST interface
+     * @param parentExpand           The parent objects expansion details
+     * @param baseUrl                The base of the url that was used to access this collection
+     * @param revision               The revision number of the Parent entity, if it's not the latest version.
      * @param expandParentReferences If any Parent references in entities should be expanded.
-     * @param entityManager The EntityManager being used to provide data for the collection.
+     * @param entityManager          The EntityManager being used to provide data for the collection.
      * @return a REST collection from a collection of database entities.
      */
     public V create(final Class<V> clazz, final RESTDataObjectFactory<T, U, V, W> dataObjectFactory, final List<U> entities,
-            final String expandName, final String dataType, final ExpandDataTrunk parentExpand, final String baseUrl,
-            final Number revision, final boolean expandParentReferences, final EntityManager entityManager) {
+            final String expandName, final String dataType, final ExpandDataTrunk parentExpand, final String baseUrl, final Number revision,
+            final boolean expandParentReferences, final EntityManager entityManager) {
         return create(clazz, dataObjectFactory, entities, null, revision, null, expandName, dataType, parentExpand, baseUrl,
                 expandParentReferences, entityManager);
     }
 
     /**
      * Create a Collection of REST Entities from a collection of Database Entities.
-     * 
-     * @param clazz The Class of the Collection Object that should be returned by the method.
-     * @param dataObjectFactory The factory to convert the database entity to a REST entity
-     * @param entities A collection of numbers mapped to database entities. If isRevsionMap is true, these numbers are envers
-     *        revision numbers. If isRevsionMap is false, these numbers have no meaning.
-     * @param parent The parent from which to find previous versions
-     * @param parentRevision The revision number of the Parent entity, if it's not the latest version.
-     * @param revisions A list of Envers revision numbers that we want to add to the collection
-     * @param expandName The name of the collection that we are working with
-     * @param dataType The type of data that is returned through the REST interface
-     * @param parentExpand The parent objects expansion details
-     * @param baseUrl The base of the url that was used to access this collection
+     *
+     * @param clazz                  The Class of the Collection Object that should be returned by the method.
+     * @param dataObjectFactory      The factory to convert the database entity to a REST entity
+     * @param entities               A collection of numbers mapped to database entities. If isRevsionMap is true, these numbers are envers
+     *                               revision numbers. If isRevsionMap is false, these numbers have no meaning.
+     * @param parent                 The parent from which to find previous versions
+     * @param parentRevision         The revision number of the Parent entity, if it's not the latest version.
+     * @param revisions              A list of Envers revision numbers that we want to add to the collection
+     * @param expandName             The name of the collection that we are working with
+     * @param dataType               The type of data that is returned through the REST interface
+     * @param parentExpand           The parent objects expansion details
+     * @param baseUrl                The base of the url that was used to access this collection
      * @param expandParentReferences If any Parent references in entities should be expanded.
-     * @param entityManager The EntityManager being used to provide data for the collection.
+     * @param entityManager          The EntityManager being used to provide data for the collection.
      * @return a REST collection from a collection of database entities.
      */
-    public V create(final Class<V> clazz, final RESTDataObjectFactory<T, U, V, W> dataObjectFactory, final List<U> entities,
-            final U parent, final Number parentRevision, final List<Number> revisions, final String expandName,
-            final String dataType, final ExpandDataTrunk parentExpand, final String baseUrl,
-            final boolean expandParentReferences, final EntityManager entityManager) {
+    public V create(final Class<V> clazz, final RESTDataObjectFactory<T, U, V, W> dataObjectFactory, final List<U> entities, final U parent,
+            final Number parentRevision, final List<Number> revisions, final String expandName, final String dataType,
+            final ExpandDataTrunk parentExpand, final String baseUrl, final boolean expandParentReferences,
+            final EntityManager entityManager) {
         V retValue = null;
 
         try {
@@ -145,8 +145,7 @@ public class RESTDataObjectCollectionFactory<T extends RESTBaseEntityV1<T, V, W>
         /*
          * either the entities collection needs to be set, or the revisions and parent
          */
-        if (!(entities != null || (revisions != null && parent != null)))
-            return retValue;
+        if (!(entities != null || (revisions != null && parent != null))) return retValue;
 
         final boolean usingRevisions = entities == null;
 
@@ -227,8 +226,8 @@ public class RESTDataObjectCollectionFactory<T extends RESTBaseEntityV1<T, V, W>
 
                         // If the entity was found then create the REST Entity
                         if (dbEntity != null) {
-                            final T restEntity = dataObjectFactory.createRESTEntityFromDBEntity(dbEntity, baseUrl, dataType,
-                                    expand, revision, expandParentReferences, entityManager);
+                            final T restEntity = dataObjectFactory.createRESTEntityFromDBEntity(dbEntity, baseUrl, dataType, expand,
+                                    revision, expandParentReferences, entityManager);
 
                             // Add the item to the return value
                             retValue.addItem(restEntity);
