@@ -8,30 +8,29 @@ import javax.transaction.TransactionManager;
 
 /**
  * A class that holds a set of utility methods for looking up objects from JNDI.
- * 
+ *
  * @author lnewson
  */
 public class JNDIUtilities {
     /**
      * Lookup the named "java:jboss/EntityManagerFactory" EntityManagerFactory associated with the underlying Application
      * Server.
-     * 
+     *
      * @return The EntityManagerFactory object.
      * @throws NamingException Thrown if a name based error occurs looking up the EntityManagerFactory.
      */
     public static EntityManagerFactory lookupEntityManagerFactory() throws NamingException {
         final InitialContext initCtx = new InitialContext();
-        final EntityManagerFactory entityManagerFactory = (EntityManagerFactory) initCtx
-                .lookup("java:jboss/EntityManagerFactory");
+        final EntityManagerFactory entityManagerFactory = (EntityManagerFactory) initCtx.lookup("java:jboss/EntityManagerFactory");
 
         return entityManagerFactory;
     }
 
     /**
      * A generic method provided to lookup any object bound to JNDI.
-     * 
+     *
      * @param clazz The class type of the expected return.
-     * @param name The JNDI name of the object. eg "java:comp/BeanManager"
+     * @param name  The JNDI name of the object. eg "java:comp/BeanManager"
      * @return The requested lookup object.
      * @throws NamingException Thrown if a name based error occurs looking up the Object.
      */
@@ -44,7 +43,7 @@ public class JNDIUtilities {
 
     /**
      * Lookup the TransactionManager associated with the underlying Application Server.
-     * 
+     *
      * @return The TransactionManager object.
      * @throws NamingException Thrown if a name based error occurs looking up the TransactionManager.
      */
@@ -52,15 +51,14 @@ public class JNDIUtilities {
         final InitialContext initCtx = new InitialContext();
 
         final TransactionManager transactionManager = (TransactionManager) initCtx.lookup("java:jboss/TransactionManager");
-        if (transactionManager == null)
-            throw new NamingException("Could not find the TransactionManager");
+        if (transactionManager == null) throw new NamingException("Could not find the TransactionManager");
 
         return transactionManager;
     }
 
     /**
      * Lookup the BeanManager associated with the underlying Application Server.
-     * 
+     *
      * @return The BeanManager object.
      * @throws NamingException Thrown if a name based error occurs looking up the Bean Manager.
      */

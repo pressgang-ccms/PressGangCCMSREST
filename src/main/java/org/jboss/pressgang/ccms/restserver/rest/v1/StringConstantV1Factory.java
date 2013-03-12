@@ -1,9 +1,8 @@
 package org.jboss.pressgang.ccms.restserver.rest.v1;
 
+import javax.persistence.EntityManager;
 import java.util.ArrayList;
 import java.util.List;
-
-import javax.persistence.EntityManager;
 
 import org.jboss.pressgang.ccms.model.StringConstants;
 import org.jboss.pressgang.ccms.rest.v1.collections.RESTStringConstantCollectionV1;
@@ -16,9 +15,8 @@ import org.jboss.pressgang.ccms.restserver.rest.v1.base.RESTDataObjectCollection
 import org.jboss.pressgang.ccms.restserver.rest.v1.base.RESTDataObjectFactory;
 import org.jboss.pressgang.ccms.restserver.utils.EnversUtilities;
 
-public class StringConstantV1Factory
-        extends
-        RESTDataObjectFactory<RESTStringConstantV1, StringConstants, RESTStringConstantCollectionV1, RESTStringConstantCollectionItemV1> {
+public class StringConstantV1Factory extends RESTDataObjectFactory<RESTStringConstantV1, StringConstants, RESTStringConstantCollectionV1,
+        RESTStringConstantCollectionItemV1> {
 
     public StringConstantV1Factory() {
         super(StringConstants.class);
@@ -35,8 +33,7 @@ public class StringConstantV1Factory
 
         final List<String> expandOptions = new ArrayList<String>();
         expandOptions.add(RESTBaseEntityV1.LOG_DETAILS_NAME);
-        if (revision == null)
-            expandOptions.add(RESTBaseEntityV1.REVISIONS_NAME);
+        if (revision == null) expandOptions.add(RESTBaseEntityV1.REVISIONS_NAME);
         retValue.setExpand(expandOptions);
 
         retValue.setId(entity.getStringConstantsId());
@@ -45,9 +42,12 @@ public class StringConstantV1Factory
 
         // REVISIONS
         if (revision == null && expand != null && expand.contains(RESTBaseEntityV1.REVISIONS_NAME)) {
-            retValue.setRevisions(new RESTDataObjectCollectionFactory<RESTStringConstantV1, StringConstants, RESTStringConstantCollectionV1, RESTStringConstantCollectionItemV1>()
-                    .create(RESTStringConstantCollectionV1.class, new StringConstantV1Factory(), entity, EnversUtilities.getRevisions(entityManager, entity),
-                            RESTBaseEntityV1.REVISIONS_NAME, dataType, expand, baseUrl, entityManager));
+            retValue.setRevisions(
+                    new RESTDataObjectCollectionFactory<RESTStringConstantV1, StringConstants, RESTStringConstantCollectionV1,
+                            RESTStringConstantCollectionItemV1>().create(
+                            RESTStringConstantCollectionV1.class, new StringConstantV1Factory(), entity,
+                            EnversUtilities.getRevisions(entityManager, entity), RESTBaseEntityV1.REVISIONS_NAME, dataType, expand, baseUrl,
+                            entityManager));
         }
 
         retValue.setLinks(baseUrl, RESTv1Constants.STRINGCONSTANT_URL_NAME, dataType, retValue.getId());
@@ -58,11 +58,9 @@ public class StringConstantV1Factory
     @Override
     public void syncDBEntityWithRESTEntity(final EntityManager entityManager, final StringConstants entity,
             final RESTStringConstantV1 dataObject) {
-        if (dataObject.hasParameterSet(RESTStringConstantV1.NAME_NAME))
-            entity.setConstantName(dataObject.getName());
+        if (dataObject.hasParameterSet(RESTStringConstantV1.NAME_NAME)) entity.setConstantName(dataObject.getName());
 
-        if (dataObject.hasParameterSet(RESTStringConstantV1.VALUE_NAME))
-            entity.setConstantValue(dataObject.getValue());
+        if (dataObject.hasParameterSet(RESTStringConstantV1.VALUE_NAME)) entity.setConstantValue(dataObject.getValue());
 
         entityManager.persist(entity);
     }
