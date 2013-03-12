@@ -385,27 +385,27 @@ INSERT INTO RS_ENDPOINT (ENDPOINT_ID, ENDPOINT_URL, ENDPOINT_METHOD, URL_REGEX) 
 INSERT INTO RS_ENDPOINT (ENDPOINT_ID, ENDPOINT_URL, ENDPOINT_METHOD, URL_REGEX) VALUES (334, 'https://localhost:8443/testrestserver/rest/1/contentspecnode/delete/json/\\d+', 'DELETE', TRUE);
 INSERT INTO RS_ENDPOINT (ENDPOINT_ID, ENDPOINT_URL, ENDPOINT_METHOD, URL_REGEX) VALUES (335, 'https://localhost:8443/testrestserver/rest/1/contentspecnodes/delete/json/ids;(\\d+;)*\\d+;?', 'DELETE', TRUE);
 
-INSERT INTO RS_ENDPOINT (ENDPOINT_ID, ENDPOINT_URL, ENDPOINT_METHOD, URL_REGEX) VALUES (336, 'https://localhost:8443/testrestserver/rest/1/contentspecmetadata/get/jsonp/\\d+', 'GET', TRUE);
-INSERT INTO RS_ENDPOINT (ENDPOINT_ID, ENDPOINT_URL, ENDPOINT_METHOD, URL_REGEX) VALUES (337, 'https://localhost:8443/testrestserver/rest/1/contentspecmetadata/get/jsonp/\\d+/r/\\d+', 'GET', TRUE);
-INSERT INTO RS_ENDPOINT (ENDPOINT_ID, ENDPOINT_URL, ENDPOINT_METHOD, URL_REGEX) VALUES (338, 'https://localhost:8443/testrestserver/rest/1/contentspecmetadatas/get/jsonp/all', 'GET', FALSE);
-INSERT INTO RS_ENDPOINT (ENDPOINT_ID, ENDPOINT_URL, ENDPOINT_METHOD, URL_REGEX) VALUES (339, 'https://localhost:8443/testrestserver/rest/1/contentspecmetadatas/get/jsonp/query;([-\\w%~\\.]+=[-\\w%~\\.]*;)*([-\\w%~\\.]+=[-\\w%~\\.]*;?)?', 'GET', TRUE);
-INSERT INTO RS_ENDPOINT (ENDPOINT_ID, ENDPOINT_URL, ENDPOINT_METHOD, URL_REGEX) VALUES (340, 'https://localhost:8443/testrestserver/rest/1/contentspecmetadata/update/jsonp', 'GET', FALSE);
-INSERT INTO RS_ENDPOINT (ENDPOINT_ID, ENDPOINT_URL, ENDPOINT_METHOD, URL_REGEX) VALUES (341, 'https://localhost:8443/testrestserver/rest/1/contentspecmetadatas/update/jsonp', 'GET', FALSE);
-INSERT INTO RS_ENDPOINT (ENDPOINT_ID, ENDPOINT_URL, ENDPOINT_METHOD, URL_REGEX) VALUES (342, 'https://localhost:8443/testrestserver/rest/1/contentspecmetadata/create/jsonp', 'GET', FALSE);
-INSERT INTO RS_ENDPOINT (ENDPOINT_ID, ENDPOINT_URL, ENDPOINT_METHOD, URL_REGEX) VALUES (343, 'https://localhost:8443/testrestserver/rest/1/contentspecmetadatas/create/jsonp', 'GET', FALSE);
-INSERT INTO RS_ENDPOINT (ENDPOINT_ID, ENDPOINT_URL, ENDPOINT_METHOD, URL_REGEX) VALUES (344, 'https://localhost:8443/testrestserver/rest/1/contentspecmetadata/delete/jsonp/\\d+', 'GET', TRUE);
-INSERT INTO RS_ENDPOINT (ENDPOINT_ID, ENDPOINT_URL, ENDPOINT_METHOD, URL_REGEX) VALUES (345, 'https://localhost:8443/testrestserver/rest/1/contentspecmetadatas/delete/jsonp/ids;(\\d+;)*\\d+;?', 'GET', TRUE);
+INSERT INTO RS_ENDPOINT (ENDPOINT_ID, ENDPOINT_URL, ENDPOINT_METHOD, URL_REGEX) VALUES (336, 'https://localhost:8443/testrestserver/rest/1/contentspectranslatednode/get/jsonp/\\d+', 'GET', TRUE);
+INSERT INTO RS_ENDPOINT (ENDPOINT_ID, ENDPOINT_URL, ENDPOINT_METHOD, URL_REGEX) VALUES (337, 'https://localhost:8443/testrestserver/rest/1/contentspectranslatednode/get/jsonp/\\d+/r/\\d+', 'GET', TRUE);
+INSERT INTO RS_ENDPOINT (ENDPOINT_ID, ENDPOINT_URL, ENDPOINT_METHOD, URL_REGEX) VALUES (338, 'https://localhost:8443/testrestserver/rest/1/contentspectranslatednodes/get/jsonp/all', 'GET', FALSE);
+INSERT INTO RS_ENDPOINT (ENDPOINT_ID, ENDPOINT_URL, ENDPOINT_METHOD, URL_REGEX) VALUES (339, 'https://localhost:8443/testrestserver/rest/1/contentspectranslatednodes/get/jsonp/query;([-\\w%~\\.]+=[-\\w%~\\.]*;)*([-\\w%~\\.]+=[-\\w%~\\.]*;?)?', 'GET', TRUE);
+INSERT INTO RS_ENDPOINT (ENDPOINT_ID, ENDPOINT_URL, ENDPOINT_METHOD, URL_REGEX) VALUES (340, 'https://localhost:8443/testrestserver/rest/1/contentspectranslatednode/update/jsonp', 'GET', FALSE);
+INSERT INTO RS_ENDPOINT (ENDPOINT_ID, ENDPOINT_URL, ENDPOINT_METHOD, URL_REGEX) VALUES (341, 'https://localhost:8443/testrestserver/rest/1/contentspectranslatednodes/update/jsonp', 'GET', FALSE);
+INSERT INTO RS_ENDPOINT (ENDPOINT_ID, ENDPOINT_URL, ENDPOINT_METHOD, URL_REGEX) VALUES (342, 'https://localhost:8443/testrestserver/rest/1/contentspectranslatednode/create/jsonp', 'GET', FALSE);
+INSERT INTO RS_ENDPOINT (ENDPOINT_ID, ENDPOINT_URL, ENDPOINT_METHOD, URL_REGEX) VALUES (343, 'https://localhost:8443/testrestserver/rest/1/contentspectranslatednodes/create/jsonp', 'GET', FALSE);
+INSERT INTO RS_ENDPOINT (ENDPOINT_ID, ENDPOINT_URL, ENDPOINT_METHOD, URL_REGEX) VALUES (344, 'https://localhost:8443/testrestserver/rest/1/contentspectranslatednode/delete/jsonp/\\d+', 'GET', TRUE);
+INSERT INTO RS_ENDPOINT (ENDPOINT_ID, ENDPOINT_URL, ENDPOINT_METHOD, URL_REGEX) VALUES (345, 'https://localhost:8443/testrestserver/rest/1/contentspectranslatednodes/delete/jsonp/ids;(\\d+;)*\\d+;?', 'GET', TRUE);
 
-INSERT INTO RS_ENDPOINT (ENDPOINT_ID, ENDPOINT_URL, ENDPOINT_METHOD, URL_REGEX) VALUES (346, 'https://localhost:8443/testrestserver/rest/1/contentspecmetadata/get/json/\\d+', 'GET', TRUE);
-INSERT INTO RS_ENDPOINT (ENDPOINT_ID, ENDPOINT_URL, ENDPOINT_METHOD, URL_REGEX) VALUES (347, 'https://localhost:8443/testrestserver/rest/1/contentspecmetadata/get/json/\\d+/r/\\d+', 'GET', TRUE);
-INSERT INTO RS_ENDPOINT (ENDPOINT_ID, ENDPOINT_URL, ENDPOINT_METHOD, URL_REGEX) VALUES (348, 'https://localhost:8443/testrestserver/rest/1/contentspecmetadatas/get/json/all', 'GET', FALSE);
-INSERT INTO RS_ENDPOINT (ENDPOINT_ID, ENDPOINT_URL, ENDPOINT_METHOD, URL_REGEX) VALUES (349, 'https://localhost:8443/testrestserver/rest/1/contentspecmetadatas/get/json/query;([-\\w%~\\.]+=[-\\w%~\\.]*;)*([-\\w%~\\.]+=[-\\w%~\\.]*;?)?', 'GET', TRUE);
-INSERT INTO RS_ENDPOINT (ENDPOINT_ID, ENDPOINT_URL, ENDPOINT_METHOD, URL_REGEX) VALUES (350, 'https://localhost:8443/testrestserver/rest/1/contentspecmetadata/update/json', 'POST', FALSE);
-INSERT INTO RS_ENDPOINT (ENDPOINT_ID, ENDPOINT_URL, ENDPOINT_METHOD, URL_REGEX) VALUES (351, 'https://localhost:8443/testrestserver/rest/1/contentspecmetadatas/update/json', 'POST', FALSE);
-INSERT INTO RS_ENDPOINT (ENDPOINT_ID, ENDPOINT_URL, ENDPOINT_METHOD, URL_REGEX) VALUES (352, 'https://localhost:8443/testrestserver/rest/1/contentspecmetadata/create/json', 'POST', FALSE);
-INSERT INTO RS_ENDPOINT (ENDPOINT_ID, ENDPOINT_URL, ENDPOINT_METHOD, URL_REGEX) VALUES (353, 'https://localhost:8443/testrestserver/rest/1/contentspecmetadatas/create/json', 'POST', FALSE);
-INSERT INTO RS_ENDPOINT (ENDPOINT_ID, ENDPOINT_URL, ENDPOINT_METHOD, URL_REGEX) VALUES (354, 'https://localhost:8443/testrestserver/rest/1/contentspecmetadata/delete/json/\\d+', 'DELETE', TRUE);
-INSERT INTO RS_ENDPOINT (ENDPOINT_ID, ENDPOINT_URL, ENDPOINT_METHOD, URL_REGEX) VALUES (355, 'https://localhost:8443/testrestserver/rest/1/contentspecmetadatas/delete/json/ids;(\\d+;)*\\d+;?', 'DELETE', TRUE);
+INSERT INTO RS_ENDPOINT (ENDPOINT_ID, ENDPOINT_URL, ENDPOINT_METHOD, URL_REGEX) VALUES (346, 'https://localhost:8443/testrestserver/rest/1/contentspectranslatednode/get/json/\\d+', 'GET', TRUE);
+INSERT INTO RS_ENDPOINT (ENDPOINT_ID, ENDPOINT_URL, ENDPOINT_METHOD, URL_REGEX) VALUES (347, 'https://localhost:8443/testrestserver/rest/1/contentspectranslatednode/get/json/\\d+/r/\\d+', 'GET', TRUE);
+INSERT INTO RS_ENDPOINT (ENDPOINT_ID, ENDPOINT_URL, ENDPOINT_METHOD, URL_REGEX) VALUES (348, 'https://localhost:8443/testrestserver/rest/1/contentspectranslatednodes/get/json/all', 'GET', FALSE);
+INSERT INTO RS_ENDPOINT (ENDPOINT_ID, ENDPOINT_URL, ENDPOINT_METHOD, URL_REGEX) VALUES (349, 'https://localhost:8443/testrestserver/rest/1/contentspectranslatednodes/get/json/query;([-\\w%~\\.]+=[-\\w%~\\.]*;)*([-\\w%~\\.]+=[-\\w%~\\.]*;?)?', 'GET', TRUE);
+INSERT INTO RS_ENDPOINT (ENDPOINT_ID, ENDPOINT_URL, ENDPOINT_METHOD, URL_REGEX) VALUES (350, 'https://localhost:8443/testrestserver/rest/1/contentspectranslatednode/update/json', 'POST', FALSE);
+INSERT INTO RS_ENDPOINT (ENDPOINT_ID, ENDPOINT_URL, ENDPOINT_METHOD, URL_REGEX) VALUES (351, 'https://localhost:8443/testrestserver/rest/1/contentspectranslatednodes/update/json', 'POST', FALSE);
+INSERT INTO RS_ENDPOINT (ENDPOINT_ID, ENDPOINT_URL, ENDPOINT_METHOD, URL_REGEX) VALUES (352, 'https://localhost:8443/testrestserver/rest/1/contentspectranslatednode/create/json', 'POST', FALSE);
+INSERT INTO RS_ENDPOINT (ENDPOINT_ID, ENDPOINT_URL, ENDPOINT_METHOD, URL_REGEX) VALUES (353, 'https://localhost:8443/testrestserver/rest/1/contentspectranslatednodes/create/json', 'POST', FALSE);
+INSERT INTO RS_ENDPOINT (ENDPOINT_ID, ENDPOINT_URL, ENDPOINT_METHOD, URL_REGEX) VALUES (354, 'https://localhost:8443/testrestserver/rest/1/contentspectranslatednode/delete/json/\\d+', 'DELETE', TRUE);
+INSERT INTO RS_ENDPOINT (ENDPOINT_ID, ENDPOINT_URL, ENDPOINT_METHOD, URL_REGEX) VALUES (355, 'https://localhost:8443/testrestserver/rest/1/contentspectranslatednodes/delete/json/ids;(\\d+;)*\\d+;?', 'DELETE', TRUE);
 
 INSERT INTO RS_SCOPE_RS_ENDPOINT (SCOPE_ID, ENDPOINT_ID) VALUES (1, 1);
 INSERT INTO RS_SCOPE_RS_ENDPOINT (SCOPE_ID, ENDPOINT_ID) VALUES (1, 2);
