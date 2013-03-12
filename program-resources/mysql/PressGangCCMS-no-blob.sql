@@ -1032,7 +1032,8 @@ CREATE TABLE IF NOT EXISTS `PropertyTag` (
 -- Dumping data for table `PropertyTag`
 --
 
-INSERT INTO `PropertyTag` (`PropertyTagID`, `PropertyTagName`, `PropertyTagDescription`, `PropertyTagRegex`, `PropertyTagCanBeNull`, `PropertyTagIsUnqiue`) VALUES
+INSERT INTO `PropertyTag` (`PropertyTagID`, `PropertyTagName`, `PropertyTagDescription`, `PropertyTagRegex`, `PropertyTagCanBeNull`,
+                           `PropertyTagIsUnique`) VALUES
 (1, 'First Name', '', '^[a-zA-Z][a-zA-Z\\-'' ]*[a-zA-Z ]$', b'0', b'0'),
 (2, 'Last Name', '', '^[a-zA-Z][a-zA-Z\\-'' ]*[a-zA-Z ]$', b'0', b'0'),
 (3, 'Email Address', '', '^([a-zA-Z0-9_\\-\\.]+)@((\\[[0-9]{1,3}\\.[0-9]{1,3}\\.[0-9]{1,3}\\.)|(([a-zA-Z0-9\\-]+\\.)+))([a-zA-Z]{2,4}|[0-9]{1,3})(\\]?)$', b'0', b'0'),
@@ -1223,7 +1224,7 @@ CREATE TABLE IF NOT EXISTS `PropertyTag_AUD` (
 -- Dumping data for table `PropertyTag_AUD`
 --
 
-INSERT INTO `PropertyTag_AUD` (`PropertyTagID`, `REV`, `REVEND`, `REVTYPE`, `PropertyTagCanBeNull`, `PropertyTagDescription`, `PropertyTagName`, `PropertyTagRegex`, `PropertyTagIsUnqiue`) VALUES
+INSERT INTO `PropertyTag_AUD` (`PropertyTagID`, `REV`, `REVEND`, `REVTYPE`, `PropertyTagCanBeNull`, `PropertyTagDescription`, `PropertyTagName`, `PropertyTagRegex`, `PropertyTagIsUnique`) VALUES
 (1, 1, NULL, 0, b'0', '', 'First Name', '^[a-zA-Z][a-zA-Z\\-'' ]*[a-zA-Z ]$', b'0'),
 (2, 1, NULL, 0, b'0', '', 'Last Name', '^[a-zA-Z][a-zA-Z\\-'' ]*[a-zA-Z ]$', b'0'),
 (3, 1, NULL, 0, b'0', '', 'Email Address', '^([a-zA-Z0-9_\\-\\.]+)@((\\[[0-9]{1,3}\\.[0-9]{1,3}\\.[0-9]{1,3}\\.)|(([a-zA-Z0-9\\-]+\\.)+))([a-zA-Z]{2,4}|[0-9]{1,3})(\\]?)$', b'0'),
