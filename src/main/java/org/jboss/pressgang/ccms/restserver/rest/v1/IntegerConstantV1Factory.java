@@ -26,7 +26,7 @@ public class IntegerConstantV1Factory extends RESTDataObjectFactory<RESTIntegerC
     public RESTIntegerConstantV1 createRESTEntityFromDBEntityInternal(final IntegerConstants entity, final String baseUrl,
             final String dataType, final ExpandDataTrunk expand, final Number revision, final boolean expandParentReferences,
             final EntityManager entityManager) {
-        assert entity != null : "Parameter topic can not be null";
+        assert entity != null : "Parameter entity can not be null";
         assert baseUrl != null : "Parameter baseUrl can not be null";
 
         final RESTIntegerConstantV1 retValue = new RESTIntegerConstantV1();
@@ -58,9 +58,10 @@ public class IntegerConstantV1Factory extends RESTDataObjectFactory<RESTIntegerC
     @Override
     public void syncDBEntityWithRESTEntity(final EntityManager entityManager, final IntegerConstants entity,
             final RESTIntegerConstantV1 dataObject) {
-        if (dataObject.hasParameterSet(RESTStringConstantV1.NAME_NAME)) entity.setConstantName(dataObject.getName());
-
-        if (dataObject.hasParameterSet(RESTStringConstantV1.VALUE_NAME)) entity.setConstantValue(dataObject.getValue());
+        if (dataObject.hasParameterSet(RESTStringConstantV1.NAME_NAME))
+            entity.setConstantName(dataObject.getName());
+        if (dataObject.hasParameterSet(RESTStringConstantV1.VALUE_NAME))
+            entity.setConstantValue(dataObject.getValue());
 
         entityManager.persist(entity);
     }

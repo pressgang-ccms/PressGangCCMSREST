@@ -12,16 +12,13 @@ import java.util.Set;
 
 import org.hibernate.envers.AuditReader;
 import org.hibernate.envers.AuditReaderFactory;
-import org.jboss.pressgang.ccms.docbook.messaging.TopicRendererType;
 import org.jboss.pressgang.ccms.model.Topic;
 import org.jboss.pressgang.ccms.model.TranslatedTopic;
 import org.jboss.pressgang.ccms.model.TranslatedTopicData;
 import org.jboss.pressgang.ccms.model.TranslatedTopicString;
 import org.jboss.pressgang.ccms.restserver.utils.EntityUtilities;
 import org.jboss.pressgang.ccms.restserver.utils.JNDIUtilities;
-import org.jboss.pressgang.ccms.restserver.utils.topicrenderer.TopicQueueRenderer;
 import org.jboss.pressgang.ccms.utils.common.XMLUtilities;
-import org.jboss.pressgang.ccms.utils.concurrency.WorkQueue;
 import org.jboss.pressgang.ccms.utils.constants.CommonConstants;
 import org.jboss.pressgang.ccms.utils.structures.StringToNodeCollection;
 import org.jboss.pressgang.ccms.zanata.ZanataInterface;
@@ -63,10 +60,10 @@ public class ZanataPullTopicThread implements Runnable {
             EntityManager entityManager = null;
 
             try {
-                final EntityManagerFactory entityManagerFactory = JNDIUtilities.lookupEntityManagerFactory();
+                final EntityManagerFactory entityManagerFactory = JNDIUtilities.lookupJBossEntityManagerFactory();
 
                 // Get the TransactionManager and start a transaction.
-                transactionManager = JNDIUtilities.lookupTransactionManager();
+                transactionManager = JNDIUtilities.lookupJBossTransactionManager();
                 transactionManager.begin();
 
                 // Get an EntityManager instance
@@ -103,11 +100,6 @@ public class ZanataPullTopicThread implements Runnable {
 
                 // Commit all the changes
                 transactionManager.commit();
-
-                // Render all the updated translated topics
-                for (final Integer id : processedIds) {
-                    WorkQueue.getInstance().execute(TopicQueueRenderer.createNewInstance(id, TopicRendererType.TRANSLATEDTOPIC));
-                }
             } catch (final Exception ex) {
                 log.error("Probably an error looking up the EntityManagerFactory or the TransactionManager", ex);
 

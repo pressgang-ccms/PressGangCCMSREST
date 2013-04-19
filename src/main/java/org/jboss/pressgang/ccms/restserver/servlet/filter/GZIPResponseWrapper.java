@@ -100,7 +100,7 @@ public class GZIPResponseWrapper extends HttpServletResponseWrapper {
      */
     protected boolean isCompressible(final String contentType) {
         if (contentType == null) {
-            return false;
+            return true;
         }
         // Strip away any extra details that are after the mime type
         final String stripped = stripParams(contentType);

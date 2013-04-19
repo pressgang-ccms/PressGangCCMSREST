@@ -16,11 +16,11 @@ import org.jboss.pressgang.ccms.rest.v1.entities.RESTPropertyTagV1;
 import org.jboss.pressgang.ccms.rest.v1.entities.base.RESTBaseEntityV1;
 import org.jboss.pressgang.ccms.rest.v1.entities.join.RESTPropertyCategoryInPropertyTagV1;
 import org.jboss.pressgang.ccms.rest.v1.entities.join.RESTPropertyTagInPropertyCategoryV1;
-import org.jboss.pressgang.ccms.rest.v1.exceptions.InvalidParameterException;
 import org.jboss.pressgang.ccms.rest.v1.expansion.ExpandDataTrunk;
 import org.jboss.pressgang.ccms.restserver.rest.v1.base.RESTDataObjectCollectionFactory;
 import org.jboss.pressgang.ccms.restserver.rest.v1.base.RESTDataObjectFactory;
 import org.jboss.pressgang.ccms.restserver.utils.EnversUtilities;
+import org.jboss.resteasy.spi.BadRequestException;
 
 public class PropertyTagV1Factory extends RESTDataObjectFactory<RESTPropertyTagV1, PropertyTag, RESTPropertyTagCollectionV1,
         RESTPropertyTagCollectionItemV1> {
@@ -31,7 +31,7 @@ public class PropertyTagV1Factory extends RESTDataObjectFactory<RESTPropertyTagV
     @Override
     public RESTPropertyTagV1 createRESTEntityFromDBEntityInternal(final PropertyTag entity, final String baseUrl, final String dataType,
             final ExpandDataTrunk expand, final Number revision, final boolean expandParentReferences, final EntityManager entityManager) {
-        assert entity != null : "Parameter topic can not be null";
+        assert entity != null : "Parameter entity can not be null";
         assert baseUrl != null : "Parameter baseUrl can not be null";
 
         final RESTPropertyTagV1 retValue = new RESTPropertyTagV1();
@@ -76,7 +76,7 @@ public class PropertyTagV1Factory extends RESTDataObjectFactory<RESTPropertyTagV
 
     @Override
     public void syncDBEntityWithRESTEntity(final EntityManager entityManager, final PropertyTag entity,
-            final RESTPropertyTagV1 dataObject) throws InvalidParameterException {
+            final RESTPropertyTagV1 dataObject) {
         if (dataObject.hasParameterSet(RESTPropertyTagV1.DESCRIPTION_NAME)) entity.setPropertyTagDescription(dataObject.getDescription());
         if (dataObject.hasParameterSet(RESTPropertyTagV1.CANBENULL_NAME)) entity.setPropertyTagCanBeNull(dataObject.getCanBeNull());
         if (dataObject.hasParameterSet(RESTPropertyTagV1.NAME_NAME)) entity.setPropertyTagName(dataObject.getName());
@@ -95,7 +95,7 @@ public class PropertyTagV1Factory extends RESTDataObjectFactory<RESTPropertyTagV
 
                 if (restEntityItem.returnIsAddItem() || restEntityItem.returnIsRemoveItem()) {
                     final PropertyTagCategory dbEntity = entityManager.find(PropertyTagCategory.class, restEntity.getId());
-                    if (dbEntity == null) throw new InvalidParameterException(
+                    if (dbEntity == null) throw new BadRequestException(
                             "No PropertyTagCategory entity was found with the primary key " + restEntity.getId());
 
                     if (restEntityItem.returnIsAddItem()) {
@@ -106,7 +106,7 @@ public class PropertyTagV1Factory extends RESTDataObjectFactory<RESTPropertyTagV
                 } else if (restEntityItem.returnIsUpdateItem()) {
                     final PropertyTagToPropertyTagCategory dbEntity = entityManager.find(PropertyTagToPropertyTagCategory.class,
                             restEntity.getRelationshipId());
-                    if (dbEntity == null) throw new InvalidParameterException(
+                    if (dbEntity == null) throw new BadRequestException(
                             "No PropertyTagToPropertyTagCategory entity was found with the primary key " + restEntity.getRelationshipId());
 
                     new PropertyCategoryInPropertyTagV1Factory().syncDBEntityWithRESTEntity(entityManager, dbEntity, restEntity);

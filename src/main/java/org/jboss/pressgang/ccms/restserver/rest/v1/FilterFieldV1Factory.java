@@ -24,7 +24,7 @@ public class FilterFieldV1Factory extends RESTDataObjectFactory<RESTFilterFieldV
     @Override
     public RESTFilterFieldV1 createRESTEntityFromDBEntityInternal(final FilterField entity, final String baseUrl, final String dataType,
             final ExpandDataTrunk expand, final Number revision, boolean expandParentReferences, final EntityManager entityManager) {
-        assert entity != null : "Parameter filterEntity can not be null";
+        assert entity != null : "Parameter entity can not be null";
         assert baseUrl != null : "Parameter baseUrl can not be null";
 
         final RESTFilterFieldV1 retValue = new RESTFilterFieldV1();
@@ -62,9 +62,12 @@ public class FilterFieldV1Factory extends RESTDataObjectFactory<RESTFilterFieldV
     @Override
     public void syncDBEntityWithRESTEntity(final EntityManager entityManager, final FilterField entity,
             final RESTFilterFieldV1 dataObject) {
-        if (dataObject.hasParameterSet(RESTFilterFieldV1.DESCRIPTION_NAME)) entity.setDescription(dataObject.getDescription());
-        if (dataObject.hasParameterSet(RESTFilterFieldV1.NAME_NAME)) entity.setField(dataObject.getName());
-        if (dataObject.hasParameterSet(RESTFilterFieldV1.VALUE_NAME)) entity.setValue(dataObject.getValue());
+        if (dataObject.hasParameterSet(RESTFilterFieldV1.DESCRIPTION_NAME))
+            entity.setDescription(dataObject.getDescription());
+        if (dataObject.hasParameterSet(RESTFilterFieldV1.NAME_NAME))
+            entity.setField(dataObject.getName());
+        if (dataObject.hasParameterSet(RESTFilterFieldV1.VALUE_NAME))
+            entity.setValue(dataObject.getValue());
 
         entityManager.persist(entity);
     }

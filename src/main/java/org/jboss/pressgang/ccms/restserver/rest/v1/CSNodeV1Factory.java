@@ -8,12 +8,12 @@ import org.jboss.pressgang.ccms.model.PropertyTag;
 import org.jboss.pressgang.ccms.model.contentspec.CSNode;
 import org.jboss.pressgang.ccms.model.contentspec.CSNodeToCSNode;
 import org.jboss.pressgang.ccms.model.contentspec.CSNodeToPropertyTag;
-import org.jboss.pressgang.ccms.model.contentspec.CSTranslatedNode;
 import org.jboss.pressgang.ccms.model.contentspec.ContentSpec;
+import org.jboss.pressgang.ccms.model.contentspec.TranslatedCSNode;
 import org.jboss.pressgang.ccms.rest.v1.collections.contentspec.RESTCSNodeCollectionV1;
-import org.jboss.pressgang.ccms.rest.v1.collections.contentspec.RESTCSTranslatedNodeCollectionV1;
+import org.jboss.pressgang.ccms.rest.v1.collections.contentspec.RESTTranslatedCSNodeCollectionV1;
 import org.jboss.pressgang.ccms.rest.v1.collections.contentspec.items.RESTCSNodeCollectionItemV1;
-import org.jboss.pressgang.ccms.rest.v1.collections.contentspec.items.RESTCSTranslatedNodeCollectionItemV1;
+import org.jboss.pressgang.ccms.rest.v1.collections.contentspec.items.RESTTranslatedCSNodeCollectionItemV1;
 import org.jboss.pressgang.ccms.rest.v1.collections.contentspec.items.join.RESTCSRelatedNodeCollectionItemV1;
 import org.jboss.pressgang.ccms.rest.v1.collections.contentspec.join.RESTCSRelatedNodeCollectionV1;
 import org.jboss.pressgang.ccms.rest.v1.collections.items.join.RESTAssignedPropertyTagCollectionItemV1;
@@ -21,16 +21,16 @@ import org.jboss.pressgang.ccms.rest.v1.collections.join.RESTAssignedPropertyTag
 import org.jboss.pressgang.ccms.rest.v1.constants.RESTv1Constants;
 import org.jboss.pressgang.ccms.rest.v1.entities.base.RESTBaseEntityV1;
 import org.jboss.pressgang.ccms.rest.v1.entities.contentspec.RESTCSNodeV1;
-import org.jboss.pressgang.ccms.rest.v1.entities.contentspec.RESTCSTranslatedNodeV1;
 import org.jboss.pressgang.ccms.rest.v1.entities.contentspec.RESTContentSpecV1;
+import org.jboss.pressgang.ccms.rest.v1.entities.contentspec.RESTTranslatedCSNodeV1;
 import org.jboss.pressgang.ccms.rest.v1.entities.contentspec.enums.RESTCSNodeTypeV1;
 import org.jboss.pressgang.ccms.rest.v1.entities.contentspec.join.RESTCSRelatedNodeV1;
 import org.jboss.pressgang.ccms.rest.v1.entities.join.RESTAssignedPropertyTagV1;
-import org.jboss.pressgang.ccms.rest.v1.exceptions.InvalidParameterException;
 import org.jboss.pressgang.ccms.rest.v1.expansion.ExpandDataTrunk;
 import org.jboss.pressgang.ccms.restserver.rest.v1.base.RESTDataObjectCollectionFactory;
 import org.jboss.pressgang.ccms.restserver.rest.v1.base.RESTDataObjectFactory;
 import org.jboss.pressgang.ccms.restserver.utils.EnversUtilities;
+import org.jboss.resteasy.spi.BadRequestException;
 
 public class CSNodeV1Factory extends RESTDataObjectFactory<RESTCSNodeV1, CSNode, RESTCSNodeCollectionV1, RESTCSNodeCollectionItemV1> {
 
@@ -92,7 +92,7 @@ public class CSNodeV1Factory extends RESTDataObjectFactory<RESTCSNodeV1, CSNode,
         if (entity.getPrevious() != null) retValue.setPreviousNodeId(entity.getPrevious().getId());
 
         // CHILDREN NODES
-        if (expand != null && expand.contains(RESTContentSpecV1.NODES_NAME)) {
+        if (expand != null && expand.contains(RESTContentSpecV1.CHILDREN_NAME)) {
             retValue.setChildren_OTM(
                     new RESTDataObjectCollectionFactory<RESTCSNodeV1, CSNode, RESTCSNodeCollectionV1, RESTCSNodeCollectionItemV1>().create(
                             RESTCSNodeCollectionV1.class, new CSNodeV1Factory(), entity.getChildrenList(), RESTCSNodeV1.CHILDREN_NAME,
@@ -120,9 +120,8 @@ public class CSNodeV1Factory extends RESTDataObjectFactory<RESTCSNodeV1, CSNode,
         // TRANSLATED STRINGS
         if (expand != null && expand.contains(RESTCSNodeV1.TRANSLATED_NODES_NAME)) {
             retValue.setTranslatedNodes_OTM(
-                    new RESTDataObjectCollectionFactory<RESTCSTranslatedNodeV1, CSTranslatedNode, RESTCSTranslatedNodeCollectionV1,
-                            RESTCSTranslatedNodeCollectionItemV1>().create(
-                            RESTCSTranslatedNodeCollectionV1.class, new CSTranslatedNodeV1Factory(),
+                    new RESTDataObjectCollectionFactory<RESTTranslatedCSNodeV1, TranslatedCSNode, RESTTranslatedCSNodeCollectionV1, RESTTranslatedCSNodeCollectionItemV1>().create(
+                            RESTTranslatedCSNodeCollectionV1.class, new TranslatedCSNodeV1Factory(),
                             entity.getTranslatedNodes(entityManager, revision), RESTCSNodeV1.TRANSLATED_NODES_NAME, dataType, expand,
                             baseUrl, false, entityManager));
         }
@@ -144,7 +143,7 @@ public class CSNodeV1Factory extends RESTDataObjectFactory<RESTCSNodeV1, CSNode,
 
     @Override
     public void syncDBEntityWithRESTEntity(final EntityManager entityManager, final CSNode entity,
-            final RESTCSNodeV1 dataObject) throws InvalidParameterException {
+            final RESTCSNodeV1 dataObject) {
         if (dataObject.hasParameterSet(RESTCSNodeV1.TITLE_NAME)) entity.setCSNodeTitle(dataObject.getTitle());
 
         if (dataObject.hasParameterSet(RESTCSNodeV1.TARGET_ID_NAME)) entity.setCSNodeTargetId(dataObject.getTargetId());
@@ -160,14 +159,14 @@ public class CSNodeV1Factory extends RESTDataObjectFactory<RESTCSNodeV1, CSNode,
 
         if (dataObject.hasParameterSet(RESTCSNodeV1.ENTITY_REVISION_NAME)) entity.setEntityRevision(dataObject.getEntityRevision());
 
-        /* Set the ContentSpec for the Node */
+        // Set the ContentSpec for the Node
         if (dataObject.hasParameterSet(RESTCSNodeV1.CONTENT_SPEC_NAME)) {
             final RESTContentSpecV1 restEntity = dataObject.getContentSpec();
 
             if (restEntity != null) {
                 final ContentSpec dbEntity = entityManager.find(ContentSpec.class, restEntity.getId());
                 if (dbEntity == null)
-                    throw new InvalidParameterException("No ContentSpec entity was found with the primary key " + restEntity.getId());
+                    throw new BadRequestException("No ContentSpec entity was found with the primary key " + restEntity.getId());
 
                 dbEntity.addChild(entity);
             } else if (entity.getContentSpec() != null) {
@@ -177,14 +176,14 @@ public class CSNodeV1Factory extends RESTDataObjectFactory<RESTCSNodeV1, CSNode,
             }
         }
 
-        /* Set the Parent for the Node */
+        // Set the Parent for the Node
         if (dataObject.hasParameterSet(RESTCSNodeV1.PARENT_NAME)) {
             final RESTCSNodeV1 restEntity = dataObject.getParent();
 
             if (restEntity != null) {
                 final CSNode dbEntity = entityManager.find(CSNode.class, restEntity.getId());
                 if (dbEntity == null)
-                    throw new InvalidParameterException("No CSNode entity was found with the primary key " + restEntity.getId());
+                    throw new BadRequestException("No CSNode entity was found with the primary key " + restEntity.getId());
 
                 dbEntity.addChild(entity);
             } else if (entity.getParent() != null) {
@@ -194,13 +193,13 @@ public class CSNodeV1Factory extends RESTDataObjectFactory<RESTCSNodeV1, CSNode,
             }
         }
 
-        /* Set the Next Node */
+        // Set the Next Node
         if (dataObject.hasParameterSet(RESTCSNodeV1.NEXT_NODE_NAME)) {
             final Integer nextNodeId = dataObject.getNextNodeId();
 
             if (nextNodeId != null) {
                 final CSNode dbEntity = entityManager.find(CSNode.class, nextNodeId);
-                if (dbEntity == null) throw new InvalidParameterException("No CSNode entity was found with the primary key " + nextNodeId);
+                if (dbEntity == null) throw new BadRequestException("No CSNode entity was found with the primary key " + nextNodeId);
 
                 dbEntity.setPrevious(entity);
                 entity.setNext(dbEntity);
@@ -212,14 +211,14 @@ public class CSNodeV1Factory extends RESTDataObjectFactory<RESTCSNodeV1, CSNode,
             }
         }
 
-         /* Set the Previous Node */
+         // Set the Previous Node
         if (dataObject.hasParameterSet(RESTCSNodeV1.PREVIOUS_NODE_NAME)) {
             final Integer previousNodeId = dataObject.getPreviousNodeId();
 
             if (previousNodeId != null) {
                 final CSNode dbEntity = entityManager.find(CSNode.class, previousNodeId);
                 if (dbEntity == null)
-                    throw new InvalidParameterException("No CSNode entity was found with the primary key " + previousNodeId);
+                    throw new BadRequestException("No CSNode entity was found with the primary key " + previousNodeId);
 
                 dbEntity.setNext(entity);
                 entity.setPrevious(dbEntity);
@@ -237,25 +236,25 @@ public class CSNodeV1Factory extends RESTDataObjectFactory<RESTCSNodeV1, CSNode,
                 RESTCSNodeV1.PROPERTIES_NAME) && dataObject.getProperties() != null && dataObject.getProperties().getItems() != null) {
             dataObject.getProperties().removeInvalidChangeItemRequests();
 
-            /* remove children first */
+            // Remove children first
             for (final RESTAssignedPropertyTagCollectionItemV1 restEntityItem : dataObject.getProperties().getItems()) {
                 final RESTAssignedPropertyTagV1 restEntity = restEntityItem.getItem();
 
                 if (restEntityItem.returnIsRemoveItem()) {
                     final PropertyTag dbEntity = entityManager.find(PropertyTag.class, restEntity.getId());
                     if (dbEntity == null)
-                        throw new InvalidParameterException("No PropertyTag entity was found with the primary key " + restEntity.getId());
+                        throw new BadRequestException("No PropertyTag entity was found with the primary key " + restEntity.getId());
 
                     entity.removePropertyTag(dbEntity, restEntity.getValue());
                 } else if (restEntityItem.returnIsAddItem()) {
                     final PropertyTag dbEntity = entityManager.find(PropertyTag.class, restEntity.getId());
                     if (dbEntity == null)
-                        throw new InvalidParameterException("No PropertyTag entity was found with the primary key " + restEntity.getId());
+                        throw new BadRequestException("No PropertyTag entity was found with the primary key " + restEntity.getId());
 
                     entity.addPropertyTag(dbEntity, restEntity.getValue());
                 } else if (restEntityItem.returnIsUpdateItem()) {
                     final CSNodeToPropertyTag dbEntity = entityManager.find(CSNodeToPropertyTag.class, restEntity.getRelationshipId());
-                    if (dbEntity == null) throw new InvalidParameterException(
+                    if (dbEntity == null) throw new BadRequestException(
                             "No CSNodeToPropertyTag entity was found with the primary key " + restEntity.getRelationshipId());
 
                     new CSNodePropertyTagV1Factory().syncDBEntityWithRESTEntity(entityManager, dbEntity, restEntity);
@@ -263,7 +262,7 @@ public class CSNodeV1Factory extends RESTDataObjectFactory<RESTCSNodeV1, CSNode,
             }
         }
 
-        /* One To Many - Add will create a new mapping */
+        // One To Many - Add will create a new mapping
         if (dataObject.hasParameterSet(
                 RESTCSNodeV1.CHILDREN_NAME) && dataObject.getChildren_OTM() != null && dataObject.getChildren_OTM().getItems() != null) {
             dataObject.getChildren_OTM().removeInvalidChangeItemRequests();
@@ -274,7 +273,7 @@ public class CSNodeV1Factory extends RESTDataObjectFactory<RESTCSNodeV1, CSNode,
                 if (restEntityItem.returnIsRemoveItem()) {
                     final CSNode dbEntity = entityManager.find(CSNode.class, restEntity.getId());
                     if (dbEntity == null)
-                        throw new InvalidParameterException("No CSNode entity was found with the primary key " + restEntity.getId());
+                        throw new BadRequestException("No CSNode entity was found with the primary key " + restEntity.getId());
 
                     entity.removeChild(dbEntity);
                     entityManager.remove(dbEntity);
@@ -285,7 +284,7 @@ public class CSNodeV1Factory extends RESTDataObjectFactory<RESTCSNodeV1, CSNode,
                 } else if (restEntityItem.returnIsUpdateItem()) {
                     final CSNode dbEntity = entityManager.find(CSNode.class, restEntity.getId());
                     if (dbEntity == null)
-                        throw new InvalidParameterException("No CSNode entity was found with the primary key " + restEntity.getId());
+                        throw new BadRequestException("No CSNode entity was found with the primary key " + restEntity.getId());
 
                     new CSNodeV1Factory().syncDBEntityWithRESTEntity(entityManager, dbEntity, restEntity);
                 }

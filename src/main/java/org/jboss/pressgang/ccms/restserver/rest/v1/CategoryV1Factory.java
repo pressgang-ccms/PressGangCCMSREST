@@ -16,11 +16,11 @@ import org.jboss.pressgang.ccms.rest.v1.entities.RESTCategoryV1;
 import org.jboss.pressgang.ccms.rest.v1.entities.base.RESTBaseEntityV1;
 import org.jboss.pressgang.ccms.rest.v1.entities.join.RESTCategoryInTagV1;
 import org.jboss.pressgang.ccms.rest.v1.entities.join.RESTTagInCategoryV1;
-import org.jboss.pressgang.ccms.rest.v1.exceptions.InvalidParameterException;
 import org.jboss.pressgang.ccms.rest.v1.expansion.ExpandDataTrunk;
 import org.jboss.pressgang.ccms.restserver.rest.v1.base.RESTDataObjectCollectionFactory;
 import org.jboss.pressgang.ccms.restserver.rest.v1.base.RESTDataObjectFactory;
 import org.jboss.pressgang.ccms.restserver.utils.EnversUtilities;
+import org.jboss.resteasy.spi.BadRequestException;
 
 class CategoryV1Factory extends RESTDataObjectFactory<RESTCategoryV1, Category, RESTCategoryCollectionV1, RESTCategoryCollectionItemV1> {
     CategoryV1Factory() {
@@ -30,7 +30,7 @@ class CategoryV1Factory extends RESTDataObjectFactory<RESTCategoryV1, Category, 
     @Override
     public RESTCategoryV1 createRESTEntityFromDBEntityInternal(final Category entity, final String baseUrl, final String dataType,
             final ExpandDataTrunk expand, final Number revision, final boolean expandParentReferences, final EntityManager entityManager) {
-        assert entity != null : "Parameter topic can not be null";
+        assert entity != null : "Parameter entity can not be null";
         assert baseUrl != null : "Parameter baseUrl can not be null";
 
         final RESTCategoryV1 retValue = new RESTCategoryV1();
@@ -73,8 +73,7 @@ class CategoryV1Factory extends RESTDataObjectFactory<RESTCategoryV1, Category, 
     }
 
     @Override
-    public void syncDBEntityWithRESTEntity(final EntityManager entityManager, final Category entity,
-            final RESTCategoryV1 dataObject) throws InvalidParameterException {
+    public void syncDBEntityWithRESTEntity(final EntityManager entityManager, final Category entity, final RESTCategoryV1 dataObject) {
         if (dataObject.hasParameterSet(RESTCategoryV1.DESCRIPTION_NAME)) entity.setCategoryDescription(dataObject.getDescription());
         if (dataObject.hasParameterSet(RESTCategoryV1.MUTUALLYEXCLUSIVE_NAME))
             entity.setMutuallyExclusive(dataObject.getMutuallyExclusive());
@@ -94,7 +93,7 @@ class CategoryV1Factory extends RESTDataObjectFactory<RESTCategoryV1, Category, 
                 if (restEntityItem.returnIsAddItem() || restEntityItem.returnIsRemoveItem()) {
                     final Tag dbEntity = entityManager.find(Tag.class, restEntity.getId());
                     if (dbEntity == null)
-                        throw new InvalidParameterException("No Tag entity was found with the primary key " + restEntity.getId());
+                        throw new BadRequestException("No Tag entity was found with the primary key " + restEntity.getId());
 
                     if (restEntityItem.returnIsAddItem()) {
                         if (restEntity.hasParameterSet(RESTCategoryInTagV1.RELATIONSHIP_SORT_NAME))
@@ -105,7 +104,7 @@ class CategoryV1Factory extends RESTDataObjectFactory<RESTCategoryV1, Category, 
                     }
                 } else if (restEntityItem.returnIsUpdateItem()) {
                     final TagToCategory dbEntity = entityManager.find(TagToCategory.class, restEntity.getRelationshipId());
-                    if (dbEntity == null) throw new InvalidParameterException(
+                    if (dbEntity == null) throw new BadRequestException(
                             "No TagToCategory entity was found with the primary key " + restEntity.getRelationshipId());
 
                     new TagInCategoryV1Factory().syncDBEntityWithRESTEntity(entityManager, dbEntity, restEntity);

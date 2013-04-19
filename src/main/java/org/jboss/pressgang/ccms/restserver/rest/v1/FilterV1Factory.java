@@ -26,11 +26,11 @@ import org.jboss.pressgang.ccms.rest.v1.entities.RESTFilterLocaleV1;
 import org.jboss.pressgang.ccms.rest.v1.entities.RESTFilterTagV1;
 import org.jboss.pressgang.ccms.rest.v1.entities.RESTFilterV1;
 import org.jboss.pressgang.ccms.rest.v1.entities.base.RESTBaseEntityV1;
-import org.jboss.pressgang.ccms.rest.v1.exceptions.InvalidParameterException;
 import org.jboss.pressgang.ccms.rest.v1.expansion.ExpandDataTrunk;
 import org.jboss.pressgang.ccms.restserver.rest.v1.base.RESTDataObjectCollectionFactory;
 import org.jboss.pressgang.ccms.restserver.rest.v1.base.RESTDataObjectFactory;
 import org.jboss.pressgang.ccms.restserver.utils.EnversUtilities;
+import org.jboss.resteasy.spi.BadRequestException;
 
 public class FilterV1Factory extends RESTDataObjectFactory<RESTFilterV1, Filter, RESTFilterCollectionV1, RESTFilterCollectionItemV1> {
     public FilterV1Factory() {
@@ -40,7 +40,7 @@ public class FilterV1Factory extends RESTDataObjectFactory<RESTFilterV1, Filter,
     @Override
     public RESTFilterV1 createRESTEntityFromDBEntityInternal(final Filter entity, final String baseUrl, final String dataType,
             final ExpandDataTrunk expand, final Number revision, boolean expandParentReferences, final EntityManager entityManager) {
-        assert entity != null : "Parameter filterTag can not be null";
+        assert entity != null : "Parameter entity can not be null";
         assert baseUrl != null : "Parameter baseUrl can not be null";
 
         final RESTFilterV1 retValue = new RESTFilterV1();
@@ -109,7 +109,7 @@ public class FilterV1Factory extends RESTDataObjectFactory<RESTFilterV1, Filter,
 
     @Override
     public void syncDBEntityWithRESTEntity(final EntityManager entityManager, final Filter entity,
-            final RESTFilterV1 dataObject) throws InvalidParameterException {
+            final RESTFilterV1 dataObject) {
         if (dataObject.hasParameterSet(RESTFilterV1.NAME_NAME)) entity.setFilterName(dataObject.getName());
         if (dataObject.hasParameterSet(RESTFilterV1.DESCRIPTION_NAME)) entity.setFilterDescription(dataObject.getDescription());
 
@@ -127,7 +127,7 @@ public class FilterV1Factory extends RESTDataObjectFactory<RESTFilterV1, Filter,
                 if (restEntityItem.returnIsRemoveItem()) {
                     final FilterTag dbEntity = entityManager.find(FilterTag.class, restEntity.getId());
                     if (dbEntity == null)
-                        throw new InvalidParameterException("No FilterTag entity was found with the primary key " + restEntity.getId());
+                        throw new BadRequestException("No FilterTag entity was found with the primary key " + restEntity.getId());
 
                     entity.removeFilterTag(dbEntity);
                     entityManager.remove(dbEntity);
@@ -138,7 +138,7 @@ public class FilterV1Factory extends RESTDataObjectFactory<RESTFilterV1, Filter,
                 } else if (restEntityItem.returnIsUpdateItem()) {
                     final FilterTag dbEntity = entityManager.find(FilterTag.class, restEntity.getId());
                     if (dbEntity == null)
-                        throw new InvalidParameterException("No FilterTag entity was found with the primary key " + restEntity.getId());
+                        throw new BadRequestException("No FilterTag entity was found with the primary key " + restEntity.getId());
 
                     new FilterTagV1Factory().syncDBEntityWithRESTEntity(entityManager, dbEntity, restEntity);
                 }
@@ -157,7 +157,7 @@ public class FilterV1Factory extends RESTDataObjectFactory<RESTFilterV1, Filter,
                 if (restEntityItem.returnIsRemoveItem()) {
                     final FilterLocale dbEntity = entityManager.find(FilterLocale.class, restEntity.getId());
                     if (dbEntity == null)
-                        throw new InvalidParameterException("No FilterLocale entity was found with the primary key " + restEntity.getId());
+                        throw new BadRequestException("No FilterLocale entity was found with the primary key " + restEntity.getId());
 
                     entity.removeFilterLocale(dbEntity);
                     entityManager.remove(dbEntity);
@@ -168,7 +168,7 @@ public class FilterV1Factory extends RESTDataObjectFactory<RESTFilterV1, Filter,
                 } else if (restEntityItem.returnIsUpdateItem()) {
                     final FilterLocale dbEntity = entityManager.find(FilterLocale.class, restEntity.getId());
                     if (dbEntity == null)
-                        throw new InvalidParameterException("No FilterLocale entity was found with the primary key " + restEntity.getId());
+                        throw new BadRequestException("No FilterLocale entity was found with the primary key " + restEntity.getId());
 
                     new FilterLocaleV1Factory().syncDBEntityWithRESTEntity(entityManager, dbEntity, restEntity);
                 }
@@ -186,7 +186,7 @@ public class FilterV1Factory extends RESTDataObjectFactory<RESTFilterV1, Filter,
 
                 if (restEntityItem.returnIsRemoveItem()) {
                     final FilterCategory dbEntity = entityManager.find(FilterCategory.class, restEntity.getId());
-                    if (dbEntity == null) throw new InvalidParameterException(
+                    if (dbEntity == null) throw new BadRequestException(
                             "No FilterCategory entity was found with the primary key " + restEntity.getId());
 
                     entity.removeFilterCategory(dbEntity);
@@ -197,7 +197,7 @@ public class FilterV1Factory extends RESTDataObjectFactory<RESTFilterV1, Filter,
                     entity.addFilterCategory(dbEntity);
                 } else if (restEntityItem.returnIsUpdateItem()) {
                     final FilterCategory dbEntity = entityManager.find(FilterCategory.class, restEntity.getId());
-                    if (dbEntity == null) throw new InvalidParameterException(
+                    if (dbEntity == null) throw new BadRequestException(
                             "No FilterCategory entity was found with the primary key " + restEntity.getId());
 
                     new FilterCategoryV1Factory().syncDBEntityWithRESTEntity(entityManager, dbEntity, restEntity);
@@ -217,7 +217,7 @@ public class FilterV1Factory extends RESTDataObjectFactory<RESTFilterV1, Filter,
                 if (restEntityItem.returnIsRemoveItem()) {
                     final FilterField dbEntity = entityManager.find(FilterField.class, restEntity.getId());
                     if (dbEntity == null)
-                        throw new InvalidParameterException("No FilterField entity was found with the primary key " + restEntity.getId());
+                        throw new BadRequestException("No FilterField entity was found with the primary key " + restEntity.getId());
 
                     entity.removeFilterField(dbEntity);
                     entityManager.remove(dbEntity);
@@ -228,7 +228,7 @@ public class FilterV1Factory extends RESTDataObjectFactory<RESTFilterV1, Filter,
                 } else if (restEntityItem.returnIsUpdateItem()) {
                     final FilterField dbEntity = entityManager.find(FilterField.class, restEntity.getId());
                     if (dbEntity == null)
-                        throw new InvalidParameterException("No FilterField entity was found with the primary key " + restEntity.getId());
+                        throw new BadRequestException("No FilterField entity was found with the primary key " + restEntity.getId());
 
                     new FilterFieldV1Factory().syncDBEntityWithRESTEntity(entityManager, dbEntity, restEntity);
                 }

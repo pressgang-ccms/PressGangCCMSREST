@@ -14,11 +14,11 @@ import org.jboss.pressgang.ccms.rest.v1.constants.RESTv1Constants;
 import org.jboss.pressgang.ccms.rest.v1.entities.RESTImageV1;
 import org.jboss.pressgang.ccms.rest.v1.entities.RESTLanguageImageV1;
 import org.jboss.pressgang.ccms.rest.v1.entities.base.RESTBaseEntityV1;
-import org.jboss.pressgang.ccms.rest.v1.exceptions.InvalidParameterException;
 import org.jboss.pressgang.ccms.rest.v1.expansion.ExpandDataTrunk;
 import org.jboss.pressgang.ccms.restserver.rest.v1.base.RESTDataObjectCollectionFactory;
 import org.jboss.pressgang.ccms.restserver.rest.v1.base.RESTDataObjectFactory;
 import org.jboss.pressgang.ccms.restserver.utils.EnversUtilities;
+import org.jboss.resteasy.spi.BadRequestException;
 
 public class ImageV1Factory extends RESTDataObjectFactory<RESTImageV1, ImageFile, RESTImageCollectionV1, RESTImageCollectionItemV1> {
     ImageV1Factory() {
@@ -28,7 +28,7 @@ public class ImageV1Factory extends RESTDataObjectFactory<RESTImageV1, ImageFile
     @Override
     public RESTImageV1 createRESTEntityFromDBEntityInternal(final ImageFile entity, final String baseUrl, final String dataType,
             final ExpandDataTrunk expand, final Number revision, final boolean expandParentReferences, final EntityManager entityManager) {
-        assert entity != null : "Parameter topic can not be null";
+        assert entity != null : "Parameter entity can not be null";
         assert baseUrl != null : "Parameter baseUrl can not be null";
 
         final RESTImageV1 retValue = new RESTImageV1();
@@ -68,8 +68,9 @@ public class ImageV1Factory extends RESTDataObjectFactory<RESTImageV1, ImageFile
 
     @Override
     public void syncDBEntityWithRESTEntity(final EntityManager entityManager, final ImageFile entity,
-            final RESTImageV1 dataObject) throws InvalidParameterException {
-        if (dataObject.hasParameterSet(RESTImageV1.DESCRIPTION_NAME)) entity.setDescription(dataObject.getDescription());
+            final RESTImageV1 dataObject) {
+        if (dataObject.hasParameterSet(RESTImageV1.DESCRIPTION_NAME))
+            entity.setDescription(dataObject.getDescription());
 
         /* One To Many - Add will create a child entity */
         if (dataObject.hasParameterSet(
@@ -88,8 +89,9 @@ public class ImageV1Factory extends RESTDataObjectFactory<RESTImageV1, ImageFile
                         entity.getLanguageImages().add(dbEntity);
                     } else if (restEntityItem.returnIsRemoveItem()) {
                         final LanguageImage dbEntity = entityManager.find(LanguageImage.class, restEntity.getId());
-                        if (dbEntity == null) throw new InvalidParameterException(
-                                "No LanguageImage entity was found with the primary key " + restEntity.getId());
+                        if (dbEntity == null)
+                            throw new BadRequestException("No LanguageImage entity was found with the primary key "
+                                    + restEntity.getId());
 
                         entity.getLanguageImages().remove(dbEntity);
                         entityManager.remove(dbEntity);
@@ -97,7 +99,8 @@ public class ImageV1Factory extends RESTDataObjectFactory<RESTImageV1, ImageFile
                 } else if (restEntityItem.returnIsUpdateItem()) {
                     final LanguageImage dbEntity = entityManager.find(LanguageImage.class, restEntity.getId());
                     if (dbEntity == null)
-                        throw new InvalidParameterException("No LanguageImage entity was found with the primary key " + restEntity.getId());
+                        throw new BadRequestException("No LanguageImage entity was found with the primary key "
+                                + restEntity.getId());
 
                     new LanguageImageV1Factory().syncDBEntityWithRESTEntity(entityManager, dbEntity, restEntity);
                 }

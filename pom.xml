@@ -35,6 +35,7 @@
         <javamelody.version>1.41.0</javamelody.version>
         <xstream.version>1.4.2</xstream.version>
         <itext.version>2.1.7</itext.version>
+        <liquibase.version>2.0.5</liquibase.version>
     </properties>
 
     <dependencyManagement>
@@ -77,6 +78,21 @@
                 <groupId>org.jboss.as.plugins</groupId>
                 <artifactId>jboss-as-maven-plugin</artifactId>
                 <version>${jbossasplugin.version}</version>
+            </plugin>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-war-plugin</artifactId>
+                <version>${warplugin.version}</version>
+                <configuration>
+                    <archive>
+                        <manifest>
+                            <addDefaultImplementationEntries>true</addDefaultImplementationEntries>
+                        </manifest>
+                        <manifestEntries>
+                            <Implementation-Build>${maven.build.timestamp}</Implementation-Build>
+                        </manifestEntries>
+                    </archive>
+                </configuration>
             </plugin>
         </plugins>
         <pluginManagement>
@@ -242,18 +258,11 @@
         </dependency>
         <dependency>
             <groupId>org.jboss.pressgang.ccms</groupId>
-            <artifactId>j2bugzilla-extended</artifactId>
+            <artifactId>j2bugzilla-pressgang</artifactId>
             <version>${j2bugzilla.version}</version>
         </dependency>
 
-        <!-- Belay Library -->
-        <dependency>
-            <groupId>org.jboss.pressgang.belay</groupId>
-            <artifactId>resource-server-provider</artifactId>
-            <version>1.0-SNAPSHOT</version>
-        </dependency>
-
-        <!-- JavaMelody monitoring -->
+        <!-- Java Melody -->
         <dependency>
             <groupId>net.bull.javamelody</groupId>
             <artifactId>javamelody-core</artifactId>
@@ -283,6 +292,13 @@
                     <groupId>bouncycastle</groupId>
                 </exclusion>
             </exclusions>
+        </dependency>
+
+        <!-- Liquibase -->
+        <dependency>
+            <groupId>org.liquibase</groupId>
+            <artifactId>liquibase-core</artifactId>
+            <version>${liquibase.version}</version>
         </dependency>
 
         <!-- Logging Libraries -->
@@ -372,6 +388,17 @@
     </dependencies>
 
     <profiles>
+        <profile>
+            <id>belay</id>
+            <dependencies>
+                <!-- Belay Library -->
+                <dependency>
+                    <groupId>org.jboss.pressgang.belay</groupId>
+                    <artifactId>resource-server-provider</artifactId>
+                    <version>1.0-SNAPSHOT</version>
+                </dependency>
+            </dependencies>
+        </profile>
         <profile>
             <!-- When built in OpenShift the 'openshift' profile will be 
                 used when invoking mvn. -->
@@ -573,6 +600,14 @@
                     </plugin>
                 </plugins>
             </build>
+            <dependencies>
+                <!-- Belay Library -->
+                <dependency>
+                    <groupId>org.jboss.pressgang.belay</groupId>
+                    <artifactId>resource-server-provider</artifactId>
+                    <version>1.0-SNAPSHOT</version>
+                </dependency>
+            </dependencies>
         </profile>
     </profiles>
 </project>

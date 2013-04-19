@@ -15,16 +15,15 @@ import org.jboss.pressgang.ccms.rest.v1.constants.RESTv1Constants;
 import org.jboss.pressgang.ccms.rest.v1.entities.RESTRoleV1;
 import org.jboss.pressgang.ccms.rest.v1.entities.RESTUserV1;
 import org.jboss.pressgang.ccms.rest.v1.entities.base.RESTBaseEntityV1;
-import org.jboss.pressgang.ccms.rest.v1.exceptions.InvalidParameterException;
 import org.jboss.pressgang.ccms.rest.v1.expansion.ExpandDataTrunk;
 import org.jboss.pressgang.ccms.restserver.rest.v1.base.RESTDataObjectCollectionFactory;
 import org.jboss.pressgang.ccms.restserver.rest.v1.base.RESTDataObjectFactory;
 import org.jboss.pressgang.ccms.restserver.utils.EnversUtilities;
+import org.jboss.resteasy.spi.BadRequestException;
 
 /*
  * Note: Since roles and users are going to be re-done soon using Katie's OAuth Library, I've left out the ability to update the
- * RoleToRoleRelationship information
- * and made it a static variable since we only have one definition anyways.
+ * RoleToRoleRelationship information and made it a static variable since we only have one definition anyways.
  * 
  * Lee
  */
@@ -94,10 +93,11 @@ public class RoleV1Factory extends RESTDataObjectFactory<RESTRoleV1, Role, RESTR
     }
 
     @Override
-    public void syncDBEntityWithRESTEntity(final EntityManager entityManager, final Role entity,
-            final RESTRoleV1 dataObject) throws InvalidParameterException {
-        if (dataObject.hasParameterSet(RESTUserV1.DESCRIPTION_NAME)) entity.setDescription(dataObject.getDescription());
-        if (dataObject.hasParameterSet(RESTUserV1.NAME_NAME)) entity.setRoleName(dataObject.getName());
+    public void syncDBEntityWithRESTEntity(final EntityManager entityManager, final Role entity, final RESTRoleV1 dataObject) {
+        if (dataObject.hasParameterSet(RESTUserV1.DESCRIPTION_NAME))
+            entity.setDescription(dataObject.getDescription());
+        if (dataObject.hasParameterSet(RESTUserV1.NAME_NAME))
+            entity.setRoleName(dataObject.getName());
 
         entityManager.persist(entity);
 
@@ -111,7 +111,7 @@ public class RoleV1Factory extends RESTDataObjectFactory<RESTRoleV1, Role, RESTR
 
                 final User dbEntity = entityManager.find(User.class, restEntity.getId());
                 if (dbEntity == null)
-                    throw new InvalidParameterException("No User entity was found with the primary key " + restEntity.getId());
+                    throw new BadRequestException("No User entity was found with the primary key " + restEntity.getId());
 
                 if (restEntityItem.returnIsAddItem()) {
                     entity.addUser(dbEntity);
@@ -133,9 +133,10 @@ public class RoleV1Factory extends RESTDataObjectFactory<RESTRoleV1, Role, RESTR
                 final RoleToRoleRelationship dbRelationshipEntity = entityManager.find(RoleToRoleRelationship.class, ROLE_TO_ROLE_ID);
 
                 if (dbEntity == null)
-                    throw new InvalidParameterException("No Role entity was found with the primary key " + restEntity.getId());
-                else if (dbRelationshipEntity == null) throw new InvalidParameterException(
-                        "No RoleToRoleRelationship entity was found with the primary key " + ROLE_TO_ROLE_ID);
+                    throw new BadRequestException("No Role entity was found with the primary key " + restEntity.getId());
+                else if (dbRelationshipEntity == null)
+                    throw new BadRequestException("No RoleToRoleRelationship entity was found with the primary key "
+                            + ROLE_TO_ROLE_ID);
 
                 if (restEntityItem.returnIsAddItem()) {
                     entity.addParentRole(dbEntity, dbRelationshipEntity);
@@ -157,9 +158,10 @@ public class RoleV1Factory extends RESTDataObjectFactory<RESTRoleV1, Role, RESTR
                 final RoleToRoleRelationship dbRelationshipEntity = entityManager.find(RoleToRoleRelationship.class, ROLE_TO_ROLE_ID);
 
                 if (dbEntity == null)
-                    throw new InvalidParameterException("No Role entity was found with the primary key " + restEntity.getId());
-                else if (dbRelationshipEntity == null) throw new InvalidParameterException(
-                        "No RoleToRoleRelationship entity was found with the primary key " + ROLE_TO_ROLE_ID);
+                    throw new BadRequestException("No Role entity was found with the primary key " + restEntity.getId());
+                else if (dbRelationshipEntity == null)
+                    throw new BadRequestException("No RoleToRoleRelationship entity was found with the primary key "
+                            + ROLE_TO_ROLE_ID);
 
                 if (restEntityItem.returnIsAddItem()) {
                     entity.addChildRole(dbEntity, dbRelationshipEntity);

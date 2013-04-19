@@ -555,7 +555,7 @@ public class EntityUtilities extends org.jboss.pressgang.ccms.filter.utils.Entit
     @SuppressWarnings("unchecked")
     public static List<Integer> getImagesWithFileName(final EntityManager entityManager, final String filename) {
         final Query query = entityManager.createQuery(
-                LanguageImage.SELECT_ALL_QUERY + " WHERE LOWER(languageImage.originalFileName) LIKE LOWER(:filename)");
+                LanguageImage.SELECT_ALL_QUERY + (" WHERE LOWER(languageImage.originalFileName) LIKE LOWER(:filename)"));
         query.setParameter("filename", "%" + filename + "%");
         final List<LanguageImage> mappings = query.getResultList();
         if (mappings.size() == 0) return null;
