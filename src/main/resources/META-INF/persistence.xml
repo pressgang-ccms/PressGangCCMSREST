@@ -12,7 +12,6 @@
         <class>org.jboss.pressgang.ccms.model.BugzillaBug</class>
         <class>org.jboss.pressgang.ccms.model.Category</class>
         <class>org.jboss.pressgang.ccms.model.contentspec.ContentSpec</class>
-        <class>org.jboss.pressgang.ccms.model.contentspec.ContentSpecToProject</class>
         <class>org.jboss.pressgang.ccms.model.contentspec.ContentSpecToPropertyTag</class>
         <class>org.jboss.pressgang.ccms.model.contentspec.ContentSpecToTag</class>
         <class>org.jboss.pressgang.ccms.model.contentspec.CSNode</class>
@@ -65,8 +64,8 @@
         <properties>
             <property name="hibernate.dialect" value="org.jboss.pressgang.ccms.restserver.entity.dialect.MySql5BitBooleanDialect"/>
             <property name="hibernate.hbm2ddl.auto" value="none"/>
-            <property name="hibernate.show_sql" value="true"/>
-            <property name="hibernate.format_sql" value="true"/>
+            <property name="hibernate.show_sql" value="false"/>
+            <property name="hibernate.format_sql" value="false"/>
             <property name="jboss.entity.manager.factory.jndi.name" value="java:jboss/EntityManagerFactory"/>
             <property name="hibernate.jdbc.batch_size" value="20"/>
             <property name="hibernate.cache.use_second_level_cache" value="true"/>

@@ -62,7 +62,7 @@ public class ContentSpecV1Factory extends RESTDataObjectFactory<RESTContentSpecV
         retValue.setCondition(entity.getCondition());
         retValue.setType(RESTContentSpecTypeV1.getContentSpecType(entity.getContentSpecType()));
         retValue.setLastPublished(entity.getLastPublished());
-        retValue.setLastModified(EnversUtilities.getFixedLastModifiedDate(entityManager, entity));
+        retValue.setLastModified(entity.getLastModified());
 
         // REVISIONS
         if (revision == null && expand != null && expand.contains(RESTBaseEntityV1.REVISIONS_NAME)) {
@@ -154,6 +154,9 @@ public class ContentSpecV1Factory extends RESTDataObjectFactory<RESTContentSpecV
                             restEntity.getRelationshipId());
                     if (dbEntity == null) throw new BadRequestException(
                             "No ContentSpecToPropertyTag entity was found with the primary key " + restEntity.getRelationshipId());
+                    if (!entity.getContentSpecToPropertyTags().contains(dbEntity)) throw new BadRequestException(
+                            "No ContentSpecToPropertyTag entity was found with the primary key " + restEntity.getId() + " for " +
+                                    "ContentSpec " + entity.getId());
 
                     new ContentSpecPropertyTagV1Factory().syncDBEntityWithRESTEntity(entityManager, dbEntity, restEntity);
                 }
@@ -192,7 +195,8 @@ public class ContentSpecV1Factory extends RESTDataObjectFactory<RESTContentSpecV
 
         // One To Many - Add will create a new mapping
         if (dataObject.hasParameterSet(
-                RESTContentSpecV1.CHILDREN_NAME) && dataObject.getChildren_OTM() != null && dataObject.getChildren_OTM().getItems() != null) {
+                RESTContentSpecV1.CHILDREN_NAME) && dataObject.getChildren_OTM() != null && dataObject.getChildren_OTM().getItems() !=
+                null) {
             dataObject.getChildren_OTM().removeInvalidChangeItemRequests();
 
             for (final RESTCSNodeCollectionItemV1 restEntityItem : dataObject.getChildren_OTM().getItems()) {
@@ -207,12 +211,16 @@ public class ContentSpecV1Factory extends RESTDataObjectFactory<RESTContentSpecV
                     entityManager.remove(dbEntity);
                 } else if (restEntityItem.returnIsAddItem()) {
                     final CSNode dbEntity = new CSNodeV1Factory().createDBEntityFromRESTEntity(entityManager, restEntity);
+                    dbEntity.setParent(null);
                     entityManager.persist(dbEntity);
                     entity.addChild(dbEntity);
                 } else if (restEntityItem.returnIsUpdateItem()) {
                     final CSNode dbEntity = entityManager.find(CSNode.class, restEntity.getId());
                     if (dbEntity == null)
                         throw new BadRequestException("No CSNode entity was found with the primary key " + restEntity.getId());
+                    if (!entity.getTopCSNodes().contains(dbEntity))
+                        throw new BadRequestException("No CSNode entity was found with the primary key " + restEntity.getId() + " for " +
+                                "ContentSpec " + entity.getId());
 
                     new CSNodeV1Factory().syncDBEntityWithRESTEntity(entityManager, dbEntity, restEntity);
                 }

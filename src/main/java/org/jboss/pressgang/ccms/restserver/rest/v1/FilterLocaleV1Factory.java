@@ -63,7 +63,7 @@ public class FilterLocaleV1Factory extends RESTDataObjectFactory<RESTFilterLocal
 
     @Override
     public void syncDBEntityWithRESTEntity(final EntityManager entityManager, final FilterLocale entity,
-            final RESTFilterLocaleV1 dataObject) throws BadRequestException {
+            final RESTFilterLocaleV1 dataObject) {
         if (dataObject.hasParameterSet(RESTFilterLocaleV1.LOCALE_NAME))
             entity.setLocaleName(dataObject.getLocale());
         if (dataObject.hasParameterSet(RESTFilterLocaleV1.STATE_NAME))

@@ -11,6 +11,7 @@ import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.ResponseBuilder;
 import javax.ws.rs.ext.Provider;
 import java.io.IOException;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Set;
 
@@ -123,10 +124,13 @@ import org.jboss.pressgang.ccms.restserver.rest.v1.base.BaseRESTv1;
 import org.jboss.pressgang.ccms.restserver.utils.TopicUtilities;
 import org.jboss.pressgang.ccms.utils.common.CollectionUtilities;
 import org.jboss.pressgang.ccms.utils.common.DocBookUtilities;
+import org.jboss.pressgang.ccms.utils.common.ZipUtilities;
 import org.jboss.pressgang.ccms.utils.constants.CommonConstants;
 import org.jboss.pressgang.ccms.wrapper.ContentSpecWrapper;
+import org.jboss.pressgang.ccms.wrapper.collection.CollectionWrapper;
 import org.jboss.resteasy.annotations.interception.ServerInterceptor;
 import org.jboss.resteasy.plugins.providers.atom.Feed;
+import org.jboss.resteasy.specimpl.PathSegmentImpl;
 import org.jboss.resteasy.spi.BadRequestException;
 import org.jboss.resteasy.spi.HttpResponse;
 import org.jboss.resteasy.spi.InternalServerErrorException;
@@ -209,8 +213,7 @@ public class RESTv1 extends BaseRESTv1 implements RESTBaseInterfaceV1, RESTInter
     /* BLOBCONSTANTS FUNCTIONS */
     /* JSONP FUNCTIONS */
     @Override
-    public String getJSONPBlobConstant(final Integer id, final String expand,
-            final String callback) {
+    public String getJSONPBlobConstant(final Integer id, final String expand, final String callback) {
         if (callback == null) throw new BadRequestException("The callback parameter can not be null");
 
         try {
@@ -221,8 +224,7 @@ public class RESTv1 extends BaseRESTv1 implements RESTBaseInterfaceV1, RESTInter
     }
 
     @Override
-    public String getJSONPBlobConstantRevision(final Integer id, final Integer revision, final String expand,
-            final String callback) {
+    public String getJSONPBlobConstantRevision(final Integer id, final Integer revision, final String expand, final String callback) {
         if (callback == null) throw new BadRequestException("The callback parameter can not be null");
 
         try {
@@ -232,8 +234,7 @@ public class RESTv1 extends BaseRESTv1 implements RESTBaseInterfaceV1, RESTInter
         }
     }
 
-    public String getJSONPBlobConstants(final String expand,
-            final String callback) {
+    public String getJSONPBlobConstants(final String expand, final String callback) {
         if (callback == null) throw new BadRequestException("The callback parameter can not be null");
 
         try {
@@ -244,8 +245,7 @@ public class RESTv1 extends BaseRESTv1 implements RESTBaseInterfaceV1, RESTInter
     }
 
     @Override
-    public String getJSONPBlobConstantsWithQuery(final PathSegment query, final String expand,
-            final String callback) {
+    public String getJSONPBlobConstantsWithQuery(final PathSegment query, final String expand, final String callback) {
         if (callback == null) throw new BadRequestException("The callback parameter can not be null");
 
         try {
@@ -329,16 +329,14 @@ public class RESTv1 extends BaseRESTv1 implements RESTBaseInterfaceV1, RESTInter
 
     /* JSON FUNCTIONS */
     @Override
-    public RESTBlobConstantV1 getJSONBlobConstant(final Integer id,
-            final String expand) {
+    public RESTBlobConstantV1 getJSONBlobConstant(final Integer id, final String expand) {
         if (id == null) throw new BadRequestException("The id parameter can not be null");
 
         return getJSONResource(BlobConstants.class, new BlobConstantV1Factory(), id, expand);
     }
 
     @Override
-    public RESTBlobConstantV1 getJSONBlobConstantRevision(final Integer id, final Integer revision,
-            final String expand) {
+    public RESTBlobConstantV1 getJSONBlobConstantRevision(final Integer id, final Integer revision, final String expand) {
         if (id == null) throw new BadRequestException("The id parameter can not be null");
         if (revision == null) throw new BadRequestException("The revision parameter can not be null");
 
@@ -346,15 +344,13 @@ public class RESTv1 extends BaseRESTv1 implements RESTBaseInterfaceV1, RESTInter
     }
 
     @Override
-    public RESTBlobConstantCollectionV1 getJSONBlobConstants(
-            final String expand) {
+    public RESTBlobConstantCollectionV1 getJSONBlobConstants(final String expand) {
         return getJSONResources(RESTBlobConstantCollectionV1.class, BlobConstants.class, new BlobConstantV1Factory(),
                 RESTv1Constants.BLOBCONSTANTS_EXPANSION_NAME, expand);
     }
 
     @Override
-    public RESTBlobConstantCollectionV1 getJSONBlobConstantsWithQuery(final PathSegment query,
-            final String expand) {
+    public RESTBlobConstantCollectionV1 getJSONBlobConstantsWithQuery(final PathSegment query, final String expand) {
         return getJSONResourcesFromQuery(RESTBlobConstantCollectionV1.class, query.getMatrixParameters(),
                 BlobConstantFilterQueryBuilder.class, new BlobConstantFieldFilter(), new BlobConstantV1Factory(),
                 RESTv1Constants.BLOBCONSTANTS_EXPANSION_NAME, expand);
@@ -438,8 +434,7 @@ public class RESTv1 extends BaseRESTv1 implements RESTBaseInterfaceV1, RESTInter
     /* PROJECT FUNCTIONS */
     /* JSONP FUNCTIONS */
     @Override
-    public String getJSONPProject(final Integer id, final String expand,
-            final String callback) {
+    public String getJSONPProject(final Integer id, final String expand, final String callback) {
         if (callback == null) throw new BadRequestException("The callback parameter can not be null");
 
         try {
@@ -450,8 +445,7 @@ public class RESTv1 extends BaseRESTv1 implements RESTBaseInterfaceV1, RESTInter
     }
 
     @Override
-    public String getJSONPProjectRevision(final Integer id, final Integer revision, final String expand,
-            final String callback) {
+    public String getJSONPProjectRevision(final Integer id, final Integer revision, final String expand, final String callback) {
         if (callback == null) throw new BadRequestException("The callback parameter can not be null");
 
         try {
@@ -462,8 +456,7 @@ public class RESTv1 extends BaseRESTv1 implements RESTBaseInterfaceV1, RESTInter
     }
 
     @Override
-    public String getJSONPProjects(final String expand,
-            final String callback) {
+    public String getJSONPProjects(final String expand, final String callback) {
         if (callback == null) throw new BadRequestException("The callback parameter can not be null");
 
         try {
@@ -474,8 +467,7 @@ public class RESTv1 extends BaseRESTv1 implements RESTBaseInterfaceV1, RESTInter
     }
 
     @Override
-    public String getJSONPProjectsWithQuery(final PathSegment query, final String expand,
-            final String callback) {
+    public String getJSONPProjectsWithQuery(final PathSegment query, final String expand, final String callback) {
         if (callback == null) throw new BadRequestException("The callback parameter can not be null");
 
         try {
@@ -559,16 +551,14 @@ public class RESTv1 extends BaseRESTv1 implements RESTBaseInterfaceV1, RESTInter
 
     /* JSON FUNCTIONS */
     @Override
-    public RESTProjectV1 getJSONProject(final Integer id,
-            final String expand) {
+    public RESTProjectV1 getJSONProject(final Integer id, final String expand) {
         if (id == null) throw new BadRequestException("The id parameter can not be null");
 
         return getJSONResource(Project.class, new ProjectV1Factory(), id, expand);
     }
 
     @Override
-    public RESTProjectV1 getJSONProjectRevision(final Integer id, final Integer revision,
-            final String expand) {
+    public RESTProjectV1 getJSONProjectRevision(final Integer id, final Integer revision, final String expand) {
         if (id == null) throw new BadRequestException("The id parameter can not be null");
         if (revision == null) throw new BadRequestException("The revision parameter can not be null");
 
@@ -582,8 +572,7 @@ public class RESTv1 extends BaseRESTv1 implements RESTBaseInterfaceV1, RESTInter
     }
 
     @Override
-    public RESTProjectCollectionV1 getJSONProjectsWithQuery(final PathSegment query,
-            final String expand) {
+    public RESTProjectCollectionV1 getJSONProjectsWithQuery(final PathSegment query, final String expand) {
         return getJSONResourcesFromQuery(RESTProjectCollectionV1.class, query.getMatrixParameters(), ProjectFilterQueryBuilder.class,
                 new ProjectFieldFilter(), new ProjectV1Factory(), RESTv1Constants.PROJECTS_EXPANSION_NAME, expand);
     }
@@ -667,8 +656,7 @@ public class RESTv1 extends BaseRESTv1 implements RESTBaseInterfaceV1, RESTInter
     /* PROPERYTAG FUNCTIONS */
     /* JSONP FUNCTIONS */
     @Override
-    public String getJSONPPropertyTag(final Integer id, final String expand,
-            final String callback) {
+    public String getJSONPPropertyTag(final Integer id, final String expand, final String callback) {
         if (callback == null) throw new BadRequestException("The callback parameter can not be null");
 
         try {
@@ -679,8 +667,7 @@ public class RESTv1 extends BaseRESTv1 implements RESTBaseInterfaceV1, RESTInter
     }
 
     @Override
-    public String getJSONPPropertyTagRevision(final Integer id, final Integer revision, final String expand,
-            final String callback) {
+    public String getJSONPPropertyTagRevision(final Integer id, final Integer revision, final String expand, final String callback) {
         if (callback == null) throw new BadRequestException("The callback parameter can not be null");
 
         try {
@@ -691,8 +678,7 @@ public class RESTv1 extends BaseRESTv1 implements RESTBaseInterfaceV1, RESTInter
     }
 
     @Override
-    public String getJSONPPropertyTags(final String expand,
-            final String callback) {
+    public String getJSONPPropertyTags(final String expand, final String callback) {
         if (callback == null) throw new BadRequestException("The callback parameter can not be null");
 
         try {
@@ -703,8 +689,7 @@ public class RESTv1 extends BaseRESTv1 implements RESTBaseInterfaceV1, RESTInter
     }
 
     @Override
-    public String getJSONPPropertyTagsWithQuery(final PathSegment query, final String expand,
-            final String callback) {
+    public String getJSONPPropertyTagsWithQuery(final PathSegment query, final String expand, final String callback) {
         if (callback == null) throw new BadRequestException("The callback parameter can not be null");
 
         try {
@@ -788,16 +773,14 @@ public class RESTv1 extends BaseRESTv1 implements RESTBaseInterfaceV1, RESTInter
 
     /* JSON FUNCTIONS */
     @Override
-    public RESTPropertyTagV1 getJSONPropertyTag(final Integer id,
-            final String expand) {
+    public RESTPropertyTagV1 getJSONPropertyTag(final Integer id, final String expand) {
         if (id == null) throw new BadRequestException("The id parameter can not be null");
 
         return getJSONResource(PropertyTag.class, new PropertyTagV1Factory(), id, expand);
     }
 
     @Override
-    public RESTPropertyTagV1 getJSONPropertyTagRevision(final Integer id, final Integer revision,
-            final String expand) {
+    public RESTPropertyTagV1 getJSONPropertyTagRevision(final Integer id, final Integer revision, final String expand) {
         if (id == null) throw new BadRequestException("The id parameter can not be null");
         if (revision == null) throw new BadRequestException("The revision parameter can not be null");
 
@@ -805,15 +788,13 @@ public class RESTv1 extends BaseRESTv1 implements RESTBaseInterfaceV1, RESTInter
     }
 
     @Override
-    public RESTPropertyTagCollectionV1 getJSONPropertyTags(
-            final String expand) {
+    public RESTPropertyTagCollectionV1 getJSONPropertyTags(final String expand) {
         return getJSONResources(RESTPropertyTagCollectionV1.class, PropertyTag.class, new PropertyTagV1Factory(),
                 RESTv1Constants.PROPERTYTAGS_EXPANSION_NAME, expand);
     }
 
     @Override
-    public RESTPropertyTagCollectionV1 getJSONPropertyTagsWithQuery(final PathSegment query,
-            final String expand) {
+    public RESTPropertyTagCollectionV1 getJSONPropertyTagsWithQuery(final PathSegment query, final String expand) {
         return this.getJSONResourcesFromQuery(RESTPropertyTagCollectionV1.class, query.getMatrixParameters(),
                 PropertyTagFilterQueryBuilder.class, new PropertyTagFieldFilter(), new PropertyTagV1Factory(),
                 RESTv1Constants.PROPERTYTAGS_EXPANSION_NAME, expand);
@@ -899,8 +880,7 @@ public class RESTv1 extends BaseRESTv1 implements RESTBaseInterfaceV1, RESTInter
     /* PROPERYCATEGORY FUNCTIONS */
     /* JSONP FUNCTIONS */
     @Override
-    public String getJSONPPropertyCategory(final Integer id, final String expand,
-            final String callback) {
+    public String getJSONPPropertyCategory(final Integer id, final String expand, final String callback) {
         if (callback == null) throw new BadRequestException("The callback parameter can not be null");
 
         try {
@@ -911,8 +891,7 @@ public class RESTv1 extends BaseRESTv1 implements RESTBaseInterfaceV1, RESTInter
     }
 
     @Override
-    public String getJSONPPropertyCategoryRevision(final Integer id, final Integer revision, final String expand,
-            final String callback) {
+    public String getJSONPPropertyCategoryRevision(final Integer id, final Integer revision, final String expand, final String callback) {
         if (callback == null) throw new BadRequestException("The callback parameter can not be null");
 
         try {
@@ -923,8 +902,7 @@ public class RESTv1 extends BaseRESTv1 implements RESTBaseInterfaceV1, RESTInter
     }
 
     @Override
-    public String getJSONPPropertyCategories(final String expand,
-            final String callback) {
+    public String getJSONPPropertyCategories(final String expand, final String callback) {
         if (callback == null) throw new BadRequestException("The callback parameter can not be null");
 
         try {
@@ -935,8 +913,7 @@ public class RESTv1 extends BaseRESTv1 implements RESTBaseInterfaceV1, RESTInter
     }
 
     @Override
-    public String getJSONPPropertyCategoriesWithQuery(final PathSegment query, final String expand,
-            final String callback) {
+    public String getJSONPPropertyCategoriesWithQuery(final PathSegment query, final String expand, final String callback) {
         if (callback == null) throw new BadRequestException("The callback parameter can not be null");
 
         try {
@@ -960,8 +937,7 @@ public class RESTv1 extends BaseRESTv1 implements RESTBaseInterfaceV1, RESTInter
 
     @Override
     public String updateJSONPPropertyCategories(final String expand, final RESTPropertyCategoryCollectionV1 dataObjects,
-            final String message, final Integer flag, final String userId,
-            final String callback) {
+            final String message, final Integer flag, final String userId, final String callback) {
         if (callback == null) throw new BadRequestException("The callback parameter can not be null");
 
         try {
@@ -986,8 +962,7 @@ public class RESTv1 extends BaseRESTv1 implements RESTBaseInterfaceV1, RESTInter
 
     @Override
     public String createJSONPPropertyCategories(final String expand, final RESTPropertyCategoryCollectionV1 dataObjects,
-            final String message, final Integer flag, final String userId,
-            final String callback) {
+            final String message, final Integer flag, final String userId, final String callback) {
         if (callback == null) throw new BadRequestException("The callback parameter can not be null");
 
         try {
@@ -1024,16 +999,14 @@ public class RESTv1 extends BaseRESTv1 implements RESTBaseInterfaceV1, RESTInter
 
     /* JSON FUNCTIONS */
     @Override
-    public RESTPropertyCategoryV1 getJSONPropertyCategory(final Integer id,
-            final String expand) {
+    public RESTPropertyCategoryV1 getJSONPropertyCategory(final Integer id, final String expand) {
         if (id == null) throw new BadRequestException("The id parameter can not be null");
 
         return getJSONResource(PropertyTagCategory.class, new PropertyCategoryV1Factory(), id, expand);
     }
 
     @Override
-    public RESTPropertyCategoryV1 getJSONPropertyCategoryRevision(final Integer id, final Integer revision,
-            final String expand) {
+    public RESTPropertyCategoryV1 getJSONPropertyCategoryRevision(final Integer id, final Integer revision, final String expand) {
         if (id == null) throw new BadRequestException("The id parameter can not be null");
         if (revision == null) throw new BadRequestException("The revision parameter can not be null");
 
@@ -1041,15 +1014,13 @@ public class RESTv1 extends BaseRESTv1 implements RESTBaseInterfaceV1, RESTInter
     }
 
     @Override
-    public RESTPropertyCategoryCollectionV1 getJSONPropertyCategories(
-            final String expand) {
+    public RESTPropertyCategoryCollectionV1 getJSONPropertyCategories(final String expand) {
         return getJSONResources(RESTPropertyCategoryCollectionV1.class, PropertyTagCategory.class, new PropertyCategoryV1Factory(),
                 RESTv1Constants.PROPERTY_CATEGORIES_EXPANSION_NAME, expand);
     }
 
     @Override
-    public RESTPropertyCategoryCollectionV1 getJSONPropertyCategoriesWithQuery(final PathSegment query,
-            final String expand) {
+    public RESTPropertyCategoryCollectionV1 getJSONPropertyCategoriesWithQuery(final PathSegment query, final String expand) {
         return this.getJSONResourcesFromQuery(RESTPropertyCategoryCollectionV1.class, query.getMatrixParameters(),
                 PropertyTagCategoryFilterQueryBuilder.class, new PropertyTagCategoryFieldFilter(), new PropertyCategoryV1Factory(),
                 RESTv1Constants.PROPERTY_CATEGORIES_EXPANSION_NAME, expand);
@@ -1070,8 +1041,7 @@ public class RESTv1 extends BaseRESTv1 implements RESTBaseInterfaceV1, RESTInter
 
     @Override
     public RESTPropertyCategoryCollectionV1 updateJSONPropertyCategories(final String expand,
-            final RESTPropertyCategoryCollectionV1 dataObjects, final String message, final Integer flag,
-            final String userId) {
+            final RESTPropertyCategoryCollectionV1 dataObjects, final String message, final Integer flag, final String userId) {
         if (dataObjects == null) throw new BadRequestException("The dataObjects parameter can not be null");
 
         if (dataObjects.getItems() == null) throw new BadRequestException("The dataObjects.getItems() parameter can not be null");
@@ -1096,8 +1066,7 @@ public class RESTv1 extends BaseRESTv1 implements RESTBaseInterfaceV1, RESTInter
 
     @Override
     public RESTPropertyCategoryCollectionV1 createJSONPropertyCategories(final String expand,
-            final RESTPropertyCategoryCollectionV1 dataObjects, final String message, final Integer flag,
-            final String userId) {
+            final RESTPropertyCategoryCollectionV1 dataObjects, final String message, final Integer flag, final String userId) {
         if (dataObjects == null) throw new BadRequestException("The dataObjects parameter can not be null");
 
         if (dataObjects.getItems() == null) throw new BadRequestException("The dataObjects.getItems() parameter can not be null");
@@ -1137,8 +1106,7 @@ public class RESTv1 extends BaseRESTv1 implements RESTBaseInterfaceV1, RESTInter
     /* ROLE FUNCTIONS */
     /* JSONP FUNCTIONS */
     @Override
-    public String getJSONPRole(final Integer id, final String expand,
-            final String callback) {
+    public String getJSONPRole(final Integer id, final String expand, final String callback) {
         if (callback == null) throw new BadRequestException("The callback parameter can not be null");
 
         try {
@@ -1149,8 +1117,7 @@ public class RESTv1 extends BaseRESTv1 implements RESTBaseInterfaceV1, RESTInter
     }
 
     @Override
-    public String getJSONPRoleRevision(final Integer id, final Integer revision, final String expand,
-            final String callback) {
+    public String getJSONPRoleRevision(final Integer id, final Integer revision, final String expand, final String callback) {
         if (callback == null) throw new BadRequestException("The callback parameter can not be null");
 
         try {
@@ -1172,8 +1139,7 @@ public class RESTv1 extends BaseRESTv1 implements RESTBaseInterfaceV1, RESTInter
     }
 
     @Override
-    public String getJSONPRolesWithQuery(final PathSegment query, final String expand,
-            final String callback) {
+    public String getJSONPRolesWithQuery(final PathSegment query, final String expand, final String callback) {
         if (callback == null) throw new BadRequestException("The callback parameter can not be null");
 
         try {
@@ -1264,8 +1230,7 @@ public class RESTv1 extends BaseRESTv1 implements RESTBaseInterfaceV1, RESTInter
     }
 
     @Override
-    public RESTRoleV1 getJSONRoleRevision(final Integer id, final Integer revision,
-            final String expand) {
+    public RESTRoleV1 getJSONRoleRevision(final Integer id, final Integer revision, final String expand) {
         if (id == null) throw new BadRequestException("The id parameter can not be null");
         if (revision == null) throw new BadRequestException("The revision parameter can not be null");
 
@@ -1278,8 +1243,7 @@ public class RESTv1 extends BaseRESTv1 implements RESTBaseInterfaceV1, RESTInter
     }
 
     @Override
-    public RESTRoleCollectionV1 getJSONRolesWithQuery(final PathSegment query,
-            final String expand) {
+    public RESTRoleCollectionV1 getJSONRolesWithQuery(final PathSegment query, final String expand) {
         return getJSONResourcesFromQuery(RESTRoleCollectionV1.class, query.getMatrixParameters(), RoleFilterQueryBuilder.class,
                 new RoleFieldFilter(), new RoleV1Factory(), RESTv1Constants.ROLES_EXPANSION_NAME, expand);
     }
@@ -1337,8 +1301,7 @@ public class RESTv1 extends BaseRESTv1 implements RESTBaseInterfaceV1, RESTInter
     }
 
     @Override
-    public RESTRoleV1 deleteJSONRole(final Integer id, final String message, final Integer flag, final String userId,
-            final String expand) {
+    public RESTRoleV1 deleteJSONRole(final Integer id, final String message, final Integer flag, final String userId, final String expand) {
         if (id == null) throw new BadRequestException("The dataObject parameter can not be null");
 
         final RoleV1Factory factory = new RoleV1Factory();
@@ -1364,8 +1327,7 @@ public class RESTv1 extends BaseRESTv1 implements RESTBaseInterfaceV1, RESTInter
     /* TRANSLATEDTOPIC FUNCTIONS */
     /* JSONP FUNCTIONS */
     @Override
-    public String getJSONPTranslatedTopic(final Integer id, final String expand,
-            final String callback) {
+    public String getJSONPTranslatedTopic(final Integer id, final String expand, final String callback) {
         if (callback == null) throw new BadRequestException("The callback parameter can not be null");
 
         try {
@@ -1376,8 +1338,7 @@ public class RESTv1 extends BaseRESTv1 implements RESTBaseInterfaceV1, RESTInter
     }
 
     @Override
-    public String getJSONPTranslatedTopicRevision(final Integer id, final Integer revision, final String expand,
-            final String callback) {
+    public String getJSONPTranslatedTopicRevision(final Integer id, final Integer revision, final String expand, final String callback) {
         if (callback == null) throw new BadRequestException("The callback parameter can not be null");
 
         try {
@@ -1388,8 +1349,7 @@ public class RESTv1 extends BaseRESTv1 implements RESTBaseInterfaceV1, RESTInter
     }
 
     @Override
-    public String getJSONPTranslatedTopics(final String expand,
-            final String callback) {
+    public String getJSONPTranslatedTopics(final String expand, final String callback) {
         if (callback == null) throw new BadRequestException("The callback parameter can not be null");
 
         try {
@@ -1400,8 +1360,7 @@ public class RESTv1 extends BaseRESTv1 implements RESTBaseInterfaceV1, RESTInter
     }
 
     @Override
-    public String getJSONPTranslatedTopicsWithQuery(final PathSegment query, final String expand,
-            final String callback) {
+    public String getJSONPTranslatedTopicsWithQuery(final PathSegment query, final String expand, final String callback) {
         if (callback == null) throw new BadRequestException("The callback parameter can not be null");
 
         try {
@@ -1485,16 +1444,14 @@ public class RESTv1 extends BaseRESTv1 implements RESTBaseInterfaceV1, RESTInter
 
     /* JSON FUNCTIONS */
     @Override
-    public RESTTranslatedTopicV1 getJSONTranslatedTopic(final Integer id,
-            final String expand) {
+    public RESTTranslatedTopicV1 getJSONTranslatedTopic(final Integer id, final String expand) {
         if (id == null) throw new BadRequestException("The id parameter can not be null");
 
         return getJSONResource(TranslatedTopicData.class, new TranslatedTopicV1Factory(), id, expand);
     }
 
     @Override
-    public RESTTranslatedTopicV1 getJSONTranslatedTopicRevision(final Integer id, final Integer revision,
-            final String expand) {
+    public RESTTranslatedTopicV1 getJSONTranslatedTopicRevision(final Integer id, final Integer revision, final String expand) {
         if (id == null) throw new BadRequestException("The id parameter can not be null");
         if (revision == null) throw new BadRequestException("The revision parameter can not be null");
 
@@ -1502,16 +1459,14 @@ public class RESTv1 extends BaseRESTv1 implements RESTBaseInterfaceV1, RESTInter
     }
 
     @Override
-    public RESTTranslatedTopicCollectionV1 getJSONTranslatedTopicsWithQuery(PathSegment query,
-            final String expand) {
+    public RESTTranslatedTopicCollectionV1 getJSONTranslatedTopicsWithQuery(PathSegment query, final String expand) {
         return getJSONResourcesFromQuery(RESTTranslatedTopicCollectionV1.class, query.getMatrixParameters(),
                 TranslatedTopicDataFilterQueryBuilder.class, new TopicFieldFilter(), new TranslatedTopicV1Factory(),
                 RESTv1Constants.TRANSLATEDTOPICS_EXPANSION_NAME, expand);
     }
 
     @Override
-    public RESTTranslatedTopicCollectionV1 getJSONTranslatedTopics(
-            final String expand) {
+    public RESTTranslatedTopicCollectionV1 getJSONTranslatedTopics(final String expand) {
         return getJSONResources(RESTTranslatedTopicCollectionV1.class, TranslatedTopicData.class, new TranslatedTopicV1Factory(),
                 RESTv1Constants.TRANSLATEDTOPICS_EXPANSION_NAME, expand);
     }
@@ -1531,8 +1486,7 @@ public class RESTv1 extends BaseRESTv1 implements RESTBaseInterfaceV1, RESTInter
 
     @Override
     public RESTTranslatedTopicCollectionV1 updateJSONTranslatedTopics(final String expand,
-            final RESTTranslatedTopicCollectionV1 dataObjects, final String message, final Integer flag,
-            final String userId) {
+            final RESTTranslatedTopicCollectionV1 dataObjects, final String message, final Integer flag, final String userId) {
         if (dataObjects == null) throw new BadRequestException("The dataObjects parameter can not be null");
 
         if (dataObjects.getItems() == null) throw new BadRequestException("The dataObjects.getItems() parameter can not be null");
@@ -1557,8 +1511,7 @@ public class RESTv1 extends BaseRESTv1 implements RESTBaseInterfaceV1, RESTInter
 
     @Override
     public RESTTranslatedTopicCollectionV1 createJSONTranslatedTopics(final String expand,
-            final RESTTranslatedTopicCollectionV1 dataObjects, final String message, final Integer flag,
-            final String userId) {
+            final RESTTranslatedTopicCollectionV1 dataObjects, final String message, final Integer flag, final String userId) {
         if (dataObjects == null) throw new BadRequestException("The dataObjects parameter can not be null");
 
         if (dataObjects.getItems() == null) throw new BadRequestException("The dataObjects.getItems() parameter can not be null");
@@ -1598,8 +1551,7 @@ public class RESTv1 extends BaseRESTv1 implements RESTBaseInterfaceV1, RESTInter
     /* STRINGCONSTANT FUNCTIONS */
     /* JSONP FUNCTIONS */
     @Override
-    public String getJSONPStringConstant(final Integer id, final String expand,
-            final String callback) {
+    public String getJSONPStringConstant(final Integer id, final String expand, final String callback) {
         if (callback == null) throw new BadRequestException("The callback parameter can not be null");
 
         try {
@@ -1610,8 +1562,7 @@ public class RESTv1 extends BaseRESTv1 implements RESTBaseInterfaceV1, RESTInter
     }
 
     @Override
-    public String getJSONPStringConstantRevision(final Integer id, final Integer revision, final String expand,
-            final String callback) {
+    public String getJSONPStringConstantRevision(final Integer id, final Integer revision, final String expand, final String callback) {
         if (callback == null) throw new BadRequestException("The callback parameter can not be null");
 
         try {
@@ -1622,8 +1573,7 @@ public class RESTv1 extends BaseRESTv1 implements RESTBaseInterfaceV1, RESTInter
     }
 
     @Override
-    public String getJSONPStringConstants(final String expand,
-            final String callback) {
+    public String getJSONPStringConstants(final String expand, final String callback) {
         if (callback == null) throw new BadRequestException("The callback parameter can not be null");
 
         try {
@@ -1634,8 +1584,7 @@ public class RESTv1 extends BaseRESTv1 implements RESTBaseInterfaceV1, RESTInter
     }
 
     @Override
-    public String getJSONPStringConstantsWithQuery(final PathSegment query, final String expand,
-            final String callback) {
+    public String getJSONPStringConstantsWithQuery(final PathSegment query, final String expand, final String callback) {
         if (callback == null) throw new BadRequestException("The callback parameter can not be null");
 
         try {
@@ -1719,16 +1668,14 @@ public class RESTv1 extends BaseRESTv1 implements RESTBaseInterfaceV1, RESTInter
 
     /* JSON FUNCTIONS */
     @Override
-    public RESTStringConstantV1 getJSONStringConstant(final Integer id,
-            final String expand) {
+    public RESTStringConstantV1 getJSONStringConstant(final Integer id, final String expand) {
         if (id == null) throw new BadRequestException("The id parameter can not be null");
 
         return getJSONResource(StringConstants.class, new StringConstantV1Factory(), id, expand);
     }
 
     @Override
-    public RESTStringConstantV1 getJSONStringConstantRevision(final Integer id, final Integer revision,
-            final String expand) {
+    public RESTStringConstantV1 getJSONStringConstantRevision(final Integer id, final Integer revision, final String expand) {
         if (id == null) throw new BadRequestException("The id parameter can not be null");
         if (revision == null) throw new BadRequestException("The revision parameter can not be null");
 
@@ -1736,15 +1683,13 @@ public class RESTv1 extends BaseRESTv1 implements RESTBaseInterfaceV1, RESTInter
     }
 
     @Override
-    public RESTStringConstantCollectionV1 getJSONStringConstants(
-            final String expand) {
+    public RESTStringConstantCollectionV1 getJSONStringConstants(final String expand) {
         return getJSONResources(RESTStringConstantCollectionV1.class, StringConstants.class, new StringConstantV1Factory(),
                 RESTv1Constants.STRINGCONSTANTS_EXPANSION_NAME, expand);
     }
 
     @Override
-    public RESTStringConstantCollectionV1 getJSONStringConstantsWithQuery(final PathSegment query,
-            final String expand) {
+    public RESTStringConstantCollectionV1 getJSONStringConstantsWithQuery(final PathSegment query, final String expand) {
         return getJSONResourcesFromQuery(RESTStringConstantCollectionV1.class, query.getMatrixParameters(),
                 StringConstantFilterQueryBuilder.class, new StringConstantFieldFilter(), new StringConstantV1Factory(),
                 RESTv1Constants.STRINGCONSTANTS_EXPANSION_NAME, expand);
@@ -1829,8 +1774,7 @@ public class RESTv1 extends BaseRESTv1 implements RESTBaseInterfaceV1, RESTInter
     /* USER FUNCTIONS */
     /* JSONP FUNCTIONS */
     @Override
-    public String getJSONPUser(final Integer id, final String expand,
-            final String callback) {
+    public String getJSONPUser(final Integer id, final String expand, final String callback) {
         if (callback == null) throw new BadRequestException("The callback parameter can not be null");
 
         try {
@@ -1841,8 +1785,7 @@ public class RESTv1 extends BaseRESTv1 implements RESTBaseInterfaceV1, RESTInter
     }
 
     @Override
-    public String getJSONPUserRevision(final Integer id, final Integer revision, final String expand,
-            final String callback) {
+    public String getJSONPUserRevision(final Integer id, final Integer revision, final String expand, final String callback) {
         if (callback == null) throw new BadRequestException("The callback parameter can not be null");
 
         try {
@@ -1864,8 +1807,7 @@ public class RESTv1 extends BaseRESTv1 implements RESTBaseInterfaceV1, RESTInter
     }
 
     @Override
-    public String getJSONPUsersWithQuery(final PathSegment query, final String expand,
-            final String callback) {
+    public String getJSONPUsersWithQuery(final PathSegment query, final String expand, final String callback) {
         if (callback == null) throw new BadRequestException("The callback parameter can not be null");
 
         try {
@@ -1956,8 +1898,7 @@ public class RESTv1 extends BaseRESTv1 implements RESTBaseInterfaceV1, RESTInter
     }
 
     @Override
-    public RESTUserV1 getJSONUserRevision(final Integer id, final Integer revision,
-            final String expand) {
+    public RESTUserV1 getJSONUserRevision(final Integer id, final Integer revision, final String expand) {
         if (id == null) throw new BadRequestException("The id parameter can not be null");
         if (revision == null) throw new BadRequestException("The revision parameter can not be null");
 
@@ -1970,8 +1911,7 @@ public class RESTv1 extends BaseRESTv1 implements RESTBaseInterfaceV1, RESTInter
     }
 
     @Override
-    public RESTUserCollectionV1 getJSONUsersWithQuery(final PathSegment query,
-            final String expand) {
+    public RESTUserCollectionV1 getJSONUsersWithQuery(final PathSegment query, final String expand) {
         return this.getJSONResourcesFromQuery(RESTUserCollectionV1.class, query.getMatrixParameters(), UserFilterQueryBuilder.class,
                 new UserFieldFilter(), new UserV1Factory(), RESTv1Constants.USERS_EXPANSION_NAME, expand);
     }
@@ -2029,8 +1969,7 @@ public class RESTv1 extends BaseRESTv1 implements RESTBaseInterfaceV1, RESTInter
     }
 
     @Override
-    public RESTUserV1 deleteJSONUser(final Integer id, final String message, final Integer flag, final String userId,
-            final String expand) {
+    public RESTUserV1 deleteJSONUser(final Integer id, final String message, final Integer flag, final String userId, final String expand) {
         if (id == null) throw new BadRequestException("The id parameter can not be null");
 
         final UserV1Factory factory = new UserV1Factory();
@@ -2056,8 +1995,7 @@ public class RESTv1 extends BaseRESTv1 implements RESTBaseInterfaceV1, RESTInter
     /* TAG FUNCTIONS */
     /* JSONP FUNCTIONS */
     @Override
-    public String getJSONPTag(final Integer id, final String expand,
-            final String callback) {
+    public String getJSONPTag(final Integer id, final String expand, final String callback) {
         if (callback == null) throw new BadRequestException("The callback parameter can not be null");
 
         try {
@@ -2068,8 +2006,7 @@ public class RESTv1 extends BaseRESTv1 implements RESTBaseInterfaceV1, RESTInter
     }
 
     @Override
-    public String getJSONPTagRevision(final Integer id, final Integer revision, final String expand,
-            final String callback) {
+    public String getJSONPTagRevision(final Integer id, final Integer revision, final String expand, final String callback) {
         if (callback == null) throw new BadRequestException("The callback parameter can not be null");
 
         try {
@@ -2091,8 +2028,7 @@ public class RESTv1 extends BaseRESTv1 implements RESTBaseInterfaceV1, RESTInter
     }
 
     @Override
-    public String getJSONPTagsWithQuery(final PathSegment query, final String expand,
-            final String callback) {
+    public String getJSONPTagsWithQuery(final PathSegment query, final String expand, final String callback) {
         if (callback == null) throw new BadRequestException("The callback parameter can not be null");
 
         try {
@@ -2183,8 +2119,7 @@ public class RESTv1 extends BaseRESTv1 implements RESTBaseInterfaceV1, RESTInter
     }
 
     @Override
-    public RESTTagV1 getJSONTagRevision(final Integer id, final Integer revision,
-            final String expand) {
+    public RESTTagV1 getJSONTagRevision(final Integer id, final Integer revision, final String expand) {
         if (id == null) throw new BadRequestException("The id parameter can not be null");
         if (revision == null) throw new BadRequestException("The revision parameter can not be null");
 
@@ -2197,8 +2132,7 @@ public class RESTv1 extends BaseRESTv1 implements RESTBaseInterfaceV1, RESTInter
     }
 
     @Override
-    public RESTTagCollectionV1 getJSONTagsWithQuery(final PathSegment query,
-            final String expand) {
+    public RESTTagCollectionV1 getJSONTagsWithQuery(final PathSegment query, final String expand) {
         return getJSONResourcesFromQuery(RESTTagCollectionV1.class, query.getMatrixParameters(), TagFilterQueryBuilder.class,
                 new TagFieldFilter(), new TagV1Factory(), RESTv1Constants.TAGS_EXPANSION_NAME, expand);
     }
@@ -2256,8 +2190,7 @@ public class RESTv1 extends BaseRESTv1 implements RESTBaseInterfaceV1, RESTInter
     }
 
     @Override
-    public RESTTagV1 deleteJSONTag(final Integer id, final String message, final Integer flag, final String userId,
-            final String expand) {
+    public RESTTagV1 deleteJSONTag(final Integer id, final String message, final Integer flag, final String userId, final String expand) {
         if (id == null) throw new BadRequestException("The id parameter can not be null");
 
         final TagV1Factory factory = new TagV1Factory();
@@ -2282,8 +2215,7 @@ public class RESTv1 extends BaseRESTv1 implements RESTBaseInterfaceV1, RESTInter
     /* CATEGORY FUNCTIONS */
     /* JSONP FUNCTIONS */
     @Override
-    public String getJSONPCategory(final Integer id, final String expand,
-            final String callback) {
+    public String getJSONPCategory(final Integer id, final String expand, final String callback) {
         if (callback == null) throw new BadRequestException("The callback parameter can not be null");
 
         try {
@@ -2294,8 +2226,7 @@ public class RESTv1 extends BaseRESTv1 implements RESTBaseInterfaceV1, RESTInter
     }
 
     @Override
-    public String getJSONPCategoryRevision(final Integer id, final Integer revision, final String expand,
-            final String callback) {
+    public String getJSONPCategoryRevision(final Integer id, final Integer revision, final String expand, final String callback) {
         if (callback == null) throw new BadRequestException("The callback parameter can not be null");
 
         try {
@@ -2306,8 +2237,7 @@ public class RESTv1 extends BaseRESTv1 implements RESTBaseInterfaceV1, RESTInter
     }
 
     @Override
-    public String getJSONPCategories(final String expand,
-            final String callback) {
+    public String getJSONPCategories(final String expand, final String callback) {
         if (callback == null) throw new BadRequestException("The callback parameter can not be null");
 
         try {
@@ -2318,8 +2248,7 @@ public class RESTv1 extends BaseRESTv1 implements RESTBaseInterfaceV1, RESTInter
     }
 
     @Override
-    public String getJSONPCategoriesWithQuery(final PathSegment query, final String expand,
-            final String callback) {
+    public String getJSONPCategoriesWithQuery(final PathSegment query, final String expand, final String callback) {
         if (callback == null) throw new BadRequestException("The callback parameter can not be null");
 
         try {
@@ -2409,16 +2338,14 @@ public class RESTv1 extends BaseRESTv1 implements RESTBaseInterfaceV1, RESTInter
     }
 
     @Override
-    public RESTCategoryV1 getJSONCategory(final Integer id,
-            final String expand) {
+    public RESTCategoryV1 getJSONCategory(final Integer id, final String expand) {
         if (id == null) throw new BadRequestException("The id parameter can not be null");
 
         return getJSONResource(Category.class, new CategoryV1Factory(), id, expand);
     }
 
     @Override
-    public RESTCategoryV1 getJSONCategoryRevision(final Integer id, final Integer revision,
-            final String expand) {
+    public RESTCategoryV1 getJSONCategoryRevision(final Integer id, final Integer revision, final String expand) {
         if (id == null) throw new BadRequestException("The id parameter can not be null");
         if (revision == null) throw new BadRequestException("The revision parameter can not be null");
 
@@ -2426,8 +2353,7 @@ public class RESTv1 extends BaseRESTv1 implements RESTBaseInterfaceV1, RESTInter
     }
 
     @Override
-    public RESTCategoryCollectionV1 getJSONCategoriesWithQuery(final PathSegment query,
-            final String expand) {
+    public RESTCategoryCollectionV1 getJSONCategoriesWithQuery(final PathSegment query, final String expand) {
         return getJSONResourcesFromQuery(RESTCategoryCollectionV1.class, query.getMatrixParameters(), CategoryFilterQueryBuilder.class,
                 new CategoryFieldFilter(), new CategoryV1Factory(), RESTv1Constants.CATEGORIES_EXPANSION_NAME, expand);
     }
@@ -2512,8 +2438,7 @@ public class RESTv1 extends BaseRESTv1 implements RESTBaseInterfaceV1, RESTInter
     /* IMAGE FUNCTIONS */
     /* JSONP FUNCTIONS */
     @Override
-    public String getJSONPImage(final Integer id, final String expand,
-            final String callback) {
+    public String getJSONPImage(final Integer id, final String expand, final String callback) {
         if (callback == null) throw new BadRequestException("The callback parameter can not be null");
 
         try {
@@ -2524,8 +2449,7 @@ public class RESTv1 extends BaseRESTv1 implements RESTBaseInterfaceV1, RESTInter
     }
 
     @Override
-    public String getJSONPImageRevision(final Integer id, final Integer revision, final String expand,
-            final String callback) {
+    public String getJSONPImageRevision(final Integer id, final Integer revision, final String expand, final String callback) {
         if (callback == null) throw new BadRequestException("The callback parameter can not be null");
 
         try {
@@ -2547,8 +2471,7 @@ public class RESTv1 extends BaseRESTv1 implements RESTBaseInterfaceV1, RESTInter
     }
 
     @Override
-    public String getJSONPImagesWithQuery(final PathSegment query, final String expand,
-            final String callback) {
+    public String getJSONPImagesWithQuery(final PathSegment query, final String expand, final String callback) {
         if (callback == null) throw new BadRequestException("The callback parameter can not be null");
 
         try {
@@ -2639,8 +2562,7 @@ public class RESTv1 extends BaseRESTv1 implements RESTBaseInterfaceV1, RESTInter
     }
 
     @Override
-    public RESTImageV1 getJSONImageRevision(final Integer id, Integer revision,
-            final String expand) {
+    public RESTImageV1 getJSONImageRevision(final Integer id, Integer revision, final String expand) {
         if (id == null) throw new BadRequestException("The id parameter can not be null");
 
         if (revision == null) throw new BadRequestException("The revision parameter can not be null");
@@ -2659,8 +2581,7 @@ public class RESTv1 extends BaseRESTv1 implements RESTBaseInterfaceV1, RESTInter
     }
 
     @Override
-    public RESTImageCollectionV1 getJSONImagesWithQuery(final PathSegment query,
-            final String expand) {
+    public RESTImageCollectionV1 getJSONImagesWithQuery(final PathSegment query, final String expand) {
         return this.getJSONResourcesFromQuery(RESTImageCollectionV1.class, query.getMatrixParameters(), ImageFilterQueryBuilder.class,
                 new ImageFieldFilter(), new ImageV1Factory(), RESTv1Constants.IMAGES_EXPANSION_NAME, expand);
     }
@@ -2768,8 +2689,7 @@ public class RESTv1 extends BaseRESTv1 implements RESTBaseInterfaceV1, RESTInter
     }
 
     @Override
-    public Response getRAWImageRevision(final Integer id, final Integer revision,
-            final String locale) {
+    public Response getRAWImageRevision(final Integer id, final Integer revision, final String locale) {
         if (id == null) throw new BadRequestException("The id parameter can not be null");
         if (revision == null) throw new BadRequestException("The revision parameter can not be null");
 
@@ -2795,8 +2715,7 @@ public class RESTv1 extends BaseRESTv1 implements RESTBaseInterfaceV1, RESTInter
     }
 
     @Override
-    public Response getRAWImageThumbnail(final Integer id,
-            final String locale) {
+    public Response getRAWImageThumbnail(final Integer id, final String locale) {
         if (id == null) throw new BadRequestException("The id parameter can not be null");
 
         final EntityManager entityManager = getEntityManager();
@@ -2823,8 +2742,7 @@ public class RESTv1 extends BaseRESTv1 implements RESTBaseInterfaceV1, RESTInter
     /* TOPIC FUNCTIONS */
     /* JSONP FUNCTIONS */
     @Override
-    public String getJSONPTopicsWithQuery(PathSegment query, final String expand,
-            final String callback) {
+    public String getJSONPTopicsWithQuery(PathSegment query, final String expand, final String callback) {
         if (callback == null) throw new BadRequestException("The callback parameter can not be null");
 
         try {
@@ -2846,8 +2764,7 @@ public class RESTv1 extends BaseRESTv1 implements RESTBaseInterfaceV1, RESTInter
     }
 
     @Override
-    public String getJSONPTopic(final Integer id, final String expand,
-            final String callback) {
+    public String getJSONPTopic(final Integer id, final String expand, final String callback) {
         if (callback == null) throw new BadRequestException("The callback parameter can not be null");
 
         try {
@@ -2858,8 +2775,7 @@ public class RESTv1 extends BaseRESTv1 implements RESTBaseInterfaceV1, RESTInter
     }
 
     @Override
-    public String getJSONPTopicRevision(final Integer id, final Integer revision, final String expand,
-            final String callback) {
+    public String getJSONPTopicRevision(final Integer id, final Integer revision, final String expand, final String callback) {
         if (callback == null) throw new BadRequestException("The callback parameter can not be null");
 
         try {
@@ -2949,15 +2865,13 @@ public class RESTv1 extends BaseRESTv1 implements RESTBaseInterfaceV1, RESTInter
     }
 
     @Override
-    public RESTTopicCollectionV1 getJSONTopicsWithQuery(PathSegment query,
-            final String expand) {
+    public RESTTopicCollectionV1 getJSONTopicsWithQuery(PathSegment query, final String expand) {
         return getJSONResourcesFromQuery(RESTTopicCollectionV1.class, query.getMatrixParameters(), TopicFilterQueryBuilder.class,
                 new TopicFieldFilter(), new TopicV1Factory(), RESTv1Constants.TOPICS_EXPANSION_NAME, expand);
     }
 
     @Override
-    public Feed getATOMTopicsWithQuery(PathSegment query,
-            final String expand) {
+    public Feed getATOMTopicsWithQuery(PathSegment query, final String expand) {
         final RESTTopicCollectionV1 topics = getJSONTopicsWithQuery(query, expand);
         return this.convertTopicsIntoFeed(topics, "Topic Query (" + topics.getSize() + " items)");
     }
@@ -2970,8 +2884,7 @@ public class RESTv1 extends BaseRESTv1 implements RESTBaseInterfaceV1, RESTInter
     }
 
     @Override
-    public RESTTopicV1 getJSONTopicRevision(final Integer id, final Integer revision,
-            final String expand) {
+    public RESTTopicV1 getJSONTopicRevision(final Integer id, final Integer revision, final String expand) {
         assert id != null : "The id parameter can not be null";
         assert revision != null : "The revision parameter can not be null";
 
@@ -3071,8 +2984,7 @@ public class RESTv1 extends BaseRESTv1 implements RESTBaseInterfaceV1, RESTInter
     }
 
     @Override
-    public RESTTopicV1 getXMLTopicRevision(final Integer id,
-            final Integer revision) {
+    public RESTTopicV1 getXMLTopicRevision(final Integer id, final Integer revision) {
         assert id != null : "The id parameter can not be null";
 
         return getXMLResource(Topic.class, new TopicV1Factory(), id, revision, null);
@@ -3112,8 +3024,7 @@ public class RESTv1 extends BaseRESTv1 implements RESTBaseInterfaceV1, RESTInter
     }
 
     @Override
-    public String getXMLTopicRevisionXML(final Integer id,
-            final Integer revision) {
+    public String getXMLTopicRevisionXML(final Integer id, final Integer revision) {
         assert id != null : "The id parameter can not be null";
         assert revision != null : "The revision parameter can not be null";
 
@@ -3130,8 +3041,7 @@ public class RESTv1 extends BaseRESTv1 implements RESTBaseInterfaceV1, RESTInter
     }
 
     @Override
-    public String getXMLTopicXMLContained(final Integer id,
-            final String containerName) {
+    public String getXMLTopicXMLContained(final Integer id, final String containerName) {
         assert id != null : "The id parameter can not be null";
         assert containerName != null : "The containerName parameter can not be null";
 
@@ -3139,8 +3049,7 @@ public class RESTv1 extends BaseRESTv1 implements RESTBaseInterfaceV1, RESTInter
     }
 
     @Override
-    public String getXMLTopicXMLNoContainer(final Integer id,
-            final Boolean includeTitle) {
+    public String getXMLTopicXMLNoContainer(final Integer id, final Boolean includeTitle) {
         assert id != null : "The id parameter can not be null";
 
         final String retValue = ComponentTopicV1.returnXMLWithNoContainer(getXMLResource(Topic.class, new TopicV1Factory(), id, null),
@@ -3158,8 +3067,7 @@ public class RESTv1 extends BaseRESTv1 implements RESTBaseInterfaceV1, RESTInter
     }
 
     @Override
-    public String getHTMLTopicRevisionHTML(final Integer id,
-            final Integer revision) {
+    public String getHTMLTopicRevisionHTML(final Integer id, final Integer revision) {
         assert id != null : "The id parameter can not be null";
 
         return getXMLResource(Topic.class, new TopicV1Factory(), id, revision, null).getHtml();
@@ -3178,8 +3086,7 @@ public class RESTv1 extends BaseRESTv1 implements RESTBaseInterfaceV1, RESTInter
     }
 
     @Override
-    public String getCSVTopicsWithQuery(
-            @PathParam("query") PathSegment query) {
+    public String getCSVTopicsWithQuery(@PathParam("query") PathSegment query) {
         final EntityManager entityManager = getEntityManager();
         final List<Topic> topicList = getEntitiesFromQuery(entityManager, query.getMatrixParameters(),
                 new TopicFilterQueryBuilder(entityManager), new TopicFieldFilter());
@@ -3202,8 +3109,7 @@ public class RESTv1 extends BaseRESTv1 implements RESTBaseInterfaceV1, RESTInter
     }
 
     @Override
-    public byte[] getZIPTopicsWithQuery(
-            @PathParam("query") PathSegment query) {
+    public byte[] getZIPTopicsWithQuery(PathSegment query) {
         final EntityManager entityManager = getEntityManager();
         final List<Topic> topicList = getEntitiesFromQuery(entityManager, query.getMatrixParameters(),
                 new TopicFilterQueryBuilder(entityManager), new TopicFieldFilter());
@@ -3216,8 +3122,7 @@ public class RESTv1 extends BaseRESTv1 implements RESTBaseInterfaceV1, RESTInter
     /* FILTERS FUNCTIONS */
     /* JSONP FUNCTIONS */
     @Override
-    public String getJSONPFilter(final Integer id, final String expand,
-            final String callback) {
+    public String getJSONPFilter(final Integer id, final String expand, final String callback) {
         if (callback == null) throw new BadRequestException("The callback parameter can not be null");
 
         try {
@@ -3228,8 +3133,7 @@ public class RESTv1 extends BaseRESTv1 implements RESTBaseInterfaceV1, RESTInter
     }
 
     @Override
-    public String getJSONPFilterRevision(final Integer id, final Integer revision, final String expand,
-            final String callback) {
+    public String getJSONPFilterRevision(final Integer id, final Integer revision, final String expand, final String callback) {
         if (callback == null) throw new BadRequestException("The callback parameter can not be null");
 
         try {
@@ -3240,8 +3144,7 @@ public class RESTv1 extends BaseRESTv1 implements RESTBaseInterfaceV1, RESTInter
     }
 
     @Override
-    public String getJSONPFilters(final String expand,
-            final String callback) {
+    public String getJSONPFilters(final String expand, final String callback) {
         if (callback == null) throw new BadRequestException("The callback parameter can not be null");
 
         try {
@@ -3252,8 +3155,7 @@ public class RESTv1 extends BaseRESTv1 implements RESTBaseInterfaceV1, RESTInter
     }
 
     @Override
-    public String getJSONPFiltersWithQuery(final PathSegment query, final String expand,
-            final String callback) {
+    public String getJSONPFiltersWithQuery(final PathSegment query, final String expand, final String callback) {
         if (callback == null) throw new BadRequestException("The callback parameter can not be null");
 
         try {
@@ -3344,8 +3246,7 @@ public class RESTv1 extends BaseRESTv1 implements RESTBaseInterfaceV1, RESTInter
     }
 
     @Override
-    public RESTFilterV1 getJSONFilterRevision(final Integer id, final Integer revision,
-            final String expand) {
+    public RESTFilterV1 getJSONFilterRevision(final Integer id, final Integer revision, final String expand) {
         if (id == null) throw new BadRequestException("The id parameter can not be null");
 
         if (revision == null) throw new BadRequestException("The revision parameter can not be null");
@@ -3364,8 +3265,7 @@ public class RESTv1 extends BaseRESTv1 implements RESTBaseInterfaceV1, RESTInter
     }
 
     @Override
-    public RESTFilterCollectionV1 getJSONFiltersWithQuery(final PathSegment query,
-            final String expand) {
+    public RESTFilterCollectionV1 getJSONFiltersWithQuery(final PathSegment query, final String expand) {
         return getJSONResourcesFromQuery(RESTFilterCollectionV1.class, query.getMatrixParameters(), FilterFilterQueryBuilder.class,
                 new FilterFieldFilter(), new FilterV1Factory(), RESTv1Constants.FILTERS_EXPANSION_NAME, expand);
     }
@@ -3449,8 +3349,7 @@ public class RESTv1 extends BaseRESTv1 implements RESTBaseInterfaceV1, RESTInter
     /* INTEGERCONSTANT FUNCTIONS */
     /* JSONP FUNCTIONS */
     @Override
-    public String getJSONPIntegerConstant(final Integer id, final String expand,
-            final String callback) {
+    public String getJSONPIntegerConstant(final Integer id, final String expand, final String callback) {
         if (callback == null) throw new BadRequestException("The callback parameter can not be null");
 
         try {
@@ -3461,8 +3360,7 @@ public class RESTv1 extends BaseRESTv1 implements RESTBaseInterfaceV1, RESTInter
     }
 
     @Override
-    public String getJSONPIntegerConstantRevision(final Integer id, final Integer revision, final String expand,
-            final String callback) {
+    public String getJSONPIntegerConstantRevision(final Integer id, final Integer revision, final String expand, final String callback) {
         if (callback == null) throw new BadRequestException("The callback parameter can not be null");
 
         try {
@@ -3473,8 +3371,7 @@ public class RESTv1 extends BaseRESTv1 implements RESTBaseInterfaceV1, RESTInter
     }
 
     @Override
-    public String getJSONPIntegerConstants(final String expand,
-            final String callback) {
+    public String getJSONPIntegerConstants(final String expand, final String callback) {
         if (callback == null) throw new BadRequestException("The callback parameter can not be null");
 
         try {
@@ -3485,8 +3382,7 @@ public class RESTv1 extends BaseRESTv1 implements RESTBaseInterfaceV1, RESTInter
     }
 
     @Override
-    public String getJSONPIntegerConstantsWithQuery(final PathSegment query, final String expand,
-            final String callback) {
+    public String getJSONPIntegerConstantsWithQuery(final PathSegment query, final String expand, final String callback) {
         if (callback == null) throw new BadRequestException("The callback parameter can not be null");
 
         try {
@@ -3570,16 +3466,14 @@ public class RESTv1 extends BaseRESTv1 implements RESTBaseInterfaceV1, RESTInter
 
     /* JSON FUNCTIONS */
     @Override
-    public RESTIntegerConstantV1 getJSONIntegerConstant(final Integer id,
-            final String expand) {
+    public RESTIntegerConstantV1 getJSONIntegerConstant(final Integer id, final String expand) {
         if (id == null) throw new BadRequestException("The id parameter can not be null");
 
         return getJSONResource(IntegerConstants.class, new IntegerConstantV1Factory(), id, expand);
     }
 
     @Override
-    public RESTIntegerConstantV1 getJSONIntegerConstantRevision(final Integer id, final Integer revision,
-            final String expand) {
+    public RESTIntegerConstantV1 getJSONIntegerConstantRevision(final Integer id, final Integer revision, final String expand) {
         if (id == null) throw new BadRequestException("The id parameter can not be null");
         if (revision == null) throw new BadRequestException("The revision parameter can not be null");
 
@@ -3587,15 +3481,13 @@ public class RESTv1 extends BaseRESTv1 implements RESTBaseInterfaceV1, RESTInter
     }
 
     @Override
-    public RESTIntegerConstantCollectionV1 getJSONIntegerConstants(
-            final String expand) {
+    public RESTIntegerConstantCollectionV1 getJSONIntegerConstants(final String expand) {
         return getJSONResources(RESTIntegerConstantCollectionV1.class, IntegerConstants.class, new IntegerConstantV1Factory(),
                 RESTv1Constants.INTEGERCONSTANTS_EXPANSION_NAME, expand);
     }
 
     @Override
-    public RESTIntegerConstantCollectionV1 getJSONIntegerConstantsWithQuery(final PathSegment query,
-            final String expand) {
+    public RESTIntegerConstantCollectionV1 getJSONIntegerConstantsWithQuery(final PathSegment query, final String expand) {
         return getJSONResourcesFromQuery(RESTIntegerConstantCollectionV1.class, query.getMatrixParameters(),
                 IntegerConstantFilterQueryBuilder.class, new IntegerConstantFieldFilter(), new IntegerConstantV1Factory(),
                 RESTv1Constants.INTEGERCONSTANTS_EXPANSION_NAME, expand);
@@ -3616,8 +3508,7 @@ public class RESTv1 extends BaseRESTv1 implements RESTBaseInterfaceV1, RESTInter
 
     @Override
     public RESTIntegerConstantCollectionV1 updateJSONIntegerConstants(final String expand,
-            final RESTIntegerConstantCollectionV1 dataObjects, final String message, final Integer flag,
-            final String userId) {
+            final RESTIntegerConstantCollectionV1 dataObjects, final String message, final Integer flag, final String userId) {
         if (dataObjects == null) throw new BadRequestException("The dataObjects parameter can not be null");
 
         if (dataObjects.getItems() == null) throw new BadRequestException("The dataObjects.getItems() parameter can not be null");
@@ -3642,8 +3533,7 @@ public class RESTv1 extends BaseRESTv1 implements RESTBaseInterfaceV1, RESTInter
 
     @Override
     public RESTIntegerConstantCollectionV1 createJSONIntegerConstants(final String expand,
-            final RESTIntegerConstantCollectionV1 dataObjects, final String message, final Integer flag,
-            final String userId) {
+            final RESTIntegerConstantCollectionV1 dataObjects, final String message, final Integer flag, final String userId) {
         if (dataObjects == null) throw new BadRequestException("The dataObjects parameter can not be null");
 
         if (dataObjects.getItems() == null) throw new BadRequestException("The dataObjects.getItems() parameter can not be null");
@@ -3682,8 +3572,7 @@ public class RESTv1 extends BaseRESTv1 implements RESTBaseInterfaceV1, RESTInter
     /* CONTENT SPEC FUNCTIONS */
     /* JSONP FUNCTIONS */
     @Override
-    public String getJSONPContentSpec(final Integer id, final String expand,
-            final String callback) {
+    public String getJSONPContentSpec(final Integer id, final String expand, final String callback) {
         if (callback == null) throw new BadRequestException("The callback parameter can not be null");
 
         try {
@@ -3694,8 +3583,7 @@ public class RESTv1 extends BaseRESTv1 implements RESTBaseInterfaceV1, RESTInter
     }
 
     @Override
-    public String getJSONPContentSpecRevision(final Integer id, final Integer revision, final String expand,
-            final String callback) {
+    public String getJSONPContentSpecRevision(final Integer id, final Integer revision, final String expand, final String callback) {
         if (callback == null) throw new BadRequestException("The callback parameter can not be null");
 
         try {
@@ -3706,8 +3594,7 @@ public class RESTv1 extends BaseRESTv1 implements RESTBaseInterfaceV1, RESTInter
     }
 
     @Override
-    public String getJSONPContentSpecs(final String expand,
-            final String callback) {
+    public String getJSONPContentSpecs(final String expand, final String callback) {
         if (callback == null) throw new BadRequestException("The callback parameter can not be null");
 
         try {
@@ -3718,8 +3605,7 @@ public class RESTv1 extends BaseRESTv1 implements RESTBaseInterfaceV1, RESTInter
     }
 
     @Override
-    public String getJSONPContentSpecsWithQuery(final PathSegment query, final String expand,
-            final String callback) {
+    public String getJSONPContentSpecsWithQuery(final PathSegment query, final String expand, final String callback) {
         if (callback == null) throw new BadRequestException("The callback parameter can not be null");
 
         try {
@@ -3803,16 +3689,14 @@ public class RESTv1 extends BaseRESTv1 implements RESTBaseInterfaceV1, RESTInter
 
     /* JSON FUNCTIONS */
     @Override
-    public RESTContentSpecV1 getJSONContentSpec(final Integer id,
-            final String expand) {
+    public RESTContentSpecV1 getJSONContentSpec(final Integer id, final String expand) {
         if (id == null) throw new BadRequestException("The id parameter can not be null");
 
         return getJSONResource(ContentSpec.class, new ContentSpecV1Factory(), id, expand);
     }
 
     @Override
-    public RESTContentSpecV1 getJSONContentSpecRevision(final Integer id, final Integer revision,
-            final String expand) {
+    public RESTContentSpecV1 getJSONContentSpecRevision(final Integer id, final Integer revision, final String expand) {
         if (id == null) throw new BadRequestException("The id parameter can not be null");
         if (revision == null) throw new BadRequestException("The revision parameter can not be null");
 
@@ -3820,15 +3704,13 @@ public class RESTv1 extends BaseRESTv1 implements RESTBaseInterfaceV1, RESTInter
     }
 
     @Override
-    public RESTContentSpecCollectionV1 getJSONContentSpecs(
-            final String expand) {
+    public RESTContentSpecCollectionV1 getJSONContentSpecs(final String expand) {
         return getJSONResources(RESTContentSpecCollectionV1.class, ContentSpec.class, new ContentSpecV1Factory(),
                 RESTv1Constants.INTEGERCONSTANTS_EXPANSION_NAME, expand);
     }
 
     @Override
-    public RESTContentSpecCollectionV1 getJSONContentSpecsWithQuery(final PathSegment query,
-            final String expand) {
+    public RESTContentSpecCollectionV1 getJSONContentSpecsWithQuery(final PathSegment query, final String expand) {
         return getJSONResourcesFromQuery(RESTContentSpecCollectionV1.class, query.getMatrixParameters(),
                 ContentSpecFilterQueryBuilder.class, new ContentSpecFieldFilter(), new ContentSpecV1Factory(),
                 RESTv1Constants.CONTENT_SPEC_EXPANSION_NAME, expand);
@@ -3939,8 +3821,7 @@ public class RESTv1 extends BaseRESTv1 implements RESTBaseInterfaceV1, RESTInter
     }
 
     @Override
-    public String updateTEXTContentSpec(Integer id, String contentSpec, String message, Integer flag,
-            String userId) {
+    public String updateTEXTContentSpec(Integer id, String contentSpec, String message, Integer flag, String userId) {
         if (id == null) throw new BadRequestException("The id parameter can not be null");
         if (contentSpec == null) throw new BadRequestException("The contentSpec parameter can not be null");
 
@@ -3949,19 +3830,46 @@ public class RESTv1 extends BaseRESTv1 implements RESTBaseInterfaceV1, RESTInter
     }
 
     @Override
-    public String createTEXTContentSpec(String contentSpec, String message, Integer flag,
-            String userId) {
+    public String createTEXTContentSpec(String contentSpec, String message, Integer flag, String userId) {
         if (contentSpec == null) throw new BadRequestException("The contentSpec parameter can not be null");
 
         final RESTLogDetailsV1 logDetails = generateLogDetails(message, flag, userId);
         return createOrUpdateContentSpecFromString(null, contentSpec, DatabaseOperation.CREATE, logDetails);
     }
 
+    @Override
+    public byte[] getZIPContentSpecs() {
+        final PathSegment pathSegment = new PathSegmentImpl("query;", false);
+        return getZIPContentSpecsWithQuery(pathSegment);
+    }
+
+    @Override
+    public byte[] getZIPContentSpecsWithQuery(PathSegment query) {
+        final EntityManager entityManager = getEntityManager();
+        response.getOutputHeaders().putSingle("Content-Disposition", "filename=ContentSpecs.zip");
+
+        final DBProviderFactory providerFactory = DBProviderFactory.create(entityManager);
+        final CollectionWrapper<ContentSpecWrapper> contentSpecs = providerFactory.getProvider(
+                ContentSpecProvider.class).getContentSpecsWithQuery(query.toString());
+        final CSTransformer transformer = new CSTransformer();
+
+        final HashMap<String, byte[]> files = new HashMap<String, byte[]>();
+        try {
+            for (final ContentSpecWrapper entity : contentSpecs.getItems()) {
+                final org.jboss.pressgang.ccms.contentspec.ContentSpec contentSpec = transformer.transform(entity, providerFactory);
+                files.put(contentSpec.getId() + ".contentspec", contentSpec.toString().getBytes("UTF-8"));
+            }
+
+            return ZipUtilities.createZip(files);
+        } catch (Exception e) {
+            throw new InternalServerErrorException(e);
+        }
+    }
+
     /* CONTENT SPEC NODE FUNCTIONS */
     /* JSONP FUNCTIONS */
     @Override
-    public String getJSONPContentSpecNode(final Integer id, final String expand,
-            final String callback) {
+    public String getJSONPContentSpecNode(final Integer id, final String expand, final String callback) {
         if (callback == null) throw new BadRequestException("The callback parameter can not be null");
 
         try {
@@ -3972,8 +3880,7 @@ public class RESTv1 extends BaseRESTv1 implements RESTBaseInterfaceV1, RESTInter
     }
 
     @Override
-    public String getJSONPContentSpecNodeRevision(final Integer id, final Integer revision, final String expand,
-            final String callback) {
+    public String getJSONPContentSpecNodeRevision(final Integer id, final Integer revision, final String expand, final String callback) {
         if (callback == null) throw new BadRequestException("The callback parameter can not be null");
 
         try {
@@ -3984,8 +3891,7 @@ public class RESTv1 extends BaseRESTv1 implements RESTBaseInterfaceV1, RESTInter
     }
 
     @Override
-    public String getJSONPContentSpecNodes(final String expand,
-            final String callback) {
+    public String getJSONPContentSpecNodes(final String expand, final String callback) {
         if (callback == null) throw new BadRequestException("The callback parameter can not be null");
 
         try {
@@ -3996,8 +3902,7 @@ public class RESTv1 extends BaseRESTv1 implements RESTBaseInterfaceV1, RESTInter
     }
 
     @Override
-    public String getJSONPContentSpecNodesWithQuery(final PathSegment query, final String expand,
-            final String callback) {
+    public String getJSONPContentSpecNodesWithQuery(final PathSegment query, final String expand, final String callback) {
         if (callback == null) throw new BadRequestException("The callback parameter can not be null");
 
         try {
@@ -4007,90 +3912,90 @@ public class RESTv1 extends BaseRESTv1 implements RESTBaseInterfaceV1, RESTInter
         }
     }
 
-    @Override
-    public String updateJSONPContentSpecNode(final String expand, final RESTCSNodeV1 dataObject, final String message, final Integer flag,
-            final String userId, final String callback) {
-        if (callback == null) throw new BadRequestException("The callback parameter can not be null");
-
-        try {
-            return wrapJsonInPadding(callback, convertObjectToJSON(updateJSONContentSpecNode(expand, dataObject, message, flag, userId)));
-        } catch (final Exception ex) {
-            throw new InternalServerErrorException("Could not marshall return value into JSON");
-        }
-    }
-
-    @Override
-    public String updateJSONPContentSpecNodes(final String expand, final RESTCSNodeCollectionV1 dataObjects, final String message,
-            final Integer flag, final String userId, final String callback) {
-        if (callback == null) throw new BadRequestException("The callback parameter can not be null");
-
-        try {
-            return wrapJsonInPadding(callback, convertObjectToJSON(updateJSONContentSpecNodes(expand, dataObjects, message, flag, userId)));
-        } catch (final Exception ex) {
-            throw new InternalServerErrorException("Could not marshall return value into JSON");
-        }
-    }
-
-    @Override
-    public String createJSONPContentSpecNode(final String expand, final RESTCSNodeV1 dataObject, final String message, final Integer flag,
-            final String userId, final String callback) {
-        if (callback == null) throw new BadRequestException("The callback parameter can not be null");
-
-        try {
-            return wrapJsonInPadding(callback, convertObjectToJSON(createJSONContentSpecNode(expand, dataObject, message, flag, userId)));
-        } catch (final Exception ex) {
-            throw new InternalServerErrorException("Could not marshall return value into JSON");
-        }
-    }
-
-    @Override
-    public String createJSONPContentSpecNodes(final String expand, final RESTCSNodeCollectionV1 dataObjects, final String message,
-            final Integer flag, final String userId, final String callback) {
-        if (callback == null) throw new BadRequestException("The callback parameter can not be null");
-
-        try {
-            return wrapJsonInPadding(callback, convertObjectToJSON(createJSONContentSpecNodes(expand, dataObjects, message, flag, userId)));
-        } catch (final Exception ex) {
-            throw new InternalServerErrorException("Could not marshall return value into JSON");
-        }
-    }
-
-    @Override
-    public String deleteJSONPContentSpecNode(final Integer id, final String message, final Integer flag, final String userId,
-            final String expand, final String callback) {
-        if (callback == null) throw new BadRequestException("The callback parameter can not be null");
-
-        try {
-            return wrapJsonInPadding(callback, convertObjectToJSON(deleteJSONContentSpecNode(id, message, flag, userId, expand)));
-        } catch (final Exception ex) {
-            throw new InternalServerErrorException("Could not marshall return value into JSON");
-        }
-    }
-
-    @Override
-    public String deleteJSONPContentSpecNodes(final PathSegment ids, final String message, final Integer flag, final String userId,
-            final String expand, final String callback) {
-        if (callback == null) throw new BadRequestException("The callback parameter can not be null");
-
-        try {
-            return wrapJsonInPadding(callback, convertObjectToJSON(deleteJSONContentSpecNodes(ids, message, flag, userId, expand)));
-        } catch (final Exception ex) {
-            throw new InternalServerErrorException("Could not marshall return value into JSON");
-        }
-    }
+//    @Override
+//    public String updateJSONPContentSpecNode(final String expand, final RESTCSNodeV1 dataObject, final String message, final Integer flag,
+//            final String userId, final String callback) {
+//        if (callback == null) throw new BadRequestException("The callback parameter can not be null");
+//
+//        try {
+//            return wrapJsonInPadding(callback, convertObjectToJSON(updateJSONContentSpecNode(expand, dataObject, message, flag, userId)));
+//        } catch (final Exception ex) {
+//            throw new InternalServerErrorException("Could not marshall return value into JSON");
+//        }
+//    }
+//
+//    @Override
+//    public String updateJSONPContentSpecNodes(final String expand, final RESTCSNodeCollectionV1 dataObjects, final String message,
+//            final Integer flag, final String userId, final String callback) {
+//        if (callback == null) throw new BadRequestException("The callback parameter can not be null");
+//
+//        try {
+//            return wrapJsonInPadding(callback, convertObjectToJSON(updateJSONContentSpecNodes(expand, dataObjects, message, flag,
+// userId)));
+//        } catch (final Exception ex) {
+//            throw new InternalServerErrorException("Could not marshall return value into JSON");
+//        }
+//    }
+//
+//    @Override
+//    public String createJSONPContentSpecNode(final String expand, final RESTCSNodeV1 dataObject, final String message, final Integer flag,
+//            final String userId, final String callback) {
+//        if (callback == null) throw new BadRequestException("The callback parameter can not be null");
+//
+//        try {
+//            return wrapJsonInPadding(callback, convertObjectToJSON(createJSONContentSpecNode(expand, dataObject, message, flag, userId)));
+//        } catch (final Exception ex) {
+//            throw new InternalServerErrorException("Could not marshall return value into JSON");
+//        }
+//    }
+//
+//    @Override
+//    public String createJSONPContentSpecNodes(final String expand, final RESTCSNodeCollectionV1 dataObjects, final String message,
+//            final Integer flag, final String userId, final String callback) {
+//        if (callback == null) throw new BadRequestException("The callback parameter can not be null");
+//
+//        try {
+//            return wrapJsonInPadding(callback, convertObjectToJSON(createJSONContentSpecNodes(expand, dataObjects, message, flag,
+// userId)));
+//        } catch (final Exception ex) {
+//            throw new InternalServerErrorException("Could not marshall return value into JSON");
+//        }
+//    }
+//
+//    @Override
+//    public String deleteJSONPContentSpecNode(final Integer id, final String message, final Integer flag, final String userId,
+//            final String expand, final String callback) {
+//        if (callback == null) throw new BadRequestException("The callback parameter can not be null");
+//
+//        try {
+//            return wrapJsonInPadding(callback, convertObjectToJSON(deleteJSONContentSpecNode(id, message, flag, userId, expand)));
+//        } catch (final Exception ex) {
+//            throw new InternalServerErrorException("Could not marshall return value into JSON");
+//        }
+//    }
+//
+//    @Override
+//    public String deleteJSONPContentSpecNodes(final PathSegment ids, final String message, final Integer flag, final String userId,
+//            final String expand, final String callback) {
+//        if (callback == null) throw new BadRequestException("The callback parameter can not be null");
+//
+//        try {
+//            return wrapJsonInPadding(callback, convertObjectToJSON(deleteJSONContentSpecNodes(ids, message, flag, userId, expand)));
+//        } catch (final Exception ex) {
+//            throw new InternalServerErrorException("Could not marshall return value into JSON");
+//        }
+//    }
 
     /* JSON FUNCTIONS */
     @Override
-    public RESTCSNodeV1 getJSONContentSpecNode(final Integer id,
-            final String expand) {
+    public RESTCSNodeV1 getJSONContentSpecNode(final Integer id, final String expand) {
         if (id == null) throw new BadRequestException("The id parameter can not be null");
 
         return getJSONResource(CSNode.class, new CSNodeV1Factory(), id, expand);
     }
 
     @Override
-    public RESTCSNodeV1 getJSONContentSpecNodeRevision(final Integer id, final Integer revision,
-            final String expand) {
+    public RESTCSNodeV1 getJSONContentSpecNodeRevision(final Integer id, final Integer revision, final String expand) {
         if (id == null) throw new BadRequestException("The id parameter can not be null");
         if (revision == null) throw new BadRequestException("The revision parameter can not be null");
 
@@ -4098,101 +4003,98 @@ public class RESTv1 extends BaseRESTv1 implements RESTBaseInterfaceV1, RESTInter
     }
 
     @Override
-    public RESTCSNodeCollectionV1 getJSONContentSpecNodes(
-            final String expand) {
+    public RESTCSNodeCollectionV1 getJSONContentSpecNodes(final String expand) {
         return getJSONResources(RESTCSNodeCollectionV1.class, CSNode.class, new CSNodeV1Factory(),
                 RESTv1Constants.CONTENT_SPEC_NODE_EXPANSION_NAME, expand);
     }
 
     @Override
-    public RESTCSNodeCollectionV1 getJSONContentSpecNodesWithQuery(final PathSegment query,
-            final String expand) {
+    public RESTCSNodeCollectionV1 getJSONContentSpecNodesWithQuery(final PathSegment query, final String expand) {
         return getJSONResourcesFromQuery(RESTCSNodeCollectionV1.class, query.getMatrixParameters(), ContentSpecNodeFilterQueryBuilder.class,
                 new ContentSpecNodeFieldFilter(), new CSNodeV1Factory(), RESTv1Constants.CONTENT_SPEC_NODE_EXPANSION_NAME, expand);
     }
 
-    @Override
-    public RESTCSNodeV1 updateJSONContentSpecNode(final String expand, final RESTCSNodeV1 dataObject, final String message,
-            final Integer flag, final String userId) {
-        if (dataObject == null) throw new BadRequestException("The dataObject parameter can not be null");
-
-        if (dataObject.getId() == null) throw new BadRequestException("The dataObject.getId() parameter can not be null");
-
-        final CSNodeV1Factory factory = new CSNodeV1Factory();
-        final RESTLogDetailsV1 logDetails = generateLogDetails(message, flag, userId);
-
-        return updateJSONEntity(CSNode.class, dataObject, factory, expand, logDetails);
-    }
-
-    @Override
-    public RESTCSNodeCollectionV1 updateJSONContentSpecNodes(final String expand, final RESTCSNodeCollectionV1 dataObjects,
-            final String message, final Integer flag, final String userId) {
-        if (dataObjects == null) throw new BadRequestException("The dataObjects parameter can not be null");
-
-        if (dataObjects.getItems() == null) throw new BadRequestException("The dataObjects.getItems() parameter can not be null");
-
-        final CSNodeV1Factory factory = new CSNodeV1Factory();
-        final RESTLogDetailsV1 logDetails = generateLogDetails(message, flag, userId);
-
-        return updateJSONEntities(RESTCSNodeCollectionV1.class, CSNode.class, dataObjects, factory,
-                RESTv1Constants.CONTENT_SPEC_NODE_EXPANSION_NAME, expand, logDetails);
-    }
-
-    @Override
-    public RESTCSNodeV1 createJSONContentSpecNode(final String expand, final RESTCSNodeV1 dataObject, final String message,
-            final Integer flag, final String userId) {
-        if (dataObject == null) throw new BadRequestException("The dataObject parameter can not be null");
-
-        final CSNodeV1Factory factory = new CSNodeV1Factory();
-        final RESTLogDetailsV1 logDetails = generateLogDetails(message, flag, userId);
-
-        return createJSONEntity(CSNode.class, dataObject, factory, expand, logDetails);
-    }
-
-    @Override
-    public RESTCSNodeCollectionV1 createJSONContentSpecNodes(final String expand, final RESTCSNodeCollectionV1 dataObjects,
-            final String message, final Integer flag, final String userId) {
-        if (dataObjects == null) throw new BadRequestException("The dataObjects parameter can not be null");
-
-        if (dataObjects.getItems() == null) throw new BadRequestException("The dataObjects.getItems() parameter can not be null");
-
-        final CSNodeV1Factory factory = new CSNodeV1Factory();
-        final RESTLogDetailsV1 logDetails = generateLogDetails(message, flag, userId);
-
-        return createJSONEntities(RESTCSNodeCollectionV1.class, CSNode.class, dataObjects, factory,
-                RESTv1Constants.CONTENT_SPEC_NODE_EXPANSION_NAME, expand, logDetails);
-    }
-
-    @Override
-    public RESTCSNodeV1 deleteJSONContentSpecNode(final Integer id, final String message, final Integer flag, final String userId,
-            final String expand) {
-        if (id == null) throw new BadRequestException("The dataObject parameter can not be null");
-
-        final CSNodeV1Factory factory = new CSNodeV1Factory();
-        final RESTLogDetailsV1 logDetails = generateLogDetails(message, flag, userId);
-
-        return deleteJSONEntity(CSNode.class, factory, id, expand, logDetails);
-    }
-
-    @Override
-    public RESTCSNodeCollectionV1 deleteJSONContentSpecNodes(final PathSegment ids, final String message, final Integer flag,
-            final String userId, final String expand) {
-        if (ids == null) throw new BadRequestException("The dataObjects parameter can not be null");
-
-        final Set<String> dbEntityIds = ids.getMatrixParameters().keySet();
-
-        final CSNodeV1Factory factory = new CSNodeV1Factory();
-        final RESTLogDetailsV1 logDetails = generateLogDetails(message, flag, userId);
-
-        return deleteJSONEntities(RESTCSNodeCollectionV1.class, CSNode.class, factory, dbEntityIds,
-                RESTv1Constants.CONTENT_SPEC_NODE_EXPANSION_NAME, expand, logDetails);
-    }
+//    @Override
+//    public RESTCSNodeV1 updateJSONContentSpecNode(final String expand, final RESTCSNodeV1 dataObject, final String message,
+//            final Integer flag, final String userId) {
+//        if (dataObject == null) throw new BadRequestException("The dataObject parameter can not be null");
+//
+//        if (dataObject.getId() == null) throw new BadRequestException("The dataObject.getId() parameter can not be null");
+//
+//        final CSNodeV1Factory factory = new CSNodeV1Factory();
+//        final RESTLogDetailsV1 logDetails = generateLogDetails(message, flag, userId);
+//
+//        return updateJSONEntity(CSNode.class, dataObject, factory, expand, logDetails);
+//    }
+//
+//    @Override
+//    public RESTCSNodeCollectionV1 updateJSONContentSpecNodes(final String expand, final RESTCSNodeCollectionV1 dataObjects,
+//            final String message, final Integer flag, final String userId) {
+//        if (dataObjects == null) throw new BadRequestException("The dataObjects parameter can not be null");
+//
+//        if (dataObjects.getItems() == null) throw new BadRequestException("The dataObjects.getItems() parameter can not be null");
+//
+//        final CSNodeV1Factory factory = new CSNodeV1Factory();
+//        final RESTLogDetailsV1 logDetails = generateLogDetails(message, flag, userId);
+//
+//        return updateJSONEntities(RESTCSNodeCollectionV1.class, CSNode.class, dataObjects, factory,
+//                RESTv1Constants.CONTENT_SPEC_NODE_EXPANSION_NAME, expand, logDetails);
+//    }
+//
+//    @Override
+//    public RESTCSNodeV1 createJSONContentSpecNode(final String expand, final RESTCSNodeV1 dataObject, final String message,
+//            final Integer flag, final String userId) {
+//        if (dataObject == null) throw new BadRequestException("The dataObject parameter can not be null");
+//
+//        final CSNodeV1Factory factory = new CSNodeV1Factory();
+//        final RESTLogDetailsV1 logDetails = generateLogDetails(message, flag, userId);
+//
+//        return createJSONEntity(CSNode.class, dataObject, factory, expand, logDetails);
+//    }
+//
+//    @Override
+//    public RESTCSNodeCollectionV1 createJSONContentSpecNodes(final String expand, final RESTCSNodeCollectionV1 dataObjects,
+//            final String message, final Integer flag, final String userId) {
+//        if (dataObjects == null) throw new BadRequestException("The dataObjects parameter can not be null");
+//
+//        if (dataObjects.getItems() == null) throw new BadRequestException("The dataObjects.getItems() parameter can not be null");
+//
+//        final CSNodeV1Factory factory = new CSNodeV1Factory();
+//        final RESTLogDetailsV1 logDetails = generateLogDetails(message, flag, userId);
+//
+//        return createJSONEntities(RESTCSNodeCollectionV1.class, CSNode.class, dataObjects, factory,
+//                RESTv1Constants.CONTENT_SPEC_NODE_EXPANSION_NAME, expand, logDetails);
+//    }
+//
+//    @Override
+//    public RESTCSNodeV1 deleteJSONContentSpecNode(final Integer id, final String message, final Integer flag, final String userId,
+//            final String expand) {
+//        if (id == null) throw new BadRequestException("The dataObject parameter can not be null");
+//
+//        final CSNodeV1Factory factory = new CSNodeV1Factory();
+//        final RESTLogDetailsV1 logDetails = generateLogDetails(message, flag, userId);
+//
+//        return deleteJSONEntity(CSNode.class, factory, id, expand, logDetails);
+//    }
+//
+//    @Override
+//    public RESTCSNodeCollectionV1 deleteJSONContentSpecNodes(final PathSegment ids, final String message, final Integer flag,
+//            final String userId, final String expand) {
+//        if (ids == null) throw new BadRequestException("The dataObjects parameter can not be null");
+//
+//        final Set<String> dbEntityIds = ids.getMatrixParameters().keySet();
+//
+//        final CSNodeV1Factory factory = new CSNodeV1Factory();
+//        final RESTLogDetailsV1 logDetails = generateLogDetails(message, flag, userId);
+//
+//        return deleteJSONEntities(RESTCSNodeCollectionV1.class, CSNode.class, factory, dbEntityIds,
+//                RESTv1Constants.CONTENT_SPEC_NODE_EXPANSION_NAME, expand, logDetails);
+//    }
 
     /* TRANSLATED CONTENT SPEC FUNCTIONS */
     /* JSONP FUNCTIONS */
     @Override
-    public String getJSONPTranslatedContentSpec(final Integer id, final String expand,
-            final String callback) {
+    public String getJSONPTranslatedContentSpec(final Integer id, final String expand, final String callback) {
         if (callback == null) throw new BadRequestException("The callback parameter can not be null");
 
         try {
@@ -4215,8 +4117,7 @@ public class RESTv1 extends BaseRESTv1 implements RESTBaseInterfaceV1, RESTInter
     }
 
     @Override
-    public String getJSONPTranslatedContentSpecs(final String expand,
-            final String callback) {
+    public String getJSONPTranslatedContentSpecs(final String expand, final String callback) {
         if (callback == null) throw new BadRequestException("The callback parameter can not be null");
 
         try {
@@ -4227,8 +4128,7 @@ public class RESTv1 extends BaseRESTv1 implements RESTBaseInterfaceV1, RESTInter
     }
 
     @Override
-    public String getJSONPTranslatedContentSpecsWithQuery(final PathSegment query, final String expand,
-            final String callback) {
+    public String getJSONPTranslatedContentSpecsWithQuery(final PathSegment query, final String expand, final String callback) {
         if (callback == null) throw new BadRequestException("The callback parameter can not be null");
 
         try {
@@ -4253,8 +4153,7 @@ public class RESTv1 extends BaseRESTv1 implements RESTBaseInterfaceV1, RESTInter
 
     @Override
     public String updateJSONPTranslatedContentSpecs(final String expand, final RESTTranslatedContentSpecCollectionV1 dataObjects,
-            final String message, final Integer flag, final String userId,
-            final String callback) {
+            final String message, final Integer flag, final String userId, final String callback) {
         if (callback == null) throw new BadRequestException("The callback parameter can not be null");
 
         try {
@@ -4280,8 +4179,7 @@ public class RESTv1 extends BaseRESTv1 implements RESTBaseInterfaceV1, RESTInter
 
     @Override
     public String createJSONPTranslatedContentSpecs(final String expand, final RESTTranslatedContentSpecCollectionV1 dataObjects,
-            final String message, final Integer flag, final String userId,
-            final String callback) {
+            final String message, final Integer flag, final String userId, final String callback) {
         if (callback == null) throw new BadRequestException("The callback parameter can not be null");
 
         try {
@@ -4305,13 +4203,12 @@ public class RESTv1 extends BaseRESTv1 implements RESTBaseInterfaceV1, RESTInter
     }
 
     @Override
-    public String deleteJSONPTranslatedContentSpecs(final PathSegment ids, final String message, final Integer flag,
-            final String userId, final String expand, final String callback) {
+    public String deleteJSONPTranslatedContentSpecs(final PathSegment ids, final String message, final Integer flag, final String userId,
+            final String expand, final String callback) {
         if (callback == null) throw new BadRequestException("The callback parameter can not be null");
 
         try {
-            return wrapJsonInPadding(callback,
-                    convertObjectToJSON(deleteJSONTranslatedContentSpecs(ids, message, flag, userId, expand)));
+            return wrapJsonInPadding(callback, convertObjectToJSON(deleteJSONTranslatedContentSpecs(ids, message, flag, userId, expand)));
         } catch (final Exception ex) {
             throw new InternalServerErrorException("Could not marshall return value into JSON");
         }
@@ -4319,16 +4216,14 @@ public class RESTv1 extends BaseRESTv1 implements RESTBaseInterfaceV1, RESTInter
 
     /* JSON FUNCTIONS */
     @Override
-    public RESTTranslatedContentSpecV1 getJSONTranslatedContentSpec(final Integer id,
-            final String expand) {
+    public RESTTranslatedContentSpecV1 getJSONTranslatedContentSpec(final Integer id, final String expand) {
         if (id == null) throw new BadRequestException("The id parameter can not be null");
 
         return getJSONResource(TranslatedContentSpec.class, new TranslatedContentSpecV1Factory(), id, expand);
     }
 
     @Override
-    public RESTTranslatedContentSpecV1 getJSONTranslatedContentSpecRevision(final Integer id, final Integer revision,
-            final String expand) {
+    public RESTTranslatedContentSpecV1 getJSONTranslatedContentSpecRevision(final Integer id, final Integer revision, final String expand) {
         if (id == null) throw new BadRequestException("The id parameter can not be null");
         if (revision == null) throw new BadRequestException("The revision parameter can not be null");
 
@@ -4336,18 +4231,16 @@ public class RESTv1 extends BaseRESTv1 implements RESTBaseInterfaceV1, RESTInter
     }
 
     @Override
-    public RESTTranslatedContentSpecCollectionV1 getJSONTranslatedContentSpecs(
-            final String expand) {
-        return getJSONResources(RESTTranslatedContentSpecCollectionV1.class, TranslatedContentSpec.class, new TranslatedContentSpecV1Factory(),
-                RESTv1Constants.TRANSLATED_CONTENT_SPEC_EXPANSION_NAME, expand);
+    public RESTTranslatedContentSpecCollectionV1 getJSONTranslatedContentSpecs(final String expand) {
+        return getJSONResources(RESTTranslatedContentSpecCollectionV1.class, TranslatedContentSpec.class,
+                new TranslatedContentSpecV1Factory(), RESTv1Constants.TRANSLATED_CONTENT_SPEC_EXPANSION_NAME, expand);
     }
 
     @Override
-    public RESTTranslatedContentSpecCollectionV1 getJSONTranslatedContentSpecsWithQuery(final PathSegment query,
-            final String expand) {
+    public RESTTranslatedContentSpecCollectionV1 getJSONTranslatedContentSpecsWithQuery(final PathSegment query, final String expand) {
         return getJSONResourcesFromQuery(RESTTranslatedContentSpecCollectionV1.class, query.getMatrixParameters(),
-                TranslatedContentSpecFilterQueryBuilder.class, new TranslatedContentSpecFieldFilter(),
-                new TranslatedContentSpecV1Factory(), RESTv1Constants.TRANSLATED_CONTENT_SPEC_EXPANSION_NAME, expand);
+                TranslatedContentSpecFilterQueryBuilder.class, new TranslatedContentSpecFieldFilter(), new TranslatedContentSpecV1Factory(),
+                RESTv1Constants.TRANSLATED_CONTENT_SPEC_EXPANSION_NAME, expand);
     }
 
     @Override
@@ -4365,8 +4258,7 @@ public class RESTv1 extends BaseRESTv1 implements RESTBaseInterfaceV1, RESTInter
 
     @Override
     public RESTTranslatedContentSpecCollectionV1 updateJSONTranslatedContentSpecs(final String expand,
-            final RESTTranslatedContentSpecCollectionV1 dataObjects, final String message, final Integer flag,
-            final String userId) {
+            final RESTTranslatedContentSpecCollectionV1 dataObjects, final String message, final Integer flag, final String userId) {
         if (dataObjects == null) throw new BadRequestException("The dataObjects parameter can not be null");
 
         if (dataObjects.getItems() == null) throw new BadRequestException("The dataObjects.getItems() parameter can not be null");
@@ -4391,8 +4283,7 @@ public class RESTv1 extends BaseRESTv1 implements RESTBaseInterfaceV1, RESTInter
 
     @Override
     public RESTTranslatedContentSpecCollectionV1 createJSONTranslatedContentSpecs(final String expand,
-            final RESTTranslatedContentSpecCollectionV1 dataObjects, final String message, final Integer flag,
-            final String userId) {
+            final RESTTranslatedContentSpecCollectionV1 dataObjects, final String message, final Integer flag, final String userId) {
         if (dataObjects == null) throw new BadRequestException("The dataObjects parameter can not be null");
 
         if (dataObjects.getItems() == null) throw new BadRequestException("The dataObjects.getItems() parameter can not be null");
@@ -4432,8 +4323,7 @@ public class RESTv1 extends BaseRESTv1 implements RESTBaseInterfaceV1, RESTInter
     /* TRANSLATED CONTENT SPEC NODE FUNCTIONS */
     /* JSONP FUNCTIONS */
     @Override
-    public String getJSONPTranslatedContentSpecNode(final Integer id, final String expand,
-            final String callback) {
+    public String getJSONPTranslatedContentSpecNode(final Integer id, final String expand, final String callback) {
         if (callback == null) throw new BadRequestException("The callback parameter can not be null");
 
         try {
@@ -4456,8 +4346,7 @@ public class RESTv1 extends BaseRESTv1 implements RESTBaseInterfaceV1, RESTInter
     }
 
     @Override
-    public String getJSONPTranslatedContentSpecNodes(final String expand,
-            final String callback) {
+    public String getJSONPTranslatedContentSpecNodes(final String expand, final String callback) {
         if (callback == null) throw new BadRequestException("The callback parameter can not be null");
 
         try {
@@ -4468,8 +4357,7 @@ public class RESTv1 extends BaseRESTv1 implements RESTBaseInterfaceV1, RESTInter
     }
 
     @Override
-    public String getJSONPTranslatedContentSpecNodesWithQuery(final PathSegment query, final String expand,
-            final String callback) {
+    public String getJSONPTranslatedContentSpecNodesWithQuery(final PathSegment query, final String expand, final String callback) {
         if (callback == null) throw new BadRequestException("The callback parameter can not be null");
 
         try {
@@ -4494,8 +4382,7 @@ public class RESTv1 extends BaseRESTv1 implements RESTBaseInterfaceV1, RESTInter
 
     @Override
     public String updateJSONPTranslatedContentSpecNodes(final String expand, final RESTTranslatedCSNodeCollectionV1 dataObjects,
-            final String message, final Integer flag, final String userId,
-            final String callback) {
+            final String message, final Integer flag, final String userId, final String callback) {
         if (callback == null) throw new BadRequestException("The callback parameter can not be null");
 
         try {
@@ -4521,8 +4408,7 @@ public class RESTv1 extends BaseRESTv1 implements RESTBaseInterfaceV1, RESTInter
 
     @Override
     public String createJSONPTranslatedContentSpecNodes(final String expand, final RESTTranslatedCSNodeCollectionV1 dataObjects,
-            final String message, final Integer flag, final String userId,
-            final String callback) {
+            final String message, final Integer flag, final String userId, final String callback) {
         if (callback == null) throw new BadRequestException("The callback parameter can not be null");
 
         try {
@@ -4560,16 +4446,14 @@ public class RESTv1 extends BaseRESTv1 implements RESTBaseInterfaceV1, RESTInter
 
     /* JSON FUNCTIONS */
     @Override
-    public RESTTranslatedCSNodeV1 getJSONTranslatedContentSpecNode(final Integer id,
-            final String expand) {
+    public RESTTranslatedCSNodeV1 getJSONTranslatedContentSpecNode(final Integer id, final String expand) {
         if (id == null) throw new BadRequestException("The id parameter can not be null");
 
         return getJSONResource(TranslatedCSNode.class, new TranslatedCSNodeV1Factory(), id, expand);
     }
 
     @Override
-    public RESTTranslatedCSNodeV1 getJSONTranslatedContentSpecNodeRevision(final Integer id, final Integer revision,
-            final String expand) {
+    public RESTTranslatedCSNodeV1 getJSONTranslatedContentSpecNodeRevision(final Integer id, final Integer revision, final String expand) {
         if (id == null) throw new BadRequestException("The id parameter can not be null");
         if (revision == null) throw new BadRequestException("The revision parameter can not be null");
 
@@ -4577,15 +4461,13 @@ public class RESTv1 extends BaseRESTv1 implements RESTBaseInterfaceV1, RESTInter
     }
 
     @Override
-    public RESTTranslatedCSNodeCollectionV1 getJSONTranslatedContentSpecNodes(
-            final String expand) {
+    public RESTTranslatedCSNodeCollectionV1 getJSONTranslatedContentSpecNodes(final String expand) {
         return getJSONResources(RESTTranslatedCSNodeCollectionV1.class, TranslatedCSNode.class, new TranslatedCSNodeV1Factory(),
                 RESTv1Constants.CONTENT_SPEC_TRANSLATED_NODE_EXPANSION_NAME, expand);
     }
 
     @Override
-    public RESTTranslatedCSNodeCollectionV1 getJSONTranslatedContentSpecNodesWithQuery(final PathSegment query,
-            final String expand) {
+    public RESTTranslatedCSNodeCollectionV1 getJSONTranslatedContentSpecNodesWithQuery(final PathSegment query, final String expand) {
         return getJSONResourcesFromQuery(RESTTranslatedCSNodeCollectionV1.class, query.getMatrixParameters(),
                 TranslatedContentSpecNodeFilterQueryBuilder.class, new TranslatedContentSpecNodeFieldFilter(),
                 new TranslatedCSNodeV1Factory(), RESTv1Constants.CONTENT_SPEC_TRANSLATED_NODE_EXPANSION_NAME, expand);
@@ -4606,8 +4488,7 @@ public class RESTv1 extends BaseRESTv1 implements RESTBaseInterfaceV1, RESTInter
 
     @Override
     public RESTTranslatedCSNodeCollectionV1 updateJSONTranslatedContentSpecNodes(final String expand,
-            final RESTTranslatedCSNodeCollectionV1 dataObjects, final String message, final Integer flag,
-            final String userId) {
+            final RESTTranslatedCSNodeCollectionV1 dataObjects, final String message, final Integer flag, final String userId) {
         if (dataObjects == null) throw new BadRequestException("The dataObjects parameter can not be null");
 
         if (dataObjects.getItems() == null) throw new BadRequestException("The dataObjects.getItems() parameter can not be null");
@@ -4632,8 +4513,7 @@ public class RESTv1 extends BaseRESTv1 implements RESTBaseInterfaceV1, RESTInter
 
     @Override
     public RESTTranslatedCSNodeCollectionV1 createJSONTranslatedContentSpecNodes(final String expand,
-            final RESTTranslatedCSNodeCollectionV1 dataObjects, final String message, final Integer flag,
-            final String userId) {
+            final RESTTranslatedCSNodeCollectionV1 dataObjects, final String message, final Integer flag, final String userId) {
         if (dataObjects == null) throw new BadRequestException("The dataObjects parameter can not be null");
 
         if (dataObjects.getItems() == null) throw new BadRequestException("The dataObjects.getItems() parameter can not be null");

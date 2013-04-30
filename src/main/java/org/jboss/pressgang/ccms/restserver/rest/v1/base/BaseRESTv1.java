@@ -6,6 +6,7 @@ import javax.naming.NamingException;
 import javax.persistence.EntityManager;
 import javax.persistence.EntityManagerFactory;
 import javax.persistence.FlushModeType;
+import javax.persistence.PersistenceException;
 import javax.persistence.PersistenceUnit;
 import javax.persistence.TypedQuery;
 import javax.persistence.criteria.CriteriaBuilder;
@@ -13,6 +14,8 @@ import javax.persistence.criteria.CriteriaQuery;
 import javax.persistence.criteria.Root;
 import javax.transaction.Status;
 import javax.transaction.TransactionManager;
+import javax.validation.ConstraintViolation;
+import javax.validation.ConstraintViolationException;
 import javax.validation.ValidationException;
 import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MediaType;
@@ -43,8 +46,11 @@ import org.jboss.pressgang.ccms.filter.utils.FilterUtilities;
 import org.jboss.pressgang.ccms.model.Filter;
 import org.jboss.pressgang.ccms.model.User;
 import org.jboss.pressgang.ccms.model.base.AuditedEntity;
+import org.jboss.pressgang.ccms.model.contentspec.ContentSpec;
 import org.jboss.pressgang.ccms.model.exceptions.CustomConstraintViolationException;
 import org.jboss.pressgang.ccms.provider.DBProviderFactory;
+import org.jboss.pressgang.ccms.provider.exception.ProviderException;
+import org.jboss.pressgang.ccms.provider.exception.UnauthorisedException;
 import org.jboss.pressgang.ccms.rest.v1.collections.RESTTopicCollectionV1;
 import org.jboss.pressgang.ccms.rest.v1.collections.base.RESTBaseCollectionItemV1;
 import org.jboss.pressgang.ccms.rest.v1.collections.base.RESTBaseCollectionV1;
@@ -66,6 +72,8 @@ import org.jboss.resteasy.plugins.providers.atom.Feed;
 import org.jboss.resteasy.spi.BadRequestException;
 import org.jboss.resteasy.spi.Failure;
 import org.jboss.resteasy.spi.InternalServerErrorException;
+import org.jboss.resteasy.spi.NotFoundException;
+import org.jboss.resteasy.spi.UnauthorizedException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -965,15 +973,109 @@ public class BaseRESTv1 {
      * Creates or Updates a content spec from a String representation of a content specification.
      *
      * @param id          The content spec id being updated, or null if one is to be created.
-     * @param contentSpec The content spec string representation.
+     * @param contentSpecString The content spec string representation.
      * @param operation   The Database Operation type (CREATE or UPDATE).
      * @param logDetails  The details about the changes that need to be logged.
      * @return The post processed representation of the Content Specification.
      */
-    protected String createOrUpdateContentSpecFromString(final Integer id, final String contentSpec, final DatabaseOperation operation,
+    protected String createOrUpdateContentSpecFromString(final Integer id, final String contentSpecString, final DatabaseOperation operation,
             final RESTLogDetailsV1 logDetails) {
-        assert contentSpec != null;
+        assert contentSpecString != null;
 
+        TransactionManager transactionManager = null;
+        EntityManager entityManager = null;
+        boolean success = true;
+        final ErrorLoggerManager loggerManager = new ErrorLoggerManager();
+
+        try {
+            // Get the TransactionManager and start a Transaction
+            transactionManager = JNDIUtilities.lookupJBossTransactionManager();
+            transactionManager.begin();
+
+            // Get an EntityManager instance
+            entityManager = getEntityManager();
+            entityManager.setFlushMode(FlushModeType.AUTO);
+
+            // Store the log details into the Logging Java Bean
+            setLogDetails(entityManager, logDetails);
+
+            // Get the current entity
+            final ContentSpec entity;
+            if (id != null) {
+                entity = entityManager.find(ContentSpec.class, id);
+                // Check the entity exists
+                if (entity == null) {
+                    throw new BadRequestException("No entity was found with the primary key " + id);
+                }
+            } else {
+                entity = null;
+            }
+
+            final DBProviderFactory providerFactory = DBProviderFactory.create(entityManager, transactionManager);
+            final ProcessingOptions processingOptions = new ProcessingOptions();
+
+            final ContentSpecParser parser = new ContentSpecParser(providerFactory, loggerManager);
+            final ContentSpecProcessor processor = new ContentSpecProcessor(providerFactory, loggerManager, processingOptions);
+            final ContentSpecParser.ParsingMode mode;
+            if (operation == DatabaseOperation.CREATE) {
+                mode = ContentSpecParser.ParsingMode.NEW;
+            } else {
+                mode = ContentSpecParser.ParsingMode.EDITED;
+            }
+
+            // Parse the spec
+            success = parser.parse(contentSpecString, mode, true);
+            if (success) {
+                // Check that the id matches
+                if (id != null && parser.getContentSpec() != null) {
+                    if (!id.equals(parser.getContentSpec().getId())) {
+                        throw new BadRequestException("The Content Spec ID doesn't match the request ID.");
+                    }
+                }
+
+                // Process and save the spec
+                success = processor.processContentSpec(parser.getContentSpec(), null, mode);
+            }
+
+            // If the content spec processed correctly then commit the changes, otherwise roll them back.
+            if (!success) {
+                transactionManager.rollback();
+            } else {
+                if (entity != null) {
+                    // Remove any errors that occurred previously
+                    entity.setErrors(null);
+                    entity.setFailedContentSpec(null);
+                }
+                transactionManager.commit();
+            }
+        } catch (final Throwable e) {
+            throw processError(transactionManager, e);
+        } finally {
+            if (entityManager != null) entityManager.close();
+
+            // Check if the processing succeeded, if not set the error fields and throw an error
+            final String log = loggerManager.generateLogs();
+            if (!success) {
+                if (operation == DatabaseOperation.UPDATE) {
+                    setContentSpecErrors(id, contentSpecString, log, logDetails);
+                }
+                throw new BadRequestException(log);
+            } else {
+                return log;
+            }
+        }
+    }
+
+    /**
+     * Set a Content Spec to include any errors messages from processing and the failed content spec.
+     *
+     * @param id The ID of the content spec to set the errors for.
+     * @param contentSpecString The failed Content Spec string.
+     * @param errors The error messages.
+     * @param logDetails The log details for the failed Content Spec.
+     */
+    private void setContentSpecErrors(final Integer id, final String contentSpecString, final String errors,
+            final RESTLogDetailsV1 logDetails) {
         TransactionManager transactionManager = null;
         EntityManager entityManager = null;
 
@@ -989,43 +1091,19 @@ public class BaseRESTv1 {
             // Store the log details into the Logging Java Bean
             setLogDetails(entityManager, logDetails);
 
-            final DBProviderFactory providerFactory = DBProviderFactory.create(entityManager, transactionManager);
-            final ErrorLoggerManager loggerManager = new ErrorLoggerManager();
-            final ProcessingOptions processingOptions = new ProcessingOptions();
-
-            final ContentSpecParser parser = new ContentSpecParser(providerFactory, loggerManager);
-            final ContentSpecProcessor processor = new ContentSpecProcessor(providerFactory, loggerManager, processingOptions);
-            boolean success = false;
-            final ContentSpecParser.ParsingMode mode;
-            if (operation == DatabaseOperation.CREATE) {
-                mode = ContentSpecParser.ParsingMode.NEW;
+            // Get the current entity
+            final ContentSpec entity;
+            if (id != null) {
+                entity = entityManager.find(ContentSpec.class, id);
             } else {
-                mode = ContentSpecParser.ParsingMode.EDITED;
+                entity = null;
             }
 
-            // Parse the spec
-            if (!parser.parse(contentSpec, mode, true)) {
-                throw new BadRequestException(loggerManager.generateLogs());
-            }
+            if (entity == null) throw new BadRequestException("No entity was found with the primary key " + id);
 
-            // Check that the id matches
-            if (id != null && parser.getContentSpec() != null) {
-                if (!id.equals(parser.getContentSpec().getId())) {
-                    throw new BadRequestException("The Content Spec ID doesn't match the request ID.");
-                }
-            }
-
-            // Process and save the spec
-            success = processor.processContentSpec(parser.getContentSpec(), null, mode);
-
-            // If the content spec processed correctly then commit the changes, otherwise roll them back.
-            if (success) {
-                transactionManager.commit();
-            } else {
-                throw new BadRequestException(loggerManager.generateLogs());
-            }
-
-            return loggerManager.generateLogs();
+            entity.setErrors(errors);
+            entity.setFailedContentSpec(contentSpecString);
+            transactionManager.commit();
         } catch (final Throwable e) {
             throw processError(transactionManager, e);
         } finally {
@@ -1185,20 +1263,45 @@ public class BaseRESTv1 {
         while (cause != null) {
             if (cause instanceof Failure) {
                 return (Failure) cause;
-            } else if (cause instanceof ValidationException) {
+            } else if (cause instanceof ValidationException || cause instanceof PersistenceException || cause instanceof
+                    CustomConstraintViolationException) {
                 break;
+            } else if (cause instanceof ProviderException) {
+                if (cause != null && (cause instanceof ValidationException || cause instanceof PersistenceException || cause instanceof
+                        CustomConstraintViolationException)) {
+                    cause = cause.getCause();
+                } else {
+                    break;
+                }
             } else if (cause instanceof BatchUpdateException) {
                 cause = ((SQLException) cause).getNextException();
-            } else if (cause instanceof CustomConstraintViolationException) {
-                break;
             } else {
                 cause = cause.getCause();
             }
         }
 
         // This is a Persistence exception with information
-        if (cause instanceof ValidationException || cause instanceof CustomConstraintViolationException) {
+        if (cause instanceof ConstraintViolationException) {
+            final ConstraintViolationException e = (ConstraintViolationException) cause;
+            final StringBuilder stringBuilder = new StringBuilder();
+
+            // Construct a "readable" message outlining the validation errors
+            for (ConstraintViolation invalidValue : e.getConstraintViolations())
+                stringBuilder.append(invalidValue.getMessage()).append("\n");
+
+            return new BadRequestException(stringBuilder.toString(), cause);
+        } else if (cause instanceof ValidationException || cause instanceof PersistenceException || cause instanceof CustomConstraintViolationException) {
             return new BadRequestException(ex);
+        } else if (cause instanceof ProviderException) {
+            if (cause instanceof org.jboss.pressgang.ccms.provider.exception.NotFoundException) {
+                throw new NotFoundException(cause);
+            } else if (cause instanceof org.jboss.pressgang.ccms.provider.exception.InternalServerErrorException) {
+                throw new InternalServerErrorException(cause);
+            } else if (cause instanceof org.jboss.pressgang.ccms.provider.exception.BadRequestException) {
+                throw new BadRequestException(cause);
+            } else if (cause instanceof UnauthorisedException) {
+                throw new UnauthorizedException(cause);
+            }
         }
 
         // If it's not some validation error then it must be an internal error.

@@ -73,8 +73,9 @@ public class TagV1Factory extends RESTDataObjectFactory<RESTTagV1, Tag, RESTTagC
         if (expand != null && expand.contains(RESTTagV1.CATEGORIES_NAME)) {
             retValue.setCategories(
                     new RESTDataObjectCollectionFactory<RESTCategoryInTagV1, TagToCategory, RESTCategoryInTagCollectionV1,
-                            RESTCategoryInTagCollectionItemV1>().create(RESTCategoryInTagCollectionV1.class, new CategoryInTagV1Factory(),
-                            entity.getTagToCategoriesArray(), RESTTagV1.CATEGORIES_NAME, dataType, expand, baseUrl, entityManager));
+                            RESTCategoryInTagCollectionItemV1>().create(
+                            RESTCategoryInTagCollectionV1.class, new CategoryInTagV1Factory(), entity.getTagToCategoriesArray(),
+                            RESTTagV1.CATEGORIES_NAME, dataType, expand, baseUrl, entityManager));
         }
 
         // PARENT TAGS
@@ -97,17 +98,18 @@ public class TagV1Factory extends RESTDataObjectFactory<RESTTagV1, Tag, RESTTagC
         if (expand != null && expand.contains(RESTTagV1.PROPERTIES_NAME)) {
             retValue.setProperties(
                     new RESTDataObjectCollectionFactory<RESTAssignedPropertyTagV1, TagToPropertyTag, RESTAssignedPropertyTagCollectionV1,
-                            RESTAssignedPropertyTagCollectionItemV1>().create(RESTAssignedPropertyTagCollectionV1.class,
-                            new TagPropertyTagV1Factory(), entity.getTagToPropertyTagsArray(), RESTTagV1.PROPERTIES_NAME, dataType, expand,
-                            baseUrl, entityManager));
+                            RESTAssignedPropertyTagCollectionItemV1>().create(
+                            RESTAssignedPropertyTagCollectionV1.class, new TagPropertyTagV1Factory(), entity.getTagToPropertyTagsArray(),
+                            RESTTagV1.PROPERTIES_NAME, dataType, expand, baseUrl, entityManager));
         }
 
         // PROJECTS
         if (expand != null && expand.contains(RESTTagV1.PROJECTS_NAME)) {
             retValue.setProjects(
                     new RESTDataObjectCollectionFactory<RESTProjectV1, Project, RESTProjectCollectionV1,
-                            RESTProjectCollectionItemV1>().create(RESTProjectCollectionV1.class, new ProjectV1Factory(),
-                            entity.getProjects(), RESTTagV1.PROJECTS_NAME, dataType, expand, baseUrl, entityManager));
+                            RESTProjectCollectionItemV1>().create(
+                            RESTProjectCollectionV1.class, new ProjectV1Factory(), entity.getProjects(), RESTTagV1.PROJECTS_NAME, dataType,
+                            expand, baseUrl, entityManager));
         }
 
         retValue.setLinks(baseUrl, RESTv1Constants.TAG_URL_NAME, dataType, retValue.getId());
@@ -132,8 +134,7 @@ public class TagV1Factory extends RESTDataObjectFactory<RESTTagV1, Tag, RESTTagC
                 if (restEntityItem.returnIsAddItem() || restEntityItem.returnIsRemoveItem()) {
                     final Category dbEntity = entityManager.find(Category.class, restEntity.getId());
                     if (dbEntity == null)
-                        throw new BadRequestException("No Category entity was found with the primary key "
-                                + restEntity.getId());
+                        throw new BadRequestException("No Category entity was found with the primary key " + restEntity.getId());
 
                     if (restEntityItem.returnIsAddItem()) {
                         if (restEntity.hasParameterSet(RESTCategoryInTagV1.RELATIONSHIP_SORT_NAME)) {
@@ -146,9 +147,11 @@ public class TagV1Factory extends RESTDataObjectFactory<RESTTagV1, Tag, RESTTagC
                     }
                 } else if (restEntityItem.returnIsUpdateItem()) {
                     final TagToCategory dbEntity = entityManager.find(TagToCategory.class, restEntity.getRelationshipId());
-                    if (dbEntity == null)
-                        throw new BadRequestException("No TagToCategory entity was found with the primary key "
-                                + restEntity.getRelationshipId());
+                    if (dbEntity == null) throw new BadRequestException(
+                            "No TagToCategory entity was found with the primary key " + restEntity.getRelationshipId());
+                    if (!entity.getTagToCategories().contains(dbEntity)) throw new BadRequestException(
+                            "No TagToCategory entity was found with the primary key " + restEntity.getRelationshipId() + " for Tag " +
+                                    entity.getId());
 
                     new CategoryInTagV1Factory().syncDBEntityWithRESTEntity(entityManager, dbEntity, restEntity);
                 }
@@ -165,8 +168,7 @@ public class TagV1Factory extends RESTDataObjectFactory<RESTTagV1, Tag, RESTTagC
                 if (restEntityItem.returnIsAddItem() || restEntityItem.returnIsRemoveItem()) {
                     final Project dbEntity = entityManager.find(Project.class, restEntity.getId());
                     if (dbEntity == null)
-                        throw new BadRequestException("No Project entity was found with the primary key "
-                                + restEntity.getId());
+                        throw new BadRequestException("No Project entity was found with the primary key " + restEntity.getId());
 
                     if (restEntityItem.returnIsAddItem()) {
                         dbEntity.addRelationshipTo(entity);
@@ -187,8 +189,7 @@ public class TagV1Factory extends RESTDataObjectFactory<RESTTagV1, Tag, RESTTagC
                 if (restEntityItem.returnIsAddItem() || restEntityItem.returnIsRemoveItem()) {
                     final Tag dbEntity = entityManager.find(Tag.class, restEntity.getId());
                     if (dbEntity == null)
-                        throw new BadRequestException("No Tag entity was found with the primary key "
-                                + restEntity.getId());
+                        throw new BadRequestException("No Tag entity was found with the primary key " + restEntity.getId());
 
                     if (restEntityItem.returnIsAddItem()) {
                         entity.addTagRelationship(dbEntity);
@@ -209,8 +210,7 @@ public class TagV1Factory extends RESTDataObjectFactory<RESTTagV1, Tag, RESTTagC
                 if (restEntityItem.returnIsAddItem() || restEntityItem.returnIsRemoveItem()) {
                     final Tag dbEntity = entityManager.find(Tag.class, restEntity.getId());
                     if (dbEntity == null)
-                        throw new BadRequestException("No Tag entity was found with the primary key "
-                                + restEntity.getId());
+                        throw new BadRequestException("No Tag entity was found with the primary key " + restEntity.getId());
 
                     if (restEntityItem.returnIsAddItem()) {
                         dbEntity.addTagRelationship(entity);
@@ -231,8 +231,7 @@ public class TagV1Factory extends RESTDataObjectFactory<RESTTagV1, Tag, RESTTagC
                 if (restEntityItem.returnIsAddItem() || restEntityItem.returnIsRemoveItem()) {
                     final PropertyTag dbEntity = entityManager.find(PropertyTag.class, restEntity.getId());
                     if (dbEntity == null)
-                        throw new BadRequestException("No PropertyTag entity was found with the primary key "
-                                + restEntity.getId());
+                        throw new BadRequestException("No PropertyTag entity was found with the primary key " + restEntity.getId());
 
                     if (restEntityItem.returnIsAddItem()) {
                         entity.addPropertyTag(dbEntity, restEntity.getValue());
@@ -241,9 +240,11 @@ public class TagV1Factory extends RESTDataObjectFactory<RESTTagV1, Tag, RESTTagC
                     }
                 } else if (restEntityItem.returnIsUpdateItem()) {
                     final TagToPropertyTag dbEntity = entityManager.find(TagToPropertyTag.class, restEntity.getRelationshipId());
-                    if (dbEntity == null)
-                        throw new BadRequestException("No TagToPropertyTag entity was found with the primary key "
-                                + restEntity.getRelationshipId());
+                    if (dbEntity == null) throw new BadRequestException(
+                            "No TagToPropertyTag entity was found with the primary key " + restEntity.getRelationshipId());
+                    if (!entity.getTagToPropertyTags().contains(dbEntity)) throw new BadRequestException(
+                            "No TagToPropertyTag entity was found with the primary key " + restEntity.getRelationshipId() + " for Tag " +
+                                    entity.getId());
 
                     new TagPropertyTagV1Factory().syncDBEntityWithRESTEntity(entityManager, dbEntity, restEntity);
                 }

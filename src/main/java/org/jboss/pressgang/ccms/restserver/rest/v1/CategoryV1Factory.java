@@ -106,6 +106,9 @@ class CategoryV1Factory extends RESTDataObjectFactory<RESTCategoryV1, Category, 
                     final TagToCategory dbEntity = entityManager.find(TagToCategory.class, restEntity.getRelationshipId());
                     if (dbEntity == null) throw new BadRequestException(
                             "No TagToCategory entity was found with the primary key " + restEntity.getRelationshipId());
+                    if (!entity.getTagToCategories().contains(dbEntity)) throw new BadRequestException(
+                            "No TagToCategory entity was found with the primary key " + restEntity.getRelationshipId() + " for Category "
+                                    + entity.getId());
 
                     new TagInCategoryV1Factory().syncDBEntityWithRESTEntity(entityManager, dbEntity, restEntity);
                 }

@@ -95,8 +95,8 @@ public class PropertyTagV1Factory extends RESTDataObjectFactory<RESTPropertyTagV
 
                 if (restEntityItem.returnIsAddItem() || restEntityItem.returnIsRemoveItem()) {
                     final PropertyTagCategory dbEntity = entityManager.find(PropertyTagCategory.class, restEntity.getId());
-                    if (dbEntity == null) throw new BadRequestException(
-                            "No PropertyTagCategory entity was found with the primary key " + restEntity.getId());
+                    if (dbEntity == null)
+                        throw new BadRequestException("No PropertyTagCategory entity was found with the primary key " + restEntity.getId());
 
                     if (restEntityItem.returnIsAddItem()) {
                         entity.addPropertyTagCategory(dbEntity);
@@ -108,6 +108,9 @@ public class PropertyTagV1Factory extends RESTDataObjectFactory<RESTPropertyTagV
                             restEntity.getRelationshipId());
                     if (dbEntity == null) throw new BadRequestException(
                             "No PropertyTagToPropertyTagCategory entity was found with the primary key " + restEntity.getRelationshipId());
+                    if (!entity.getPropertyTagToPropertyTagCategories().contains(dbEntity)) throw new BadRequestException(
+                            "No PropertyTagToPropertyTagCategory entity was found with the primary key " + restEntity.getRelationshipId()
+                                    + " for PropertyTag " + entity.getId());
 
                     new PropertyCategoryInPropertyTagV1Factory().syncDBEntityWithRESTEntity(entityManager, dbEntity, restEntity);
                 }

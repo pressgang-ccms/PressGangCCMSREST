@@ -111,12 +111,15 @@ public class TranslatedContentSpecV1Factory extends RESTDataObjectFactory<RESTTr
                 } else if (restEntityItem.returnIsAddItem()) {
                     final TranslatedCSNode dbEntity = new TranslatedCSNodeV1Factory().createDBEntityFromRESTEntity(entityManager,
                             restEntity);
-                    entityManager.persist(dbEntity);
                     entity.addTranslatedNode(dbEntity);
+                    entityManager.persist(dbEntity);
                 } else if (restEntityItem.returnIsUpdateItem()) {
                     final TranslatedCSNode dbEntity = entityManager.find(TranslatedCSNode.class, restEntity.getId());
                     if (dbEntity == null) throw new BadRequestException(
                             "No TranslatedCSNode entity was found with the primary key " + restEntity.getId());
+                    if (!entity.getTranslatedCSNodes().contains(dbEntity)) throw new BadRequestException(
+                            "No TranslatedCSNode entity was found with the primary key " + restEntity.getId() + " for " +
+                                    "TranslatedContentSpec " + entity.getId());
 
                     new TranslatedCSNodeV1Factory().syncDBEntityWithRESTEntity(entityManager, dbEntity, restEntity);
                 }

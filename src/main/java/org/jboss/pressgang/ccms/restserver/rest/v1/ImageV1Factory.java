@@ -67,10 +67,8 @@ public class ImageV1Factory extends RESTDataObjectFactory<RESTImageV1, ImageFile
     }
 
     @Override
-    public void syncDBEntityWithRESTEntity(final EntityManager entityManager, final ImageFile entity,
-            final RESTImageV1 dataObject) {
-        if (dataObject.hasParameterSet(RESTImageV1.DESCRIPTION_NAME))
-            entity.setDescription(dataObject.getDescription());
+    public void syncDBEntityWithRESTEntity(final EntityManager entityManager, final ImageFile entity, final RESTImageV1 dataObject) {
+        if (dataObject.hasParameterSet(RESTImageV1.DESCRIPTION_NAME)) entity.setDescription(dataObject.getDescription());
 
         /* One To Many - Add will create a child entity */
         if (dataObject.hasParameterSet(
@@ -90,8 +88,7 @@ public class ImageV1Factory extends RESTDataObjectFactory<RESTImageV1, ImageFile
                     } else if (restEntityItem.returnIsRemoveItem()) {
                         final LanguageImage dbEntity = entityManager.find(LanguageImage.class, restEntity.getId());
                         if (dbEntity == null)
-                            throw new BadRequestException("No LanguageImage entity was found with the primary key "
-                                    + restEntity.getId());
+                            throw new BadRequestException("No LanguageImage entity was found with the primary key " + restEntity.getId());
 
                         entity.getLanguageImages().remove(dbEntity);
                         entityManager.remove(dbEntity);
@@ -99,8 +96,10 @@ public class ImageV1Factory extends RESTDataObjectFactory<RESTImageV1, ImageFile
                 } else if (restEntityItem.returnIsUpdateItem()) {
                     final LanguageImage dbEntity = entityManager.find(LanguageImage.class, restEntity.getId());
                     if (dbEntity == null)
-                        throw new BadRequestException("No LanguageImage entity was found with the primary key "
-                                + restEntity.getId());
+                        throw new BadRequestException("No LanguageImage entity was found with the primary key " + restEntity.getId());
+                    if (!entity.getLanguageImages().contains(dbEntity)) throw new BadRequestException(
+                            "No LanguageImage entity was found with the primary key " + restEntity.getId() + " for Image " + entity.getId
+                                    ());
 
                     new LanguageImageV1Factory().syncDBEntityWithRESTEntity(entityManager, dbEntity, restEntity);
                 }

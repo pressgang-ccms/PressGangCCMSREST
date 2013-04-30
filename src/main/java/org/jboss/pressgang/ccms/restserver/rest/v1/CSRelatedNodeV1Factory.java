@@ -81,11 +81,6 @@ public class CSRelatedNodeV1Factory extends RESTDataObjectFactory<RESTCSRelatedN
                     new ContentSpecV1Factory().createRESTEntityFromDBEntity(entity.getRelatedNode().getContentSpec(), baseUrl, dataType,
                             expand.get(RESTCSRelatedNodeV1.CONTENT_SPEC_NAME), revision, expandParentReferences, entityManager));
 
-        // NEXT / PREVIOUS
-        if (entity.getRelatedNode().getNext() != null) retValue.setNextNodeId(entity.getRelatedNode().getNext().getId());
-
-        if (entity.getRelatedNode().getPrevious() != null) retValue.setPreviousNodeId(entity.getRelatedNode().getPrevious().getId());
-
         // PROPERTY TAGS
         if (expand != null && expand.contains(RESTCSRelatedNodeV1.PROPERTIES_NAME)) {
             retValue.setProperties(

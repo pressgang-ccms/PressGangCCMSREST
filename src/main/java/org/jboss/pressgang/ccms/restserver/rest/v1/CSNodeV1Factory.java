@@ -49,6 +49,7 @@ public class CSNodeV1Factory extends RESTDataObjectFactory<RESTCSNodeV1, CSNode,
         final List<String> expandOptions = new ArrayList<String>();
         expandOptions.add(RESTCSNodeV1.CHILDREN_NAME);
         expandOptions.add(RESTBaseEntityV1.LOG_DETAILS_NAME);
+        expandOptions.add(RESTCSNodeV1.NEXT_NODE_NAME);
         expandOptions.add(RESTCSNodeV1.PARENT_NAME);
         expandOptions.add(RESTCSNodeV1.PROPERTIES_NAME);
         expandOptions.add(RESTCSNodeV1.RELATED_FROM_NAME);
@@ -86,10 +87,11 @@ public class CSNodeV1Factory extends RESTDataObjectFactory<RESTCSNodeV1, CSNode,
                 new ContentSpecV1Factory().createRESTEntityFromDBEntity(entity.getContentSpec(), baseUrl, dataType,
                         expand.get(RESTCSNodeV1.CONTENT_SPEC_NAME), revision, expandParentReferences, entityManager));
 
-        // NEXT / PREVIOUS
-        if (entity.getNext() != null) retValue.setNextNodeId(entity.getNext().getId());
-
-        if (entity.getPrevious() != null) retValue.setPreviousNodeId(entity.getPrevious().getId());
+        // NEXT
+        if (expand != null && expand.contains(RESTCSNodeV1.NEXT_NODE_NAME) && entity.getNext() != null) {
+            retValue.setNextNode(new CSNodeV1Factory().createRESTEntityFromDBEntity(entity.getNext(), baseUrl, dataType,
+                    expand.get(RESTCSNodeV1.NEXT_NODE_NAME), entityManager));
+        }
 
         // CHILDREN NODES
         if (expand != null && expand.contains(RESTContentSpecV1.CHILDREN_NAME)) {
@@ -120,7 +122,8 @@ public class CSNodeV1Factory extends RESTDataObjectFactory<RESTCSNodeV1, CSNode,
         // TRANSLATED STRINGS
         if (expand != null && expand.contains(RESTCSNodeV1.TRANSLATED_NODES_NAME)) {
             retValue.setTranslatedNodes_OTM(
-                    new RESTDataObjectCollectionFactory<RESTTranslatedCSNodeV1, TranslatedCSNode, RESTTranslatedCSNodeCollectionV1, RESTTranslatedCSNodeCollectionItemV1>().create(
+                    new RESTDataObjectCollectionFactory<RESTTranslatedCSNodeV1, TranslatedCSNode, RESTTranslatedCSNodeCollectionV1,
+                            RESTTranslatedCSNodeCollectionItemV1>().create(
                             RESTTranslatedCSNodeCollectionV1.class, new TranslatedCSNodeV1Factory(),
                             entity.getTranslatedNodes(entityManager, revision), RESTCSNodeV1.TRANSLATED_NODES_NAME, dataType, expand,
                             baseUrl, false, entityManager));
@@ -142,8 +145,7 @@ public class CSNodeV1Factory extends RESTDataObjectFactory<RESTCSNodeV1, CSNode,
     }
 
     @Override
-    public void syncDBEntityWithRESTEntity(final EntityManager entityManager, final CSNode entity,
-            final RESTCSNodeV1 dataObject) {
+    public void syncDBEntityWithRESTEntity(final EntityManager entityManager, final CSNode entity, final RESTCSNodeV1 dataObject) {
         if (dataObject.hasParameterSet(RESTCSNodeV1.TITLE_NAME)) entity.setCSNodeTitle(dataObject.getTitle());
 
         if (dataObject.hasParameterSet(RESTCSNodeV1.TARGET_ID_NAME)) entity.setCSNodeTargetId(dataObject.getTargetId());
@@ -176,30 +178,14 @@ public class CSNodeV1Factory extends RESTDataObjectFactory<RESTCSNodeV1, CSNode,
             }
         }
 
-        // Set the Parent for the Node
-        if (dataObject.hasParameterSet(RESTCSNodeV1.PARENT_NAME)) {
-            final RESTCSNodeV1 restEntity = dataObject.getParent();
+        // Set the Next Node
+        if (dataObject.hasParameterSet(RESTCSNodeV1.NEXT_NODE_NAME)) {
+            final RESTCSNodeV1 restEntity = dataObject.getNextNode();
 
             if (restEntity != null) {
                 final CSNode dbEntity = entityManager.find(CSNode.class, restEntity.getId());
                 if (dbEntity == null)
                     throw new BadRequestException("No CSNode entity was found with the primary key " + restEntity.getId());
-
-                dbEntity.addChild(entity);
-            } else if (entity.getParent() != null) {
-                entity.getParent().removeChild(entity);
-            } else {
-                entity.setParent(null);
-            }
-        }
-
-        // Set the Next Node
-        if (dataObject.hasParameterSet(RESTCSNodeV1.NEXT_NODE_NAME)) {
-            final Integer nextNodeId = dataObject.getNextNodeId();
-
-            if (nextNodeId != null) {
-                final CSNode dbEntity = entityManager.find(CSNode.class, nextNodeId);
-                if (dbEntity == null) throw new BadRequestException("No CSNode entity was found with the primary key " + nextNodeId);
 
                 dbEntity.setPrevious(entity);
                 entity.setNext(dbEntity);
@@ -208,25 +194,6 @@ public class CSNodeV1Factory extends RESTDataObjectFactory<RESTCSNodeV1, CSNode,
                 entity.setNext(null);
             } else {
                 entity.setNext(null);
-            }
-        }
-
-         // Set the Previous Node
-        if (dataObject.hasParameterSet(RESTCSNodeV1.PREVIOUS_NODE_NAME)) {
-            final Integer previousNodeId = dataObject.getPreviousNodeId();
-
-            if (previousNodeId != null) {
-                final CSNode dbEntity = entityManager.find(CSNode.class, previousNodeId);
-                if (dbEntity == null)
-                    throw new BadRequestException("No CSNode entity was found with the primary key " + previousNodeId);
-
-                dbEntity.setNext(entity);
-                entity.setPrevious(dbEntity);
-            } else if (entity.getPrevious() != null) {
-                entity.getPrevious().setNext(null);
-                entity.setPrevious(null);
-            } else {
-                entity.setPrevious(null);
             }
         }
 
@@ -256,6 +223,9 @@ public class CSNodeV1Factory extends RESTDataObjectFactory<RESTCSNodeV1, CSNode,
                     final CSNodeToPropertyTag dbEntity = entityManager.find(CSNodeToPropertyTag.class, restEntity.getRelationshipId());
                     if (dbEntity == null) throw new BadRequestException(
                             "No CSNodeToPropertyTag entity was found with the primary key " + restEntity.getRelationshipId());
+                    if (!entity.getCSNodeToPropertyTags().contains(dbEntity)) throw new BadRequestException(
+                            "No CSNodeToPropertyTag entity was found with the primary key " + restEntity.getRelationshipId() + " for " +
+                                    "CSNode " + entity.getId());
 
                     new CSNodePropertyTagV1Factory().syncDBEntityWithRESTEntity(entityManager, dbEntity, restEntity);
                 }
@@ -285,6 +255,8 @@ public class CSNodeV1Factory extends RESTDataObjectFactory<RESTCSNodeV1, CSNode,
                     final CSNode dbEntity = entityManager.find(CSNode.class, restEntity.getId());
                     if (dbEntity == null)
                         throw new BadRequestException("No CSNode entity was found with the primary key " + restEntity.getId());
+                    if (!entity.getChildren().contains(dbEntity)) throw new BadRequestException(
+                            "No CSNode entity was found with the primary key " + restEntity.getId() + " for CSNode " + entity.getId());
 
                     new CSNodeV1Factory().syncDBEntityWithRESTEntity(entityManager, dbEntity, restEntity);
                 }

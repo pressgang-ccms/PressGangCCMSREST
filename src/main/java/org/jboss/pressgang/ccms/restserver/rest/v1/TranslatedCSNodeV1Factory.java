@@ -77,7 +77,7 @@ public class TranslatedCSNodeV1Factory extends RESTDataObjectFactory<RESTTransla
                     new RESTDataObjectCollectionFactory<RESTTranslatedCSNodeStringV1, TranslatedCSNodeString,
                             RESTTranslatedCSNodeStringCollectionV1, RESTTranslatedCSNodeStringCollectionItemV1>().create(
                             RESTTranslatedCSNodeStringCollectionV1.class, new TranslatedCSNodeStringV1Factory(),
-                            entity.getCSTranslatedNodeStringsArray(), RESTTranslatedCSNodeV1.TRANSLATED_STRING_NAME, dataType, expand,
+                            entity.getTranslatedCSNodeStringsArray(), RESTTranslatedCSNodeV1.TRANSLATED_STRING_NAME, dataType, expand,
                             baseUrl, false, entityManager));
         }
 
@@ -145,12 +145,15 @@ public class TranslatedCSNodeV1Factory extends RESTDataObjectFactory<RESTTransla
                 } else if (restEntityItem.returnIsAddItem()) {
                     final TranslatedCSNodeString dbEntity = new TranslatedCSNodeStringV1Factory().createDBEntityFromRESTEntity(
                             entityManager, restEntity);
-                    entityManager.persist(dbEntity);
                     entity.addTranslatedString(dbEntity);
+                    entityManager.persist(dbEntity);
                 } else if (restEntityItem.returnIsUpdateItem()) {
                     final TranslatedCSNodeString dbEntity = entityManager.find(TranslatedCSNodeString.class, restEntity.getId());
                     if (dbEntity == null) throw new BadRequestException(
                             "No TranslatedCSNodeString entity was found with the primary key " + restEntity.getId());
+                    if (!entity.getTranslatedCSNodeStrings().contains(dbEntity)) throw new BadRequestException(
+                            "No TranslatedCSNodeString entity was found with the primary key " + restEntity.getId() + " for " +
+                                    "TranslatedCSNode " + entity.getId());
 
                     new TranslatedCSNodeStringV1Factory().syncDBEntityWithRESTEntity(entityManager, dbEntity, restEntity);
                 }
