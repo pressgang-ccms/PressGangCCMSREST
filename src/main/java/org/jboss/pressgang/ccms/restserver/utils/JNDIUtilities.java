@@ -5,6 +5,7 @@ import javax.naming.InitialContext;
 import javax.naming.NamingException;
 import javax.persistence.EntityManagerFactory;
 import javax.transaction.TransactionManager;
+import javax.transaction.UserTransaction;
 
 /**
  * A class that holds a set of utility methods for looking up objects from JNDI.
@@ -19,7 +20,7 @@ public class JNDIUtilities {
      * @return The EntityManagerFactory object.
      * @throws NamingException Thrown if a name based error occurs looking up the EntityManagerFactory.
      */
-    public static EntityManagerFactory lookupEntityManagerFactory() throws NamingException {
+    public static EntityManagerFactory lookupJBossEntityManagerFactory() throws NamingException {
         final InitialContext initCtx = new InitialContext();
         final EntityManagerFactory entityManagerFactory = (EntityManagerFactory) initCtx.lookup("java:jboss/EntityManagerFactory");
 
@@ -47,13 +48,30 @@ public class JNDIUtilities {
      * @return The TransactionManager object.
      * @throws NamingException Thrown if a name based error occurs looking up the TransactionManager.
      */
-    public static final TransactionManager lookupTransactionManager() throws NamingException {
+    public static final TransactionManager lookupJBossTransactionManager() throws NamingException {
         final InitialContext initCtx = new InitialContext();
 
         final TransactionManager transactionManager = (TransactionManager) initCtx.lookup("java:jboss/TransactionManager");
-        if (transactionManager == null) throw new NamingException("Could not find the TransactionManager");
+        if (transactionManager == null)
+            throw new NamingException("Could not find the TransactionManager");
 
         return transactionManager;
+    }
+
+    /**
+     * Lookup the a UserTransaction managed with the underlying Application Server.
+     *
+     * @return The UserTransaction object.
+     * @throws NamingException Thrown if a name based error occurs looking up the TransactionManager.
+     */
+    public static final UserTransaction lookupUserTransaction() throws NamingException {
+        final InitialContext initCtx = new InitialContext();
+
+        final UserTransaction userTransaction = (UserTransaction) initCtx.lookup("java:comp/UserTransaction");
+        if (userTransaction == null)
+            throw new NamingException("Could not find the UserTransaction");
+
+        return userTransaction;
     }
 
     /**

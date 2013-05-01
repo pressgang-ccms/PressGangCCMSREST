@@ -10,6 +10,7 @@ import org.jboss.pressgang.ccms.rest.v1.entities.base.RESTBaseEntityV1;
 import org.jboss.pressgang.ccms.rest.v1.expansion.ExpandDataDetails;
 import org.jboss.pressgang.ccms.rest.v1.expansion.ExpandDataTrunk;
 import org.jboss.pressgang.ccms.restserver.utils.EnversUtilities;
+import org.jboss.resteasy.spi.InternalServerErrorException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -139,7 +140,7 @@ public class RESTDataObjectCollectionFactory<T extends RESTBaseEntityV1<T, V, W>
         try {
             retValue = clazz.newInstance();
         } catch (final Exception ex) {
-            return null;
+            throw new InternalServerErrorException(ex);
         }
 
         /*
@@ -157,87 +158,83 @@ public class RESTDataObjectCollectionFactory<T extends RESTBaseEntityV1<T, V, W>
 
         final ExpandDataTrunk expand = parentExpand != null ? parentExpand.get(expandName) : null;
 
-        try {
-            if (expand != null) {
-                if (expand.getTrunk().getName().equals(expandName)) {
-                    assert baseUrl != null : "Parameter baseUrl can not be null if parameter expand is not null";
+        if (expand != null) {
+            if (expand.getTrunk().getName().equals(expandName)) {
+                assert baseUrl != null : "Parameter baseUrl can not be null if parameter expand is not null";
 
-                    final ExpandDataDetails indexes = expand.getTrunk();
+                final ExpandDataDetails indexes = expand.getTrunk();
 
-                    /*
-                     * Un-comment this to make it so that size is only shown when the expand is set. Don't forget to comment out
-                     * line 136 above.
-                     */
-                    retValue.setSize(usingRevisions ? revisions.size() : entities.size());
+                /*
+                 * Un-comment this to make it so that size is only shown when the expand is set. Don't forget to comment out
+                 * line 136 above.
+                 */
+                retValue.setSize(usingRevisions ? revisions.size() : entities.size());
 
-                    // Find the start reference for the response using the start and size of the entity list.
-                    int start = 0;
-                    if (indexes.getStart() != null) {
-                        final int startIndex = indexes.getStart();
-                        final int size = usingRevisions ? revisions.size() : entities.size();
-                        if (startIndex < 0) {
-                            start = Math.max(0, size + startIndex);
-                        } else {
-                            start = Math.min(startIndex, size - 1);
-                        }
-                    }
-
-                    // Find the end reference for the response using the start and size of the entity list.
-                    int end = usingRevisions ? revisions.size() : entities.size();
-                    if (indexes.getEnd() != null) {
-                        final int endIndex = indexes.getEnd();
-                        final int size = usingRevisions ? revisions.size() : entities.size();
-                        if (endIndex < 0) {
-                            end = Math.max(0, size + endIndex + 1);
-                        } else {
-                            end = Math.min(endIndex, size);
-                        }
-                    }
-
-                    // Fix the start and end if the two overlap
-                    final int fixedStart = Math.min(start, end);
-                    final int fixedEnd = Math.max(start, end);
-
-                    retValue.setStartExpandIndex(fixedStart);
-                    retValue.setEndExpandIndex(fixedEnd);
-
-                    // Get the entities requested from the entity list and create the REST Entities.
-                    for (int i = fixedStart; i < fixedEnd; i++) {
-                        U dbEntity = null;
-
-                        // Find the Entity to be used
-                        Number revision = parentRevision;
-                        if (usingRevisions) {
-                            /*
-                             * Looking up an Envers previous version is an expensive operation. So instead of getting a complete
-                             * collection and only adding those we need to the REST collection (like we do with standard related
-                             * entities in the database), when it comes to Envers we only retrieve the previous versions when
-                             * they are specifically requested.
-                             * 
-                             * This means that we only have to request the list of revision numbers (supplied to us via the
-                             * revisions parameter) instead of having to request every revision.
-                             */
-                            revision = revisions.get(i);
-                            dbEntity = EnversUtilities.getRevision(entityManager, parent, revision);
-
-                        } else {
-                            dbEntity = entities.get(i);
-                        }
-
-                        // If the entity was found then create the REST Entity
-                        if (dbEntity != null) {
-                            final T restEntity = dataObjectFactory.createRESTEntityFromDBEntity(dbEntity, baseUrl, dataType, expand,
-                                    revision, expandParentReferences, entityManager);
-
-                            // Add the item to the return value
-                            retValue.addItem(restEntity);
-                        }
-
+                // Find the start reference for the response using the start and size of the entity list.
+                int start = 0;
+                if (indexes.getStart() != null) {
+                    final int startIndex = indexes.getStart();
+                    final int size = usingRevisions ? revisions.size() : entities.size();
+                    if (startIndex < 0) {
+                        start = Math.max(0, size + startIndex);
+                    } else {
+                        start = Math.min(startIndex, size == 0 ? 0 : size - 1);
                     }
                 }
+
+                // Find the end reference for the response using the start and size of the entity list.
+                int end = usingRevisions ? revisions.size() : entities.size();
+                if (indexes.getEnd() != null) {
+                    final int endIndex = indexes.getEnd();
+                    final int size = usingRevisions ? revisions.size() : entities.size();
+                    if (endIndex < 0) {
+                        end = Math.max(0, size + endIndex + 1);
+                    } else {
+                        end = Math.min(endIndex, size);
+                    }
+                }
+
+                // Fix the start and end if the two overlap
+                final int fixedStart = Math.min(start, end);
+                final int fixedEnd = Math.max(start, end);
+
+                retValue.setStartExpandIndex(fixedStart);
+                retValue.setEndExpandIndex(fixedEnd);
+
+                // Get the entities requested from the entity list and create the REST Entities.
+                for (int i = fixedStart; i < fixedEnd; i++) {
+                    U dbEntity = null;
+
+                    // Find the Entity to be used
+                    Number revision = parentRevision;
+                    if (usingRevisions) {
+                        /*
+                         * Looking up an Envers previous version is an expensive operation. So instead of getting a complete
+                         * collection and only adding those we need to the REST collection (like we do with standard related
+                         * entities in the database), when it comes to Envers we only retrieve the previous versions when
+                         * they are specifically requested.
+                         *
+                         * This means that we only have to request the list of revision numbers (supplied to us via the
+                         * revisions parameter) instead of having to request every revision.
+                         */
+                        revision = revisions.get(i);
+                        dbEntity = EnversUtilities.getRevision(entityManager, parent, revision);
+
+                    } else {
+                        dbEntity = entities.get(i);
+                    }
+
+                    // If the entity was found then create the REST Entity
+                    if (dbEntity != null) {
+                        final T restEntity = dataObjectFactory.createRESTEntityFromDBEntity(dbEntity, baseUrl, dataType, expand,
+                                revision, expandParentReferences, entityManager);
+
+                        // Add the item to the return value
+                        retValue.addItem(restEntity);
+                    }
+
+                }
             }
-        } catch (final Exception ex) {
-            log.error("An error creating or populating a RESTBaseCollectionV1", ex);
         }
 
         return retValue;
