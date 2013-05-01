@@ -11,11 +11,11 @@ import org.jboss.pressgang.ccms.rest.v1.collections.items.RESTFilterLocaleCollec
 import org.jboss.pressgang.ccms.rest.v1.entities.RESTFilterLocaleV1;
 import org.jboss.pressgang.ccms.rest.v1.entities.RESTFilterV1;
 import org.jboss.pressgang.ccms.rest.v1.entities.base.RESTBaseEntityV1;
-import org.jboss.pressgang.ccms.rest.v1.exceptions.InvalidParameterException;
 import org.jboss.pressgang.ccms.rest.v1.expansion.ExpandDataTrunk;
 import org.jboss.pressgang.ccms.restserver.rest.v1.base.RESTDataObjectCollectionFactory;
 import org.jboss.pressgang.ccms.restserver.rest.v1.base.RESTDataObjectFactory;
 import org.jboss.pressgang.ccms.restserver.utils.EnversUtilities;
+import org.jboss.resteasy.spi.BadRequestException;
 
 public class FilterLocaleV1Factory extends RESTDataObjectFactory<RESTFilterLocaleV1, FilterLocale, RESTFilterLocaleCollectionV1,
         RESTFilterLocaleCollectionItemV1> {
@@ -27,7 +27,7 @@ public class FilterLocaleV1Factory extends RESTDataObjectFactory<RESTFilterLocal
     @Override
     public RESTFilterLocaleV1 createRESTEntityFromDBEntityInternal(final FilterLocale entity, final String baseUrl, final String dataType,
             final ExpandDataTrunk expand, final Number revision, boolean expandParentReferences, final EntityManager entityManager) {
-        assert entity != null : "Parameter filterLocale can not be null";
+        assert entity != null : "Parameter entity can not be null";
         assert baseUrl != null : "Parameter baseUrl can not be null";
 
         final RESTFilterLocaleV1 retValue = new RESTFilterLocaleV1();
@@ -63,9 +63,11 @@ public class FilterLocaleV1Factory extends RESTDataObjectFactory<RESTFilterLocal
 
     @Override
     public void syncDBEntityWithRESTEntity(final EntityManager entityManager, final FilterLocale entity,
-            final RESTFilterLocaleV1 dataObject) throws InvalidParameterException {
-        if (dataObject.hasParameterSet(RESTFilterLocaleV1.LOCALE_NAME)) entity.setLocaleName(dataObject.getLocale());
-        if (dataObject.hasParameterSet(RESTFilterLocaleV1.STATE_NAME)) entity.setLocaleState(dataObject.getState());
+            final RESTFilterLocaleV1 dataObject) {
+        if (dataObject.hasParameterSet(RESTFilterLocaleV1.LOCALE_NAME))
+            entity.setLocaleName(dataObject.getLocale());
+        if (dataObject.hasParameterSet(RESTFilterLocaleV1.STATE_NAME))
+            entity.setLocaleState(dataObject.getState());
 
         if (dataObject.hasParameterSet(RESTFilterLocaleV1.FILTER_NAME)) {
             final RESTFilterV1 restEntity = dataObject.getFilter();
@@ -73,7 +75,7 @@ public class FilterLocaleV1Factory extends RESTDataObjectFactory<RESTFilterLocal
             if (restEntity != null) {
                 final Filter dbEntity = entityManager.find(Filter.class, restEntity.getId());
                 if (dbEntity == null)
-                    throw new InvalidParameterException("No Filter entity was found with the primary key " + restEntity.getId());
+                    throw new BadRequestException("No Filter entity was found with the primary key " + restEntity.getId());
 
                 entity.setFilter(dbEntity);
             }

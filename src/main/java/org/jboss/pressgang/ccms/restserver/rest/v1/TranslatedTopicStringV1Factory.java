@@ -25,7 +25,7 @@ public class TranslatedTopicStringV1Factory extends RESTDataObjectFactory<RESTTr
     public RESTTranslatedTopicStringV1 createRESTEntityFromDBEntityInternal(final TranslatedTopicString entity, final String baseUrl,
             final String dataType, final ExpandDataTrunk expand, final Number revision, final boolean expandParentReferences,
             final EntityManager entityManager) {
-        assert entity != null : "Parameter topic can not be null";
+        assert entity != null : "Parameter entity can not be null";
         assert baseUrl != null : "Parameter baseUrl can not be null";
         assert expand != null : "Parameter expand can not be null";
 

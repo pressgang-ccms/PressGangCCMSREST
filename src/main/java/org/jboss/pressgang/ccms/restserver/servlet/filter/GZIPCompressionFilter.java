@@ -6,6 +6,7 @@ import javax.servlet.FilterConfig;
 import javax.servlet.ServletException;
 import javax.servlet.ServletRequest;
 import javax.servlet.ServletResponse;
+import javax.servlet.annotation.WebFilter;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
@@ -25,18 +26,19 @@ import org.slf4j.LoggerFactory;
  * <br><br>
  * Sample web.xml config:
  * <pre>{@code<filter>
- * <filter-name>compression</filter-name>
- * <filter-class>org.jboss.pressgang.ccms.restserver.servlet.filter.GZIPCompressionFilter</filter-class>
- * <init-param>
- * <param-name>mime-types</param-name>
- * <param-value>application/json, application/svg+xml, text/*</param-value>
- * </init-param>
- * </filter>
- * <filter-mapping>
- * <filter-name>compression</filter-name>
- * <url-pattern>/*</url-pattern>
- * </filter-mapping>}</pre>
+    <filter-name>compression</filter-name>
+    <filter-class>org.jboss.pressgang.ccms.restserver.servlet.filter.GZIPCompressionFilter</filter-class>
+    <init-param>
+        <param-name>mime-types</param-name>
+        <param-value>application/json, application/svg+xml, text/*</param-value>
+    </init-param>
+</filter>
+<filter-mapping>
+    <filter-name>compression</filter-name>
+    <url-pattern>/*</url-pattern>
+</filter-mapping>}</pre>
  */
+@WebFilter(urlPatterns = "/rest/*")
 public class GZIPCompressionFilter implements Filter {
     private static Logger log = LoggerFactory.getLogger(GZIPCompressionFilter.class);
     private static AtomicBoolean initialised = new AtomicBoolean(false);
@@ -73,7 +75,7 @@ public class GZIPCompressionFilter implements Filter {
             }
         }
 
-        // Do the compression if it's supported otherwise contain down the chain
+        // Do the compression if it's supported otherwise continue down the chain
         if (!supportCompression) {
             chain.doFilter(request, response);
             return;

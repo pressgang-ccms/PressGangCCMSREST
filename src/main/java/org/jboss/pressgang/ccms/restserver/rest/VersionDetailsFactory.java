@@ -11,19 +11,26 @@ public class VersionDetailsFactory {
     public RESTVersionDetailsCollection create(final String baseUrl) {
         final RESTVersionDetailsCollection versions = new RESTVersionDetailsCollection();
 
-        versions.addItem(getRESTVersionDetails(baseUrl, RESTBaseInterfaceV1.class, RESTVersionDetails.DEV_STATE));
+        versions.addItem(getRESTVersionDetails(baseUrl, RESTBaseInterfaceV1.class));
 
         return versions;
     }
 
-    protected RESTVersionDetails getRESTVersionDetails(final String baseUrl, final Class<?> interfaceClazz, final String state) {
+    protected RESTVersionDetails getRESTVersionDetails(final String baseUrl, final Class<?> interfaceClazz) {
         final RESTVersionDetails versionDetails = new RESTVersionDetails();
         final String version = VersionUtilities.getAPIVersion(interfaceClazz);
+        final String build = VersionUtilities.getAPIBuildTimestamp(interfaceClazz);
         final Path path = interfaceClazz.getAnnotation(Path.class);
 
         versionDetails.setVersion(version);
-        versionDetails.setState(state);
+        versionDetails.setBuild(build);
         versionDetails.setPath(baseUrl + path.value());
+
+        if (version.contains("SNAPSHOT")) {
+            versionDetails.setState(RESTVersionDetails.DEV_STATE);
+        } else {
+            versionDetails.setState(RESTVersionDetails.STABLE_STATE);
+        }
 
         return versionDetails;
     }

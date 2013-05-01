@@ -20,7 +20,7 @@ public class Constants {
     /**
      * The system property that defines the STOMP message queue that skynet should send topic rendering requests to
      */
-    public static final String STOMP_MESSAGE_SERVER_TRANSLATED_TOPIC_RENDER_QUEUE_SYSTEM_PROPERTY = "topicIndex" + "" +
+    public static final String STOMP_MESSAGE_SERVER_TRANSLATED_TOPIC_RENDER_QUEUE_SYSTEM_PROPERTY = "topicIndex" +
             ".stompMessageServerRenderTranslatedTopicQueue";
 
     public static final String PROPERTY_TAG_SELECT_ITEM_VALUE_PREFIX = "PropertyTag";
@@ -69,7 +69,7 @@ public class Constants {
      * The generic error message to display to the user
      */
     public static final String GENERIC_ERROR_INSTRUCTIONS = "Please log out, log back in and try again. If the problem persists, " +
-            "" + "please log a bug.";
+            "please log a bug.";
 
     /**
      * The base URL from which the REST interface can be accessed

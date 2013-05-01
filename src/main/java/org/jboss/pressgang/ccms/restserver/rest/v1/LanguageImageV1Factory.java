@@ -23,7 +23,7 @@ public class LanguageImageV1Factory extends RESTDataObjectFactory<RESTLanguageIm
     @Override
     public RESTLanguageImageV1 createRESTEntityFromDBEntityInternal(final LanguageImage entity, final String baseUrl, final String dataType,
             final ExpandDataTrunk expand, final Number revision, final boolean expandParentReferences, final EntityManager entityManager) {
-        assert entity != null : "Parameter topic can not be null";
+        assert entity != null : "Parameter entity can not be null";
         assert baseUrl != null : "Parameter baseUrl can not be null";
 
         final RESTLanguageImageV1 retValue = new RESTLanguageImageV1();
@@ -43,10 +43,12 @@ public class LanguageImageV1Factory extends RESTDataObjectFactory<RESTLanguageIm
         retValue.setFilename(entity.getOriginalFileName());
 
         /* potentially large fields need to be expanded manually */
-        if (expand != null && expand.contains(RESTLanguageImageV1.IMAGEDATA_NAME)) retValue.setImageData(entity.getImageData());
+        if (expand != null && expand.contains(RESTLanguageImageV1.IMAGEDATA_NAME))
+            retValue.setImageData(entity.getImageData());
         if (expand != null && expand.contains(RESTLanguageImageV1.IMAGEDATABASE64_NAME))
             retValue.setImageDataBase64(entity.getImageDataBase64());
-        if (expand != null && expand.contains(RESTLanguageImageV1.THUMBNAIL_NAME)) retValue.setThumbnail(entity.getThumbnailData());
+        if (expand != null && expand.contains(RESTLanguageImageV1.THUMBNAIL_NAME))
+            retValue.setThumbnail(entity.getThumbnailData());
 
         /* Set the object references */
         if (expandParentReferences && expand != null && expand.contains(RESTLanguageImageV1.IMAGE_NAME) && entity.getImageFile() != null) {
@@ -70,9 +72,12 @@ public class LanguageImageV1Factory extends RESTDataObjectFactory<RESTLanguageIm
     @Override
     public void syncDBEntityWithRESTEntity(final EntityManager entityManager, final LanguageImage entity,
             final RESTLanguageImageV1 dataObject) {
-        if (dataObject.hasParameterSet(RESTLanguageImageV1.LOCALE_NAME)) entity.setLocale(dataObject.getLocale());
-        if (dataObject.hasParameterSet(RESTLanguageImageV1.IMAGEDATA_NAME)) entity.setImageData(dataObject.getImageData());
-        if (dataObject.hasParameterSet(RESTLanguageImageV1.FILENAME_NAME)) entity.setOriginalFileName(dataObject.getFilename());
+        if (dataObject.hasParameterSet(RESTLanguageImageV1.LOCALE_NAME))
+            entity.setLocale(dataObject.getLocale());
+        if (dataObject.hasParameterSet(RESTLanguageImageV1.IMAGEDATA_NAME))
+            entity.setImageData(dataObject.getImageData());
+        if (dataObject.hasParameterSet(RESTLanguageImageV1.FILENAME_NAME))
+            entity.setOriginalFileName(dataObject.getFilename());
     }
 
 }

@@ -14,11 +14,11 @@ import org.jboss.pressgang.ccms.rest.v1.constants.RESTv1Constants;
 import org.jboss.pressgang.ccms.rest.v1.entities.RESTProjectV1;
 import org.jboss.pressgang.ccms.rest.v1.entities.RESTTagV1;
 import org.jboss.pressgang.ccms.rest.v1.entities.base.RESTBaseEntityV1;
-import org.jboss.pressgang.ccms.rest.v1.exceptions.InvalidParameterException;
 import org.jboss.pressgang.ccms.rest.v1.expansion.ExpandDataTrunk;
 import org.jboss.pressgang.ccms.restserver.rest.v1.base.RESTDataObjectCollectionFactory;
 import org.jboss.pressgang.ccms.restserver.rest.v1.base.RESTDataObjectFactory;
 import org.jboss.pressgang.ccms.restserver.utils.EnversUtilities;
+import org.jboss.resteasy.spi.BadRequestException;
 
 public class ProjectV1Factory extends RESTDataObjectFactory<RESTProjectV1, Project, RESTProjectCollectionV1, RESTProjectCollectionItemV1> {
     ProjectV1Factory() {
@@ -28,7 +28,7 @@ public class ProjectV1Factory extends RESTDataObjectFactory<RESTProjectV1, Proje
     @Override
     public RESTProjectV1 createRESTEntityFromDBEntityInternal(final Project entity, final String baseUrl, final String dataType,
             final ExpandDataTrunk expand, final Number revision, final boolean expandParentReferences, final EntityManager entityManager) {
-        assert entity != null : "Parameter topic can not be null";
+        assert entity != null : "Parameter entity can not be null";
         assert baseUrl != null : "Parameter baseUrl can not be null";
 
         final RESTProjectV1 retValue = new RESTProjectV1();
@@ -68,9 +68,11 @@ public class ProjectV1Factory extends RESTDataObjectFactory<RESTProjectV1, Proje
 
     @Override
     public void syncDBEntityWithRESTEntity(final EntityManager entityManager, final Project entity,
-            final RESTProjectV1 dataObject) throws InvalidParameterException {
-        if (dataObject.hasParameterSet(RESTProjectV1.DESCRIPTION_NAME)) entity.setProjectDescription(dataObject.getDescription());
-        if (dataObject.hasParameterSet(RESTProjectV1.NAME_NAME)) entity.setProjectName(dataObject.getName());
+            final RESTProjectV1 dataObject) {
+        if (dataObject.hasParameterSet(RESTProjectV1.DESCRIPTION_NAME))
+            entity.setProjectDescription(dataObject.getDescription());
+        if (dataObject.hasParameterSet(RESTProjectV1.NAME_NAME))
+            entity.setProjectName(dataObject.getName());
 
         entityManager.persist(entity);
 
@@ -85,7 +87,8 @@ public class ProjectV1Factory extends RESTDataObjectFactory<RESTProjectV1, Proje
                 if (restEntityItem.returnIsAddItem() || restEntityItem.returnIsRemoveItem()) {
                     final Tag dbEntity = entityManager.find(Tag.class, restEntity.getId());
                     if (dbEntity == null)
-                        throw new InvalidParameterException("No Tag entity was found with the primary key " + restEntity.getId());
+                        throw new BadRequestException("No Tag entity was found with the primary key "
+                                + restEntity.getId());
 
                     if (restEntityItem.returnIsAddItem()) {
                         entity.addRelationshipTo(dbEntity);
