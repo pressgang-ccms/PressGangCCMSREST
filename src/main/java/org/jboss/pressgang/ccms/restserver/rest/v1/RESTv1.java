@@ -121,6 +121,7 @@ import org.jboss.pressgang.ccms.rest.v1.jaxrsinterfaces.RESTBaseInterfaceV1;
 import org.jboss.pressgang.ccms.rest.v1.jaxrsinterfaces.RESTInterfaceAdvancedV1;
 import org.jboss.pressgang.ccms.restserver.rest.DatabaseOperation;
 import org.jboss.pressgang.ccms.restserver.rest.v1.base.BaseRESTv1;
+import org.jboss.pressgang.ccms.restserver.utils.ContentSpecUtilities;
 import org.jboss.pressgang.ccms.restserver.utils.TopicUtilities;
 import org.jboss.pressgang.ccms.utils.common.CollectionUtilities;
 import org.jboss.pressgang.ccms.utils.common.DocBookUtilities;
@@ -3723,10 +3724,16 @@ public class RESTv1 extends BaseRESTv1 implements RESTBaseInterfaceV1, RESTInter
 
         if (dataObject.getId() == null) throw new BadRequestException("The dataObject.getId() parameter can not be null");
 
-        final ContentSpecV1Factory factory = new ContentSpecV1Factory();
-        final RESTLogDetailsV1 logDetails = generateLogDetails(message, flag, userId);
+        if (dataObject.hasParameterSet(RESTContentSpecV1.TEXT_NAME)) {
+            updateTEXTContentSpec(dataObject.getId(), dataObject.getText(), message, flag, userId);
 
-        return updateJSONEntity(ContentSpec.class, dataObject, factory, expand, logDetails);
+            return getJSONContentSpec(dataObject.getId(), expand);
+        } else {
+            final ContentSpecV1Factory factory = new ContentSpecV1Factory();
+            final RESTLogDetailsV1 logDetails = generateLogDetails(message, flag, userId);
+
+            return updateJSONEntity(ContentSpec.class, dataObject, factory, expand, logDetails);
+        }
     }
 
     @Override
@@ -3748,10 +3755,18 @@ public class RESTv1 extends BaseRESTv1 implements RESTBaseInterfaceV1, RESTInter
             final Integer flag, final String userId) {
         if (dataObject == null) throw new BadRequestException("The dataObject parameter can not be null");
 
-        final ContentSpecV1Factory factory = new ContentSpecV1Factory();
-        final RESTLogDetailsV1 logDetails = generateLogDetails(message, flag, userId);
+        if (dataObject.hasParameterSet(RESTContentSpecV1.TEXT_NAME)) {
+        // TODO
+//            createTEXTContentSpec(dataObject.getText(), message, flag, userId);
+//
+//            return getJSONContentSpec(dataObject.getId(), expand);
+            throw new BadRequestException("Creating Content Specs from TEXT via the JSON endpoints isn't supported yet.");
+        } else {
+            final ContentSpecV1Factory factory = new ContentSpecV1Factory();
+            final RESTLogDetailsV1 logDetails = generateLogDetails(message, flag, userId);
 
-        return createJSONEntity(ContentSpec.class, dataObject, factory, expand, logDetails);
+            return createJSONEntity(ContentSpec.class, dataObject, factory, expand, logDetails);
+        }
     }
 
     @Override
@@ -3799,12 +3814,7 @@ public class RESTv1 extends BaseRESTv1 implements RESTBaseInterfaceV1, RESTInter
     public String getTEXTContentSpec(Integer id) {
         if (id == null) throw new BadRequestException("The id parameter can not be null");
 
-        final DBProviderFactory providerFactory = DBProviderFactory.create(getEntityManager());
-        final ContentSpecWrapper entity = providerFactory.getProvider(ContentSpecProvider.class).getContentSpec(id);
-        final CSTransformer transformer = new CSTransformer();
-
-        final org.jboss.pressgang.ccms.contentspec.ContentSpec contentSpec = transformer.transform(entity, providerFactory);
-        return contentSpec.toString();
+        return ContentSpecUtilities.getContentSpecText(id, getEntityManager());
     }
 
     @Override
@@ -3812,12 +3822,7 @@ public class RESTv1 extends BaseRESTv1 implements RESTBaseInterfaceV1, RESTInter
         if (id == null) throw new BadRequestException("The id parameter can not be null");
         if (revision == null) throw new BadRequestException("The revision parameter can not be null");
 
-        final DBProviderFactory providerFactory = DBProviderFactory.create(getEntityManager());
-        final ContentSpecWrapper entity = providerFactory.getProvider(ContentSpecProvider.class).getContentSpec(id, revision);
-        final CSTransformer transformer = new CSTransformer();
-
-        final org.jboss.pressgang.ccms.contentspec.ContentSpec contentSpec = transformer.transform(entity, providerFactory);
-        return contentSpec.toString();
+        return ContentSpecUtilities.getContentSpecText(id, revision, getEntityManager());
     }
 
     @Override

@@ -75,7 +75,7 @@ public class GZIPCompressionFilter implements Filter {
             }
         }
 
-        // Do the compression if it's supported otherwise contain down the chain
+        // Do the compression if it's supported otherwise continue down the chain
         if (!supportCompression) {
             chain.doFilter(request, response);
             return;

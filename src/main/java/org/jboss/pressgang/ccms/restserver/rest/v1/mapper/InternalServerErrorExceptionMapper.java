@@ -12,7 +12,7 @@ public class InternalServerErrorExceptionMapper implements ExceptionMapper<Inter
 
     @Override
     public Response toResponse(InternalServerErrorException exception) {
-        return Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity(exception.getMessage()).header("Content-Type",
+        return Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity(exception.getMessage() + "\n").header("Content-Type",
                 MediaType.TEXT_PLAIN).build();
     }
 }

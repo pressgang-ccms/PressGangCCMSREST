@@ -132,6 +132,15 @@ public class BaseRESTv1 {
     }
 
     /**
+     * Get the URL of the REST endpoint from the calling request.
+     *
+     * @return The URL of the endpoint that was called for the request.
+     */
+    protected String getRequestUrl() {
+        return uriInfo.getRequestUri().toString();
+    }
+
+    /**
      * Converts a Collection of Topics into an ATOM Feed.
      *
      * @param topics The collection of topics that should be transformed into the Feed.
@@ -142,7 +151,7 @@ public class BaseRESTv1 {
         try {
             final Feed feed = new Feed();
 
-            feed.setId(new URI(this.getUrl()));
+            feed.setId(new URI(this.getRequestUrl()));
             feed.setTitle(title);
             feed.setUpdated(new Date());
 
@@ -151,6 +160,7 @@ public class BaseRESTv1 {
                     final String html = topic.getHtml();
 
                     final Entry entry = new Entry();
+                    entry.setId(new URI(topic.getSelfLink()));
                     entry.setTitle(topic.getTitle());
                     entry.setUpdated(topic.getLastModified());
                     entry.setPublished(topic.getCreated());
@@ -986,6 +996,7 @@ public class BaseRESTv1 {
         EntityManager entityManager = null;
         boolean success = true;
         final ErrorLoggerManager loggerManager = new ErrorLoggerManager();
+        RuntimeException exception = null;
 
         try {
             // Get the TransactionManager and start a Transaction
@@ -1035,6 +1046,10 @@ public class BaseRESTv1 {
 
                 // Process and save the spec
                 success = processor.processContentSpec(parser.getContentSpec(), null, mode);
+
+                if (success) {
+
+                }
             }
 
             // If the content spec processed correctly then commit the changes, otherwise roll them back.
@@ -1049,7 +1064,7 @@ public class BaseRESTv1 {
                 transactionManager.commit();
             }
         } catch (final Throwable e) {
-            throw processError(transactionManager, e);
+            exception = processError(transactionManager, e);
         } finally {
             if (entityManager != null) entityManager.close();
 
@@ -1060,6 +1075,8 @@ public class BaseRESTv1 {
                     setContentSpecErrors(id, contentSpecString, log, logDetails);
                 }
                 throw new BadRequestException(log);
+            } else if (exception != null) {
+                throw exception;
             } else {
                 return log;
             }
@@ -1224,7 +1241,7 @@ public class BaseRESTv1 {
      * lookup as well. *
      *
      * @param joinTransaction Whether or not the EntityManager should attempt to join any active Transactions.
-     * @return An intialised EntityManager object.
+     * @return An initialised EntityManager object.
      */
     protected EntityManager getEntityManager(boolean joinTransaction) {
         if (entityManagerFactory == null) {

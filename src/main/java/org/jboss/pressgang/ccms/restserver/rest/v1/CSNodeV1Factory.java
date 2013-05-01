@@ -187,8 +187,7 @@ public class CSNodeV1Factory extends RESTDataObjectFactory<RESTCSNodeV1, CSNode,
                 if (dbEntity == null)
                     throw new BadRequestException("No CSNode entity was found with the primary key " + restEntity.getId());
 
-                dbEntity.setPrevious(entity);
-                entity.setNext(dbEntity);
+                entity.setNextAndClean(dbEntity);
             } else if (entity.getNext() != null) {
                 entity.getNext().setPrevious(null);
                 entity.setNext(null);
