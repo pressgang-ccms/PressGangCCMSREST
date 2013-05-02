@@ -119,7 +119,6 @@ import org.jboss.pressgang.ccms.rest.v1.expansion.ExpandDataDetails;
 import org.jboss.pressgang.ccms.rest.v1.expansion.ExpandDataTrunk;
 import org.jboss.pressgang.ccms.rest.v1.jaxrsinterfaces.RESTBaseInterfaceV1;
 import org.jboss.pressgang.ccms.rest.v1.jaxrsinterfaces.RESTInterfaceAdvancedV1;
-import org.jboss.pressgang.ccms.restserver.rest.DatabaseOperation;
 import org.jboss.pressgang.ccms.restserver.rest.v1.base.BaseRESTv1;
 import org.jboss.pressgang.ccms.restserver.utils.ContentSpecUtilities;
 import org.jboss.pressgang.ccms.restserver.utils.TopicUtilities;
@@ -3724,13 +3723,14 @@ public class RESTv1 extends BaseRESTv1 implements RESTBaseInterfaceV1, RESTInter
 
         if (dataObject.getId() == null) throw new BadRequestException("The dataObject.getId() parameter can not be null");
 
-        if (dataObject.hasParameterSet(RESTContentSpecV1.TEXT_NAME)) {
-            updateTEXTContentSpec(dataObject.getId(), dataObject.getText(), message, flag, userId);
+        final RESTLogDetailsV1 logDetails = generateLogDetails(message, flag, userId);
 
-            return getJSONContentSpec(dataObject.getId(), expand);
+        if (dataObject.hasParameterSet(RESTContentSpecV1.TEXT_NAME)) {
+            if (dataObject.getText() == null) throw new BadRequestException("The dataObject.getText() parameter can not be null");
+
+            return updateJSONContentSpecFromString(dataObject, logDetails, expand);
         } else {
             final ContentSpecV1Factory factory = new ContentSpecV1Factory();
-            final RESTLogDetailsV1 logDetails = generateLogDetails(message, flag, userId);
 
             return updateJSONEntity(ContentSpec.class, dataObject, factory, expand, logDetails);
         }
@@ -3755,15 +3755,14 @@ public class RESTv1 extends BaseRESTv1 implements RESTBaseInterfaceV1, RESTInter
             final Integer flag, final String userId) {
         if (dataObject == null) throw new BadRequestException("The dataObject parameter can not be null");
 
+        final RESTLogDetailsV1 logDetails = generateLogDetails(message, flag, userId);
+
         if (dataObject.hasParameterSet(RESTContentSpecV1.TEXT_NAME)) {
-        // TODO
-//            createTEXTContentSpec(dataObject.getText(), message, flag, userId);
-//
-//            return getJSONContentSpec(dataObject.getId(), expand);
-            throw new BadRequestException("Creating Content Specs from TEXT via the JSON endpoints isn't supported yet.");
+            if (dataObject.getText() == null) throw new BadRequestException("The dataObject.getText() parameter can not be null");
+
+            return createJSONContentSpecFromString(dataObject, logDetails, expand);
         } else {
             final ContentSpecV1Factory factory = new ContentSpecV1Factory();
-            final RESTLogDetailsV1 logDetails = generateLogDetails(message, flag, userId);
 
             return createJSONEntity(ContentSpec.class, dataObject, factory, expand, logDetails);
         }
@@ -3831,7 +3830,7 @@ public class RESTv1 extends BaseRESTv1 implements RESTBaseInterfaceV1, RESTInter
         if (contentSpec == null) throw new BadRequestException("The contentSpec parameter can not be null");
 
         final RESTLogDetailsV1 logDetails = generateLogDetails(message, flag, userId);
-        return createOrUpdateContentSpecFromString(id, contentSpec, DatabaseOperation.UPDATE, logDetails);
+        return updateTEXTContentSpecFromString(id, contentSpec, logDetails);
     }
 
     @Override
@@ -3839,7 +3838,7 @@ public class RESTv1 extends BaseRESTv1 implements RESTBaseInterfaceV1, RESTInter
         if (contentSpec == null) throw new BadRequestException("The contentSpec parameter can not be null");
 
         final RESTLogDetailsV1 logDetails = generateLogDetails(message, flag, userId);
-        return createOrUpdateContentSpecFromString(null, contentSpec, DatabaseOperation.CREATE, logDetails);
+        return createTEXTContentSpecFromString(contentSpec, logDetails);
     }
 
     @Override

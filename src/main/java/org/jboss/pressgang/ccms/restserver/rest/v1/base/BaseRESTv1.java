@@ -37,6 +37,7 @@ import org.hibernate.envers.query.AuditEntity;
 import org.hibernate.envers.query.AuditQuery;
 import org.jboss.pressgang.ccms.contentspec.processor.ContentSpecParser;
 import org.jboss.pressgang.ccms.contentspec.processor.ContentSpecProcessor;
+import org.jboss.pressgang.ccms.contentspec.processor.constants.ProcessorConstants;
 import org.jboss.pressgang.ccms.contentspec.processor.structures.ProcessingOptions;
 import org.jboss.pressgang.ccms.contentspec.utils.logging.ErrorLoggerManager;
 import org.jboss.pressgang.ccms.filter.base.IFieldFilter;
@@ -48,6 +49,7 @@ import org.jboss.pressgang.ccms.model.User;
 import org.jboss.pressgang.ccms.model.base.AuditedEntity;
 import org.jboss.pressgang.ccms.model.contentspec.ContentSpec;
 import org.jboss.pressgang.ccms.model.exceptions.CustomConstraintViolationException;
+import org.jboss.pressgang.ccms.model.utils.EnversUtilities;
 import org.jboss.pressgang.ccms.provider.DBProviderFactory;
 import org.jboss.pressgang.ccms.provider.exception.ProviderException;
 import org.jboss.pressgang.ccms.provider.exception.UnauthorisedException;
@@ -60,9 +62,11 @@ import org.jboss.pressgang.ccms.rest.v1.entities.RESTTopicV1;
 import org.jboss.pressgang.ccms.rest.v1.entities.RESTUserV1;
 import org.jboss.pressgang.ccms.rest.v1.entities.base.RESTBaseEntityV1;
 import org.jboss.pressgang.ccms.rest.v1.entities.base.RESTLogDetailsV1;
+import org.jboss.pressgang.ccms.rest.v1.entities.contentspec.RESTContentSpecV1;
 import org.jboss.pressgang.ccms.rest.v1.expansion.ExpandDataTrunk;
 import org.jboss.pressgang.ccms.restserver.ejb.EnversLoggingBean;
 import org.jboss.pressgang.ccms.restserver.rest.DatabaseOperation;
+import org.jboss.pressgang.ccms.restserver.rest.v1.ContentSpecV1Factory;
 import org.jboss.pressgang.ccms.restserver.utils.Constants;
 import org.jboss.pressgang.ccms.restserver.utils.EntityUtilities;
 import org.jboss.pressgang.ccms.restserver.utils.JNDIUtilities;
@@ -980,23 +984,97 @@ public class BaseRESTv1 {
     }
 
     /**
+     * Creates a content spec from a String representation of a content specification.
+     *
+     * @param dataObject The REST Entity to create/update the database with.
+     * @param logDetails The details about the changes that need to be logged.
+     * @param expand    The Expand Object that contains details about what should be expanded.
+     * @return
+     */
+    protected RESTContentSpecV1 createJSONContentSpecFromString(final RESTContentSpecV1 dataObject, final RESTLogDetailsV1 logDetails,
+            final String expand) {
+        return createOrUpdateJSONContentSpecFromString(null, dataObject.getText(), DatabaseOperation.CREATE, logDetails, expand);
+    }
+
+    /**
+     * Updates a content spec from a String representation of a content specification.
+     *
+     * @param dataObject The REST Entity to create/update the database with.
+     * @param logDetails The details about the changes that need to be logged.
+     * @param expand    The Expand Object that contains details about what should be expanded.
+     * @return
+     */
+    protected RESTContentSpecV1 updateJSONContentSpecFromString(final RESTContentSpecV1 dataObject, final RESTLogDetailsV1 logDetails,
+            final String expand) {
+        return createOrUpdateJSONContentSpecFromString(dataObject.getId(), dataObject.getText(), DatabaseOperation.UPDATE, logDetails,
+                expand);
+    }
+
+    /**
+     * Creates a content spec from a String representation of a content specification.
+     *
+     * @param contentSpecString The content spec string representation.
+     * @param logDetails        The details about the changes that need to be logged.
+     * @return
+     */
+    protected String createTEXTContentSpecFromString(final String contentSpecString, final RESTLogDetailsV1 logDetails) {
+        final ErrorLoggerManager loggerManager = new ErrorLoggerManager();
+        createOrUpdateJSONContentSpecFromString(null, contentSpecString, DatabaseOperation.CREATE, logDetails, "", loggerManager);
+
+        return loggerManager.generateLogs(false);
+    }
+
+    /**
+     * Updates a content spec from a String representation of a content specification.
+     *
+     * @param id                The content spec id being updated.
+     * @param contentSpecString The content spec string representation.
+     * @param logDetails        The details about the changes that need to be logged.
+     * @return
+     */
+    protected String updateTEXTContentSpecFromString(final Integer id, final String contentSpecString, final RESTLogDetailsV1 logDetails) {
+        final ErrorLoggerManager loggerManager = new ErrorLoggerManager();
+        createOrUpdateJSONContentSpecFromString(id, contentSpecString, DatabaseOperation.UPDATE, logDetails, "", loggerManager);
+
+        return loggerManager.generateLogs(false);
+    }
+
+    /**
      * Creates or Updates a content spec from a String representation of a content specification.
      *
-     * @param id          The content spec id being updated, or null if one is to be created.
+     * @param id                The content spec id being updated, or null if one is to be created.
      * @param contentSpecString The content spec string representation.
-     * @param operation   The Database Operation type (CREATE or UPDATE).
-     * @param logDetails  The details about the changes that need to be logged.
-     * @return The post processed representation of the Content Specification.
+     * @param operation         The Database Operation type (CREATE or UPDATE).
+     * @param logDetails        The details about the changes that need to be logged.
+     * @param expand            The Expand Object that contains details about what should be expanded.
+     * @return
      */
-    protected String createOrUpdateContentSpecFromString(final Integer id, final String contentSpecString, final DatabaseOperation operation,
-            final RESTLogDetailsV1 logDetails) {
+    private RESTContentSpecV1 createOrUpdateJSONContentSpecFromString(final Integer id, final String contentSpecString,
+            final DatabaseOperation operation, final RESTLogDetailsV1 logDetails, final String expand) {
+        return createOrUpdateJSONContentSpecFromString(id, contentSpecString, operation, logDetails, expand, new ErrorLoggerManager());
+    }
+
+    /**
+     * Creates or Updates a content spec from a String representation of a content specification.
+     *
+     * @param id                The content spec id being updated, or null if one is to be created.
+     * @param contentSpecString The content spec string representation.
+     * @param operation         The Database Operation type (CREATE or UPDATE).
+     * @param logDetails        The details about the changes that need to be logged.
+     * @param expand            The Expand Object that contains details about what should be expanded.
+     * @param loggerManager     The Content Spec Logging manager to capture logs messages.
+     * @return
+     */
+    private RESTContentSpecV1 createOrUpdateJSONContentSpecFromString(final Integer id, final String contentSpecString,
+            final DatabaseOperation operation, final RESTLogDetailsV1 logDetails, final String expand,
+            final ErrorLoggerManager loggerManager) {
         assert contentSpecString != null;
 
         TransactionManager transactionManager = null;
         EntityManager entityManager = null;
         boolean success = true;
-        final ErrorLoggerManager loggerManager = new ErrorLoggerManager();
         RuntimeException exception = null;
+        RESTContentSpecV1 retValue = null;
 
         try {
             // Get the TransactionManager and start a Transaction
@@ -1007,61 +1085,47 @@ public class BaseRESTv1 {
             entityManager = getEntityManager();
             entityManager.setFlushMode(FlushModeType.AUTO);
 
-            // Store the log details into the Logging Java Bean
-            setLogDetails(entityManager, logDetails);
-
-            // Get the current entity
-            final ContentSpec entity;
+            // Check the current entity exists
             if (id != null) {
-                entity = entityManager.find(ContentSpec.class, id);
-                // Check the entity exists
-                if (entity == null) {
+                if (entityManager.find(ContentSpec.class, id) == null) {
                     throw new BadRequestException("No entity was found with the primary key " + id);
                 }
-            } else {
-                entity = null;
             }
+
+            // Store the log details into the Logging Java Bean
+            setLogDetails(entityManager, logDetails);
 
             final DBProviderFactory providerFactory = DBProviderFactory.create(entityManager, transactionManager);
             final ProcessingOptions processingOptions = new ProcessingOptions();
 
             final ContentSpecParser parser = new ContentSpecParser(providerFactory, loggerManager);
             final ContentSpecProcessor processor = new ContentSpecProcessor(providerFactory, loggerManager, processingOptions);
-            final ContentSpecParser.ParsingMode mode;
-            if (operation == DatabaseOperation.CREATE) {
-                mode = ContentSpecParser.ParsingMode.NEW;
-            } else {
-                mode = ContentSpecParser.ParsingMode.EDITED;
-            }
 
-            // Parse the spec
-            success = parser.parse(contentSpecString, mode, true);
-            if (success) {
-                // Check that the id matches
-                if (id != null && parser.getContentSpec() != null) {
-                    if (!id.equals(parser.getContentSpec().getId())) {
-                        throw new BadRequestException("The Content Spec ID doesn't match the request ID.");
-                    }
-                }
-
-                // Process and save the spec
-                success = processor.processContentSpec(parser.getContentSpec(), null, mode);
-
-                if (success) {
-
-                }
-            }
+            // Process the content spec
+            success = processContentSpecString(id, contentSpecString, parser, processor, operation);
 
             // If the content spec processed correctly then commit the changes, otherwise roll them back.
             if (!success) {
                 transactionManager.rollback();
             } else {
+                // Get the updated or created entity
+                final Integer csId = parser.getContentSpec().getId();
+                final ContentSpec entity = entityManager.find(ContentSpec.class, csId);
+
                 if (entity != null) {
                     // Remove any errors that occurred previously
                     entity.setErrors(null);
                     entity.setFailedContentSpec(null);
                 }
                 transactionManager.commit();
+
+                // Get the revision and log a message
+                final Integer revision = (Integer) EnversUtilities.getLatestRevision(entityManager, ContentSpec.class, csId);
+                loggerManager.getLogger(ContentSpecProcessor.class).info(String.format(ProcessorConstants.SUCCESSFUL_PUSH_MSG, csId,
+                        revision));
+
+                // Create the return value
+                retValue = getJSONResource(ContentSpec.class, new ContentSpecV1Factory(), csId, expand);
             }
         } catch (final Throwable e) {
             exception = processError(transactionManager, e);
@@ -1078,18 +1142,55 @@ public class BaseRESTv1 {
             } else if (exception != null) {
                 throw exception;
             } else {
-                return log;
+                return retValue;
             }
         }
     }
 
     /**
+     * Parse and process a Content Specification as a String representation.
+     *
+     * @param id                The id that the content spec should be, or null if it's being created.
+     * @param contentSpecString The Content Spec string representation.
+     * @param parser            The parser to use to parse the String representation.
+     * @param processor         The processor to use, to valid and save the parsed content spec.
+     * @param operation         Whether the content spec should be created or updated.
+     * @return True if the Content Spec was parsed and processed successfully, otherwise false.
+     */
+    private boolean processContentSpecString(final Integer id, final String contentSpecString, final ContentSpecParser parser,
+            final ContentSpecProcessor processor, final DatabaseOperation operation) {
+        final ContentSpecParser.ParsingMode mode;
+        if (operation == DatabaseOperation.CREATE) {
+            mode = ContentSpecParser.ParsingMode.NEW;
+        } else {
+            mode = ContentSpecParser.ParsingMode.EDITED;
+        }
+
+        // Parse the spec
+        boolean success = true;
+        success = parser.parse(contentSpecString, mode, true);
+        if (success) {
+            // Check that the id matches
+            if (id != null && parser.getContentSpec() != null) {
+                if (!id.equals(parser.getContentSpec().getId())) {
+                    throw new BadRequestException("The Content Spec ID doesn't match the request ID.");
+                }
+            }
+
+            // Process and save the spec
+            success = processor.processContentSpec(parser.getContentSpec(), null, mode);
+        }
+
+        return success;
+    }
+
+    /**
      * Set a Content Spec to include any errors messages from processing and the failed content spec.
      *
-     * @param id The ID of the content spec to set the errors for.
+     * @param id                The ID of the content spec to set the errors for.
      * @param contentSpecString The failed Content Spec string.
-     * @param errors The error messages.
-     * @param logDetails The log details for the failed Content Spec.
+     * @param errors            The error messages.
+     * @param logDetails        The log details for the failed Content Spec.
      */
     private void setContentSpecErrors(final Integer id, final String contentSpecString, final String errors,
             final RESTLogDetailsV1 logDetails) {
@@ -1230,7 +1331,7 @@ public class BaseRESTv1 {
      * <p/>
      * Note: This method won't join any active Transactions.
      *
-     * @return An intialised EntityManager object.
+     * @return An initialised EntityManager object.
      */
     protected EntityManager getEntityManager() {
         return getEntityManager(false);
@@ -1262,6 +1363,13 @@ public class BaseRESTv1 {
         return entityManager;
     }
 
+    /**
+     * Process an Error/Exception and generate a RESTEasy Exception based on the error/exception produced.
+     *
+     * @param transactionManager The transaction manager to handle rolling back changes.
+     * @param ex The Error/Exception to be processed.
+     * @return A RESTEasy Exception containing the details of the Error.
+     */
     public Failure processError(final TransactionManager transactionManager, final Throwable ex) {
         // Rollback if a transaction is active
         try {
@@ -1307,7 +1415,8 @@ public class BaseRESTv1 {
                 stringBuilder.append(invalidValue.getMessage()).append("\n");
 
             return new BadRequestException(stringBuilder.toString(), cause);
-        } else if (cause instanceof ValidationException || cause instanceof PersistenceException || cause instanceof CustomConstraintViolationException) {
+        } else if (cause instanceof ValidationException || cause instanceof PersistenceException || cause instanceof
+                CustomConstraintViolationException) {
             return new BadRequestException(ex);
         } else if (cause instanceof ProviderException) {
             if (cause instanceof org.jboss.pressgang.ccms.provider.exception.NotFoundException) {
