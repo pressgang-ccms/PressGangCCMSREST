@@ -39,6 +39,7 @@ import org.jboss.pressgang.ccms.contentspec.processor.ContentSpecParser;
 import org.jboss.pressgang.ccms.contentspec.processor.ContentSpecProcessor;
 import org.jboss.pressgang.ccms.contentspec.processor.constants.ProcessorConstants;
 import org.jboss.pressgang.ccms.contentspec.processor.structures.ProcessingOptions;
+import org.jboss.pressgang.ccms.contentspec.utils.logging.ErrorLogger;
 import org.jboss.pressgang.ccms.contentspec.utils.logging.ErrorLoggerManager;
 import org.jboss.pressgang.ccms.filter.base.IFieldFilter;
 import org.jboss.pressgang.ccms.filter.base.IFilterQueryBuilder;
@@ -988,7 +989,7 @@ public class BaseRESTv1 {
      *
      * @param dataObject The REST Entity to create/update the database with.
      * @param logDetails The details about the changes that need to be logged.
-     * @param expand    The Expand Object that contains details about what should be expanded.
+     * @param expand     The Expand Object that contains details about what should be expanded.
      * @return
      */
     protected RESTContentSpecV1 createJSONContentSpecFromString(final RESTContentSpecV1 dataObject, final RESTLogDetailsV1 logDetails,
@@ -1001,7 +1002,7 @@ public class BaseRESTv1 {
      *
      * @param dataObject The REST Entity to create/update the database with.
      * @param logDetails The details about the changes that need to be logged.
-     * @param expand    The Expand Object that contains details about what should be expanded.
+     * @param expand     The Expand Object that contains details about what should be expanded.
      * @return
      */
     protected RESTContentSpecV1 updateJSONContentSpecFromString(final RESTContentSpecV1 dataObject, final RESTLogDetailsV1 logDetails,
@@ -1019,9 +1020,9 @@ public class BaseRESTv1 {
      */
     protected String createTEXTContentSpecFromString(final String contentSpecString, final RESTLogDetailsV1 logDetails) {
         final ErrorLoggerManager loggerManager = new ErrorLoggerManager();
-        createOrUpdateJSONContentSpecFromString(null, contentSpecString, DatabaseOperation.CREATE, logDetails, "", loggerManager);
+        createOrUpdateJSONContentSpecFromString(null, contentSpecString, DatabaseOperation.CREATE, logDetails, "", loggerManager, false);
 
-        return loggerManager.generateLogs(false);
+        return loggerManager.generateLogs();
     }
 
     /**
@@ -1034,9 +1035,9 @@ public class BaseRESTv1 {
      */
     protected String updateTEXTContentSpecFromString(final Integer id, final String contentSpecString, final RESTLogDetailsV1 logDetails) {
         final ErrorLoggerManager loggerManager = new ErrorLoggerManager();
-        createOrUpdateJSONContentSpecFromString(id, contentSpecString, DatabaseOperation.UPDATE, logDetails, "", loggerManager);
+        createOrUpdateJSONContentSpecFromString(id, contentSpecString, DatabaseOperation.UPDATE, logDetails, "", loggerManager, true);
 
-        return loggerManager.generateLogs(false);
+        return loggerManager.generateLogs();
     }
 
     /**
@@ -1051,7 +1052,8 @@ public class BaseRESTv1 {
      */
     private RESTContentSpecV1 createOrUpdateJSONContentSpecFromString(final Integer id, final String contentSpecString,
             final DatabaseOperation operation, final RESTLogDetailsV1 logDetails, final String expand) {
-        return createOrUpdateJSONContentSpecFromString(id, contentSpecString, operation, logDetails, expand, new ErrorLoggerManager());
+        return createOrUpdateJSONContentSpecFromString(id, contentSpecString, operation, logDetails, expand, new ErrorLoggerManager(),
+                true);
     }
 
     /**
@@ -1063,18 +1065,19 @@ public class BaseRESTv1 {
      * @param logDetails        The details about the changes that need to be logged.
      * @param expand            The Expand Object that contains details about what should be expanded.
      * @param loggerManager     The Content Spec Logging manager to capture logs messages.
+     * @param saveWhenInvalid   If the Content Specification should be saved even if the text isn't valid.
      * @return
      */
     private RESTContentSpecV1 createOrUpdateJSONContentSpecFromString(final Integer id, final String contentSpecString,
             final DatabaseOperation operation, final RESTLogDetailsV1 logDetails, final String expand,
-            final ErrorLoggerManager loggerManager) {
+            final ErrorLoggerManager loggerManager, boolean saveWhenInvalid) {
         assert contentSpecString != null;
 
         TransactionManager transactionManager = null;
         EntityManager entityManager = null;
         boolean success = true;
         RuntimeException exception = null;
-        RESTContentSpecV1 retValue = null;
+        Integer csId = id;
 
         try {
             // Get the TransactionManager and start a Transaction
@@ -1109,7 +1112,7 @@ public class BaseRESTv1 {
                 transactionManager.rollback();
             } else {
                 // Get the updated or created entity
-                final Integer csId = parser.getContentSpec().getId();
+                csId = parser.getContentSpec().getId();
                 final ContentSpec entity = entityManager.find(ContentSpec.class, csId);
 
                 if (entity != null) {
@@ -1121,11 +1124,9 @@ public class BaseRESTv1 {
 
                 // Get the revision and log a message
                 final Integer revision = (Integer) EnversUtilities.getLatestRevision(entityManager, ContentSpec.class, csId);
-                loggerManager.getLogger(ContentSpecProcessor.class).info(String.format(ProcessorConstants.SUCCESSFUL_PUSH_MSG, csId,
-                        revision));
-
-                // Create the return value
-                retValue = getJSONResource(ContentSpec.class, new ContentSpecV1Factory(), csId, expand);
+                final ErrorLogger logger = loggerManager.getLogger(ContentSpecProcessor.class);
+                logger.info(String.format(ProcessorConstants.SUCCESSFUL_PUSH_ID_MSG, csId));
+                logger.info(String.format(ProcessorConstants.SUCCESSFUL_PUSH_REV_MSG, revision));
             }
         } catch (final Throwable e) {
             exception = processError(transactionManager, e);
@@ -1134,16 +1135,19 @@ public class BaseRESTv1 {
 
             // Check if the processing succeeded, if not set the error fields and throw an error
             final String log = loggerManager.generateLogs();
-            if (!success) {
-                if (operation == DatabaseOperation.UPDATE) {
-                    setContentSpecErrors(id, contentSpecString, log, logDetails);
+            if (saveWhenInvalid) {
+                if (!success) {
+                    csId = setContentSpecErrors(id, contentSpecString, log, logDetails);
                 }
-                throw new BadRequestException(log);
-            } else if (exception != null) {
-                throw exception;
             } else {
-                return retValue;
+                throw new BadRequestException(log);
             }
+        }
+
+        if (exception != null) {
+            throw exception;
+        } else {
+            return getJSONResource(ContentSpec.class, new ContentSpecV1Factory(), csId, expand);
         }
     }
 
@@ -1191,12 +1195,12 @@ public class BaseRESTv1 {
      * @param contentSpecString The failed Content Spec string.
      * @param errors            The error messages.
      * @param logDetails        The log details for the failed Content Spec.
+     * @return The ID of the Content Spec.
      */
-    private void setContentSpecErrors(final Integer id, final String contentSpecString, final String errors,
+    private Integer setContentSpecErrors(final Integer id, final String contentSpecString, final String errors,
             final RESTLogDetailsV1 logDetails) {
         TransactionManager transactionManager = null;
         EntityManager entityManager = null;
-
         try {
             // Get the TransactionManager and start a Transaction
             transactionManager = JNDIUtilities.lookupJBossTransactionManager();
@@ -1214,14 +1218,19 @@ public class BaseRESTv1 {
             if (id != null) {
                 entity = entityManager.find(ContentSpec.class, id);
             } else {
-                entity = null;
+                entity = new ContentSpec();
             }
 
             if (entity == null) throw new BadRequestException("No entity was found with the primary key " + id);
 
             entity.setErrors(errors);
             entity.setFailedContentSpec(contentSpecString);
+
+            // Save the error messages
+            entityManager.persist(entity);
             transactionManager.commit();
+
+            return entity.getId();
         } catch (final Throwable e) {
             throw processError(transactionManager, e);
         } finally {
@@ -1367,7 +1376,7 @@ public class BaseRESTv1 {
      * Process an Error/Exception and generate a RESTEasy Exception based on the error/exception produced.
      *
      * @param transactionManager The transaction manager to handle rolling back changes.
-     * @param ex The Error/Exception to be processed.
+     * @param ex                 The Error/Exception to be processed.
      * @return A RESTEasy Exception containing the details of the Error.
      */
     public Failure processError(final TransactionManager transactionManager, final Throwable ex) {
