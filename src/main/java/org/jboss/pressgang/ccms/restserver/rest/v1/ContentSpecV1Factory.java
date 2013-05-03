@@ -115,7 +115,7 @@ public class ContentSpecV1Factory extends RESTDataObjectFactory<RESTContentSpecV
 
         // TEXT
         if (expand != null && expand.contains(RESTContentSpecV1.TEXT_NAME)) {
-            final String text = ContentSpecUtilities.getContentSpecText(entity.getId(), entityManager);
+            final String text = ContentSpecUtilities.getContentSpecText(entity.getId(), (Integer) revision, entityManager);
             retValue.setText(text);
         }
 
