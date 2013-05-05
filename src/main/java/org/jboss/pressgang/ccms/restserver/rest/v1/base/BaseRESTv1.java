@@ -1020,7 +1020,8 @@ public class BaseRESTv1 {
      */
     protected String createTEXTContentSpecFromString(final String contentSpecString, final RESTLogDetailsV1 logDetails) {
         final ErrorLoggerManager loggerManager = new ErrorLoggerManager();
-        createOrUpdateJSONContentSpecFromString(null, contentSpecString, DatabaseOperation.CREATE, logDetails, "", loggerManager, false);
+        createOrUpdateJSONContentSpecFromString(null, contentSpecString, DatabaseOperation.CREATE, logDetails, "", RESTv1Constants.TEXT_URL,
+                loggerManager, false);
 
         return loggerManager.generateLogs();
     }
@@ -1035,7 +1036,8 @@ public class BaseRESTv1 {
      */
     protected String updateTEXTContentSpecFromString(final Integer id, final String contentSpecString, final RESTLogDetailsV1 logDetails) {
         final ErrorLoggerManager loggerManager = new ErrorLoggerManager();
-        createOrUpdateJSONContentSpecFromString(id, contentSpecString, DatabaseOperation.UPDATE, logDetails, "", loggerManager, true);
+        createOrUpdateJSONContentSpecFromString(id, contentSpecString, DatabaseOperation.UPDATE, logDetails, "", RESTv1Constants.TEXT_URL,
+                loggerManager, true);
 
         return loggerManager.generateLogs();
     }
@@ -1052,8 +1054,8 @@ public class BaseRESTv1 {
      */
     private RESTContentSpecV1 createOrUpdateJSONContentSpecFromString(final Integer id, final String contentSpecString,
             final DatabaseOperation operation, final RESTLogDetailsV1 logDetails, final String expand) {
-        return createOrUpdateJSONContentSpecFromString(id, contentSpecString, operation, logDetails, expand, new ErrorLoggerManager(),
-                true);
+        return createOrUpdateJSONContentSpecFromString(id, contentSpecString, operation, logDetails, expand, RESTv1Constants.JSON_URL,
+                new ErrorLoggerManager(), true);
     }
 
     /**
@@ -1064,12 +1066,13 @@ public class BaseRESTv1 {
      * @param operation         The Database Operation type (CREATE or UPDATE).
      * @param logDetails        The details about the changes that need to be logged.
      * @param expand            The Expand Object that contains details about what should be expanded.
+     * @param dataType
      * @param loggerManager     The Content Spec Logging manager to capture logs messages.
      * @param saveWhenInvalid   If the Content Specification should be saved even if the text isn't valid.
      * @return
      */
     private RESTContentSpecV1 createOrUpdateJSONContentSpecFromString(final Integer id, final String contentSpecString,
-            final DatabaseOperation operation, final RESTLogDetailsV1 logDetails, final String expand,
+            final DatabaseOperation operation, final RESTLogDetailsV1 logDetails, final String expand, final String dataType,
             final ErrorLoggerManager loggerManager, boolean saveWhenInvalid) {
         assert contentSpecString != null;
 
@@ -1105,7 +1108,7 @@ public class BaseRESTv1 {
             final ContentSpecProcessor processor = new ContentSpecProcessor(providerFactory, loggerManager, processingOptions);
 
             // Process the content spec
-            success = processContentSpecString(id, contentSpecString, parser, processor, operation);
+            success = processContentSpecString(id, contentSpecString, parser, processor, operation, dataType);
 
             // If the content spec processed correctly then commit the changes, otherwise roll them back.
             if (!success) {
@@ -1159,15 +1162,20 @@ public class BaseRESTv1 {
      * @param parser            The parser to use to parse the String representation.
      * @param processor         The processor to use, to valid and save the parsed content spec.
      * @param operation         Whether the content spec should be created or updated.
+     * @param dataType
      * @return True if the Content Spec was parsed and processed successfully, otherwise false.
      */
     private boolean processContentSpecString(final Integer id, final String contentSpecString, final ContentSpecParser parser,
-            final ContentSpecProcessor processor, final DatabaseOperation operation) {
+            final ContentSpecProcessor processor, final DatabaseOperation operation, final String dataType) {
         final ContentSpecParser.ParsingMode mode;
-        if (operation == DatabaseOperation.CREATE) {
-            mode = ContentSpecParser.ParsingMode.NEW;
+        if (dataType.equals(RESTv1Constants.TEXT_URL)) {
+            if (operation == DatabaseOperation.CREATE) {
+                mode = ContentSpecParser.ParsingMode.NEW;
+            } else {
+                mode = ContentSpecParser.ParsingMode.EDITED;
+            }
         } else {
-            mode = ContentSpecParser.ParsingMode.EDITED;
+            mode = ContentSpecParser.ParsingMode.EITHER;
         }
 
         // Parse the spec
