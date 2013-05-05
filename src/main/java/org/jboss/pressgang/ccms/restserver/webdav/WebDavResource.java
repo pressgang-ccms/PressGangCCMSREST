@@ -22,7 +22,6 @@ import static javax.ws.rs.core.HttpHeaders.CONTENT_LENGTH;
 import static net.java.dev.webdav.jaxrs.Headers.DEPTH;
 import static net.java.dev.webdav.jaxrs.Headers.DESTINATION;
 import static net.java.dev.webdav.jaxrs.Headers.OVERWRITE;
-import static net.java.dev.webdav.jaxrs.Headers.DAV;
 
 import java.io.IOException;
 import java.io.InputStream;

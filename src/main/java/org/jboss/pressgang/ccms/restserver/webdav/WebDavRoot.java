@@ -13,6 +13,7 @@ import static net.java.dev.webdav.jaxrs.Headers.DEPTH;
 import static net.java.dev.webdav.jaxrs.Headers.DESTINATION;
 import static net.java.dev.webdav.jaxrs.Headers.OVERWRITE;
 import static javax.ws.rs.core.Response.Status.OK;
+import static net.java.dev.webdav.jaxrs.Headers.DAV;
 
 import javax.ws.rs.core.*;
 import javax.ws.rs.core.Response.StatusType;
