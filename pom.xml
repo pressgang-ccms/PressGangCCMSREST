@@ -262,6 +262,13 @@
             <version>${j2bugzilla.version}</version>
         </dependency>
 
+        <!-- WebDAV for JAX-RS -->
+        <dependency>
+            <groupId>net.java.dev.webdav</groupId>
+            <artifactId>webdav-jaxrs</artifactId>
+            <version>[1.1.1,1.2)</version>
+        </dependency>
+
         <!-- Java Melody -->
         <dependency>
             <groupId>net.bull.javamelody</groupId>
