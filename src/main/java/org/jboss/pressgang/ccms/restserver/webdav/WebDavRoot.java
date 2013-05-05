@@ -41,8 +41,7 @@ import java.util.List;
  */
 @Path("webdav")
 public class WebDavRoot implements WebDavResource {
-    private static final String XML_MIME = "application/xml;charset=UTF-8";
-    private static final String OCTET_STREAM_MIME = "application/octet-stream";
+
 
     /**
      * The Factory used to create EntityManagers
@@ -85,32 +84,20 @@ public class WebDavRoot implements WebDavResource {
 
                 final Response folder = new Response(hRef, null, null, null, propStat);
 
-                return javax.ws.rs.core.Response.status(207).entity(new MultiStatus(folder)).type(XML_MIME).build();
+                return javax.ws.rs.core.Response.status(207).entity(new MultiStatus(folder)).type(WebDavConstants.XML_MIME).build();
             } else {
                 /* Otherwise we are retuning info on the children in this collection */
                 final EntityManager entityManager = getEntityManager(false);
                 final List<Topic> topics = entityManager.createQuery("SELECT topic FROM Topic").getResultList();
                 final List<Response> responses = new ArrayList<Response>();
                 for (final Topic topic : topics) {
-
-                    final HRef hRef = new HRef(uriInfo.getRequestUriBuilder().path(topic.getId().toString()).build());
-                    final CreationDate creationDate = new CreationDate(topic.getTopicTimeStamp());
-                    final GetLastModified getLastModified = new GetLastModified(topic.getLastModifiedDate());
-                    final GetContentType getContentType = new GetContentType(OCTET_STREAM_MIME);
-                    final GetContentLength getContentLength = new GetContentLength(topic.getTopicXML().length());
-                    final DisplayName displayName = new DisplayName(topic.getId().toString());
-                    final Prop prop = new Prop(creationDate, getLastModified, getContentType, getContentLength, displayName);
-                    final Status status = new Status((StatusType) OK);
-                    final PropStat propStat = new PropStat(prop, status);
-
-                    final Response davFile = new Response(hRef, null, null, null, propStat);
-
-                    responses.add(davFile);
+                    final WebDavTopic webDavTopic = new WebDavTopic(topic);
+                    responses.add(webDavTopic.getProperties(uriInfo));
                 }
 
                 final MultiStatus st = new MultiStatus(responses.toArray(new Response[responses.size()]));
 
-                return javax.ws.rs.core.Response.status(207).entity(st).type(XML_MIME).build();
+                return javax.ws.rs.core.Response.status(207).entity(st).type(WebDavConstants.XML_MIME).build();
             }
 
         } catch (final Exception ex) {
