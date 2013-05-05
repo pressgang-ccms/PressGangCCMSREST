@@ -22,6 +22,7 @@ import static javax.ws.rs.core.HttpHeaders.CONTENT_LENGTH;
 import static net.java.dev.webdav.jaxrs.Headers.DEPTH;
 import static net.java.dev.webdav.jaxrs.Headers.DESTINATION;
 import static net.java.dev.webdav.jaxrs.Headers.OVERWRITE;
+import static net.java.dev.webdav.jaxrs.Headers.DAV;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -52,6 +53,8 @@ import org.jboss.pressgang.ccms.restserver.utils.JNDIUtilities;
 import org.jboss.resteasy.spi.InternalServerErrorException;
 
 public interface WebDavResource {
+    String WEBDAV_COMPLIANCE_LEVEL = "1";
+
     @GET
     @Produces("application/octet-stream")
     javax.ws.rs.core.Response get();
