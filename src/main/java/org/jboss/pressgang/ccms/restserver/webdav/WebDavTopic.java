@@ -14,10 +14,7 @@ import static net.java.dev.webdav.jaxrs.Headers.DAV;
 
 
 import javax.persistence.EntityManager;
-import javax.ws.rs.GET;
-import javax.ws.rs.HeaderParam;
-import javax.ws.rs.PathParam;
-import javax.ws.rs.Produces;
+import javax.ws.rs.*;
 import javax.ws.rs.core.*;
 import javax.ws.rs.ext.Providers;
 
@@ -33,7 +30,8 @@ import static net.java.dev.webdav.jaxrs.Headers.DAV;
 /**
     A WebDAV representation of a topic.
 */
-public class WebDavTopic implements WebDavResource {
+@Path("/webdav/topics")
+public class WebDavTopic extends WebDavResource {
 
     private static final Logger LOGGER = Logger.getLogger(WebDavTopic.class.getName());
 
@@ -67,18 +65,6 @@ public class WebDavTopic implements WebDavResource {
     }
 
     @Override
-    public javax.ws.rs.core.Response put(@Context UriInfo uriInfo, InputStream entityStream, @HeaderParam(CONTENT_LENGTH) long contentLength) throws IOException, URISyntaxException {
-        LOGGER.info("ENTER WebDavTopic.put()");
-        return javax.ws.rs.core.Response.status(404).build();
-    }
-
-    @Override
-    public javax.ws.rs.core.Response mkcol() {
-        LOGGER.info("ENTER WebDavTopic.mkcol()");
-        return javax.ws.rs.core.Response.status(404).build();
-    }
-
-    @Override
     public javax.ws.rs.core.Response propfind(@Context UriInfo uriInfo, @HeaderParam(DEPTH) int depth, InputStream entityStream, @HeaderParam(CONTENT_LENGTH) long contentLength, @Context Providers providers, @Context HttpHeaders httpHeaders) throws URISyntaxException, IOException {
         LOGGER.info("ENTER WebDavTopic.propfind()");
         final Topic topic = getTopic(uriInfo);
@@ -91,39 +77,7 @@ public class WebDavTopic implements WebDavResource {
         return javax.ws.rs.core.Response.status(404).build();
     }
 
-    @Override
-    public javax.ws.rs.core.Response proppatch() {
-        LOGGER.info("ENTER WebDavTopic.proppatch()");
-        return javax.ws.rs.core.Response.status(404).build();
-    }
-
-    @Override
-    public javax.ws.rs.core.Response copy() {
-        LOGGER.info("ENTER WebDavTopic.copy()");
-        return javax.ws.rs.core.Response.status(404).build();
-    }
-
-    @Override
-    public javax.ws.rs.core.Response move(@Context UriInfo uriInfo, @HeaderParam(OVERWRITE) String overwriteStr, @HeaderParam(DESTINATION) String destination) throws URISyntaxException {
-        LOGGER.info("ENTER WebDavTopic.move()");
-        return javax.ws.rs.core.Response.status(404).build();
-    }
-
-    @Override
-    public javax.ws.rs.core.Response delete() {
-        LOGGER.info("ENTER WebDavTopic.delete()");
-        return javax.ws.rs.core.Response.status(404).build();
-    }
-
-    @Override
-    public javax.ws.rs.core.Response options() {
-        LOGGER.info("ENTER WebDavTopic.options()");
-        javax.ws.rs.core.Response.ResponseBuilder builder = javax.ws.rs.core.Response.ok();
-        builder.header(DAV, WEBDAV_COMPLIANCE_LEVEL);
-
-        return builder.build();
-    }
-
+    @Path("{topicid}")
     private final Topic getTopic(final UriInfo uriInfo) {
         final String path = uriInfo.getAbsolutePath().toString();
         final int indexOfSlash =  path.lastIndexOf("/");
