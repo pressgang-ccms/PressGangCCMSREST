@@ -45,6 +45,10 @@ public class WebDavRoot implements WebDavResource {
 
     private static final Logger LOGGER = Logger.getLogger(WebDavRoot.class.getName());
 
+    public WebDavRoot() {
+        LOGGER.info("ENTER WebDavRoot()");
+    }
+
     @Override
     public javax.ws.rs.core.Response get(@Context final UriInfo uriInfo) {
         LOGGER.info("ENTER WebDavRoot.get()");

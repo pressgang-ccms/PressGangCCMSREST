@@ -1,6 +1,8 @@
 package org.jboss.pressgang.ccms.restserver.rest;
 
 import net.java.dev.webdav.jaxrs.xml.WebDavContextResolver;
+import org.jboss.pressgang.ccms.restserver.rest.v1.RESTv1;
+import org.jboss.pressgang.ccms.restserver.webdav.WebDavRoot;
 
 import javax.ws.rs.ApplicationPath;
 import javax.ws.rs.core.Application;
@@ -23,8 +25,11 @@ import java.util.logging.Logger;
 public class JaxRsActivator extends Application {
     private static final Logger LOGGER = Logger.getLogger(JaxRsActivator.class.getName());
 
+    protected Set<Class<?>> serviceClasses = new HashSet<Class<?>>();
+
     public JaxRsActivator() {
         LOGGER.info("ENTER JaxRsActivator()");
+        serviceClasses.add(WebDavRoot.class);
     }
 
     @Override
@@ -35,6 +40,11 @@ public class JaxRsActivator extends Application {
             LOGGER.severe(e.toString());
             return null;
         }
+    }
+
+    @Override
+    public Set<Class<?>> getClasses() {
+        return serviceClasses;
     }
 
 }
