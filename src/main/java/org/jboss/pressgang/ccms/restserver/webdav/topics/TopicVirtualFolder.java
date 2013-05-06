@@ -33,11 +33,12 @@ import java.util.List;
 import java.util.logging.Logger;
 
 /**
-    The virtual folder that holds all the topics
+    The virtual folder that holds all the topics.
  */
 @Path("/webdav/TOPICS")
 public class TopicVirtualFolder extends WebDavResource {
 
+    private static final String RESOURCE_NAME = "TOPICS";
     private static final Logger LOGGER = Logger.getLogger(TopicVirtualFolder.class.getName());
 
     @Override
@@ -76,7 +77,7 @@ public class TopicVirtualFolder extends WebDavResource {
     }
 
     public static Response getProperties(final UriInfo uriInfo) {
-        final URI uri = uriInfo.getRequestUriBuilder().path("TOPICS").build();
+        final URI uri = uriInfo.getRequestUriBuilder().path(RESOURCE_NAME).build();
         final HRef hRef = new HRef(uri);
         final Date lastModified = new Date();
         final CreationDate creationDate = new CreationDate(lastModified);

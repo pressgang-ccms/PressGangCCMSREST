@@ -25,11 +25,12 @@ import java.util.Date;
 import java.util.logging.Logger;
 
 /**
- A WebDAV representation of a topic.
+    A WebDAV file that holds the topics contents.
  */
 @Path("{var:.*}/{topicId: \\d+}/CONTENT")
 public class WebDavTopicContent extends WebDavResource {
 
+    private static final String RESOURCE_NAME = "CONTENT";
     private static final Logger LOGGER = Logger.getLogger(WebDavTopicContent.class.getName());
 
     @PathParam("topicId") int topicId;
@@ -67,7 +68,7 @@ public class WebDavTopicContent extends WebDavResource {
             if (topic != null) {
                 final Response response = getProperties(uriInfo, topic);
                 final MultiStatus st = new MultiStatus(response);
-                return javax.ws.rs.core.Response.status(207).entity(st).type("application/xml;charset=UTF-8").build();
+                return javax.ws.rs.core.Response.status(207).entity(st).type(WebDavConstants.XML_MIME).build();
             }
 
         } catch (final NumberFormatException ex) {
@@ -78,12 +79,12 @@ public class WebDavTopicContent extends WebDavResource {
     }
 
     public static Response getProperties(final UriInfo uriInfo, final Topic topic) {
-        final HRef hRef = new HRef(uriInfo.getRequestUriBuilder().path("CONTENT").build());
+        final HRef hRef = new HRef(uriInfo.getRequestUriBuilder().path(RESOURCE_NAME).build());
         final CreationDate creationDate = new CreationDate(topic.getTopicTimeStamp() == null ? new Date() : topic.getTopicTimeStamp());
         final GetLastModified getLastModified = new GetLastModified(topic.getLastModifiedDate() == null ? new Date() : topic.getLastModifiedDate());
         final GetContentType getContentType = new GetContentType(WebDavConstants.OCTET_STREAM_MIME);
         final GetContentLength getContentLength = new GetContentLength(topic.getTopicXML() == null ? 0 : topic.getTopicXML().length());
-        final DisplayName displayName = new DisplayName(topic.getId().toString());
+        final DisplayName displayName = new DisplayName(RESOURCE_NAME);
         final Prop prop = new Prop(creationDate, getLastModified, getContentType, getContentLength, displayName);
         final Status status = new Status((javax.ws.rs.core.Response.StatusType) OK);
         final PropStat propStat = new PropStat(prop, status);

@@ -33,7 +33,7 @@ import java.util.List;
 import java.util.logging.Logger;
 
 /**
-    The virtual folder that holds all the topics
+    The virtual folder that holds all the topic's details
  */
 @Path("{var:.*}/TOPICS/{topicId: \\d+}")
 public class WebDavTopic extends WebDavResource {
