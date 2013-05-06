@@ -5,27 +5,16 @@ import static net.java.dev.webdav.jaxrs.xml.properties.ResourceType.COLLECTION;
 import net.java.dev.webdav.jaxrs.xml.elements.*;
 import net.java.dev.webdav.jaxrs.xml.elements.Response;
 import net.java.dev.webdav.jaxrs.xml.properties.*;
-import org.jboss.pressgang.ccms.model.Topic;
-import org.jboss.pressgang.ccms.restserver.utils.JNDIUtilities;
-import org.jboss.resteasy.spi.InternalServerErrorException;
 
 import static javax.ws.rs.core.HttpHeaders.CONTENT_LENGTH;
 import static net.java.dev.webdav.jaxrs.Headers.DEPTH;
-import static net.java.dev.webdav.jaxrs.Headers.DESTINATION;
-import static net.java.dev.webdav.jaxrs.Headers.OVERWRITE;
 import static javax.ws.rs.core.Response.Status.OK;
-import static net.java.dev.webdav.jaxrs.Headers.DAV;
 
 import javax.ws.rs.core.*;
 import javax.ws.rs.core.Response.StatusType;
 
-import javax.naming.NamingException;
-import javax.persistence.EntityManager;
-import javax.persistence.EntityManagerFactory;
-import javax.persistence.PersistenceUnit;
 import javax.ws.rs.HeaderParam;
 import javax.ws.rs.Path;
-import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
 import javax.ws.rs.ext.Providers;
 import java.io.IOException;
@@ -36,6 +25,9 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 import java.util.logging.Logger;
+
+import org.jboss.pressgang.ccms.restserver.webdav.topics.TopicVirtualFolder;
+import org.jboss.pressgang.ccms.restserver.webdav.topics.topic.WebDavTopic;
 
 /**
     The root of the WebDAV server.
@@ -73,7 +65,11 @@ public class WebDavRoot extends WebDavResource {
                 LOGGER.info("Depth != 0");
                 /* Otherwise we are retuning info on the children in this collection */
                 final List<Response> responses = new ArrayList<Response>();
+
+                /* The topic collection */
                 responses.add(TopicVirtualFolder.getProperties(uriInfo));
+
+
                 final MultiStatus st = new MultiStatus(responses.toArray(new Response[responses.size()]));
                 return javax.ws.rs.core.Response.status(207).entity(st).type(WebDavConstants.XML_MIME).build();
             }

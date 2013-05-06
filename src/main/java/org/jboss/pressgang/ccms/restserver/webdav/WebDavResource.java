@@ -57,7 +57,7 @@ public class WebDavResource {
 
     @GET
     @Produces("application/octet-stream")
-    public javax.ws.rs.core.Response get(@Context final UriInfo uriInfo) {
+    public javax.ws.rs.core.Response get() {
         LOGGER.info("ENTER WebDavResource.get()");
         return javax.ws.rs.core.Response.status(404).build();
     }

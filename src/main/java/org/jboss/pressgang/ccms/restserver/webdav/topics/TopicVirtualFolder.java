@@ -1,4 +1,4 @@
-package org.jboss.pressgang.ccms.restserver.webdav;
+package org.jboss.pressgang.ccms.restserver.webdav.topics;
 
 import net.java.dev.webdav.jaxrs.methods.PROPFIND;
 import static net.java.dev.webdav.jaxrs.xml.properties.ResourceType.COLLECTION;
@@ -6,26 +6,21 @@ import net.java.dev.webdav.jaxrs.xml.elements.*;
 import net.java.dev.webdav.jaxrs.xml.elements.Response;
 import net.java.dev.webdav.jaxrs.xml.properties.*;
 import org.jboss.pressgang.ccms.model.Topic;
-import org.jboss.pressgang.ccms.restserver.utils.JNDIUtilities;
-import org.jboss.resteasy.spi.InternalServerErrorException;
+import org.jboss.pressgang.ccms.restserver.webdav.WebDavConstants;
+import org.jboss.pressgang.ccms.restserver.webdav.WebDavResource;
+import org.jboss.pressgang.ccms.restserver.webdav.topics.topic.WebDavTopic;
+import org.jboss.pressgang.ccms.restserver.webdav.topics.topic.fields.WebDavTopicContent;
+import org.jboss.pressgang.ccms.restserver.webdav.WebDavUtils;
 
 import static javax.ws.rs.core.HttpHeaders.CONTENT_LENGTH;
 import static net.java.dev.webdav.jaxrs.Headers.DEPTH;
-import static net.java.dev.webdav.jaxrs.Headers.DESTINATION;
-import static net.java.dev.webdav.jaxrs.Headers.OVERWRITE;
 import static javax.ws.rs.core.Response.Status.OK;
-import static net.java.dev.webdav.jaxrs.Headers.DAV;
 
 import javax.ws.rs.core.*;
-import javax.ws.rs.core.Response.StatusType;
 
-import javax.naming.NamingException;
 import javax.persistence.EntityManager;
-import javax.persistence.EntityManagerFactory;
-import javax.persistence.PersistenceUnit;
 import javax.ws.rs.HeaderParam;
 import javax.ws.rs.Path;
-import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
 import javax.ws.rs.ext.Providers;
 import java.io.IOException;
@@ -48,9 +43,9 @@ public class TopicVirtualFolder extends WebDavResource {
     @Override
     @Produces(MediaType.APPLICATION_XML)
     @PROPFIND
-    public javax.ws.rs.core.Response propfind(@Context UriInfo uriInfo, @HeaderParam(DEPTH) int depth, InputStream entityStream,
-                                              @HeaderParam(CONTENT_LENGTH) long contentLength, @Context Providers providers,
-                                              @Context HttpHeaders httpHeaders) throws URISyntaxException, IOException {
+    public javax.ws.rs.core.Response propfind(@Context final UriInfo uriInfo, @HeaderParam(DEPTH) final int depth, final InputStream entityStream,
+                                              @HeaderParam(CONTENT_LENGTH) final long contentLength, @Context final Providers providers,
+                                              @Context final HttpHeaders httpHeaders) throws URISyntaxException, IOException {
         try {
             LOGGER.info("ENTER TopicVirtualFolder.propfind()");
 
@@ -65,7 +60,7 @@ public class TopicVirtualFolder extends WebDavResource {
                 final List<Topic> topics = entityManager.createQuery("SELECT topic FROM Topic topic").getResultList();
                 final List<net.java.dev.webdav.jaxrs.xml.elements.Response> responses = new ArrayList<net.java.dev.webdav.jaxrs.xml.elements.Response>();
                 for (final Topic topic : topics) {
-                    responses.add(WebDavTopic.getProperties(uriInfo, topic));
+                    responses.add(WebDavTopic.getProperties(uriInfo, topic.getTopicId()));
                 }
 
                 final MultiStatus st = new MultiStatus(responses.toArray(new net.java.dev.webdav.jaxrs.xml.elements.Response[responses.size()]));

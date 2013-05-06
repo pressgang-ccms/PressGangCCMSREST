@@ -1,8 +1,10 @@
 package org.jboss.pressgang.ccms.restserver.rest;
 
 import net.java.dev.webdav.jaxrs.xml.WebDavContextResolver;
-import org.jboss.pressgang.ccms.restserver.rest.v1.RESTv1;
 import org.jboss.pressgang.ccms.restserver.webdav.WebDavRoot;
+import org.jboss.pressgang.ccms.restserver.webdav.topics.TopicVirtualFolder;
+import org.jboss.pressgang.ccms.restserver.webdav.topics.topic.WebDavTopic;
+import org.jboss.pressgang.ccms.restserver.webdav.topics.topic.fields.WebDavTopicContent;
 
 import javax.ws.rs.ApplicationPath;
 import javax.ws.rs.core.Application;
@@ -30,6 +32,11 @@ public class JaxRsActivator extends Application {
     public JaxRsActivator() {
         LOGGER.info("ENTER JaxRsActivator()");
         serviceClasses.add(WebDavRoot.class);
+        serviceClasses.add(TopicVirtualFolder.class);
+        serviceClasses.add(WebDavTopic.class);
+        serviceClasses.add(WebDavTopicContent.class);
+
+        //ResteasyProviderFactory.getInstance().registerProvider(WebDavContextResolver.class);
     }
 
     @Override
