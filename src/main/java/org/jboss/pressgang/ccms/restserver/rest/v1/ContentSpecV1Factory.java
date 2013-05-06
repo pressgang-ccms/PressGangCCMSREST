@@ -65,6 +65,8 @@ public class ContentSpecV1Factory extends RESTDataObjectFactory<RESTContentSpecV
         retValue.setType(RESTContentSpecTypeV1.getContentSpecType(entity.getContentSpecType()));
         retValue.setLastPublished(entity.getLastPublished());
         retValue.setLastModified(entity.getLastModified());
+        retValue.setErrors(entity.getErrors());
+        retValue.setFailedContentSpec(entity.getFailedContentSpec());
 
         // REVISIONS
         if (revision == null && expand != null && expand.contains(RESTBaseEntityV1.REVISIONS_NAME)) {
@@ -113,7 +115,7 @@ public class ContentSpecV1Factory extends RESTDataObjectFactory<RESTContentSpecV
 
         // TEXT
         if (expand != null && expand.contains(RESTContentSpecV1.TEXT_NAME)) {
-            final String text = ContentSpecUtilities.getContentSpecText(entity.getId(), entityManager);
+            final String text = ContentSpecUtilities.getContentSpecText(entity.getId(), (Integer) revision, entityManager);
             retValue.setText(text);
         }
 
