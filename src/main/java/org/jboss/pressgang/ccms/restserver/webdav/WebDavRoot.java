@@ -76,6 +76,7 @@ public class WebDavRoot implements WebDavResource {
             LOGGER.info("ENTER WebDavRoot.propfind()");
 
             if (depth == 0) {
+                LOGGER.info("Depth == 0");
                 /* A depth of zero means we are returning information about this item only */
                 final URI uri = uriInfo.getRequestUri();
                 final HRef hRef = new HRef(uri);
@@ -90,9 +91,10 @@ public class WebDavRoot implements WebDavResource {
 
                 return javax.ws.rs.core.Response.status(207).entity(new MultiStatus(folder)).type(WebDavConstants.XML_MIME).build();
             } else {
+                LOGGER.info("Depth != 0");
                 /* Otherwise we are retuning info on the children in this collection */
                 final EntityManager entityManager = WebDavUtils.getEntityManager(false);
-                final List<Topic> topics = entityManager.createQuery("SELECT topic FROM Topic").getResultList();
+                final List<Topic> topics = entityManager.createQuery("SELECT topic FROM Topic topic").getResultList();
                 final List<Response> responses = new ArrayList<Response>();
                 for (final Topic topic : topics) {
                     responses.add(WebDavTopic.getProperties(uriInfo, topic));
@@ -104,6 +106,8 @@ public class WebDavRoot implements WebDavResource {
             }
 
         } catch (final Exception ex) {
+            LOGGER.severe(ex.toString());
+            ex.printStackTrace();
             return javax.ws.rs.core.Response.status(500).build();
         }
     }

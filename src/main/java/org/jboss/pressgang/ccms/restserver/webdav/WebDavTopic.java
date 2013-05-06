@@ -24,6 +24,7 @@ import javax.ws.rs.ext.Providers;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.URISyntaxException;
+import java.util.Date;
 import java.util.logging.Logger;
 
 import static javax.ws.rs.core.Response.Status.OK;
@@ -38,10 +39,10 @@ public class WebDavTopic implements WebDavResource {
 
     public static Response getProperties(final UriInfo uriInfo, final Topic topic) {
         final HRef hRef = new HRef(uriInfo.getRequestUriBuilder().path(topic.getId().toString()).build());
-        final CreationDate creationDate = new CreationDate(topic.getTopicTimeStamp());
-        final GetLastModified getLastModified = new GetLastModified(topic.getLastModifiedDate());
+        final CreationDate creationDate = new CreationDate(topic.getTopicTimeStamp() == null ? new Date() : topic.getTopicTimeStamp());
+        final GetLastModified getLastModified = new GetLastModified(topic.getLastModifiedDate() == null ? new Date() : topic.getLastModifiedDate());
         final GetContentType getContentType = new GetContentType(WebDavConstants.OCTET_STREAM_MIME);
-        final GetContentLength getContentLength = new GetContentLength(topic.getTopicXML().length());
+        final GetContentLength getContentLength = new GetContentLength(topic.getTopicXML() == null ? 0 : topic.getTopicXML().length());
         final DisplayName displayName = new DisplayName(topic.getId().toString());
         final Prop prop = new Prop(creationDate, getLastModified, getContentType, getContentLength, displayName);
         final Status status = new Status((javax.ws.rs.core.Response.StatusType) OK);

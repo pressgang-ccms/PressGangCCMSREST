@@ -25,7 +25,7 @@ import java.util.logging.Logger;
 public class JaxRsActivator extends Application {
     private static final Logger LOGGER = Logger.getLogger(JaxRsActivator.class.getName());
 
-    protected Set<Class<?>> serviceClasses = new HashSet<Class<?>>();
+    private final Set<Class<?>> serviceClasses = new HashSet<Class<?>>();
 
     public JaxRsActivator() {
         LOGGER.info("ENTER JaxRsActivator()");
