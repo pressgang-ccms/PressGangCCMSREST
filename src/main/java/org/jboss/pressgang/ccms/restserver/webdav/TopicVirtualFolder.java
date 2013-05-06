@@ -40,12 +40,14 @@ import java.util.logging.Logger;
 /**
     The virtual folder that holds all the topics
  */
-@Path("/webdav/topics")
+@Path("/webdav/TOPICS")
 public class TopicVirtualFolder extends WebDavResource {
 
     private static final Logger LOGGER = Logger.getLogger(TopicVirtualFolder.class.getName());
 
     @Override
+    @Produces(MediaType.APPLICATION_XML)
+    @PROPFIND
     public javax.ws.rs.core.Response propfind(@Context UriInfo uriInfo, @HeaderParam(DEPTH) int depth, InputStream entityStream,
                                               @HeaderParam(CONTENT_LENGTH) long contentLength, @Context Providers providers,
                                               @Context HttpHeaders httpHeaders) throws URISyntaxException, IOException {
@@ -79,13 +81,13 @@ public class TopicVirtualFolder extends WebDavResource {
     }
 
     public static Response getProperties(final UriInfo uriInfo) {
-        final URI uri = uriInfo.getRequestUri();
+        final URI uri = uriInfo.getRequestUriBuilder().path("TOPICS").build();
         final HRef hRef = new HRef(uri);
         final Date lastModified = new Date();
         final CreationDate creationDate = new CreationDate(lastModified);
         final GetLastModified getLastModified = new GetLastModified(lastModified);
         final Status status = new Status((javax.ws.rs.core.Response.StatusType) OK);
-        final Prop prop = new Prop(creationDate,getLastModified, COLLECTION);
+        final Prop prop = new Prop(creationDate, getLastModified, COLLECTION);
         final PropStat propStat = new PropStat(prop, status);
 
         final Response folder = new Response(hRef, null, null, null, propStat);

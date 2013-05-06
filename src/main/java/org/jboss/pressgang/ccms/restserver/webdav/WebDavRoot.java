@@ -46,7 +46,7 @@ public class WebDavRoot extends WebDavResource {
     private static final Logger LOGGER = Logger.getLogger(WebDavRoot.class.getName());
 
     @Override
-    @Produces("application/xml")
+    @Produces(MediaType.APPLICATION_XML)
     @PROPFIND
     public javax.ws.rs.core.Response propfind(@Context final UriInfo uriInfo, @HeaderParam(DEPTH) final int depth,
                                               final InputStream entityStream, @HeaderParam(CONTENT_LENGTH) final long contentLength,
@@ -84,8 +84,4 @@ public class WebDavRoot extends WebDavResource {
             return javax.ws.rs.core.Response.status(500).build();
         }
     }
-
-
-
-
 }

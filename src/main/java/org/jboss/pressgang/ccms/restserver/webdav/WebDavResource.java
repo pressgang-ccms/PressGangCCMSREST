@@ -58,6 +58,7 @@ public class WebDavResource {
     @GET
     @Produces("application/octet-stream")
     public javax.ws.rs.core.Response get(@Context final UriInfo uriInfo) {
+        LOGGER.info("ENTER WebDavResource.get()");
         return javax.ws.rs.core.Response.status(404).build();
     }
 
@@ -67,11 +68,13 @@ public class WebDavResource {
                                   final InputStream entityStream,
                                   @HeaderParam(CONTENT_LENGTH) final long contentLength)
             throws IOException, URISyntaxException {
+        LOGGER.info("ENTER WebDavResource.put()");
         return javax.ws.rs.core.Response.status(404).build();
     }
 
     @MKCOL
     public javax.ws.rs.core.Response mkcol() {
+        LOGGER.info("ENTER WebDavResource.mkcol()");
         return javax.ws.rs.core.Response.status(404).build();
     }
 
@@ -80,16 +83,19 @@ public class WebDavResource {
     public javax.ws.rs.core.Response propfind(@Context final UriInfo uriInfo, @HeaderParam(DEPTH) final int depth, final InputStream entityStream,
                                        @HeaderParam(CONTENT_LENGTH) final long contentLength, @Context final Providers providers,
                                        @Context final HttpHeaders httpHeaders) throws URISyntaxException, IOException {
+        LOGGER.info("ENTER WebDavResource.propfind()");
         return javax.ws.rs.core.Response.status(404).build();
     }
 
     @PROPPATCH
     public javax.ws.rs.core.Response proppatch() {
+        LOGGER.info("ENTER WebDavResource.proppatch()");
         return javax.ws.rs.core.Response.status(404).build();
     }
 
     @COPY
     public javax.ws.rs.core.Response copy() {
+        LOGGER.info("ENTER WebDavResource.copy()");
         return javax.ws.rs.core.Response.status(404).build();
     }
 
@@ -104,11 +110,13 @@ public class WebDavResource {
      */
     @MOVE
     public javax.ws.rs.core.Response move(@Context final UriInfo uriInfo, @HeaderParam(OVERWRITE) final String overwriteStr, @HeaderParam(DESTINATION) final String destination) throws URISyntaxException {
+        LOGGER.info("ENTER WebDavResource.move()");
         return javax.ws.rs.core.Response.status(404).build();
     }
 
     @DELETE
     public javax.ws.rs.core.Response delete() {
+        LOGGER.info("ENTER WebDavResource.delete()");
         return javax.ws.rs.core.Response.status(404).build();
     }
 

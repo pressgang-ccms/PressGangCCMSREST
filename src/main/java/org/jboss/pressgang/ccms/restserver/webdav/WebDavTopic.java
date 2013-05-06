@@ -30,7 +30,7 @@ import static net.java.dev.webdav.jaxrs.Headers.DAV;
 /**
     A WebDAV representation of a topic.
 */
-@Path("/webdav/topics")
+@Path("/webdav/TOPICS")
 public class WebDavTopic extends WebDavResource {
 
     private static final Logger LOGGER = Logger.getLogger(WebDavTopic.class.getName());
