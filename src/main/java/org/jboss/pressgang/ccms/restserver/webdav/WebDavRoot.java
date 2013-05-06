@@ -35,27 +35,25 @@ import java.net.URISyntaxException;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
+import java.util.logging.Logger;
 
 /**
     The root of the WebDAV server.
  */
-@Path("webdav")
+@Path("/webdav")
 public class WebDavRoot implements WebDavResource {
 
-
-    /**
-     * The Factory used to create EntityManagers
-     */
-    @PersistenceUnit
-    private EntityManagerFactory entityManagerFactory;
+    private static final Logger LOGGER = Logger.getLogger(WebDavRoot.class.getName());
 
     @Override
-    public javax.ws.rs.core.Response get() {
+    public javax.ws.rs.core.Response get(@Context final UriInfo uriInfo) {
+        LOGGER.info("ENTER WebDavRoot.get()");
         return javax.ws.rs.core.Response.status(404).build();
     }
 
     @Override
     public javax.ws.rs.core.Response put(@Context UriInfo uriInfo, InputStream entityStream, @HeaderParam(CONTENT_LENGTH) long contentLength) throws IOException, URISyntaxException {
+        LOGGER.info("ENTER WebDavRoot.put()");
         return javax.ws.rs.core.Response.status(404).build();
     }
 
@@ -71,6 +69,8 @@ public class WebDavRoot implements WebDavResource {
                                               final InputStream entityStream, @HeaderParam(CONTENT_LENGTH) final long contentLength,
                                               @Context final Providers providers, @Context final HttpHeaders httpHeaders) throws URISyntaxException, IOException {
         try {
+            LOGGER.info("ENTER WebDavRoot.propfind()");
+
             if (depth == 0) {
                 /* A depth of zero means we are returning information about this item only */
                 final URI uri = uriInfo.getRequestUri();
@@ -87,12 +87,11 @@ public class WebDavRoot implements WebDavResource {
                 return javax.ws.rs.core.Response.status(207).entity(new MultiStatus(folder)).type(WebDavConstants.XML_MIME).build();
             } else {
                 /* Otherwise we are retuning info on the children in this collection */
-                final EntityManager entityManager = getEntityManager(false);
+                final EntityManager entityManager = WebDavUtils.getEntityManager(false);
                 final List<Topic> topics = entityManager.createQuery("SELECT topic FROM Topic").getResultList();
                 final List<Response> responses = new ArrayList<Response>();
                 for (final Topic topic : topics) {
-                    final WebDavTopic webDavTopic = new WebDavTopic(topic);
-                    responses.add(webDavTopic.getProperties(uriInfo));
+                    responses.add(WebDavTopic.getProperties(uriInfo, topic));
                 }
 
                 final MultiStatus st = new MultiStatus(responses.toArray(new Response[responses.size()]));
@@ -107,31 +106,31 @@ public class WebDavRoot implements WebDavResource {
 
     @Override
     public javax.ws.rs.core.Response proppatch() {
+        LOGGER.info("ENTER WebDavRoot.proppatch()");
         return javax.ws.rs.core.Response.status(404).build();
     }
 
     @Override
     public javax.ws.rs.core.Response copy() {
+        LOGGER.info("ENTER WebDavRoot.copy()");
         return javax.ws.rs.core.Response.status(404).build();
     }
 
     @Override
     public javax.ws.rs.core.Response move(@Context UriInfo uriInfo, @HeaderParam(OVERWRITE) String overwriteStr, @HeaderParam(DESTINATION) String destination) throws URISyntaxException {
+        LOGGER.info("ENTER WebDavRoot.move()");
         return javax.ws.rs.core.Response.status(404).build();
     }
 
     @Override
     public javax.ws.rs.core.Response delete() {
-        return javax.ws.rs.core.Response.status(404).build();
-    }
-
-    @Override
-    public Object findResource(@PathParam("resource") String res) {
+        LOGGER.info("ENTER WebDavRoot.delete()");
         return javax.ws.rs.core.Response.status(404).build();
     }
 
     @Override
     public javax.ws.rs.core.Response options() {
+        LOGGER.info("ENTER WebDavRoot.options()");
         javax.ws.rs.core.Response.ResponseBuilder builder = javax.ws.rs.core.Response.ok();
         builder.header(DAV, WEBDAV_COMPLIANCE_LEVEL);
 
@@ -139,22 +138,5 @@ public class WebDavRoot implements WebDavResource {
     }
 
 
-    private EntityManager getEntityManager(boolean joinTransaction) {
-        if (entityManagerFactory == null) {
-            try {
-                entityManagerFactory = JNDIUtilities.lookupJBossEntityManagerFactory();
-            } catch (NamingException e) {
-                throw new InternalServerErrorException("Could not find the EntityManagerFactory");
-            }
-        }
 
-        final EntityManager entityManager = entityManagerFactory.createEntityManager();
-        if (entityManager == null) throw new InternalServerErrorException("Could not create an EntityManager");
-
-        if (joinTransaction) {
-            entityManager.joinTransaction();
-        }
-
-        return entityManager;
-    }
 }

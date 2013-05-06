@@ -38,7 +38,7 @@
     </context-param>
 
     <!-- Listeners -->
-    <listener>
-        <listener-class>liquibase.integration.servlet.LiquibaseServletListener</listener-class>
-    </listener>
+    <!--<listener>-->
+        <!--<listener-class>liquibase.integration.servlet.LiquibaseServletListener</listener-class>-->
+    <!--</listener>-->
 </web-app>

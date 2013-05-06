@@ -56,7 +56,7 @@ public interface WebDavResource {
 
     @GET
     @Produces("application/octet-stream")
-    javax.ws.rs.core.Response get();
+    javax.ws.rs.core.Response get(@Context final UriInfo uriInfo);
 
     @PUT
     @Consumes("application/octet-stream")
@@ -93,9 +93,6 @@ public interface WebDavResource {
 
     @DELETE
     javax.ws.rs.core.Response delete();
-
-    @Path("{resource}")
-    Object findResource(@PathParam("resource") final String res);
 
     @OPTIONS
     javax.ws.rs.core.Response options();
