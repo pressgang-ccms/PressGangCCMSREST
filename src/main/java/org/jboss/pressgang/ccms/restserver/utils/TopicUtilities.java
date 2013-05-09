@@ -29,6 +29,7 @@ import com.j2bugzilla.base.ECSBug;
 import com.j2bugzilla.rpc.BugSearch;
 import com.j2bugzilla.rpc.GetBug;
 import com.j2bugzilla.rpc.LogIn;
+import org.jboss.pressgang.ccms.contentspec.constants.CSConstants;
 import org.jboss.pressgang.ccms.model.BlobConstants;
 import org.jboss.pressgang.ccms.model.BugzillaBug;
 import org.jboss.pressgang.ccms.model.Category;
@@ -56,6 +57,8 @@ import org.jboss.pressgang.ccms.utils.structures.NameIDSortMap;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.w3c.dom.Document;
+import org.w3c.dom.Element;
+import org.w3c.dom.NodeList;
 import org.xml.sax.SAXException;
 
 public class TopicUtilities {
@@ -250,7 +253,10 @@ public class TopicUtilities {
             log.warn("An Error occurred transforming a XML String to a DOM Document", ex);
         }
         if (doc != null) {
-            DocBookUtilities.setSectionTitle(topic.getTopicTitle(), doc);
+            // Sync the topic title, if the topic is a regular topic
+            if (isTopicNormalTopic(topic)) {
+                DocBookUtilities.setSectionTitle(topic.getTopicTitle(), doc);
+            }
 
             // Get the XML elements that require special formatting/processing
             final StringConstants xmlElementsProperties = entityManager.find(StringConstants.class,
@@ -264,7 +270,7 @@ public class TopicUtilities {
                 log.error("The XML Elements Properties file couldn't be loaded as a property file", ex);
             }
 
-            // Find the XML elements that need formating for different display rules.
+            // Find the XML elements that need formatting for different display rules.
             final String verbatimElementsString = prop.getProperty(CommonConstants.VERBATIM_XML_ELEMENTS_PROPERTY_KEY);
             final String inlineElementsString = prop.getProperty(CommonConstants.INLINE_XML_ELEMENTS_PROPERTY_KEY);
             final String contentsInlineElementsString = prop.getProperty(CommonConstants.CONTENTS_INLINE_XML_ELEMENTS_PROPERTY_KEY);
@@ -473,12 +479,91 @@ public class TopicUtilities {
 
         if (dtd == null) throw new IllegalArgumentException("blobConstantId must be a valid BlobConstants entity id");
 
-        final XMLValidator validator = new XMLValidator();
-        if (validator.validateTopicXML(topic.getTopicXML(), dtd.getConstantName(), dtd.getConstantValue()) == null) {
-            topic.setTopicXMLErrors(validator.getErrorText());
-        } else {
-            topic.setTopicXMLErrors(null);
+        try {
+            final StringBuilder xmlErrors = new StringBuilder();
+            final Document doc = XMLUtilities.convertStringToDocument(topic.getTopicXML());
+
+            // Do a normal DTD validation on the topic
+            final XMLValidator validator = new XMLValidator();
+            if (validator.validateTopicXML(doc, dtd.getConstantName(), dtd.getConstantValue()) == null) {
+                final String errorText = validator.getErrorText();
+                if (errorText != null) {
+                    xmlErrors.append(errorText);
+                }
+            }
+
+            if (!isTopicNormalTopic(topic)) {
+                if (topic.isTaggedWith(CSConstants.REVISION_HISTORY_TAG_ID)) {
+                    // Make sure the revision history is an appendix
+                    if (!doc.getDocumentElement().getNodeName().equals("appendix")) {
+                        xmlErrors.append("Root element is not <appendix>.");
+                    }
+
+                    // Check to make sure that a revhistory entry exists
+                    final NodeList revHistoryList = doc.getElementsByTagName("revhistory");
+                    if (revHistoryList.getLength() == 0) {
+                        xmlErrors.append("No <revhistory> element found. A <revhistory> must exist for Revision Histories.\n");
+                    }
+                } else if (topic.isTaggedWith(CSConstants.LEGAL_NOTICE_TAG_ID)) {
+                    // Make sure the Legal Notice is a legalnotice
+                    if (!doc.getDocumentElement().getNodeName().equals("legalnotice")) {
+                        xmlErrors.append("Root element is not <legalnotice>.");
+                    }
+                }
+            } else {
+                // Make sure the topic is a section
+                if (!doc.getDocumentElement().getNodeName().equals(DocBookUtilities.TOPIC_ROOT_NODE_NAME)) {
+                    xmlErrors.append("Root element is not <section>.");
+                }
+
+                // Check the tables are valid
+                if (!validateTopicTables(doc)) {
+                    xmlErrors.append("Table column declaration doesn't match the number of entry elements.\n");
+                }
+            }
+
+            if (xmlErrors.length() != 0) {
+                topic.setTopicXMLErrors(xmlErrors.toString());
+            }
+        } catch (SAXException e) {
+            topic.setTopicXMLErrors(e.getMessage());
         }
+    }
+
+    /**
+     * Check to see if a Topic is a normal topic, instead of a Revision History or Legal Notice
+     *
+     * @param topic The topic to be checked.
+     * @return True if the topic is a normal topic, otherwise false.
+     */
+    public static boolean isTopicNormalTopic(final Topic topic) {
+        return topic.isTaggedWith(CSConstants.REVISION_HISTORY_TAG_ID) || topic.isTaggedWith(CSConstants.LEGAL_NOTICE_TAG_ID);
+    }
+
+    /**
+     * Checks to see if the Rows, in XML Tables exceed the maximum number of columns.
+     *
+     * @param doc The XML DOM Document to be validated.
+     * @return True if the XML is valid, otherwise false.
+     */
+    protected static boolean validateTopicTables(final Document doc) {
+        final NodeList tables = doc.getElementsByTagName("table");
+        for (int i = 0; i < tables.getLength(); i++) {
+            final Element table = (Element) tables.item(i);
+            if (!DocBookUtilities.validateTableRows(table)) {
+                return false;
+            }
+        }
+
+        final NodeList informalTables = doc.getElementsByTagName("informaltable");
+        for (int i = 0; i < informalTables.getLength(); i++) {
+            final Element informalTable = (Element) informalTables.item(i);
+            if (!DocBookUtilities.validateTableRows(informalTable)) {
+                return false;
+            }
+        }
+
+        return true;
     }
 
     public static TranslatedTopic createTranslatedTopic(final EntityManager entityManager, final Integer topicId, final Number revision) {
