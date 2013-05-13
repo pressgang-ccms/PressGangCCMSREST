@@ -221,6 +221,19 @@ then
 	echo "************ sed test 1 failed ************"
 fi
 
+# sponge test 1
+echo Starting sponge test 1
+echo '<!-- sponge test -->' > "${TEMP_DOC}"
+echo '<!-- sponge test -->' > "${TEST_DOC}"
+sed -e 's/test/sedreplaced/g' "${TEMP_DOC}" | sponge "${TEMP_DOC}"
+sed -e 's/test/sedreplaced/g' "${TEST_DOC}" | sponge "${TEST_DOC}"
+diff "${TEST_DOC}" "${TEMP_DOC}"
+
+if [[ $? -ne 0 ]]
+then
+	echo "************ sponge test 1 failed ************"
+fi
+
 # tar test 1
 echo Starting tar test 1
 echo '<!-- sed test -->' > "${TEMP_DOC}"
@@ -337,17 +350,17 @@ echo '<section><title>Test</title><para>hi</para></section>' > "${TEST_DOC}"
 
 cd /tmp
 rm -rf book
-publican create --name=book > /dev/null 2>&1
+publican create --name=book
 echo '<?xml version="1.0" encoding="utf-8" ?><!DOCTYPE bookinfo PUBLIC "-//OASIS//DTD DocBook XML V4.5//EN" "http://www.oasis-open.org/docbook/xml/4.5/docbookx.dtd" [<!ENTITY % BOOK_ENTITIES SYSTEM "book.ent">%BOOK_ENTITIES;]><chapter><title>Book</title><xi:include href="'${TEMP_DOC}'" xmlns:xi="http://www.w3.org/2001/XInclude"/></chapter>' > /tmp/book/en-US/Chapter.xml
 cd /tmp/book
-publican build --langs=en-US --formats=html-single > /dev/null 2>&1
+publican build --langs=en-US --formats=html-single
 
 cd /tmp
 rm -rf bookwebdav
-publican create --name=bookwebdav > /dev/null 2>&1
+publican create --name=bookwebdav
 echo '<?xml version="1.0" encoding="utf-8" ?><!DOCTYPE bookinfo PUBLIC "-//OASIS//DTD DocBook XML V4.5//EN" "http://www.oasis-open.org/docbook/xml/4.5/docbookx.dtd" [<!ENTITY % BOOK_ENTITIES SYSTEM "book.ent">%BOOK_ENTITIES;]><chapter><title>Book</title><xi:include href="'${TEST_DOC}'" xmlns:xi="http://www.w3.org/2001/XInclude"/></chapter>' > /tmp/bookwebdav/en-US/Chapter.xml
 cd /tmp/bookwebdav
-publican build --langs=en-US --formats=html-single > /dev/null 2>&1
+publican build --langs=en-US --formats=html-single
 
 # the id and href attributes change, as well as the book title and entity references
 sed -i -e 's/id=\".*\"//g' /tmp/bookwebdav/tmp/en-US/html-single/index.html
