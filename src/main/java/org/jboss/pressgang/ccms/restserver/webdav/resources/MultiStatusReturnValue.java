@@ -7,7 +7,7 @@ import javax.annotation.Nullable;
 /**
  * A wrapper that contains the HTTP return code, and the returned MultiStatus.
  */
-public class MultiStatusReturnValue {
+public final class MultiStatusReturnValue {
     private final int statusCode;
     @Nullable
     private final MultiStatus value;

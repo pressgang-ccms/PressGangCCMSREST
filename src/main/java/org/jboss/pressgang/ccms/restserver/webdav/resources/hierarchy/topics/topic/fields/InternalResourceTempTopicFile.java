@@ -20,6 +20,7 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
+import java.util.Calendar;
 import java.util.Date;
 import java.util.logging.Logger;
 
@@ -32,12 +33,12 @@ public class InternalResourceTempTopicFile extends InternalResource {
 
     private static final Logger LOGGER = Logger.getLogger(InternalResourceTempTopicFile.class.getName());
 
-    public InternalResourceTempTopicFile(final UriInfo uriInfo, @NotNull final DeleteManager deleteManager, @Nullable final String remoteAddress, final String path) {
+    public InternalResourceTempTopicFile(@NotNull final UriInfo uriInfo, @NotNull final DeleteManager deleteManager, @Nullable final String remoteAddress, @NotNull final String path) {
         super(uriInfo, deleteManager, remoteAddress, path);
     }
 
     @Override
-    public int write(final byte[] contents) {
+    public int write(@NotNull final byte[] contents) {
         LOGGER.info("ENTER InternalResourceTempTopicFile.write() " + getStringId());
 
         try {
@@ -75,6 +76,11 @@ public class InternalResourceTempTopicFile extends InternalResource {
         final String fileLocation = buildTempFileName(getStringId());
 
         try {
+
+            if (!exists(fileLocation)) {
+                return new ByteArrayReturnValue(Response.Status.NOT_FOUND.getStatusCode(), null);
+            }
+
             final FileInputStream inputStream = new FileInputStream(fileLocation);
             try {
                 final byte[] fileContents = IOUtils.toByteArray(inputStream);
@@ -89,11 +95,41 @@ public class InternalResourceTempTopicFile extends InternalResource {
 
                 }
             }
+
         } catch (final FileNotFoundException e) {
             return new ByteArrayReturnValue(Response.Status.NOT_FOUND.getStatusCode(), null);
         }
 
         return new ByteArrayReturnValue(Response.Status.INTERNAL_SERVER_ERROR.getStatusCode(), null);
+    }
+
+    /**
+        Temp files only live for a short period of time. This method determines if the
+        temp file should be visible.
+    */
+    public static boolean exists(@NotNull final String fileLocation) {
+        return exists(new File(fileLocation));
+    }
+
+    /**
+     Temp files only live for a short period of time. This method determines if the
+     temp file should be visible.
+     */
+    public static boolean exists(@NotNull final File file) {
+        if (file.exists()) {
+
+            final Calendar window = Calendar.getInstance();
+            window.add(Calendar.SECOND, -WebDavConstants.TEMP_WINDOW);
+
+            if (window.before(file.lastModified())) {
+                file.delete();
+            }
+            else {
+                return true;
+            }
+        }
+
+        return false;
     }
 
     @Override

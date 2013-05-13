@@ -55,17 +55,28 @@ public abstract class InternalResource {
     /** Matches something like /webdav/TOPICS/3/4/5/6/TOPIC3456/3456.xml~ */
     public static final Pattern TOPIC_TEMP_FILE_RE = Pattern.compile("/webdav/TOPICS(/\\d)*/TOPIC\\d+/[^/]+");
 
+    /**
+     * The integer id that this resource represents. This is usually a database primary key. This or stringId will
+     * be not null.
+     */
     @Nullable
     private final Integer intId;
+    /**
+     * The integer id that this resource represents. This is usally a filename. This or intId will
+     * be not null.
+     */
     @Nullable
     private final String stringId;
+    /** Info about the request. */
     @Nullable
     private final UriInfo uriInfo;
-    @Nullable
+    /** The client id */
+    @NotNull
     private final String remoteAddress;
+    /** The manager responsible for determining if a resource is deleted or not */
     @NotNull private final DeleteManager deleteManager;
 
-    protected InternalResource(@Nullable final UriInfo uriInfo, final DeleteManager deleteManager, @Nullable final String remoteAddress, @NotNull final Integer intId) {
+    protected InternalResource(@Nullable final UriInfo uriInfo, @NotNull final DeleteManager deleteManager, @NotNull final String remoteAddress, @NotNull final Integer intId) {
         this.intId = intId;
         this.stringId = null;
         this.uriInfo = uriInfo;
@@ -73,7 +84,7 @@ public abstract class InternalResource {
         this.deleteManager = deleteManager;
     }
 
-    protected InternalResource(@Nullable final UriInfo uriInfo, final DeleteManager deleteManager, @Nullable final String remoteAddress, @NotNull final String stringId) {
+    protected InternalResource(@Nullable final UriInfo uriInfo, @NotNull final DeleteManager deleteManager, @NotNull final String remoteAddress, @NotNull final String stringId) {
         this.intId = null;
         this.stringId = stringId;
         this.uriInfo = uriInfo;
@@ -280,8 +291,6 @@ public abstract class InternalResource {
             return new InternalResourceTempTopicFile(uri, deleteManager, remoteAddress, requestPath);
         }
 
-
-
         LOGGER.info("None matched");
         return null;
     }
@@ -366,11 +375,12 @@ public abstract class InternalResource {
         return stringId;
     }
 
-    @Nullable
+    @NotNull
     public String getRemoteAddress() {
         return remoteAddress;
     }
 
+    @NotNull
     public DeleteManager getDeleteManager() {
         return deleteManager;
     }

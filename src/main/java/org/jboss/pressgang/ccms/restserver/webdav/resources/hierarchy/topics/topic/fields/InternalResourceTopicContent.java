@@ -33,12 +33,12 @@ public class InternalResourceTopicContent extends InternalResource {
 
     private static final Logger LOGGER = Logger.getLogger(InternalResourceTopicContent.class.getName());
 
-    public InternalResourceTopicContent(final UriInfo uriInfo, @NotNull final DeleteManager deleteManager, @NotNull final String remoteAddress, final Integer intId) {
+    public InternalResourceTopicContent(@NotNull final UriInfo uriInfo, @NotNull final DeleteManager deleteManager, @NotNull final String remoteAddress, @NotNull final Integer intId) {
         super(uriInfo, deleteManager, remoteAddress, intId);
     }
 
     @Override
-    public int write(final byte[] contents) {
+    public int write(@NotNull final byte[] contents) {
 
         final String stringContents = new String(contents);
 
@@ -189,7 +189,7 @@ public class InternalResourceTopicContent extends InternalResource {
      *                properties for a child resource.
      * @return
      */
-    public static net.java.dev.webdav.jaxrs.xml.elements.Response getProperties(final UriInfo uriInfo, final Topic topic, final boolean local) {
+    public static net.java.dev.webdav.jaxrs.xml.elements.Response getProperties(@NotNull final UriInfo uriInfo, @NotNull final Topic topic, final boolean local) {
         final HRef hRef = local ? new HRef(uriInfo.getRequestUri()) : new HRef(uriInfo.getRequestUriBuilder().path(topic.getId() + ".xml").build());
         final FixedCreationDate creationDate = new FixedCreationDate(topic.getTopicTimeStamp() == null ? new Date() : topic.getTopicTimeStamp());
         final GetLastModified getLastModified = new GetLastModified(topic.getLastModifiedDate() == null ? new Date() : topic.getLastModifiedDate());

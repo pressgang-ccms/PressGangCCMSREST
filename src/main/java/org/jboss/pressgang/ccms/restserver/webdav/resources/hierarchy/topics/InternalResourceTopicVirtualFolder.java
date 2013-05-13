@@ -29,7 +29,7 @@ public class InternalResourceTopicVirtualFolder extends InternalResource {
     public static final String RESOURCE_NAME = "TOPICS";
     private static final Logger LOGGER = Logger.getLogger(InternalResourceTopicVirtualFolder.class.getName());
 
-    public InternalResourceTopicVirtualFolder(final UriInfo uriInfo, @NotNull final DeleteManager deleteManager, @Nullable final String remoteAddress, final String stringId) {
+    public InternalResourceTopicVirtualFolder(@NotNull final UriInfo uriInfo, @NotNull final DeleteManager deleteManager, @Nullable final String remoteAddress, @NotNull final String stringId) {
         super(uriInfo, deleteManager, remoteAddress, stringId);
     }
 

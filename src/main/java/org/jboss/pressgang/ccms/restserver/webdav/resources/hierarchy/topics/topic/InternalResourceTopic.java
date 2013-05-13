@@ -30,7 +30,7 @@ import java.util.List;
  * Represents the available fields and temporary files associated with a topic.
  */
 public class InternalResourceTopic extends InternalResource {
-    public InternalResourceTopic(final UriInfo uriInfo, @NotNull final DeleteManager deleteManager, @Nullable final String remoteAddress, final Integer intId) {
+    public InternalResourceTopic(@NotNull final UriInfo uriInfo, @NotNull final DeleteManager deleteManager, @Nullable final String remoteAddress, @NotNull final Integer intId) {
         super(uriInfo, deleteManager, remoteAddress, intId);
     }
 
@@ -76,7 +76,7 @@ public class InternalResourceTopic extends InternalResource {
                 final String tempFileNamePrefix = InternalResourceTempTopicFile.buildTempFileName(getUriInfo().getPath());
                 if (dir.exists() && dir.isDirectory()) {
                     for (final File child : dir.listFiles()) {
-                        if (child.getPath().startsWith(tempFileNamePrefix)) {
+                        if (child.getPath().startsWith(tempFileNamePrefix) && InternalResourceTempTopicFile.exists(child)) {
                             responses.add(InternalResourceTempTopicFile.getProperties(getUriInfo(), child, false));
                         }
                     }

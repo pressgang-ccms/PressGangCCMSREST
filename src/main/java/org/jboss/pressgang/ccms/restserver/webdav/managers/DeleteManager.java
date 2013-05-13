@@ -3,6 +3,7 @@ package org.jboss.pressgang.ccms.restserver.webdav.managers;
 import org.jboss.pressgang.ccms.restserver.webdav.constants.WebDavConstants;
 
 import javax.enterprise.context.ApplicationScoped;
+import javax.validation.constraints.NotNull;
 import java.util.Calendar;
 import java.util.HashMap;
 import java.util.Map;
@@ -22,7 +23,7 @@ public class DeleteManager {
      */
     final Map<ResourceTypes, HashMap<String, HashMap<Integer, Calendar>>> deletedResources = new HashMap<ResourceTypes, HashMap<String, HashMap<Integer, Calendar>>>();
 
-    synchronized public boolean isDeleted(final ResourceTypes resourceType, final String remoteAddress, final Integer id) {
+    synchronized public boolean isDeleted(@NotNull final ResourceTypes resourceType, @NotNull final String remoteAddress, @NotNull final Integer id) {
         if (deletedResources.containsKey(resourceType)) {
             final HashMap<String, HashMap<Integer, Calendar>> specificDeletedResources = deletedResources.get(resourceType);
 
@@ -45,7 +46,7 @@ public class DeleteManager {
         return false;
     }
 
-    synchronized public void delete(final ResourceTypes resourceType, final String remoteAddress, final Integer id) {
+    synchronized public void delete(@NotNull final ResourceTypes resourceType, @NotNull final String remoteAddress, @NotNull final Integer id) {
         if (!deletedResources.containsKey(resourceType)) {
             deletedResources.put(resourceType, new HashMap<String, HashMap<Integer, Calendar>>());
         }
@@ -57,7 +58,7 @@ public class DeleteManager {
         deletedResources.get(resourceType).get(remoteAddress).put(id, Calendar.getInstance());
     }
 
-    synchronized public void create(final ResourceTypes resourceType, final String remoteAddress, final Integer id) {
+    synchronized public void create(@NotNull final ResourceTypes resourceType, @NotNull final String remoteAddress, @NotNull final Integer id) {
         if (deletedResources.containsKey(resourceType) &&
             deletedResources.get(resourceType).containsKey(remoteAddress) &&
             deletedResources.get(resourceType).get(remoteAddress).containsKey(id)) {

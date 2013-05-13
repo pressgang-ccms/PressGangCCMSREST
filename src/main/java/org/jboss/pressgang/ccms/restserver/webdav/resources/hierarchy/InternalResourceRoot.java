@@ -18,7 +18,7 @@ import java.util.List;
  * The root folder of the WebDAV hierarchy.
  */
 public class InternalResourceRoot extends InternalResource {
-    public InternalResourceRoot(final UriInfo uriInfo, @NotNull final DeleteManager deleteManager, @Nullable final String remoteAddress, final String stringId) {
+    public InternalResourceRoot(@NotNull final UriInfo uriInfo, @NotNull final DeleteManager deleteManager, @Nullable final String remoteAddress, @NotNull final String stringId) {
         super(uriInfo, deleteManager, remoteAddress, stringId);
     }
 

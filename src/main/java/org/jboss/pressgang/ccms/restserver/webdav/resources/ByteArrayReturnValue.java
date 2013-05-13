@@ -5,7 +5,7 @@ import javax.annotation.Nullable;
 /**
  * A wrapper that contains the HTTP return code, and the returned byte array.
  */
-public class ByteArrayReturnValue {
+public final class ByteArrayReturnValue {
     private final int statusCode;
     @Nullable
     private final byte[] value;

@@ -11,7 +11,10 @@ import javax.persistence.PersistenceUnit;
 import javax.servlet.http.HttpServletRequest;
 import javax.validation.constraints.NotNull;
 
-public class WebDavUtils {
+/**
+ * Some util methods relating to the WebDav server.
+ */
+public final class WebDavUtils {
 
     /**
      * See http://stackoverflow.com/questions/12491773/why-does-request-getremoteaddr-equals127-0-0-1-when-accessing-from-a-remot
@@ -30,6 +33,9 @@ public class WebDavUtils {
         return req.getRemoteAddr();
     }
 
+    /**
+     * private constructor to prevent instantiation.
+     */
     private WebDavUtils() {
 
     }

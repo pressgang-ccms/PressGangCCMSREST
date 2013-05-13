@@ -3,7 +3,7 @@ package org.jboss.pressgang.ccms.restserver.webdav.utils;
 /**
  *  Some useful maths utility methods.
  */
-public class MathUtils {
+public final class MathUtils {
     /**
      * @param number The number to check.
      * @return The scale of the number (i.e. the number of zeros)
@@ -20,5 +20,12 @@ public class MathUtils {
         }
 
         return zeros;
+    }
+
+    /**
+     * private constructor to prevent instantiation.
+     */
+    private MathUtils() {
+
     }
 }
