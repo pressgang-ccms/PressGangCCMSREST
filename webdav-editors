@@ -1,0 +1,25 @@
+#!/bin/bash
+
+TEST_FILENAME=3737.xml
+TEST_DIR="/mnt/pressgang/TOPICS/3/7/3/7/TOPIC3737"
+TEST_DOC=${TEST_DIR}/${TEST_FILENAME}
+
+jedit "${TEST_DOC}"
+vi "${TEST_DOC}"
+nano "${TEST_DOC}"
+nano-tiny "${TEST_DOC}"
+#joe "${TEST_DOC}"
+gedit "${TEST_DOC}"
+geany "${TEST_DOC}"
+emacs "${TEST_DOC}"
+kate "${TEST_DOC}"
+kwrite "${TEST_DOC}"
+leafpad "${TEST_DOC}"
+textadept "${TEST_DOC}"
+eclipse "${TEST_DOC}"
+"/opt/Sublime Text 2/sublime_test" "${TEST_DOC}"
+/opt/serna-free-4.4/bin/serna.sh "${TEST_DOC}"
+bluefish "${TEST_DOC}"
+amaya "${TEST_DOC}"
+#nedit "${TEST_DOC}"
+#e3 "${TEST_DOC}"
