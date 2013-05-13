@@ -83,7 +83,7 @@ for i in {0..9}
 do
    for j in {0..9}
    do
-       FILENAMES="${FILENAMES} \"${MOUNT_DIR}/3/0/${i}/${j}/TOPIC30{i}{j}/30{i}{j}.xml\""
+       FILENAMES="${FILENAMES} \"${MOUNT_DIR}/3/0/${i}/${j}/TOPIC30${i}${j}/30${i}${j}.xml\""
    done
 done
 
