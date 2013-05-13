@@ -9,8 +9,8 @@ for i in {0..9}
 do
    for j in {0..9}
    do
-       cp "${MOUNT_DIR}/3/0/0/{i}/TOPIC30{i}{j}/30{i}{j}.xml" /tmp
-       diff "${MOUNT_DIR}/3/0/0/{i}/TOPIC30{i}{j}/30{i}{j}.xml" "/tmp/30{i}{j}.xml"
+       cp "${MOUNT_DIR}/3/0/${i}/${j}/TOPIC30${i}${j}/30${i}${j}.xml" /tmp
+       diff "${MOUNT_DIR}/3/0/${i}/${j}/TOPIC30${i}${j}/30${i}${j}.xml" "/tmp/30${i}${j}.xml"
 
        if [[ $? -ne 0 ]]
        then
@@ -27,7 +27,7 @@ for i in {0..9}
 do
    for j in {0..9}
    do
-       mv "${MOUNT_DIR}/3/0/0/{i}/TOPIC30{i}{j}/30{i}{j}.xml" /tmp
+       mv "${MOUNT_DIR}/3/0/${i}/${j}/TOPIC30${i}${j}/30${i}${j}.xml" /tmp
    done
 done
 
@@ -35,7 +35,7 @@ for i in {0..9}
 do
    for j in {0..9}
    do
-      if [[ -f "${MOUNT_DIR}/3/0/0/{i}/TOPIC30{i}{j}/30{i}{j}.xml" ]]
+      if [[ -f "${MOUNT_DIR}/3/0/${i}/${j}/TOPIC30${i}${j}/30${i}${j}.xml" ]]
       then
        echo "************ mv extended test 1 failed  ************"
        break
@@ -50,7 +50,7 @@ for i in {0..9}
 do
    for j in {0..9}
    do
-       rm "${MOUNT_DIR}/3/0/0/{i}/TOPIC30{i}{j}/30{i}{j}.xml"
+       rm "${MOUNT_DIR}/3/0/${i}/${j}/TOPIC30${i}${j}/30${i}${j}.xml"
    done
 done
 
@@ -58,7 +58,7 @@ for i in {0..9}
 do
    for j in {0..9}
    do
-       touch "${MOUNT_DIR}/3/0/0/{i}/TOPIC30{i}{j}/30{i}{j}.xml"
+       touch "${MOUNT_DIR}/3/0/${i}/${j}/TOPIC30${i}${j}/30${i}${j}.xml"
    done
 done
 
@@ -66,7 +66,7 @@ for i in {0..9}
 do
    for j in {0..9}
    do
-      if [[ ! -f "${MOUNT_DIR}/3/0/0/{i}/TOPIC30{i}{j}/30{i}{j}.xml" ]]
+      if [[ ! -f "${MOUNT_DIR}/3/0/${i}/${j}/TOPIC30${i}${j}/30${i}${j}.xml" ]]
       then
        echo "************ touch extended test 1 failed  ************"
        break
@@ -81,7 +81,7 @@ for i in {0..9}
 do
    for j in {0..9}
    do
-       FILENAMES="${FILENAMES} \"${MOUNT_DIR}/3/0/0/{i}/TOPIC30{i}{j}/30{i}{j}.xml\""
+       FILENAMES="${FILENAMES} \"${MOUNT_DIR}/3/0/${i}/${j}/TOPIC30{i}{j}/30{i}{j}.xml\""
    done
 done
 
