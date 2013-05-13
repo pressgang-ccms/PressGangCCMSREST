@@ -21,6 +21,7 @@
           <element id="library" level="project" name="Maven: org.codehaus.jackson:jackson-mapper-asl:1.9.8" />
           <element id="library" level="project" name="Maven: org.codehaus.jackson:jackson-jaxrs:1.8.5" />
           <element id="library" level="project" name="Maven: org.codehaus.jackson:jackson-xc:1.8.5" />
+          <element id="library" level="project" name="Maven: commons-io:commons-io:2.4" />
           <element id="library" level="project" name="Maven: org.slf4j:slf4j-api:1.6.4" />
           <element id="library" level="project" name="Maven: commons-lang:commons-lang:2.6" />
           <element id="library" level="project" name="Maven: com.google.guava:guava:11.0.2" />
