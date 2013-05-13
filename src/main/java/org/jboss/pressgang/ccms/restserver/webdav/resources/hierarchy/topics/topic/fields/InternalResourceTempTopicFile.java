@@ -123,7 +123,7 @@ public class InternalResourceTempTopicFile extends InternalResource {
 
             final Date lastModified = new Date(file.lastModified());
 
-            if (window.after(lastModified)) {
+            if (lastModified.before(window.getTime())) {
                 file.delete();
             }
             else {
