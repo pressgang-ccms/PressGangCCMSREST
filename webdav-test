@@ -1,7 +1,8 @@
 #!/bin/bash
 
+MOUNT_DIR="/mnt/pressgang/TOPICS"
 TEST_FILENAME=3737.xml
-TEST_DIR="/mnt/pressgang/TOPICS/3/7/3/7/TOPIC3737"
+TEST_DIR="${MOUNT_DIR}/3/7/3/7/TOPIC3737"
 TEST_DOC=${TEST_DIR}/${TEST_FILENAME}
 TEMP_DIR=/tmp
 TEMP_DOC=${TEMP_DIR}/${TEST_FILENAME}
@@ -90,6 +91,20 @@ rm "${TEST_DOC}"
 if [ -f "${TEST_DOC}" ]
 then
 	echo "************ rm test 1 failed  ************"
+fi
+
+# touch test 1
+echo Starting touch test 1
+echo '<!-- rm test 1 -->' > "${TEST_DOC}"
+echo '<!-- rm test 1 -->' > "${TEMP_DOC}"
+rm "${TEST_DOC}"
+touch "${TEST_DOC}"
+
+diff "${TEST_DOC}" "${TEST_DOC}"
+
+if [[ $? -ne 0 ]]
+then
+	echo "************ touch test 1 failed  ************"
 fi
 
 # cat test 1
