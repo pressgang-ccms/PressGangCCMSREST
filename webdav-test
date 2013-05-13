@@ -234,6 +234,30 @@ then
 	echo "************ sponge test 1 failed ************"
 fi
 
+# imagemagick test 1
+echo Starting imagemagick test 1
+convert -size 100x100  gradient:blue "${TEST_DIR}\gradient_range1.jpg"
+convert -size 100x100  gradient:blue "${TEMP_DIR}\gradient_range1.jpg"
+
+diff "${TEST_DIR}\gradient_range1.jpg" "${TEMP_DIR}\gradient_range1.jpg"
+
+if [[ $? -ne 0 ]]
+then
+	echo "************ imagemagick test 1 failed ************"
+fi
+
+# imagemagick test 2
+echo Starting imagemagick test 2
+convert "${TEST_DIR}\gradient_range1.jpg" -virtual-pixel tile  -blur 0x1  -auto-level  "${TEST_DIR}\gradient_range1_blurred.jpg"
+convert "${TEMP_DIR}\gradient_range1.jpg" -virtual-pixel tile  -blur 0x1  -auto-level  "${TEMP_DIR}\gradient_range1_blurred.jpg"
+
+diff "${TEST_DIR}\gradient_range1_blurred.jpg" "${TEMP_DIR}\gradient_range1_blurred.jpg"
+
+if [[ $? -ne 0 ]]
+then
+	echo "************ imagemagick test 2 failed ************"
+fi
+
 # tar test 1
 echo Starting tar test 1
 echo '<!-- sed test -->' > "${TEMP_DOC}"
