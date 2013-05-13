@@ -389,17 +389,17 @@ echo '<section><title>Test</title><para>hi</para></section>' > "${TEST_DOC}"
 
 cd /tmp
 rm -rf book
-publican create --name=book
+publican create --name=book > /dev/null 2>&1
 echo '<?xml version="1.0" encoding="utf-8" ?><!DOCTYPE bookinfo PUBLIC "-//OASIS//DTD DocBook XML V4.5//EN" "http://www.oasis-open.org/docbook/xml/4.5/docbookx.dtd" [<!ENTITY % BOOK_ENTITIES SYSTEM "book.ent">%BOOK_ENTITIES;]><chapter><title>Book</title><xi:include href="'${TEMP_DOC}'" xmlns:xi="http://www.w3.org/2001/XInclude"/></chapter>' > /tmp/book/en-US/Chapter.xml
 cd /tmp/book
-publican build --langs=en-US --formats=html-single
+publican build --langs=en-US --formats=html-single > /dev/null 2>&1
 
 cd /tmp
 rm -rf bookwebdav
-publican create --name=bookwebdav
+publican create --name=bookwebdav > /dev/null 2>&1
 echo '<?xml version="1.0" encoding="utf-8" ?><!DOCTYPE bookinfo PUBLIC "-//OASIS//DTD DocBook XML V4.5//EN" "http://www.oasis-open.org/docbook/xml/4.5/docbookx.dtd" [<!ENTITY % BOOK_ENTITIES SYSTEM "book.ent">%BOOK_ENTITIES;]><chapter><title>Book</title><xi:include href="'${TEST_DOC}'" xmlns:xi="http://www.w3.org/2001/XInclude"/></chapter>' > /tmp/bookwebdav/en-US/Chapter.xml
 cd /tmp/bookwebdav
-publican build --langs=en-US --formats=html-single
+publican build --langs=en-US --formats=html-single > /dev/null 2>&1
 
 # the id and href attributes change, as well as the book title and entity references
 sed -i -e 's/id=\".*\"//g' /tmp/bookwebdav/tmp/en-US/html-single/index.html
