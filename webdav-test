@@ -299,6 +299,21 @@ then
 	echo "************ python test 1 failed ************"
 fi
 
+# nodejs test 1
+echo Starting nodejs test 1
+echo 'console.log("Hello World from NodeJS")' > "${TEMP_DOC}"
+echo 'console.log("Hello World from NodeJS")' > "${TEST_DOC}"
+
+nodejs "${TEMP_DOC}" > /tmp/nodejs1.tmp
+nodejs "${TEST_DOC}" > /tmp/nodejs2.tmp
+
+diff /tmp/nodejs1.tmp /tmp/nodejs2.tmp
+
+if [[ $? -ne 0 ]]
+then
+	echo "************ nodejs test 1 failed ************"
+fi
+
 # vi test 1
 echo Starting vi test 1
 echo '<article><title>test</title><para>hi</para></article>' > "${TEMP_DOC}"
