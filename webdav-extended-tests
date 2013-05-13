@@ -3,7 +3,7 @@
 MOUNT_DIR="/mnt/pressgang/TOPICS"
 
 # cp extended test 1
-echo Starting cp test 1
+echo Starting cp extended test 1
 
 for i in {0..9}
 do
@@ -21,7 +21,7 @@ do
 done
 
 # mv extended test 1
-echo Starting mv test 1
+echo Starting mv extended test 1
 
 for i in {0..9}
 do
@@ -44,7 +44,7 @@ do
 done
 
 # touch extended test 1
-echo Starting touch test 1
+echo Starting touch extended test 1
 
 for i in {0..9}
 do
@@ -74,8 +74,8 @@ do
    done
 done
 
-# tar test 1
-echo Starting tar test 1
+# tar extended test 1
+echo Starting tar extended test 1
 
 for i in {0..9}
 do
