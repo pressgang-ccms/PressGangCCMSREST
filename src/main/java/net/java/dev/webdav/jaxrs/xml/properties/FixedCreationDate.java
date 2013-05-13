@@ -17,7 +17,7 @@
  * along with webdav-jaxrs.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package org.jboss.pressgang.ccms.restserver.webdav.system;
+package net.java.dev.webdav.jaxrs.xml.properties;
 
 import net.java.dev.webdav.jaxrs.NullArgumentException;
 
@@ -47,7 +47,7 @@ public final class FixedCreationDate {
      * Creates an empty (thus <em>invalid</em>) instance. Use <em>only</em> to
      * list property name within response to &lt;propname/&gt; request. Not to
      * be used for creation of valid instances of this property; use
-     * {@link #FixedCreationDate(Date)} instead.
+     * {@link #FixedCreationDate(java.util.Date)} instead.
      */
     public FixedCreationDate() {
         // Keeping defaults by intention.

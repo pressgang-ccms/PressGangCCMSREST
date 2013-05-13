@@ -144,7 +144,7 @@ import org.slf4j.LoggerFactory;
  */
 @Provider
 @ServerInterceptor
-@Path("/1")
+@Path("/rest/1")
 public class RESTv1 extends BaseRESTv1 implements RESTBaseInterfaceV1, RESTInterfaceAdvancedV1, MessageBodyWriterInterceptor {
     private static final Logger log = LoggerFactory.getLogger(RESTv1.class);
 

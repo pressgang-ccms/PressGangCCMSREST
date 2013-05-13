@@ -8,7 +8,7 @@ import org.jboss.pressgang.ccms.rest.collections.RESTVersionDetailsCollection;
 import org.jboss.pressgang.ccms.rest.jaxrsinterfaces.RESTInterface;
 import org.jboss.pressgang.ccms.restserver.utils.Constants;
 
-@Path("/")
+@Path("/rest")
 public class REST implements RESTInterface {
 
     @Context

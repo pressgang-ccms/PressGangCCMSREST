@@ -1,8 +1,9 @@
 package org.jboss.pressgang.ccms.restserver.rest;
 
-import net.java.dev.webdav.jaxrs.xml.WebDavContextResolver;
 import org.jboss.pressgang.ccms.restserver.rest.v1.RESTv1;
 import org.jboss.pressgang.ccms.restserver.webdav.jaxrs.WebDavResource;
+import org.jboss.pressgang.ccms.restserver.webdav.system.FixedWebDavContextResolver;
+import org.jboss.resteasy.spi.ResteasyProviderFactory;
 
 import javax.ws.rs.ApplicationPath;
 import javax.ws.rs.core.Application;
@@ -21,7 +22,7 @@ import java.util.logging.Logger;
  * annotation.
  * </p>
  */
-@ApplicationPath("/rest")
+@ApplicationPath("/")
 public class JaxRsActivator extends Application {
     private static final Logger LOGGER = Logger.getLogger(JaxRsActivator.class.getName());
 
@@ -35,19 +36,19 @@ public class JaxRsActivator extends Application {
         serviceClasses.add(WebDavResource.class);
     }
 
-    @Override
-    public Set<Object> getSingletons() {
-        try {
-            return new HashSet<Object>(Arrays.asList(new WebDavContextResolver()));
-        } catch (final JAXBException e) {
-            LOGGER.severe(e.toString());
-            return null;
-        }
-    }
+//    @Override
+//    public Set<Object> getSingletons() {
+//        try {
+//            return new HashSet<Object>(Arrays.asList(new FixedWebDavContextResolver()));
+//        } catch (final JAXBException e) {
+//            LOGGER.severe(e.toString());
+//            return null;
+//        }
+//    }
 
-    @Override
+    /*@Override
     public Set<Class<?>> getClasses() {
         return serviceClasses;
-    }
+    } */
 
 }
