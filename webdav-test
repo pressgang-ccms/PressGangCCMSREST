@@ -236,10 +236,10 @@ fi
 
 # imagemagick test 1
 echo Starting imagemagick test 1
-convert -size 100x100  gradient:blue "${TEST_DIR}\gradient_range1.jpg"
-convert -size 100x100  gradient:blue "${TEMP_DIR}\gradient_range1.jpg"
+convert -size 100x100  gradient:blue "${TEST_DIR}/gradient_range1.jpg"
+convert -size 100x100  gradient:blue "${TEMP_DIR}/gradient_range1.jpg"
 
-diff "${TEST_DIR}\gradient_range1.jpg" "${TEMP_DIR}\gradient_range1.jpg"
+diff "${TEST_DIR}/gradient_range1.jpg" "${TEMP_DIR}/gradient_range1.jpg"
 
 if [[ $? -ne 0 ]]
 then
@@ -248,14 +248,29 @@ fi
 
 # imagemagick test 2
 echo Starting imagemagick test 2
-convert "${TEST_DIR}\gradient_range1.jpg" -virtual-pixel tile  -blur 0x1  -auto-level  "${TEST_DIR}\gradient_range1_blurred.jpg"
-convert "${TEMP_DIR}\gradient_range1.jpg" -virtual-pixel tile  -blur 0x1  -auto-level  "${TEMP_DIR}\gradient_range1_blurred.jpg"
+convert "${TEST_DIR}/gradient_range1.jpg" -virtual-pixel tile  -blur 0x1  -auto-level  "${TEST_DIR}/gradient_range1_blurred.jpg"
+convert "${TEMP_DIR}/gradient_range1.jpg" -virtual-pixel tile  -blur 0x1  -auto-level  "${TEMP_DIR}/gradient_range1_blurred.jpg"
 
-diff "${TEST_DIR}\gradient_range1_blurred.jpg" "${TEMP_DIR}\gradient_range1_blurred.jpg"
+diff "${TEST_DIR}/gradient_range1_blurred.jpg" "${TEMP_DIR}/gradient_range1_blurred.jpg"
 
 if [[ $? -ne 0 ]]
 then
 	echo "************ imagemagick test 2 failed ************"
+fi
+
+# awk test 1
+echo Starting awk test 1
+echo -e "100  Thomas  Manager    Sales       $5,000\n200  Jason   Developer  Technology  $5,500\n300  Sanjay  Sysadmin   Technology  $7,000\n400  Nisha   Manager    Marketing   $9,500\n500  Randy   DBA        Technology  $6,000" > "${TEMP_DOC}"
+echo -e "100  Thomas  Manager    Sales       $5,000\n200  Jason   Developer  Technology  $5,500\n300  Sanjay  Sysadmin   Technology  $7,000\n400  Nisha   Manager    Marketing   $9,500\n500  Randy   DBA        Technology  $6,000" > "${TEST_DOC}"
+
+awk '{print $2,$5;}' "${TEMP_DOC}" > /tmp/awk1.tmp
+awk '{print $2,$5;}' "${TEST_DOC}" > /tmp/awk2.tmp
+
+diff /tmp/awk1.tmp /tmp/awk2.tmp
+
+if [[ $? -ne 0 ]]
+then
+	echo "************ awk test 1 failed ************"
 fi
 
 # tar test 1
