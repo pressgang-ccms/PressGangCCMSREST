@@ -121,7 +121,9 @@ public class InternalResourceTempTopicFile extends InternalResource {
             final Calendar window = Calendar.getInstance();
             window.add(Calendar.SECOND, -WebDavConstants.TEMP_WINDOW);
 
-            if (window.after(file.lastModified())) {
+            final Date lastModified = new Date(file.lastModified());
+
+            if (window.after(lastModified)) {
                 file.delete();
             }
             else {
