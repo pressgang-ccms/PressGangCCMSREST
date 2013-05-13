@@ -435,7 +435,6 @@
                         <configuration>
                             <outputDirectory>deployments</outputDirectory>
                             <warName>ROOT</warName>
-
                         </configuration>
                     </plugin>
                 </plugins>

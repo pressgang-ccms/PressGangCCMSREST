@@ -10,7 +10,6 @@ import org.jboss.pressgang.ccms.restserver.webdav.resources.MultiStatusReturnVal
 import org.jboss.pressgang.ccms.restserver.webdav.resources.ByteArrayReturnValue;
 import org.jboss.pressgang.ccms.restserver.webdav.managers.DeleteManager;
 import org.jboss.pressgang.ccms.restserver.webdav.managers.ResourceTypes;
-import org.jboss.pressgang.ccms.restserver.webdav.system.FixedCreationDate;
 
 import javax.annotation.Nullable;
 import javax.naming.NamingException;

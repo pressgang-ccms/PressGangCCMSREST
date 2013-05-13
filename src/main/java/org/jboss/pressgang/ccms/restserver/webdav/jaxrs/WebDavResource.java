@@ -46,7 +46,7 @@ import static net.java.dev.webdav.jaxrs.Headers.*;
  * which will build the objects that will actually respond to the requests.
  */
 @RequestScoped
-@Path("/webdav/{var:.*}")
+@Path("/webdav{var:.*}")
 public class WebDavResource {
     public static final String WEBDAV_COMPLIANCE_LEVEL = "1";
 

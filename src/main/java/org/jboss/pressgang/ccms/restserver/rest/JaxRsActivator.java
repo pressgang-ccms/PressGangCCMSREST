@@ -2,7 +2,6 @@ package org.jboss.pressgang.ccms.restserver.rest;
 
 import org.jboss.pressgang.ccms.restserver.rest.v1.RESTv1;
 import org.jboss.pressgang.ccms.restserver.webdav.jaxrs.WebDavResource;
-import org.jboss.pressgang.ccms.restserver.webdav.system.FixedWebDavContextResolver;
 import org.jboss.resteasy.spi.ResteasyProviderFactory;
 
 import javax.ws.rs.ApplicationPath;
@@ -26,29 +25,7 @@ import java.util.logging.Logger;
 public class JaxRsActivator extends Application {
     private static final Logger LOGGER = Logger.getLogger(JaxRsActivator.class.getName());
 
-    private final Set<Class<?>> serviceClasses = new HashSet<Class<?>>();
-
     public JaxRsActivator() {
         LOGGER.info("ENTER JaxRsActivator()");
-
-        serviceClasses.add(REST.class);
-        serviceClasses.add(RESTv1.class);
-        serviceClasses.add(WebDavResource.class);
     }
-
-//    @Override
-//    public Set<Object> getSingletons() {
-//        try {
-//            return new HashSet<Object>(Arrays.asList(new FixedWebDavContextResolver()));
-//        } catch (final JAXBException e) {
-//            LOGGER.severe(e.toString());
-//            return null;
-//        }
-//    }
-
-    /*@Override
-    public Set<Class<?>> getClasses() {
-        return serviceClasses;
-    } */
-
 }
