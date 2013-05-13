@@ -1,5 +1,8 @@
 #!/bin/bash
 
+# These tests are designed to test the WebDAV server's capabilities against
+# multiple common tools.
+
 MOUNT_DIR="/mnt/pressgang/TOPICS"
 TEST_FILENAME=3737.xml
 TEST_DIR="${MOUNT_DIR}/3/7/3/7/TOPIC3737"

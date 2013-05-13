@@ -1,4 +1,6 @@
-#1/bin/bash
+#!/bin/bash
+
+# These tests are designed to stress the WebDAV server by making hundreds of calls.
 
 MOUNT_DIR="/mnt/pressgang/TOPICS"
 
