@@ -131,6 +131,8 @@ public class InternalResourceTempTopicFile extends InternalResource {
             else {
                 return true;
             }
+        } else {
+            LOGGER.info("File " + file.getAbsolutePath() + " does not exist");
         }
 
         return false;
