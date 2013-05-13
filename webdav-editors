@@ -5,7 +5,7 @@ TEST_DIR="/mnt/pressgang/TOPICS/3/7/3/7/TOPIC3737"
 TEST_DOC=${TEST_DIR}/${TEST_FILENAME}
 
 jedit "${TEST_DOC}"
-vi "${TEST_DOC}"
+vim "${TEST_DOC}"
 nano "${TEST_DOC}"
 nano-tiny "${TEST_DOC}"
 #joe "${TEST_DOC}"
