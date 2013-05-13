@@ -94,7 +94,7 @@ public class WebDavContextResolver implements ContextResolver<JAXBContext> {
     @Override
     public JAXBContext getContext(final Class<?> cls) {
 
-        if (cls.getPackage().getName().startsWith("net.java.dev.webdav.jaxrs.xml")) {
+        if (cls.getPackage().getName().startsWith(WebDavContextResolver.class.getPackage().getName())) {
             return this.context;
         }
 
