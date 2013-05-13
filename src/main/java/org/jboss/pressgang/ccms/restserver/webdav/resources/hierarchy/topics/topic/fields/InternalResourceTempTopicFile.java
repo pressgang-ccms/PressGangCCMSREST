@@ -116,6 +116,7 @@ public class InternalResourceTempTopicFile extends InternalResource {
      temp file should be visible.
      */
     public static boolean exists(@NotNull final File file) {
+
         if (file.exists()) {
 
             final Calendar window = Calendar.getInstance();
@@ -124,6 +125,7 @@ public class InternalResourceTempTopicFile extends InternalResource {
             final Date lastModified = new Date(file.lastModified());
 
             if (lastModified.before(window.getTime())) {
+                LOGGER.info("Deleting old temp file " + file.getAbsolutePath());
                 file.delete();
             }
             else {
