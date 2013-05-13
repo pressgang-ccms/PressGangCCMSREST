@@ -36,12 +36,15 @@ import java.util.List;
 
 /**
  * Provides support for custom extensions to WebDAV, like custom Properties and XML Elements.<br>
- * <p/>
+ *
  * WebDAV allows custom extensions for XML Elements and Properties. To enable JAX-RS to deal with these,
  * each of them must be implemented as a JAXB class and registered by passing it to the constructor of this resolver.
- * <p/>
+ *
  * This version of the class has been extended to provide the text/html mime type. This is required by tools like
  * perl-HTTP-DAV, which do not accept application/xml responses as valid WedDAV responses.
+ *
+ * The class itself and its methods are also not final, which prevents it from being used as a scanned resource in
+ * RESTEasy.
  *
  * @author Markus KARG (mkarg@users.dev.java.net)
  * @see <a href="http://www.webdav.org/specs/rfc4918.html#xml-extensibility">Chapter 17 "XML Extensibility in DAV" of RFC 2616 "Hypertext Transfer Protocol -- HTTP/1.1"</a>
