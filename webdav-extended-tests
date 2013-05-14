@@ -52,7 +52,10 @@ for i in {0..9}
 do
    for j in {0..9}
    do
-       rm "${MOUNT_DIR}/3/0/${i}/${j}/TOPIC30${i}${j}/30${i}${j}.xml"
+   if [[ -f "${MOUNT_DIR}/3/0/${i}/${j}/TOPIC30${i}${j}/30${i}${j}.xml" ]]
+	then	
+		rm "${MOUNT_DIR}/3/0/${i}/${j}/TOPIC30${i}${j}/30${i}${j}.xml"
+	fi
    done
 done
 
@@ -79,12 +82,14 @@ done
 # tar extended test 1
 echo Starting tar extended test 1
 
+rm /tmp/filelist
+
 for i in {0..9}
 do
    for j in {0..9}
    do
-       FILENAMES="${FILENAMES} \"${MOUNT_DIR}/3/0/${i}/${j}/TOPIC30${i}${j}/30${i}${j}.xml\""
+       echo "3/0/${i}/${j}/TOPIC30${i}${j}/30${i}${j}.xml" >> /tmp/filelist
    done
 done
 
-tar -C "${MOUNT_DIR}/3/0/0/" -cjf /tmp/tar1.tar.bz2 ${FILENAMES}
+tar -C "${MOUNT_DIR}" -cjf /tmp/tar1.tar.bz2 -T /tmp/filelist
