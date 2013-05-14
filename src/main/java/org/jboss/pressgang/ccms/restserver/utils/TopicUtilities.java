@@ -496,7 +496,7 @@ public class TopicUtilities {
                 if (topic.isTaggedWith(CSConstants.REVISION_HISTORY_TAG_ID)) {
                     // Make sure the revision history is an appendix
                     if (!doc.getDocumentElement().getNodeName().equals("appendix")) {
-                        xmlErrors.append("Root element is not <appendix>.");
+                        xmlErrors.append("Root element must be <appendix> for Revision History Topics.");
                     }
 
                     // Check to make sure that a revhistory entry exists
@@ -507,13 +507,13 @@ public class TopicUtilities {
                 } else if (topic.isTaggedWith(CSConstants.LEGAL_NOTICE_TAG_ID)) {
                     // Make sure the Legal Notice is a legalnotice
                     if (!doc.getDocumentElement().getNodeName().equals("legalnotice")) {
-                        xmlErrors.append("Root element is not <legalnotice>.");
+                        xmlErrors.append("Root element must be <legalnotice> for Legal Notice Topics.");
                     }
                 }
             } else {
                 // Make sure the topic is a section
                 if (!doc.getDocumentElement().getNodeName().equals(DocBookUtilities.TOPIC_ROOT_NODE_NAME)) {
-                    xmlErrors.append("Root element is not <section>.");
+                    xmlErrors.append("Root element must be <" + DocBookUtilities.TOPIC_ROOT_NODE_NAME + "> for Topics.");
                 }
 
                 // Check the tables are valid
@@ -524,6 +524,8 @@ public class TopicUtilities {
 
             if (xmlErrors.length() != 0) {
                 topic.setTopicXMLErrors(xmlErrors.toString());
+            } else {
+                topic.setTopicXMLErrors(null);
             }
         } catch (SAXException e) {
             topic.setTopicXMLErrors(e.getMessage());
@@ -537,7 +539,7 @@ public class TopicUtilities {
      * @return True if the topic is a normal topic, otherwise false.
      */
     public static boolean isTopicNormalTopic(final Topic topic) {
-        return topic.isTaggedWith(CSConstants.REVISION_HISTORY_TAG_ID) || topic.isTaggedWith(CSConstants.LEGAL_NOTICE_TAG_ID);
+        return !(topic.isTaggedWith(CSConstants.REVISION_HISTORY_TAG_ID) || topic.isTaggedWith(CSConstants.LEGAL_NOTICE_TAG_ID));
     }
 
     /**
