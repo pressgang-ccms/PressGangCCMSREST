@@ -28,6 +28,7 @@ diff "${TEST_DOC}" "${TEMP_DOC}"
 if [[ $? -ne 0 ]]
 then
 	echo "************ cp test 1 failed ************"
+	read -n 1 -s
 fi
 
 # cp test 2
@@ -39,6 +40,7 @@ diff "${TEST_DOC}" "${TEMP_DOC}"
 if [[ $? -ne 0 ]]
 then
 	echo "************ cp test 2 failed ************"
+	read -n 1 -s
 fi
 
 # cp test 3
@@ -50,6 +52,7 @@ diff "${TEST_DOC}" "${TEST_DOC}".copy
 if [[ $? -ne 0 ]]
 then
 	echo "************ cp test 3 failed ************"
+	read -n 1 -s
 fi
 
 # mv test 1
@@ -62,20 +65,24 @@ diff "${TEST_DOC}".copy "${TEST_DOC}".move
 if [[ $? -ne 0 ]]
 then
 	echo "************ mv test 1 failed ************"
+	read -n 1 -s
 fi
 
 # mv test 2
 echo Starting mv test 2
-echo '<!-- mv test 2 -->' > "${TEST_DOC}".move
-mv "${TEST_DOC}".move "${TEST_DOC}".move1
+echo '<!-- mv test 2 -->' > "${TEST_DOC}.move"
+mv "${TEST_DOC}.move" "${TEST_DOC}.move1"
 
-if [ -f "${TEST_DOC}".move ]
+if [ -f "${TEST_DOC}.move" ]
 then
 	echo "************ mv test 2 failed - item not deleted ************"
+	read -n 1 -s
 fi
 
-if [ ! -f "${TEST_DOC}".move1 ]
+if [ ! -f "${TEST_DOC}.move1" ]
+then
     echo "************ mv test 2 failed - item not exist ************"
+	read -n 1 -s
 fi
 
 # rm test 1
@@ -86,6 +93,7 @@ rm "${TEST_DOC}".delete
 if [ -f "${TEST_DOC}".delete ]
 then
 	echo "************ rm test 1 failed - item not deleted ************"
+	read -n 1 -s
 fi
 
 # rm test 2
@@ -96,6 +104,7 @@ rm "${TEST_DOC}"
 if [ -f "${TEST_DOC}" ]
 then
 	echo "************ rm test 1 failed  ************"
+	read -n 1 -s
 fi
 
 # touch test 1
@@ -110,6 +119,7 @@ diff "${TEST_DOC}" "${TEST_DOC}"
 if [[ $? -ne 0 ]]
 then
 	echo "************ touch test 1 failed  ************"
+	read -n 1 -s
 fi
 
 # cat test 1
@@ -119,6 +129,7 @@ echo '<!-- cp test 1 -->' > "${TEST_DOC}".cat
 if [ ! -f "${TEST_DOC}".cat ]
 then
 	echo "************ cat test 1 failed - item not exist ************"
+	read -n 1 -s
 fi
 
 # cat test 2
@@ -132,6 +143,7 @@ diff /tmp/cattest1 /tmp/cattest2
 if [[ $? -ne 0 ]]
 then
 	echo "************ cat test 2 failed ************"
+	read -n 1 -s
 fi
 
 # redirect test 1
@@ -143,6 +155,7 @@ diff "${TEST_DOC}" "${TEMP_DOC}"
 if [[ $? -ne 0 ]]
 then
 	echo "************ redirect test 1 failed ************"
+	read -n 1 -s
 fi
 
 # rsync test 1
@@ -160,6 +173,7 @@ diff /tmp/rsynctmp/3737.xml /mnt/pressgang/TOPICS/3/7/3/7/TOPIC3737/3737.xml
 if [[ $? -ne 0 ]]
 then
 	echo "************ rsync test 1 failed - 3737.xml ************"
+	read -n 1 -s
 fi
 
 diff /tmp/rsynctmp/a1.log /mnt/pressgang/TOPICS/3/7/3/7/TOPIC3737/a1.log
@@ -167,6 +181,7 @@ diff /tmp/rsynctmp/a1.log /mnt/pressgang/TOPICS/3/7/3/7/TOPIC3737/a1.log
 if [[ $? -ne 0 ]]
 then
 	echo "************ rsync test 1 failed ************"
+	read -n 1 -s
 fi
 
 diff /tmp/rsynctmp/a2.log /mnt/pressgang/TOPICS/3/7/3/7/TOPIC3737/a2.log
@@ -174,6 +189,7 @@ diff /tmp/rsynctmp/a2.log /mnt/pressgang/TOPICS/3/7/3/7/TOPIC3737/a2.log
 if [[ $? -ne 0 ]]
 then
 	echo "************ rsync test 1 failed ************"
+	read -n 1 -s
 fi
 
 diff /tmp/rsynctmp/a3.log /mnt/pressgang/TOPICS/3/7/3/7/TOPIC3737/a3.log
@@ -181,6 +197,7 @@ diff /tmp/rsynctmp/a3.log /mnt/pressgang/TOPICS/3/7/3/7/TOPIC3737/a3.log
 if [[ $? -ne 0 ]]
 then
 	echo "************ rsync test 1 failed ************"
+	read -n 1 -s
 fi
 
 # grep test 1
@@ -195,6 +212,7 @@ diff /tmp/grep1.tmp /tmp/grep2.tmp
 if [[ $? -ne 0 ]]
 then
 	echo "************ grep test 1 failed ************"
+	read -n 1 -s
 fi
 
 # xmllint test 1
@@ -212,6 +230,7 @@ diff /tmp/xml1.tmp /tmp/xml2.tmp
 if [[ $? -ne 0 ]]
 then
 	echo "************ xmllint test 1 failed ************"
+	read -n 1 -s
 fi
 
 # xmllint test 2
@@ -226,6 +245,7 @@ diff "${TEST_DOC}" "${TEMP_DOC}"
 if [[ $? -ne 0 ]]
 then
 	echo "************ xmllint test 2 failed ************"
+	read -n 1 -s
 fi
 
 # sed test 1
@@ -239,6 +259,7 @@ diff "${TEST_DOC}" "${TEMP_DOC}"
 if [[ $? -ne 0 ]]
 then
 	echo "************ sed test 1 failed ************"
+	read -n 1 -s
 fi
 
 # sponge test 1
@@ -252,6 +273,7 @@ diff "${TEST_DOC}" "${TEMP_DOC}"
 if [[ $? -ne 0 ]]
 then
 	echo "************ sponge test 1 failed ************"
+	read -n 1 -s
 fi
 
 # imagemagick test 1
@@ -264,6 +286,7 @@ diff "${TEST_DIR}/gradient_range1.jpg" "${TEMP_DIR}/gradient_range1.jpg"
 if [[ $? -ne 0 ]]
 then
 	echo "************ imagemagick test 1 failed ************"
+	read -n 1 -s
 fi
 
 # imagemagick test 2
@@ -276,6 +299,7 @@ diff "${TEST_DIR}/gradient_range1_blurred.jpg" "${TEMP_DIR}/gradient_range1_blur
 if [[ $? -ne 0 ]]
 then
 	echo "************ imagemagick test 2 failed ************"
+	read -n 1 -s
 fi
 
 # awk test 1
@@ -291,6 +315,7 @@ diff /tmp/awk1.tmp /tmp/awk2.tmp
 if [[ $? -ne 0 ]]
 then
 	echo "************ awk test 1 failed ************"
+	read -n 1 -s
 fi
 
 # tar test 1
@@ -304,6 +329,7 @@ diff /tmp/tar1.tar.bz2 /tmp/tar2.tar.bz2
 if [[ $? -ne 0 ]]
 then
 	echo "************ tar test 1 failed ************"
+	read -n 1 -s
 fi
 
 # python test 1
@@ -317,6 +343,7 @@ diff /tmp/python1.tmp /tmp/python2.tmp
 if [[ $? -ne 0 ]]
 then
 	echo "************ python test 1 failed ************"
+	read -n 1 -s
 fi
 
 # nodejs test 1
@@ -332,6 +359,7 @@ diff /tmp/nodejs1.tmp /tmp/nodejs2.tmp
 if [[ $? -ne 0 ]]
 then
 	echo "************ nodejs test 1 failed ************"
+	read -n 1 -s
 fi
 
 # vi test 1
@@ -355,6 +383,7 @@ diff "${TEMP_DOC}" "${TEST_DOC}"
 if [[ $? -ne 0 ]]
 then
 	echo "************ vi test 1 failed ************"
+	read -n 1 -s
 fi
 
 # hunspell test 1
@@ -368,6 +397,7 @@ diff /tmp/hunspell1.tmp /tmp/hunspell2.tmp
 if [[ $? -ne 0 ]]
 then
 	echo "************ hunspell test 1 failed ************"
+	read -n 1 -s
 fi
 
 
@@ -382,6 +412,7 @@ diff /tmp/docbook1.html /tmp/docbook2.html
 if [[ $? -ne 0 ]]
 then
 	echo "************ saxon test 1 failed ************"
+	read -n 1 -s
 fi
 
 # xsltproc test 1
@@ -400,6 +431,7 @@ diff /tmp/docbook1.html /tmp/docbook2.html
 if [[ $? -ne 0 ]]
 then
 	echo "************ xsltproc test 1 failed ************"
+	read -n 1 -s
 fi
 
 # xmlformat test 1
@@ -414,6 +446,7 @@ diff "${TEMP_DOC}" "${TEST_DOC}"
 if [[ $? -ne 0 ]]
 then
 	echo "************ xmlformat test 1 failed ************"
+	read -n 1 -s
 fi
 
 # publican test 1
@@ -451,6 +484,7 @@ diff /tmp/book/tmp/en-US/html-single/index.html /tmp/bookwebdav/tmp/en-US/html-s
 if [[ $? -ne 0 ]]
 then
 	echo "************ publican test 1 failed ************"
+	read -n 1 -s
 fi
 
 # find test 1
@@ -484,6 +518,7 @@ diff /tmp/jing1.tmp /tmp/jing2.tmp
 if [[ $? -ne 0 ]]
 then
 	echo "************ jing test 1 failed ************"
+	read -n 1 -s
 fi
 
 
