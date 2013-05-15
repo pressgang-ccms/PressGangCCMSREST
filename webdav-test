@@ -22,13 +22,17 @@ XML_FORMAT_LOCATION=/opt/xmlformat-1.04
 
 # cp test 1
 echo Starting cp test 1
-cp "${TEST_DOC}" "${TEMP_DIR}"
-diff "${TEST_DOC}" "${TEMP_DOC}"
-
-if [[ $? -ne 0 ]]
+# it is possible that this file was deleted by some other script
+if [[ -f "${TEST_DOC}" ]]
 then
-	echo "************ cp test 1 failed ************"
-	read -n 1 -s
+    cp "${TEST_DOC}" "${TEMP_DIR}"
+    diff "${TEST_DOC}" "${TEMP_DOC}"
+
+    if [[ $? -ne 0 ]]
+    then
+        echo "************ cp test 1 failed ************"
+        read -n 1 -s
+    fi
 fi
 
 # cp test 2
@@ -59,8 +63,8 @@ fi
 echo Starting mv test 1
 echo '<!-- cp test 1 -->' > "${TEST_DOC}"
 cp "${TEST_DOC}" "${TEST_DOC}".copy
-mv "${TEST_DOC}" "${TEST_DOC}".move
-diff "${TEST_DOC}".copy "${TEST_DOC}".move
+mv "${TEST_DOC}".copy "${TEST_DOC}".move
+diff "${TEST_DOC}" "${TEST_DOC}".move
 
 if [[ $? -ne 0 ]]
 then
@@ -71,8 +75,9 @@ fi
 # mv test 2
 echo Starting mv test 2
 echo '<!-- mv test 2 -->' > "${TEST_DOC}.move"
+echo -e "\tmv"
 mv "${TEST_DOC}.move" "${TEST_DOC}.move1"
-
+echo -e "\ttest"
 if [ -f "${TEST_DOC}.move" ]
 then
 	echo "************ mv test 2 failed - item not deleted ************"

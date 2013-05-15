@@ -1,0 +1,8 @@
+#!/bin/bash
+
+while 'true'
+do
+    TIME=$(date)
+    echo "********************* Tests Started ${TIME} *********************"
+    ./webdav-test
+done
