@@ -72,7 +72,9 @@ mv "${TEST_DOC}".move "${TEST_DOC}".move1
 if [ -f "${TEST_DOC}".move ]
 then
 	echo "************ mv test 2 failed - item not deleted ************"
-eleif [ ! -f "${TEST_DOC}".move1 ]
+fi
+
+if [ ! -f "${TEST_DOC}".move1 ]
     echo "************ mv test 2 failed - item not exist ************"
 fi
 
