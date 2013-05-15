@@ -347,6 +347,16 @@ echo '<!-- tar test -->' > "${TEST_DOC}"
 tar -C "${TEMP_DIR}" -cjf /tmp/tar1.tar.bz2 "${TEST_FILENAME}"
 tar -C "${TEST_DIR}" -cjf /tmp/tar2.tar.bz2 "${TEST_FILENAME}"
 
+if [ -d /tmp/temp ]
+then
+    rm -rf /tmp/temp
+fi
+
+if [ -d /tmp/temp2 ]
+then
+    rm -rf /tmp/temp2
+fi
+
 mkdir /tmp/temp
 mkdir /tmp/temp2
 
