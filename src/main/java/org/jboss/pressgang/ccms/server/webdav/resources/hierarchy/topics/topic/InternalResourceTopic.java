@@ -1,42 +1,39 @@
 package org.jboss.pressgang.ccms.server.webdav.resources.hierarchy.topics.topic;
 
-import net.java.dev.webdav.jaxrs.xml.elements.MultiStatus;
-import net.java.dev.webdav.jaxrs.xml.elements.Response;
-import org.jboss.pressgang.ccms.model.Topic;
-import org.jboss.pressgang.ccms.server.utils.EnversUtilities;
-import org.jboss.pressgang.ccms.server.utils.JNDIUtilities;
-import org.jboss.pressgang.ccms.server.webdav.constants.WebDavConstants;
-import org.jboss.pressgang.ccms.server.webdav.utils.WebDavUtils;
-import org.jboss.pressgang.ccms.server.webdav.resources.InternalResource;
-import org.jboss.pressgang.ccms.server.webdav.resources.MultiStatusReturnValue;
-import org.jboss.pressgang.ccms.server.webdav.managers.DeleteManager;
-import org.jboss.pressgang.ccms.server.webdav.managers.ResourceTypes;
-import org.jboss.pressgang.ccms.server.webdav.resources.hierarchy.topics.topic.fields.InternalResourceTempTopicFile;
-import org.jboss.pressgang.ccms.server.webdav.resources.hierarchy.topics.topic.fields.InternalResourceTopicContent;
-import org.jboss.resteasy.spi.InternalServerErrorException;
-
 import javax.annotation.Nullable;
 import javax.naming.NamingException;
 import javax.persistence.EntityManager;
 import javax.persistence.EntityManagerFactory;
-import javax.servlet.http.HttpServletRequest;
 import javax.validation.constraints.NotNull;
 import javax.ws.rs.core.UriInfo;
 import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
 
+import net.java.dev.webdav.jaxrs.xml.elements.MultiStatus;
+import net.java.dev.webdav.jaxrs.xml.elements.Response;
+import org.jboss.pressgang.ccms.model.Topic;
+import org.jboss.pressgang.ccms.server.utils.EnversUtilities;
+import org.jboss.pressgang.ccms.server.utils.JNDIUtilities;
+import org.jboss.pressgang.ccms.server.webdav.constants.WebDavConstants;
+import org.jboss.pressgang.ccms.server.webdav.managers.DeleteManager;
+import org.jboss.pressgang.ccms.server.webdav.managers.ResourceTypes;
+import org.jboss.pressgang.ccms.server.webdav.resources.InternalResource;
+import org.jboss.pressgang.ccms.server.webdav.resources.MultiStatusReturnValue;
+import org.jboss.pressgang.ccms.server.webdav.resources.hierarchy.topics.topic.fields.InternalResourceTempTopicFile;
+import org.jboss.pressgang.ccms.server.webdav.resources.hierarchy.topics.topic.fields.InternalResourceTopicContent;
+
 /**
  * Represents the available fields and temporary files associated with a topic.
  */
 public class InternalResourceTopic extends InternalResource {
-    public InternalResourceTopic(@NotNull final UriInfo uriInfo, @NotNull final DeleteManager deleteManager, @Nullable final String remoteAddress, @NotNull final Integer intId) {
+    public InternalResourceTopic(@NotNull final UriInfo uriInfo, @NotNull final DeleteManager deleteManager,
+            @Nullable final String remoteAddress, @NotNull final Integer intId) {
         super(uriInfo, deleteManager, remoteAddress, intId);
     }
 
     @Override
     public MultiStatusReturnValue propfind(final int depth) {
-
         if (getUriInfo() == null) {
             throw new IllegalStateException("Can not perform propfind without uriInfo");
         }
@@ -68,7 +65,9 @@ public class InternalResourceTopic extends InternalResource {
 
                     /* Don't list the contents if it is "deleted" */
                     if (!getDeleteManager().isDeleted(ResourceTypes.TOPIC_CONTENTS, getRemoteAddress(), topic.getId())) {
-                        responses.add(InternalResourceTopicContent.getProperties(getDeleteManager(), getRemoteAddress(), getUriInfo(), topic, false));
+                        responses.add(
+                                InternalResourceTopicContent.getProperties(getDeleteManager(), getRemoteAddress(), getUriInfo(), topic,
+                                        false));
                     }
                 }
 

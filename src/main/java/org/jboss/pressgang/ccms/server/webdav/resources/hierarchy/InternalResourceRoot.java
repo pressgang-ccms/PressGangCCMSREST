@@ -1,5 +1,11 @@
 package org.jboss.pressgang.ccms.server.webdav.resources.hierarchy;
 
+import javax.annotation.Nullable;
+import javax.validation.constraints.NotNull;
+import javax.ws.rs.core.UriInfo;
+import java.util.ArrayList;
+import java.util.List;
+
 import net.java.dev.webdav.jaxrs.xml.elements.MultiStatus;
 import net.java.dev.webdav.jaxrs.xml.elements.Response;
 import org.jboss.pressgang.ccms.server.webdav.managers.DeleteManager;
@@ -7,24 +13,17 @@ import org.jboss.pressgang.ccms.server.webdav.resources.InternalResource;
 import org.jboss.pressgang.ccms.server.webdav.resources.MultiStatusReturnValue;
 import org.jboss.pressgang.ccms.server.webdav.resources.hierarchy.topics.InternalResourceTopicVirtualFolder;
 
-import javax.annotation.Nullable;
-import javax.servlet.http.HttpServletRequest;
-import javax.validation.constraints.NotNull;
-import javax.ws.rs.core.UriInfo;
-import java.util.ArrayList;
-import java.util.List;
-
 /**
  * The root folder of the WebDAV hierarchy.
  */
 public class InternalResourceRoot extends InternalResource {
-    public InternalResourceRoot(@NotNull final UriInfo uriInfo, @NotNull final DeleteManager deleteManager, @Nullable final String remoteAddress, @NotNull final String stringId) {
+    public InternalResourceRoot(@NotNull final UriInfo uriInfo, @NotNull final DeleteManager deleteManager,
+            @Nullable final String remoteAddress, @NotNull final String stringId) {
         super(uriInfo, deleteManager, remoteAddress, stringId);
     }
 
     @Override
     public MultiStatusReturnValue propfind(final int depth) {
-
         if (getUriInfo() == null) {
             throw new IllegalStateException("Can not perform propfind without uriInfo");
         }

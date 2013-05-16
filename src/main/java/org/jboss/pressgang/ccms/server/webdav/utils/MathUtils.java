@@ -1,7 +1,7 @@
 package org.jboss.pressgang.ccms.server.webdav.utils;
 
 /**
- *  Some useful maths utility methods.
+ * Some useful maths utility methods.
  */
 public final class MathUtils {
     /**

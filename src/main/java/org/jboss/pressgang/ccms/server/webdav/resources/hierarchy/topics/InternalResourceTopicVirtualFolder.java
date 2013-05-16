@@ -1,42 +1,40 @@
 package org.jboss.pressgang.ccms.server.webdav.resources.hierarchy.topics;
 
-import net.java.dev.webdav.jaxrs.xml.elements.MultiStatus;
-import net.java.dev.webdav.jaxrs.xml.elements.Response;
-import org.jboss.pressgang.ccms.server.utils.JNDIUtilities;
-import org.jboss.pressgang.ccms.server.webdav.utils.MathUtils;
-import org.jboss.pressgang.ccms.server.webdav.utils.WebDavUtils;
-import org.jboss.pressgang.ccms.server.webdav.resources.InternalResource;
-import org.jboss.pressgang.ccms.server.webdav.resources.MultiStatusReturnValue;
-import org.jboss.pressgang.ccms.server.webdav.managers.DeleteManager;
-
 import javax.annotation.Nullable;
 import javax.naming.NamingException;
 import javax.persistence.EntityManager;
 import javax.persistence.EntityManagerFactory;
-import javax.servlet.http.HttpServletRequest;
 import javax.validation.constraints.NotNull;
 import javax.ws.rs.core.UriInfo;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.logging.Logger;
 import java.util.regex.Matcher;
 
+import net.java.dev.webdav.jaxrs.xml.elements.MultiStatus;
+import net.java.dev.webdav.jaxrs.xml.elements.Response;
+import org.jboss.pressgang.ccms.server.utils.JNDIUtilities;
+import org.jboss.pressgang.ccms.server.webdav.managers.DeleteManager;
+import org.jboss.pressgang.ccms.server.webdav.resources.InternalResource;
+import org.jboss.pressgang.ccms.server.webdav.resources.MultiStatusReturnValue;
+import org.jboss.pressgang.ccms.server.webdav.utils.MathUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 /**
-    Represents a folder that can hold topics.
+ * Represents a folder that can hold topics.
  */
 public class InternalResourceTopicVirtualFolder extends InternalResource {
-
     public static final String RESOURCE_NAME = "TOPICS";
-    private static final Logger LOGGER = Logger.getLogger(InternalResourceTopicVirtualFolder.class.getName());
+    private static final Logger LOGGER = LoggerFactory.getLogger(InternalResourceTopicVirtualFolder.class.getName());
 
-    public InternalResourceTopicVirtualFolder(@NotNull final UriInfo uriInfo, @NotNull final DeleteManager deleteManager, @Nullable final String remoteAddress, @NotNull final String stringId) {
+    public InternalResourceTopicVirtualFolder(@NotNull final UriInfo uriInfo, @NotNull final DeleteManager deleteManager,
+            @Nullable final String remoteAddress, @NotNull final String stringId) {
         super(uriInfo, deleteManager, remoteAddress, stringId);
     }
 
     @Override
     public MultiStatusReturnValue propfind(final int depth) {
-
-        LOGGER.info("ENTER InternalResourceTopicVirtualFolder.propfind() " + depth + " " + getStringId());
+        LOGGER.debug("ENTER InternalResourceTopicVirtualFolder.propfind() " + depth + " " + getStringId());
 
         if (getUriInfo() == null) {
             throw new IllegalStateException("Can not perform propfind without uriInfo");
@@ -65,8 +63,10 @@ public class InternalResourceTopicVirtualFolder extends InternalResource {
                 entityManagerFactory = JNDIUtilities.lookupJBossEntityManagerFactory();
                 entityManager = entityManagerFactory.createEntityManager();
 
-                final Integer minId = entityManager.createQuery("SELECT MIN(topic.topicId) FROM Topic topic", Integer.class).getSingleResult();
-                final Integer maxId = entityManager.createQuery("SELECT MAX(topic.topicId) FROM Topic topic", Integer.class).getSingleResult();
+                final Integer minId = entityManager.createQuery("SELECT MIN(topic.topicId) FROM Topic topic",
+                        Integer.class).getSingleResult();
+                final Integer maxId = entityManager.createQuery("SELECT MAX(topic.topicId) FROM Topic topic",
+                        Integer.class).getSingleResult();
 
                 int maxScale = Math.abs(minId) > maxId ? Math.abs(minId) : maxId;
 
@@ -110,7 +110,8 @@ public class InternalResourceTopicVirtualFolder extends InternalResource {
                     responses.add(getFolderProperties(getUriInfo(), "TOPIC" + lastPath.toString()));
                 }
 
-                final MultiStatus st = new MultiStatus(responses.toArray(new net.java.dev.webdav.jaxrs.xml.elements.Response[responses.size()]));
+                final MultiStatus st = new MultiStatus(
+                        responses.toArray(new net.java.dev.webdav.jaxrs.xml.elements.Response[responses.size()]));
 
                 return new MultiStatusReturnValue(207, st);
             } catch (NamingException e) {

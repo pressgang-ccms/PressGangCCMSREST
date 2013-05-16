@@ -1,17 +1,8 @@
 package org.jboss.pressgang.ccms.server.webdav.resources.hierarchy.topics.topic.fields;
 
-import net.java.dev.webdav.jaxrs.xml.elements.*;
-import net.java.dev.webdav.jaxrs.xml.properties.*;
-import org.apache.commons.io.FileUtils;
-import org.apache.commons.io.IOUtils;
-import org.jboss.pressgang.ccms.server.webdav.constants.WebDavConstants;
-import org.jboss.pressgang.ccms.server.webdav.resources.InternalResource;
-import org.jboss.pressgang.ccms.server.webdav.resources.MultiStatusReturnValue;
-import org.jboss.pressgang.ccms.server.webdav.resources.ByteArrayReturnValue;
-import org.jboss.pressgang.ccms.server.webdav.managers.DeleteManager;
+import static javax.ws.rs.core.Response.Status.OK;
 
 import javax.annotation.Nullable;
-import javax.servlet.http.HttpServletRequest;
 import javax.validation.constraints.NotNull;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
@@ -22,24 +13,42 @@ import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.util.Calendar;
 import java.util.Date;
-import java.util.logging.Logger;
 
-import static javax.ws.rs.core.Response.Status.OK;
+import net.java.dev.webdav.jaxrs.xml.elements.HRef;
+import net.java.dev.webdav.jaxrs.xml.elements.MultiStatus;
+import net.java.dev.webdav.jaxrs.xml.elements.Prop;
+import net.java.dev.webdav.jaxrs.xml.elements.PropStat;
+import net.java.dev.webdav.jaxrs.xml.elements.Status;
+import net.java.dev.webdav.jaxrs.xml.properties.DisplayName;
+import net.java.dev.webdav.jaxrs.xml.properties.GetContentLength;
+import net.java.dev.webdav.jaxrs.xml.properties.GetContentType;
+import net.java.dev.webdav.jaxrs.xml.properties.GetLastModified;
+import net.java.dev.webdav.jaxrs.xml.properties.LockDiscovery;
+import net.java.dev.webdav.jaxrs.xml.properties.SupportedLock;
+import org.apache.commons.io.FileUtils;
+import org.apache.commons.io.IOUtils;
+import org.jboss.pressgang.ccms.server.webdav.constants.WebDavConstants;
+import org.jboss.pressgang.ccms.server.webdav.managers.DeleteManager;
+import org.jboss.pressgang.ccms.server.webdav.resources.ByteArrayReturnValue;
+import org.jboss.pressgang.ccms.server.webdav.resources.InternalResource;
+import org.jboss.pressgang.ccms.server.webdav.resources.MultiStatusReturnValue;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * Handles access to temporary files.
  */
 public class InternalResourceTempTopicFile extends InternalResource {
+    private static final Logger LOGGER = LoggerFactory.getLogger(InternalResourceTempTopicFile.class);
 
-    private static final Logger LOGGER = Logger.getLogger(InternalResourceTempTopicFile.class.getName());
-
-    public InternalResourceTempTopicFile(@NotNull final UriInfo uriInfo, @NotNull final DeleteManager deleteManager, @Nullable final String remoteAddress, @NotNull final String path) {
+    public InternalResourceTempTopicFile(@NotNull final UriInfo uriInfo, @NotNull final DeleteManager deleteManager,
+            @Nullable final String remoteAddress, @NotNull final String path) {
         super(uriInfo, deleteManager, remoteAddress, path);
     }
 
     @Override
     public int write(@NotNull final byte[] contents) {
-        LOGGER.info("ENTER InternalResourceTempTopicFile.write() " + getStringId());
+        LOGGER.debug("ENTER InternalResourceTempTopicFile.write() " + getStringId());
 
         try {
             final File directory = new java.io.File(WebDavConstants.TEMP_LOCATION);
@@ -70,8 +79,7 @@ public class InternalResourceTempTopicFile extends InternalResource {
 
     @Override
     public ByteArrayReturnValue get() {
-
-        LOGGER.info("ENTER InternalResourceTempTopicFile.get() " + getStringId());
+        LOGGER.debug("ENTER InternalResourceTempTopicFile.get() " + getStringId());
 
         final String fileLocation = buildTempFileName(getStringId());
 
@@ -104,19 +112,18 @@ public class InternalResourceTempTopicFile extends InternalResource {
     }
 
     /**
-        Temp files only live for a short period of time. This method determines if the
-        temp file should be visible.
-    */
+     * Temp files only live for a short period of time. This method determines if the
+     * temp file should be visible.
+     */
     public static boolean exists(@NotNull final String fileLocation) {
         return exists(new File(fileLocation));
     }
 
     /**
-     Temp files only live for a short period of time. This method determines if the
-     temp file should be visible.
+     * Temp files only live for a short period of time. This method determines if the
+     * temp file should be visible.
      */
     public static boolean exists(@NotNull final File file) {
-
         if (file.exists()) {
 
             final Calendar window = Calendar.getInstance();
@@ -125,10 +132,9 @@ public class InternalResourceTempTopicFile extends InternalResource {
             final Date lastModified = new Date(file.lastModified());
 
             if (lastModified.before(window.getTime())) {
-                LOGGER.info("Deleting old temp file " + file.getAbsolutePath());
+                LOGGER.debug("Deleting old temp file " + file.getAbsolutePath());
                 file.delete();
-            }
-            else {
+            } else {
                 return true;
             }
         }
@@ -138,7 +144,7 @@ public class InternalResourceTempTopicFile extends InternalResource {
 
     @Override
     public int delete() {
-        LOGGER.info("ENTER InternalResourceTempTopicFile.delete() " + getStringId());
+        LOGGER.debug("ENTER InternalResourceTempTopicFile.delete() " + getStringId());
 
         final String fileLocation = buildTempFileName(getStringId());
 
@@ -153,7 +159,6 @@ public class InternalResourceTempTopicFile extends InternalResource {
 
     @Override
     public MultiStatusReturnValue propfind(final int depth) {
-
         if (getUriInfo() == null) {
             throw new IllegalStateException("Can not perform propfind without uriInfo");
         }
@@ -191,8 +196,10 @@ public class InternalResourceTempTopicFile extends InternalResource {
      *                properties for a child resource.
      * @return
      */
-    public static net.java.dev.webdav.jaxrs.xml.elements.Response getProperties(final UriInfo uriInfo, final File file, final boolean local) {
-        final HRef hRef = local ? new HRef(uriInfo.getRequestUri()) : new HRef(uriInfo.getRequestUriBuilder().path(InternalResourceTempTopicFile.buildWebDavFileName(uriInfo.getPath(), file)).build());
+    public static net.java.dev.webdav.jaxrs.xml.elements.Response getProperties(final UriInfo uriInfo, final File file,
+            final boolean local) {
+        final HRef hRef = local ? new HRef(uriInfo.getRequestUri()) : new HRef(
+                uriInfo.getRequestUriBuilder().path(InternalResourceTempTopicFile.buildWebDavFileName(uriInfo.getPath(), file)).build());
         final GetLastModified getLastModified = new GetLastModified(new Date(file.lastModified()));
         final GetContentType getContentType = new GetContentType(MediaType.APPLICATION_OCTET_STREAM);
         final GetContentLength getContentLength = new GetContentLength(file.length());
@@ -203,7 +210,8 @@ public class InternalResourceTempTopicFile extends InternalResource {
         final Status status = new Status((javax.ws.rs.core.Response.StatusType) OK);
         final PropStat propStat = new PropStat(prop, status);
 
-        final net.java.dev.webdav.jaxrs.xml.elements.Response davFile = new net.java.dev.webdav.jaxrs.xml.elements.Response(hRef, null, null, null, propStat);
+        final net.java.dev.webdav.jaxrs.xml.elements.Response davFile = new net.java.dev.webdav.jaxrs.xml.elements.Response(hRef, null,
+                null, null, propStat);
 
         return davFile;
     }
