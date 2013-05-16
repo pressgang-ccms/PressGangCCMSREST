@@ -7,7 +7,7 @@
         <version>1.5</version>
     </parent>
     <groupId>org.jboss.pressgang.ccms</groupId>
-    <artifactId>pressgang-ccms-restserver</artifactId>
+    <artifactId>pressgang-ccms-server</artifactId>
     <version>1.1-SNAPSHOT</version>
     <name>PressGang CCMS REST Server</name>
     <packaging>war</packaging>
