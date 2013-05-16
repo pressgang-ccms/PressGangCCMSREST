@@ -19,7 +19,7 @@ Configure JBoss AS 7.1.1
 ------------------------
 
 1. Open the Standalone Configuration located at `<JBOSS_DIR>/standalone/configuration/standalone.xml`
-2. Add the following System Properties and populate it with relavent data.
+2. Add the following System Properties and populate it with relevant data.
 
         <system-properties>
             <property name="topicIndex.bugzillaUrl" value="bugzilla.redhat.com"/>
@@ -71,8 +71,26 @@ Configure JBoss AS 7.1.1
 		    <driver name="mysql" module="com.mysql"/>
 		</drivers>
 
-4. The last step is to unzip the MySQL Driver into the Modules directory. The archive can be found at *program-resources/modules.zip* in
-this repository.
+4. Now create a Keystore that will contain the Self-Signed SSL Certificate for HTTPS communication. You can do this by running the
+following command:
+
+		keytool -genkey -keyalg RSA -keystore keystore.jks -keysize 2048
+
+5. Add the configuration to the Web Subsystem. The following is an example of what it could look like:
+
+		<subsystem xmlns="urn:jboss:domain:web:1.1" default-virtual-server="default-host" native="false">
+            <connector name="http" protocol="HTTP/1.1" scheme="http" socket-binding="http"/>
+            <connector name="https" protocol="HTTP/1.1" scheme="https" socket-binding="https" secure="true">
+                <ssl name="https" password="<PASSWORD>" certificate-key-file="<KEYSTORE_LOCATION>"/>
+            </connector>
+            <virtual-server name="default-host" enable-welcome-root="true">
+                <alias name="localhost"/>
+                <alias name="example.com"/>
+            </virtual-server>
+        </subsystem>
+
+6. The last step is to unzip the MySQL Driver and Hibernate Module into the Modules directory. The archive can be found at
+*program-resources/modules.zip* in this repository.
 
 Importing the Base Database
 ---------------------------
@@ -90,7 +108,7 @@ Compiling the Source
 Installing to the Application Server
 ------------------------------------
 
-1. Ensure that the Application Server is running by opening another terminal and navigating to *<JBOSS-DIR>/bin* and execute the *standalone.sh* script.
+1. Ensure that the Application Server is running by opening another terminal and navigating to `<JBOSS-DIR>/bin` and execute the *standalone.sh* script.
 2. In the first terminal run the following command:
 
     	mvn clean package jboss-as:deploy
