@@ -20,6 +20,6 @@ public class JaxRsActivator extends Application {
     private static final Logger LOGGER = LoggerFactory.getLogger(JaxRsActivator.class);
 
     public JaxRsActivator() {
-        LOGGER.info("ENTER JaxRsActivator()");
+        LOGGER.debug("ENTER JaxRsActivator()");
     }
 }
