@@ -68,7 +68,7 @@ public class InternalResourceTopic extends InternalResource {
 
                     /* Don't list the contents if it is "deleted" */
                     if (!getDeleteManager().isDeleted(ResourceTypes.TOPIC_CONTENTS, getRemoteAddress(), topic.getId())) {
-                        responses.add(InternalResourceTopicContent.getProperties(getUriInfo(), topic, false));
+                        responses.add(InternalResourceTopicContent.getProperties(getDeleteManager(), getRemoteAddress(), getUriInfo(), topic, false));
                     }
                 }
 

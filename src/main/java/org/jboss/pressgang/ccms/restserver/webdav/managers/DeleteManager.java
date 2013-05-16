@@ -2,6 +2,7 @@ package org.jboss.pressgang.ccms.restserver.webdav.managers;
 
 import org.jboss.pressgang.ccms.restserver.webdav.constants.WebDavConstants;
 
+import javax.annotation.Nullable;
 import javax.enterprise.context.ApplicationScoped;
 import javax.validation.constraints.NotNull;
 import java.util.Calendar;
@@ -22,6 +23,7 @@ public class DeleteManager {
      * A resource type mapped to a remote address mapped to an id mapped to a deletion time.
      */
     final Map<ResourceTypes, HashMap<String, HashMap<Integer, Calendar>>> deletedResources = new HashMap<ResourceTypes, HashMap<String, HashMap<Integer, Calendar>>>();
+    final Map<ResourceTypes, HashMap<String, HashMap<Integer, Calendar>>> createdResources = new HashMap<ResourceTypes, HashMap<String, HashMap<Integer, Calendar>>>();
 
     synchronized public boolean isDeleted(@NotNull final ResourceTypes resourceType, @NotNull final String remoteAddress, @NotNull final Integer id) {
         if (deletedResources.containsKey(resourceType)) {
@@ -58,12 +60,40 @@ public class DeleteManager {
         deletedResources.get(resourceType).get(remoteAddress).put(id, Calendar.getInstance());
     }
 
+    /**
+     * Deleted files that are recreated with an empty put (e.g. where they are touched) need to have an updated
+     * last modified date to invalidate the clients cache.
+     * @return  The date that this file was recreated, or null if it has not been recreated.
+     */
+    @Nullable
+    synchronized public Calendar lastCreatedDate(@NotNull final ResourceTypes resourceType, @NotNull final String remoteAddress, @NotNull final Integer id) {
+        if (createdResources.containsKey(resourceType) &&
+                createdResources.get(resourceType).containsKey(remoteAddress) &&
+                createdResources.get(resourceType).get(remoteAddress).containsKey(id)) {
+            createdResources.get(resourceType).get(remoteAddress).get(id);
+        }
+
+        return null;
+    }
+
     synchronized public void create(@NotNull final ResourceTypes resourceType, @NotNull final String remoteAddress, @NotNull final Integer id) {
         if (deletedResources.containsKey(resourceType) &&
             deletedResources.get(resourceType).containsKey(remoteAddress) &&
             deletedResources.get(resourceType).get(remoteAddress).containsKey(id)) {
                 deletedResources.get(resourceType).get(remoteAddress).remove(id);
         }
+
+        if (!createdResources.containsKey(resourceType)) {
+            createdResources.put(resourceType, new HashMap<String, HashMap<Integer, Calendar>>());
+        }
+
+        if (!createdResources.get(resourceType).containsKey(remoteAddress)) {
+            createdResources.get(resourceType).put(remoteAddress, new HashMap<Integer, Calendar>());
+        }
+
+        final Calendar now =  Calendar.getInstance();
+        now.add(1, Calendar.SECOND);
+        createdResources.get(resourceType).get(remoteAddress).put(id, now);
     }
 
 }

@@ -21,6 +21,7 @@ import javax.validation.constraints.NotNull;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.UriInfo;
+import java.util.Calendar;
 import java.util.Date;
 import java.util.logging.Logger;
 
@@ -164,7 +165,7 @@ public class InternalResourceTopicContent extends InternalResource {
             final Topic topic = entityManager.find(Topic.class, getIntId());
 
             if (topic != null) {
-                final net.java.dev.webdav.jaxrs.xml.elements.Response response = getProperties(getUriInfo(), topic, true);
+                final net.java.dev.webdav.jaxrs.xml.elements.Response response = getProperties(getDeleteManager(), getRemoteAddress(), getUriInfo(), topic, true);
                 final MultiStatus st = new MultiStatus(response);
                 return new MultiStatusReturnValue(207, st);
             }
@@ -189,10 +190,15 @@ public class InternalResourceTopicContent extends InternalResource {
      *                properties for a child resource.
      * @return
      */
-    public static net.java.dev.webdav.jaxrs.xml.elements.Response getProperties(@NotNull final UriInfo uriInfo, @NotNull final Topic topic, final boolean local) {
+    public static net.java.dev.webdav.jaxrs.xml.elements.Response getProperties(@NotNull final DeleteManager deleteManager, @NotNull final String remoteAddress, @NotNull final UriInfo uriInfo, @NotNull final Topic topic, final boolean local) {
+
+        final Calendar lastCreatedDate =  deleteManager.lastCreatedDate(ResourceTypes.TOPIC_CONTENTS, remoteAddress, topic.getId());
+        final Calendar lastCreatedDateFixed =  lastCreatedDate == null ? Calendar.getInstance() : lastCreatedDate;
+        final Date lastModifiedDate = topic.getLastModifiedDate() == null ? new Date() : topic.getLastModifiedDate();
+        final GetLastModified getLastModified = new GetLastModified(lastCreatedDateFixed.after(lastModifiedDate) ? lastCreatedDateFixed.getTime() : lastModifiedDate);
+
         final HRef hRef = local ? new HRef(uriInfo.getRequestUri()) : new HRef(uriInfo.getRequestUriBuilder().path(topic.getId() + ".xml").build());
         final FixedCreationDate creationDate = new FixedCreationDate(topic.getTopicTimeStamp() == null ? new Date() : topic.getTopicTimeStamp());
-        final GetLastModified getLastModified = new GetLastModified(topic.getLastModifiedDate() == null ? new Date() : topic.getLastModifiedDate());
         final GetContentType getContentType = new GetContentType(MediaType.APPLICATION_OCTET_STREAM);
         final GetContentLength getContentLength = new GetContentLength(topic.getTopicXML() == null ? 0 : topic.getTopicXML().length());
         final DisplayName displayName = new DisplayName(topic.getId() + ".xml");
