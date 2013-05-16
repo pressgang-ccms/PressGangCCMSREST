@@ -104,8 +104,8 @@ public class RESTVersionInterceptor implements PreProcessInterceptor {
         final Integer majorVersion = getMajorVersion(version);
         final Integer minorVersion = getMinorVersion(version);
 
-        // Check that the version is 0.28 or higher.
-        return (majorVersion != null && majorVersion >= 0) && (minorVersion == null || minorVersion >= 28);
+        // Check that the version is 0.31 or higher.
+        return (majorVersion != null && majorVersion >= 0) && (minorVersion == null || minorVersion >= 31);
     }
 
     protected static Integer getMajorVersion(final String version) {
