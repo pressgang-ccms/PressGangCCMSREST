@@ -1,0 +1,95 @@
+#!/bin/bash
+
+# These tests are designed to stress the WebDAV server by making hundreds of calls.
+
+MOUNT_DIR="/mnt/pressgang/TOPICS"
+
+# cp extended test 1
+echo Starting cp extended test 1
+
+for i in {0..9}
+do
+   for j in {0..9}
+   do
+       cp "${MOUNT_DIR}/3/0/${i}/${j}/TOPIC30${i}${j}/30${i}${j}.xml" /tmp
+       diff "${MOUNT_DIR}/3/0/${i}/${j}/TOPIC30${i}${j}/30${i}${j}.xml" "/tmp/30${i}${j}.xml"
+
+       if [[ $? -ne 0 ]]
+       then
+        echo "************ cp extended test 1 failed  ************"
+        break
+       fi
+   done
+done
+
+# mv extended test 1
+echo Starting mv extended test 1
+
+for i in {0..9}
+do
+   for j in {0..9}
+   do
+       mv "${MOUNT_DIR}/3/0/${i}/${j}/TOPIC30${i}${j}/30${i}${j}.xml" /tmp
+   done
+done
+
+for i in {0..9}
+do
+   for j in {0..9}
+   do
+      if [[ -f "${MOUNT_DIR}/3/0/${i}/${j}/TOPIC30${i}${j}/30${i}${j}.xml" ]]
+      then
+       echo "************ mv extended test 1 failed  ************"
+       break
+      fi
+   done
+done
+
+# touch extended test 1
+echo Starting touch extended test 1
+
+for i in {0..9}
+do
+   for j in {0..9}
+   do
+   if [[ -f "${MOUNT_DIR}/3/0/${i}/${j}/TOPIC30${i}${j}/30${i}${j}.xml" ]]
+	then	
+		rm "${MOUNT_DIR}/3/0/${i}/${j}/TOPIC30${i}${j}/30${i}${j}.xml"
+	fi
+   done
+done
+
+for i in {0..9}
+do
+   for j in {0..9}
+   do
+       touch "${MOUNT_DIR}/3/0/${i}/${j}/TOPIC30${i}${j}/30${i}${j}.xml"
+   done
+done
+
+for i in {0..9}
+do
+   for j in {0..9}
+   do
+      if [[ ! -f "${MOUNT_DIR}/3/0/${i}/${j}/TOPIC30${i}${j}/30${i}${j}.xml" ]]
+      then
+       echo "************ touch extended test 1 failed  ************"
+       break
+      fi
+   done
+done
+
+# tar extended test 1
+echo Starting tar extended test 1
+
+rm /tmp/filelist
+
+for i in {0..9}
+do
+   for j in {0..9}
+   do
+       echo "3/0/${i}/${j}/TOPIC30${i}${j}/30${i}${j}.xml" >> /tmp/filelist
+   done
+done
+
+tar -C "${MOUNT_DIR}" -cjf /tmp/tar1.tar.bz2 -T /tmp/filelist

@@ -1,0 +1,586 @@
+#!/bin/bash
+
+# These tests are designed to test the WebDAV server's capabilities against
+# multiple common tools.
+
+MOUNT_DIR="/mnt/pressgang/TOPICS"
+TEST_FILENAME=3737.xml
+TEST_DIR="${MOUNT_DIR}/3/7/3/7/TOPIC3737"
+TEST_DOC=${TEST_DIR}/${TEST_FILENAME}
+TEMP_DIR=/tmp
+TEMP_DOC=${TEMP_DIR}/${TEST_FILENAME}
+#DOCBOOK_HTML_XSL=/usr/share/sgml/docbook/xsl-stylesheets-1.75.2/html/docbook.xsl
+#DOCBOOK_HTML_XSL=/usr/share/sgml/docbook/xsl-stylesheets-1.78.1/html/docbook.xsl
+DOCBOOK_HTML_XSL=/usr/share/xml/docbook/stylesheet/docbook-xsl/html/docbook.xsl
+#DOCBOOK_DTD=/usr/share/sgml/docbook/xml-dtd-4.5-1.0-51.el6/docbookx.dtd
+#DOCBOOK_DTD=/usr/share/sgml/docbook/xml-dtd-4.5/docbookx.dtd
+DOCBOOK_DTD=/usr/share/xml/docbook/schema/dtd/4.5/docbookx.dtd
+JING_JAR=/opt/jing-20091111/bin/jing.jar
+XML_FORMAT_LOCATION=/opt/xmlformat-1.04
+
+#sudo mount.davfs http://skynet-dev.usersys.redhat.com:8080/pressgang-ccms-webdav /mnt/pressgang -o uid=matthew
+
+# cp test 1
+echo Starting cp test 1
+# it is possible that this file was deleted by some other script
+if [[ -f "${TEST_DOC}" ]]
+then
+    cp "${TEST_DOC}" "${TEMP_DIR}"
+    diff "${TEST_DOC}" "${TEMP_DOC}"
+
+    if [[ $? -ne 0 ]]
+    then
+        echo "************ cp test 1 failed ************"
+        read -n 1 -s
+    fi
+fi
+
+# cp test 2
+echo Starting cp test 2
+echo '<!-- cp test 2 -->' > "${TEMP_DOC}"
+cp "${TEMP_DOC}" "${TEST_DIR}"
+diff "${TEST_DOC}" "${TEMP_DOC}"
+
+if [[ $? -ne 0 ]]
+then
+	echo "************ cp test 2 failed ************"
+	read -n 1 -s
+fi
+
+# cp test 3
+echo Starting cp test 3
+echo '<!-- cp test 3 -->' > "${TEST_DOC}"
+cp "${TEST_DOC}" "${TEST_DOC}".copy
+diff "${TEST_DOC}" "${TEST_DOC}".copy
+
+if [[ $? -ne 0 ]]
+then
+	echo "************ cp test 3 failed ************"
+	read -n 1 -s
+fi
+
+# mv test 1
+echo Starting mv test 1
+echo '<!-- cp test 1 -->' > "${TEST_DOC}"
+cp "${TEST_DOC}" "${TEST_DOC}".copy
+mv "${TEST_DOC}".copy "${TEST_DOC}".move
+diff "${TEST_DOC}" "${TEST_DOC}".move
+
+if [[ $? -ne 0 ]]
+then
+	echo "************ mv test 1 failed ************"
+	read -n 1 -s
+fi
+
+# mv test 2
+echo Starting mv test 2
+echo '<!-- mv test 2 -->' > "${TEST_DOC}.move"
+echo -e "\tmv"
+mv "${TEST_DOC}.move" "${TEST_DOC}.move1"
+echo -e "\ttest"
+if [ -f "${TEST_DOC}.move" ]
+then
+	echo "************ mv test 2 failed - item not deleted ************"
+	read -n 1 -s
+fi
+
+if [ ! -f "${TEST_DOC}.move1" ]
+then
+    echo "************ mv test 2 failed - item not exist ************"
+	read -n 1 -s
+fi
+
+# rm test 1
+echo Starting rm test 1
+echo '<!-- rm test 1 -->' > "${TEST_DOC}".delete
+rm "${TEST_DOC}".delete
+
+if [ -f "${TEST_DOC}".delete ]
+then
+	echo "************ rm test 1 failed - item not deleted ************"
+	read -n 1 -s
+fi
+
+# rm test 2
+echo Starting rm test 2
+echo '<!-- rm test 1 -->' > "${TEST_DOC}"
+rm "${TEST_DOC}"
+
+if [ -f "${TEST_DOC}" ]
+then
+	echo "************ rm test 1 failed  ************"
+	read -n 1 -s
+fi
+
+# touch test 1
+echo Starting touch test 1
+echo '<!-- rm test 1 -->' > "${TEST_DOC}"
+echo '<!-- rm test 1 -->' > "${TEMP_DOC}"
+rm "${TEST_DOC}"
+touch "${TEST_DOC}"
+
+diff "${TEST_DOC}" "${TEST_DOC}"
+
+if [[ $? -ne 0 ]]
+then
+	echo "************ touch test 1 failed  ************"
+	read -n 1 -s
+fi
+
+# cat test 1
+echo Starting cat test 1
+echo '<!-- cp test 1 -->' > "${TEST_DOC}".cat
+
+if [ ! -f "${TEST_DOC}".cat ]
+then
+	echo "************ cat test 1 failed - item not exist ************"
+	read -n 1 -s
+fi
+
+# cat test 2
+echo Starting cat test 2
+echo '<!-- cat test 2 -->' > "${TEMP_DOC}"
+echo '<!-- cat test 2 -->' > "${TEST_DOC}"
+cat "${TEMP_DOC}" > /tmp/cattest1
+cat "${TEST_DOC}" > /tmp/cattest2
+diff /tmp/cattest1 /tmp/cattest2
+
+if [[ $? -ne 0 ]]
+then
+	echo "************ cat test 2 failed ************"
+	read -n 1 -s
+fi
+
+# redirect test 1
+echo Starting redirect test 1
+echo '<!-- redirect test 1 -->' > "${TEMP_DOC}"
+echo '<!-- redirect test 1 -->' > "${TEST_DOC}"
+diff "${TEST_DOC}" "${TEMP_DOC}"
+
+if [[ $? -ne 0 ]]
+then
+	echo "************ redirect test 1 failed ************"
+	read -n 1 -s
+fi
+
+# rsync test 1
+echo Starting rsync test 1
+rm -rf /tmp/rsynctmp
+mkdir /tmp/rsynctmp
+dd if=/dev/urandom of=/tmp/rsynctmp/a1.log bs=1K count=50 > /dev/null 2>&1
+dd if=/dev/urandom of=/tmp/rsynctmp/a2.log bs=1K count=75 > /dev/null 2>&1
+dd if=/dev/urandom of=/tmp/rsynctmp/a3.log bs=1K count=100 > /dev/null 2>&1
+echo -e "I love rsync\nrsync is the best" > /tmp/rsynctmp/3737.xml
+rsync -vr /tmp/rsynctmp/ /mnt/pressgang/TOPICS/3/7/3/7/TOPIC3737 > /dev/null 2>&1
+
+diff /tmp/rsynctmp/3737.xml /mnt/pressgang/TOPICS/3/7/3/7/TOPIC3737/3737.xml
+
+if [[ $? -ne 0 ]]
+then
+	echo "************ rsync test 1 failed - 3737.xml ************"
+	read -n 1 -s
+fi
+
+diff /tmp/rsynctmp/a1.log /mnt/pressgang/TOPICS/3/7/3/7/TOPIC3737/a1.log
+
+if [[ $? -ne 0 ]]
+then
+	echo "************ rsync test 1 failed ************"
+	read -n 1 -s
+fi
+
+diff /tmp/rsynctmp/a2.log /mnt/pressgang/TOPICS/3/7/3/7/TOPIC3737/a2.log
+
+if [[ $? -ne 0 ]]
+then
+	echo "************ rsync test 1 failed ************"
+	read -n 1 -s
+fi
+
+diff /tmp/rsynctmp/a3.log /mnt/pressgang/TOPICS/3/7/3/7/TOPIC3737/a3.log
+
+if [[ $? -ne 0 ]]
+then
+	echo "************ rsync test 1 failed ************"
+	read -n 1 -s
+fi
+
+# grep test 1
+echo Starting grep test 1
+echo -e "I love grep\ngrep is the best" > "${TEMP_DOC}"
+echo -e "I love grep\ngrep is the best" > "${TEST_DOC}"
+grep grep "${TEMP_DOC}" > /tmp/grep1.tmp
+grep grep "${TEST_DOC}" > /tmp/grep2.tmp
+
+diff /tmp/grep1.tmp /tmp/grep2.tmp
+
+if [[ $? -ne 0 ]]
+then
+	echo "************ grep test 1 failed ************"
+	read -n 1 -s
+fi
+
+# tail test 1
+echo Starting tail test 1
+echo -e "100  Thomas  Manager    Sales       $5,000\n200  Jason   Developer  Technology  $5,500\n300  Sanjay  Sysadmin   Technology  $7,000\n400  Nisha   Manager    Marketing   $9,500\n500  Randy   DBA        Technology  $6,000" > "${TEMP_DOC}"
+echo -e "100  Thomas  Manager    Sales       $5,000\n200  Jason   Developer  Technology  $5,500\n300  Sanjay  Sysadmin   Technology  $7,000\n400  Nisha   Manager    Marketing   $9,500\n500  Randy   DBA        Technology  $6,000" > "${TEST_DOC}"
+tail "${TEMP_DOC}" > /tmp/tail1.tmp
+tail "${TEST_DOC}" > /tmp/tail2.tmp
+
+diff /tmp/tail1.tmp /tmp/tail2.tmp
+
+if [[ $? -ne 0 ]]
+then
+	echo "************ tail test 1 failed ************"
+	read -n 1 -s
+fi
+
+# xmllint test 1
+echo Starting xmllint test 1
+echo '<section></section1>' > "${TEMP_DOC}"
+echo '<section></section1>' > "${TEST_DOC}"
+xmllint --valid "${TEMP_DOC}" 2> /tmp/xml1.tmp
+xmllint --valid "${TEST_DOC}" 2> /tmp/xml2.tmp
+
+sed -i -e 's#'${TEMP_DOC}'##g' /tmp/xml1.tmp
+sed -i -e 's#'${TEST_DOC}'##g' /tmp/xml2.tmp
+
+diff /tmp/xml1.tmp /tmp/xml2.tmp
+
+if [[ $? -ne 0 ]]
+then
+	echo "************ xmllint test 1 failed ************"
+	read -n 1 -s
+fi
+
+# xmllint test 2
+echo Starting xmllint test 2
+echo '<section></section>' > "${TEMP_DOC}"
+echo '<section></section>' > "${TEST_DOC}"
+xmllint --output "${TEMP_DOC}" "${TEMP_DOC}"
+xmllint --output "${TEST_DOC}" "${TEST_DOC}"
+
+diff "${TEST_DOC}" "${TEMP_DOC}"
+
+if [[ $? -ne 0 ]]
+then
+	echo "************ xmllint test 2 failed ************"
+	read -n 1 -s
+fi
+
+# sed test 1
+echo Starting sed test 1
+echo '<!-- sed test -->' > "${TEMP_DOC}"
+echo '<!-- sed test -->' > "${TEST_DOC}"
+sed -i -e 's/test/sedreplaced/g' "${TEMP_DOC}"
+sed -i -e 's/test/sedreplaced/g' "${TEST_DOC}"
+diff "${TEST_DOC}" "${TEMP_DOC}"
+
+if [[ $? -ne 0 ]]
+then
+	echo "************ sed test 1 failed ************"
+	read -n 1 -s
+fi
+
+# sponge test 1
+echo Starting sponge test 1
+echo '<!-- sponge test -->' > "${TEMP_DOC}"
+echo '<!-- sponge test -->' > "${TEST_DOC}"
+sed -e 's/test/sedreplaced/g' "${TEMP_DOC}" | sponge "${TEMP_DOC}"
+sed -e 's/test/sedreplaced/g' "${TEST_DOC}" | sponge "${TEST_DOC}"
+diff "${TEST_DOC}" "${TEMP_DOC}"
+
+if [[ $? -ne 0 ]]
+then
+	echo "************ sponge test 1 failed ************"
+	read -n 1 -s
+fi
+
+# imagemagick test 1
+echo Starting imagemagick test 1
+convert -size 100x100  gradient:blue "${TEST_DIR}/gradient_range1.jpg"
+convert -size 100x100  gradient:blue "${TEMP_DIR}/gradient_range1.jpg"
+
+diff "${TEST_DIR}/gradient_range1.jpg" "${TEMP_DIR}/gradient_range1.jpg"
+
+if [[ $? -ne 0 ]]
+then
+	echo "************ imagemagick test 1 failed ************"
+	read -n 1 -s
+fi
+
+# imagemagick test 2
+echo Starting imagemagick test 2
+convert "${TEST_DIR}/gradient_range1.jpg" -virtual-pixel tile  -blur 0x1  -auto-level  "${TEST_DIR}/gradient_range1_blurred.jpg"
+convert "${TEMP_DIR}/gradient_range1.jpg" -virtual-pixel tile  -blur 0x1  -auto-level  "${TEMP_DIR}/gradient_range1_blurred.jpg"
+
+diff "${TEST_DIR}/gradient_range1_blurred.jpg" "${TEMP_DIR}/gradient_range1_blurred.jpg"
+
+if [[ $? -ne 0 ]]
+then
+	echo "************ imagemagick test 2 failed ************"
+	read -n 1 -s
+fi
+
+# awk test 1
+echo Starting awk test 1
+echo -e "100  Thomas  Manager    Sales       $5,000\n200  Jason   Developer  Technology  $5,500\n300  Sanjay  Sysadmin   Technology  $7,000\n400  Nisha   Manager    Marketing   $9,500\n500  Randy   DBA        Technology  $6,000" > "${TEMP_DOC}"
+echo -e "100  Thomas  Manager    Sales       $5,000\n200  Jason   Developer  Technology  $5,500\n300  Sanjay  Sysadmin   Technology  $7,000\n400  Nisha   Manager    Marketing   $9,500\n500  Randy   DBA        Technology  $6,000" > "${TEST_DOC}"
+
+awk '{print $2,$5;}' "${TEMP_DOC}" > /tmp/awk1.tmp
+awk '{print $2,$5;}' "${TEST_DOC}" > /tmp/awk2.tmp
+
+diff /tmp/awk1.tmp /tmp/awk2.tmp
+
+if [[ $? -ne 0 ]]
+then
+	echo "************ awk test 1 failed ************"
+	read -n 1 -s
+fi
+
+# bz2 test 1
+echo Starting bz2 test 1
+
+echo '<!-- bzip2 test -->' > "${TEMP_DOC}"
+echo '<!-- bzip2 test -->' > "${TEST_DOC}"
+
+bzip2 -k -f "${TEMP_DOC}"
+bzip2 -k -f "${TEST_DOC}"
+
+bzcmp "${TEMP_DOC}.bz2" "${TEST_DOC}.bz2"
+
+if [[ $? -ne 0 ]]
+then
+echo "************ bz2 test 2 failed ************"
+read -n 1 -s
+fi
+
+# tar test 1
+echo Starting tar test 1
+echo '<!-- tar test -->' > "${TEMP_DOC}"
+echo '<!-- tar test -->' > "${TEST_DOC}"
+tar -C "${TEMP_DIR}" -cjf /tmp/tar1.tar.bz2 "${TEST_FILENAME}"
+tar -C "${TEST_DIR}" -cjf /tmp/tar2.tar.bz2 "${TEST_FILENAME}"
+
+if [ -d /tmp/temp ]
+then
+    rm -rf /tmp/temp
+fi
+
+if [ -d /tmp/temp2 ]
+then
+    rm -rf /tmp/temp2
+fi
+
+mkdir /tmp/temp
+mkdir /tmp/temp2
+
+cd /tmp/temp; tar -xjf /tmp/tar1.tar.bz2
+cd /tmp/temp2; tar -xjf /tmp/tar2.tar.bz2
+
+diff "/tmp/temp/${TEST_FILENAME}" "/tmp/temp2/${TEST_FILENAME}"
+
+if [[ $? -ne 0 ]]
+then
+	echo "************ tar test 1 failed ************"
+	read -n 1 -s
+fi
+
+# python test 1
+echo Starting python test 1
+echo 'print "Hello WebDAV"' > "${TEMP_DOC}"
+echo 'print "Hello WebDAV"' > "${TEST_DOC}"
+python "${TEMP_DOC}" > /tmp/python1.tmp
+python "${TEST_DOC}" > /tmp/python2.tmp
+diff /tmp/python1.tmp /tmp/python2.tmp
+
+if [[ $? -ne 0 ]]
+then
+	echo "************ python test 1 failed ************"
+	read -n 1 -s
+fi
+
+# nodejs test 1
+echo Starting nodejs test 1
+echo 'console.log("Hello World from NodeJS")' > "${TEMP_DOC}"
+echo 'console.log("Hello World from NodeJS")' > "${TEST_DOC}"
+
+nodejs "${TEMP_DOC}" > /tmp/nodejs1.tmp
+nodejs "${TEST_DOC}" > /tmp/nodejs2.tmp
+
+diff /tmp/nodejs1.tmp /tmp/nodejs2.tmp
+
+if [[ $? -ne 0 ]]
+then
+	echo "************ nodejs test 1 failed ************"
+	read -n 1 -s
+fi
+
+# vi test 1
+echo Starting vi test 1
+echo '<article><title>test</title><para>hi</para></article>' > "${TEMP_DOC}"
+echo '<article><title>test</title><para>hi</para></article>' > "${TEST_DOC}"
+vi -E -s "${TEMP_DOC}" << EOF
+   :%substitute/hi/there/
+   :update
+   :quit
+EOF
+
+vi -E -s "${TEST_DOC}" << EOF
+   :%substitute/hi/there/
+   :update
+   :quit
+EOF
+
+diff "${TEMP_DOC}" "${TEST_DOC}"
+
+if [[ $? -ne 0 ]]
+then
+	echo "************ vi test 1 failed ************"
+	read -n 1 -s
+fi
+
+# hunspell test 1
+echo Starting hunspell test 1
+echo 'mispealled word' > "${TEMP_DOC}"
+echo 'mispealled word' > "${TEST_DOC}"
+hunspell -L "${TEMP_DOC}" > /tmp/hunspell1.tmp
+hunspell -L "${TEST_DOC}" > /tmp/hunspell2.tmp
+diff /tmp/hunspell1.tmp /tmp/hunspell2.tmp
+
+if [[ $? -ne 0 ]]
+then
+	echo "************ hunspell test 1 failed ************"
+	read -n 1 -s
+fi
+
+
+# saxon test 1
+echo Starting saxon test 1
+echo '<article><title>test</title><para>hi</para></article>' > "${TEMP_DOC}"
+echo '<article><title>test</title><para>hi</para></article>' > "${TEST_DOC}"
+saxon-xslt -o:/tmp/docbook1.html "${TEMP_DOC}" "${DOCBOOK_HTML_XSL}" 2> /dev/null
+saxon-xslt -o:/tmp/docbook2.html "${TEST_DOC}" "${DOCBOOK_HTML_XSL}" 2> /dev/null
+diff /tmp/docbook1.html /tmp/docbook2.html
+
+if [[ $? -ne 0 ]]
+then
+	echo "************ saxon test 1 failed ************"
+	read -n 1 -s
+fi
+
+# xsltproc test 1
+echo Starting xsltproc test 1
+echo '<article><title>test</title><para>hi</para></article>' > "${TEMP_DOC}"
+echo '<article><title>test</title><para>hi</para></article>' > "${TEST_DOC}"
+xsltproc -o /tmp/docbook1.html "${DOCBOOK_HTML_XSL}" "${TEMP_DOC}" 
+xsltproc -o /tmp/docbook2.html "${DOCBOOK_HTML_XSL}" "${TEST_DOC}" 
+
+# the name attributes change
+sed -i -e 's/name=\".*\"//g' /tmp/docbook1.html
+sed -i -e 's/name=\".*\"//g' /tmp/docbook2.html
+
+diff /tmp/docbook1.html /tmp/docbook2.html
+
+if [[ $? -ne 0 ]]
+then
+	echo "************ xsltproc test 1 failed ************"
+	read -n 1 -s
+fi
+
+# xmlformat test 1
+echo Starting xmlformat test 1
+echo '<article><title>test</title><para>hi</para></article>' > "${TEMP_DOC}"
+echo '<article><title>test</title><para>hi</para></article>' > "${TEST_DOC}"
+${XML_FORMAT_LOCATION}/xmlformat.pl -i "${TEMP_DOC}" 
+${XML_FORMAT_LOCATION}/xmlformat.pl -i "${TEST_DOC}" 
+
+diff "${TEMP_DOC}" "${TEST_DOC}"
+
+if [[ $? -ne 0 ]]
+then
+	echo "************ xmlformat test 1 failed ************"
+	read -n 1 -s
+fi
+
+# publican test 1
+echo Starting publican test 1
+
+echo '<section><title>Test</title><para>hi</para></section>' > "${TEMP_DOC}"
+echo '<section><title>Test</title><para>hi</para></section>' > "${TEST_DOC}"
+
+cd /tmp
+rm -rf book
+publican create --name=book > /dev/null 2>&1
+echo '<?xml version="1.0" encoding="utf-8" ?><!DOCTYPE bookinfo PUBLIC "-//OASIS//DTD DocBook XML V4.5//EN" "http://www.oasis-open.org/docbook/xml/4.5/docbookx.dtd" [<!ENTITY % BOOK_ENTITIES SYSTEM "book.ent">%BOOK_ENTITIES;]><chapter><title>Book</title><xi:include href="'${TEMP_DOC}'" xmlns:xi="http://www.w3.org/2001/XInclude"/></chapter>' > /tmp/book/en-US/Chapter.xml
+cd /tmp/book
+publican build --langs=en-US --formats=html-single > /dev/null 2>&1
+
+cd /tmp
+rm -rf bookwebdav
+publican create --name=bookwebdav > /dev/null 2>&1
+echo '<?xml version="1.0" encoding="utf-8" ?><!DOCTYPE bookinfo PUBLIC "-//OASIS//DTD DocBook XML V4.5//EN" "http://www.oasis-open.org/docbook/xml/4.5/docbookx.dtd" [<!ENTITY % BOOK_ENTITIES SYSTEM "book.ent">%BOOK_ENTITIES;]><chapter><title>Book</title><xi:include href="'${TEST_DOC}'" xmlns:xi="http://www.w3.org/2001/XInclude"/></chapter>' > /tmp/bookwebdav/en-US/Chapter.xml
+cd /tmp/bookwebdav
+publican build --langs=en-US --formats=html-single > /dev/null 2>&1
+
+# the id and href attributes change, as well as the book title and entity references
+sed -i -e 's/id=\".*\"//g' /tmp/bookwebdav/tmp/en-US/html-single/index.html
+sed -i -e 's/href=\".*\"//g' /tmp/bookwebdav/tmp/en-US/html-single/index.html
+sed -i -e 's/<title>bookwebdav<\/title>//g' /tmp/bookwebdav/tmp/en-US/html-single/index.html
+sed -i -e 's/bookwebdav.ent//g' /tmp/bookwebdav/tmp/en-US/html-single/index.html
+sed -i -e 's/id=\".*\"//g' /tmp/book/tmp/en-US/html-single/index.html
+sed -i -e 's/href=\".*\"//g' /tmp/book/tmp/en-US/html-single/index.html
+sed -i -e 's/<title>book<\/title>//g' /tmp/book/tmp/en-US/html-single/index.html
+sed -i -e 's/book.ent//g' /tmp/book/tmp/en-US/html-single/index.html
+
+diff /tmp/book/tmp/en-US/html-single/index.html /tmp/bookwebdav/tmp/en-US/html-single/index.html
+
+if [[ $? -ne 0 ]]
+then
+	echo "************ publican test 1 failed ************"
+	read -n 1 -s
+fi
+
+# find test 1
+echo starting find test 1
+cd /mnt/pressgang/TOPICS/3/7/3/7/TOPIC3737
+find . -name ${TEST_FILENAME} > find.tmp
+RESULT=$(head -1 find.tmp)
+EXPECTED=./3737.xml
+
+if [[ ! ${RESULT} == ${EXPECTED} ]]
+then
+	echo "find test 1 failed"
+fi
+
+# jing test 1
+echo Starting jing test 1
+echo '<!DOCTYPE article PUBLIC '"'"'-//OASIS//DTD DocBook XML V4.5//EN'"'"' '"'"'http://www.oasis-open.org/docbook/xml/4.5/docbookx.dtd'"'"'>
+<article><title>test</title><para>hi</para></article>' > "${TEMP_DOC}"
+echo '<!DOCTYPE article PUBLIC '"'"'-//OASIS//DTD DocBook XML V4.5//EN'"'"' '"'"'http://www.oasis-open.org/docbook/xml/4.5/docbookx.dtd'"'"'>
+<article><title>test</title><para>hi</para></article>' > "${TEST_DOC}"
+
+java -jar "${JING_JAR}" "${TEMP_DOC}" "${DOCBOOK_DTD}" > /tmp/jing1.tmp
+java -jar "${JING_JAR}" "${TEST_DOC}" "${DOCBOOK_DTD}" > /tmp/jing2.tmp
+
+# The file names change
+sed -i -e 's#'${TEMP_DOC}'##g' /tmp/jing1.tmp
+sed -i -e 's#'${TEST_DOC}'##g' /tmp/jing2.tmp
+
+diff /tmp/jing1.tmp /tmp/jing2.tmp
+
+if [[ $? -ne 0 ]]
+then
+	echo "************ jing test 1 failed ************"
+	read -n 1 -s
+fi
+
+
+# find test 1
+#echo Starting find test 1. Grab a coffee, this will take a while.
+#find /mnt/pressgang -name 3737.xml
+
+#if [[ $? -ne 0 ]]
+#then
+#	echo "find test 1 failed"
+#fi

@@ -6,12 +6,12 @@
         http://docs.jboss.org/ironjacamar/schema/datasources_1_0.xsd">
     <datasource enabled="true"
                 jta="true"
-                jndi-name="java:jboss/restservertest"
+                jndi-name="java:jboss/servertest"
                 pool-name="testpool"
                 use-java-context="true"
                 use-ccm="true">
         <connection-url>
-            jdbc:h2:mem:restservertest;DB_CLOSE_ON_EXIT=FALSE
+            jdbc:h2:mem:servertest;DB_CLOSE_ON_EXIT=FALSE
         </connection-url>
         <driver>h2</driver>
         <transaction-isolation>TRANSACTION_READ_COMMITTED</transaction-isolation>
