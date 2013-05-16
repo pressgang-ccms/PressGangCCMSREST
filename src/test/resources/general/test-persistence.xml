@@ -4,8 +4,8 @@
              xsi:schemaLocation="http://java.sun.com/xml/ns/persistence http://java.sun.com/xml/ns/persistence/persistence_2_0.xsd"
              version="2.0">
 
-    <persistence-unit name="restservertest" transaction-type="JTA">
-        <jta-data-source>java:jboss/restservertest</jta-data-source>
+    <persistence-unit name="servertest" transaction-type="JTA">
+        <jta-data-source>java:jboss/servertest</jta-data-source>
         <jar-file>resource-server-provider-1.0-SNAPSHOT.jar</jar-file>
         <class>org.jboss.pressgang.ccms.model.BlobConstants</class>
         <class>org.jboss.pressgang.ccms.model.BugzillaBug</class>
@@ -59,7 +59,7 @@
         <class>org.jboss.pressgang.ccms.model.TranslatedTopicString</class>
         <class>org.jboss.pressgang.ccms.model.User</class>
         <class>org.jboss.pressgang.ccms.model.UserRole</class>
-        <class>org.jboss.pressgang.ccms.restserver.envers.LoggingRevisionEntity</class>
+        <class>org.jboss.pressgang.ccms.server.envers.LoggingRevisionEntity</class>
         <class>org.jboss.pressgang.belay.oauth2.resourceserver.data.model.OAuth2RSScope</class>
         <class>org.jboss.pressgang.belay.oauth2.resourceserver.data.model.OAuth2RSEndpoint</class>
         <exclude-unlisted-classes>true</exclude-unlisted-classes>

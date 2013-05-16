@@ -19,7 +19,7 @@
 
     <filter>
         <filter-name>compression</filter-name>
-        <filter-class>org.jboss.pressgang.ccms.restserver.servlet.filter.GZIPCompressionFilter</filter-class>
+        <filter-class>org.jboss.pressgang.ccms.server.servlet.filter.GZIPCompressionFilter</filter-class>
     </filter>
 
     <filter-mapping>
