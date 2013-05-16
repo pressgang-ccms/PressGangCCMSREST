@@ -1,8 +1,8 @@
 package org.jboss.pressgang.ccms.server.webdav.resources;
 
-import net.java.dev.webdav.jaxrs.xml.elements.MultiStatus;
-
 import javax.annotation.Nullable;
+
+import net.java.dev.webdav.jaxrs.xml.elements.MultiStatus;
 
 /**
  * A wrapper that contains the HTTP return code, and the returned MultiStatus.
@@ -16,6 +16,7 @@ public final class MultiStatusReturnValue {
         this.statusCode = statusCode;
         this.value = value;
     }
+
     public MultiStatusReturnValue(final int statusCode) {
         this.statusCode = statusCode;
         this.value = null;

@@ -27,7 +27,6 @@ public class TranslatedTopicStringV1Factory extends RESTDataObjectFactory<RESTTr
             final EntityManager entityManager) {
         assert entity != null : "Parameter entity can not be null";
         assert baseUrl != null : "Parameter baseUrl can not be null";
-        assert expand != null : "Parameter expand can not be null";
 
         final RESTTranslatedTopicStringV1 retValue = new RESTTranslatedTopicStringV1();
 

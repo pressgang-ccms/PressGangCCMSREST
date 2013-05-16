@@ -1,13 +1,6 @@
 package org.jboss.pressgang.ccms.server.webdav.utils;
 
-import org.jboss.pressgang.ccms.server.utils.JNDIUtilities;
-import org.jboss.resteasy.spi.InternalServerErrorException;
-
 import javax.annotation.Nullable;
-import javax.naming.NamingException;
-import javax.persistence.EntityManager;
-import javax.persistence.EntityManagerFactory;
-import javax.persistence.PersistenceUnit;
 import javax.servlet.http.HttpServletRequest;
 import javax.validation.constraints.NotNull;
 
@@ -18,7 +11,8 @@ public final class WebDavUtils {
 
     /**
      * See http://stackoverflow.com/questions/12491773/why-does-request-getremoteaddr-equals127-0-0-1-when-accessing-from-a-remot
-     * @param req The http request
+     *
+     * @param req                The http request
      * @param xForwaredForHeader The X-Forwarded-For header
      * @return The client IP address
      */

@@ -154,7 +154,7 @@ public class Constants {
     /**
      * The Content Specification tag name
      */
-    public static final String CONTENT_SPEC_TAG_NAME = "Content Specfication";
+    public static final String CONTENT_SPEC_TAG_NAME = "Content Specification";
 
     /**
      * The Added By Property Tag ID
