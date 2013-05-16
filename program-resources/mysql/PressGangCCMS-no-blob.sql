@@ -1,11 +1,11 @@
 -- phpMyAdmin SQL Dump
--- version 3.5.6
+-- version 3.5.3
 -- http://www.phpmyadmin.net
 --
 -- Host: localhost
--- Generation Time: Mar 12, 2013 at 03:47 AM
--- Server version: 5.5.30
--- PHP Version: 5.4.11
+-- Generation Time: Nov 08, 2012 at 01:13 PM
+-- Server version: 5.5.28
+-- PHP Version: 5.3.16
 
 SET time_zone = "+00:00";
 
@@ -18,7 +18,7 @@ SET time_zone = "+00:00";
 --
 -- Database: `PressGangCCMS`
 --
- CREATE DATABASE /*!32312 IF NOT EXISTS*/ `PressGangCCMS` /*!40100 DEFAULT CHARACTER SET utf8 */;
+CREATE DATABASE /*!32312 IF NOT EXISTS*/ `PressGangCCMS` /*!40100 DEFAULT CHARACTER SET utf8 */;
 
 USE PressGangCCMS;
 
@@ -29,15 +29,11 @@ USE PressGangCCMS;
 --
 
 CREATE TABLE IF NOT EXISTS `BlobConstants` (
-  `BlobConstantsID` INT(11)     NOT NULL AUTO_INCREMENT,
-  `ConstantName`    VARCHAR(45) NOT NULL,
-  `ConstantValue`   LONGBLOB,
+  `BlobConstantsID` int(11) NOT NULL AUTO_INCREMENT,
+  `ConstantName` varchar(45) NOT NULL,
+  `ConstantValue` longblob,
   PRIMARY KEY (`BlobConstantsID`)
-)
-  ENGINE = InnoDB
-  DEFAULT CHARSET = utf8
-  COMMENT = 'This table holds blob constants for things like image files '
-  AUTO_INCREMENT = 1;
+) ENGINE=InnoDB  DEFAULT CHARSET=utf8 COMMENT='This table holds blob constants for things like image files ' AUTO_INCREMENT=10 ;
 
 -- --------------------------------------------------------
 
@@ -46,18 +42,16 @@ CREATE TABLE IF NOT EXISTS `BlobConstants` (
 --
 
 CREATE TABLE IF NOT EXISTS `BlobConstants_AUD` (
-  `BlobConstantsID` INT(11) NOT NULL,
-  `REV`             INT(11) NOT NULL,
-  `REVEND`          INT(11) DEFAULT NULL,
-  `REVTYPE`         TINYINT(4) DEFAULT NULL,
-  `ConstantName`    VARCHAR(45) DEFAULT NULL,
-  `ConstantValue`   LONGBLOB,
-  PRIMARY KEY (`BlobConstantsID`, `REV`),
+  `BlobConstantsID` int(11) NOT NULL,
+  `REV` int(11) NOT NULL,
+  `REVEND` int(11) DEFAULT NULL,
+  `REVTYPE` tinyint(4) DEFAULT NULL,
+  `ConstantName` varchar(45) DEFAULT NULL,
+  `ConstantValue` longblob,
+  PRIMARY KEY (`BlobConstantsID`,`REV`),
   KEY `FKEEA7C6E3DF74E053` (`REV`),
   KEY `FKEEA7C6E3A7C21108` (`REVEND`)
-)
-  ENGINE = InnoDB
-  DEFAULT CHARSET = utf8;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
 -- --------------------------------------------------------
 
@@ -66,15 +60,13 @@ CREATE TABLE IF NOT EXISTS `BlobConstants_AUD` (
 --
 
 CREATE TABLE IF NOT EXISTS `BugzillaBug` (
-  `BugzillaBugID`         INT(11) NOT NULL AUTO_INCREMENT,
-  `BugzillaBugBuzillaID`  INT(11) NOT NULL,
-  `BugzillaBugSummary`    TEXT,
-  `BugzillaBugOpen`       BIT(1) DEFAULT NULL,
-  `BugzillaBugBugzillaID` INT(11) NOT NULL,
+  `BugzillaBugID` int(11) NOT NULL AUTO_INCREMENT,
+  `BugzillaBugBuzillaID` int(11) NOT NULL,
+  `BugzillaBugSummary` text,
+  `BugzillaBugOpen` bit(1) DEFAULT NULL,
+  `BugzillaBugBugzillaID` int(11) NOT NULL,
   PRIMARY KEY (`BugzillaBugID`)
-)
-  ENGINE = InnoDB
-  DEFAULT CHARSET = utf8;
+) ENGINE=InnoDB  DEFAULT CHARSET=utf8;
 
 -- --------------------------------------------------------
 
@@ -83,19 +75,17 @@ CREATE TABLE IF NOT EXISTS `BugzillaBug` (
 --
 
 CREATE TABLE IF NOT EXISTS `BugzillaBug_AUD` (
-  `BugzillaBugID`         INT(11) NOT NULL,
-  `REV`                   INT(11) NOT NULL,
-  `REVEND`                INT(11) DEFAULT NULL,
-  `REVTYPE`               TINYINT(4) DEFAULT NULL,
-  `BugzillaBugBugzillaID` INT(11) DEFAULT NULL,
-  `BugzillaBugOpen`       BIT(1) DEFAULT NULL,
-  `BugzillaBugSummary`    TEXT,
-  PRIMARY KEY (`BugzillaBugID`, `REV`),
+  `BugzillaBugID` int(11) NOT NULL,
+  `REV` int(11) NOT NULL,
+  `REVEND` int(11) DEFAULT NULL,
+  `REVTYPE` tinyint(4) DEFAULT NULL,
+  `BugzillaBugBugzillaID` int(11) DEFAULT NULL,
+  `BugzillaBugOpen` bit(1) DEFAULT NULL,
+  `BugzillaBugSummary` text,
+  PRIMARY KEY (`BugzillaBugID`,`REV`),
   KEY `FK8122C0E7DF74E053` (`REV`),
   KEY `FK8122C0E7A7C21108` (`REVEND`)
-)
-  ENGINE = InnoDB
-  DEFAULT CHARSET = utf8;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
 -- --------------------------------------------------------
 
@@ -104,18 +94,15 @@ CREATE TABLE IF NOT EXISTS `BugzillaBug_AUD` (
 --
 
 CREATE TABLE IF NOT EXISTS `Category` (
-  `CategoryID`          INT(11)      NOT NULL AUTO_INCREMENT,
-  `CategoryName`        VARCHAR(255) NOT NULL,
-  `CategoryDescription` TEXT,
-  `CategorySort`        INT(11) DEFAULT NULL,
-  `MutuallyExclusive`   TINYINT(1)   NOT NULL DEFAULT '0',
+  `CategoryID` int(11) NOT NULL AUTO_INCREMENT,
+  `CategoryName` varchar(255) NOT NULL,
+  `CategoryDescription` text,
+  `CategorySort` int(11) DEFAULT NULL,
+  `MutuallyExclusive` tinyint(1) NOT NULL DEFAULT '0',
   PRIMARY KEY (`CategoryID`),
   UNIQUE KEY `index3` (`CategoryName`),
   KEY `fk_Category_1` (`CategoryID`)
-)
-  ENGINE = InnoDB
-  DEFAULT CHARSET = utf8
-  COMMENT = 'Categories contain tags. The relationship between a tag and ';
+) ENGINE=InnoDB  DEFAULT CHARSET=utf8 COMMENT='Categories contain tags. The relationship between a tag and ';
 
 --
 -- Dumping data for table `Category`
@@ -164,20 +151,18 @@ INSERT INTO `Category` (`CategoryID`, `CategoryName`, `CategoryDescription`, `Ca
 --
 
 CREATE TABLE IF NOT EXISTS `Category_AUD` (
-  `CategoryID`          INT(11) NOT NULL,
-  `REV`                 INT(11) NOT NULL,
-  `REVEND`              INT(11) DEFAULT NULL,
-  `REVTYPE`             TINYINT(4) DEFAULT NULL,
-  `CategoryDescription` TEXT,
-  `CategoryName`        VARCHAR(255) DEFAULT NULL,
-  `CategorySort`        INT(11) DEFAULT NULL,
-  `MutuallyExclusive`   BIT(1) DEFAULT NULL,
-  PRIMARY KEY (`CategoryID`, `REV`),
+  `CategoryID` int(11) NOT NULL,
+  `REV` int(11) NOT NULL,
+  `REVEND` int(11) DEFAULT NULL,
+  `REVTYPE` tinyint(4) DEFAULT NULL,
+  `CategoryDescription` text,
+  `CategoryName` varchar(255) DEFAULT NULL,
+  `CategorySort` int(11) DEFAULT NULL,
+  `MutuallyExclusive` bit(1) DEFAULT NULL,
+  PRIMARY KEY (`CategoryID`,`REV`),
   KEY `FK23378FEFDF74E053` (`REV`),
   KEY `FK23378FEFA7C21108` (`REVEND`)
-)
-  ENGINE = InnoDB
-  DEFAULT CHARSET = utf8;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
 --
 -- Dumping data for table `Category_AUD`
@@ -293,46 +278,6 @@ CREATE TABLE IF NOT EXISTS `ContentSpecNode_AUD` (
   PRIMARY KEY (`ContentSpecNodeID`, `REV`),
   KEY `FK2311DEA7DE0FB5A8` (`REVEND`),
   KEY `FK2311DEA715C284F3` (`REV`)
-)
-  ENGINE = InnoDB
-  DEFAULT CHARSET = utf8;
-
--- --------------------------------------------------------
-
---
--- Table structure for table `ContentSpecToProject`
---
-
-CREATE TABLE IF NOT EXISTS `ContentSpecToProject` (
-  `ContentSpecToProjectID` INT(11) NOT NULL AUTO_INCREMENT,
-  `ContentSpecID`          INT(11) NOT NULL,
-  `ProjectID`              INT(11) NOT NULL,
-  PRIMARY KEY (`ContentSpecToProjectID`),
-  UNIQUE KEY `ContentSpecToProjectID` (`ContentSpecToProjectID`),
-  KEY `FKADEB4ACAFBF105B5` (`ContentSpecID`),
-  KEY `FKADEB4ACA66658A59` (`ProjectID`)
-)
-  ENGINE = InnoDB
-  DEFAULT CHARSET = utf8;
-
--- --------------------------------------------------------
-
---
--- Table structure for table `ContentSpecToProject_AUD`
---
-
-CREATE TABLE IF NOT EXISTS `ContentSpecToProject_AUD` (
-  `ContentSpecToProjectID` INT(11) NOT NULL,
-  `REV`                    INT(11) NOT NULL,
-  `REVTYPE`                TINYINT(4) DEFAULT NULL,
-  `REVEND`                 INT(11) DEFAULT NULL,
-  `ContentSpecID`          INT(11) DEFAULT NULL,
-  `ProjectID`              INT(11) DEFAULT NULL,
-  PRIMARY KEY (`ContentSpecToProjectID`, `REV`),
-  KEY `FKDE81039BDE0FB5A8` (`REVEND`),
-  KEY `FKDE81039B15C284F3` (`REV`),
-  KEY `ProjectID` (`ProjectID`),
-  KEY `ContentSpecID` (`ContentSpecID`)
 )
   ENGINE = InnoDB
   DEFAULT CHARSET = utf8;
@@ -613,15 +558,12 @@ CREATE TABLE IF NOT EXISTS `CSTranslatedNode_AUD` (
 --
 
 CREATE TABLE IF NOT EXISTS `Filter` (
-  `FilterID`          INT(11)      NOT NULL AUTO_INCREMENT,
-  `FilterName`        VARCHAR(255) NOT NULL,
-  `FilterDescription` TEXT,
+  `FilterID` int(11) NOT NULL AUTO_INCREMENT,
+  `FilterName` varchar(255) NOT NULL,
+  `FilterDescription` text,
   PRIMARY KEY (`FilterID`),
   UNIQUE KEY `index2` (`FilterName`)
-)
-  ENGINE = InnoDB
-  DEFAULT CHARSET = utf8
-  COMMENT = 'A filter is a saved query. A filter is made up of a row in t';
+) ENGINE=InnoDB  DEFAULT CHARSET=utf8 COMMENT='A filter is a saved query. A filter is made up of a row in t' ;
 
 -- --------------------------------------------------------
 
@@ -630,18 +572,16 @@ CREATE TABLE IF NOT EXISTS `Filter` (
 --
 
 CREATE TABLE IF NOT EXISTS `FilterCategory` (
-  `FilterCategoryID` INT(11) NOT NULL AUTO_INCREMENT,
-  `FilterID`         INT(11) NOT NULL,
-  `CategoryID`       INT(11) NOT NULL,
-  `CategoryState`    INT(11) NOT NULL DEFAULT '0',
-  `ProjectID`        INT(11) DEFAULT NULL,
+  `FilterCategoryID` int(11) NOT NULL AUTO_INCREMENT,
+  `FilterID` int(11) NOT NULL,
+  `CategoryID` int(11) NOT NULL,
+  `CategoryState` int(11) NOT NULL DEFAULT '0',
+  `ProjectID` int(11) DEFAULT NULL,
   PRIMARY KEY (`FilterCategoryID`),
   KEY `fk_FilterCategory_1` (`CategoryID`),
   KEY `fk_FilterCategory_2` (`FilterID`),
   KEY `FKBB45C0B6EB3A6876` (`ProjectID`)
-)
-  ENGINE = InnoDB
-  DEFAULT CHARSET = utf8;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
 -- --------------------------------------------------------
 
@@ -650,20 +590,18 @@ CREATE TABLE IF NOT EXISTS `FilterCategory` (
 --
 
 CREATE TABLE IF NOT EXISTS `FilterCategory_AUD` (
-  `FilterCategoryID` INT(11) NOT NULL,
-  `REV`              INT(11) NOT NULL,
-  `REVEND`           INT(11) DEFAULT NULL,
-  `REVTYPE`          TINYINT(4) DEFAULT NULL,
-  `CategoryState`    INT(11) DEFAULT NULL,
-  `CategoryID`       INT(11) DEFAULT NULL,
-  `FilterID`         INT(11) DEFAULT NULL,
-  `ProjectID`        INT(11) DEFAULT NULL,
-  PRIMARY KEY (`FilterCategoryID`, `REV`),
+  `FilterCategoryID` int(11) NOT NULL,
+  `REV` int(11) NOT NULL,
+  `REVEND` int(11) DEFAULT NULL,
+  `REVTYPE` tinyint(4) DEFAULT NULL,
+  `CategoryState` int(11) DEFAULT NULL,
+  `CategoryID` int(11) DEFAULT NULL,
+  `FilterID` int(11) DEFAULT NULL,
+  `ProjectID` int(11) DEFAULT NULL,
+  PRIMARY KEY (`FilterCategoryID`,`REV`),
   KEY `FK2C96A387DF74E053` (`REV`),
   KEY `FK2C96A387A7C21108` (`REVEND`)
-)
-  ENGINE = InnoDB
-  DEFAULT CHARSET = utf8;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
 -- --------------------------------------------------------
 
@@ -672,17 +610,15 @@ CREATE TABLE IF NOT EXISTS `FilterCategory_AUD` (
 --
 
 CREATE TABLE IF NOT EXISTS `FilterField` (
-  `FilterFieldID` INT(11)      NOT NULL AUTO_INCREMENT,
-  `FilterID`      INT(11)      NOT NULL,
-  `Field`         VARCHAR(255) NOT NULL,
-  `Value`         TEXT         NOT NULL,
-  `Description`   TEXT,
+  `FilterFieldID` int(11) NOT NULL AUTO_INCREMENT,
+  `FilterID` int(11) NOT NULL,
+  `Field` varchar(255) NOT NULL,
+  `Value` text NOT NULL,
+  `Description` text,
   PRIMARY KEY (`FilterFieldID`),
-  UNIQUE KEY `index3` (`Field`, `FilterID`),
+  UNIQUE KEY `index3` (`Field`,`FilterID`),
   KEY `fk_Filter_Field_1` (`FilterID`)
-)
-  ENGINE = InnoDB
-  DEFAULT CHARSET = utf8;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8 ;
 
 -- --------------------------------------------------------
 
@@ -691,20 +627,18 @@ CREATE TABLE IF NOT EXISTS `FilterField` (
 --
 
 CREATE TABLE IF NOT EXISTS `FilterField_AUD` (
-  `FilterFieldID` INT(11) NOT NULL,
-  `REV`           INT(11) NOT NULL,
-  `REVEND`        INT(11) DEFAULT NULL,
-  `REVTYPE`       TINYINT(4) DEFAULT NULL,
-  `Description`   TEXT,
-  `Field`         VARCHAR(255) DEFAULT NULL,
-  `Value`         TEXT,
-  `FilterID`      INT(11) DEFAULT NULL,
-  PRIMARY KEY (`FilterFieldID`, `REV`),
+  `FilterFieldID` int(11) NOT NULL,
+  `REV` int(11) NOT NULL,
+  `REVEND` int(11) DEFAULT NULL,
+  `REVTYPE` tinyint(4) DEFAULT NULL,
+  `Description` text,
+  `Field` varchar(255) DEFAULT NULL,
+  `Value` text,
+  `FilterID` int(11) DEFAULT NULL,
+  PRIMARY KEY (`FilterFieldID`,`REV`),
   KEY `FK9B8B3513DF74E053` (`REV`),
   KEY `FK9B8B3513A7C21108` (`REVEND`)
-)
-  ENGINE = InnoDB
-  DEFAULT CHARSET = utf8;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
 -- --------------------------------------------------------
 
@@ -713,17 +647,15 @@ CREATE TABLE IF NOT EXISTS `FilterField_AUD` (
 --
 
 CREATE TABLE IF NOT EXISTS `FilterLocale` (
-  `FilterLocaleID` INT(11)      NOT NULL AUTO_INCREMENT,
-  `LocaleName`     VARCHAR(255) NOT NULL,
-  `LocaleState`    INT(11)      NOT NULL,
-  `FilterID`       INT(11)      NOT NULL,
+  `FilterLocaleID` int(11) NOT NULL AUTO_INCREMENT,
+  `LocaleName` varchar(255) NOT NULL,
+  `LocaleState` int(11) NOT NULL,
+  `FilterID` int(11) NOT NULL,
   PRIMARY KEY (`FilterLocaleID`),
   UNIQUE KEY `FilterLocaleID` (`FilterLocaleID`),
-  UNIQUE KEY `LocaleName` (`LocaleName`, `FilterID`),
+  UNIQUE KEY `LocaleName` (`LocaleName`,`FilterID`),
   KEY `FK7CB6A01259256D82` (`FilterID`)
-)
-  ENGINE = InnoDB
-  DEFAULT CHARSET = utf8;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
 -- --------------------------------------------------------
 
@@ -732,19 +664,17 @@ CREATE TABLE IF NOT EXISTS `FilterLocale` (
 --
 
 CREATE TABLE IF NOT EXISTS `FilterLocale_AUD` (
-  `FilterLocaleID` INT(11) NOT NULL,
-  `REV`            INT(11) NOT NULL,
-  `REVTYPE`        TINYINT(4) DEFAULT NULL,
-  `REVEND`         INT(11) DEFAULT NULL,
-  `LocaleName`     VARCHAR(255) DEFAULT NULL,
-  `LocaleState`    INT(11) DEFAULT NULL,
-  `FilterID`       INT(11) DEFAULT NULL,
-  PRIMARY KEY (`FilterLocaleID`, `REV`),
+  `FilterLocaleID` int(11) NOT NULL,
+  `REV` int(11) NOT NULL,
+  `REVTYPE` tinyint(4) DEFAULT NULL,
+  `REVEND` int(11) DEFAULT NULL,
+  `LocaleName` varchar(255) DEFAULT NULL,
+  `LocaleState` int(11) DEFAULT NULL,
+  `FilterID` int(11) DEFAULT NULL,
+  PRIMARY KEY (`FilterLocaleID`,`REV`),
   KEY `FK19074E3A7C21108` (`REVEND`),
   KEY `FK19074E3DF74E053` (`REV`)
-)
-  ENGINE = InnoDB
-  DEFAULT CHARSET = utf8;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
 -- --------------------------------------------------------
 
@@ -753,17 +683,15 @@ CREATE TABLE IF NOT EXISTS `FilterLocale_AUD` (
 --
 
 CREATE TABLE IF NOT EXISTS `FilterOption` (
-  `FilterOptionID`    INT(11)      NOT NULL AUTO_INCREMENT,
-  `FilterOptionName`  VARCHAR(255) NOT NULL,
-  `FilterOptionValue` VARCHAR(255) NOT NULL,
-  `FilterID`          INT(11)      NOT NULL,
+  `FilterOptionID` int(11) NOT NULL AUTO_INCREMENT,
+  `FilterOptionName` varchar(255) NOT NULL,
+  `FilterOptionValue` varchar(255) NOT NULL,
+  `FilterID` int(11) NOT NULL,
   PRIMARY KEY (`FilterOptionID`),
   UNIQUE KEY `FilterOptionID` (`FilterOptionID`),
-  UNIQUE KEY `FilterOptionName` (`FilterOptionName`, `FilterID`),
+  UNIQUE KEY `FilterOptionName` (`FilterOptionName`,`FilterID`),
   KEY `FK81EB1A2D59256D82` (`FilterID`)
-)
-  ENGINE = InnoDB
-  DEFAULT CHARSET = utf8;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
 -- --------------------------------------------------------
 
@@ -772,19 +700,17 @@ CREATE TABLE IF NOT EXISTS `FilterOption` (
 --
 
 CREATE TABLE IF NOT EXISTS `FilterOption_AUD` (
-  `FilterOptionID`    INT(11) NOT NULL,
-  `REV`               INT(11) NOT NULL,
-  `REVEND`            INT(11) DEFAULT NULL,
-  `REVTYPE`           TINYINT(4) DEFAULT NULL,
-  `FilterOptionName`  VARCHAR(255) DEFAULT NULL,
-  `FilterOptionValue` VARCHAR(255) DEFAULT NULL,
-  `FilterID`          INT(11) DEFAULT NULL,
-  PRIMARY KEY (`FilterOptionID`, `REV`),
+  `FilterOptionID` int(11) NOT NULL,
+  `REV` int(11) NOT NULL,
+  `REVEND` int(11) DEFAULT NULL,
+  `REVTYPE` tinyint(4) DEFAULT NULL,
+  `FilterOptionName` varchar(255) DEFAULT NULL,
+  `FilterOptionValue` varchar(255) DEFAULT NULL,
+  `FilterID` int(11) DEFAULT NULL,
+  PRIMARY KEY (`FilterOptionID`,`REV`),
   KEY `FK574697EDF74E053` (`REV`),
   KEY `FK574697EA7C21108` (`REVEND`)
-)
-  ENGINE = InnoDB
-  DEFAULT CHARSET = utf8;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
 -- --------------------------------------------------------
 
@@ -793,16 +719,14 @@ CREATE TABLE IF NOT EXISTS `FilterOption_AUD` (
 --
 
 CREATE TABLE IF NOT EXISTS `FilterTag` (
-  `FilterTagID` INT(11) NOT NULL AUTO_INCREMENT,
-  `FilterID`    INT(11) NOT NULL,
-  `TagID`       INT(11) NOT NULL,
-  `TagState`    INT(11) NOT NULL DEFAULT '0',
+  `FilterTagID` int(11) NOT NULL AUTO_INCREMENT,
+  `FilterID` int(11) NOT NULL,
+  `TagID` int(11) NOT NULL,
+  `TagState` int(11) NOT NULL DEFAULT '0',
   PRIMARY KEY (`FilterTagID`),
   KEY `fk_FilterTag_1` (`TagID`),
   KEY `fk_FilterTag_2` (`FilterID`)
-)
-  ENGINE = InnoDB
-  DEFAULT CHARSET = utf8;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
 -- --------------------------------------------------------
 
@@ -811,19 +735,17 @@ CREATE TABLE IF NOT EXISTS `FilterTag` (
 --
 
 CREATE TABLE IF NOT EXISTS `FilterTag_AUD` (
-  `FilterTagID` INT(11) NOT NULL,
-  `REV`         INT(11) NOT NULL,
-  `REVEND`      INT(11) DEFAULT NULL,
-  `REVTYPE`     TINYINT(4) DEFAULT NULL,
-  `TagState`    INT(11) DEFAULT NULL,
-  `FilterID`    INT(11) DEFAULT NULL,
-  `TagID`       INT(11) DEFAULT NULL,
-  PRIMARY KEY (`FilterTagID`, `REV`),
+  `FilterTagID` int(11) NOT NULL,
+  `REV` int(11) NOT NULL,
+  `REVEND` int(11) DEFAULT NULL,
+  `REVTYPE` tinyint(4) DEFAULT NULL,
+  `TagState` int(11) DEFAULT NULL,
+  `FilterID` int(11) DEFAULT NULL,
+  `TagID` int(11) DEFAULT NULL,
+  PRIMARY KEY (`FilterTagID`,`REV`),
   KEY `FKA9A235B3DF74E053` (`REV`),
   KEY `FKA9A235B3A7C21108` (`REVEND`)
-)
-  ENGINE = InnoDB
-  DEFAULT CHARSET = utf8;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
 -- --------------------------------------------------------
 
@@ -832,18 +754,16 @@ CREATE TABLE IF NOT EXISTS `FilterTag_AUD` (
 --
 
 CREATE TABLE IF NOT EXISTS `Filter_AUD` (
-  `FilterID`          INT(11) NOT NULL,
-  `REV`               INT(11) NOT NULL,
-  `REVEND`            INT(11) DEFAULT NULL,
-  `REVTYPE`           TINYINT(4) DEFAULT NULL,
-  `FilterDescription` TEXT,
-  `FilterName`        VARCHAR(255) DEFAULT NULL,
-  PRIMARY KEY (`FilterID`, `REV`),
+  `FilterID` int(11) NOT NULL,
+  `REV` int(11) NOT NULL,
+  `REVEND` int(11) DEFAULT NULL,
+  `REVTYPE` tinyint(4) DEFAULT NULL,
+  `FilterDescription` text,
+  `FilterName` varchar(255) DEFAULT NULL,
+  PRIMARY KEY (`FilterID`,`REV`),
   KEY `FK1A445969DF74E053` (`REV`),
   KEY `FK1A445969A7C21108` (`REVEND`)
-)
-  ENGINE = InnoDB
-  DEFAULT CHARSET = utf8;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
 -- --------------------------------------------------------
 
@@ -852,12 +772,10 @@ CREATE TABLE IF NOT EXISTS `Filter_AUD` (
 --
 
 CREATE TABLE IF NOT EXISTS `ImageFile` (
-  `ImageFileID` INT(11) NOT NULL AUTO_INCREMENT,
-  `Description` TEXT,
+  `ImageFileID` int(11) NOT NULL AUTO_INCREMENT,
+  `Description` text,
   PRIMARY KEY (`ImageFileID`)
-)
-  ENGINE = InnoDB
-  DEFAULT CHARSET = utf8;
+) ENGINE=InnoDB  DEFAULT CHARSET=utf8;
 
 -- --------------------------------------------------------
 
@@ -866,17 +784,15 @@ CREATE TABLE IF NOT EXISTS `ImageFile` (
 --
 
 CREATE TABLE IF NOT EXISTS `ImageFile_AUD` (
-  `ImageFileID` INT(11) NOT NULL,
-  `REV`         INT(11) NOT NULL,
-  `REVEND`      INT(11) DEFAULT NULL,
-  `REVTYPE`     TINYINT(4) DEFAULT NULL,
-  `Description` TEXT,
-  PRIMARY KEY (`ImageFileID`, `REV`),
+  `ImageFileID` int(11) NOT NULL,
+  `REV` int(11) NOT NULL,
+  `REVEND` int(11) DEFAULT NULL,
+  `REVTYPE` tinyint(4) DEFAULT NULL,
+  `Description` text,
+  PRIMARY KEY (`ImageFileID`,`REV`),
   KEY `FK553BB7A8DF74E053` (`REV`),
   KEY `FK553BB7A8A7C21108` (`REVEND`)
-)
-  ENGINE = InnoDB
-  DEFAULT CHARSET = utf8;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
 -- --------------------------------------------------------
 
@@ -885,13 +801,11 @@ CREATE TABLE IF NOT EXISTS `ImageFile_AUD` (
 --
 
 CREATE TABLE IF NOT EXISTS `IntegerConstants` (
-  `IntegerConstantsID` INT(11)     NOT NULL AUTO_INCREMENT,
-  `ConstantName`       VARCHAR(45) NOT NULL,
-  `ConstantValue`      INT(11) DEFAULT NULL,
+  `IntegerConstantsID` int(11) NOT NULL AUTO_INCREMENT,
+  `ConstantName` varchar(45) NOT NULL,
+  `ConstantValue` int(11) DEFAULT NULL,
   PRIMARY KEY (`IntegerConstantsID`)
-)
-  ENGINE = InnoDB
-  DEFAULT CHARSET = utf8;
+) ENGINE=InnoDB  DEFAULT CHARSET=utf8;
 
 --
 -- Dumping data for table `IntegerConstants`
@@ -907,18 +821,16 @@ INSERT INTO `IntegerConstants` (`IntegerConstantsID`, `ConstantName`, `ConstantV
 --
 
 CREATE TABLE IF NOT EXISTS `IntegerConstants_AUD` (
-  `IntegerConstantsID` INT(11) NOT NULL,
-  `REV`                INT(11) NOT NULL,
-  `REVEND`             INT(11) DEFAULT NULL,
-  `REVTYPE`            TINYINT(4) DEFAULT NULL,
-  `ConstantName`       VARCHAR(45) DEFAULT NULL,
-  `ConstantValue`      INT(11) DEFAULT NULL,
-  PRIMARY KEY (`IntegerConstantsID`, `REV`),
+  `IntegerConstantsID` int(11) NOT NULL,
+  `REV` int(11) NOT NULL,
+  `REVEND` int(11) DEFAULT NULL,
+  `REVTYPE` tinyint(4) DEFAULT NULL,
+  `ConstantName` varchar(45) DEFAULT NULL,
+  `ConstantValue` int(11) DEFAULT NULL,
+  PRIMARY KEY (`IntegerConstantsID`,`REV`),
   KEY `FKA7C8D722DF74E053` (`REV`),
   KEY `FKA7C8D722A7C21108` (`REVEND`)
-)
-  ENGINE = InnoDB
-  DEFAULT CHARSET = utf8;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
 --
 -- Dumping data for table `IntegerConstants_AUD`
@@ -934,19 +846,17 @@ INSERT INTO `IntegerConstants_AUD` (`IntegerConstantsID`, `REV`, `REVEND`, `REVT
 --
 
 CREATE TABLE IF NOT EXISTS `LanguageImage` (
-  `LanguageImageID`  INT(11)      NOT NULL AUTO_INCREMENT,
-  `ImageFileID`      INT(11)      NOT NULL,
-  `ThumbnailData`    MEDIUMBLOB,
-  `ImageDataBase64`  MEDIUMBLOB,
-  `Locale`           VARCHAR(255) NOT NULL,
-  `OriginalFileName` VARCHAR(255) DEFAULT NULL,
-  `ImageData`        MEDIUMBLOB,
+  `LanguageImageID` int(11) NOT NULL AUTO_INCREMENT,
+  `ImageFileID` int(11) NOT NULL,
+  `ThumbnailData` mediumblob,
+  `ImageDataBase64` mediumblob,
+  `Locale` varchar(255) NOT NULL,
+  `OriginalFileName` varchar(255) DEFAULT NULL,
+  `ImageData` mediumblob,
   PRIMARY KEY (`LanguageImageID`),
   KEY `FK15D2ACC3E0AD6B52` (`ImageFileID`),
   KEY `FK15D2ACC34F65E026` (`ImageFileID`)
-)
-  ENGINE = InnoDB
-  DEFAULT CHARSET = utf8;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
 -- --------------------------------------------------------
 
@@ -955,24 +865,22 @@ CREATE TABLE IF NOT EXISTS `LanguageImage` (
 --
 
 CREATE TABLE IF NOT EXISTS `LanguageImage_AUD` (
-  `LanguageImageID`  INT(11) NOT NULL,
-  `REV`              INT(11) NOT NULL,
-  `REVTYPE`          TINYINT(4) DEFAULT NULL,
-  `REVEND`           INT(11) DEFAULT NULL,
-  `ImageData`        MEDIUMBLOB,
-  `ImageDataBase64`  MEDIUMBLOB,
-  `Locale`           VARCHAR(255) DEFAULT NULL,
-  `OriginalFileName` VARCHAR(255) DEFAULT NULL,
-  `ThumbnailData`    MEDIUMBLOB,
-  `ImageFileID`      INT(11) DEFAULT NULL,
-  PRIMARY KEY (`LanguageImageID`, `REV`),
+  `LanguageImageID` int(11) NOT NULL,
+  `REV` int(11) NOT NULL,
+  `REVTYPE` tinyint(4) DEFAULT NULL,
+  `REVEND` int(11) DEFAULT NULL,
+  `ImageData` mediumblob,
+  `ImageDataBase64` mediumblob,
+  `Locale` varchar(255) DEFAULT NULL,
+  `OriginalFileName` varchar(255) DEFAULT NULL,
+  `ThumbnailData` mediumblob,
+  `ImageFileID` int(11) DEFAULT NULL,
+  PRIMARY KEY (`LanguageImageID`,`REV`),
   KEY `FK5F84C114A7C21108` (`REVEND`),
   KEY `FK5F84C114DF74E053` (`REV`),
   KEY `FK5F84C11416D0EC8F` (`REVEND`),
   KEY `FK5F84C1144E83BBDA` (`REV`)
-)
-  ENGINE = InnoDB
-  DEFAULT CHARSET = utf8;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
 -- --------------------------------------------------------
 
@@ -981,13 +889,11 @@ CREATE TABLE IF NOT EXISTS `LanguageImage_AUD` (
 --
 
 CREATE TABLE IF NOT EXISTS `Project` (
-  `ProjectID`          INT(11)      NOT NULL AUTO_INCREMENT,
-  `ProjectName`        VARCHAR(255) NOT NULL,
-  `ProjectDescription` TEXT,
+  `ProjectID` int(11) NOT NULL AUTO_INCREMENT,
+  `ProjectName` varchar(255) NOT NULL,
+  `ProjectDescription` text,
   PRIMARY KEY (`ProjectID`)
-)
-  ENGINE = InnoDB
-  DEFAULT CHARSET = utf8;
+) ENGINE=InnoDB  DEFAULT CHARSET=utf8;
 
 -- --------------------------------------------------------
 
@@ -996,18 +902,16 @@ CREATE TABLE IF NOT EXISTS `Project` (
 --
 
 CREATE TABLE IF NOT EXISTS `Project_AUD` (
-  `ProjectID`          INT(11) NOT NULL,
-  `REV`                INT(11) NOT NULL,
-  `REVEND`             INT(11) DEFAULT NULL,
-  `REVTYPE`            TINYINT(4) DEFAULT NULL,
-  `ProjectDescription` TEXT,
-  `ProjectName`        VARCHAR(255) DEFAULT NULL,
-  PRIMARY KEY (`ProjectID`, `REV`),
+  `ProjectID` int(11) NOT NULL,
+  `REV` int(11) NOT NULL,
+  `REVEND` int(11) DEFAULT NULL,
+  `REVTYPE` tinyint(4) DEFAULT NULL,
+  `ProjectDescription` text,
+  `ProjectName` varchar(255) DEFAULT NULL,
+  PRIMARY KEY (`ProjectID`,`REV`),
   KEY `FK2B68EC4ADF74E053` (`REV`),
   KEY `FK2B68EC4AA7C21108` (`REVEND`)
-)
-  ENGINE = InnoDB
-  DEFAULT CHARSET = utf8;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
 -- --------------------------------------------------------
 
@@ -1016,24 +920,21 @@ CREATE TABLE IF NOT EXISTS `Project_AUD` (
 --
 
 CREATE TABLE IF NOT EXISTS `PropertyTag` (
-  `PropertyTagID`          INT(11)      NOT NULL AUTO_INCREMENT,
-  `PropertyTagName`        VARCHAR(255) NOT NULL,
-  `PropertyTagDescription` TEXT,
-  `PropertyTagRegex`       TEXT         NOT NULL,
-  `PropertyTagCanBeNull`   BIT(1)       NOT NULL,
-  `PropertyTagIsUnique`    BIT(1)       NOT NULL DEFAULT b'0',
+  `PropertyTagID` int(11) NOT NULL AUTO_INCREMENT,
+  `PropertyTagName` varchar(255) NOT NULL,
+  `PropertyTagDescription` text,
+  `PropertyTagRegex` text NOT NULL,
+  `PropertyTagCanBeNull` bit(1) NOT NULL,
+  `PropertyTagIsUnique` bit(1) NOT NULL DEFAULT b'0',
   PRIMARY KEY (`PropertyTagID`),
   UNIQUE KEY `PropertyTagUnique` (`PropertyTagName`)
-)
-  ENGINE = InnoDB
-  DEFAULT CHARSET = utf8;
+) ENGINE=InnoDB  DEFAULT CHARSET=utf8;
 
 --
 -- Dumping data for table `PropertyTag`
 --
 
-INSERT INTO `PropertyTag` (`PropertyTagID`, `PropertyTagName`, `PropertyTagDescription`, `PropertyTagRegex`, `PropertyTagCanBeNull`,
-                           `PropertyTagIsUnique`) VALUES
+INSERT INTO `PropertyTag` (`PropertyTagID`, `PropertyTagName`, `PropertyTagDescription`, `PropertyTagRegex`, `PropertyTagCanBeNull`, `PropertyTagIsUnqiue`) VALUES
 (1, 'First Name', '', '^[a-zA-Z][a-zA-Z\\-'' ]*[a-zA-Z ]$', b'0', b'0'),
 (2, 'Last Name', '', '^[a-zA-Z][a-zA-Z\\-'' ]*[a-zA-Z ]$', b'0', b'0'),
 (3, 'Email Address', '', '^([a-zA-Z0-9_\\-\\.]+)@((\\[[0-9]{1,3}\\.[0-9]{1,3}\\.[0-9]{1,3}\\.)|(([a-zA-Z0-9\\-]+\\.)+))([a-zA-Z]{2,4}|[0-9]{1,3})(\\]?)$', b'0', b'0'),
@@ -1064,14 +965,12 @@ INSERT INTO `PropertyTag` (`PropertyTagID`, `PropertyTagName`, `PropertyTagDescr
 --
 
 CREATE TABLE IF NOT EXISTS `PropertyTagCategory` (
-  `PropertyTagCategoryID`          INT(11)      NOT NULL AUTO_INCREMENT,
-  `PropertyTagCategoryName`        VARCHAR(255) NOT NULL,
-  `PropertyTagCategoryDescription` TEXT,
+  `PropertyTagCategoryID` int(11) NOT NULL AUTO_INCREMENT,
+  `PropertyTagCategoryName` varchar(255) NOT NULL,
+  `PropertyTagCategoryDescription` text,
   PRIMARY KEY (`PropertyTagCategoryID`),
   UNIQUE KEY `PropertyTagCategoryNameUnique` (`PropertyTagCategoryName`)
-)
-  ENGINE = InnoDB
-  DEFAULT CHARSET = utf8;
+) ENGINE=InnoDB  DEFAULT CHARSET=utf8;
 
 --
 -- Dumping data for table `PropertyTagCategory`
@@ -1091,18 +990,16 @@ INSERT INTO `PropertyTagCategory` (`PropertyTagCategoryID`, `PropertyTagCategory
 --
 
 CREATE TABLE IF NOT EXISTS `PropertyTagCategory_AUD` (
-  `PropertyTagCategoryID`          INT(11) NOT NULL,
-  `REV`                            INT(11) NOT NULL,
-  `REVEND`                         INT(11) DEFAULT NULL,
-  `REVTYPE`                        TINYINT(4) DEFAULT NULL,
-  `PropertyTagCategoryDescription` TEXT,
-  `PropertyTagCategoryName`        VARCHAR(255) DEFAULT NULL,
-  PRIMARY KEY (`PropertyTagCategoryID`, `REV`),
+  `PropertyTagCategoryID` int(11) NOT NULL,
+  `REV` int(11) NOT NULL,
+  `REVEND` int(11) DEFAULT NULL,
+  `REVTYPE` tinyint(4) DEFAULT NULL,
+  `PropertyTagCategoryDescription` text,
+  `PropertyTagCategoryName` varchar(255) DEFAULT NULL,
+  PRIMARY KEY (`PropertyTagCategoryID`,`REV`),
   KEY `FKE73E65D4DF74E053` (`REV`),
   KEY `FKE73E65D4A7C21108` (`REVEND`)
-)
-  ENGINE = InnoDB
-  DEFAULT CHARSET = utf8;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
 --
 -- Dumping data for table `PropertyTagCategory_AUD`
@@ -1122,17 +1019,14 @@ INSERT INTO `PropertyTagCategory_AUD` (`PropertyTagCategoryID`, `REV`, `REVEND`,
 --
 
 CREATE TABLE IF NOT EXISTS `PropertyTagToPropertyTagCategory` (
-  `PropertyTagToPropertyTagCategoryID` INT(11) NOT NULL AUTO_INCREMENT,
-  `PropertyTagID`                      INT(11) NOT NULL,
-  `PropertyTagCategoryID`              INT(11) NOT NULL,
-  `Sorting`                            INT(11) DEFAULT NULL,
+  `PropertyTagToPropertyTagCategoryID` int(11) NOT NULL AUTO_INCREMENT,
+  `PropertyTagID` int(11) NOT NULL,
+  `PropertyTagCategoryID` int(11) NOT NULL,
+  `Sorting` int(11) DEFAULT NULL,
   PRIMARY KEY (`PropertyTagToPropertyTagCategoryID`),
-  UNIQUE KEY `PropertyTagToPropertTagCategoryUnique` (`PropertyTagID`, `PropertyTagCategoryID`),
+  UNIQUE KEY `PropertyTagToPropertTagCategoryUnique` (`PropertyTagID`,`PropertyTagCategoryID`),
   KEY `PropertyTagToPropertTagCategoryFk2` (`PropertyTagCategoryID`)
-)
-  ENGINE = InnoDB
-  DEFAULT CHARSET = utf8
-  COMMENT = 'PropertyTagToPropertyTagCategoryID\nPropertyTagToPropertyTagC';
+) ENGINE=InnoDB  DEFAULT CHARSET=utf8 COMMENT='PropertyTagToPropertyTagCategoryID\nPropertyTagToPropertyTagC' ;
 
 --
 -- Dumping data for table `PropertyTagToPropertyTagCategory`
@@ -1162,19 +1056,17 @@ INSERT INTO `PropertyTagToPropertyTagCategory` (`PropertyTagToPropertyTagCategor
 --
 
 CREATE TABLE IF NOT EXISTS `PropertyTagToPropertyTagCategory_AUD` (
-  `PropertyTagToPropertyTagCategoryID` INT(11) NOT NULL,
-  `REV`                                INT(11) NOT NULL,
-  `REVEND`                             INT(11) DEFAULT NULL,
-  `REVTYPE`                            TINYINT(4) DEFAULT NULL,
-  `Sorting`                            INT(11) DEFAULT NULL,
-  `PropertyTagID`                      INT(11) DEFAULT NULL,
-  `PropertyTagCategoryID`              INT(11) DEFAULT NULL,
-  PRIMARY KEY (`PropertyTagToPropertyTagCategoryID`, `REV`),
+  `PropertyTagToPropertyTagCategoryID` int(11) NOT NULL,
+  `REV` int(11) NOT NULL,
+  `REVEND` int(11) DEFAULT NULL,
+  `REVTYPE` tinyint(4) DEFAULT NULL,
+  `Sorting` int(11) DEFAULT NULL,
+  `PropertyTagID` int(11) DEFAULT NULL,
+  `PropertyTagCategoryID` int(11) DEFAULT NULL,
+  PRIMARY KEY (`PropertyTagToPropertyTagCategoryID`,`REV`),
   KEY `FK95A54314DF74E053` (`REV`),
   KEY `FK95A54314A7C21108` (`REVEND`)
-)
-  ENGINE = InnoDB
-  DEFAULT CHARSET = utf8;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
 --
 -- Dumping data for table `PropertyTagToPropertyTagCategory_AUD`
@@ -1204,27 +1096,25 @@ INSERT INTO `PropertyTagToPropertyTagCategory_AUD` (`PropertyTagToPropertyTagCat
 --
 
 CREATE TABLE IF NOT EXISTS `PropertyTag_AUD` (
-  `PropertyTagID`          INT(11) NOT NULL,
-  `REV`                    INT(11) NOT NULL,
-  `REVEND`                 INT(11) DEFAULT NULL,
-  `REVTYPE`                TINYINT(4) DEFAULT NULL,
-  `PropertyTagCanBeNull`   BIT(1) DEFAULT NULL,
-  `PropertyTagDescription` TEXT,
-  `PropertyTagName`        VARCHAR(255) DEFAULT NULL,
-  `PropertyTagRegex`       TEXT,
-  `PropertyTagIsUnique`    BIT(1) DEFAULT NULL,
-  PRIMARY KEY (`PropertyTagID`, `REV`),
+  `PropertyTagID` int(11) NOT NULL,
+  `REV` int(11) NOT NULL,
+  `REVEND` int(11) DEFAULT NULL,
+  `REVTYPE` tinyint(4) DEFAULT NULL,
+  `PropertyTagCanBeNull` bit(1) DEFAULT NULL,
+  `PropertyTagDescription` text,
+  `PropertyTagName` varchar(255) DEFAULT NULL,
+  `PropertyTagRegex` text,
+  `PropertyTagIsUnique` bit(1) DEFAULT NULL,
+  PRIMARY KEY (`PropertyTagID`,`REV`),
   KEY `FK4825B8B6DF74E053` (`REV`),
   KEY `FK4825B8B6A7C21108` (`REVEND`)
-)
-  ENGINE = InnoDB
-  DEFAULT CHARSET = utf8;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
 --
 -- Dumping data for table `PropertyTag_AUD`
 --
 
-INSERT INTO `PropertyTag_AUD` (`PropertyTagID`, `REV`, `REVEND`, `REVTYPE`, `PropertyTagCanBeNull`, `PropertyTagDescription`, `PropertyTagName`, `PropertyTagRegex`, `PropertyTagIsUnique`) VALUES
+INSERT INTO `PropertyTag_AUD` (`PropertyTagID`, `REV`, `REVEND`, `REVTYPE`, `PropertyTagCanBeNull`, `PropertyTagDescription`, `PropertyTagName`, `PropertyTagRegex`, `PropertyTagIsUnqiue`) VALUES
 (1, 1, NULL, 0, b'0', '', 'First Name', '^[a-zA-Z][a-zA-Z\\-'' ]*[a-zA-Z ]$', b'0'),
 (2, 1, NULL, 0, b'0', '', 'Last Name', '^[a-zA-Z][a-zA-Z\\-'' ]*[a-zA-Z ]$', b'0'),
 (3, 1, NULL, 0, b'0', '', 'Email Address', '^([a-zA-Z0-9_\\-\\.]+)@((\\[[0-9]{1,3}\\.[0-9]{1,3}\\.[0-9]{1,3}\\.)|(([a-zA-Z0-9\\-]+\\.)+))([a-zA-Z]{2,4}|[0-9]{1,3})(\\]?)$', b'0'),
@@ -1255,14 +1145,12 @@ INSERT INTO `PropertyTag_AUD` (`PropertyTagID`, `REV`, `REVEND`, `REVTYPE`, `Pro
 --
 
 CREATE TABLE IF NOT EXISTS `RelationshipTag` (
-  `RelationshipTagID`          INT(11)      NOT NULL AUTO_INCREMENT,
-  `RelationshipTagName`        VARCHAR(255) NOT NULL,
-  `RelationshipTagDescription` TEXT,
+  `RelationshipTagID` int(11) NOT NULL AUTO_INCREMENT,
+  `RelationshipTagName` varchar(255) NOT NULL,
+  `RelationshipTagDescription` text,
   PRIMARY KEY (`RelationshipTagID`),
   UNIQUE KEY `RelationshipTagNameUnique` (`RelationshipTagName`)
-)
-  ENGINE = InnoDB
-  DEFAULT CHARSET = utf8;
+) ENGINE=InnoDB  DEFAULT CHARSET=utf8;
 
 --
 -- Dumping data for table `RelationshipTag`
@@ -1276,7 +1164,7 @@ INSERT INTO `RelationshipTag` (`RelationshipTagID`, `RelationshipTagName`, `Rela
 (5, 'Obsoletes', NULL),
 (6, 'Includes', NULL),
 (7, 'Has Prerequisite Of', NULL),
-(8, 'License', 'A relationship to a license agreement');
+(8, 'License', 'A relationship to a license agreemenet');
 
 -- --------------------------------------------------------
 
@@ -1285,18 +1173,16 @@ INSERT INTO `RelationshipTag` (`RelationshipTagID`, `RelationshipTagName`, `Rela
 --
 
 CREATE TABLE IF NOT EXISTS `RelationshipTag_AUD` (
-  `RelationshipTagId`          INT(11) NOT NULL,
-  `REV`                        INT(11) NOT NULL,
-  `REVEND`                     INT(11) DEFAULT NULL,
-  `REVTYPE`                    TINYINT(4) DEFAULT NULL,
-  `RelationshipTagDescription` TEXT,
-  `RelationshipTagName`        VARCHAR(255) DEFAULT NULL,
-  PRIMARY KEY (`RelationshipTagId`, `REV`),
+  `RelationshipTagId` int(11) NOT NULL,
+  `REV` int(11) NOT NULL,
+  `REVEND` int(11) DEFAULT NULL,
+  `REVTYPE` tinyint(4) DEFAULT NULL,
+  `RelationshipTagDescription` text,
+  `RelationshipTagName` varchar(255) DEFAULT NULL,
+  PRIMARY KEY (`RelationshipTagId`,`REV`),
   KEY `FK6CA98AF3DF74E053` (`REV`),
   KEY `FK6CA98AF3A7C21108` (`REVEND`)
-)
-  ENGINE = InnoDB
-  DEFAULT CHARSET = utf8;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
 --
 -- Dumping data for table `RelationshipTag_AUD`
@@ -1319,15 +1205,13 @@ INSERT INTO `RelationshipTag_AUD` (`RelationshipTagId`, `REV`, `REVEND`, `REVTYP
 --
 
 CREATE TABLE IF NOT EXISTS `REVINFO` (
-  `REV`      INT(11) NOT NULL AUTO_INCREMENT,
-  `REVTSTMP` BIGINT(20) DEFAULT NULL,
-  `Flag`     TINYINT(4) DEFAULT NULL,
-  `Message`  TEXT,
-  `UserName` VARCHAR(255) DEFAULT NULL,
+  `REV` int(11) NOT NULL AUTO_INCREMENT,
+  `REVTSTMP` bigint(20) DEFAULT NULL,
+  `Flag` tinyint(4) DEFAULT NULL,
+  `Message` text,
+  `UserName` varchar(255) DEFAULT NULL,
   PRIMARY KEY (`REV`)
-)
-  ENGINE = InnoDB
-  DEFAULT CHARSET = utf8;
+) ENGINE=InnoDB  DEFAULT CHARSET=utf8;
 
 --
 -- Dumping data for table `REVINFO`
@@ -1343,14 +1227,12 @@ INSERT INTO `REVINFO` (`REV`, `REVTSTMP`, `Flag`, `Message`, `UserName`) VALUES
 --
 
 CREATE TABLE IF NOT EXISTS `Role` (
-  `RoleID`      INT(11)      NOT NULL AUTO_INCREMENT,
-  `RoleName`    VARCHAR(255) NOT NULL,
-  `Description` TEXT,
+  `RoleID` int(11) NOT NULL AUTO_INCREMENT,
+  `RoleName` varchar(255) NOT NULL,
+  `Description` text,
   PRIMARY KEY (`RoleID`),
   UNIQUE KEY `index2` (`RoleName`)
-)
-  ENGINE = InnoDB
-  DEFAULT CHARSET = utf8;
+) ENGINE=InnoDB  DEFAULT CHARSET=utf8;
 
 --
 -- Dumping data for table `Role`
@@ -1374,19 +1256,17 @@ INSERT INTO `Role` (`RoleID`, `RoleName`, `Description`) VALUES
 --
 
 CREATE TABLE IF NOT EXISTS `RoleToRole` (
-  `RoleToRoleID`     INT(11) NOT NULL AUTO_INCREMENT,
-  `PrimaryRole`      INT(11) NOT NULL,
-  `RelationshipType` INT(11) NOT NULL,
-  `SecondaryRole`    INT(11) NOT NULL,
+  `RoleToRoleID` int(11) NOT NULL AUTO_INCREMENT,
+  `PrimaryRole` int(11) NOT NULL,
+  `RelationshipType` int(11) NOT NULL,
+  `SecondaryRole` int(11) NOT NULL,
   PRIMARY KEY (`RoleToRoleID`),
   UNIQUE KEY `RoleToRoleID` (`RoleToRoleID`),
-  UNIQUE KEY `PrimaryRole` (`PrimaryRole`, `SecondaryRole`, `RelationshipType`),
+  UNIQUE KEY `PrimaryRole` (`PrimaryRole`,`SecondaryRole`,`RelationshipType`),
   KEY `FKD0A0E5C78433D197` (`SecondaryRole`),
   KEY `FKD0A0E5C7844F7725` (`PrimaryRole`),
   KEY `fk_RoleToRole_1` (`RelationshipType`)
-)
-  ENGINE = InnoDB
-  DEFAULT CHARSET = utf8;
+) ENGINE=InnoDB  DEFAULT CHARSET=utf8 ;
 
 --
 -- Dumping data for table `RoleToRole`
@@ -1409,12 +1289,10 @@ INSERT INTO `RoleToRole` (`RoleToRoleID`, `PrimaryRole`, `RelationshipType`, `Se
 --
 
 CREATE TABLE IF NOT EXISTS `RoleToRoleRelationship` (
-  `RoleToRoleRelationshipID` INT(11) NOT NULL AUTO_INCREMENT,
-  `Description`              TEXT,
+  `RoleToRoleRelationshipID` int(11) NOT NULL AUTO_INCREMENT,
+  `Description` text,
   PRIMARY KEY (`RoleToRoleRelationshipID`)
-)
-  ENGINE = InnoDB
-  DEFAULT CHARSET = utf8;
+) ENGINE=InnoDB  DEFAULT CHARSET=utf8;
 
 --
 -- Dumping data for table `RoleToRoleRelationship`
@@ -1430,17 +1308,15 @@ INSERT INTO `RoleToRoleRelationship` (`RoleToRoleRelationshipID`, `Description`)
 --
 
 CREATE TABLE IF NOT EXISTS `RoleToRoleRelationship_AUD` (
-  `RoleToRoleRelationshipID` INT(11) NOT NULL,
-  `REV`                      INT(11) NOT NULL,
-  `REVEND`                   INT(11) DEFAULT NULL,
-  `REVTYPE`                  TINYINT(4) DEFAULT NULL,
-  `Description`              TEXT,
-  PRIMARY KEY (`RoleToRoleRelationshipID`, `REV`),
+  `RoleToRoleRelationshipID` int(11) NOT NULL,
+  `REV` int(11) NOT NULL,
+  `REVEND` int(11) DEFAULT NULL,
+  `REVTYPE` tinyint(4) DEFAULT NULL,
+  `Description` text,
+  PRIMARY KEY (`RoleToRoleRelationshipID`,`REV`),
   KEY `FKA68183F0DF74E053` (`REV`),
   KEY `FKA68183F0A7C21108` (`REVEND`)
-)
-  ENGINE = InnoDB
-  DEFAULT CHARSET = utf8;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
 --
 -- Dumping data for table `RoleToRoleRelationship_AUD`
@@ -1456,19 +1332,17 @@ INSERT INTO `RoleToRoleRelationship_AUD` (`RoleToRoleRelationshipID`, `REV`, `RE
 --
 
 CREATE TABLE IF NOT EXISTS `RoleToRole_AUD` (
-  `RoleToRoleID`     INT(11) NOT NULL,
-  `REV`              INT(11) NOT NULL,
-  `REVEND`           INT(11) DEFAULT NULL,
-  `REVTYPE`          TINYINT(4) DEFAULT NULL,
-  `PrimaryRole`      INT(11) DEFAULT NULL,
-  `RelationshipType` INT(11) DEFAULT NULL,
-  `SecondaryRole`    INT(11) DEFAULT NULL,
-  PRIMARY KEY (`RoleToRoleID`, `REV`),
+  `RoleToRoleID` int(11) NOT NULL,
+  `REV` int(11) NOT NULL,
+  `REVEND` int(11) DEFAULT NULL,
+  `REVTYPE` tinyint(4) DEFAULT NULL,
+  `PrimaryRole` int(11) DEFAULT NULL,
+  `RelationshipType` int(11) DEFAULT NULL,
+  `SecondaryRole` int(11) DEFAULT NULL,
+  PRIMARY KEY (`RoleToRoleID`,`REV`),
   KEY `FK26C6D818DF74E053` (`REV`),
   KEY `FK26C6D818A7C21108` (`REVEND`)
-)
-  ENGINE = InnoDB
-  DEFAULT CHARSET = utf8;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
 --
 -- Dumping data for table `RoleToRole_AUD`
@@ -1491,18 +1365,16 @@ INSERT INTO `RoleToRole_AUD` (`RoleToRoleID`, `REV`, `REVEND`, `REVTYPE`, `Prima
 --
 
 CREATE TABLE IF NOT EXISTS `Role_AUD` (
-  `RoleID`      INT(11) NOT NULL,
-  `REV`         INT(11) NOT NULL,
-  `REVEND`      INT(11) DEFAULT NULL,
-  `REVTYPE`     TINYINT(4) DEFAULT NULL,
-  `Description` TEXT,
-  `RoleName`    VARCHAR(255) DEFAULT NULL,
-  PRIMARY KEY (`RoleID`, `REV`),
+  `RoleID` int(11) NOT NULL,
+  `REV` int(11) NOT NULL,
+  `REVEND` int(11) DEFAULT NULL,
+  `REVTYPE` tinyint(4) DEFAULT NULL,
+  `Description` text,
+  `RoleName` varchar(255) DEFAULT NULL,
+  PRIMARY KEY (`RoleID`,`REV`),
   KEY `FKF3FAE767DF74E053` (`REV`),
   KEY `FKF3FAE767A7C21108` (`REVEND`)
-)
-  ENGINE = InnoDB
-  DEFAULT CHARSET = utf8;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
 --
 -- Dumping data for table `Role_AUD`
@@ -1526,14 +1398,11 @@ INSERT INTO `Role_AUD` (`RoleID`, `REV`, `REVEND`, `REVTYPE`, `Description`, `Ro
 --
 
 CREATE TABLE IF NOT EXISTS `StringConstants` (
-  `StringConstantsID` INT(11)     NOT NULL AUTO_INCREMENT,
-  `ConstantName`      VARCHAR(45) NOT NULL,
-  `ConstantValue`     MEDIUMTEXT,
+  `StringConstantsID` int(11) NOT NULL AUTO_INCREMENT,
+  `ConstantName` varchar(45) NOT NULL,
+  `ConstantValue` mediumtext,
   PRIMARY KEY (`StringConstantsID`)
-)
-  ENGINE = InnoDB
-  DEFAULT CHARSET = utf8
-  COMMENT = 'This table holds the string constants used by PressGang, inc';
+) ENGINE=InnoDB  DEFAULT CHARSET=utf8 COMMENT='This table holds the string constants used by Skynet, includ';
 
 --
 -- Dumping data for table `StringConstants`
@@ -1551,7 +1420,7 @@ INSERT INTO `StringConstants` (`StringConstantsID`, `ConstantName`, `ConstantVal
 (12, 'Reference Topic Template', '<section>\r\n	<!-- INJECT TITLE HERE -->\r\n	\r\n	<!-- A Reference provides additional information. Typically this is a table or variable list. -->\r\n	\r\n	<!-- Use the appropriate template and remove the other -->\r\n\r\n	<table id="table-">\r\n		<title>** table title **</title>\r\n		<tgroup align="left" cols="2" colsep="1" rowsep="1">\r\n			<colspec colname="c1" colwidth="1*"/>\r\n			<colspec colname="c2" colwidth="1*"/>\r\n			<thead>\r\n				<row>\r\n					<entry>** column 1 header **</entry>\r\n					<entry>** column 2 header **</entry>\r\n				</row>\r\n			</thead>\r\n			<tbody>\r\n				<row>\r\n					<entry>** column 1 content **</entry>\r\n					<entry>** column 2 content **</entry>\r\n				</row>\r\n			</tbody>\r\n		</tgroup>\r\n	</table>\r\n\r\n	<variablelist>\r\n		<varlistentry>\r\n			<term>** item name **</term>\r\n			<listitem>\r\n				<para>** item description **</para>\r\n			</listitem>\r\n		</varlistentry>\r\n	</variablelist>\r\n	\r\n</section>'),
 (13, 'Task Topic Template', '<section>\r\n	<!-- INJECT TITLE HERE -->\r\n\r\n	<!-- Uncomment prerequisites and result if required. -->\r\n	<!-- Replace all text marked with ** and leave other text -->\r\n\r\n	<!--\r\n     	<itemizedlist>\r\n        	<title>Prerequisites</title>\r\n        	** inject list items here **\r\n     	</itemizedlist>\r\n	-->\r\n\r\n	<procedure>\r\n        	<title>Task</title>   <!-- "Task" title only required to visually separate task from prerequisites -->\r\n		<step>\r\n           		<title>** step title **</title>\r\n           		<para>** step instructions **</para>\r\n        	</step>\r\n        	<step>\r\n           		<title>** step title **</title>\r\n           		<para>** explain sub steps **</para>\r\n           		<!-- or use <stepalternatives> for one step or the other -->\r\n           		<substeps>\r\n              			<step>\r\n                 			<para>** step instructions **</para>\r\n              			</step>\r\n              			<step>\r\n                 			<para>** step instructions **</para>\r\n              			</step>\r\n           		</substeps>\r\n        	</step>\r\n	</procedure>\r\n\r\n	<!--\r\n	<formalpara>\r\n        	<title>Result</title>\r\n        	<para>** describe resulting state **</para>\r\n	</formalpara>\r\n	-->\r\n</section>   '),
 (14, 'Concept Topic Template', '<section>\r\n	<!-- Topic type: Concept -->\r\n	\r\n	<!-- The 4 Characteristics of a Concept: -->\r\n	<!-- 1. It has single information role: "illuminate". -->\r\n	<!-- 2. It treats one, and only one subject. -->\r\n	<!-- 3. It builds a bridge from the known to the unknown. -->\r\n	<!-- 4. It reduces uncertainty. -->\r\n	\r\n	<!-- INJECT TITLE HERE -->\r\n	\r\n	<para>\r\n		The concept body goes here.\r\n	</para>\r\n</section>'),
-(19, 'en-US/StartPage.xml', '<?xml version=''1.0'' encoding=''utf-8'' ?>\n<!DOCTYPE authorgroup PUBLIC "-//OASIS//DTD DocBook XML V4.5//EN"\n"http://www.oasis-open.org/docbook/xml/4.5/docbookx.dtd" [\n<!ENTITY % BOOK_ENTITIES SYSTEM "Book.ent">\n%BOOK_ENTITIES;\n]>\n<chapter id="StartPage">\n	<title>EAP6 Alpha Documentation</title>\n	<section >\n		<title></title>\n		<para>\n			<inlinemediaobject>\n				<imageobject>\n					<imagedata fileref="Common_Content/images/title_logo.svg" format="SVG" />\n				</imageobject>\n			</inlinemediaobject>\n		</para>\n	</section>\n</chapter>'),
+(15, 'en-US/Revision_History.xml', '<appendix id="appe-test-Revision_History">\r\n	<title>Revision History</title>\r\n	<simpara>\r\n		<revhistory>\r\n		</revhistory>\r\n	</simpara>\r\n</appendix>'),
 (20, 'en-US/images/jboss.svg', '<?xml version="1.0" encoding="UTF-8" standalone="no"?>\n<!-- Created with Inkscape (http://www.inkscape.org/) -->\n\n<svg\n   xmlns:svg="http://www.w3.org/2000/svg"\n   xmlns="http://www.w3.org/2000/svg"\n   version="1.0"\n   width="265"\n   height="150"\n   id="svg2898">\n  <defs\n     id="defs21" />\n  <g\n     transform="scale(1.2295957,1.2260211)"\n     id="g2622">\n    <g\n       id="g2624">\n      <path\n         d="m 140.253,110.221 2.945,5.891 -2.492,0 -2.863,-5.705 -3.255,0 0,5.705 -2.121,0 0,-14.419 6.323,0 c 2.514,0 4.635,1.339 4.635,4.306 0,2.306 -1.215,3.728 -3.172,4.222 z m -1.463,-6.489 -4.202,0 0,4.635 4.202,0 c 1.442,0 2.451,-0.741 2.451,-2.307 0,-1.504 -0.988,-2.328 -2.451,-2.328 z"\n         id="path2626"\n         style="fill:#cc0000" />\n      <path\n         d="m 155.164,111.458 -7.148,0 c 0.227,2.08 1.401,2.966 2.72,2.966 0.906,0 1.627,-0.329 2.348,-0.865 l 1.257,1.359 c -0.947,0.906 -2.08,1.421 -3.729,1.421 -2.533,0 -4.676,-2.039 -4.676,-5.623 0,-3.667 1.937,-5.645 4.737,-5.645 3.069,0 4.553,2.492 4.553,5.418 0,0.39 -0.041,0.742 -0.062,0.969 z m -4.635,-4.471 c -1.422,0 -2.287,0.988 -2.473,2.719 l 5.026,0 c -0.102,-1.483 -0.802,-2.719 -2.553,-2.719 z"\n         id="path2628"\n         style="fill:#cc0000" />\n      <path\n         d="m 164.37,116.112 0,-1.029 c -0.783,0.721 -1.689,1.256 -2.822,1.256 -2.328,0 -4.161,-1.688 -4.161,-5.809 0,-3.708 2.019,-5.459 4.264,-5.459 1.092,0 2.122,0.577 2.72,1.236 l 0,-4.12 2.101,-1.092 0,15.017 -2.102,0 z m 0.021,-7.662 c -0.474,-0.639 -1.463,-1.422 -2.534,-1.422 -1.524,0 -2.348,1.154 -2.348,3.44 0,2.719 0.865,3.913 2.431,3.913 1.009,0 1.895,-0.68 2.451,-1.379 l 0,-4.552 z"\n         id="path2630"\n         style="fill:#cc0000" />\n      <path\n         d="m 184.266,116.112 0,-6.468 -6.634,0 0,6.468 -2.162,0 0,-14.419 2.162,0 0,5.829 6.634,0 0,-5.829 2.162,0 0,14.419 -2.162,0 z"\n         id="path2632"\n         style="fill:#cc0000" />\n      <path\n         d="m 196.065,116.112 0,-1.07 c -0.741,0.741 -1.792,1.297 -2.966,1.297 -1.751,0 -3.749,-0.988 -3.749,-3.646 0,-2.41 1.854,-3.502 4.305,-3.502 1.01,0 1.813,0.144 2.41,0.412 l 0,-0.804 c 0,-1.174 -0.721,-1.833 -2.039,-1.833 -1.112,0 -1.978,0.206 -2.822,0.68 l -0.824,-1.606 c 1.03,-0.639 2.184,-0.969 3.708,-0.969 2.41,0 4.059,1.174 4.059,3.626 l 0,7.415 -2.082,0 0,0 z m 0,-4.613 c -0.576,-0.289 -1.318,-0.475 -2.472,-0.475 -1.359,0 -2.225,0.618 -2.225,1.607 0,1.07 0.68,1.792 2.08,1.792 1.134,0 2.122,-0.7 2.616,-1.38 l 0,-1.544 0.001,0 z"\n         id="path2634"\n         style="fill:#cc0000" />\n      <path\n         d="m 206.363,115.844 c -0.516,0.289 -1.236,0.494 -2.081,0.494 -1.504,0 -2.431,-0.926 -2.431,-2.863 l 0,-6.241 -1.545,0 0,-1.937 1.545,0 0,-3.09 2.081,-1.112 0,4.202 2.678,0 0,1.937 -2.678,0 0,5.871 c 0,1.009 0.329,1.298 1.112,1.298 0.556,0 1.174,-0.206 1.565,-0.433 l -0.246,1.874 z"\n         id="path2636"\n         style="fill:#cc0000" />\n    </g>\n    <g\n       id="g2638">\n      <path\n         d="m 106.389,51.025 c 3.57,-1.787 6,-5.101 6,-9.181 0,-9.509 -8.614,-11.555 -16.465,-11.421 l -21.186,0 -0.121,0 -11.746,0 0,30.362 c 0,4.409 -1.537,5.936 -4.274,5.936 -2.941,0 -4.595,-1.654 -4.595,-4.658 l 0,-4.205 -11.17,0 0,1.969 c 0,10.154 3.892,17.099 15.952,17.099 9.837,0 15.038,-4.356 15.833,-12.958 l 0,12.004 21.879,0 c 9.761,0 17.737,-3.315 17.737,-14.161 0,-5.165 -2.991,-9.376 -7.844,-10.786 z m -19.902,-11.42 9.181,0 c 2.493,0 4.852,1.092 4.852,4.405 0,3.253 -2.806,4.338 -4.852,4.338 l -9.181,0 0,-8.743 z m 9.502,26.864 -9.502,0 0,-10.469 9.502,0 c 3.576,0 6.384,1.345 6.384,5.355 0,3.77 -2.617,5.114 -6.384,5.114 z"\n         id="path2640"\n         style="fill:#cc0000" />\n      <path\n         d="m 90.067,108.399 c 0,-7.695 -6.245,-13.947 -13.944,-13.947 -7.714,0 -13.955,6.252 -13.955,13.947 0,7.709 6.241,13.948 13.955,13.948 7.699,0 13.944,-6.239 13.944,-13.948 z"\n         id="path2642"\n         style="fill:#cc0000" />\n      <path\n         d="m 53.012,103.999 c 0,-6.818 -5.533,-12.349 -12.357,-12.349 -6.823,0 -12.352,5.53 -12.352,12.349 0,6.824 5.528,12.357 12.352,12.357 6.824,0 12.357,-5.533 12.357,-12.357 z"\n         id="path2644"\n         style="fill:#cc0000" />\n      <path\n         d="m 25.097,81.68 c 0,-6.157 -4.984,-11.151 -11.15,-11.151 -6.168,0 -11.16,4.994 -11.16,11.151 0,6.174 4.992,11.168 11.16,11.168 6.165,0 11.15,-4.994 11.15,-11.168 z"\n         id="path2646"\n         style="fill:#cc0000" />\n      <path\n         d="m 19.918,50.615 c 0,-5.506 -4.455,-9.956 -9.955,-9.956 -5.499,0 -9.963,4.449 -9.963,9.956 0,5.5 4.464,9.964 9.963,9.964 5.5,0 9.955,-4.465 9.955,-9.964 z"\n         id="path2648"\n         style="fill:#cc0000" />\n      <path\n         d="m 33.88,22.719 c 0,-4.619 -3.756,-8.366 -8.372,-8.366 -4.619,0 -8.369,3.747 -8.369,8.366 0,4.623 3.75,8.367 8.369,8.367 4.616,0 8.372,-3.744 8.372,-8.367 z"\n         id="path2650"\n         style="fill:#cc0000" />\n      <path\n         d="m 57.78,10.364 c 0,-4.18 -3.385,-7.571 -7.566,-7.571 -4.18,0 -7.571,3.391 -7.571,7.571 0,4.187 3.392,7.578 7.571,7.578 4.182,0 7.566,-3.391 7.566,-7.578 z"\n         id="path2652"\n         style="fill:#cc0000" />\n      <path\n         d="M 82.891,6.377 C 82.891,2.855 80.042,0 76.517,0 73.001,0 70.14,2.855 70.14,6.377 c 0,3.526 2.861,6.38 6.377,6.38 3.525,0 6.374,-2.854 6.374,-6.38 z"\n         id="path2654"\n         style="fill:#cc0000" />\n    </g>\n    <g\n       id="g2656">\n      <g\n         id="g2658">\n        <path\n           d="m 161.415,62.895 c -5.338,-1.352 -11.706,-1.777 -14.243,-6.153 0.121,0.882 0.204,1.78 0.204,2.706 0,1.985 -0.299,3.867 -0.84,5.619 l 9.258,0 c 0,1.654 0.71,2.866 1.788,3.695 1.022,0.77 2.494,1.142 4.022,1.142 2.097,0 5.102,-0.884 5.102,-3.504 0,-2.545 -3.385,-3.064 -5.291,-3.505 z"\n           id="path2660"\n           style="fill:none" />\n        <path\n           d="m 129.896,50.193 c -5.045,0 -6.578,5.051 -6.578,9.255 0,4.217 1.533,9.187 6.578,9.187 5.039,0 6.633,-4.97 6.633,-9.187 -0.001,-4.204 -1.594,-9.255 -6.633,-9.255 z"\n           id="path2662"\n           style="fill:none" />\n        <path\n           d="M 192.015,62.895 C 185.337,61.204 176.724,60.97 176.338,52.616 l -9.62,0 c 0,-1.396 -0.512,-2.29 -1.396,-2.866 -0.903,-0.569 -2.107,-0.827 -3.447,-0.827 -1.781,0 -4.992,0.188 -4.992,2.487 0,3.132 7.273,3.705 12.247,4.787 6.649,1.335 8.399,6.118 8.423,8.869 l 8.842,0 c 0,1.654 0.71,2.866 1.788,3.695 1.023,0.77 2.494,1.142 4.021,1.142 2.097,0 5.103,-0.884 5.103,-3.504 -10e-4,-2.544 -3.385,-3.063 -5.292,-3.504 z"\n           id="path2664"\n           style="fill:none" />\n        <path\n           d="m 199.729,56.198 c -4.975,-1.082 -12.581,-1.654 -12.581,-4.787 0,-2.3 2.879,-2.487 4.66,-2.487 1.339,0 2.544,0.258 3.447,0.827 0.884,0.576 1.396,1.47 1.396,2.866 l 10.019,0 c -0.385,-8.606 -7.98,-10.714 -15.239,-10.714 -6.048,0 -13.905,1.882 -14.992,8.54 -1.485,-6.781 -8.344,-8.54 -14.943,-8.54 -6.51,0 -15.461,2.172 -15.461,10.146 0,0.141 0.021,0.261 0.024,0.398 -2.525,-6.296 -8.49,-10.544 -16.163,-10.544 -8.299,0 -14.504,4.847 -16.602,11.996 1.604,2.158 2.448,4.973 2.448,7.912 0,2.413 -0.384,4.549 -1.111,6.419 2.853,5.273 8.343,8.696 15.265,8.696 7.354,0 13.123,-3.872 15.815,-9.719 1.414,7.509 8.762,9.719 15.957,9.719 6.187,0 13.02,-2.027 15.179,-7.772 2.235,5.949 8.89,7.772 15.421,7.772 7.462,0 15.886,-2.931 15.886,-11.801 -0.001,-2.742 -1.731,-7.583 -8.425,-8.927 z m -69.833,12.437 c -5.045,0 -6.578,-4.97 -6.578,-9.187 0,-4.205 1.533,-9.255 6.578,-9.255 5.039,0 6.633,5.051 6.633,9.255 -0.001,4.218 -1.594,9.187 -6.633,9.187 z m 31.708,1.269 c -1.528,0 -3,-0.372 -4.022,-1.142 -1.078,-0.829 -1.788,-2.041 -1.788,-3.695 l -9.258,0 c 0.541,-1.752 0.84,-3.634 0.84,-5.619 0,-0.926 -0.083,-1.824 -0.204,-2.706 2.537,4.375 8.905,4.801 14.243,6.153 1.906,0.441 5.291,0.96 5.291,3.505 0,2.62 -3.005,3.504 -5.102,3.504 z m 30.599,0 c -1.527,0 -2.998,-0.372 -4.021,-1.142 -1.078,-0.829 -1.788,-2.041 -1.788,-3.695 l -8.842,0 c -0.023,-2.751 -1.773,-7.534 -8.423,-8.869 -4.974,-1.082 -12.247,-1.654 -12.247,-4.787 0,-2.3 3.211,-2.487 4.992,-2.487 1.34,0 2.544,0.258 3.447,0.827 0.885,0.576 1.396,1.47 1.396,2.866 l 9.62,0 c 0.386,8.354 8.999,8.587 15.677,10.279 1.907,0.441 5.291,0.96 5.291,3.505 0.001,2.619 -3.005,3.503 -5.102,3.503 z"\n           id="path2666"\n           style="fill:#60605b" />\n      </g>\n      <path\n         d="m 209.127,36.16 0.965,0 1.452,2.386 0.941,0 -1.571,-2.43 c 0.807,-0.102 1.42,-0.53 1.42,-1.509 0,-1.099 -0.638,-1.573 -1.938,-1.573 l -2.102,0 0,5.512 0.833,0 0,-2.386 z m 0,-0.714 0,-1.711 1.143,0 c 0.567,0 1.2,0.132 1.2,0.815 0,0.847 -0.633,0.896 -1.339,0.896 l -1.004,0 z"\n         id="path2668"\n         style="fill:#60605b" />\n      <path\n         d="m 215.518,35.8 c 0,2.98 -2.42,5.392 -5.399,5.392 -2.986,0 -5.406,-2.412 -5.406,-5.392 0,-2.987 2.42,-5.405 5.406,-5.405 2.979,0.001 5.399,2.418 5.399,5.405 z m -5.4,-4.444 c -2.464,0 -4.452,1.982 -4.452,4.444 0,2.451 1.988,4.432 4.452,4.432 2.45,0 4.438,-1.981 4.438,-4.432 10e-4,-2.462 -1.988,-4.444 -4.438,-4.444 z"\n         id="path2670"\n         style="fill:#60605b" />\n    </g>\n    <g\n       id="g2672">\n      <path\n         d="m 108.227,116.338 c -1.092,0 -2.122,-0.576 -2.719,-1.235 l 0,1.009 -2.102,0 0,-13.925 2.102,-1.092 0,5.232 c 0.782,-0.722 1.688,-1.257 2.822,-1.257 2.327,0 4.16,1.689 4.16,5.809 0,3.709 -2.018,5.459 -4.263,5.459 z m -0.289,-9.31 c -1.01,0 -1.896,0.68 -2.451,1.381 l 0,4.552 c 0.474,0.639 1.462,1.421 2.533,1.421 1.524,0 2.349,-1.152 2.349,-3.439 0,-2.72 -0.865,-3.915 -2.431,-3.915 z"\n         id="path2674"\n         style="fill:#60605b" />\n      <path\n         d="m 118.915,119.923 -2.245,0 1.565,-4.017 -3.976,-10.609 2.328,0 1.771,5.295 c 0.329,0.947 0.824,2.554 0.947,3.15 0.186,-0.638 0.639,-2.183 0.968,-3.109 l 1.834,-5.336 2.245,0 -5.437,14.626 z"\n         id="path2676"\n         style="fill:#60605b" />\n    </g>\n  </g>\n</svg>'),
 (30, 'Docbook Elements To Ignore For Spelling', 'abbrev\r\naccel\r\nacronym\r\nclassname\r\ncode\r\ncommand\r\ncomputeroutput\r\nfilename\r\nforeignphrase\r\nguimenu\r\nhardware\r\ninterfacename\r\nkeycap\r\nliteral\r\nmenuchoice\r\noption\r\norgname\r\npackage\r\nparameter\r\nprogramlisting\r\nreplaceable\r\nscreen\r\nsgmltag\r\nsurname\r\nuserinput'),
 (31, 'EmptyTopicError.xml', '<section>\r\n  <title><!-- Inject TopicTitle --></title>\r\n  <note>\r\n    <para>This topic has no XML content, and is included here as a placeholder.</para>\r\n  </note>\r\n</section>'),
@@ -1590,18 +1459,16 @@ INSERT INTO `StringConstants` (`StringConstantsID`, `ConstantName`, `ConstantVal
 --
 
 CREATE TABLE IF NOT EXISTS `StringConstants_AUD` (
-  `StringConstantsID` INT(11) NOT NULL,
-  `REV`               INT(11) NOT NULL,
-  `REVEND`            INT(11) DEFAULT NULL,
-  `REVTYPE`           TINYINT(4) DEFAULT NULL,
-  `ConstantName`      VARCHAR(45) DEFAULT NULL,
-  `ConstantValue`     MEDIUMTEXT,
-  PRIMARY KEY (`StringConstantsID`, `REV`),
+  `StringConstantsID` int(11) NOT NULL,
+  `REV` int(11) NOT NULL,
+  `REVEND` int(11) DEFAULT NULL,
+  `REVTYPE` tinyint(4) DEFAULT NULL,
+  `ConstantName` varchar(45) DEFAULT NULL,
+  `ConstantValue` mediumtext,
+  PRIMARY KEY (`StringConstantsID`,`REV`),
   KEY `FK399D7AEFDF74E053` (`REV`),
   KEY `FK399D7AEFA7C21108` (`REVEND`)
-)
-  ENGINE = InnoDB
-  DEFAULT CHARSET = utf8;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
 --
 -- Dumping data for table `StringConstants_AUD`
@@ -1658,16 +1525,14 @@ INSERT INTO `StringConstants_AUD` (`StringConstantsID`, `REV`, `REVEND`, `REVTYP
 --
 
 CREATE TABLE IF NOT EXISTS `Tag` (
-  `TagID`          INT(11)      NOT NULL AUTO_INCREMENT,
-  `TagName`        VARCHAR(255) NOT NULL,
-  `TagDescription` TEXT,
+  `TagID` int(11) NOT NULL AUTO_INCREMENT,
+  `TagName` varchar(255) NOT NULL,
+  `TagDescription` text,
   PRIMARY KEY (`TagID`),
   UNIQUE KEY `index4` (`TagName`),
   KEY `fk_Tag_1` (`TagID`),
   KEY `fk_Tag_2` (`TagID`)
-)
-  ENGINE = InnoDB
-  DEFAULT CHARSET = utf8;
+) ENGINE=InnoDB  DEFAULT CHARSET=utf8;
 
 --
 -- Dumping data for table `Tag`
@@ -1687,14 +1552,12 @@ INSERT INTO `Tag` (`TagID`, `TagName`, `TagDescription`) VALUES
 --
 
 CREATE TABLE IF NOT EXISTS `TagExclusion` (
-  `Tag1ID` INT(11) NOT NULL,
-  `Tag2ID` INT(11) NOT NULL,
-  PRIMARY KEY (`Tag1ID`, `Tag2ID`),
+  `Tag1ID` int(11) NOT NULL,
+  `Tag2ID` int(11) NOT NULL,
+  PRIMARY KEY (`Tag1ID`,`Tag2ID`),
   KEY `fk_TagExclusion_1` (`Tag1ID`),
   KEY `fk_TagExclusion_2` (`Tag2ID`)
-)
-  ENGINE = InnoDB
-  DEFAULT CHARSET = utf8;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
 -- --------------------------------------------------------
 
@@ -1703,17 +1566,15 @@ CREATE TABLE IF NOT EXISTS `TagExclusion` (
 --
 
 CREATE TABLE IF NOT EXISTS `TagExclusion_AUD` (
-  `REV`     INT(11) NOT NULL,
-  `REVEND`  INT(11) DEFAULT NULL,
-  `Tag1ID`  INT(11) NOT NULL,
-  `Tag2ID`  INT(11) NOT NULL,
-  `REVTYPE` TINYINT(4) DEFAULT NULL,
-  PRIMARY KEY (`REV`, `Tag1ID`, `Tag2ID`),
+  `REV` int(11) NOT NULL,
+  `REVEND` int(11) DEFAULT NULL,
+  `Tag1ID` int(11) NOT NULL,
+  `Tag2ID` int(11) NOT NULL,
+  `REVTYPE` tinyint(4) DEFAULT NULL,
+  PRIMARY KEY (`REV`,`Tag1ID`,`Tag2ID`),
   KEY `FK5BBFB345DF74E053` (`REV`),
   KEY `FK5BBFB345A7C21108` (`REVEND`)
-)
-  ENGINE = InnoDB
-  DEFAULT CHARSET = utf8;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
 -- --------------------------------------------------------
 
@@ -1722,22 +1583,17 @@ CREATE TABLE IF NOT EXISTS `TagExclusion_AUD` (
 --
 
 CREATE TABLE IF NOT EXISTS `TagToCategory` (
-  `TagToCategoryID` INT(11) NOT NULL AUTO_INCREMENT,
-  `TagID`           INT(11) NOT NULL
-  COMMENT 'References the TagID that is to be placed into the Category.',
-  `CategoryID`      INT(11) NOT NULL
-  COMMENT 'References the CategoryID that the Tag is to be made a child of.',
-  `Sorting`         INT(11) DEFAULT NULL
-  COMMENT 'Defines the sorting order of the Tag in the Category.',
+  `TagToCategoryID` int(11) NOT NULL AUTO_INCREMENT,
+  `TagID` int(11) NOT NULL COMMENT 'References the TagID that is to be placed into the Category.',
+  `CategoryID` int(11) NOT NULL COMMENT 'References the CategoryID that the Tag is to be made a child of.',
+  `Sorting` int(11) DEFAULT NULL COMMENT 'Defines the sorting order of the Tag in the Category.',
   PRIMARY KEY (`TagToCategoryID`),
-  UNIQUE KEY `Unique` (`TagID`, `CategoryID`),
+  UNIQUE KEY `Unique` (`TagID`,`CategoryID`),
   KEY `fk_TagToCategory_1` (`TagID`),
   KEY `fk_TagToCategory_2` (`CategoryID`),
   KEY `FK8DF417B37D4F054E` (`CategoryID`),
   KEY `FK8DF417B36F9851B8` (`TagID`)
-)
-  ENGINE = InnoDB
-  DEFAULT CHARSET = utf8;
+) ENGINE=InnoDB  DEFAULT CHARSET=utf8;
 
 --
 -- Dumping data for table `TagToCategory`
@@ -1757,19 +1613,17 @@ INSERT INTO `TagToCategory` (`TagToCategoryID`, `TagID`, `CategoryID`, `Sorting`
 --
 
 CREATE TABLE IF NOT EXISTS `TagToCategory_AUD` (
-  `TagToCategoryID` INT(11) NOT NULL,
-  `REV`             INT(11) NOT NULL,
-  `REVEND`          INT(11) DEFAULT NULL,
-  `REVTYPE`         TINYINT(4) DEFAULT NULL,
-  `Sorting`         INT(11) DEFAULT NULL,
-  `CategoryID`      INT(11) DEFAULT NULL,
-  `TagID`           INT(11) DEFAULT NULL,
-  PRIMARY KEY (`TagToCategoryID`, `REV`),
+  `TagToCategoryID` int(11) NOT NULL,
+  `REV` int(11) NOT NULL,
+  `REVEND` int(11) DEFAULT NULL,
+  `REVTYPE` tinyint(4) DEFAULT NULL,
+  `Sorting` int(11) DEFAULT NULL,
+  `CategoryID` int(11) DEFAULT NULL,
+  `TagID` int(11) DEFAULT NULL,
+  PRIMARY KEY (`TagToCategoryID`,`REV`),
   KEY `FKC2173404DF74E053` (`REV`),
   KEY `FKC2173404A7C21108` (`REVEND`)
-)
-  ENGINE = InnoDB
-  DEFAULT CHARSET = utf8;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
 --
 -- Dumping data for table `TagToCategory_AUD`
@@ -1789,16 +1643,14 @@ INSERT INTO `TagToCategory_AUD` (`TagToCategoryID`, `REV`, `REVEND`, `REVTYPE`, 
 --
 
 CREATE TABLE IF NOT EXISTS `TagToProject` (
-  `TagToProjectID` INT(11) NOT NULL AUTO_INCREMENT,
-  `ProjectID`      INT(11) NOT NULL,
-  `TagID`          INT(11) NOT NULL,
+  `TagToProjectID` int(11) NOT NULL AUTO_INCREMENT,
+  `ProjectID` int(11) NOT NULL,
+  `TagID` int(11) NOT NULL,
   PRIMARY KEY (`TagToProjectID`),
-  UNIQUE KEY `index4` (`ProjectID`, `TagID`),
+  UNIQUE KEY `index4` (`ProjectID`,`TagID`),
   KEY `fk_TagToProject_1` (`ProjectID`),
   KEY `fk_TagToProject_2` (`TagID`)
-)
-  ENGINE = InnoDB
-  DEFAULT CHARSET = utf8;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
 -- --------------------------------------------------------
 
@@ -1807,18 +1659,16 @@ CREATE TABLE IF NOT EXISTS `TagToProject` (
 --
 
 CREATE TABLE IF NOT EXISTS `TagToProject_AUD` (
-  `TagToProjectID` INT(11) NOT NULL,
-  `REV`            INT(11) NOT NULL,
-  `REVEND`         INT(11) DEFAULT NULL,
-  `REVTYPE`        TINYINT(4) DEFAULT NULL,
-  `ProjectID`      INT(11) DEFAULT NULL,
-  `TagID`          INT(11) DEFAULT NULL,
-  PRIMARY KEY (`TagToProjectID`, `REV`),
+  `TagToProjectID` int(11) NOT NULL,
+  `REV` int(11) NOT NULL,
+  `REVEND` int(11) DEFAULT NULL,
+  `REVTYPE` tinyint(4) DEFAULT NULL,
+  `ProjectID` int(11) DEFAULT NULL,
+  `TagID` int(11) DEFAULT NULL,
+  PRIMARY KEY (`TagToProjectID`,`REV`),
   KEY `FKB4A9F195DF74E053` (`REV`),
   KEY `FKB4A9F195A7C21108` (`REVEND`)
-)
-  ENGINE = InnoDB
-  DEFAULT CHARSET = utf8;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
 -- --------------------------------------------------------
 
@@ -1827,16 +1677,14 @@ CREATE TABLE IF NOT EXISTS `TagToProject_AUD` (
 --
 
 CREATE TABLE IF NOT EXISTS `TagToPropertyTag` (
-  `TagToPropertyTagID` INT(11) NOT NULL AUTO_INCREMENT,
-  `TagID`              INT(11) NOT NULL,
-  `PropertyTagID`      INT(11) NOT NULL,
-  `Value`              TEXT,
+  `TagToPropertyTagID` int(11) NOT NULL AUTO_INCREMENT,
+  `TagID` int(11) NOT NULL,
+  `PropertyTagID` int(11) NOT NULL,
+  `Value` text,
   PRIMARY KEY (`TagToPropertyTagID`),
   KEY `TagIDFK` (`TagID`),
   KEY `PropertyTagIDFK` (`PropertyTagID`)
-)
-  ENGINE = InnoDB
-  DEFAULT CHARSET = utf8;
+) ENGINE=InnoDB  DEFAULT CHARSET=utf8;
 
 -- --------------------------------------------------------
 
@@ -1845,19 +1693,17 @@ CREATE TABLE IF NOT EXISTS `TagToPropertyTag` (
 --
 
 CREATE TABLE IF NOT EXISTS `TagToPropertyTag_AUD` (
-  `TagToPropertyTagID` INT(11) NOT NULL,
-  `REV`                INT(11) NOT NULL,
-  `REVEND`             INT(11) DEFAULT NULL,
-  `REVTYPE`            TINYINT(4) DEFAULT NULL,
-  `Value`              TEXT,
-  `PropertyTagID`      INT(11) DEFAULT NULL,
-  `TagID`              INT(11) DEFAULT NULL,
-  PRIMARY KEY (`TagToPropertyTagID`, `REV`),
+  `TagToPropertyTagID` int(11) NOT NULL,
+  `REV` int(11) NOT NULL,
+  `REVEND` int(11) DEFAULT NULL,
+  `REVTYPE` tinyint(4) DEFAULT NULL,
+  `Value` text,
+  `PropertyTagID` int(11) DEFAULT NULL,
+  `TagID` int(11) DEFAULT NULL,
+  PRIMARY KEY (`TagToPropertyTagID`,`REV`),
   KEY `FK937D2081DF74E053` (`REV`),
   KEY `FK937D2081A7C21108` (`REVEND`)
-)
-  ENGINE = InnoDB
-  DEFAULT CHARSET = utf8;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
 -- --------------------------------------------------------
 
@@ -1866,18 +1712,16 @@ CREATE TABLE IF NOT EXISTS `TagToPropertyTag_AUD` (
 --
 
 CREATE TABLE IF NOT EXISTS `TagToTag` (
-  `TagToTagID`       INT(11) NOT NULL AUTO_INCREMENT,
-  `PrimaryTagID`     INT(11) NOT NULL,
-  `SecondaryTagID`   INT(11) NOT NULL,
-  `RelationshipType` INT(11) NOT NULL,
+  `TagToTagID` int(11) NOT NULL AUTO_INCREMENT,
+  `PrimaryTagID` int(11) NOT NULL,
+  `SecondaryTagID` int(11) NOT NULL,
+  `RelationshipType` int(11) NOT NULL,
   PRIMARY KEY (`TagToTagID`),
-  UNIQUE KEY `UNIQUE` (`PrimaryTagID`, `SecondaryTagID`, `RelationshipType`),
+  UNIQUE KEY `UNIQUE` (`PrimaryTagID`,`SecondaryTagID`,`RelationshipType`),
   KEY `fk_TagToTag_1` (`RelationshipType`),
   KEY `fk_TagToTag_2` (`PrimaryTagID`),
   KEY `fk_TagToTag_3` (`SecondaryTagID`)
-)
-  ENGINE = InnoDB
-  DEFAULT CHARSET = utf8;
+) ENGINE=InnoDB  DEFAULT CHARSET=utf8;
 
 -- --------------------------------------------------------
 
@@ -1886,12 +1730,10 @@ CREATE TABLE IF NOT EXISTS `TagToTag` (
 --
 
 CREATE TABLE IF NOT EXISTS `TagToTagRelationship` (
-  `TagToTagRelationshipType`        INT(11) NOT NULL,
-  `TagToTagRelationshipDescription` TEXT,
+  `TagToTagRelationshipType` int(11) NOT NULL,
+  `TagToTagRelationshipDescription` text,
   PRIMARY KEY (`TagToTagRelationshipType`)
-)
-  ENGINE = InnoDB
-  DEFAULT CHARSET = utf8;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
 --
 -- Dumping data for table `TagToTagRelationship`
@@ -1907,17 +1749,15 @@ INSERT INTO `TagToTagRelationship` (`TagToTagRelationshipType`, `TagToTagRelatio
 --
 
 CREATE TABLE IF NOT EXISTS `TagToTagRelationship_AUD` (
-  `TagToTagRelationshipType`        INT(11) NOT NULL,
-  `REV`                             INT(11) NOT NULL,
-  `REVEND`                          INT(11) DEFAULT NULL,
-  `REVTYPE`                         TINYINT(4) DEFAULT NULL,
-  `TagToTagRelationshipDescription` TEXT,
-  PRIMARY KEY (`TagToTagRelationshipType`, `REV`),
+  `TagToTagRelationshipType` int(11) NOT NULL,
+  `REV` int(11) NOT NULL,
+  `REVEND` int(11) DEFAULT NULL,
+  `REVTYPE` tinyint(4) DEFAULT NULL,
+  `TagToTagRelationshipDescription` text,
+  PRIMARY KEY (`TagToTagRelationshipType`,`REV`),
   KEY `FK583EA9EEDF74E053` (`REV`),
   KEY `FK583EA9EEA7C21108` (`REVEND`)
-)
-  ENGINE = InnoDB
-  DEFAULT CHARSET = utf8;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
 --
 -- Dumping data for table `TagToTagRelationship_AUD`
@@ -1933,19 +1773,17 @@ INSERT INTO `TagToTagRelationship_AUD` (`TagToTagRelationshipType`, `REV`, `REVE
 --
 
 CREATE TABLE IF NOT EXISTS `TagToTag_AUD` (
-  `TagToTagID`       INT(11) NOT NULL,
-  `REV`              INT(11) NOT NULL,
-  `REVEND`           INT(11) DEFAULT NULL,
-  `REVTYPE`          TINYINT(4) DEFAULT NULL,
-  `RelationshipType` INT(11) DEFAULT NULL,
-  `PrimaryTagID`     INT(11) DEFAULT NULL,
-  `SecondaryTagID`   INT(11) DEFAULT NULL,
-  PRIMARY KEY (`TagToTagID`, `REV`),
+  `TagToTagID` int(11) NOT NULL,
+  `REV` int(11) NOT NULL,
+  `REVEND` int(11) DEFAULT NULL,
+  `REVTYPE` tinyint(4) DEFAULT NULL,
+  `RelationshipType` int(11) DEFAULT NULL,
+  `PrimaryTagID` int(11) DEFAULT NULL,
+  `SecondaryTagID` int(11) DEFAULT NULL,
+  PRIMARY KEY (`TagToTagID`,`REV`),
   KEY `FKF27E8B16DF74E053` (`REV`),
   KEY `FKF27E8B16A7C21108` (`REVEND`)
-)
-  ENGINE = InnoDB
-  DEFAULT CHARSET = utf8;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
 -- --------------------------------------------------------
 
@@ -1954,18 +1792,16 @@ CREATE TABLE IF NOT EXISTS `TagToTag_AUD` (
 --
 
 CREATE TABLE IF NOT EXISTS `Tag_AUD` (
-  `TagID`          INT(11) NOT NULL,
-  `REV`            INT(11) NOT NULL,
-  `REVEND`         INT(11) DEFAULT NULL,
-  `REVTYPE`        TINYINT(4) DEFAULT NULL,
-  `TagDescription` TEXT,
-  `TagName`        VARCHAR(255) DEFAULT NULL,
-  PRIMARY KEY (`TagID`, `REV`),
+  `TagID` int(11) NOT NULL,
+  `REV` int(11) NOT NULL,
+  `REVEND` int(11) DEFAULT NULL,
+  `REVTYPE` tinyint(4) DEFAULT NULL,
+  `TagDescription` text,
+  `TagName` varchar(255) DEFAULT NULL,
+  PRIMARY KEY (`TagID`,`REV`),
   KEY `FK6E9284BDF74E053` (`REV`),
   KEY `FK6E9284BA7C21108` (`REVEND`)
-)
-  ENGINE = InnoDB
-  DEFAULT CHARSET = utf8;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
 --
 -- Dumping data for table `Tag_AUD`
@@ -1985,19 +1821,17 @@ INSERT INTO `Tag_AUD` (`TagID`, `REV`, `REVEND`, `REVTYPE`, `TagDescription`, `T
 --
 
 CREATE TABLE IF NOT EXISTS `Topic` (
-  `TopicID`         INT(11)      NOT NULL AUTO_INCREMENT,
-  `TopicTitle`      VARCHAR(255) DEFAULT NULL,
-  `TopicText`       TEXT,
-  `TopicTimeStamp`  TIMESTAMP    NOT NULL DEFAULT CURRENT_TIMESTAMP,
-  `TopicXML`        MEDIUMTEXT,
-  `TopicLocale`     VARCHAR(255) NOT NULL,
-  `TopicXMLDoctype` INT(11) DEFAULT NULL,
+  `TopicID` int(11) NOT NULL AUTO_INCREMENT,
+  `TopicTitle` varchar(255) DEFAULT NULL,
+  `TopicText` text,
+  `TopicTimeStamp` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  `TopicXML` mediumtext,
+  `TopicLocale` varchar(255) NOT NULL,
+  `TopicXMLDoctype` int(11) DEFAULT NULL,
   PRIMARY KEY (`TopicID`),
   KEY `fk_Topic_1` (`TopicID`),
   KEY `FK4D3DD0FE2436E96` (`TopicID`)
-)
-  ENGINE = InnoDB
-  DEFAULT CHARSET = utf8;
+) ENGINE=InnoDB  DEFAULT CHARSET=utf8;
 
 -- --------------------------------------------------------
 
@@ -2006,14 +1840,12 @@ CREATE TABLE IF NOT EXISTS `Topic` (
 --
 
 CREATE TABLE IF NOT EXISTS `TopicSecondOrderData` (
-  `TopicSecondOrderDataID` INT(11) NOT NULL AUTO_INCREMENT,
-  `TopicXMLErrors`         TEXT,
-  `TopicHTMLView`          MEDIUMTEXT,
-  `TopicID`                INT(11) NOT NULL,
+  `TopicSecondOrderDataID` int(11) NOT NULL AUTO_INCREMENT,
+  `TopicXMLErrors` text,
+  `TopicHTMLView` mediumtext,
+  `TopicID` int(11) NOT NULL,
   PRIMARY KEY (`TopicSecondOrderDataID`)
-)
-  ENGINE = InnoDB
-  DEFAULT CHARSET = utf8;
+) ENGINE=InnoDB  DEFAULT CHARSET=utf8;
 
 -- --------------------------------------------------------
 
@@ -2022,19 +1854,17 @@ CREATE TABLE IF NOT EXISTS `TopicSecondOrderData` (
 --
 
 CREATE TABLE IF NOT EXISTS `TopicSecondOrderData_AUD` (
-  `TopicID`                INT(11) NOT NULL,
-  `REV`                    INT(11) NOT NULL,
-  `REVEND`                 INT(11) DEFAULT NULL,
-  `REVTYPE`                TINYINT(4) DEFAULT NULL,
-  `TopicHTMLView`          MEDIUMTEXT,
-  `TopicXMLErrors`         TEXT,
-  `TopicSecondOrderDataID` INT(11) NOT NULL,
-  PRIMARY KEY (`TopicSecondOrderDataID`, `REV`),
+  `TopicID` int(11) NOT NULL,
+  `REV` int(11) NOT NULL,
+  `REVEND` int(11) DEFAULT NULL,
+  `REVTYPE` tinyint(4) DEFAULT NULL,
+  `TopicHTMLView` mediumtext,
+  `TopicXMLErrors` text,
+  `TopicSecondOrderDataID` int(11) NOT NULL,
+  PRIMARY KEY (`TopicSecondOrderDataID`,`REV`),
   KEY `FK8E541846DF74E053` (`REV`),
   KEY `FK8E541846A7C21108` (`REVEND`)
-)
-  ENGINE = InnoDB
-  DEFAULT CHARSET = utf8;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
 -- --------------------------------------------------------
 
@@ -2043,14 +1873,12 @@ CREATE TABLE IF NOT EXISTS `TopicSecondOrderData_AUD` (
 --
 
 CREATE TABLE IF NOT EXISTS `TopicSourceURL` (
-  `TopicSourceURLID` INT(11)       NOT NULL AUTO_INCREMENT,
-  `SourceURL`        VARCHAR(2048) NOT NULL,
-  `Description`      TEXT,
-  `Title`            VARCHAR(255) DEFAULT NULL,
+  `TopicSourceURLID` int(11) NOT NULL AUTO_INCREMENT,
+  `SourceURL` varchar(2048) NOT NULL,
+  `Description` text,
+  `Title` varchar(255) DEFAULT NULL,
   PRIMARY KEY (`TopicSourceURLID`)
-)
-  ENGINE = InnoDB
-  DEFAULT CHARSET = utf8;
+) ENGINE=InnoDB  DEFAULT CHARSET=utf8;
 
 -- --------------------------------------------------------
 
@@ -2059,20 +1887,18 @@ CREATE TABLE IF NOT EXISTS `TopicSourceURL` (
 --
 
 CREATE TABLE IF NOT EXISTS `TopicSourceURL_AUD` (
-  `TopicSourceURLID` INT(11) NOT NULL,
-  `REV`              INT(11) NOT NULL,
-  `REVEND`           INT(11) DEFAULT NULL,
-  `REVTYPE`          TINYINT(4) DEFAULT NULL,
-  `TopicXML`         TEXT,
-  `SourceURL`        VARCHAR(2048) DEFAULT NULL,
-  `Title`            VARCHAR(255) DEFAULT NULL,
-  `Description`      TEXT,
-  PRIMARY KEY (`TopicSourceURLID`, `REV`),
+  `TopicSourceURLID` int(11) NOT NULL,
+  `REV` int(11) NOT NULL,
+  `REVEND` int(11) DEFAULT NULL,
+  `REVTYPE` tinyint(4) DEFAULT NULL,
+  `TopicXML` text,
+  `SourceURL` varchar(2048) DEFAULT NULL,
+  `Title` varchar(255) DEFAULT NULL,
+  `Description` text,
+  PRIMARY KEY (`TopicSourceURLID`,`REV`),
   KEY `FK4FDDCE56DF74E053` (`REV`),
   KEY `FK4FDDCE56A7C21108` (`REVEND`)
-)
-  ENGINE = InnoDB
-  DEFAULT CHARSET = utf8;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
 -- --------------------------------------------------------
 
@@ -2081,16 +1907,14 @@ CREATE TABLE IF NOT EXISTS `TopicSourceURL_AUD` (
 --
 
 CREATE TABLE IF NOT EXISTS `TopicToBugzillaBug` (
-  `TopicToBugzillaBugID` INT(11) NOT NULL AUTO_INCREMENT,
-  `TopicID`              INT(11) NOT NULL,
-  `BugzillaBugID`        INT(11) NOT NULL,
+  `TopicToBugzillaBugID` int(11) NOT NULL AUTO_INCREMENT,
+  `TopicID` int(11) NOT NULL,
+  `BugzillaBugID` int(11) NOT NULL,
   PRIMARY KEY (`TopicToBugzillaBugID`),
-  UNIQUE KEY `TopicIDBugzillaBugIDUnique` (`TopicID`, `BugzillaBugID`),
+  UNIQUE KEY `TopicIDBugzillaBugIDUnique` (`TopicID`,`BugzillaBugID`),
   UNIQUE KEY `TopicToBugzillaBugBugzillaBugIDUnique` (`BugzillaBugID`),
   KEY `TopicToBugzillaBugFK2` (`BugzillaBugID`)
-)
-  ENGINE = InnoDB
-  DEFAULT CHARSET = utf8;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
 -- --------------------------------------------------------
 
@@ -2099,18 +1923,16 @@ CREATE TABLE IF NOT EXISTS `TopicToBugzillaBug` (
 --
 
 CREATE TABLE IF NOT EXISTS `TopicToBugzillaBug_AUD` (
-  `TopicToBugzillaBugID` INT(11) NOT NULL,
-  `REV`                  INT(11) NOT NULL,
-  `REVEND`               INT(11) DEFAULT NULL,
-  `REVTYPE`              TINYINT(4) DEFAULT NULL,
-  `BugzillaBugID`        INT(11) DEFAULT NULL,
-  `TopicID`              INT(11) DEFAULT NULL,
-  PRIMARY KEY (`TopicToBugzillaBugID`, `REV`),
+  `TopicToBugzillaBugID` int(11) NOT NULL,
+  `REV` int(11) NOT NULL,
+  `REVEND` int(11) DEFAULT NULL,
+  `REVTYPE` tinyint(4) DEFAULT NULL,
+  `BugzillaBugID` int(11) DEFAULT NULL,
+  `TopicID` int(11) DEFAULT NULL,
+  PRIMARY KEY (`TopicToBugzillaBugID`,`REV`),
   KEY `FK176CCFBDDF74E053` (`REV`),
   KEY `FK176CCFBDA7C21108` (`REVEND`)
-)
-  ENGINE = InnoDB
-  DEFAULT CHARSET = utf8;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
 -- --------------------------------------------------------
 
@@ -2119,16 +1941,14 @@ CREATE TABLE IF NOT EXISTS `TopicToBugzillaBug_AUD` (
 --
 
 CREATE TABLE IF NOT EXISTS `TopicToPropertyTag` (
-  `TopicToPropertyTagID` INT(11) NOT NULL AUTO_INCREMENT,
-  `TopicID`              INT(11) NOT NULL,
-  `PropertyTagID`        INT(11) NOT NULL,
-  `Value`                TEXT,
+  `TopicToPropertyTagID` int(11) NOT NULL AUTO_INCREMENT,
+  `TopicID` int(11) NOT NULL,
+  `PropertyTagID` int(11) NOT NULL,
+  `Value` text,
   PRIMARY KEY (`TopicToPropertyTagID`),
   KEY `TopicToPropertyTagFK1` (`TopicID`),
   KEY `TopicToPropertyTagFK2` (`PropertyTagID`)
-)
-  ENGINE = InnoDB
-  DEFAULT CHARSET = utf8;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
 -- --------------------------------------------------------
 
@@ -2137,19 +1957,17 @@ CREATE TABLE IF NOT EXISTS `TopicToPropertyTag` (
 --
 
 CREATE TABLE IF NOT EXISTS `TopicToPropertyTag_AUD` (
-  `TopicToPropertyTagID` INT(11) NOT NULL,
-  `REV`                  INT(11) NOT NULL,
-  `REVEND`               INT(11) DEFAULT NULL,
-  `REVTYPE`              TINYINT(4) DEFAULT NULL,
-  `Value`                TEXT,
-  `PropertyTagID`        INT(11) DEFAULT NULL,
-  `TopicID`              INT(11) DEFAULT NULL,
-  PRIMARY KEY (`TopicToPropertyTagID`, `REV`),
+  `TopicToPropertyTagID` int(11) NOT NULL,
+  `REV` int(11) NOT NULL,
+  `REVEND` int(11) DEFAULT NULL,
+  `REVTYPE` tinyint(4) DEFAULT NULL,
+  `Value` text,
+  `PropertyTagID` int(11) DEFAULT NULL,
+  `TopicID` int(11) DEFAULT NULL,
+  PRIMARY KEY (`TopicToPropertyTagID`,`REV`),
   KEY `FKDE6FC78CDF74E053` (`REV`),
   KEY `FKDE6FC78CA7C21108` (`REVEND`)
-)
-  ENGINE = InnoDB
-  DEFAULT CHARSET = utf8;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
 -- --------------------------------------------------------
 
@@ -2158,16 +1976,14 @@ CREATE TABLE IF NOT EXISTS `TopicToPropertyTag_AUD` (
 --
 
 CREATE TABLE IF NOT EXISTS `TopicToTag` (
-  `TopicToTagID` INT(11) NOT NULL AUTO_INCREMENT,
-  `TopicID`      INT(11) NOT NULL,
-  `TagID`        INT(11) NOT NULL,
+  `TopicToTagID` int(11) NOT NULL AUTO_INCREMENT,
+  `TopicID` int(11) NOT NULL,
+  `TagID` int(11) NOT NULL,
   PRIMARY KEY (`TopicToTagID`),
-  UNIQUE KEY `UNIQUE` (`TopicID`, `TagID`),
+  UNIQUE KEY `UNIQUE` (`TopicID`,`TagID`),
   KEY `fk_TopicToTag_1` (`TopicID`),
   KEY `fk_TopicToTag_2` (`TagID`)
-)
-  ENGINE = InnoDB
-  DEFAULT CHARSET = utf8;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
 -- --------------------------------------------------------
 
@@ -2176,18 +1992,16 @@ CREATE TABLE IF NOT EXISTS `TopicToTag` (
 --
 
 CREATE TABLE IF NOT EXISTS `TopicToTag_AUD` (
-  `TopicToTagID` INT(11) NOT NULL,
-  `REV`          INT(11) NOT NULL,
-  `REVEND`       INT(11) DEFAULT NULL,
-  `REVTYPE`      TINYINT(4) DEFAULT NULL,
-  `TagID`        INT(11) DEFAULT NULL,
-  `TopicID`      INT(11) DEFAULT NULL,
-  PRIMARY KEY (`TopicToTagID`, `REV`),
+  `TopicToTagID` int(11) NOT NULL,
+  `REV` int(11) NOT NULL,
+  `REVEND` int(11) DEFAULT NULL,
+  `REVTYPE` tinyint(4) DEFAULT NULL,
+  `TagID` int(11) DEFAULT NULL,
+  `TopicID` int(11) DEFAULT NULL,
+  PRIMARY KEY (`TopicToTagID`,`REV`),
   KEY `FK27826D21DF74E053` (`REV`),
   KEY `FK27826D21A7C21108` (`REVEND`)
-)
-  ENGINE = InnoDB
-  DEFAULT CHARSET = utf8;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
 -- --------------------------------------------------------
 
@@ -2196,18 +2010,16 @@ CREATE TABLE IF NOT EXISTS `TopicToTag_AUD` (
 --
 
 CREATE TABLE IF NOT EXISTS `TopicToTopic` (
-  `TopicToTopicID`    INT(11) NOT NULL AUTO_INCREMENT,
-  `MainTopicID`       INT(11) NOT NULL,
-  `RelatedTopicID`    INT(11) NOT NULL,
-  `RelationshipTagID` INT(11) NOT NULL,
+  `TopicToTopicID` int(11) NOT NULL AUTO_INCREMENT,
+  `MainTopicID` int(11) NOT NULL,
+  `RelatedTopicID` int(11) NOT NULL,
+  `RelationshipTagID` int(11) NOT NULL,
   PRIMARY KEY (`TopicToTopicID`),
-  UNIQUE KEY `TopicToTopicUnique` (`MainTopicID`, `RelatedTopicID`, `RelationshipTagID`),
+  UNIQUE KEY `TopicToTopicUnique` (`MainTopicID`,`RelatedTopicID`,`RelationshipTagID`),
   KEY `fk_TopicToTopic_1` (`MainTopicID`),
   KEY `fk_TopicToTopic_2` (`RelatedTopicID`),
   KEY `fk_TopicToTopic_3` (`RelationshipTagID`)
-)
-  ENGINE = InnoDB
-  DEFAULT CHARSET = utf8;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
 -- --------------------------------------------------------
 
@@ -2216,17 +2028,15 @@ CREATE TABLE IF NOT EXISTS `TopicToTopic` (
 --
 
 CREATE TABLE IF NOT EXISTS `TopicToTopicSecondOrderData` (
-  `TopicToTopicSecondOrderDataID` INT(11) NOT NULL AUTO_INCREMENT,
-  `TopicID`                       INT(11) NOT NULL,
-  `TopicSecondOrderDataID`        INT(11) NOT NULL,
+  `TopicToTopicSecondOrderDataID` int(11) NOT NULL AUTO_INCREMENT,
+  `TopicID` int(11) NOT NULL,
+  `TopicSecondOrderDataID` int(11) NOT NULL,
   PRIMARY KEY (`TopicToTopicSecondOrderDataID`),
   UNIQUE KEY `TopicToTopicSecondOrderDataTopicIdUnique` (`TopicID`),
   UNIQUE KEY `TopicToTopicSecondOrderDataTopicSecondOrderDataIdUnique` (`TopicSecondOrderDataID`),
   KEY `FK303D33DF3340562` (`TopicID`),
   KEY `fk_TopicToTopicSecondOrderData_1` (`TopicSecondOrderDataID`)
-)
-  ENGINE = InnoDB
-  DEFAULT CHARSET = utf8;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
 -- --------------------------------------------------------
 
@@ -2235,16 +2045,14 @@ CREATE TABLE IF NOT EXISTS `TopicToTopicSecondOrderData` (
 --
 
 CREATE TABLE IF NOT EXISTS `TopicToTopicSourceURL` (
-  `TopicToTopicSourceURLID` INT(11) NOT NULL AUTO_INCREMENT,
-  `TopicID`                 INT(11) NOT NULL,
-  `TopicSourceURLID`        INT(11) NOT NULL,
+  `TopicToTopicSourceURLID` int(11) NOT NULL AUTO_INCREMENT,
+  `TopicID` int(11) NOT NULL,
+  `TopicSourceURLID` int(11) NOT NULL,
   PRIMARY KEY (`TopicToTopicSourceURLID`),
-  UNIQUE KEY `UniqueIndex` (`TopicID`, `TopicSourceURLID`),
+  UNIQUE KEY `UniqueIndex` (`TopicID`,`TopicSourceURLID`),
   UNIQUE KEY `UniqueTopicSourceURLID` (`TopicSourceURLID`),
   KEY `ForeignTopicSourceURLID` (`TopicSourceURLID`)
-)
-  ENGINE = InnoDB
-  DEFAULT CHARSET = utf8;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
 -- --------------------------------------------------------
 
@@ -2253,18 +2061,16 @@ CREATE TABLE IF NOT EXISTS `TopicToTopicSourceURL` (
 --
 
 CREATE TABLE IF NOT EXISTS `TopicToTopicSourceURL_AUD` (
-  `TopicToTopicSourceURLID` INT(11) NOT NULL,
-  `REV`                     INT(11) NOT NULL,
-  `REVEND`                  INT(11) DEFAULT NULL,
-  `REVTYPE`                 TINYINT(4) DEFAULT NULL,
-  `TopicID`                 INT(11) DEFAULT NULL,
-  `TopicSourceURLID`        INT(11) DEFAULT NULL,
-  PRIMARY KEY (`TopicToTopicSourceURLID`, `REV`),
+  `TopicToTopicSourceURLID` int(11) NOT NULL,
+  `REV` int(11) NOT NULL,
+  `REVEND` int(11) DEFAULT NULL,
+  `REVTYPE` tinyint(4) DEFAULT NULL,
+  `TopicID` int(11) DEFAULT NULL,
+  `TopicSourceURLID` int(11) DEFAULT NULL,
+  PRIMARY KEY (`TopicToTopicSourceURLID`,`REV`),
   KEY `FKA41247C0DF74E053` (`REV`),
   KEY `FKA41247C0A7C21108` (`REVEND`)
-)
-  ENGINE = InnoDB
-  DEFAULT CHARSET = utf8;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
 -- --------------------------------------------------------
 
@@ -2273,19 +2079,17 @@ CREATE TABLE IF NOT EXISTS `TopicToTopicSourceURL_AUD` (
 --
 
 CREATE TABLE IF NOT EXISTS `TopicToTopic_AUD` (
-  `TopicToTopicID`    INT(11) NOT NULL,
-  `REV`               INT(11) NOT NULL,
-  `REVEND`            INT(11) DEFAULT NULL,
-  `REVTYPE`           TINYINT(4) DEFAULT NULL,
-  `MainTopicID`       INT(11) DEFAULT NULL,
-  `RelatedTopicID`    INT(11) DEFAULT NULL,
-  `RelationshipTagID` INT(11) DEFAULT NULL,
-  PRIMARY KEY (`TopicToTopicID`, `REV`),
+  `TopicToTopicID` int(11) NOT NULL,
+  `REV` int(11) NOT NULL,
+  `REVEND` int(11) DEFAULT NULL,
+  `REVTYPE` tinyint(4) DEFAULT NULL,
+  `MainTopicID` int(11) DEFAULT NULL,
+  `RelatedTopicID` int(11) DEFAULT NULL,
+  `RelationshipTagID` int(11) DEFAULT NULL,
+  PRIMARY KEY (`TopicToTopicID`,`REV`),
   KEY `FKEDF852B6DF74E053` (`REV`),
   KEY `FKEDF852B6A7C21108` (`REVEND`)
-)
-  ENGINE = InnoDB
-  DEFAULT CHARSET = utf8;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
 -- --------------------------------------------------------
 
@@ -2294,22 +2098,20 @@ CREATE TABLE IF NOT EXISTS `TopicToTopic_AUD` (
 --
 
 CREATE TABLE IF NOT EXISTS `Topic_AUD` (
-  `TopicID`         INT(11) NOT NULL,
-  `REV`             INT(11) NOT NULL,
-  `REVEND`          INT(11) DEFAULT NULL,
-  `REVTYPE`         TINYINT(4) DEFAULT NULL,
-  `TopicText`       TEXT,
-  `TopicTimeStamp`  DATETIME DEFAULT NULL,
-  `TopicTitle`      VARCHAR(255) DEFAULT NULL,
-  `TopicXML`        MEDIUMTEXT,
-  `TopicLocale`     VARCHAR(255) DEFAULT NULL,
-  `TopicXMLDoctype` INT(11) DEFAULT NULL,
-  PRIMARY KEY (`TopicID`, `REV`),
+  `TopicID` int(11) NOT NULL,
+  `REV` int(11) NOT NULL,
+  `REVEND` int(11) DEFAULT NULL,
+  `REVTYPE` tinyint(4) DEFAULT NULL,
+  `TopicText` text,
+  `TopicTimeStamp` datetime DEFAULT NULL,
+  `TopicTitle` varchar(255) DEFAULT NULL,
+  `TopicXML` mediumtext,
+  `TopicLocale` varchar(255) DEFAULT NULL,
+  `TopicXMLDoctype` int(11) DEFAULT NULL,
+  PRIMARY KEY (`TopicID`,`REV`),
   KEY `FK8E9CEB60DF74E053` (`REV`),
   KEY `FK8E9CEB60A7C21108` (`REVEND`)
-)
-  ENGINE = InnoDB
-  DEFAULT CHARSET = utf8;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
 -- --------------------------------------------------------
 
@@ -2318,15 +2120,13 @@ CREATE TABLE IF NOT EXISTS `Topic_AUD` (
 --
 
 CREATE TABLE IF NOT EXISTS `TranslatedTopic` (
-  `TranslatedTopicID` INT(11) NOT NULL AUTO_INCREMENT,
-  `TopicID`           INT(11) NOT NULL,
-  `TopicRevision`     INT(11) NOT NULL,
+  `TranslatedTopicID` int(11) NOT NULL AUTO_INCREMENT,
+  `TopicID` int(11) NOT NULL,
+  `TopicRevision` int(11) NOT NULL,
   PRIMARY KEY (`TranslatedTopicID`),
   UNIQUE KEY `TranslatedTopicID` (`TranslatedTopicID`),
-  UNIQUE KEY `TopicRevision` (`TopicRevision`, `TopicID`)
-)
-  ENGINE = InnoDB
-  DEFAULT CHARSET = utf8;
+  UNIQUE KEY `TopicRevision` (`TopicRevision`,`TopicID`)
+) ENGINE=InnoDB  DEFAULT CHARSET=utf8;
 
 -- --------------------------------------------------------
 
@@ -2335,21 +2135,19 @@ CREATE TABLE IF NOT EXISTS `TranslatedTopic` (
 --
 
 CREATE TABLE IF NOT EXISTS `TranslatedTopicData` (
-  `TranslatedTopicDataID`        INT(11)     NOT NULL AUTO_INCREMENT,
-  `TranslatedXML`                MEDIUMTEXT,
-  `TranslatedXMLErrors`          TEXT,
-  `TranslatedXMLRendered`        MEDIUMTEXT,
-  `TranslatedXMLRenderedUpdated` DATETIME DEFAULT NULL,
-  `TranslationLocale`            VARCHAR(45) NOT NULL,
-  `TranslationPercentage`        INT(11)     NOT NULL,
-  `TranslatedTopicID`            INT(11)     NOT NULL,
+  `TranslatedTopicDataID` int(11) NOT NULL AUTO_INCREMENT,
+  `TranslatedXML` mediumtext,
+  `TranslatedXMLErrors` text,
+  `TranslatedXMLRendered` mediumtext,
+  `TranslatedXMLRenderedUpdated` datetime DEFAULT NULL,
+  `TranslationLocale` varchar(45) NOT NULL,
+  `TranslationPercentage` int(11) NOT NULL,
+  `TranslatedTopicID` int(11) NOT NULL,
   PRIMARY KEY (`TranslatedTopicDataID`),
   UNIQUE KEY `TranslatedTopicDataID` (`TranslatedTopicDataID`),
-  UNIQUE KEY `TranslatedTopicID` (`TranslatedTopicID`, `TranslationLocale`),
+  UNIQUE KEY `TranslatedTopicID` (`TranslatedTopicID`,`TranslationLocale`),
   KEY `FKBEAB41239248FD56` (`TranslatedTopicID`)
-)
-  ENGINE = InnoDB
-  DEFAULT CHARSET = utf8;
+) ENGINE=InnoDB  DEFAULT CHARSET=utf8;
 
 -- --------------------------------------------------------
 
@@ -2358,23 +2156,21 @@ CREATE TABLE IF NOT EXISTS `TranslatedTopicData` (
 --
 
 CREATE TABLE IF NOT EXISTS `TranslatedTopicData_AUD` (
-  `TranslatedTopicDataID`        INT(11) NOT NULL,
-  `REV`                          INT(11) NOT NULL,
-  `REVTYPE`                      TINYINT(4) DEFAULT NULL,
-  `REVEND`                       INT(11) DEFAULT NULL,
-  `TranslatedXML`                MEDIUMTEXT,
-  `TranslatedXMLErrors`          TEXT,
-  `TranslatedXMLRendered`        MEDIUMTEXT,
-  `TranslatedXMLRenderedUpdated` DATETIME DEFAULT NULL,
-  `TranslationLocale`            VARCHAR(45) DEFAULT NULL,
-  `TranslationPercentage`        INT(11) DEFAULT NULL,
-  `TranslatedTopicID`            INT(11) DEFAULT NULL,
-  PRIMARY KEY (`TranslatedTopicDataID`, `REV`),
+  `TranslatedTopicDataID` int(11) NOT NULL,
+  `REV` int(11) NOT NULL,
+  `REVTYPE` tinyint(4) DEFAULT NULL,
+  `REVEND` int(11) DEFAULT NULL,
+  `TranslatedXML` mediumtext,
+  `TranslatedXMLErrors` text,
+  `TranslatedXMLRendered` mediumtext,
+  `TranslatedXMLRenderedUpdated` datetime DEFAULT NULL,
+  `TranslationLocale` varchar(45) DEFAULT NULL,
+  `TranslationPercentage` int(11) DEFAULT NULL,
+  `TranslatedTopicID` int(11) DEFAULT NULL,
+  PRIMARY KEY (`TranslatedTopicDataID`,`REV`),
   KEY `FK73C2574A7C21108` (`REVEND`),
   KEY `FK73C2574DF74E053` (`REV`)
-)
-  ENGINE = InnoDB
-  DEFAULT CHARSET = utf8;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
 -- --------------------------------------------------------
 
@@ -2383,17 +2179,15 @@ CREATE TABLE IF NOT EXISTS `TranslatedTopicData_AUD` (
 --
 
 CREATE TABLE IF NOT EXISTS `TranslatedTopicString` (
-  `TranslatedTopicStringID` INT(11) NOT NULL AUTO_INCREMENT,
-  `OriginalString`          TEXT,
-  `TranslatedString`        TEXT,
-  `TranslatedTopicDataID`   INT(11) NOT NULL,
-  `FuzzyTranslation`        BIT(1)  NOT NULL,
+  `TranslatedTopicStringID` int(11) NOT NULL AUTO_INCREMENT,
+  `OriginalString` text,
+  `TranslatedString` text,
+  `TranslatedTopicDataID` int(11) NOT NULL,
+  `FuzzyTranslation` bit(1) NOT NULL,
   PRIMARY KEY (`TranslatedTopicStringID`),
   UNIQUE KEY `TranslatedTopicStringID` (`TranslatedTopicStringID`),
   KEY `FKDB83374A17E278CA` (`TranslatedTopicDataID`)
-)
-  ENGINE = InnoDB
-  DEFAULT CHARSET = utf8;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
 -- --------------------------------------------------------
 
@@ -2402,20 +2196,18 @@ CREATE TABLE IF NOT EXISTS `TranslatedTopicString` (
 --
 
 CREATE TABLE IF NOT EXISTS `TranslatedTopicString_AUD` (
-  `TranslatedTopicStringID` INT(11) NOT NULL,
-  `REV`                     INT(11) NOT NULL,
-  `REVTYPE`                 TINYINT(4) DEFAULT NULL,
-  `REVEND`                  INT(11) DEFAULT NULL,
-  `OriginalString`          TEXT,
-  `TranslatedString`        TEXT,
-  `TranslatedTopicDataID`   INT(11) DEFAULT NULL,
-  `FuzzyTranslation`        BIT(1) DEFAULT NULL,
-  PRIMARY KEY (`TranslatedTopicStringID`, `REV`),
+  `TranslatedTopicStringID` int(11) NOT NULL,
+  `REV` int(11) NOT NULL,
+  `REVTYPE` tinyint(4) DEFAULT NULL,
+  `REVEND` int(11) DEFAULT NULL,
+  `OriginalString` text,
+  `TranslatedString` text,
+  `TranslatedTopicDataID` int(11) DEFAULT NULL,
+  `FuzzyTranslation` bit(1) DEFAULT NULL,
+  PRIMARY KEY (`TranslatedTopicStringID`,`REV`),
   KEY `FK6D4EB01BA7C21108` (`REVEND`),
   KEY `FK6D4EB01BDF74E053` (`REV`)
-)
-  ENGINE = InnoDB
-  DEFAULT CHARSET = utf8;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
 -- --------------------------------------------------------
 
@@ -2424,18 +2216,16 @@ CREATE TABLE IF NOT EXISTS `TranslatedTopicString_AUD` (
 --
 
 CREATE TABLE IF NOT EXISTS `TranslatedTopic_AUD` (
-  `TranslatedTopicID` INT(11) NOT NULL,
-  `REV`               INT(11) NOT NULL,
-  `REVTYPE`           TINYINT(4) DEFAULT NULL,
-  `REVEND`            INT(11) DEFAULT NULL,
-  `TopicID`           INT(11) DEFAULT NULL,
-  `TopicRevision`     INT(11) DEFAULT NULL,
-  PRIMARY KEY (`TranslatedTopicID`, `REV`),
+  `TranslatedTopicID` int(11) NOT NULL,
+  `REV` int(11) NOT NULL,
+  `REVTYPE` tinyint(4) DEFAULT NULL,
+  `REVEND` int(11) DEFAULT NULL,
+  `TopicID` int(11) DEFAULT NULL,
+  `TopicRevision` int(11) DEFAULT NULL,
+  PRIMARY KEY (`TranslatedTopicID`,`REV`),
   KEY `FKBEB70B2AA7C21108` (`REVEND`),
   KEY `FKBEB70B2ADF74E053` (`REV`)
-)
-  ENGINE = InnoDB
-  DEFAULT CHARSET = utf8;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
 -- --------------------------------------------------------
 
@@ -2444,14 +2234,12 @@ CREATE TABLE IF NOT EXISTS `TranslatedTopic_AUD` (
 --
 
 CREATE TABLE IF NOT EXISTS `User` (
-  `UserID`      INT(11)      NOT NULL AUTO_INCREMENT,
-  `UserName`    VARCHAR(255) NOT NULL,
-  `Description` TEXT,
+  `UserID` int(11) NOT NULL AUTO_INCREMENT,
+  `UserName` varchar(255) NOT NULL,
+  `Description` text,
   PRIMARY KEY (`UserID`),
   UNIQUE KEY `index2` (`UserName`)
-)
-  ENGINE = InnoDB
-  DEFAULT CHARSET = utf8;
+) ENGINE=InnoDB  DEFAULT CHARSET=utf8;
 
 --
 -- Dumping data for table `User`
@@ -2468,16 +2256,14 @@ INSERT INTO `User` (`UserID`, `UserName`, `Description`) VALUES
 --
 
 CREATE TABLE IF NOT EXISTS `UserRole` (
-  `UserRoleID` INT(11) NOT NULL AUTO_INCREMENT,
-  `UserNameID` INT(11) NOT NULL,
-  `RoleNameID` INT(11) NOT NULL,
+  `UserRoleID` int(11) NOT NULL AUTO_INCREMENT,
+  `UserNameID` int(11) NOT NULL,
+  `RoleNameID` int(11) NOT NULL,
   PRIMARY KEY (`UserRoleID`),
-  UNIQUE KEY `UserRoleUnique` (`UserNameID`, `RoleNameID`),
+  UNIQUE KEY `UserRoleUnique` (`UserNameID`,`RoleNameID`),
   KEY `fk_UserRole_1` (`RoleNameID`),
   KEY `fk_UserRole_2` (`UserNameID`)
-)
-  ENGINE = InnoDB
-  DEFAULT CHARSET = utf8;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
 -- --------------------------------------------------------
 
@@ -2486,18 +2272,16 @@ CREATE TABLE IF NOT EXISTS `UserRole` (
 --
 
 CREATE TABLE IF NOT EXISTS `UserRole_AUD` (
-  `UserRoleID` INT(11) NOT NULL,
-  `REV`        INT(11) NOT NULL,
-  `REVEND`     INT(11) DEFAULT NULL,
-  `REVTYPE`    TINYINT(4) DEFAULT NULL,
-  `RoleNameID` INT(11) DEFAULT NULL,
-  `UserNameID` INT(11) DEFAULT NULL,
-  PRIMARY KEY (`UserRoleID`, `REV`),
+  `UserRoleID` int(11) NOT NULL,
+  `REV` int(11) NOT NULL,
+  `REVEND` int(11) DEFAULT NULL,
+  `REVTYPE` tinyint(4) DEFAULT NULL,
+  `RoleNameID` int(11) DEFAULT NULL,
+  `UserNameID` int(11) DEFAULT NULL,
+  PRIMARY KEY (`UserRoleID`,`REV`),
   KEY `FKCC262C52DF74E053` (`REV`),
   KEY `FKCC262C52A7C21108` (`REVEND`)
-)
-  ENGINE = InnoDB
-  DEFAULT CHARSET = utf8;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
 -- --------------------------------------------------------
 
@@ -2506,18 +2290,16 @@ CREATE TABLE IF NOT EXISTS `UserRole_AUD` (
 --
 
 CREATE TABLE IF NOT EXISTS `User_AUD` (
-  `UserID`      INT(11) NOT NULL,
-  `REV`         INT(11) NOT NULL,
-  `REVEND`      INT(11) DEFAULT NULL,
-  `REVTYPE`     TINYINT(4) DEFAULT NULL,
-  `Description` TEXT,
-  `UserName`    VARCHAR(255) DEFAULT NULL,
-  PRIMARY KEY (`UserID`, `REV`),
+  `UserID` int(11) NOT NULL,
+  `REV` int(11) NOT NULL,
+  `REVEND` int(11) DEFAULT NULL,
+  `REVTYPE` tinyint(4) DEFAULT NULL,
+  `Description` text,
+  `UserName` varchar(255) DEFAULT NULL,
+  PRIMARY KEY (`UserID`,`REV`),
   KEY `FKF3FCA03CDF74E053` (`REV`),
   KEY `FKF3FCA03CA7C21108` (`REVEND`)
-)
-  ENGINE = InnoDB
-  DEFAULT CHARSET = utf8;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
 --
 -- Dumping data for table `User_AUD`
@@ -2533,16 +2315,16 @@ INSERT INTO `User_AUD` (`UserID`, `REV`, `REVEND`, `REVTYPE`, `Description`, `Us
 --
 -- Constraints for table `BlobConstants_AUD`
 --
- ALTER TABLE `BlobConstants_AUD`
-ADD CONSTRAINT `FKEEA7C6E3A7C21108` FOREIGN KEY (`REVEND`) REFERENCES `REVINFO` (`REV`),
-ADD CONSTRAINT `FKEEA7C6E3DF74E053` FOREIGN KEY (`REV`) REFERENCES `REVINFO` (`REV`);
+ALTER TABLE `BlobConstants_AUD`
+  ADD CONSTRAINT `FKEEA7C6E3A7C21108` FOREIGN KEY (`REVEND`) REFERENCES `REVINFO` (`REV`),
+  ADD CONSTRAINT `FKEEA7C6E3DF74E053` FOREIGN KEY (`REV`) REFERENCES `REVINFO` (`REV`);
 
 --
 -- Constraints for table `BugzillaBug_AUD`
 --
- ALTER TABLE `BugzillaBug_AUD`
-ADD CONSTRAINT `FK8122C0E7A7C21108` FOREIGN KEY (`REVEND`) REFERENCES `REVINFO` (`REV`),
-ADD CONSTRAINT `FK8122C0E7DF74E053` FOREIGN KEY (`REV`) REFERENCES `REVINFO` (`REV`);
+ALTER TABLE `BugzillaBug_AUD`
+  ADD CONSTRAINT `FK8122C0E7A7C21108` FOREIGN KEY (`REVEND`) REFERENCES `REVINFO` (`REV`),
+  ADD CONSTRAINT `FK8122C0E7DF74E053` FOREIGN KEY (`REV`) REFERENCES `REVINFO` (`REV`);
 
 --
 -- Constraints for table `Category_AUD`
@@ -2566,20 +2348,6 @@ ADD CONSTRAINT `FKD5DB8BD6FBF105B5` FOREIGN KEY (`ContentSpecID`) REFERENCES `Co
  ALTER TABLE `ContentSpecNode_AUD`
 ADD CONSTRAINT `FK2311DEA715C284F3` FOREIGN KEY (`REV`) REFERENCES `REVINFO` (`REV`),
 ADD CONSTRAINT `FK2311DEA7DE0FB5A8` FOREIGN KEY (`REVEND`) REFERENCES `REVINFO` (`REV`);
-
---
--- Constraints for table `ContentSpecToProject`
---
- ALTER TABLE `ContentSpecToProject`
-ADD CONSTRAINT `FKADEB4ACA66658A59` FOREIGN KEY (`ProjectID`) REFERENCES `Project` (`ProjectID`),
-ADD CONSTRAINT `FKADEB4ACAFBF105B5` FOREIGN KEY (`ContentSpecID`) REFERENCES `ContentSpec` (`ContentSpecID`);
-
---
--- Constraints for table `ContentSpecToProject_AUD`
---
- ALTER TABLE `ContentSpecToProject_AUD`
-ADD CONSTRAINT `FKDE81039B15C284F3` FOREIGN KEY (`REV`) REFERENCES `REVINFO` (`REV`),
-ADD CONSTRAINT `FKDE81039BDE0FB5A8` FOREIGN KEY (`REVEND`) REFERENCES `REVINFO` (`REV`);
 
 --
 -- Constraints for table `ContentSpecToPropertyTag`
@@ -2669,488 +2437,420 @@ ADD CONSTRAINT `CSTranslatedNode_AUD_ibfk_2` FOREIGN KEY (`REVEND`) REFERENCES `
 --
 -- Constraints for table `FilterCategory`
 --
- ALTER TABLE `FilterCategory`
-ADD CONSTRAINT `FKBB45C0B6EB3A6876` FOREIGN KEY (`ProjectID`) REFERENCES `Project` (`ProjectID`),
-ADD CONSTRAINT `fk_FilterCategory_1` FOREIGN KEY (`CategoryID`) REFERENCES `Category` (`CategoryID`)
-  ON DELETE CASCADE
-  ON UPDATE CASCADE,
-ADD CONSTRAINT `fk_FilterCategory_2` FOREIGN KEY (`FilterID`) REFERENCES `Filter` (`FilterID`)
-  ON DELETE CASCADE
-  ON UPDATE NO ACTION;
+ALTER TABLE `FilterCategory`
+  ADD CONSTRAINT `FKBB45C0B6EB3A6876` FOREIGN KEY (`ProjectID`) REFERENCES `Project` (`ProjectID`),
+  ADD CONSTRAINT `fk_FilterCategory_1` FOREIGN KEY (`CategoryID`) REFERENCES `Category` (`CategoryID`) ON DELETE CASCADE ON UPDATE CASCADE,
+  ADD CONSTRAINT `fk_FilterCategory_2` FOREIGN KEY (`FilterID`) REFERENCES `Filter` (`FilterID`) ON DELETE CASCADE ON UPDATE NO ACTION;
 
 --
 -- Constraints for table `FilterCategory_AUD`
 --
- ALTER TABLE `FilterCategory_AUD`
-ADD CONSTRAINT `FK2C96A387A7C21108` FOREIGN KEY (`REVEND`) REFERENCES `REVINFO` (`REV`),
-ADD CONSTRAINT `FK2C96A387DF74E053` FOREIGN KEY (`REV`) REFERENCES `REVINFO` (`REV`);
+ALTER TABLE `FilterCategory_AUD`
+  ADD CONSTRAINT `FK2C96A387A7C21108` FOREIGN KEY (`REVEND`) REFERENCES `REVINFO` (`REV`),
+  ADD CONSTRAINT `FK2C96A387DF74E053` FOREIGN KEY (`REV`) REFERENCES `REVINFO` (`REV`);
 
 --
 -- Constraints for table `FilterField`
 --
- ALTER TABLE `FilterField`
-ADD CONSTRAINT `fk_Filter_Field_1` FOREIGN KEY (`FilterID`) REFERENCES `Filter` (`FilterID`)
-  ON DELETE CASCADE
-  ON UPDATE CASCADE;
+ALTER TABLE `FilterField`
+  ADD CONSTRAINT `fk_Filter_Field_1` FOREIGN KEY (`FilterID`) REFERENCES `Filter` (`FilterID`) ON DELETE CASCADE ON UPDATE CASCADE;
 
 --
 -- Constraints for table `FilterField_AUD`
 --
- ALTER TABLE `FilterField_AUD`
-ADD CONSTRAINT `FK9B8B3513A7C21108` FOREIGN KEY (`REVEND`) REFERENCES `REVINFO` (`REV`),
-ADD CONSTRAINT `FK9B8B3513DF74E053` FOREIGN KEY (`REV`) REFERENCES `REVINFO` (`REV`);
+ALTER TABLE `FilterField_AUD`
+  ADD CONSTRAINT `FK9B8B3513A7C21108` FOREIGN KEY (`REVEND`) REFERENCES `REVINFO` (`REV`),
+  ADD CONSTRAINT `FK9B8B3513DF74E053` FOREIGN KEY (`REV`) REFERENCES `REVINFO` (`REV`);
 
 --
 -- Constraints for table `FilterLocale`
 --
- ALTER TABLE `FilterLocale`
-ADD CONSTRAINT `FK7CB6A01259256D82` FOREIGN KEY (`FilterID`) REFERENCES `Filter` (`FilterID`);
+ALTER TABLE `FilterLocale`
+  ADD CONSTRAINT `FK7CB6A01259256D82` FOREIGN KEY (`FilterID`) REFERENCES `Filter` (`FilterID`);
 
 --
 -- Constraints for table `FilterLocale_AUD`
 --
- ALTER TABLE `FilterLocale_AUD`
-ADD CONSTRAINT `FK19074E3A7C21108` FOREIGN KEY (`REVEND`) REFERENCES `REVINFO` (`REV`),
-ADD CONSTRAINT `FK19074E3DF74E053` FOREIGN KEY (`REV`) REFERENCES `REVINFO` (`REV`);
+ALTER TABLE `FilterLocale_AUD`
+  ADD CONSTRAINT `FK19074E3A7C21108` FOREIGN KEY (`REVEND`) REFERENCES `REVINFO` (`REV`),
+  ADD CONSTRAINT `FK19074E3DF74E053` FOREIGN KEY (`REV`) REFERENCES `REVINFO` (`REV`);
 
 --
 -- Constraints for table `FilterOption`
 --
- ALTER TABLE `FilterOption`
-ADD CONSTRAINT `FK81EB1A2D59256D82` FOREIGN KEY (`FilterID`) REFERENCES `Filter` (`FilterID`);
+ALTER TABLE `FilterOption`
+  ADD CONSTRAINT `FK81EB1A2D59256D82` FOREIGN KEY (`FilterID`) REFERENCES `Filter` (`FilterID`);
 
 --
 -- Constraints for table `FilterOption_AUD`
 --
- ALTER TABLE `FilterOption_AUD`
-ADD CONSTRAINT `FK574697EA7C21108` FOREIGN KEY (`REVEND`) REFERENCES `REVINFO` (`REV`),
-ADD CONSTRAINT `FK574697EDF74E053` FOREIGN KEY (`REV`) REFERENCES `REVINFO` (`REV`);
+ALTER TABLE `FilterOption_AUD`
+  ADD CONSTRAINT `FK574697EA7C21108` FOREIGN KEY (`REVEND`) REFERENCES `REVINFO` (`REV`),
+  ADD CONSTRAINT `FK574697EDF74E053` FOREIGN KEY (`REV`) REFERENCES `REVINFO` (`REV`);
 
 --
 -- Constraints for table `FilterTag`
 --
- ALTER TABLE `FilterTag`
-ADD CONSTRAINT `fk_FilterTag_1` FOREIGN KEY (`TagID`) REFERENCES `Tag` (`TagID`)
-  ON DELETE CASCADE
-  ON UPDATE CASCADE,
-ADD CONSTRAINT `fk_FilterTag_2` FOREIGN KEY (`FilterID`) REFERENCES `Filter` (`FilterID`)
-  ON DELETE CASCADE
-  ON UPDATE NO ACTION;
+ALTER TABLE `FilterTag`
+  ADD CONSTRAINT `fk_FilterTag_1` FOREIGN KEY (`TagID`) REFERENCES `Tag` (`TagID`) ON DELETE CASCADE ON UPDATE CASCADE,
+  ADD CONSTRAINT `fk_FilterTag_2` FOREIGN KEY (`FilterID`) REFERENCES `Filter` (`FilterID`) ON DELETE CASCADE ON UPDATE NO ACTION;
 
 --
 -- Constraints for table `FilterTag_AUD`
 --
- ALTER TABLE `FilterTag_AUD`
-ADD CONSTRAINT `FKA9A235B3A7C21108` FOREIGN KEY (`REVEND`) REFERENCES `REVINFO` (`REV`),
-ADD CONSTRAINT `FKA9A235B3DF74E053` FOREIGN KEY (`REV`) REFERENCES `REVINFO` (`REV`);
+ALTER TABLE `FilterTag_AUD`
+  ADD CONSTRAINT `FKA9A235B3A7C21108` FOREIGN KEY (`REVEND`) REFERENCES `REVINFO` (`REV`),
+  ADD CONSTRAINT `FKA9A235B3DF74E053` FOREIGN KEY (`REV`) REFERENCES `REVINFO` (`REV`);
 
 --
 -- Constraints for table `Filter_AUD`
 --
- ALTER TABLE `Filter_AUD`
-ADD CONSTRAINT `FK1A445969A7C21108` FOREIGN KEY (`REVEND`) REFERENCES `REVINFO` (`REV`),
-ADD CONSTRAINT `FK1A445969DF74E053` FOREIGN KEY (`REV`) REFERENCES `REVINFO` (`REV`);
+ALTER TABLE `Filter_AUD`
+  ADD CONSTRAINT `FK1A445969A7C21108` FOREIGN KEY (`REVEND`) REFERENCES `REVINFO` (`REV`),
+  ADD CONSTRAINT `FK1A445969DF74E053` FOREIGN KEY (`REV`) REFERENCES `REVINFO` (`REV`);
 
 --
 -- Constraints for table `ImageFile_AUD`
 --
- ALTER TABLE `ImageFile_AUD`
-ADD CONSTRAINT `FK553BB7A8A7C21108` FOREIGN KEY (`REVEND`) REFERENCES `REVINFO` (`REV`),
-ADD CONSTRAINT `FK553BB7A8DF74E053` FOREIGN KEY (`REV`) REFERENCES `REVINFO` (`REV`);
+ALTER TABLE `ImageFile_AUD`
+  ADD CONSTRAINT `FK553BB7A8A7C21108` FOREIGN KEY (`REVEND`) REFERENCES `REVINFO` (`REV`),
+  ADD CONSTRAINT `FK553BB7A8DF74E053` FOREIGN KEY (`REV`) REFERENCES `REVINFO` (`REV`);
 
 --
 -- Constraints for table `IntegerConstants_AUD`
 --
- ALTER TABLE `IntegerConstants_AUD`
-ADD CONSTRAINT `FKA7C8D722A7C21108` FOREIGN KEY (`REVEND`) REFERENCES `REVINFO` (`REV`),
-ADD CONSTRAINT `FKA7C8D722DF74E053` FOREIGN KEY (`REV`) REFERENCES `REVINFO` (`REV`);
+ALTER TABLE `IntegerConstants_AUD`
+  ADD CONSTRAINT `FKA7C8D722A7C21108` FOREIGN KEY (`REVEND`) REFERENCES `REVINFO` (`REV`),
+  ADD CONSTRAINT `FKA7C8D722DF74E053` FOREIGN KEY (`REV`) REFERENCES `REVINFO` (`REV`);
 
 --
 -- Constraints for table `LanguageImage`
 --
- ALTER TABLE `LanguageImage`
-ADD CONSTRAINT `FK15D2ACC34F65E026` FOREIGN KEY (`ImageFileID`) REFERENCES `ImageFile` (`ImageFileID`);
+ALTER TABLE `LanguageImage`
+  ADD CONSTRAINT `FK15D2ACC34F65E026` FOREIGN KEY (`ImageFileID`) REFERENCES `ImageFile` (`ImageFileID`);
 
 --
 -- Constraints for table `LanguageImage_AUD`
 --
- ALTER TABLE `LanguageImage_AUD`
-ADD CONSTRAINT `FK5F84C11416D0EC8F` FOREIGN KEY (`REVEND`) REFERENCES `REVINFO` (`REV`),
-ADD CONSTRAINT `FK5F84C1144E83BBDA` FOREIGN KEY (`REV`) REFERENCES `REVINFO` (`REV`);
+ALTER TABLE `LanguageImage_AUD`
+  ADD CONSTRAINT `FK5F84C11416D0EC8F` FOREIGN KEY (`REVEND`) REFERENCES `REVINFO` (`REV`),
+  ADD CONSTRAINT `FK5F84C1144E83BBDA` FOREIGN KEY (`REV`) REFERENCES `REVINFO` (`REV`);
 
 --
 -- Constraints for table `Project_AUD`
 --
- ALTER TABLE `Project_AUD`
-ADD CONSTRAINT `FK2B68EC4AA7C21108` FOREIGN KEY (`REVEND`) REFERENCES `REVINFO` (`REV`),
-ADD CONSTRAINT `FK2B68EC4ADF74E053` FOREIGN KEY (`REV`) REFERENCES `REVINFO` (`REV`);
+ALTER TABLE `Project_AUD`
+  ADD CONSTRAINT `FK2B68EC4AA7C21108` FOREIGN KEY (`REVEND`) REFERENCES `REVINFO` (`REV`),
+  ADD CONSTRAINT `FK2B68EC4ADF74E053` FOREIGN KEY (`REV`) REFERENCES `REVINFO` (`REV`);
 
 --
 -- Constraints for table `PropertyTagCategory_AUD`
 --
- ALTER TABLE `PropertyTagCategory_AUD`
-ADD CONSTRAINT `FKE73E65D4A7C21108` FOREIGN KEY (`REVEND`) REFERENCES `REVINFO` (`REV`),
-ADD CONSTRAINT `FKE73E65D4DF74E053` FOREIGN KEY (`REV`) REFERENCES `REVINFO` (`REV`);
+ALTER TABLE `PropertyTagCategory_AUD`
+  ADD CONSTRAINT `FKE73E65D4A7C21108` FOREIGN KEY (`REVEND`) REFERENCES `REVINFO` (`REV`),
+  ADD CONSTRAINT `FKE73E65D4DF74E053` FOREIGN KEY (`REV`) REFERENCES `REVINFO` (`REV`);
 
 --
 -- Constraints for table `PropertyTagToPropertyTagCategory`
 --
- ALTER TABLE `PropertyTagToPropertyTagCategory`
-ADD CONSTRAINT `PropertyTagToPropertTagCategoryFK1` FOREIGN KEY (`PropertyTagID`) REFERENCES `PropertyTag` (`PropertyTagID`)
-  ON DELETE CASCADE
-  ON UPDATE CASCADE,
-ADD CONSTRAINT `PropertyTagToPropertTagCategoryFk2` FOREIGN KEY (`PropertyTagCategoryID`) REFERENCES `PropertyTagCategory` (`PropertyTagCategoryID`)
-  ON DELETE CASCADE
-  ON UPDATE CASCADE;
+ALTER TABLE `PropertyTagToPropertyTagCategory`
+  ADD CONSTRAINT `PropertyTagToPropertTagCategoryFK1` FOREIGN KEY (`PropertyTagID`) REFERENCES `PropertyTag` (`PropertyTagID`) ON DELETE CASCADE ON UPDATE CASCADE,
+  ADD CONSTRAINT `PropertyTagToPropertTagCategoryFk2` FOREIGN KEY (`PropertyTagCategoryID`) REFERENCES `PropertyTagCategory` (`PropertyTagCategoryID`) ON DELETE CASCADE ON UPDATE CASCADE;
 
 --
 -- Constraints for table `PropertyTagToPropertyTagCategory_AUD`
 --
- ALTER TABLE `PropertyTagToPropertyTagCategory_AUD`
-ADD CONSTRAINT `FK95A54314A7C21108` FOREIGN KEY (`REVEND`) REFERENCES `REVINFO` (`REV`),
-ADD CONSTRAINT `FK95A54314DF74E053` FOREIGN KEY (`REV`) REFERENCES `REVINFO` (`REV`);
+ALTER TABLE `PropertyTagToPropertyTagCategory_AUD`
+  ADD CONSTRAINT `FK95A54314A7C21108` FOREIGN KEY (`REVEND`) REFERENCES `REVINFO` (`REV`),
+  ADD CONSTRAINT `FK95A54314DF74E053` FOREIGN KEY (`REV`) REFERENCES `REVINFO` (`REV`);
 
 --
 -- Constraints for table `PropertyTag_AUD`
 --
- ALTER TABLE `PropertyTag_AUD`
-ADD CONSTRAINT `FK4825B8B6A7C21108` FOREIGN KEY (`REVEND`) REFERENCES `REVINFO` (`REV`),
-ADD CONSTRAINT `FK4825B8B6DF74E053` FOREIGN KEY (`REV`) REFERENCES `REVINFO` (`REV`);
+ALTER TABLE `PropertyTag_AUD`
+  ADD CONSTRAINT `FK4825B8B6A7C21108` FOREIGN KEY (`REVEND`) REFERENCES `REVINFO` (`REV`),
+  ADD CONSTRAINT `FK4825B8B6DF74E053` FOREIGN KEY (`REV`) REFERENCES `REVINFO` (`REV`);
 
 --
 -- Constraints for table `RelationshipTag_AUD`
 --
- ALTER TABLE `RelationshipTag_AUD`
-ADD CONSTRAINT `FK6CA98AF3A7C21108` FOREIGN KEY (`REVEND`) REFERENCES `REVINFO` (`REV`),
-ADD CONSTRAINT `FK6CA98AF3DF74E053` FOREIGN KEY (`REV`) REFERENCES `REVINFO` (`REV`);
+ALTER TABLE `RelationshipTag_AUD`
+  ADD CONSTRAINT `FK6CA98AF3A7C21108` FOREIGN KEY (`REVEND`) REFERENCES `REVINFO` (`REV`),
+  ADD CONSTRAINT `FK6CA98AF3DF74E053` FOREIGN KEY (`REV`) REFERENCES `REVINFO` (`REV`);
 
 --
 -- Constraints for table `RoleToRole`
 --
- ALTER TABLE `RoleToRole`
-ADD CONSTRAINT `FKD0A0E5C78433D197` FOREIGN KEY (`SecondaryRole`) REFERENCES `Role` (`RoleID`)
-  ON DELETE CASCADE
-  ON UPDATE CASCADE,
-ADD CONSTRAINT `FKD0A0E5C7844F7725` FOREIGN KEY (`PrimaryRole`) REFERENCES `Role` (`RoleID`),
-ADD CONSTRAINT `fk_RoleToRole_1` FOREIGN KEY (`RelationshipType`) REFERENCES `RoleToRoleRelationship` (`RoleToRoleRelationshipID`)
-  ON DELETE CASCADE
-  ON UPDATE CASCADE;
+ALTER TABLE `RoleToRole`
+  ADD CONSTRAINT `FKD0A0E5C78433D197` FOREIGN KEY (`SecondaryRole`) REFERENCES `Role` (`RoleID`) ON DELETE CASCADE ON UPDATE CASCADE,
+  ADD CONSTRAINT `FKD0A0E5C7844F7725` FOREIGN KEY (`PrimaryRole`) REFERENCES `Role` (`RoleID`),
+  ADD CONSTRAINT `fk_RoleToRole_1` FOREIGN KEY (`RelationshipType`) REFERENCES `RoleToRoleRelationship` (`RoleToRoleRelationshipID`) ON DELETE CASCADE ON UPDATE CASCADE;
 
 --
 -- Constraints for table `RoleToRoleRelationship_AUD`
 --
- ALTER TABLE `RoleToRoleRelationship_AUD`
-ADD CONSTRAINT `FKA68183F0A7C21108` FOREIGN KEY (`REVEND`) REFERENCES `REVINFO` (`REV`),
-ADD CONSTRAINT `FKA68183F0DF74E053` FOREIGN KEY (`REV`) REFERENCES `REVINFO` (`REV`);
+ALTER TABLE `RoleToRoleRelationship_AUD`
+  ADD CONSTRAINT `FKA68183F0A7C21108` FOREIGN KEY (`REVEND`) REFERENCES `REVINFO` (`REV`),
+  ADD CONSTRAINT `FKA68183F0DF74E053` FOREIGN KEY (`REV`) REFERENCES `REVINFO` (`REV`);
 
 --
 -- Constraints for table `RoleToRole_AUD`
 --
- ALTER TABLE `RoleToRole_AUD`
-ADD CONSTRAINT `FK26C6D818A7C21108` FOREIGN KEY (`REVEND`) REFERENCES `REVINFO` (`REV`),
-ADD CONSTRAINT `FK26C6D818DF74E053` FOREIGN KEY (`REV`) REFERENCES `REVINFO` (`REV`);
+ALTER TABLE `RoleToRole_AUD`
+  ADD CONSTRAINT `FK26C6D818A7C21108` FOREIGN KEY (`REVEND`) REFERENCES `REVINFO` (`REV`),
+  ADD CONSTRAINT `FK26C6D818DF74E053` FOREIGN KEY (`REV`) REFERENCES `REVINFO` (`REV`);
 
 --
 -- Constraints for table `Role_AUD`
 --
- ALTER TABLE `Role_AUD`
-ADD CONSTRAINT `FKF3FAE767A7C21108` FOREIGN KEY (`REVEND`) REFERENCES `REVINFO` (`REV`),
-ADD CONSTRAINT `FKF3FAE767DF74E053` FOREIGN KEY (`REV`) REFERENCES `REVINFO` (`REV`);
+ALTER TABLE `Role_AUD`
+  ADD CONSTRAINT `FKF3FAE767A7C21108` FOREIGN KEY (`REVEND`) REFERENCES `REVINFO` (`REV`),
+  ADD CONSTRAINT `FKF3FAE767DF74E053` FOREIGN KEY (`REV`) REFERENCES `REVINFO` (`REV`);
 
 --
 -- Constraints for table `StringConstants_AUD`
 --
- ALTER TABLE `StringConstants_AUD`
-ADD CONSTRAINT `FK399D7AEFA7C21108` FOREIGN KEY (`REVEND`) REFERENCES `REVINFO` (`REV`),
-ADD CONSTRAINT `FK399D7AEFDF74E053` FOREIGN KEY (`REV`) REFERENCES `REVINFO` (`REV`);
+ALTER TABLE `StringConstants_AUD`
+  ADD CONSTRAINT `FK399D7AEFA7C21108` FOREIGN KEY (`REVEND`) REFERENCES `REVINFO` (`REV`),
+  ADD CONSTRAINT `FK399D7AEFDF74E053` FOREIGN KEY (`REV`) REFERENCES `REVINFO` (`REV`);
 
 --
 -- Constraints for table `TagExclusion`
 --
- ALTER TABLE `TagExclusion`
-ADD CONSTRAINT `fk_TagExclusion_1` FOREIGN KEY (`Tag1ID`) REFERENCES `Tag` (`TagID`)
-  ON DELETE CASCADE
-  ON UPDATE CASCADE,
-ADD CONSTRAINT `fk_TagExclusion_2` FOREIGN KEY (`Tag2ID`) REFERENCES `Tag` (`TagID`)
-  ON DELETE CASCADE
-  ON UPDATE CASCADE;
+ALTER TABLE `TagExclusion`
+  ADD CONSTRAINT `fk_TagExclusion_1` FOREIGN KEY (`Tag1ID`) REFERENCES `Tag` (`TagID`) ON DELETE CASCADE ON UPDATE CASCADE,
+  ADD CONSTRAINT `fk_TagExclusion_2` FOREIGN KEY (`Tag2ID`) REFERENCES `Tag` (`TagID`) ON DELETE CASCADE ON UPDATE CASCADE;
 
 --
 -- Constraints for table `TagExclusion_AUD`
 --
- ALTER TABLE `TagExclusion_AUD`
-ADD CONSTRAINT `FK5BBFB345A7C21108` FOREIGN KEY (`REVEND`) REFERENCES `REVINFO` (`REV`),
-ADD CONSTRAINT `FK5BBFB345DF74E053` FOREIGN KEY (`REV`) REFERENCES `REVINFO` (`REV`);
+ALTER TABLE `TagExclusion_AUD`
+  ADD CONSTRAINT `FK5BBFB345A7C21108` FOREIGN KEY (`REVEND`) REFERENCES `REVINFO` (`REV`),
+  ADD CONSTRAINT `FK5BBFB345DF74E053` FOREIGN KEY (`REV`) REFERENCES `REVINFO` (`REV`);
 
 --
 -- Constraints for table `TagToCategory`
 --
- ALTER TABLE `TagToCategory`
-ADD CONSTRAINT `FK8DF417B36F9851B8` FOREIGN KEY (`TagID`) REFERENCES `Tag` (`TagID`)
-  ON UPDATE CASCADE,
-ADD CONSTRAINT `FK8DF417B37D4F054E` FOREIGN KEY (`CategoryID`) REFERENCES `Category` (`CategoryID`)
-  ON DELETE CASCADE;
+ALTER TABLE `TagToCategory`
+  ADD CONSTRAINT `FK8DF417B36F9851B8` FOREIGN KEY (`TagID`) REFERENCES `Tag` (`TagID`) ON UPDATE CASCADE,
+  ADD CONSTRAINT `FK8DF417B37D4F054E` FOREIGN KEY (`CategoryID`) REFERENCES `Category` (`CategoryID`) ON DELETE CASCADE;
 
 --
 -- Constraints for table `TagToCategory_AUD`
 --
- ALTER TABLE `TagToCategory_AUD`
-ADD CONSTRAINT `FKC2173404A7C21108` FOREIGN KEY (`REVEND`) REFERENCES `REVINFO` (`REV`),
-ADD CONSTRAINT `FKC2173404DF74E053` FOREIGN KEY (`REV`) REFERENCES `REVINFO` (`REV`);
+ALTER TABLE `TagToCategory_AUD`
+  ADD CONSTRAINT `FKC2173404A7C21108` FOREIGN KEY (`REVEND`) REFERENCES `REVINFO` (`REV`),
+  ADD CONSTRAINT `FKC2173404DF74E053` FOREIGN KEY (`REV`) REFERENCES `REVINFO` (`REV`);
 
 --
 -- Constraints for table `TagToProject`
 --
- ALTER TABLE `TagToProject`
-ADD CONSTRAINT `fk_TagToProject_1` FOREIGN KEY (`ProjectID`) REFERENCES `Project` (`ProjectID`)
-  ON DELETE NO ACTION
-  ON UPDATE NO ACTION,
-ADD CONSTRAINT `fk_TagToProject_2` FOREIGN KEY (`TagID`) REFERENCES `Tag` (`TagID`)
-  ON DELETE NO ACTION
-  ON UPDATE NO ACTION;
+ALTER TABLE `TagToProject`
+  ADD CONSTRAINT `fk_TagToProject_1` FOREIGN KEY (`ProjectID`) REFERENCES `Project` (`ProjectID`) ON DELETE NO ACTION ON UPDATE NO ACTION,
+  ADD CONSTRAINT `fk_TagToProject_2` FOREIGN KEY (`TagID`) REFERENCES `Tag` (`TagID`) ON DELETE NO ACTION ON UPDATE NO ACTION;
 
 --
 -- Constraints for table `TagToProject_AUD`
 --
- ALTER TABLE `TagToProject_AUD`
-ADD CONSTRAINT `FKB4A9F195A7C21108` FOREIGN KEY (`REVEND`) REFERENCES `REVINFO` (`REV`),
-ADD CONSTRAINT `FKB4A9F195DF74E053` FOREIGN KEY (`REV`) REFERENCES `REVINFO` (`REV`);
+ALTER TABLE `TagToProject_AUD`
+  ADD CONSTRAINT `FKB4A9F195A7C21108` FOREIGN KEY (`REVEND`) REFERENCES `REVINFO` (`REV`),
+  ADD CONSTRAINT `FKB4A9F195DF74E053` FOREIGN KEY (`REV`) REFERENCES `REVINFO` (`REV`);
 
 --
 -- Constraints for table `TagToPropertyTag`
 --
- ALTER TABLE `TagToPropertyTag`
-ADD CONSTRAINT `TagToPropertyTagFK1` FOREIGN KEY (`PropertyTagID`) REFERENCES `PropertyTag` (`PropertyTagID`)
-  ON DELETE CASCADE
-  ON UPDATE CASCADE,
-ADD CONSTRAINT `TagToPropertyTagFK2` FOREIGN KEY (`TagID`) REFERENCES `Tag` (`TagID`)
-  ON DELETE CASCADE
-  ON UPDATE CASCADE;
+ALTER TABLE `TagToPropertyTag`
+  ADD CONSTRAINT `TagToPropertyTagFK1` FOREIGN KEY (`PropertyTagID`) REFERENCES `PropertyTag` (`PropertyTagID`) ON DELETE CASCADE ON UPDATE CASCADE,
+  ADD CONSTRAINT `TagToPropertyTagFK2` FOREIGN KEY (`TagID`) REFERENCES `Tag` (`TagID`) ON DELETE CASCADE ON UPDATE CASCADE;
 
 --
 -- Constraints for table `TagToPropertyTag_AUD`
 --
- ALTER TABLE `TagToPropertyTag_AUD`
-ADD CONSTRAINT `FK937D2081A7C21108` FOREIGN KEY (`REVEND`) REFERENCES `REVINFO` (`REV`),
-ADD CONSTRAINT `FK937D2081DF74E053` FOREIGN KEY (`REV`) REFERENCES `REVINFO` (`REV`);
+ALTER TABLE `TagToPropertyTag_AUD`
+  ADD CONSTRAINT `FK937D2081A7C21108` FOREIGN KEY (`REVEND`) REFERENCES `REVINFO` (`REV`),
+  ADD CONSTRAINT `FK937D2081DF74E053` FOREIGN KEY (`REV`) REFERENCES `REVINFO` (`REV`);
 
 --
 -- Constraints for table `TagToTag`
 --
- ALTER TABLE `TagToTag`
-ADD CONSTRAINT `fk_TagToTag_1` FOREIGN KEY (`RelationshipType`) REFERENCES `TagToTagRelationship` (`TagToTagRelationshipType`)
-  ON DELETE CASCADE
-  ON UPDATE CASCADE,
-ADD CONSTRAINT `fk_TagToTag_2` FOREIGN KEY (`PrimaryTagID`) REFERENCES `Tag` (`TagID`)
-  ON DELETE NO ACTION
-  ON UPDATE NO ACTION,
-ADD CONSTRAINT `fk_TagToTag_3` FOREIGN KEY (`SecondaryTagID`) REFERENCES `Tag` (`TagID`)
-  ON DELETE NO ACTION
-  ON UPDATE NO ACTION;
+ALTER TABLE `TagToTag`
+  ADD CONSTRAINT `fk_TagToTag_1` FOREIGN KEY (`RelationshipType`) REFERENCES `TagToTagRelationship` (`TagToTagRelationshipType`) ON DELETE CASCADE ON UPDATE CASCADE,
+  ADD CONSTRAINT `fk_TagToTag_2` FOREIGN KEY (`PrimaryTagID`) REFERENCES `Tag` (`TagID`) ON DELETE NO ACTION ON UPDATE NO ACTION,
+  ADD CONSTRAINT `fk_TagToTag_3` FOREIGN KEY (`SecondaryTagID`) REFERENCES `Tag` (`TagID`) ON DELETE NO ACTION ON UPDATE NO ACTION;
 
 --
 -- Constraints for table `TagToTagRelationship_AUD`
 --
- ALTER TABLE `TagToTagRelationship_AUD`
-ADD CONSTRAINT `FK583EA9EEA7C21108` FOREIGN KEY (`REVEND`) REFERENCES `REVINFO` (`REV`),
-ADD CONSTRAINT `FK583EA9EEDF74E053` FOREIGN KEY (`REV`) REFERENCES `REVINFO` (`REV`);
+ALTER TABLE `TagToTagRelationship_AUD`
+  ADD CONSTRAINT `FK583EA9EEA7C21108` FOREIGN KEY (`REVEND`) REFERENCES `REVINFO` (`REV`),
+  ADD CONSTRAINT `FK583EA9EEDF74E053` FOREIGN KEY (`REV`) REFERENCES `REVINFO` (`REV`);
 
 --
 -- Constraints for table `TagToTag_AUD`
 --
- ALTER TABLE `TagToTag_AUD`
-ADD CONSTRAINT `FKF27E8B16A7C21108` FOREIGN KEY (`REVEND`) REFERENCES `REVINFO` (`REV`),
-ADD CONSTRAINT `FKF27E8B16DF74E053` FOREIGN KEY (`REV`) REFERENCES `REVINFO` (`REV`);
+ALTER TABLE `TagToTag_AUD`
+  ADD CONSTRAINT `FKF27E8B16A7C21108` FOREIGN KEY (`REVEND`) REFERENCES `REVINFO` (`REV`),
+  ADD CONSTRAINT `FKF27E8B16DF74E053` FOREIGN KEY (`REV`) REFERENCES `REVINFO` (`REV`);
 
 --
 -- Constraints for table `Tag_AUD`
 --
- ALTER TABLE `Tag_AUD`
-ADD CONSTRAINT `FK6E9284BA7C21108` FOREIGN KEY (`REVEND`) REFERENCES `REVINFO` (`REV`),
-ADD CONSTRAINT `FK6E9284BDF74E053` FOREIGN KEY (`REV`) REFERENCES `REVINFO` (`REV`);
+ALTER TABLE `Tag_AUD`
+  ADD CONSTRAINT `FK6E9284BA7C21108` FOREIGN KEY (`REVEND`) REFERENCES `REVINFO` (`REV`),
+  ADD CONSTRAINT `FK6E9284BDF74E053` FOREIGN KEY (`REV`) REFERENCES `REVINFO` (`REV`);
 
 --
 -- Constraints for table `TopicSecondOrderData_AUD`
 --
- ALTER TABLE `TopicSecondOrderData_AUD`
-ADD CONSTRAINT `FK8E541846A7C21108` FOREIGN KEY (`REVEND`) REFERENCES `REVINFO` (`REV`),
-ADD CONSTRAINT `FK8E541846DF74E053` FOREIGN KEY (`REV`) REFERENCES `REVINFO` (`REV`);
+ALTER TABLE `TopicSecondOrderData_AUD`
+  ADD CONSTRAINT `FK8E541846A7C21108` FOREIGN KEY (`REVEND`) REFERENCES `REVINFO` (`REV`),
+  ADD CONSTRAINT `FK8E541846DF74E053` FOREIGN KEY (`REV`) REFERENCES `REVINFO` (`REV`);
 
 --
 -- Constraints for table `TopicSourceURL_AUD`
 --
- ALTER TABLE `TopicSourceURL_AUD`
-ADD CONSTRAINT `FK4FDDCE56A7C21108` FOREIGN KEY (`REVEND`) REFERENCES `REVINFO` (`REV`),
-ADD CONSTRAINT `FK4FDDCE56DF74E053` FOREIGN KEY (`REV`) REFERENCES `REVINFO` (`REV`);
+ALTER TABLE `TopicSourceURL_AUD`
+  ADD CONSTRAINT `FK4FDDCE56A7C21108` FOREIGN KEY (`REVEND`) REFERENCES `REVINFO` (`REV`),
+  ADD CONSTRAINT `FK4FDDCE56DF74E053` FOREIGN KEY (`REV`) REFERENCES `REVINFO` (`REV`);
 
 --
 -- Constraints for table `TopicToBugzillaBug`
 --
- ALTER TABLE `TopicToBugzillaBug`
-ADD CONSTRAINT `TopicToBugzillaBugFK2` FOREIGN KEY (`BugzillaBugID`) REFERENCES `BugzillaBug` (`BugzillaBugID`)
-  ON DELETE CASCADE
-  ON UPDATE CASCADE,
-ADD CONSTRAINT `TopicToBugzillaBug_ibfk_1` FOREIGN KEY (`TopicID`) REFERENCES `Topic` (`TopicID`)
-  ON DELETE CASCADE
-  ON UPDATE CASCADE;
+ALTER TABLE `TopicToBugzillaBug`
+  ADD CONSTRAINT `TopicToBugzillaBugFK2` FOREIGN KEY (`BugzillaBugID`) REFERENCES `BugzillaBug` (`BugzillaBugID`) ON DELETE CASCADE ON UPDATE CASCADE,
+  ADD CONSTRAINT `TopicToBugzillaBug_ibfk_1` FOREIGN KEY (`TopicID`) REFERENCES `Topic` (`TopicID`) ON DELETE CASCADE ON UPDATE CASCADE;
 
 --
 -- Constraints for table `TopicToBugzillaBug_AUD`
 --
- ALTER TABLE `TopicToBugzillaBug_AUD`
-ADD CONSTRAINT `FK176CCFBDA7C21108` FOREIGN KEY (`REVEND`) REFERENCES `REVINFO` (`REV`),
-ADD CONSTRAINT `FK176CCFBDDF74E053` FOREIGN KEY (`REV`) REFERENCES `REVINFO` (`REV`);
+ALTER TABLE `TopicToBugzillaBug_AUD`
+  ADD CONSTRAINT `FK176CCFBDA7C21108` FOREIGN KEY (`REVEND`) REFERENCES `REVINFO` (`REV`),
+  ADD CONSTRAINT `FK176CCFBDDF74E053` FOREIGN KEY (`REV`) REFERENCES `REVINFO` (`REV`);
 
 --
 -- Constraints for table `TopicToPropertyTag`
 --
- ALTER TABLE `TopicToPropertyTag`
-ADD CONSTRAINT `TopicToPropertyTagFK1` FOREIGN KEY (`PropertyTagID`) REFERENCES `PropertyTag` (`PropertyTagID`)
-  ON DELETE CASCADE
-  ON UPDATE CASCADE,
-ADD CONSTRAINT `TopicToPropertyTagFK2` FOREIGN KEY (`TopicID`) REFERENCES `Topic` (`TopicID`)
-  ON DELETE CASCADE
-  ON UPDATE CASCADE;
+ALTER TABLE `TopicToPropertyTag`
+  ADD CONSTRAINT `TopicToPropertyTagFK1` FOREIGN KEY (`PropertyTagID`) REFERENCES `PropertyTag` (`PropertyTagID`) ON DELETE CASCADE ON UPDATE CASCADE,
+  ADD CONSTRAINT `TopicToPropertyTagFK2` FOREIGN KEY (`TopicID`) REFERENCES `Topic` (`TopicID`) ON DELETE CASCADE ON UPDATE CASCADE;
 
 --
 -- Constraints for table `TopicToPropertyTag_AUD`
 --
- ALTER TABLE `TopicToPropertyTag_AUD`
-ADD CONSTRAINT `FKDE6FC78CA7C21108` FOREIGN KEY (`REVEND`) REFERENCES `REVINFO` (`REV`),
-ADD CONSTRAINT `FKDE6FC78CDF74E053` FOREIGN KEY (`REV`) REFERENCES `REVINFO` (`REV`);
+ALTER TABLE `TopicToPropertyTag_AUD`
+  ADD CONSTRAINT `FKDE6FC78CA7C21108` FOREIGN KEY (`REVEND`) REFERENCES `REVINFO` (`REV`),
+  ADD CONSTRAINT `FKDE6FC78CDF74E053` FOREIGN KEY (`REV`) REFERENCES `REVINFO` (`REV`);
 
 --
 -- Constraints for table `TopicToTag`
 --
- ALTER TABLE `TopicToTag`
-ADD CONSTRAINT `fk_TopicToTag_1` FOREIGN KEY (`TopicID`) REFERENCES `Topic` (`TopicID`)
-  ON DELETE CASCADE
-  ON UPDATE CASCADE,
-ADD CONSTRAINT `fk_TopicToTag_2` FOREIGN KEY (`TagID`) REFERENCES `Tag` (`TagID`)
-  ON DELETE CASCADE
-  ON UPDATE CASCADE;
+ALTER TABLE `TopicToTag`
+  ADD CONSTRAINT `fk_TopicToTag_1` FOREIGN KEY (`TopicID`) REFERENCES `Topic` (`TopicID`) ON DELETE CASCADE ON UPDATE CASCADE,
+  ADD CONSTRAINT `fk_TopicToTag_2` FOREIGN KEY (`TagID`) REFERENCES `Tag` (`TagID`) ON DELETE CASCADE ON UPDATE CASCADE;
 
 --
 -- Constraints for table `TopicToTag_AUD`
 --
- ALTER TABLE `TopicToTag_AUD`
-ADD CONSTRAINT `FK27826D21A7C21108` FOREIGN KEY (`REVEND`) REFERENCES `REVINFO` (`REV`),
-ADD CONSTRAINT `FK27826D21DF74E053` FOREIGN KEY (`REV`) REFERENCES `REVINFO` (`REV`);
+ALTER TABLE `TopicToTag_AUD`
+  ADD CONSTRAINT `FK27826D21A7C21108` FOREIGN KEY (`REVEND`) REFERENCES `REVINFO` (`REV`),
+  ADD CONSTRAINT `FK27826D21DF74E053` FOREIGN KEY (`REV`) REFERENCES `REVINFO` (`REV`);
 
 --
 -- Constraints for table `TopicToTopic`
 --
- ALTER TABLE `TopicToTopic`
-ADD CONSTRAINT `fk_TopicToTopic_1` FOREIGN KEY (`MainTopicID`) REFERENCES `Topic` (`TopicID`)
-  ON DELETE CASCADE
-  ON UPDATE CASCADE,
-ADD CONSTRAINT `fk_TopicToTopic_2` FOREIGN KEY (`RelatedTopicID`) REFERENCES `Topic` (`TopicID`)
-  ON DELETE CASCADE
-  ON UPDATE CASCADE,
-ADD CONSTRAINT `fk_TopicToTopic_3` FOREIGN KEY (`RelationshipTagID`) REFERENCES `RelationshipTag` (`RelationshipTagID`)
-  ON DELETE CASCADE
-  ON UPDATE CASCADE;
+ALTER TABLE `TopicToTopic`
+  ADD CONSTRAINT `fk_TopicToTopic_1` FOREIGN KEY (`MainTopicID`) REFERENCES `Topic` (`TopicID`) ON DELETE CASCADE ON UPDATE CASCADE,
+  ADD CONSTRAINT `fk_TopicToTopic_2` FOREIGN KEY (`RelatedTopicID`) REFERENCES `Topic` (`TopicID`) ON DELETE CASCADE ON UPDATE CASCADE,
+  ADD CONSTRAINT `fk_TopicToTopic_3` FOREIGN KEY (`RelationshipTagID`) REFERENCES `RelationshipTag` (`RelationshipTagID`) ON DELETE CASCADE ON UPDATE CASCADE;
 
 --
 -- Constraints for table `TopicToTopicSecondOrderData`
 --
- ALTER TABLE `TopicToTopicSecondOrderData`
-ADD CONSTRAINT `FK303D33DF3340562` FOREIGN KEY (`TopicID`) REFERENCES `Topic` (`TopicID`)
-  ON DELETE CASCADE
-  ON UPDATE CASCADE,
-ADD CONSTRAINT `fk_TopicToTopicSecondOrderData_1` FOREIGN KEY (`TopicSecondOrderDataID`) REFERENCES `TopicSecondOrderData` (`TopicSecondOrderDataID`)
-  ON DELETE CASCADE
-  ON UPDATE CASCADE;
+ALTER TABLE `TopicToTopicSecondOrderData`
+  ADD CONSTRAINT `FK303D33DF3340562` FOREIGN KEY (`TopicID`) REFERENCES `Topic` (`TopicID`) ON DELETE CASCADE ON UPDATE CASCADE,
+  ADD CONSTRAINT `fk_TopicToTopicSecondOrderData_1` FOREIGN KEY (`TopicSecondOrderDataID`) REFERENCES `TopicSecondOrderData` (`TopicSecondOrderDataID`) ON DELETE CASCADE ON UPDATE CASCADE;
 
 --
 -- Constraints for table `TopicToTopicSourceURL`
 --
- ALTER TABLE `TopicToTopicSourceURL`
-ADD CONSTRAINT `ForeignTopicID` FOREIGN KEY (`TopicID`) REFERENCES `Topic` (`TopicID`)
-  ON DELETE CASCADE
-  ON UPDATE CASCADE,
-ADD CONSTRAINT `ForeignTopicSourceURLID` FOREIGN KEY (`TopicSourceURLID`) REFERENCES `TopicSourceURL` (`TopicSourceURLID`)
-  ON DELETE CASCADE
-  ON UPDATE CASCADE;
+ALTER TABLE `TopicToTopicSourceURL`
+  ADD CONSTRAINT `ForeignTopicID` FOREIGN KEY (`TopicID`) REFERENCES `Topic` (`TopicID`) ON DELETE CASCADE ON UPDATE CASCADE,
+  ADD CONSTRAINT `ForeignTopicSourceURLID` FOREIGN KEY (`TopicSourceURLID`) REFERENCES `TopicSourceURL` (`TopicSourceURLID`) ON DELETE CASCADE ON UPDATE CASCADE;
 
 --
 -- Constraints for table `TopicToTopicSourceURL_AUD`
 --
- ALTER TABLE `TopicToTopicSourceURL_AUD`
-ADD CONSTRAINT `FKA41247C0A7C21108` FOREIGN KEY (`REVEND`) REFERENCES `REVINFO` (`REV`),
-ADD CONSTRAINT `FKA41247C0DF74E053` FOREIGN KEY (`REV`) REFERENCES `REVINFO` (`REV`);
+ALTER TABLE `TopicToTopicSourceURL_AUD`
+  ADD CONSTRAINT `FKA41247C0A7C21108` FOREIGN KEY (`REVEND`) REFERENCES `REVINFO` (`REV`),
+  ADD CONSTRAINT `FKA41247C0DF74E053` FOREIGN KEY (`REV`) REFERENCES `REVINFO` (`REV`);
 
 --
 -- Constraints for table `TopicToTopic_AUD`
 --
- ALTER TABLE `TopicToTopic_AUD`
-ADD CONSTRAINT `FKEDF852B6A7C21108` FOREIGN KEY (`REVEND`) REFERENCES `REVINFO` (`REV`),
-ADD CONSTRAINT `FKEDF852B6DF74E053` FOREIGN KEY (`REV`) REFERENCES `REVINFO` (`REV`);
+ALTER TABLE `TopicToTopic_AUD`
+  ADD CONSTRAINT `FKEDF852B6A7C21108` FOREIGN KEY (`REVEND`) REFERENCES `REVINFO` (`REV`),
+  ADD CONSTRAINT `FKEDF852B6DF74E053` FOREIGN KEY (`REV`) REFERENCES `REVINFO` (`REV`);
 
 --
 -- Constraints for table `Topic_AUD`
 --
- ALTER TABLE `Topic_AUD`
-ADD CONSTRAINT `FK8E9CEB60A7C21108` FOREIGN KEY (`REVEND`) REFERENCES `REVINFO` (`REV`),
-ADD CONSTRAINT `FK8E9CEB60DF74E053` FOREIGN KEY (`REV`) REFERENCES `REVINFO` (`REV`);
+ALTER TABLE `Topic_AUD`
+  ADD CONSTRAINT `FK8E9CEB60A7C21108` FOREIGN KEY (`REVEND`) REFERENCES `REVINFO` (`REV`),
+  ADD CONSTRAINT `FK8E9CEB60DF74E053` FOREIGN KEY (`REV`) REFERENCES `REVINFO` (`REV`);
 
 --
 -- Constraints for table `TranslatedTopicData`
 --
- ALTER TABLE `TranslatedTopicData`
-ADD CONSTRAINT `FKBEAB41239248FD56` FOREIGN KEY (`TranslatedTopicID`) REFERENCES `TranslatedTopic` (`TranslatedTopicID`);
+ALTER TABLE `TranslatedTopicData`
+  ADD CONSTRAINT `FKBEAB41239248FD56` FOREIGN KEY (`TranslatedTopicID`) REFERENCES `TranslatedTopic` (`TranslatedTopicID`);
 
 --
 -- Constraints for table `TranslatedTopicData_AUD`
 --
- ALTER TABLE `TranslatedTopicData_AUD`
-ADD CONSTRAINT `FK73C2574A7C21108` FOREIGN KEY (`REVEND`) REFERENCES `REVINFO` (`REV`),
-ADD CONSTRAINT `FK73C2574DF74E053` FOREIGN KEY (`REV`) REFERENCES `REVINFO` (`REV`);
+ALTER TABLE `TranslatedTopicData_AUD`
+  ADD CONSTRAINT `FK73C2574A7C21108` FOREIGN KEY (`REVEND`) REFERENCES `REVINFO` (`REV`),
+  ADD CONSTRAINT `FK73C2574DF74E053` FOREIGN KEY (`REV`) REFERENCES `REVINFO` (`REV`);
 
 --
 -- Constraints for table `TranslatedTopicString`
 --
- ALTER TABLE `TranslatedTopicString`
-ADD CONSTRAINT `FKDB83374A17E278CA` FOREIGN KEY (`TranslatedTopicDataID`) REFERENCES `TranslatedTopicData` (`TranslatedTopicDataID`);
+ALTER TABLE `TranslatedTopicString`
+  ADD CONSTRAINT `FKDB83374A17E278CA` FOREIGN KEY (`TranslatedTopicDataID`) REFERENCES `TranslatedTopicData` (`TranslatedTopicDataID`);
 
 --
 -- Constraints for table `TranslatedTopicString_AUD`
 --
- ALTER TABLE `TranslatedTopicString_AUD`
-ADD CONSTRAINT `FK6D4EB01BA7C21108` FOREIGN KEY (`REVEND`) REFERENCES `REVINFO` (`REV`),
-ADD CONSTRAINT `FK6D4EB01BDF74E053` FOREIGN KEY (`REV`) REFERENCES `REVINFO` (`REV`);
+ALTER TABLE `TranslatedTopicString_AUD`
+  ADD CONSTRAINT `FK6D4EB01BA7C21108` FOREIGN KEY (`REVEND`) REFERENCES `REVINFO` (`REV`),
+  ADD CONSTRAINT `FK6D4EB01BDF74E053` FOREIGN KEY (`REV`) REFERENCES `REVINFO` (`REV`);
 
 --
 -- Constraints for table `TranslatedTopic_AUD`
 --
- ALTER TABLE `TranslatedTopic_AUD`
-ADD CONSTRAINT `FKBEB70B2AA7C21108` FOREIGN KEY (`REVEND`) REFERENCES `REVINFO` (`REV`),
-ADD CONSTRAINT `FKBEB70B2ADF74E053` FOREIGN KEY (`REV`) REFERENCES `REVINFO` (`REV`);
+ALTER TABLE `TranslatedTopic_AUD`
+  ADD CONSTRAINT `FKBEB70B2AA7C21108` FOREIGN KEY (`REVEND`) REFERENCES `REVINFO` (`REV`),
+  ADD CONSTRAINT `FKBEB70B2ADF74E053` FOREIGN KEY (`REV`) REFERENCES `REVINFO` (`REV`);
 
 --
 -- Constraints for table `UserRole`
 --
- ALTER TABLE `UserRole`
-ADD CONSTRAINT `fk_UserRole_1` FOREIGN KEY (`RoleNameID`) REFERENCES `Role` (`RoleID`)
-  ON DELETE NO ACTION
-  ON UPDATE NO ACTION,
-ADD CONSTRAINT `fk_UserRole_2` FOREIGN KEY (`UserNameID`) REFERENCES `User` (`UserID`)
-  ON DELETE NO ACTION
-  ON UPDATE NO ACTION;
+ALTER TABLE `UserRole`
+  ADD CONSTRAINT `fk_UserRole_1` FOREIGN KEY (`RoleNameID`) REFERENCES `Role` (`RoleID`) ON DELETE NO ACTION ON UPDATE NO ACTION,
+  ADD CONSTRAINT `fk_UserRole_2` FOREIGN KEY (`UserNameID`) REFERENCES `User` (`UserID`) ON DELETE NO ACTION ON UPDATE NO ACTION;
 
 --
 -- Constraints for table `UserRole_AUD`
 --
- ALTER TABLE `UserRole_AUD`
-ADD CONSTRAINT `FKCC262C52A7C21108` FOREIGN KEY (`REVEND`) REFERENCES `REVINFO` (`REV`),
-ADD CONSTRAINT `FKCC262C52DF74E053` FOREIGN KEY (`REV`) REFERENCES `REVINFO` (`REV`);
+ALTER TABLE `UserRole_AUD`
+  ADD CONSTRAINT `FKCC262C52A7C21108` FOREIGN KEY (`REVEND`) REFERENCES `REVINFO` (`REV`),
+  ADD CONSTRAINT `FKCC262C52DF74E053` FOREIGN KEY (`REV`) REFERENCES `REVINFO` (`REV`);
 
 --
 -- Constraints for table `User_AUD`
 --
- ALTER TABLE `User_AUD`
-ADD CONSTRAINT `FKF3FCA03CA7C21108` FOREIGN KEY (`REVEND`) REFERENCES `REVINFO` (`REV`),
-ADD CONSTRAINT `FKF3FCA03CDF74E053` FOREIGN KEY (`REV`) REFERENCES `REVINFO` (`REV`);
+ALTER TABLE `User_AUD`
+  ADD CONSTRAINT `FKF3FCA03CA7C21108` FOREIGN KEY (`REVEND`) REFERENCES `REVINFO` (`REV`),
+  ADD CONSTRAINT `FKF3FCA03CDF74E053` FOREIGN KEY (`REV`) REFERENCES `REVINFO` (`REV`);
 
 /*!40101 SET CHARACTER_SET_CLIENT=@OLD_CHARACTER_SET_CLIENT */;
 /*!40101 SET CHARACTER_SET_RESULTS=@OLD_CHARACTER_SET_RESULTS */;

@@ -40,31 +40,31 @@ insert into TAGTOTAGRELATIONSHIP_AUD (TAGTOTAGRELATIONSHIPTYPE, REV, REVEND, REV
 insert into RS_SCOPE (SCOPE_ID, SCOPE_NAME) values (-1, 'DEFAULT')
 insert into RS_SCOPE (SCOPE_ID, SCOPE_NAME) values (-2, 'PERFORM_SUPER_USER_ACTION')
 
-insert into RS_ENDPOINT (ENDPOINT_ID, ENDPOINT_URL, ENDPOINT_METHOD, URL_REGEX) values (-1, 'https://localhost:8443/testrestserver/rest/1/settings/rerenderTopic', 'POST', false)
-insert into RS_ENDPOINT (ENDPOINT_ID, ENDPOINT_URL, ENDPOINT_METHOD, URL_REGEX) values (-2, 'https://localhost:8443/testrestserver/rest/1/expanddatatrunk/get/json', 'GET', false)
+insert into RS_ENDPOINT (ENDPOINT_ID, ENDPOINT_URL, ENDPOINT_METHOD, URL_REGEX) values (-1, 'https://localhost:8443/testserver/rest/1/settings/rerenderTopic', 'POST', false)
+insert into RS_ENDPOINT (ENDPOINT_ID, ENDPOINT_URL, ENDPOINT_METHOD, URL_REGEX) values (-2, 'https://localhost:8443/testserver/rest/1/expanddatatrunk/get/json', 'GET', false)
 
-insert into RS_ENDPOINT (ENDPOINT_ID, ENDPOINT_URL, ENDPOINT_METHOD, URL_REGEX) values (-3, 'https://localhost:8443/testrestserver/rest/1/category/get/jsonp/\d+', 'GET', true)
-insert into RS_ENDPOINT (ENDPOINT_ID, ENDPOINT_URL, ENDPOINT_METHOD, URL_REGEX) values (-4, 'https://localhost:8443/testrestserver/rest/1/categories/get/jsonp/all', 'GET', false)
-insert into RS_ENDPOINT (ENDPOINT_ID, ENDPOINT_URL, ENDPOINT_METHOD, URL_REGEX) values (-5, 'https://localhost:8443/testrestserver/rest/1/categories/get/jsonp/query;([-\w%~\.]+=[-\w%~\.]*;)*([-\w%~\.]+=[-\w%~\.]*;?)?', 'GET', true)
-insert into RS_ENDPOINT (ENDPOINT_ID, ENDPOINT_URL, ENDPOINT_METHOD, URL_REGEX) values (-6, 'https://localhost:8443/testrestserver/rest/1/category/update/jsonp', 'GET', false)
-insert into RS_ENDPOINT (ENDPOINT_ID, ENDPOINT_URL, ENDPOINT_METHOD, URL_REGEX) values (-7, 'https://localhost:8443/testrestserver/rest/1/categories/update/jsonp', 'GET', false)
-insert into RS_ENDPOINT (ENDPOINT_ID, ENDPOINT_URL, ENDPOINT_METHOD, URL_REGEX) values (-8, 'https://localhost:8443/testrestserver/rest/1/category/create/jsonp', 'GET', false)
-insert into RS_ENDPOINT (ENDPOINT_ID, ENDPOINT_URL, ENDPOINT_METHOD, URL_REGEX) values (-9, 'https://localhost:8443/testrestserver/rest/1/categories/create/jsonp', 'GET', false)
-insert into RS_ENDPOINT (ENDPOINT_ID, ENDPOINT_URL, ENDPOINT_METHOD, URL_REGEX) values (-10, 'https://localhost:8443/testrestserver/rest/1/category/delete/jsonp/\d+', 'GET', true)
-insert into RS_ENDPOINT (ENDPOINT_ID, ENDPOINT_URL, ENDPOINT_METHOD, URL_REGEX) values (-11, 'https://localhost:8443/testrestserver/rest/1/categories/delete/jsonp/ids;(\d+;)*\d+;?', 'GET', true)
+insert into RS_ENDPOINT (ENDPOINT_ID, ENDPOINT_URL, ENDPOINT_METHOD, URL_REGEX) values (-3, 'https://localhost:8443/testserver/rest/1/category/get/jsonp/\d+', 'GET', true)
+insert into RS_ENDPOINT (ENDPOINT_ID, ENDPOINT_URL, ENDPOINT_METHOD, URL_REGEX) values (-4, 'https://localhost:8443/testserver/rest/1/categories/get/jsonp/all', 'GET', false)
+insert into RS_ENDPOINT (ENDPOINT_ID, ENDPOINT_URL, ENDPOINT_METHOD, URL_REGEX) values (-5, 'https://localhost:8443/testserver/rest/1/categories/get/jsonp/query;([-\w%~\.]+=[-\w%~\.]*;)*([-\w%~\.]+=[-\w%~\.]*;?)?', 'GET', true)
+insert into RS_ENDPOINT (ENDPOINT_ID, ENDPOINT_URL, ENDPOINT_METHOD, URL_REGEX) values (-6, 'https://localhost:8443/testserver/rest/1/category/update/jsonp', 'GET', false)
+insert into RS_ENDPOINT (ENDPOINT_ID, ENDPOINT_URL, ENDPOINT_METHOD, URL_REGEX) values (-7, 'https://localhost:8443/testserver/rest/1/categories/update/jsonp', 'GET', false)
+insert into RS_ENDPOINT (ENDPOINT_ID, ENDPOINT_URL, ENDPOINT_METHOD, URL_REGEX) values (-8, 'https://localhost:8443/testserver/rest/1/category/create/jsonp', 'GET', false)
+insert into RS_ENDPOINT (ENDPOINT_ID, ENDPOINT_URL, ENDPOINT_METHOD, URL_REGEX) values (-9, 'https://localhost:8443/testserver/rest/1/categories/create/jsonp', 'GET', false)
+insert into RS_ENDPOINT (ENDPOINT_ID, ENDPOINT_URL, ENDPOINT_METHOD, URL_REGEX) values (-10, 'https://localhost:8443/testserver/rest/1/category/delete/jsonp/\d+', 'GET', true)
+insert into RS_ENDPOINT (ENDPOINT_ID, ENDPOINT_URL, ENDPOINT_METHOD, URL_REGEX) values (-11, 'https://localhost:8443/testserver/rest/1/categories/delete/jsonp/ids;(\d+;)*\d+;?', 'GET', true)
 
-insert into RS_ENDPOINT (ENDPOINT_ID, ENDPOINT_URL, ENDPOINT_METHOD, URL_REGEX) values (-12, 'https://localhost:8443/testrestserver/rest/1/category/get/json/\d+', 'GET', true)
-insert into RS_ENDPOINT (ENDPOINT_ID, ENDPOINT_URL, ENDPOINT_METHOD, URL_REGEX) values (-13, 'https://localhost:8443/testrestserver/rest/1/categories/get/json/all', 'GET', false)
-insert into RS_ENDPOINT (ENDPOINT_ID, ENDPOINT_URL, ENDPOINT_METHOD, URL_REGEX) values (-14, 'https://localhost:8443/testrestserver/rest/1/categories/get/json/query;([-\w%~\.]+=[-\w%~\.]*;)*([-\w%~\.]+=[-\w%~\.]*;?)?', 'GET', true)
-insert into RS_ENDPOINT (ENDPOINT_ID, ENDPOINT_URL, ENDPOINT_METHOD, URL_REGEX) values (-15, 'https://localhost:8443/testrestserver/rest/1/category/update/json', 'POST', false)
-insert into RS_ENDPOINT (ENDPOINT_ID, ENDPOINT_URL, ENDPOINT_METHOD, URL_REGEX) values (-16, 'https://localhost:8443/testrestserver/rest/1/categories/update/json', 'POST', false)
-insert into RS_ENDPOINT (ENDPOINT_ID, ENDPOINT_URL, ENDPOINT_METHOD, URL_REGEX) values (-17, 'https://localhost:8443/testrestserver/rest/1/category/create/json', 'POST', false)
-insert into RS_ENDPOINT (ENDPOINT_ID, ENDPOINT_URL, ENDPOINT_METHOD, URL_REGEX) values (-18, 'https://localhost:8443/testrestserver/rest/1/categories/create/json', 'POST', false)
-insert into RS_ENDPOINT (ENDPOINT_ID, ENDPOINT_URL, ENDPOINT_METHOD, URL_REGEX) values (-19, 'https://localhost:8443/testrestserver/rest/1/category/delete/json/\d+', 'DELETE', true)
-insert into RS_ENDPOINT (ENDPOINT_ID, ENDPOINT_URL, ENDPOINT_METHOD, URL_REGEX) values (-20, 'https://localhost:8443/testrestserver/rest/1/categories/delete/json/ids;(\d+;)*\d+;?', 'DELETE', true)
+insert into RS_ENDPOINT (ENDPOINT_ID, ENDPOINT_URL, ENDPOINT_METHOD, URL_REGEX) values (-12, 'https://localhost:8443/testserver/rest/1/category/get/json/\d+', 'GET', true)
+insert into RS_ENDPOINT (ENDPOINT_ID, ENDPOINT_URL, ENDPOINT_METHOD, URL_REGEX) values (-13, 'https://localhost:8443/testserver/rest/1/categories/get/json/all', 'GET', false)
+insert into RS_ENDPOINT (ENDPOINT_ID, ENDPOINT_URL, ENDPOINT_METHOD, URL_REGEX) values (-14, 'https://localhost:8443/testserver/rest/1/categories/get/json/query;([-\w%~\.]+=[-\w%~\.]*;)*([-\w%~\.]+=[-\w%~\.]*;?)?', 'GET', true)
+insert into RS_ENDPOINT (ENDPOINT_ID, ENDPOINT_URL, ENDPOINT_METHOD, URL_REGEX) values (-15, 'https://localhost:8443/testserver/rest/1/category/update/json', 'POST', false)
+insert into RS_ENDPOINT (ENDPOINT_ID, ENDPOINT_URL, ENDPOINT_METHOD, URL_REGEX) values (-16, 'https://localhost:8443/testserver/rest/1/categories/update/json', 'POST', false)
+insert into RS_ENDPOINT (ENDPOINT_ID, ENDPOINT_URL, ENDPOINT_METHOD, URL_REGEX) values (-17, 'https://localhost:8443/testserver/rest/1/category/create/json', 'POST', false)
+insert into RS_ENDPOINT (ENDPOINT_ID, ENDPOINT_URL, ENDPOINT_METHOD, URL_REGEX) values (-18, 'https://localhost:8443/testserver/rest/1/categories/create/json', 'POST', false)
+insert into RS_ENDPOINT (ENDPOINT_ID, ENDPOINT_URL, ENDPOINT_METHOD, URL_REGEX) values (-19, 'https://localhost:8443/testserver/rest/1/category/delete/json/\d+', 'DELETE', true)
+insert into RS_ENDPOINT (ENDPOINT_ID, ENDPOINT_URL, ENDPOINT_METHOD, URL_REGEX) values (-20, 'https://localhost:8443/testserver/rest/1/categories/delete/json/ids;(\d+;)*\d+;?', 'DELETE', true)
 
-insert into RS_ENDPOINT (ENDPOINT_ID, ENDPOINT_URL, ENDPOINT_METHOD, URL_REGEX) values (-21, 'https://localhost:8443/testrestserver/rest/1/tags/get/json/all', 'GET', false);
-insert into RS_ENDPOINT (ENDPOINT_ID, ENDPOINT_URL, ENDPOINT_METHOD, URL_REGEX) values (-22, 'https://localhost:8443/testrestserver/rest/1/tags/delete/json/ids;(\d+;)*\d+;?', 'DELETE', true);
+insert into RS_ENDPOINT (ENDPOINT_ID, ENDPOINT_URL, ENDPOINT_METHOD, URL_REGEX) values (-21, 'https://localhost:8443/testserver/rest/1/tags/get/json/all', 'GET', false);
+insert into RS_ENDPOINT (ENDPOINT_ID, ENDPOINT_URL, ENDPOINT_METHOD, URL_REGEX) values (-22, 'https://localhost:8443/testserver/rest/1/tags/delete/json/ids;(\d+;)*\d+;?', 'DELETE', true);
 
 insert into RS_SCOPE_RS_ENDPOINT (SCOPE_ID, ENDPOINT_ID) values (-1, -1)
 insert into RS_SCOPE_RS_ENDPOINT (SCOPE_ID, ENDPOINT_ID) values (-1, -2)
