@@ -220,6 +220,21 @@ then
 	read -n 1 -s
 fi
 
+# tail test 1
+echo Starting tail test 1
+echo -e "100  Thomas  Manager    Sales       $5,000\n200  Jason   Developer  Technology  $5,500\n300  Sanjay  Sysadmin   Technology  $7,000\n400  Nisha   Manager    Marketing   $9,500\n500  Randy   DBA        Technology  $6,000" > "${TEMP_DOC}"
+echo -e "100  Thomas  Manager    Sales       $5,000\n200  Jason   Developer  Technology  $5,500\n300  Sanjay  Sysadmin   Technology  $7,000\n400  Nisha   Manager    Marketing   $9,500\n500  Randy   DBA        Technology  $6,000" > "${TEST_DOC}"
+tail "${TEMP_DOC}" > /tmp/tail1.tmp
+tail "${TEST_DOC}" > /tmp/tail2.tmp
+
+diff /tmp/tail1.tmp /tmp/tail2.tmp
+
+if [[ $? -ne 0 ]]
+then
+	echo "************ tail test 1 failed ************"
+	read -n 1 -s
+fi
+
 # xmllint test 1
 echo Starting xmllint test 1
 echo '<section></section1>' > "${TEMP_DOC}"
