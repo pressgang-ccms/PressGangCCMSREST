@@ -1,9 +1,8 @@
 package org.jboss.pressgang.ccms.server.rest.v1;
 
+import javax.persistence.EntityManager;
 import java.util.ArrayList;
 import java.util.List;
-
-import javax.persistence.EntityManager;
 
 import org.jboss.pressgang.ccms.model.LanguageImage;
 import org.jboss.pressgang.ccms.rest.v1.collections.RESTLanguageImageCollectionV1;
@@ -15,18 +14,16 @@ import org.jboss.pressgang.ccms.server.rest.v1.base.RESTDataObjectCollectionFact
 import org.jboss.pressgang.ccms.server.rest.v1.base.RESTDataObjectFactory;
 import org.jboss.pressgang.ccms.server.utils.EnversUtilities;
 
-public class LanguageImageV1Factory
-        extends
-        RESTDataObjectFactory<RESTLanguageImageV1, LanguageImage, RESTLanguageImageCollectionV1, RESTLanguageImageCollectionItemV1> {
+public class LanguageImageV1Factory extends RESTDataObjectFactory<RESTLanguageImageV1, LanguageImage, RESTLanguageImageCollectionV1,
+        RESTLanguageImageCollectionItemV1> {
     public LanguageImageV1Factory() {
         super(LanguageImage.class);
     }
 
     @Override
-    public RESTLanguageImageV1 createRESTEntityFromDBEntityInternal(final LanguageImage entity, final String baseUrl,
-            final String dataType, final ExpandDataTrunk expand, final Number revision, final boolean expandParentReferences,
-            final EntityManager entityManager) {
-        assert entity != null : "Parameter topic can not be null";
+    public RESTLanguageImageV1 createRESTEntityFromDBEntityInternal(final LanguageImage entity, final String baseUrl, final String dataType,
+            final ExpandDataTrunk expand, final Number revision, final boolean expandParentReferences, final EntityManager entityManager) {
+        assert entity != null : "Parameter entity can not be null";
         assert baseUrl != null : "Parameter baseUrl can not be null";
 
         final RESTLanguageImageV1 retValue = new RESTLanguageImageV1();
@@ -37,8 +34,7 @@ public class LanguageImageV1Factory
         expandOptions.add(RESTLanguageImageV1.IMAGEDATABASE64_NAME);
         expandOptions.add(RESTBaseEntityV1.LOG_DETAILS_NAME);
 
-        if (revision == null)
-            expandOptions.add(RESTBaseEntityV1.REVISIONS_NAME);
+        if (revision == null) expandOptions.add(RESTBaseEntityV1.REVISIONS_NAME);
 
         retValue.setExpand(expandOptions);
 
@@ -55,18 +51,19 @@ public class LanguageImageV1Factory
             retValue.setThumbnail(entity.getThumbnailData());
 
         /* Set the object references */
-        if (expandParentReferences && expand != null && expand.contains(RESTLanguageImageV1.IMAGE_NAME)
-                && entity.getImageFile() != null) {
+        if (expandParentReferences && expand != null && expand.contains(RESTLanguageImageV1.IMAGE_NAME) && entity.getImageFile() != null) {
             retValue.setImage(new ImageV1Factory().createRESTEntityFromDBEntity(entity.getImageFile(), baseUrl, dataType,
                     expand.get(RESTLanguageImageV1.IMAGE_NAME), entityManager));
         }
 
         // REVISIONS
         if (revision == null && expand != null && expand.contains(RESTBaseEntityV1.REVISIONS_NAME)) {
-            retValue.setRevisions(new RESTDataObjectCollectionFactory<RESTLanguageImageV1, LanguageImage, RESTLanguageImageCollectionV1, RESTLanguageImageCollectionItemV1>()
-                    .create(RESTLanguageImageCollectionV1.class, new LanguageImageV1Factory(), entity,
-                            EnversUtilities.getRevisions(entityManager, entity), RESTBaseEntityV1.REVISIONS_NAME, dataType,
-                            expand, baseUrl, entityManager));
+            retValue.setRevisions(
+                    new RESTDataObjectCollectionFactory<RESTLanguageImageV1, LanguageImage, RESTLanguageImageCollectionV1,
+                            RESTLanguageImageCollectionItemV1>().create(
+                            RESTLanguageImageCollectionV1.class, new LanguageImageV1Factory(), entity,
+                            EnversUtilities.getRevisions(entityManager, entity), RESTBaseEntityV1.REVISIONS_NAME, dataType, expand, baseUrl,
+                            entityManager));
         }
 
         return retValue;

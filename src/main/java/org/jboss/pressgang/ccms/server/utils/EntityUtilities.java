@@ -12,18 +12,9 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import com.redhat.contentspec.processor.ContentSpecParser;
-import org.apache.lucene.queryParser.QueryParser;
-import org.apache.lucene.util.Version;
-import org.hibernate.Session;
-import org.hibernate.envers.AuditReader;
-import org.hibernate.envers.AuditReaderFactory;
-import org.hibernate.envers.query.AuditEntity;
-import org.hibernate.envers.query.AuditQuery;
-import org.hibernate.search.FullTextSession;
-import org.hibernate.search.Search;
 import org.jboss.pressgang.ccms.filter.base.IFieldFilter;
 import org.jboss.pressgang.ccms.filter.builder.TopicFilterQueryBuilder;
+import org.jboss.pressgang.ccms.filter.utils.FilterUtilities;
 import org.jboss.pressgang.ccms.model.BlobConstants;
 import org.jboss.pressgang.ccms.model.Category;
 import org.jboss.pressgang.ccms.model.Filter;
@@ -49,12 +40,11 @@ import org.joda.time.DateTime;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class EntityUtilities extends EntityUtilities {
+public class EntityUtilities extends org.jboss.pressgang.ccms.filter.utils.EntityUtilities {
     private static final Logger log = LoggerFactory.getLogger(EntityUtilities.class);
 
     public static byte[] loadBlobConstant(final EntityManager entityManager, final Integer id) {
-        if (id == null)
-            return null;
+        if (id == null) return null;
 
         final BlobConstants constant = entityManager.find(BlobConstants.class, id);
 
@@ -67,8 +57,7 @@ public class EntityUtilities extends EntityUtilities {
     }
 
     public static Integer loadIntegerConstant(final EntityManager entityManager, final Integer id) {
-        if (id == null)
-            return null;
+        if (id == null) return null;
 
         final IntegerConstants constant = entityManager.find(IntegerConstants.class, id);
 
@@ -81,8 +70,7 @@ public class EntityUtilities extends EntityUtilities {
     }
 
     public static String loadStringConstant(final EntityManager entityManager, final Integer id) {
-        if (id == null)
-            return null;
+        if (id == null) return null;
 
         final StringConstants constant = entityManager.find(StringConstants.class, id);
 
@@ -96,24 +84,22 @@ public class EntityUtilities extends EntityUtilities {
 
     @SuppressWarnings("unchecked")
     public static User getUserFromUsername(final EntityManager entityManager, final String username) {
-        if (username == null)
-            return null;
+        if (username == null) return null;
 
         final Query query = entityManager.createQuery(User.SELECT_ALL_QUERY + " where user.userName = '" + username + "'");
         final List<User> users = query.getResultList();
         return users == null ? null : (users.size() == 1 ? users.get(0) : null);
     }
 
-    public static Filter populateFilter(final EntityManager entityManager, final MultivaluedMap<String, String> paramMap, final String filterName,
-            final String tagPrefix, final String groupTagPrefix, final String categoryInternalPrefix,
+    public static Filter populateFilter(final EntityManager entityManager, final MultivaluedMap<String, String> paramMap,
+            final String filterName, final String tagPrefix, final String groupTagPrefix, final String categoryInternalPrefix,
             final String categoryExternalPrefix, final String localePrefix, final IFieldFilter fieldFilter) {
         final Map<String, String> newParamMap = new HashMap<String, String>();
         for (final String key : paramMap.keySet()) {
             try {
                 newParamMap.put(key, paramMap.getFirst(key).replace("%25", "%"));
             } catch (final Exception ex) {
-                log.warn("The URL query parameter " + key + " with value " + paramMap.getFirst(key)
-                        + " could not be URLDecoded", ex);
+                log.warn("The URL query parameter " + key + " with value " + paramMap.getFirst(key) + " could not be URLDecoded", ex);
             }
         }
         return populateFilter(entityManager, newParamMap, filterName, tagPrefix, groupTagPrefix, categoryInternalPrefix,
@@ -127,7 +113,7 @@ public class EntityUtilities extends EntityUtilities {
                 newParamMap.put(entry.getKey(), URLDecoder.decode(entry.getValue(), "UTF-8"));
             } catch (UnsupportedEncodingException e) {
                 log.warn("The URL query parameter " + entry.getKey() + " with value " + entry.getValue() + " could not be URLDecoded", e);
-    }
+            }
         }
 
         return newParamMap;
@@ -136,8 +122,8 @@ public class EntityUtilities extends EntityUtilities {
     /**
      * This function takes the url parameters and uses them to populate a Filter object
      */
-    public static Filter populateFilter(final EntityManager entityManager, final Map<String, String> paramMap, final String filterName, final String tagPrefix,
-            final String groupTagPrefix, final String categoryInternalPrefix, final String categoryExternalPrefix,
+    public static Filter populateFilter(final EntityManager entityManager, final Map<String, String> paramMap, final String filterName,
+            final String tagPrefix, final String groupTagPrefix, final String categoryInternalPrefix, final String categoryExternalPrefix,
             final String localePrefix, final IFieldFilter fieldFilter) {
         // decode the url parameters
         final Map<String, String> fixedParamMap = decodeUrlParameters(paramMap);
@@ -153,8 +139,8 @@ public class EntityUtilities extends EntityUtilities {
                 // filter value was not an integer
                 filterId = null;
 
-                log.debug("The filter ID URL query parameter was not an integer. Got " + filterQueryParam
-                        + ". Probably a malformed URL.", ex);
+                log.debug("The filter ID URL query parameter was not an integer. Got " + filterQueryParam + ". Probably a malformed URL.",
+                        ex);
             }
         }
 
@@ -190,8 +176,7 @@ public class EntityUtilities extends EntityUtilities {
                     /*
                      * some validity checks. make sure we have one or two strings after the split.
                      */
-                    if (catProjID.length != 1 && catProjID.length != 2)
-                        continue;
+                    if (catProjID.length != 1 && catProjID.length != 2) continue;
 
                     // try to get the category and project ids
                     Integer catID = null;
@@ -203,8 +188,7 @@ public class EntityUtilities extends EntityUtilities {
                          * if the array has just one element, we have only specified the category. in this case the project is
                          * the common project
                          */
-                        if (catProjID.length == 2)
-                            projID = Integer.parseInt(catProjID[1]);
+                        if (catProjID.length == 2) projID = Integer.parseInt(catProjID[1]);
                     } catch (final Exception ex) {
                         log.debug("Was expecting an integer. Got " + catProjID[0] + ". Probably a malformed URL.", ex);
                         continue;
@@ -254,9 +238,7 @@ public class EntityUtilities extends EntityUtilities {
                     } catch (final Exception ex) {
                         log.debug("Probably an invalid tag query parameter. Parameter: " + key + " Value: " + state, ex);
                     }
-                }
-
-                else if (groupTagVar) {
+                } else if (groupTagVar) {
                     final Integer tagId = Integer.parseInt(key.replaceFirst(groupTagPrefix, ""));
                     // final Integer intState = Integer.parseInt(state);
 
@@ -308,8 +290,8 @@ public class EntityUtilities extends EntityUtilities {
         return populateFilter(paramMap, fieldFilter);
     }
 
-    public static Filter populateFilter(final EntityManager entityManager, final MultivaluedMap<String, String> paramMap, final String localePrefix,
-            final IFieldFilter fieldFilter) {
+    public static Filter populateFilter(final EntityManager entityManager, final MultivaluedMap<String, String> paramMap,
+            final String localePrefix, final IFieldFilter fieldFilter) {
         return populateFilter(entityManager, paramMap, null, null, null, null, null, localePrefix, fieldFilter);
     }
 
@@ -319,8 +301,7 @@ public class EntityUtilities extends EntityUtilities {
     @SuppressWarnings("unchecked")
     public static List<Integer> getTopicsWithOpenBugs(final EntityManager entityManager) {
         final List<TopicToBugzillaBug> results = entityManager.createQuery(
-                TopicToBugzillaBug.SELECT_ALL_QUERY + " WHERE topicToBugzillaBug.bugzillaBug.bugzillaBugOpen = true")
-                .getResultList();
+                TopicToBugzillaBug.SELECT_ALL_QUERY + " WHERE topicToBugzillaBug.bugzillaBug.bugzillaBugOpen = true").getResultList();
         final List<Integer> retValue = new ArrayList<Integer>();
         for (final TopicToBugzillaBug map : results)
             retValue.add(map.getTopic().getTopicId());
@@ -330,8 +311,7 @@ public class EntityUtilities extends EntityUtilities {
     public static String getTopicsInContentSpecString(final EntityManager entityManager,
             final Integer contentSpecTopicID) throws Exception {
         final List<Integer> topics = getTopicsInContentSpec(entityManager, contentSpecTopicID);
-        if (topics == null || topics.size() == 0)
-            return Constants.NULL_TOPIC_ID_STRING;
+        if (topics == null || topics.size() == 0) return Constants.NULL_TOPIC_ID_STRING;
 
         return CollectionUtilities.toSeperatedString(topics);
     }
@@ -341,8 +321,7 @@ public class EntityUtilities extends EntityUtilities {
      */
     public static String getTopicsWithOpenBugsString(final EntityManager entityManager) {
         final List<Integer> topics = getTopicsWithOpenBugs(entityManager);
-        if (topics.size() == 0)
-            return Constants.NULL_TOPIC_ID_STRING;
+        if (topics.size() == 0) return Constants.NULL_TOPIC_ID_STRING;
 
         return CollectionUtilities.toSeperatedString(topics);
     }
@@ -355,8 +334,7 @@ public class EntityUtilities extends EntityUtilities {
         final List<TopicToBugzillaBug> results = entityManager.createQuery(TopicToBugzillaBug.SELECT_ALL_QUERY).getResultList();
         final List<Integer> retValue = new ArrayList<Integer>();
         for (final TopicToBugzillaBug map : results)
-            if (!retValue.contains(map.getTopic().getTopicId()))
-                retValue.add(map.getTopic().getTopicId());
+            if (!retValue.contains(map.getTopic().getTopicId())) retValue.add(map.getTopic().getTopicId());
         return retValue;
     }
 
@@ -369,8 +347,7 @@ public class EntityUtilities extends EntityUtilities {
         query.setParameter("propTagId", propertyTagIdInt);
         query.setParameter("propTagValue", propertyTagValue);
         final List<TopicToPropertyTag> mappings = query.getResultList();
-        if (mappings.size() == 0)
-            return null;
+        if (mappings.size() == 0) return null;
 
         final List<Integer> retValue = new ArrayList<Integer>();
         for (final TopicToPropertyTag mapping : mappings) {
@@ -380,24 +357,24 @@ public class EntityUtilities extends EntityUtilities {
         return retValue;
     }
 
-    public static String getTopicsWithPropertyTagString(final EntityManager entityManager, final Integer propertyTagIdInt, final String propertyTagValue) {
+    public static String getTopicsWithPropertyTagString(final EntityManager entityManager, final Integer propertyTagIdInt,
+            final String propertyTagValue) {
         final List<Integer> topics = getTopicsWithPropertyTag(entityManager, propertyTagIdInt, propertyTagValue);
-        if (topics.size() == 0)
-            return Constants.NULL_TOPIC_ID_STRING;
+        if (topics.size() == 0) return Constants.NULL_TOPIC_ID_STRING;
 
         return CollectionUtilities.toSeperatedString(topics);
     }
 
     @SuppressWarnings("unchecked")
-    public static List<Integer> getTagsWithPropertyTag(final EntityManager entityManager, final Integer propertyTagIdInt, final String propertyTagValue) {
+    public static List<Integer> getTagsWithPropertyTag(final EntityManager entityManager, final Integer propertyTagIdInt,
+            final String propertyTagValue) {
         final Query query = entityManager.createQuery(
                 TagToPropertyTag.SELECT_ALL_QUERY + " WHERE tagToPropertyTag.propertyTag.propertyTagId = :propTagId AND tagToPropertyTag" +
                         ".value = :propTagValue");
         query.setParameter("propTagId", propertyTagIdInt);
         query.setParameter("propTagValue", propertyTagValue);
         final List<TagToPropertyTag> mappings = query.getResultList();
-        if (mappings.size() == 0)
-            return null;
+        if (mappings.size() == 0) return null;
 
         final List<Integer> retValue = new ArrayList<Integer>();
         for (final TagToPropertyTag mapping : mappings) {
@@ -407,10 +384,10 @@ public class EntityUtilities extends EntityUtilities {
         return retValue;
     }
 
-    public static String getTagsWithPropertyTagString(final EntityManager entityManager, final Integer propertyTagIdInt, final String propertyTagValue) {
+    public static String getTagsWithPropertyTagString(final EntityManager entityManager, final Integer propertyTagIdInt,
+            final String propertyTagValue) {
         final List<Integer> tags = getTagsWithPropertyTag(entityManager, propertyTagIdInt, propertyTagValue);
-        if (tags.size() == 0)
-            return Constants.NULL_TOPIC_ID_STRING;
+        if (tags.size() == 0) return Constants.NULL_TOPIC_ID_STRING;
 
         return CollectionUtilities.toSeperatedString(tags);
     }
@@ -420,8 +397,7 @@ public class EntityUtilities extends EntityUtilities {
      */
     public static String getTopicsWithBugsString(final EntityManager entityManager) {
         final List<Integer> topics = getTopicsWithBugs(entityManager);
-        if (topics.size() == 0)
-            return Constants.NULL_TOPIC_ID_STRING;
+        if (topics.size() == 0) return Constants.NULL_TOPIC_ID_STRING;
 
         return CollectionUtilities.toSeperatedString(topics);
     }
@@ -429,8 +405,7 @@ public class EntityUtilities extends EntityUtilities {
     public static <E> String getEditedEntitiesString(final EntityManager entityManager, final Class<E> type, final String pkColumnName,
             final DateTime startDate, final DateTime endDate) {
         final List<Integer> ids = getEditedEntities(entityManager, type, pkColumnName, startDate, endDate);
-        if (ids != null && ids.size() != 0)
-            return CollectionUtilities.toSeperatedString(ids);
+        if (ids != null && ids.size() != 0) return CollectionUtilities.toSeperatedString(ids);
         return Constants.NULL_TOPIC_ID_STRING;
     }
 
@@ -454,10 +429,8 @@ public class EntityUtilities extends EntityUtilities {
 
         for (final String key : paramMap.keySet()) {
             if (key.startsWith(CommonFilterConstants.MATCH_TAG)) {
-                if (variables.length() == 0)
-                    variables += "?";
-                else
-                    variables += "&";
+                if (variables.length() == 0) variables += "?";
+                else variables += "&";
 
                 variables += key + "=" + paramMap.get(key);
             }
@@ -468,10 +441,10 @@ public class EntityUtilities extends EntityUtilities {
 
     /**
      * A utility function that is used to append url parameters to a collection of url parameters
-     * 
+     *
      * @param params The existing url parameter string
-     * @param name The parameter name
-     * @param value The parameter value
+     * @param name   The parameter name
+     * @param value  The parameter value
      * @return The url parameters that were passed in via params, with the new parameter appended to it
      */
     public static String addParameter(final String params, final String name, final String value) {
@@ -481,20 +454,18 @@ public class EntityUtilities extends EntityUtilities {
 
     /**
      * A utility function that is used to append url parameters to a collection of url parameters
-     * 
-     * @param params The existing url parameter string
-     * @param name The parameter name
-     * @param value The parameter value
+     *
+     * @param params       The existing url parameter string
+     * @param name         The parameter name
+     * @param value        The parameter value
      * @param defaultValue Used in place of value if it is null
      * @return The url parameters that were passed in via params, with the new parameter appended to it
      */
     public static String addParameter(final String params, final String name, final String value, final String defaultValue) {
         String newParams = params;
 
-        if (newParams.length() == 0)
-            newParams += "?";
-        else
-            newParams += "&";
+        if (newParams.length() == 0) newParams += "?";
+        else newParams += "&";
 
         newParams += name + "=" + (value == null ? defaultValue : value);
 
@@ -507,15 +478,13 @@ public class EntityUtilities extends EntityUtilities {
 
     public static String getIncomingRelationshipsTo(final EntityManager entityManager, final Integer topicId) {
         final List<Integer> ids = getIncomingRelatedTopicIDs(entityManager, topicId);
-        if (ids != null && ids.size() != 0)
-            return CollectionUtilities.toSeperatedString(ids);
+        if (ids != null && ids.size() != 0) return CollectionUtilities.toSeperatedString(ids);
         return Constants.NULL_TOPIC_ID_STRING;
     }
 
     public static String getOutgoingRelationshipsFrom(final EntityManager entityManager, final Integer topicId) {
         final List<Integer> ids = getOutgoingRelatedTopicIDs(entityManager, topicId);
-        if (ids != null && ids.size() != 0)
-            return CollectionUtilities.toSeperatedString(ids);
+        if (ids != null && ids.size() != 0) return CollectionUtilities.toSeperatedString(ids);
         return Constants.NULL_TOPIC_ID_STRING;
     }
 
@@ -538,8 +507,7 @@ public class EntityUtilities extends EntityUtilities {
         final List<TranslatedTopicData> results = entityManager.createQuery(query).getResultList();
         final List<Integer> retValue = new ArrayList<Integer>();
         for (final TranslatedTopicData topic : results)
-            if (!retValue.contains(topic.getTranslatedTopicDataId()))
-                retValue.add(topic.getTranslatedTopicDataId());
+            if (!retValue.contains(topic.getTranslatedTopicDataId())) retValue.add(topic.getTranslatedTopicDataId());
         return retValue;
     }
 
@@ -553,23 +521,20 @@ public class EntityUtilities extends EntityUtilities {
         final List<TranslatedTopicData> results = entityManager.createQuery(query).getResultList();
         final List<Integer> retValue = new ArrayList<Integer>();
         for (final TranslatedTopicData topic : results)
-            if (!retValue.contains(topic.getTranslatedTopicDataId()))
-                retValue.add(topic.getTranslatedTopicDataId());
+            if (!retValue.contains(topic.getTranslatedTopicDataId())) retValue.add(topic.getTranslatedTopicDataId());
         return retValue;
     }
 
     public static String getLatestTranslatedTopicsString(final EntityManager entityManager) {
         final List<Integer> topics = getLatestTranslatedTopics(entityManager);
-        if (topics.size() == 0)
-            return Constants.NULL_TOPIC_ID_STRING;
+        if (topics.size() == 0) return Constants.NULL_TOPIC_ID_STRING;
 
         return CollectionUtilities.toSeperatedString(topics);
     }
 
     public static String getLatestCompletedTranslatedTopicsString(final EntityManager entityManager) {
         final List<Integer> topics = getLatestCompletedTranslatedTopics(entityManager);
-        if (topics.size() == 0)
-            return Constants.NULL_TOPIC_ID_STRING;
+        if (topics.size() == 0) return Constants.NULL_TOPIC_ID_STRING;
 
         return CollectionUtilities.toSeperatedString(topics);
     }
@@ -578,8 +543,9 @@ public class EntityUtilities extends EntityUtilities {
         final String localeConstant = loadStringConstant(entityManager, CommonConstants.LOCALES_STRING_CONSTANT_ID);
 
         if (localeConstant != null) {
-            final List<String> locales = CollectionUtilities.replaceStrings(CollectionUtilities
-                    .sortAndReturn(CollectionUtilities.toArrayList(localeConstant.split("[\\s\r\n]*,[\\s\r\n]*"))), "_", "-");
+            final List<String> locales = CollectionUtilities.replaceStrings(
+                    CollectionUtilities.sortAndReturn(CollectionUtilities.toArrayList(localeConstant.split("[\\s\r\n]*,[\\s\r\n]*"))), "_",
+                    "-");
             return locales;
         } else {
             return new ArrayList<String>();
@@ -592,8 +558,7 @@ public class EntityUtilities extends EntityUtilities {
                 LanguageImage.SELECT_ALL_QUERY + (" WHERE LOWER(languageImage.originalFileName) LIKE LOWER(:filename)"));
         query.setParameter("filename", "%" + filename + "%");
         final List<LanguageImage> mappings = query.getResultList();
-        if (mappings.size() == 0)
-            return null;
+        if (mappings.size() == 0) return null;
 
         final List<Integer> retValue = new ArrayList<Integer>();
         for (final LanguageImage mapping : mappings) {

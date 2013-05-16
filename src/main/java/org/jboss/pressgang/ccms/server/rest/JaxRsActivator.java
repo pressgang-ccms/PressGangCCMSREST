@@ -3,6 +3,9 @@ package org.jboss.pressgang.ccms.server.rest;
 import javax.ws.rs.ApplicationPath;
 import javax.ws.rs.core.Application;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 /**
  * A class extending {@link javax.ws.rs.core.Application} and annotated with @ApplicationPath is the Java EE 6
  * "no XML" approach to activating JAX-RS.
@@ -14,5 +17,9 @@ import javax.ws.rs.core.Application;
  */
 @ApplicationPath("/")
 public class JaxRsActivator extends Application {
-    /* class body intentionally left blank */
+    private static final Logger LOGGER = LoggerFactory.getLogger(JaxRsActivator.class);
+
+    public JaxRsActivator() {
+        LOGGER.info("ENTER JaxRsActivator()");
+    }
 }

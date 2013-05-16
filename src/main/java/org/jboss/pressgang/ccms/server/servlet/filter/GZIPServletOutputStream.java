@@ -52,7 +52,7 @@ public class GZIPServletOutputStream extends ServletOutputStream {
 
         int status = response.getStatus();
         final byte[] bytes = baos.toByteArray();
-        
+
         // Check if the response should be empty based on the response code
         // Also only set the gzip header and content when the response isn't empty.
         if (!shouldBodyBeZero(status) && !isBodyEmpty(bytes)) {

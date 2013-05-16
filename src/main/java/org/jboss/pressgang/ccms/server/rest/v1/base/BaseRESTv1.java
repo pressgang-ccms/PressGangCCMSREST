@@ -104,21 +104,20 @@ public class BaseRESTv1 {
 
     /**
      * Get the URL of the root REST endpoint using UriInfo from a request.
-     * 
+     *
      * @return The URL of the root REST endpoint.
      */
     protected String getBaseUrl() {
         final String fullPath = uriInfo.getAbsolutePath().toString();
         final int index = fullPath.indexOf(Constants.BASE_REST_PATH);
-        if (index != -1)
-            return fullPath.substring(0, index + Constants.BASE_REST_PATH.length());
+        if (index != -1) return fullPath.substring(0, index + Constants.BASE_REST_PATH.length());
 
         return null;
     }
 
     /**
      * Get the URL of the REST endpoint from the calling request.
-     * 
+     *
      * @return The URL of the endpoint that was called for the request.
      */
     protected String getUrl() {
@@ -136,9 +135,9 @@ public class BaseRESTv1 {
 
     /**
      * Converts a Collection of Topics into an ATOM Feed.
-     * 
+     *
      * @param topics The collection of topics that should be transformed into the Feed.
-     * @param title The Title for the Feed.
+     * @param title  The Title for the Feed.
      * @return A RESTEasy ATOM Feed Object containing the topic information.
      */
     protected Feed convertTopicsIntoFeed(final RESTTopicCollectionV1 topics, final String title) {
@@ -179,7 +178,7 @@ public class BaseRESTv1 {
 
     /**
      * Fix all the Links to a Topic in a HTML Page or general Link so that the URL's are Absolute, rather than Relative URL's.
-     * 
+     *
      * @param input The Input data to be fixed.
      * @return The input data with all links fixed.
      */
@@ -193,7 +192,7 @@ public class BaseRESTv1 {
      * @param idProperty
      * @param dataObjectFactory
      * @param expandName
-     * @param expand The expand parameters to determine what fields should be expanded.
+     * @param expand            The expand parameters to determine what fields should be expanded.
      * @param date
      * @return
      */
@@ -211,7 +210,7 @@ public class BaseRESTv1 {
      * @param idProperty
      * @param dataObjectFactory
      * @param expandName
-     * @param expand The expand parameters to determine what fields should be expanded.
+     * @param expand            The expand parameters to determine what fields should be expanded.
      * @param dataType
      * @param date
      * @return
@@ -234,10 +233,10 @@ public class BaseRESTv1 {
 
             // Get the list of entity ids that were edited after the selected date
             final AuditReader reader = AuditReaderFactory.get(entityManager);
-            final AuditQuery query = reader.createQuery().forRevisionsOfEntity(type, true, false)
-                    .addOrder(AuditEntity.revisionProperty("timestamp").asc())
-                    .add(AuditEntity.revisionProperty("timestamp").ge(date.getTime()))
-                    .addProjection(AuditEntity.property("originalId." + idProperty).distinct());
+            final AuditQuery query = reader.createQuery().forRevisionsOfEntity(type, true, false).addOrder(
+                    AuditEntity.revisionProperty("timestamp").asc()).add(
+                    AuditEntity.revisionProperty("timestamp").ge(date.getTime())).addProjection(
+                    AuditEntity.property("originalId." + idProperty).distinct());
 
             @SuppressWarnings("rawtypes")
             final List entityIds = query.getResultList();
@@ -253,16 +252,15 @@ public class BaseRESTv1 {
             final List<U> entities = jpaQuery.getResultList();
 
             // Create and initialise the Collection using the specified REST Object Factory
-            final V retValue = new RESTDataObjectCollectionFactory<T, U, V, W>().create(collectionClass, dataObjectFactory,
-                    entities, expandName, dataType, expandDataTrunk, getBaseUrl(), entityManager);
+            final V retValue = new RESTDataObjectCollectionFactory<T, U, V, W>().create(collectionClass, dataObjectFactory, entities,
+                    expandName, dataType, expandDataTrunk, getBaseUrl(), entityManager);
 
             return retValue;
         } catch (final Exception ex) {
             log.error("Probably an issue querying Envers", ex);
             throw new InternalServerErrorException("There was an error running the query");
         } finally {
-            if (entityManager != null)
-                entityManager.close();
+            if (entityManager != null) entityManager.close();
         }
 
     }
@@ -276,12 +274,12 @@ public class BaseRESTv1 {
 
     /**
      * Delete a Entity from the database specified by the entities Primary Key.
-     * 
-     * @param type The Database Entity type to be deleted.
-     * @param factory The REST Object Factory to be used to generate a REST Entity return.
-     * @param id The ID of the Database Entity to be deleted.
-     * @param dataType The data type for the returned REST Entity response. (XML or JSON)
-     * @param expand The expand parameters to determine what fields should be expanded.
+     *
+     * @param type       The Database Entity type to be deleted.
+     * @param factory    The REST Object Factory to be used to generate a REST Entity return.
+     * @param id         The ID of the Database Entity to be deleted.
+     * @param dataType   The data type for the returned REST Entity response. (XML or JSON)
+     * @param expand     The expand parameters to determine what fields should be expanded.
      * @param logDetails The details about the changes that need to be logged.
      * @return
      */
@@ -310,8 +308,7 @@ public class BaseRESTv1 {
 
             // Find the specified entity and make sure that it exists
             final U entity = entityManager.find(type, id);
-            if (entity == null)
-                throw new BadRequestException("No entity was found with the id " + id);
+            if (entity == null) throw new BadRequestException("No entity was found with the id " + id);
 
             // Remove the entity from the persistence context
             entityManager.remove(entity);
@@ -324,8 +321,7 @@ public class BaseRESTv1 {
         } catch (final Throwable e) {
             throw processError(transactionManager, e);
         } finally {
-            if (entityManager != null)
-                entityManager.close();
+            if (entityManager != null) entityManager.close();
         }
     }
 
@@ -359,13 +355,13 @@ public class BaseRESTv1 {
 
     /**
      * Create or update a Database Entity using the data given from a REST Entity.
-     * 
-     * @param type The Database entity type.
+     *
+     * @param type       The Database entity type.
      * @param restEntity The REST Entity to create/update the database with.
-     * @param factory The type of REST Object Factory to use to generate the returned entity.
-     * @param operation The Database Operation type (CREATE or UPDATE).
+     * @param factory    The type of REST Object Factory to use to generate the returned entity.
+     * @param operation  The Database Operation type (CREATE or UPDATE).
      * @param dataType
-     * @param expand The expand parameters to determine what fields should be expanded.
+     * @param expand     The expand parameters to determine what fields should be expanded.
      * @param logDetails The details about the changes that need to be logged.
      * @return The updated/created REST Entity representation of the database entity.
      */
@@ -427,8 +423,7 @@ public class BaseRESTv1 {
         } catch (final Throwable e) {
             throw processError(transactionManager, e);
         } finally {
-            if (entityManager != null)
-                entityManager.close();
+            if (entityManager != null) entityManager.close();
         }
     }
 
@@ -453,8 +448,8 @@ public class BaseRESTv1 {
             final Class<V> collectionClass, final Class<U> type, final RESTBaseCollectionV1<T, V, W> entities,
             final RESTDataObjectFactory<T, U, V, W> factory, final String expandName, final String dataType, final String expand,
             final RESTLogDetailsV1 logDetails) {
-        return createOrUdpateEntities(collectionClass, type, factory, entities, DatabaseOperation.CREATE, expandName, dataType,
-                expand, logDetails);
+        return createOrUdpateEntities(collectionClass, type, factory, entities, DatabaseOperation.CREATE, expandName, dataType, expand,
+                logDetails);
     }
 
     protected <T extends RESTBaseEntityV1<T, V, W>, U extends AuditedEntity, V extends RESTBaseCollectionV1<T, V, W>,
@@ -462,8 +457,8 @@ public class BaseRESTv1 {
             final Class<V> collectionClass, final Class<U> type, final RESTBaseCollectionV1<T, V, W> entities,
             final RESTDataObjectFactory<T, U, V, W> factory, final String expandName, final String dataType, final String expand,
             final RESTLogDetailsV1 logDetails) {
-        return createOrUdpateEntities(collectionClass, type, factory, entities, DatabaseOperation.UPDATE, expandName, dataType,
-                expand, logDetails);
+        return createOrUdpateEntities(collectionClass, type, factory, entities, DatabaseOperation.UPDATE, expandName, dataType, expand,
+                logDetails);
     }
 
     protected <T extends RESTBaseEntityV1<T, V, W>, U extends AuditedEntity, V extends RESTBaseCollectionV1<T, V, W>,
@@ -530,15 +525,14 @@ public class BaseRESTv1 {
         } catch (final Throwable e) {
             throw processError(transactionManager, e);
         } finally {
-            if (entityManager != null)
-                entityManager.close();
+            if (entityManager != null) entityManager.close();
         }
     }
 
     /**
      * Takes a collection of REST entities, updates or creates the corresponding database entities, and returns those database
      * entities in a collection
-     * 
+     *
      * @param collectionClass The Class of the collection that should be returned.
      * @param type
      * @param factory
@@ -546,8 +540,8 @@ public class BaseRESTv1 {
      * @param operation       The Database Operation type (CREATE or UPDATE).
      * @param expandName
      * @param dataType
-     * @param expand The expand parameters to determine what fields should be expanded.
-     * @param logDetails The details about the changes that need to be logged.
+     * @param expand          The expand parameters to determine what fields should be expanded.
+     * @param logDetails      The details about the changes that need to be logged.
      * @return
      */
     private <T extends RESTBaseEntityV1<T, V, W>, U extends AuditedEntity, V extends RESTBaseCollectionV1<T, V, W>,
@@ -586,13 +580,11 @@ public class BaseRESTv1 {
                 U entity = null;
                 if (operation == DatabaseOperation.UPDATE) {
                     // Have to have an ID for the entity we are deleting or updating
-                    if (restEntity.getId() == null)
-                        throw new BadRequestException("An id needs to be set for update operations");
+                    if (restEntity.getId() == null) throw new BadRequestException("An id needs to be set for update operations");
 
                     // Load the entity from the database and verify it exists
                     entity = entityManager.find(type, restEntity.getId());
-                    if (entity == null)
-                        throw new BadRequestException("No entity was found with the primary key " + restEntity.getId());
+                    if (entity == null) throw new BadRequestException("No entity was found with the primary key " + restEntity.getId());
 
                     // Sync the database entity with the REST Entity
                     factory.syncDBEntityWithRESTEntity(entityManager, entity, restEntity);
@@ -601,8 +593,7 @@ public class BaseRESTv1 {
                     entity = factory.createDBEntityFromRESTEntity(entityManager, restEntity);
 
                     // Check that the entity was successfully created
-                    if (entity == null)
-                        throw new BadRequestException("The entity could not be created");
+                    if (entity == null) throw new BadRequestException("The entity could not be created");
                 }
 
                 // Save the created/updated entity
@@ -620,14 +611,13 @@ public class BaseRESTv1 {
         } catch (final Throwable e) {
             throw processError(transactionManager, e);
         } finally {
-            if (entityManager != null)
-                entityManager.close();
+            if (entityManager != null) entityManager.close();
         }
     }
 
     /**
      * Convert a POJO Object to JSON.
-     * 
+     *
      * @param object The Object to be Converted to JSON.
      * @return The JSON representation of the Object.
      * @throws IOException
@@ -638,9 +628,9 @@ public class BaseRESTv1 {
 
     /**
      * Wrap JSON content in a callback function that can be used for JSONP responses.
-     * 
+     *
      * @param padding The Callback Function.
-     * @param json The json to be wrapped in the callback function.
+     * @param json    The json to be wrapped in the callback function.
      * @return The JSON wrapped in the callback function.
      */
     protected String wrapJsonInPadding(final String padding, final String json) {
@@ -650,11 +640,11 @@ public class BaseRESTv1 {
     /**
      * This method is just a wrapper for the {@link #getResource(Class, RESTDataObjectFactory, Object, Number, String, String)
      * getResource()} method that will specify that the response dataType will be JSON.
-     * 
-     * @param type The matching Database Entity type for the REST Entity.
+     *
+     * @param type              The matching Database Entity type for the REST Entity.
      * @param dataObjectFactory The REST Object Factory to generate the REST Entity.
-     * @param id The ID of the database entity to generate the REST Entity for.
-     * @param expand The expand parameters to determine what fields should be expanded.
+     * @param id                The ID of the database entity to generate the REST Entity for.
+     * @param expand            The expand parameters to determine what fields should be expanded.
      * @return The REST Entity containing the information from the database entity.
      */
     protected <T extends RESTBaseEntityV1<T, V, W>, U extends AuditedEntity, V extends RESTBaseCollectionV1<T, V, W>,
@@ -666,12 +656,12 @@ public class BaseRESTv1 {
     /**
      * This method is just a wrapper for the {@link #getResource(Class, RESTDataObjectFactory, Object, Number, String, String)
      * getResource()} method that will specify that the response dataType will be JSON.
-     * 
-     * @param type The matching Database Entity type for the REST Entity.
+     *
+     * @param type              The matching Database Entity type for the REST Entity.
      * @param dataObjectFactory The REST Object Factory to generate the REST Entity.
-     * @param id The ID of the database entity to generate the REST Entity for.
-     * @param revision The Revision of the entity to use to get the database entity.
-     * @param expand The expand parameters to determine what fields should be expanded.
+     * @param id                The ID of the database entity to generate the REST Entity for.
+     * @param revision          The Revision of the entity to use to get the database entity.
+     * @param expand            The expand parameters to determine what fields should be expanded.
      * @return The REST Entity containing the information from the database entity.
      */
     protected <T extends RESTBaseEntityV1<T, V, W>, U extends AuditedEntity, V extends RESTBaseCollectionV1<T, V, W>,
@@ -684,11 +674,11 @@ public class BaseRESTv1 {
     /**
      * This method is just a wrapper for the {@link #getResource(Class, RESTDataObjectFactory, Object, Number, String, String)
      * getResource()} method that will specify that the response dataType will be XML.
-     * 
-     * @param type The matching Database Entity type for the REST Entity.
+     *
+     * @param type              The matching Database Entity type for the REST Entity.
      * @param dataObjectFactory The REST Object Factory to generate the REST Entity.
-     * @param id The ID of the database entity to generate the REST Entity for.
-     * @param expand The expand parameters to determine what fields should be expanded.
+     * @param id                The ID of the database entity to generate the REST Entity for.
+     * @param expand            The expand parameters to determine what fields should be expanded.
      * @return The REST Entity containing the information from the database entity.
      */
     protected <T extends RESTBaseEntityV1<T, V, W>, U extends AuditedEntity, V extends RESTBaseCollectionV1<T, V, W>,
@@ -700,12 +690,12 @@ public class BaseRESTv1 {
     /**
      * This method is just a wrapper for the {@link #getResource(Class, RESTDataObjectFactory, Object, Number, String, String)
      * getResource()} method that will specify that the response dataType will be XML.
-     * 
-     * @param type The matching Database Entity type for the REST Entity.
+     *
+     * @param type              The matching Database Entity type for the REST Entity.
      * @param dataObjectFactory The REST Object Factory to generate the REST Entity.
-     * @param id The ID of the database entity to generate the REST Entity for.
-     * @param revision The Revision of the entity to use to get the database entity.
-     * @param expand The expand parameters to determine what fields should be expanded.
+     * @param id                The ID of the database entity to generate the REST Entity for.
+     * @param revision          The Revision of the entity to use to get the database entity.
+     * @param expand            The expand parameters to determine what fields should be expanded.
      * @return The REST Entity containing the information from the database entity.
      */
     protected <T extends RESTBaseEntityV1<T, V, W>, U extends AuditedEntity, V extends RESTBaseCollectionV1<T, V, W>,
@@ -717,13 +707,13 @@ public class BaseRESTv1 {
 
     /**
      * Generate the a REST Entity using an Entity resource from the database.
-     * 
-     * @param type The matching Database Entity type for the REST Entity.
+     *
+     * @param type              The matching Database Entity type for the REST Entity.
      * @param dataObjectFactory The REST Object Factory to generate the REST Entity.
-     * @param id The ID of the database entity to generate the REST Entity for.
-     * @param revision The Revision of the entity to use to get the database entity.
-     * @param expand The expand parameters to determine what fields should be expanded.
-     * @param dataType The output data type. eg JSON or XML.
+     * @param id                The ID of the database entity to generate the REST Entity for.
+     * @param revision          The Revision of the entity to use to get the database entity.
+     * @param expand            The expand parameters to determine what fields should be expanded.
+     * @param dataType          The output data type. eg JSON or XML.
      * @return The REST Entity containing the information from the database entity.
      */
     private <T extends RESTBaseEntityV1<T, V, W>, U extends AuditedEntity, V extends RESTBaseCollectionV1<T, V, W>,
@@ -756,15 +746,14 @@ public class BaseRESTv1 {
             if (usingRevisions) {
                 // Find the closest revision that is less then the revision specified.
                 final AuditReader reader = AuditReaderFactory.get(entityManager);
-                closestRevision = (Number) reader.createQuery().forRevisionsOfEntity(type, false, true)
-                        .addProjection(AuditEntity.revisionNumber().max()).add(AuditEntity.id().eq(id))
-                        .add(AuditEntity.revisionNumber().le(revision)).getSingleResult();
+                closestRevision = (Number) reader.createQuery().forRevisionsOfEntity(type, false, true).addProjection(
+                        AuditEntity.revisionNumber().max()).add(AuditEntity.id().eq(id)).add(
+                        AuditEntity.revisionNumber().le(revision)).getSingleResult();
 
                 // Get the Revision Entity using an envers lookup.
                 entity = reader.find(type, id, closestRevision);
-                
-                if (entity == null)
-                    throw new BadRequestException("No entity was found with the primary key " + id);
+
+                if (entity == null) throw new BadRequestException("No entity was found with the primary key " + id);
 
                 // Set the entities last modified date to the information associated with the revision.
                 final Date revisionLastModified = reader.getRevisionDate(closestRevision);
@@ -772,9 +761,8 @@ public class BaseRESTv1 {
             } else {
                 entity = entityManager.find(type, id);
             }
-            
-            if (entity == null)
-                throw new BadRequestException("No entity was found with the primary key " + id);
+
+            if (entity == null) throw new BadRequestException("No entity was found with the primary key " + id);
 
             // Create the REST representation of the topic
             final T restRepresentation = dataObjectFactory.createRESTEntityFromDBEntity(entity, this.getBaseUrl(), dataType,
@@ -784,43 +772,39 @@ public class BaseRESTv1 {
         } catch (final Throwable e) {
             throw processError(null, e);
         } finally {
-            if (entityManager != null)
-                entityManager.close();
+            if (entityManager != null) entityManager.close();
         }
     }
 
     protected <U> U getEntity(final EntityManager entityManager, final Class<U> type, final Object id) {
         final U entity = entityManager.find(type, id);
-        if (entity == null)
-            throw new BadRequestException("No entity was found with the primary key " + id);
+        if (entity == null) throw new BadRequestException("No entity was found with the primary key " + id);
 
         return entity;
     }
-    
+
     protected <U extends AuditedEntity> U getEntity(final EntityManager entityManager, final Class<U> type, final Object id,
             final Integer revision) {
         final U entity;
-        
+
         if (revision != null) {
             // Find the closest revision that is less then the revision specified.
             final AuditReader reader = AuditReaderFactory.get(entityManager);
-            final Number closestRevision = (Number) reader.createQuery().forRevisionsOfEntity(type, false, true)
-                    .addProjection(AuditEntity.revisionNumber().max()).add(AuditEntity.id().eq(id))
-                    .add(AuditEntity.revisionNumber().le(revision)).getSingleResult();
+            final Number closestRevision = (Number) reader.createQuery().forRevisionsOfEntity(type, false, true).addProjection(
+                    AuditEntity.revisionNumber().max()).add(AuditEntity.id().eq(id)).add(
+                    AuditEntity.revisionNumber().le(revision)).getSingleResult();
 
             // Get the Revision Entity using an envers lookup.
             entity = reader.find(type, id, closestRevision);
-            
-            if (entity == null)
-                throw new BadRequestException("No entity was found with the primary key " + id);
+
+            if (entity == null) throw new BadRequestException("No entity was found with the primary key " + id);
 
             // Set the entities last modified date to the information assoicated with the revision.
             final Date revisionLastModified = reader.getRevisionDate(closestRevision);
             entity.setLastModifiedDate(revisionLastModified);
         } else {
             entity = entityManager.find(type, id);
-            if (entity == null)
-                throw new BadRequestException("No entity was found with the primary key " + id);
+            if (entity == null) throw new BadRequestException("No entity was found with the primary key " + id);
         }
         return entity;
     }
@@ -874,28 +858,27 @@ public class BaseRESTv1 {
             final List<U> result = getEntities(entityManager, type);
 
             // Create and initialise the Collection using the specified REST Object Factory
-            final V retValue = new RESTDataObjectCollectionFactory<T, U, V, W>().create(collectionClass, dataObjectFactory,
-                    result, expandName, dataType, expandDataTrunk, getBaseUrl(), true, entityManager);
+            final V retValue = new RESTDataObjectCollectionFactory<T, U, V, W>().create(collectionClass, dataObjectFactory, result,
+                    expandName, dataType, expandDataTrunk, getBaseUrl(), true, entityManager);
 
             return retValue;
         } catch (Throwable e) {
             throw processError(null, e);
         } finally {
-            if (entityManager != null)
-                entityManager.close();
+            if (entityManager != null) entityManager.close();
         }
     }
 
     /**
      * Get a set of entity resources that will be JSON Encoded using a URL Query Parameter Map.
-     * 
-     * @param collectionClass The Class of the collection that should be returned.
-     * @param queryParams The map of URL Query Parameters to use when searching.
+     *
+     * @param collectionClass         The Class of the collection that should be returned.
+     * @param queryParams             The map of URL Query Parameters to use when searching.
      * @param filterQueryBuilderClass The Class of the query builder to be used.
-     * @param entityFieldFilter A custom Field filter to be used by the Filter Query Builder.
-     * @param dataObjectFactory The Collection Factory object to be used to generate the contents of the collection.
-     * @param expandName The name that should be used to expand the collection.
-     * @param expand The Expand Object that contains details about what should be expanded.
+     * @param entityFieldFilter       A custom Field filter to be used by the Filter Query Builder.
+     * @param dataObjectFactory       The Collection Factory object to be used to generate the contents of the collection.
+     * @param expandName              The name that should be used to expand the collection.
+     * @param expand                  The Expand Object that contains details about what should be expanded.
      * @return A Collection of Entities represented as the passed collectionClass.
      */
     protected <T extends RESTBaseEntityV1<T, V, W>, U extends AuditedEntity, V extends RESTBaseCollectionV1<T, V, W>,
@@ -909,15 +892,15 @@ public class BaseRESTv1 {
 
     /**
      * Get a set of entity resources using a URL Query Parameter Map.
-     * 
-     * @param collectionClass The Class of the collection that should be returned.
-     * @param queryParams The map of URL Query Parameters to use when searching.
+     *
+     * @param collectionClass         The Class of the collection that should be returned.
+     * @param queryParams             The map of URL Query Parameters to use when searching.
      * @param filterQueryBuilderClass The Class of the query builder to be used.
-     * @param entityFieldFilter A custom Field filter to be used by the Filter Query Builder.
-     * @param dataObjectFactory The Collection Factory object to be used to generate the contents of the collection.
-     * @param expandName The name that should be used to expand the collection.
-     * @param expand The Expand Object that contains details about what should be expanded.
-     * @param dataType The MIME data type that should be returned and used for entity URL links.
+     * @param entityFieldFilter       A custom Field filter to be used by the Filter Query Builder.
+     * @param dataObjectFactory       The Collection Factory object to be used to generate the contents of the collection.
+     * @param expandName              The name that should be used to expand the collection.
+     * @param expand                  The Expand Object that contains details about what should be expanded.
+     * @param dataType                The MIME data type that should be returned and used for entity URL links.
      * @return A Collection of Entities represented as the passed collectionClass.
      */
     protected <T extends RESTBaseEntityV1<T, V, W>, U extends AuditedEntity, V extends RESTBaseCollectionV1<T, V, W>,
@@ -968,51 +951,45 @@ public class BaseRESTv1 {
     protected <U extends AuditedEntity> List<U> getEntitiesFromQuery(final EntityManager entityManager,
             final MultivaluedMap<String, String> queryParams, final IFilterQueryBuilder<U> filterQueryBuilder,
             final IFieldFilter entityFieldFilter) {
-            // build up a Filter object from the URL variables
-            final Filter filter;
-            if (filterQueryBuilder instanceof ITagFilterQueryBuilder) {
-                filter = EntityUtilities.populateFilter(entityManager, queryParams, CommonFilterConstants.FILTER_ID,
-                        CommonFilterConstants.MATCH_TAG, CommonFilterConstants.GROUP_TAG,
-                        CommonFilterConstants.CATEORY_INTERNAL_LOGIC, CommonFilterConstants.CATEORY_EXTERNAL_LOGIC,
-                        CommonFilterConstants.MATCH_LOCALE, entityFieldFilter);
-            } else {
-                filter = EntityUtilities.populateFilter(entityManager, queryParams, CommonFilterConstants.MATCH_LOCALE,
-                        entityFieldFilter);
-            }
+        // build up a Filter object from the URL variables
+        final Filter filter;
+        if (filterQueryBuilder instanceof ITagFilterQueryBuilder) {
+            filter = EntityUtilities.populateFilter(entityManager, queryParams, CommonFilterConstants.FILTER_ID,
+                    CommonFilterConstants.MATCH_TAG, CommonFilterConstants.GROUP_TAG, CommonFilterConstants.CATEORY_INTERNAL_LOGIC,
+                    CommonFilterConstants.CATEORY_EXTERNAL_LOGIC, CommonFilterConstants.MATCH_LOCALE, entityFieldFilter);
+        } else {
+            filter = EntityUtilities.populateFilter(entityManager, queryParams, CommonFilterConstants.MATCH_LOCALE, entityFieldFilter);
+        }
 
-            // Build the query to be used to get the resources
-            final CriteriaQuery<U> query = FilterUtilities.buildQuery(filter, filterQueryBuilder);
+        // Build the query to be used to get the resources
+        final CriteriaQuery<U> query = FilterUtilities.buildQuery(filter, filterQueryBuilder);
 
-            /*
-             * TODO This really should be constrained to the data that we need using the setMaxResults() and setFirstResult()
-             * method. It should also only be executed if the expand is specified.
-             */
-            // Retrieve the results using the generated query.
+        /*
+         * TODO This really should be constrained to the data that we need using the setMaxResults() and setFirstResult()
+         * method. It should also only be executed if the expand is specified.
+         */
+        // Retrieve the results using the generated query.
         return entityManager.createQuery(query).getResultList();
     }
 
     /**
      * Set the log details for the current request. This will use the injected EnversLoggingBean object to set the logging
      * details for Envers.
-     * 
+     *
      * @param entityManager An EntityManager Object that can be used to look up database entities.
      * @param dataObject    The LogDetails object that contains the details to be associated with in the log.
      */
     private void setLogDetails(final EntityManager entityManager, final RESTLogDetailsV1 dataObject) {
-        if (dataObject == null)
-            return;
+        if (dataObject == null) return;
 
-        if (dataObject.hasParameterSet(RESTLogDetailsV1.MESSAGE_NAME))
-            enversLoggingBean.addLogMessage(dataObject.getMessage());
-        if (dataObject.hasParameterSet(RESTLogDetailsV1.FLAG_NAME))
-            enversLoggingBean.setFlag(dataObject.getFlag());
+        if (dataObject.hasParameterSet(RESTLogDetailsV1.MESSAGE_NAME)) enversLoggingBean.addLogMessage(dataObject.getMessage());
+        if (dataObject.hasParameterSet(RESTLogDetailsV1.FLAG_NAME)) enversLoggingBean.setFlag(dataObject.getFlag());
         if (dataObject.hasParameterSet(RESTLogDetailsV1.USERNAME_NAME)) {
             if (dataObject.getUser() != null && dataObject.getUser().getId() != null) {
                 final User user = entityManager.find(User.class, dataObject.getUser().getId());
 
                 if (user == null)
-                    throw new BadRequestException("No user entity was found with the primary key "
-                            + dataObject.getUser().getId());
+                    throw new BadRequestException("No user entity was found with the primary key " + dataObject.getUser().getId());
 
                 enversLoggingBean.setUsername(user.getUserName());
             }
@@ -1021,10 +998,10 @@ public class BaseRESTv1 {
 
     /**
      * Generate a RESTLogDetails object from a set of URL passed parameters.
-     * 
+     *
      * @param message The message to be associated with the log.
-     * @param flag The Message Flags. (ie Minor or Major change).
-     * @param userId The ID of the user who has made the changes.
+     * @param flag    The Message Flags. (ie Minor or Major change).
+     * @param userId  The ID of the user who has made the changes.
      * @return A pre-populated RESTLogDetailsV1 object.
      */
     protected RESTLogDetailsV1 generateLogDetails(final String message, final Integer flag, final String userId) {
@@ -1071,7 +1048,7 @@ public class BaseRESTv1 {
 
     /**
      * Convert a String Expand representation into an ExpandDataTrunk object.
-     * 
+     *
      * @param expand The String representation for the expand.
      * @return An ExpandDataTrunk object containing the converted data.
      */
@@ -1096,7 +1073,7 @@ public class BaseRESTv1 {
      * lookup as well.
      * <p/>
      * Note: This method won't join any active Transactions.
-     * 
+     *
      * @return An initialised EntityManager object.
      */
     protected EntityManager getEntityManager() {
@@ -1106,17 +1083,17 @@ public class BaseRESTv1 {
     /**
      * Get an EntityManager instance from the EntityManagerFactory. If the Factory hasn't been looked up yet, then perform the
      * lookup as well. *
-     * 
+     *
      * @param joinTransaction Whether or not the EntityManager should attempt to join any active Transactions.
      * @return An initialised EntityManager object.
      */
     protected EntityManager getEntityManager(boolean joinTransaction) {
         if (entityManagerFactory == null) {
-        try {
+            try {
                 entityManagerFactory = JNDIUtilities.lookupJBossEntityManagerFactory();
-        } catch (NamingException e) {
+            } catch (NamingException e) {
                 throw new InternalServerErrorException("Could not find the EntityManagerFactory");
-        }
+            }
         }
 
         final EntityManager entityManager = entityManagerFactory.createEntityManager();
@@ -1154,7 +1131,8 @@ public class BaseRESTv1 {
         while (cause != null) {
             if (cause instanceof Failure) {
                 return (Failure) cause;
-            } else if (cause instanceof ValidationException || cause instanceof PersistenceException || cause instanceof CustomConstraintViolationException) {
+            } else if (cause instanceof ValidationException || cause instanceof PersistenceException || cause instanceof
+                    CustomConstraintViolationException) {
                 break;
             } else if (cause instanceof BatchUpdateException) {
                 cause = ((SQLException) cause).getNextException();

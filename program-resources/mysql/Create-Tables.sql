@@ -335,37 +335,6 @@ CREATE TABLE IF NOT EXISTS `Filter_AUD` (
 -- --------------------------------------------------------
 
 --
--- Table structure for table `Help`
---
-
-CREATE TABLE IF NOT EXISTS `Help` (
-  `HelpID` int(11) NOT NULL AUTO_INCREMENT,
-  `TableColID` varchar(255) DEFAULT NULL,
-  `HelpText` text,
-  PRIMARY KEY (`HelpID`)
-) ENGINE=InnoDB  DEFAULT CHARSET=utf8 ;
-
--- --------------------------------------------------------
-
---
--- Table structure for table `Help_AUD`
---
-
-CREATE TABLE IF NOT EXISTS `Help_AUD` (
-  `HelpID` int(11) NOT NULL,
-  `REV` int(11) NOT NULL,
-  `REVEND` int(11) DEFAULT NULL,
-  `REVTYPE` tinyint(4) DEFAULT NULL,
-  `HelpText` text,
-  `TableColID` varchar(255) DEFAULT NULL,
-  PRIMARY KEY (`HelpID`,`REV`),
-  KEY `FKD4CBD8B2DF74E053` (`REV`),
-  KEY `FKD4CBD8B2A7C21108` (`REVEND`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8;
-
--- --------------------------------------------------------
-
---
 -- Table structure for table `ImageFile`
 --
 
@@ -1604,13 +1573,6 @@ ADD CONSTRAINT `FKA9A235B3DF74E053` FOREIGN KEY (`REV`) REFERENCES `REVINFO` (`R
  ALTER TABLE `Filter_AUD`
 ADD CONSTRAINT `FK1A445969A7C21108` FOREIGN KEY (`REVEND`) REFERENCES `REVINFO` (`REV`),
 ADD CONSTRAINT `FK1A445969DF74E053` FOREIGN KEY (`REV`) REFERENCES `REVINFO` (`REV`);
-
---
--- Constraints for table `Help_AUD`
---
- ALTER TABLE `Help_AUD`
-ADD CONSTRAINT `FKD4CBD8B2A7C21108` FOREIGN KEY (`REVEND`) REFERENCES `REVINFO` (`REV`),
-ADD CONSTRAINT `FKD4CBD8B2DF74E053` FOREIGN KEY (`REV`) REFERENCES `REVINFO` (`REV`);
 
 --
 -- Constraints for table `ImageFile_AUD`

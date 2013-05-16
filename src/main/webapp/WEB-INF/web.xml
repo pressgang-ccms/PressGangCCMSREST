@@ -2,7 +2,8 @@
 <web-app version="3.0" xmlns="http://java.sun.com/xml/ns/javaee"
          xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
          xsi:schemaLocation="http://java.sun.com/xml/ns/javaee http://java.sun.com/xml/ns/javaee/web-app_3_0.xsd">
-    <filter>
+
+    <!--<filter>
         <filter-name>OAuth2 Filter</filter-name>
         <filter-class>org.jboss.pressgang.belay.oauth2.resourceserver.filter.OAuth2RSFilter</filter-class>
     </filter>
@@ -15,15 +16,30 @@
     <context-param>
         <param-name>oauth.rs.provider-class</param-name>
         <param-value>org.jboss.pressgang.belay.oauth2.resourceserver.filter.OAuth2RSProvider</param-value>
+    </context-param>-->
+
+    <!-- Java Melody Parameters -->
+    <context-param>
+        <param-name>javamelody.datasources</param-name>
+        <param-value>java:/PressGangCCMSDatasource</param-value>
     </context-param>
 
-    <filter>
-        <filter-name>compression</filter-name>
-        <filter-class>org.jboss.pressgang.ccms.server.servlet.filter.GZIPCompressionFilter</filter-class>
-    </filter>
+    <!-- Liquibase Parameters -->
+    <context-param>
+        <param-name>liquibase.changelog</param-name>
+        <param-value>db/db.changelog.xml</param-value>
+    </context-param>
+    <context-param>
+        <param-name>liquibase.datasource</param-name>
+        <param-value>java:/PressGangCCMSDatasource</param-value>
+    </context-param>
+    <context-param>
+        <param-name>liquibase.onerror.fail</param-name>
+        <param-value>true</param-value>
+    </context-param>
 
-    <filter-mapping>
-        <filter-name>compression</filter-name>
-        <url-pattern>/rest/*</url-pattern>
-    </filter-mapping>
+    <!-- Listeners -->
+    <listener>
+        <listener-class>liquibase.integration.servlet.LiquibaseServletListener</listener-class>
+    </listener>
 </web-app>

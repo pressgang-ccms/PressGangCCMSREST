@@ -16,7 +16,7 @@ import org.hibernate.envers.RevisionTimestamp;
 /**
  * A Custom Envers Revision Entity class to hold extra details about revision changes. The extra data for this class is: Log
  * Message, Username and Logging Flags.
- * 
+ *
  * @author lnewson
  */
 @Entity
@@ -85,23 +85,16 @@ public class LoggingRevisionEntity implements Serializable {
 
     @Override
     public boolean equals(Object o) {
-        if (this == o)
-            return true;
-        if (!(o instanceof LoggingRevisionEntity))
-            return false;
+        if (this == o) return true;
+        if (!(o instanceof LoggingRevisionEntity)) return false;
 
         LoggingRevisionEntity that = (LoggingRevisionEntity) o;
 
-        if (id != that.id)
-            return false;
-        if (timestamp != that.timestamp)
-            return false;
-        if (logMessage != null ? !logMessage.equals(that.logMessage) : that.logMessage != null)
-            return false;
-        if (logFlag != null ? !logFlag.equals(that.logFlag) : that.logFlag != null)
-            return false;
-        if (username != null ? !username.equals(that.username) : this.username != null)
-            return false;
+        if (!id.equals(that.id)) return false;
+        if (!timestamp.equals(that.timestamp)) return false;
+        if (logMessage != null ? !logMessage.equals(that.logMessage) : that.logMessage != null) return false;
+        if (logFlag != null ? !logFlag.equals(that.logFlag) : that.logFlag != null) return false;
+        if (username != null && !username.equals(that.username)) return false;
 
         return true;
     }

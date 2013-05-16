@@ -1,8 +1,7 @@
 package org.jboss.pressgang.ccms.server.rest.v1;
 
-import java.util.Date;
-
 import javax.persistence.EntityManager;
+import java.util.Date;
 
 import org.jboss.pressgang.ccms.model.User;
 import org.jboss.pressgang.ccms.model.base.AuditedEntity;
@@ -14,7 +13,7 @@ import org.jboss.pressgang.ccms.server.utils.EnversUtilities;
 
 public class LogDetailsV1Factory {
 
-    public <T extends AuditedEntity<T>> RESTLogDetailsV1 create(final T entity, final Number revision, final String expandName,
+    public <T extends AuditedEntity> RESTLogDetailsV1 create(final T entity, final Number revision, final String expandName,
             final ExpandDataTrunk expand, final String dataType, final String baseUrl, final EntityManager entityManager) {
         if (expand != null && expand.get(expandName) != null) {
             final LoggingRevisionEntity revisionEntity = EnversUtilities.getRevisionEntity(entityManager, entity, revision);
@@ -25,8 +24,8 @@ public class LogDetailsV1Factory {
         }
     }
 
-    public RESTLogDetailsV1 createRESTEntityFromDBEntity(final LoggingRevisionEntity revisionEntity,
-            final ExpandDataTrunk expand, final String dataType, final String baseUrl, final EntityManager entityManager) {
+    public RESTLogDetailsV1 createRESTEntityFromDBEntity(final LoggingRevisionEntity revisionEntity, final ExpandDataTrunk expand,
+            final String dataType, final String baseUrl, final EntityManager entityManager) {
 
         final RESTLogDetailsV1 retValue = new RESTLogDetailsV1();
 
