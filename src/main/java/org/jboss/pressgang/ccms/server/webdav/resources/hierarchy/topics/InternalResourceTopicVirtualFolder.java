@@ -13,7 +13,7 @@ import java.util.regex.Matcher;
 import net.java.dev.webdav.jaxrs.xml.elements.MultiStatus;
 import net.java.dev.webdav.jaxrs.xml.elements.Response;
 import org.jboss.pressgang.ccms.server.utils.JNDIUtilities;
-import org.jboss.pressgang.ccms.server.webdav.managers.DeleteManager;
+import org.jboss.pressgang.ccms.server.webdav.managers.CompatibilityManager;
 import org.jboss.pressgang.ccms.server.webdav.resources.InternalResource;
 import org.jboss.pressgang.ccms.server.webdav.resources.MultiStatusReturnValue;
 import org.jboss.pressgang.ccms.server.webdav.utils.MathUtils;
@@ -27,9 +27,9 @@ public class InternalResourceTopicVirtualFolder extends InternalResource {
     public static final String RESOURCE_NAME = "TOPICS";
     private static final Logger LOGGER = LoggerFactory.getLogger(InternalResourceTopicVirtualFolder.class.getName());
 
-    public InternalResourceTopicVirtualFolder(@NotNull final UriInfo uriInfo, @NotNull final DeleteManager deleteManager,
+    public InternalResourceTopicVirtualFolder(@NotNull final UriInfo uriInfo, @NotNull final CompatibilityManager compatibilityManager,
             @Nullable final String remoteAddress, @NotNull final String stringId) {
-        super(uriInfo, deleteManager, remoteAddress, stringId);
+        super(uriInfo, compatibilityManager, remoteAddress, stringId);
     }
 
     @Override
