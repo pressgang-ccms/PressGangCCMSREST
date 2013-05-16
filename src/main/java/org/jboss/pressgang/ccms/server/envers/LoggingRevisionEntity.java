@@ -2,13 +2,12 @@ package org.jboss.pressgang.ccms.server.envers;
 
 import static javax.persistence.GenerationType.IDENTITY;
 
-import java.io.Serializable;
-
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.Id;
 import javax.persistence.Table;
+import java.io.Serializable;
 
 import org.hibernate.envers.RevisionEntity;
 import org.hibernate.envers.RevisionNumber;
@@ -19,7 +18,6 @@ import org.hibernate.envers.RevisionTimestamp;
  * Message, Username and Logging Flags.
  * 
  * @author lnewson
- * 
  */
 @Entity
 @RevisionEntity(LoggingRevisionListener.class)

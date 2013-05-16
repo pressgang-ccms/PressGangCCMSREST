@@ -1,59 +1,63 @@
 package org.jboss.pressgang.ccms.server.rest.v1.base;
 
-import java.io.IOException;
-import java.net.URI;
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.List;
-import java.util.Set;
-
 import javax.enterprise.context.RequestScoped;
 import javax.inject.Inject;
 import javax.naming.NamingException;
 import javax.persistence.EntityManager;
 import javax.persistence.EntityManagerFactory;
 import javax.persistence.FlushModeType;
+import javax.persistence.PersistenceException;
+import javax.persistence.PersistenceUnit;
 import javax.persistence.TypedQuery;
 import javax.persistence.criteria.CriteriaBuilder;
 import javax.persistence.criteria.CriteriaQuery;
 import javax.persistence.criteria.Root;
+import javax.transaction.Status;
 import javax.transaction.TransactionManager;
+import javax.validation.ConstraintViolation;
+import javax.validation.ConstraintViolationException;
+import javax.validation.ValidationException;
 import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.MultivaluedMap;
 import javax.ws.rs.core.UriInfo;
+import java.io.IOException;
+import java.net.URI;
+import java.sql.BatchUpdateException;
+import java.sql.SQLException;
+import java.util.ArrayList;
+import java.util.Date;
+import java.util.List;
+import java.util.Set;
 
-import org.codehaus.jackson.JsonGenerationException;
-import org.codehaus.jackson.JsonParseException;
-import org.codehaus.jackson.map.JsonMappingException;
 import org.codehaus.jackson.map.ObjectMapper;
 import org.hibernate.envers.AuditReader;
 import org.hibernate.envers.AuditReaderFactory;
 import org.hibernate.envers.query.AuditEntity;
 import org.hibernate.envers.query.AuditQuery;
+import org.jboss.pressgang.ccms.filter.base.IFieldFilter;
+import org.jboss.pressgang.ccms.filter.base.IFilterQueryBuilder;
+import org.jboss.pressgang.ccms.filter.base.ITagFilterQueryBuilder;
+import org.jboss.pressgang.ccms.filter.utils.FilterUtilities;
 import org.jboss.pressgang.ccms.model.Filter;
 import org.jboss.pressgang.ccms.model.User;
 import org.jboss.pressgang.ccms.model.base.AuditedEntity;
+import org.jboss.pressgang.ccms.model.exceptions.CustomConstraintViolationException;
+import org.jboss.pressgang.ccms.model.utils.EnversUtilities;
 import org.jboss.pressgang.ccms.rest.v1.collections.RESTTopicCollectionV1;
 import org.jboss.pressgang.ccms.rest.v1.collections.base.RESTBaseCollectionItemV1;
 import org.jboss.pressgang.ccms.rest.v1.collections.base.RESTBaseCollectionV1;
+import org.jboss.pressgang.ccms.rest.v1.constants.CommonFilterConstants;
+import org.jboss.pressgang.ccms.rest.v1.constants.RESTv1Constants;
 import org.jboss.pressgang.ccms.rest.v1.entities.RESTTopicV1;
 import org.jboss.pressgang.ccms.rest.v1.entities.RESTUserV1;
 import org.jboss.pressgang.ccms.rest.v1.entities.base.RESTBaseEntityV1;
 import org.jboss.pressgang.ccms.rest.v1.entities.base.RESTLogDetailsV1;
-import org.jboss.pressgang.ccms.rest.v1.exceptions.InternalProcessingException;
-import org.jboss.pressgang.ccms.rest.v1.exceptions.InvalidParameterException;
 import org.jboss.pressgang.ccms.rest.v1.expansion.ExpandDataTrunk;
-import org.jboss.pressgang.ccms.rest.v1.constants.CommonFilterConstants;
-import org.jboss.pressgang.ccms.rest.v1.constants.RESTv1Constants;
 import org.jboss.pressgang.ccms.server.ejb.EnversLoggingBean;
-import org.jboss.pressgang.ccms.server.filter.base.IFieldFilter;
-import org.jboss.pressgang.ccms.server.filter.base.IFilterQueryBuilder;
-import org.jboss.pressgang.ccms.server.filter.base.ITagFilterQueryBuilder;
 import org.jboss.pressgang.ccms.server.rest.DatabaseOperation;
 import org.jboss.pressgang.ccms.server.utils.Constants;
 import org.jboss.pressgang.ccms.server.utils.EntityUtilities;
-import org.jboss.pressgang.ccms.server.utils.FilterUtilities;
 import org.jboss.pressgang.ccms.server.utils.JNDIUtilities;
 import org.jboss.resteasy.plugins.providers.atom.Content;
 import org.jboss.resteasy.plugins.providers.atom.Entry;
@@ -61,6 +65,8 @@ import org.jboss.resteasy.plugins.providers.atom.Feed;
 import org.jboss.resteasy.spi.BadRequestException;
 import org.jboss.resteasy.spi.Failure;
 import org.jboss.resteasy.spi.InternalServerErrorException;
+import org.jboss.resteasy.spi.NotFoundException;
+import org.jboss.resteasy.spi.UnauthorizedException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -71,17 +77,30 @@ import org.slf4j.LoggerFactory;
 @RequestScoped
 public class BaseRESTv1 {
     private static final Logger log = LoggerFactory.getLogger(BaseRESTv1.class);
-    /** The format for dates passed and returned by the REST Interface */
+    /**
+     * The format for dates passed and returned by the REST Interface
+     */
     protected static final String REST_DATE_FORMAT = "dd-MMM-yyyy";
 
-    /** An mapper to map Objects to JSON or vice-versa */
+    /**
+     * An mapper to map Objects to JSON or vice-versa
+     */
     private final ObjectMapper mapper = new ObjectMapper();
-    /** The Uri Information for the REST Request */
+    /**
+     * The Uri Information for the REST Request
+     */
     @Context
     private UriInfo uriInfo;
-    /** The Java Bean used for logging information to Envers */
+    /**
+     * The Java Bean used for logging information to Envers
+     */
     @Inject
     private EnversLoggingBean enversLoggingBean;
+    /**
+     * The Factory used to create EntityManagers
+     */
+    @PersistenceUnit
+    private EntityManagerFactory entityManagerFactory;
 
     /**
      * Get the URL of the root REST endpoint using UriInfo from a request.
@@ -107,6 +126,15 @@ public class BaseRESTv1 {
     }
 
     /**
+     * Get the URL of the REST endpoint from the calling request.
+     *
+     * @return The URL of the endpoint that was called for the request.
+     */
+    protected String getRequestUrl() {
+        return uriInfo.getRequestUri().toString();
+    }
+
+    /**
      * Converts a Collection of Topics into an ATOM Feed.
      * 
      * @param topics The collection of topics that should be transformed into the Feed.
@@ -117,7 +145,7 @@ public class BaseRESTv1 {
         try {
             final Feed feed = new Feed();
 
-            feed.setId(new URI(this.getUrl()));
+            feed.setId(new URI(this.getRequestUrl()));
             feed.setTitle(title);
             feed.setUpdated(new Date());
 
@@ -126,6 +154,7 @@ public class BaseRESTv1 {
                     final String html = topic.getHtml();
 
                     final Entry entry = new Entry();
+                    entry.setId(new URI(topic.getSelfLink()));
                     entry.setTitle(topic.getTitle());
                     entry.setUpdated(topic.getLastModified());
                     entry.setPublished(topic.getCreated());
@@ -159,8 +188,6 @@ public class BaseRESTv1 {
     }
 
     /**
-     * 
-     * 
      * @param collectionClass
      * @param type
      * @param idProperty
@@ -169,18 +196,16 @@ public class BaseRESTv1 {
      * @param expand The expand parameters to determine what fields should be expanded.
      * @param date
      * @return
-     * @throws InvalidParameterException
      */
-    protected <T extends RESTBaseEntityV1<T, V, W>, U extends AuditedEntity<U>, V extends RESTBaseCollectionV1<T, V, W>, W extends RESTBaseCollectionItemV1<T, V, W>> V getJSONEntitiesUpdatedSince(
+    protected <T extends RESTBaseEntityV1<T, V, W>, U extends AuditedEntity, V extends RESTBaseCollectionV1<T, V, W>,
+            W extends RESTBaseCollectionItemV1<T, V, W>> V getJSONEntitiesUpdatedSince(
             final Class<V> collectionClass, final Class<U> type, final String idProperty,
-            final RESTDataObjectFactory<T, U, V, W> dataObjectFactory, final String expandName, final String expand,
-            final Date date) throws InvalidParameterException {
-        return getEntitiesUpdatedSince(collectionClass, type, idProperty, dataObjectFactory, expandName, expand,
-                RESTv1Constants.JSON_URL, date);
+            final RESTDataObjectFactory<T, U, V, W> dataObjectFactory, final String expandName, final String expand, final Date date) {
+        return getEntitiesUpdatedSince(collectionClass, type, idProperty, dataObjectFactory, expandName, expand, RESTv1Constants.JSON_URL,
+                date);
     }
 
     /**
-     * 
      * @param collectionClass
      * @param type
      * @param idProperty
@@ -190,12 +215,12 @@ public class BaseRESTv1 {
      * @param dataType
      * @param date
      * @return
-     * @throws InvalidParameterException
      */
-    protected <T extends RESTBaseEntityV1<T, V, W>, U extends AuditedEntity<U>, V extends RESTBaseCollectionV1<T, V, W>, W extends RESTBaseCollectionItemV1<T, V, W>> V getEntitiesUpdatedSince(
+    protected <T extends RESTBaseEntityV1<T, V, W>, U extends AuditedEntity, V extends RESTBaseCollectionV1<T, V, W>,
+            W extends RESTBaseCollectionItemV1<T, V, W>> V getEntitiesUpdatedSince(
             final Class<V> collectionClass, final Class<U> type, final String idProperty,
-            final RESTDataObjectFactory<T, U, V, W> dataObjectFactory, final String expandName, final String expand,
-            final String dataType, final Date date) throws InvalidParameterException {
+            final RESTDataObjectFactory<T, U, V, W> dataObjectFactory, final String expandName, final String expand, final String dataType,
+            final Date date) {
         assert date != null : "The date parameter can not be null";
 
         EntityManager entityManager = null;
@@ -242,9 +267,10 @@ public class BaseRESTv1 {
 
     }
 
-    protected <T extends RESTBaseEntityV1<T, V, W>, U extends AuditedEntity<U>, V extends RESTBaseCollectionV1<T, V, W>, W extends RESTBaseCollectionItemV1<T, V, W>> T deleteJSONEntity(
+    protected <T extends RESTBaseEntityV1<T, V, W>, U extends AuditedEntity, V extends RESTBaseCollectionV1<T, V, W>,
+            W extends RESTBaseCollectionItemV1<T, V, W>> T deleteJSONEntity(
             final Class<U> type, final RESTDataObjectFactory<T, U, V, W> factory, final Integer id, final String expand,
-            final RESTLogDetailsV1 logDetails) throws InvalidParameterException {
+            final RESTLogDetailsV1 logDetails) {
         return deleteEntity(type, factory, id, RESTv1Constants.JSON_URL, expand, logDetails);
     }
 
@@ -258,11 +284,11 @@ public class BaseRESTv1 {
      * @param expand The expand parameters to determine what fields should be expanded.
      * @param logDetails The details about the changes that need to be logged.
      * @return
-     * @throws InvalidParameterException
      */
-    protected <T extends RESTBaseEntityV1<T, V, W>, U extends AuditedEntity<U>, V extends RESTBaseCollectionV1<T, V, W>, W extends RESTBaseCollectionItemV1<T, V, W>> T deleteEntity(
+    protected <T extends RESTBaseEntityV1<T, V, W>, U extends AuditedEntity, V extends RESTBaseCollectionV1<T, V, W>,
+            W extends RESTBaseCollectionItemV1<T, V, W>> T deleteEntity(
             final Class<U> type, final RESTDataObjectFactory<T, U, V, W> factory, final Integer id, final String dataType,
-            final String expand, final RESTLogDetailsV1 logDetails) throws InvalidParameterException {
+            final String expand, final RESTLogDetailsV1 logDetails) {
         assert id != null : "id should not be null";
 
         TransactionManager transactionManager = null;
@@ -273,7 +299,7 @@ public class BaseRESTv1 {
             final ExpandDataTrunk expandDataTrunk = unmarshallExpand(expand);
 
             // Get the TransactionManager and start a Transaction
-            transactionManager = JNDIUtilities.lookupTransactionManager();
+            transactionManager = JNDIUtilities.lookupJBossTransactionManager();
             transactionManager.begin();
 
             // Get an EntityManager instance
@@ -295,52 +321,39 @@ public class BaseRESTv1 {
             transactionManager.commit();
 
             return factory.createRESTEntityFromDBEntity(entity, getBaseUrl(), dataType, expandDataTrunk, entityManager);
-        } catch (final InvalidParameterException ex) {
-            log.error("There was an error looking up the entities", ex);
-            throw ex;
-        } catch (final Failure ex) {
-            log.error("There was an error looking up the required manager objects", ex);
-            throw ex;
-        } catch (final Exception ex) {
-            log.error("Probably an error saving the entity", ex);
-
-            if (transactionManager != null) {
-                try {
-                    transactionManager.rollback();
-                } catch (final Exception ex2) {
-                    log.error("There was an error rolling back the transaction", ex2);
-                }
-            }
-
-            throw new InternalServerErrorException("There was an error saving the entity");
+        } catch (final Throwable e) {
+            throw processError(transactionManager, e);
         } finally {
             if (entityManager != null)
                 entityManager.close();
         }
     }
 
-    protected <T extends RESTBaseEntityV1<T, V, W>, U extends AuditedEntity<U>, V extends RESTBaseCollectionV1<T, V, W>, W extends RESTBaseCollectionItemV1<T, V, W>> T createJSONEntity(
+    protected <T extends RESTBaseEntityV1<T, V, W>, U extends AuditedEntity, V extends RESTBaseCollectionV1<T, V, W>,
+            W extends RESTBaseCollectionItemV1<T, V, W>> T createJSONEntity(
             final Class<U> type, final T restEntity, final RESTDataObjectFactory<T, U, V, W> factory, final String expand,
-            final RESTLogDetailsV1 logDetails) throws InternalProcessingException, InvalidParameterException {
+            final RESTLogDetailsV1 logDetails) {
         return createEntity(type, restEntity, factory, RESTv1Constants.JSON_URL, expand, logDetails);
     }
 
-    protected <T extends RESTBaseEntityV1<T, V, W>, U extends AuditedEntity<U>, V extends RESTBaseCollectionV1<T, V, W>, W extends RESTBaseCollectionItemV1<T, V, W>> T updateJSONEntity(
+    protected <T extends RESTBaseEntityV1<T, V, W>, U extends AuditedEntity, V extends RESTBaseCollectionV1<T, V, W>,
+            W extends RESTBaseCollectionItemV1<T, V, W>> T updateJSONEntity(
             final Class<U> type, final T restEntity, final RESTDataObjectFactory<T, U, V, W> factory, final String expand,
-            final RESTLogDetailsV1 logDetails) throws InvalidParameterException {
+            final RESTLogDetailsV1 logDetails) {
         return updateEntity(type, restEntity, factory, RESTv1Constants.JSON_URL, expand, logDetails);
     }
 
-    protected <T extends RESTBaseEntityV1<T, V, W>, U extends AuditedEntity<U>, V extends RESTBaseCollectionV1<T, V, W>, W extends RESTBaseCollectionItemV1<T, V, W>> T createEntity(
+    protected <T extends RESTBaseEntityV1<T, V, W>, U extends AuditedEntity, V extends RESTBaseCollectionV1<T, V, W>,
+            W extends RESTBaseCollectionItemV1<T, V, W>> T createEntity(
             final Class<U> type, final T restEntity, final RESTDataObjectFactory<T, U, V, W> factory, final String dataType,
-            final String expand, final RESTLogDetailsV1 logDetails) throws InternalProcessingException,
-            InvalidParameterException {
+            final String expand, final RESTLogDetailsV1 logDetails) {
         return createOrUpdateEntity(type, restEntity, factory, DatabaseOperation.CREATE, dataType, expand, logDetails);
     }
 
-    protected <T extends RESTBaseEntityV1<T, V, W>, U extends AuditedEntity<U>, V extends RESTBaseCollectionV1<T, V, W>, W extends RESTBaseCollectionItemV1<T, V, W>> T updateEntity(
+    protected <T extends RESTBaseEntityV1<T, V, W>, U extends AuditedEntity, V extends RESTBaseCollectionV1<T, V, W>,
+            W extends RESTBaseCollectionItemV1<T, V, W>> T updateEntity(
             final Class<U> type, final T restEntity, final RESTDataObjectFactory<T, U, V, W> factory, final String dataType,
-            final String expand, final RESTLogDetailsV1 logDetails) throws InvalidParameterException {
+            final String expand, final RESTLogDetailsV1 logDetails) {
         return createOrUpdateEntity(type, restEntity, factory, DatabaseOperation.UPDATE, dataType, expand, logDetails);
     }
 
@@ -355,12 +368,11 @@ public class BaseRESTv1 {
      * @param expand The expand parameters to determine what fields should be expanded.
      * @param logDetails The details about the changes that need to be logged.
      * @return The updated/created REST Entity representation of the database entity.
-     * @throws InvalidParameterException
      */
-    private <T extends RESTBaseEntityV1<T, V, W>, U extends AuditedEntity<U>, V extends RESTBaseCollectionV1<T, V, W>, W extends RESTBaseCollectionItemV1<T, V, W>> T createOrUpdateEntity(
-            final Class<U> type, final T restEntity, final RESTDataObjectFactory<T, U, V, W> factory,
-            final DatabaseOperation operation, final String dataType, final String expand, final RESTLogDetailsV1 logDetails)
-            throws InvalidParameterException {
+    private <T extends RESTBaseEntityV1<T, V, W>, U extends AuditedEntity, V extends RESTBaseCollectionV1<T, V, W>,
+            W extends RESTBaseCollectionItemV1<T, V, W>> T createOrUpdateEntity(
+            final Class<U> type, final T restEntity, final RESTDataObjectFactory<T, U, V, W> factory, final DatabaseOperation operation,
+            final String dataType, final String expand, final RESTLogDetailsV1 logDetails) {
         assert restEntity != null : "restEntity should not be null";
         assert factory != null : "factory should not be null";
 
@@ -372,7 +384,7 @@ public class BaseRESTv1 {
             final ExpandDataTrunk expandDataTrunk = unmarshallExpand(expand);
 
             // Get the TransactionManager and start a Transaction
-            transactionManager = JNDIUtilities.lookupTransactionManager();
+            transactionManager = JNDIUtilities.lookupJBossTransactionManager();
             transactionManager.begin();
 
             // Get an EntityManager instance
@@ -389,13 +401,11 @@ public class BaseRESTv1 {
             U entity = null;
             if (operation == DatabaseOperation.UPDATE) {
                 /* Have to have an ID for the entity we are deleting or updating */
-                if (restEntity.getId() == null)
-                    throw new InvalidParameterException("An id needs to be set for update operations");
+                if (restEntity.getId() == null) throw new BadRequestException("An id needs to be set for update operations");
 
                 // Find the entity and check that it actually exists
                 entity = entityManager.find(type, restEntity.getId());
-                if (entity == null)
-                    throw new InvalidParameterException("No entity was found with the primary key " + restEntity.getId());
+                if (entity == null) throw new BadRequestException("No entity was found with the primary key " + restEntity.getId());
 
                 // Sync the changes from the REST Entity to the Database.
                 factory.syncDBEntityWithRESTEntity(entityManager, entity, restEntity);
@@ -405,8 +415,7 @@ public class BaseRESTv1 {
                 entity = factory.createDBEntityFromRESTEntity(entityManager, restEntity);
 
                 // Check that a entity was able to be successfully created.
-                if (entity == null)
-                    throw new InvalidParameterException("The entity could not be created");
+                if (entity == null) throw new BadRequestException("The entity could not be created");
             }
 
             assert entity != null : "entity should not be null";
@@ -414,84 +423,60 @@ public class BaseRESTv1 {
             entityManager.flush();
             transactionManager.commit();
 
-            return factory.createRESTEntityFromDBEntity(entity, this.getBaseUrl(), dataType, expandDataTrunk, null, true,
-                    entityManager);
-        } catch (final InvalidParameterException ex) {
-            log.error("There was an error looking up the entities", ex);
-
-            if (transactionManager != null) {
-                try {
-                    transactionManager.rollback();
-                } catch (final Exception ex2) {
-                    log.error("There was an error rolling back the transaction", ex2);
-                }
-            }
-
-            throw ex;
-        } catch (final Failure ex) {
-            log.error("There was an error looking up the required manager objects", ex);
-            throw ex;
-        } catch (final Exception ex) {
-            log.error("Probably an error saving the entity", ex);
-
-            if (transactionManager != null) {
-                try {
-                    transactionManager.rollback();
-                } catch (final Exception ex2) {
-                    log.error("There was an error rolling back the transaction", ex2);
-                }
-            }
-
-            throw new InternalServerErrorException("There was an error saving the entity");
+            return factory.createRESTEntityFromDBEntity(entity, this.getBaseUrl(), dataType, expandDataTrunk, null, true, entityManager);
+        } catch (final Throwable e) {
+            throw processError(transactionManager, e);
         } finally {
             if (entityManager != null)
                 entityManager.close();
         }
     }
 
-    protected <T extends RESTBaseEntityV1<T, V, W>, U extends AuditedEntity<U>, V extends RESTBaseCollectionV1<T, V, W>, W extends RESTBaseCollectionItemV1<T, V, W>> V createJSONEntities(
+    protected <T extends RESTBaseEntityV1<T, V, W>, U extends AuditedEntity, V extends RESTBaseCollectionV1<T, V, W>,
+            W extends RESTBaseCollectionItemV1<T, V, W>> V createJSONEntities(
             final Class<V> collectionClass, final Class<U> type, final RESTBaseCollectionV1<T, V, W> entities,
             final RESTDataObjectFactory<T, U, V, W> factory, final String expandName, final String expand,
-            final RESTLogDetailsV1 logDetails) throws InvalidParameterException {
-        return createEntities(collectionClass, type, entities, factory, expandName, RESTv1Constants.JSON_URL, expand,
-                logDetails);
+            final RESTLogDetailsV1 logDetails) {
+        return createEntities(collectionClass, type, entities, factory, expandName, RESTv1Constants.JSON_URL, expand, logDetails);
     }
 
-    protected <T extends RESTBaseEntityV1<T, V, W>, U extends AuditedEntity<U>, V extends RESTBaseCollectionV1<T, V, W>, W extends RESTBaseCollectionItemV1<T, V, W>> V updateJSONEntities(
+    protected <T extends RESTBaseEntityV1<T, V, W>, U extends AuditedEntity, V extends RESTBaseCollectionV1<T, V, W>,
+            W extends RESTBaseCollectionItemV1<T, V, W>> V updateJSONEntities(
             final Class<V> collectionClass, final Class<U> type, final RESTBaseCollectionV1<T, V, W> entities,
             final RESTDataObjectFactory<T, U, V, W> factory, final String expandName, final String expand,
-            final RESTLogDetailsV1 logDetails) throws InvalidParameterException {
-        return updateEntities(collectionClass, type, entities, factory, expandName, RESTv1Constants.JSON_URL, expand,
-                logDetails);
+            final RESTLogDetailsV1 logDetails) {
+        return updateEntities(collectionClass, type, entities, factory, expandName, RESTv1Constants.JSON_URL, expand, logDetails);
     }
 
-    protected <T extends RESTBaseEntityV1<T, V, W>, U extends AuditedEntity<U>, V extends RESTBaseCollectionV1<T, V, W>, W extends RESTBaseCollectionItemV1<T, V, W>> V createEntities(
+    protected <T extends RESTBaseEntityV1<T, V, W>, U extends AuditedEntity, V extends RESTBaseCollectionV1<T, V, W>,
+            W extends RESTBaseCollectionItemV1<T, V, W>> V createEntities(
             final Class<V> collectionClass, final Class<U> type, final RESTBaseCollectionV1<T, V, W> entities,
-            final RESTDataObjectFactory<T, U, V, W> factory, final String expandName, final String dataType,
-            final String expand, final RESTLogDetailsV1 logDetails) throws InvalidParameterException {
+            final RESTDataObjectFactory<T, U, V, W> factory, final String expandName, final String dataType, final String expand,
+            final RESTLogDetailsV1 logDetails) {
         return createOrUdpateEntities(collectionClass, type, factory, entities, DatabaseOperation.CREATE, expandName, dataType,
                 expand, logDetails);
     }
 
-    protected <T extends RESTBaseEntityV1<T, V, W>, U extends AuditedEntity<U>, V extends RESTBaseCollectionV1<T, V, W>, W extends RESTBaseCollectionItemV1<T, V, W>> V updateEntities(
+    protected <T extends RESTBaseEntityV1<T, V, W>, U extends AuditedEntity, V extends RESTBaseCollectionV1<T, V, W>,
+            W extends RESTBaseCollectionItemV1<T, V, W>> V updateEntities(
             final Class<V> collectionClass, final Class<U> type, final RESTBaseCollectionV1<T, V, W> entities,
-            final RESTDataObjectFactory<T, U, V, W> factory, final String expandName, final String dataType,
-            final String expand, final RESTLogDetailsV1 logDetails) throws InvalidParameterException {
+            final RESTDataObjectFactory<T, U, V, W> factory, final String expandName, final String dataType, final String expand,
+            final RESTLogDetailsV1 logDetails) {
         return createOrUdpateEntities(collectionClass, type, factory, entities, DatabaseOperation.UPDATE, expandName, dataType,
                 expand, logDetails);
     }
 
-    protected <T extends RESTBaseEntityV1<T, V, W>, U extends AuditedEntity<U>, V extends RESTBaseCollectionV1<T, V, W>, W extends RESTBaseCollectionItemV1<T, V, W>> V deleteJSONEntities(
-            final Class<V> collectionClass, final Class<U> type, final RESTDataObjectFactory<T, U, V, W> factory,
-            final Set<String> ids, final String expandName, final String expand, final RESTLogDetailsV1 logDetails)
-            throws InvalidParameterException, InternalProcessingException {
+    protected <T extends RESTBaseEntityV1<T, V, W>, U extends AuditedEntity, V extends RESTBaseCollectionV1<T, V, W>,
+            W extends RESTBaseCollectionItemV1<T, V, W>> V deleteJSONEntities(
+            final Class<V> collectionClass, final Class<U> type, final RESTDataObjectFactory<T, U, V, W> factory, final Set<String> ids,
+            final String expandName, final String expand, final RESTLogDetailsV1 logDetails) {
         return deleteEntities(collectionClass, type, factory, ids, expandName, RESTv1Constants.JSON_URL, expand, logDetails);
     }
 
-    protected <T extends RESTBaseEntityV1<T, V, W>, U extends AuditedEntity<U>, V extends RESTBaseCollectionV1<T, V, W>, W extends RESTBaseCollectionItemV1<T, V, W>> V deleteEntities(
-            final Class<V> collectionClass, final Class<U> type, final RESTDataObjectFactory<T, U, V, W> factory,
-            final Set<String> ids, final String expandName, final String dataType, final String expand,
-            final RESTLogDetailsV1 logDetails) throws InvalidParameterException, InternalProcessingException {
+    protected <T extends RESTBaseEntityV1<T, V, W>, U extends AuditedEntity, V extends RESTBaseCollectionV1<T, V, W>,
+            W extends RESTBaseCollectionItemV1<T, V, W>> V deleteEntities(
+            final Class<V> collectionClass, final Class<U> type, final RESTDataObjectFactory<T, U, V, W> factory, final Set<String> ids,
+            final String expandName, final String dataType, final String expand, final RESTLogDetailsV1 logDetails) {
         assert type != null : "type should not be null";
         assert ids != null : "ids should not be null";
         assert factory != null : "factory should not be null";
@@ -504,7 +489,7 @@ public class BaseRESTv1 {
             final ExpandDataTrunk expandDataTrunk = unmarshallExpand(expand);
 
             // Get the TransactionManager and start a Transaction
-            transactionManager = JNDIUtilities.lookupTransactionManager();
+            transactionManager = JNDIUtilities.lookupJBossTransactionManager();
             transactionManager.begin();
 
             // Get an EntityManager instance
@@ -523,13 +508,12 @@ public class BaseRESTv1 {
                 try {
                     idInt = Integer.parseInt(id);
                 } catch (final Exception ex) {
-                    throw new InvalidParameterException("The id " + id + " was not a valid Integer");
+                    throw new BadRequestException("The id " + id + " was not a valid Integer");
                 }
 
                 // Get the entity from the database and check it exists.
                 final U entity = entityManager.find(type, idInt);
-                if (entity == null)
-                    throw new InvalidParameterException("No entity was found with the primary key " + id);
+                if (entity == null) throw new BadRequestException("No entity was found with the primary key " + id);
 
                 // Delete the entity from the persistence context
                 entityManager.remove(entity);
@@ -541,32 +525,10 @@ public class BaseRESTv1 {
             entityManager.flush();
             transactionManager.commit();
 
-            return new RESTDataObjectCollectionFactory<T, U, V, W>().create(collectionClass, factory, retValue, expandName,
-                    dataType, expandDataTrunk, getBaseUrl(), true, entityManager);
-        } catch (final InvalidParameterException ex) {
-            log.error("There was an error looking up the database entities", ex);
-
-            if (transactionManager != null) {
-                try {
-                    transactionManager.rollback();
-                } catch (final Exception ex2) {
-                    log.error("There was an error rolling back the transaction", ex2);
-                }
-            }
-
-            throw ex;
-        } catch (final Exception ex) {
-            log.error("Probably an error saving the entity", ex);
-
-            if (transactionManager != null) {
-                try {
-                    transactionManager.rollback();
-                } catch (final Exception ex2) {
-                    log.error("There was an error rolling back the transaction", ex2);
-                }
-            }
-
-            throw new InternalServerErrorException("There was an error saving the entity");
+            return new RESTDataObjectCollectionFactory<T, U, V, W>().create(collectionClass, factory, retValue, expandName, dataType,
+                    expandDataTrunk, getBaseUrl(), true, entityManager);
+        } catch (final Throwable e) {
+            throw processError(transactionManager, e);
         } finally {
             if (entityManager != null)
                 entityManager.close();
@@ -581,18 +543,18 @@ public class BaseRESTv1 {
      * @param type
      * @param factory
      * @param entities
-     * @param operation
+     * @param operation       The Database Operation type (CREATE or UPDATE).
      * @param expandName
      * @param dataType
      * @param expand The expand parameters to determine what fields should be expanded.
      * @param logDetails The details about the changes that need to be logged.
      * @return
-     * @throws InvalidParameterException
      */
-    private <T extends RESTBaseEntityV1<T, V, W>, U extends AuditedEntity<U>, V extends RESTBaseCollectionV1<T, V, W>, W extends RESTBaseCollectionItemV1<T, V, W>> V createOrUdpateEntities(
+    private <T extends RESTBaseEntityV1<T, V, W>, U extends AuditedEntity, V extends RESTBaseCollectionV1<T, V, W>,
+            W extends RESTBaseCollectionItemV1<T, V, W>> V createOrUdpateEntities(
             final Class<V> collectionClass, final Class<U> type, final RESTDataObjectFactory<T, U, V, W> factory,
-            final RESTBaseCollectionV1<T, V, W> entities, final DatabaseOperation operation, final String expandName,
-            final String dataType, final String expand, final RESTLogDetailsV1 logDetails) throws InvalidParameterException {
+            final RESTBaseCollectionV1<T, V, W> entities, final DatabaseOperation operation, final String expandName, final String dataType,
+            final String expand, final RESTLogDetailsV1 logDetails) {
         assert entities != null : "dataObject should not be null";
         assert factory != null : "factory should not be null";
 
@@ -604,7 +566,7 @@ public class BaseRESTv1 {
             final ExpandDataTrunk expandDataTrunk = unmarshallExpand(expand);
 
             // Get the TransactionManager and start a Transaction
-            transactionManager = JNDIUtilities.lookupTransactionManager();
+            transactionManager = JNDIUtilities.lookupJBossTransactionManager();
             transactionManager.begin();
 
             // Get an EntityManager instance
@@ -653,21 +615,10 @@ public class BaseRESTv1 {
             entityManager.flush();
             transactionManager.commit();
 
-            return new RESTDataObjectCollectionFactory<T, U, V, W>().create(collectionClass, factory, retValue, expandName,
-                    dataType, expandDataTrunk, getBaseUrl(), true, entityManager);
-        } catch (final Failure ex) {
-            log.error("There was an error looking up the required manager objects", ex);
-            throw ex;
-        } catch (final Exception ex) {
-            log.error("Probably an error saving the entity", ex);
-
-            try {
-                transactionManager.rollback();
-            } catch (final Exception ex2) {
-                log.error("There was an error rolling back the transaction", ex2);
-            }
-
-            throw new InternalServerErrorException("There was an error saving the entity");
+            return new RESTDataObjectCollectionFactory<T, U, V, W>().create(collectionClass, factory, retValue, expandName, dataType,
+                    expandDataTrunk, getBaseUrl(), true, entityManager);
+        } catch (final Throwable e) {
+            throw processError(transactionManager, e);
         } finally {
             if (entityManager != null)
                 entityManager.close();
@@ -679,11 +630,9 @@ public class BaseRESTv1 {
      * 
      * @param object The Object to be Converted to JSON.
      * @return The JSON representation of the Object.
-     * @throws JsonGenerationException Thrown if there is an error generating the JSON for the Object.
-     * @throws JsonMappingException Thrown if the Object can't be mapped to a JSON output.
      * @throws IOException
      */
-    protected <T> String convertObjectToJSON(final T object) throws JsonGenerationException, JsonMappingException, IOException {
+    protected <T> String convertObjectToJSON(final T object) throws IOException {
         return mapper.writeValueAsString(object);
     }
 
@@ -707,12 +656,10 @@ public class BaseRESTv1 {
      * @param id The ID of the database entity to generate the REST Entity for.
      * @param expand The expand parameters to determine what fields should be expanded.
      * @return The REST Entity containing the information from the database entity.
-     * @throws InvalidParameterException Thrown if any of the parsed parameters are invalid.
-     * @throws InternalProcessingException Thrown if an error occurs during processing the request.
      */
-    protected <T extends RESTBaseEntityV1<T, V, W>, U extends AuditedEntity<U>, V extends RESTBaseCollectionV1<T, V, W>, W extends RESTBaseCollectionItemV1<T, V, W>> T getJSONResource(
-            final Class<U> type, final RESTDataObjectFactory<T, U, V, W> dataObjectFactory, final Object id, final String expand)
-            throws InvalidParameterException, InternalProcessingException {
+    protected <T extends RESTBaseEntityV1<T, V, W>, U extends AuditedEntity, V extends RESTBaseCollectionV1<T, V, W>,
+            W extends RESTBaseCollectionItemV1<T, V, W>> T getJSONResource(
+            final Class<U> type, final RESTDataObjectFactory<T, U, V, W> dataObjectFactory, final Object id, final String expand) {
         return getJSONResource(type, dataObjectFactory, id, null, expand);
     }
 
@@ -726,12 +673,11 @@ public class BaseRESTv1 {
      * @param revision The Revision of the entity to use to get the database entity.
      * @param expand The expand parameters to determine what fields should be expanded.
      * @return The REST Entity containing the information from the database entity.
-     * @throws InvalidParameterException Thrown if any of the parsed parameters are invalid.
-     * @throws InternalProcessingException Thrown if an error occurs during processing the request.
      */
-    protected <T extends RESTBaseEntityV1<T, V, W>, U extends AuditedEntity<U>, V extends RESTBaseCollectionV1<T, V, W>, W extends RESTBaseCollectionItemV1<T, V, W>> T getJSONResource(
-            final Class<U> type, final RESTDataObjectFactory<T, U, V, W> dataObjectFactory, final Object id,
-            final Number revision, final String expand) throws InvalidParameterException, InternalProcessingException {
+    protected <T extends RESTBaseEntityV1<T, V, W>, U extends AuditedEntity, V extends RESTBaseCollectionV1<T, V, W>,
+            W extends RESTBaseCollectionItemV1<T, V, W>> T getJSONResource(
+            final Class<U> type, final RESTDataObjectFactory<T, U, V, W> dataObjectFactory, final Object id, final Number revision,
+            final String expand) {
         return getResource(type, dataObjectFactory, id, revision, expand, RESTv1Constants.JSON_URL);
     }
 
@@ -744,12 +690,10 @@ public class BaseRESTv1 {
      * @param id The ID of the database entity to generate the REST Entity for.
      * @param expand The expand parameters to determine what fields should be expanded.
      * @return The REST Entity containing the information from the database entity.
-     * @throws InvalidParameterException Thrown if any of the parsed parameters are invalid.
-     * @throws InternalProcessingException Thrown if an error occurs during processing the request.
      */
-    protected <T extends RESTBaseEntityV1<T, V, W>, U extends AuditedEntity<U>, V extends RESTBaseCollectionV1<T, V, W>, W extends RESTBaseCollectionItemV1<T, V, W>> T getXMLResource(
-            final Class<U> type, final RESTDataObjectFactory<T, U, V, W> dataObjectFactory, final Object id, final String expand)
-            throws InvalidParameterException, InternalProcessingException {
+    protected <T extends RESTBaseEntityV1<T, V, W>, U extends AuditedEntity, V extends RESTBaseCollectionV1<T, V, W>,
+            W extends RESTBaseCollectionItemV1<T, V, W>> T getXMLResource(
+            final Class<U> type, final RESTDataObjectFactory<T, U, V, W> dataObjectFactory, final Object id, final String expand) {
         return getXMLResource(type, dataObjectFactory, id, null, expand);
     }
 
@@ -763,12 +707,11 @@ public class BaseRESTv1 {
      * @param revision The Revision of the entity to use to get the database entity.
      * @param expand The expand parameters to determine what fields should be expanded.
      * @return The REST Entity containing the information from the database entity.
-     * @throws InvalidParameterException Thrown if any of the parsed parameters are invalid.
-     * @throws InternalProcessingException Thrown if an error occurs during processing the request.
      */
-    protected <T extends RESTBaseEntityV1<T, V, W>, U extends AuditedEntity<U>, V extends RESTBaseCollectionV1<T, V, W>, W extends RESTBaseCollectionItemV1<T, V, W>> T getXMLResource(
-            final Class<U> type, final RESTDataObjectFactory<T, U, V, W> dataObjectFactory, final Object id,
-            final Number revision, final String expand) throws InvalidParameterException, InternalProcessingException {
+    protected <T extends RESTBaseEntityV1<T, V, W>, U extends AuditedEntity, V extends RESTBaseCollectionV1<T, V, W>,
+            W extends RESTBaseCollectionItemV1<T, V, W>> T getXMLResource(
+            final Class<U> type, final RESTDataObjectFactory<T, U, V, W> dataObjectFactory, final Object id, final Number revision,
+            final String expand) {
         return getResource(type, dataObjectFactory, id, revision, expand, RESTv1Constants.XML_URL);
     }
 
@@ -782,13 +725,11 @@ public class BaseRESTv1 {
      * @param expand The expand parameters to determine what fields should be expanded.
      * @param dataType The output data type. eg JSON or XML.
      * @return The REST Entity containing the information from the database entity.
-     * @throws InvalidParameterException Thrown if any of the parsed parameters are invalid.
-     * @throws InternalProcessingException Thrown if an error occurs during processing the request.
      */
-    private <T extends RESTBaseEntityV1<T, V, W>, U extends AuditedEntity<U>, V extends RESTBaseCollectionV1<T, V, W>, W extends RESTBaseCollectionItemV1<T, V, W>> T getResource(
-            final Class<U> type, final RESTDataObjectFactory<T, U, V, W> dataObjectFactory, final Object id,
-            final Number revision, final String expand, final String dataType) throws InvalidParameterException,
-            InternalProcessingException {
+    private <T extends RESTBaseEntityV1<T, V, W>, U extends AuditedEntity, V extends RESTBaseCollectionV1<T, V, W>,
+            W extends RESTBaseCollectionItemV1<T, V, W>> T getResource(
+            final Class<U> type, final RESTDataObjectFactory<T, U, V, W> dataObjectFactory, final Object id, final Number revision,
+            final String expand, final String dataType) {
         assert type != null : "The type parameter can not be null";
         assert id != null : "The id parameter can not be null";
         assert dataObjectFactory != null : "The dataObjectFactory parameter can not be null";
@@ -825,7 +766,7 @@ public class BaseRESTv1 {
                 if (entity == null)
                     throw new BadRequestException("No entity was found with the primary key " + id);
 
-                // Set the entities last modified date to the information assoicated with the revision.
+                // Set the entities last modified date to the information associated with the revision.
                 final Date revisionLastModified = reader.getRevisionDate(closestRevision);
                 entity.setLastModifiedDate(revisionLastModified);
             } else {
@@ -840,17 +781,15 @@ public class BaseRESTv1 {
                     expandDataTrunk, closestRevision, true, entityManager);
 
             return restRepresentation;
-        } catch (final InternalProcessingException ex) {
-            throw ex;
+        } catch (final Throwable e) {
+            throw processError(null, e);
         } finally {
             if (entityManager != null)
                 entityManager.close();
         }
     }
 
-    protected <U> U getEntity(final Class<U> type, final Object id) throws InternalProcessingException {
-        final EntityManager entityManager = getEntityManager();
-
+    protected <U> U getEntity(final EntityManager entityManager, final Class<U> type, final Object id) {
         final U entity = entityManager.find(type, id);
         if (entity == null)
             throw new BadRequestException("No entity was found with the primary key " + id);
@@ -858,8 +797,8 @@ public class BaseRESTv1 {
         return entity;
     }
     
-    protected <U extends AuditedEntity<U>> U getEntity(final Class<U> type, final Object id, final Integer revision) throws InternalProcessingException {
-        final EntityManager entityManager = getEntityManager();
+    protected <U extends AuditedEntity> U getEntity(final EntityManager entityManager, final Class<U> type, final Object id,
+            final Integer revision) {
         final U entity;
         
         if (revision != null) {
@@ -886,22 +825,39 @@ public class BaseRESTv1 {
         return entity;
     }
 
-    protected <T extends RESTBaseEntityV1<T, V, W>, U extends AuditedEntity<U>, V extends RESTBaseCollectionV1<T, V, W>, W extends RESTBaseCollectionItemV1<T, V, W>> V getXMLResources(
+    protected <U extends AuditedEntity> List<U> getEntities(final EntityManager entityManager, final Class<U> type) {
+        // Create the select all query
+        final CriteriaBuilder criteriaBuilder = entityManager.getCriteriaBuilder();
+        final CriteriaQuery<U> criteriaQuery = criteriaBuilder.createQuery(type);
+        criteriaQuery.from(type);
+
+        /*
+         * TODO This really should be constrained to the data that we need using the setMaxResults() and setFirstResult()
+         * method. It should also only be executed if the expand is specified.
+         */
+        // Execute the query and retrieve the results from the database
+        final TypedQuery<U> query = entityManager.createQuery(criteriaQuery);
+        return query.getResultList();
+    }
+
+    protected <T extends RESTBaseEntityV1<T, V, W>, U extends AuditedEntity, V extends RESTBaseCollectionV1<T, V, W>,
+            W extends RESTBaseCollectionItemV1<T, V, W>> V getXMLResources(
             final Class<V> collectionClass, final Class<U> type, final RESTDataObjectFactory<T, U, V, W> dataObjectFactory,
-            final String expandName, final String expand) throws InvalidParameterException, InternalProcessingException {
+            final String expandName, final String expand) {
         return getResources(collectionClass, type, dataObjectFactory, expandName, expand, RESTv1Constants.XML_URL);
     }
 
-    protected <T extends RESTBaseEntityV1<T, V, W>, U extends AuditedEntity<U>, V extends RESTBaseCollectionV1<T, V, W>, W extends RESTBaseCollectionItemV1<T, V, W>> V getJSONResources(
+    protected <T extends RESTBaseEntityV1<T, V, W>, U extends AuditedEntity, V extends RESTBaseCollectionV1<T, V, W>,
+            W extends RESTBaseCollectionItemV1<T, V, W>> V getJSONResources(
             final Class<V> collectionClass, final Class<U> type, final RESTDataObjectFactory<T, U, V, W> dataObjectFactory,
-            final String expandName, final String expand) throws InvalidParameterException, InternalProcessingException {
+            final String expandName, final String expand) {
         return getResources(collectionClass, type, dataObjectFactory, expandName, expand, RESTv1Constants.JSON_URL);
     }
 
-    protected <T extends RESTBaseEntityV1<T, V, W>, U extends AuditedEntity<U>, V extends RESTBaseCollectionV1<T, V, W>, W extends RESTBaseCollectionItemV1<T, V, W>> V getResources(
+    protected <T extends RESTBaseEntityV1<T, V, W>, U extends AuditedEntity, V extends RESTBaseCollectionV1<T, V, W>,
+            W extends RESTBaseCollectionItemV1<T, V, W>> V getResources(
             final Class<V> collectionClass, final Class<U> type, final RESTDataObjectFactory<T, U, V, W> dataObjectFactory,
-            final String expandName, final String expand, final String dataType) throws InvalidParameterException,
-            InternalProcessingException {
+            final String expandName, final String expand, final String dataType) {
         assert type != null : "The type parameter can not be null";
         assert dataObjectFactory != null : "The dataObjectFactory parameter can not be null";
 
@@ -914,28 +870,16 @@ public class BaseRESTv1 {
             // Get an EntityManager instance
             entityManager = getEntityManager();
 
-            // Create the select all query
-            final CriteriaBuilder criteriaBuilder = entityManager.getCriteriaBuilder();
-            final CriteriaQuery<U> criteriaQuery = criteriaBuilder.createQuery(type);
-            criteriaQuery.from(type);
-
-            /*
-             * TODO This really should be constrained to the data that we need using the setMaxResults() and setFirstResult()
-             * method. It should also only be executed if the expand is specified.
-             */
-            // Execute the query and retrieve the results from the database
-            final TypedQuery<U> query = entityManager.createQuery(criteriaQuery);
-            final List<U> result = query.getResultList();
+            // Get all the entities
+            final List<U> result = getEntities(entityManager, type);
 
             // Create and initialise the Collection using the specified REST Object Factory
             final V retValue = new RESTDataObjectCollectionFactory<T, U, V, W>().create(collectionClass, dataObjectFactory,
                     result, expandName, dataType, expandDataTrunk, getBaseUrl(), true, entityManager);
 
             return retValue;
-        } catch (final InternalProcessingException ex) {
-            throw ex;
-        } catch (final Exception ex) {
-            throw new InvalidParameterException("Internal processing error");
+        } catch (Throwable e) {
+            throw processError(null, e);
         } finally {
             if (entityManager != null)
                 entityManager.close();
@@ -953,16 +897,14 @@ public class BaseRESTv1 {
      * @param expandName The name that should be used to expand the collection.
      * @param expand The Expand Object that contains details about what should be expanded.
      * @return A Collection of Entities represented as the passed collectionClass.
-     * @throws InternalProcessingException
-     * @throws InvalidParameterException
      */
-    protected <T extends RESTBaseEntityV1<T, V, W>, U extends AuditedEntity<U>, V extends RESTBaseCollectionV1<T, V, W>, W extends RESTBaseCollectionItemV1<T, V, W>> V getJSONResourcesFromQuery(
+    protected <T extends RESTBaseEntityV1<T, V, W>, U extends AuditedEntity, V extends RESTBaseCollectionV1<T, V, W>,
+            W extends RESTBaseCollectionItemV1<T, V, W>> V getJSONResourcesFromQuery(
             final Class<V> collectionClass, final MultivaluedMap<String, String> queryParams,
             final Class<? extends IFilterQueryBuilder<U>> filterQueryBuilderClass, final IFieldFilter entityFieldFilter,
-            final RESTDataObjectFactory<T, U, V, W> dataObjectFactory, final String expandName, final String expand)
-            throws InternalProcessingException, InvalidParameterException {
-        return getResourcesFromQuery(collectionClass, queryParams, filterQueryBuilderClass, entityFieldFilter,
-                dataObjectFactory, expandName, expand, RESTv1Constants.JSON_URL);
+            final RESTDataObjectFactory<T, U, V, W> dataObjectFactory, final String expandName, final String expand) {
+        return getResourcesFromQuery(collectionClass, queryParams, filterQueryBuilderClass, entityFieldFilter, dataObjectFactory,
+                expandName, expand, RESTv1Constants.JSON_URL);
     }
 
     /**
@@ -977,14 +919,13 @@ public class BaseRESTv1 {
      * @param expand The Expand Object that contains details about what should be expanded.
      * @param dataType The MIME data type that should be returned and used for entity URL links.
      * @return A Collection of Entities represented as the passed collectionClass.
-     * @throws InternalProcessingException
-     * @throws InvalidParameterException
      */
-    protected <T extends RESTBaseEntityV1<T, V, W>, U extends AuditedEntity<U>, V extends RESTBaseCollectionV1<T, V, W>, W extends RESTBaseCollectionItemV1<T, V, W>> V getResourcesFromQuery(
+    protected <T extends RESTBaseEntityV1<T, V, W>, U extends AuditedEntity, V extends RESTBaseCollectionV1<T, V, W>,
+            W extends RESTBaseCollectionItemV1<T, V, W>> V getResourcesFromQuery(
             final Class<V> collectionClass, final MultivaluedMap<String, String> queryParams,
             final Class<? extends IFilterQueryBuilder<U>> filterQueryBuilderClass, final IFieldFilter entityFieldFilter,
             final RESTDataObjectFactory<T, U, V, W> dataObjectFactory, final String expandName, final String expand,
-            final String dataType) throws InternalProcessingException, InvalidParameterException {
+            final String dataType) {
         assert dataObjectFactory != null : "The dataObjectFactory parameter can not be null";
         assert uriInfo != null : "uriInfo can not be null";
 
@@ -997,10 +938,38 @@ public class BaseRESTv1 {
             // Get an EntityManager instance
             entityManager = getEntityManager();
 
+            // Get the Filter Entities
+            final IFilterQueryBuilder<U> filterQueryBuilder = filterQueryBuilderClass.getConstructor(EntityManager.class).newInstance(
+                    entityManager);
+            final List<U> result = getEntitiesFromQuery(entityManager, queryParams, filterQueryBuilder, entityFieldFilter);
+
+            // Create the Collection Class and populate it with data using the query result data
+            final V retValue = new RESTDataObjectCollectionFactory<T, U, V, W>().create(collectionClass, dataObjectFactory, result,
+                    expandName, dataType, expandDataTrunk, getBaseUrl(), true, entityManager);
+
+            return retValue;
+        } catch (Throwable e) {
+            throw processError(null, e);
+        } finally {
+            if (entityManager != null) entityManager.close();
+        }
+    }
+
+    /**
+     * Gets the resulting Entities from a Filter Query.
+     *
+     * @param entityManager      The entity manager to lookup entities.
+     * @param queryParams        The Query Parameters for the filter.
+     * @param filterQueryBuilder The Filter Query Builder to create the SQL query.
+     * @param entityFieldFilter  The entity field filter, to filter out incorrect fields.
+     * @param <U>                The Entity Class Type.
+     * @return A list of entities for the filter query.
+     */
+    protected <U extends AuditedEntity> List<U> getEntitiesFromQuery(final EntityManager entityManager,
+            final MultivaluedMap<String, String> queryParams, final IFilterQueryBuilder<U> filterQueryBuilder,
+            final IFieldFilter entityFieldFilter) {
             // build up a Filter object from the URL variables
             final Filter filter;
-            final IFilterQueryBuilder<U> filterQueryBuilder = filterQueryBuilderClass.getConstructor(EntityManager.class)
-                    .newInstance(entityManager);
             if (filterQueryBuilder instanceof ITagFilterQueryBuilder) {
                 filter = EntityUtilities.populateFilter(entityManager, queryParams, CommonFilterConstants.FILTER_ID,
                         CommonFilterConstants.MATCH_TAG, CommonFilterConstants.GROUP_TAG,
@@ -1019,19 +988,7 @@ public class BaseRESTv1 {
              * method. It should also only be executed if the expand is specified.
              */
             // Retrieve the results using the generated query.
-            final List<U> result = entityManager.createQuery(query).getResultList();
-
-            // Create the Collection Class and populate it with data using the query result data
-            final V retValue = new RESTDataObjectCollectionFactory<T, U, V, W>().create(collectionClass, dataObjectFactory,
-                    result, expandName, dataType, expandDataTrunk, getBaseUrl(), true, entityManager);
-
-            return retValue;
-        } catch (Exception e) {
-            throw new InternalServerErrorException(e.getMessage());
-        } finally {
-            if (entityManager != null)
-                entityManager.close();
-        }
+        return entityManager.createQuery(query).getResultList();
     }
 
     /**
@@ -1039,7 +996,7 @@ public class BaseRESTv1 {
      * details for Envers.
      * 
      * @param entityManager An EntityManager Object that can be used to look up database entities.
-     * @param dataObject The LogDetails object that contains the details to be associted with in the log.
+     * @param dataObject    The LogDetails object that contains the details to be associated with in the log.
      */
     private void setLogDetails(final EntityManager entityManager, final RESTLogDetailsV1 dataObject) {
         if (dataObject == null)
@@ -1073,12 +1030,18 @@ public class BaseRESTv1 {
     protected RESTLogDetailsV1 generateLogDetails(final String message, final Integer flag, final String userId) {
         final RESTLogDetailsV1 logDetails = new RESTLogDetailsV1();
 
-        if (flag != null)
+        // Flag
+        if (flag != null) {
             logDetails.explicitSetFlag(flag);
-        if (message != null)
+        }
+
+        // Message
+        if (message != null) {
             logDetails.explicitSetMessage(message);
+        }
+
+        // Username/id
         if (userId != null) {
-            
             if (userId.matches("^\\d+$")) {
                 final RESTUserV1 user = new RESTUserV1();
                 user.setId(Integer.parseInt(userId));
@@ -1087,12 +1050,14 @@ public class BaseRESTv1 {
                 EntityManager entityManager = null;
                 try {
                     entityManager = getEntityManager();
-                    final RESTUserV1 user = new RESTUserV1();
                     final User userEntity = EntityUtilities.getUserFromUsername(entityManager, userId);
+                    if (userEntity == null) throw new BadRequestException("No user was found with the username " + userId);
+
+                    final RESTUserV1 user = new RESTUserV1();
                     user.setId(userEntity.getId());
                     logDetails.explicitSetUser(user);
-                } catch (InternalProcessingException e) {
-                    
+                } catch (Throwable e) {
+                    throw processError(null, e);
                 } finally {
                     if (entityManager != null) {
                         entityManager.close();
@@ -1109,10 +1074,8 @@ public class BaseRESTv1 {
      * 
      * @param expand The String representation for the expand.
      * @return An ExpandDataTrunk object containing the converted data.
-     * @throws InvalidParameterException Thrown if the expand string can't be parsed as JSON or mapped to the ExpandDataTrunk
-     *         class.
      */
-    protected ExpandDataTrunk unmarshallExpand(final String expand) throws InvalidParameterException {
+    protected ExpandDataTrunk unmarshallExpand(final String expand) {
         try {
             /*
              * convert the expand string from JSON to an instance of ExpandDataTrunk
@@ -1123,25 +1086,20 @@ public class BaseRESTv1 {
             }
 
             return expandDataTrunk;
-        } catch (final JsonParseException ex) {
-            throw new InvalidParameterException("Could not convert expand data from JSON to an instance of ExpandDataTrunk");
-        } catch (final JsonMappingException ex) {
-            throw new InvalidParameterException("Could not convert expand data from JSON to an instance of ExpandDataTrunk");
         } catch (final IOException ex) {
-            throw new InvalidParameterException("Could not convert expand data from JSON to an instance of ExpandDataTrunk");
+            throw new BadRequestException("Could not convert expand data from JSON to an instance of ExpandDataTrunk");
         }
     }
 
     /**
      * Get an EntityManager instance from the EntityManagerFactory. If the Factory hasn't been looked up yet, then perform the
      * lookup as well.
-     * 
+     * <p/>
      * Note: This method won't join any active Transactions.
      * 
-     * @return An intialised EntityManager object.
-     * @throws InternalProcessingException
+     * @return An initialised EntityManager object.
      */
-    protected EntityManager getEntityManager() throws InternalProcessingException {
+    protected EntityManager getEntityManager() {
         return getEntityManager(false);
     }
 
@@ -1150,25 +1108,77 @@ public class BaseRESTv1 {
      * lookup as well. *
      * 
      * @param joinTransaction Whether or not the EntityManager should attempt to join any active Transactions.
-     * @return An intialised EntityManager object.
-     * @throws InternalProcessingException
+     * @return An initialised EntityManager object.
      */
-    protected EntityManager getEntityManager(boolean joinTransaction) throws InternalProcessingException {
-        EntityManagerFactory entityManagerFactory = null;
+    protected EntityManager getEntityManager(boolean joinTransaction) {
+        if (entityManagerFactory == null) {
         try {
-            entityManagerFactory = JNDIUtilities.lookupEntityManagerFactory();
+                entityManagerFactory = JNDIUtilities.lookupJBossEntityManagerFactory();
         } catch (NamingException e) {
-            throw new InternalProcessingException("Could not find the EntityManagerFactory");
+                throw new InternalServerErrorException("Could not find the EntityManagerFactory");
+        }
         }
 
         final EntityManager entityManager = entityManagerFactory.createEntityManager();
-        if (entityManager == null)
-            throw new InternalProcessingException("Could not create an EntityManager");
+        if (entityManager == null) throw new InternalServerErrorException("Could not create an EntityManager");
 
         if (joinTransaction) {
             entityManager.joinTransaction();
         }
 
         return entityManager;
+    }
+
+    /**
+     * Process an Error/Exception and generate a RESTEasy Exception based on the error/exception produced.
+     *
+     * @param transactionManager The transaction manager to handle rolling back changes.
+     * @param ex                 The Error/Exception to be processed.
+     * @return A RESTEasy Exception containing the details of the Error.
+     */
+    public Failure processError(final TransactionManager transactionManager, final Throwable ex) {
+        // Rollback if a transaction is active
+        try {
+            if (transactionManager != null) {
+                final int status = transactionManager.getStatus();
+                if (status != Status.STATUS_ROLLING_BACK && status != Status.STATUS_ROLLEDBACK && status != Status.STATUS_NO_TRANSACTION) {
+                    transactionManager.rollback();
+                }
+            }
+        } catch (Throwable e) {
+            return new InternalServerErrorException(e);
+        }
+
+        // We need to do some unwrapping of exception first
+        Throwable cause = ex;
+        while (cause != null) {
+            if (cause instanceof Failure) {
+                return (Failure) cause;
+            } else if (cause instanceof ValidationException || cause instanceof PersistenceException || cause instanceof CustomConstraintViolationException) {
+                break;
+            } else if (cause instanceof BatchUpdateException) {
+                cause = ((SQLException) cause).getNextException();
+            } else {
+                cause = cause.getCause();
+            }
+        }
+
+        // This is a Persistence exception with information
+        if (cause instanceof ConstraintViolationException) {
+            final ConstraintViolationException e = (ConstraintViolationException) cause;
+            final StringBuilder stringBuilder = new StringBuilder();
+
+            // Construct a "readable" message outlining the validation errors
+            for (ConstraintViolation invalidValue : e.getConstraintViolations())
+                stringBuilder.append(invalidValue.getMessage()).append("\n");
+
+            return new BadRequestException(stringBuilder.toString(), cause);
+        } else if (cause instanceof ValidationException || cause instanceof PersistenceException || cause instanceof
+                CustomConstraintViolationException) {
+            return new BadRequestException(ex);
+        }
+
+        // If it's not some validation error then it must be an internal error.
+        return new InternalServerErrorException(ex);
     }
 }

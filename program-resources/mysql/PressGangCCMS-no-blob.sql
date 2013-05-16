@@ -207,447 +207,6 @@ INSERT INTO `Category_AUD` (`CategoryID`, `REV`, `REVEND`, `REVTYPE`, `CategoryD
 -- --------------------------------------------------------
 
 --
--- Table structure for table `ContentSpec`
---
-
-CREATE TABLE IF NOT EXISTS `ContentSpec` (
-  `ContentSpecID` int(11) NOT NULL AUTO_INCREMENT,
-  `ContentSpecTitle` varchar(255) NOT NULL,
-  `ContentSpecType` int(11) NOT NULL,
-  `lastPublished` datetime DEFAULT NULL,
-  `Locale` varchar(255) NOT NULL,
-  PRIMARY KEY (`ContentSpecID`),
-  UNIQUE KEY `ContentSpecID` (`ContentSpecID`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8 AUTO_INCREMENT=1 ;
-
--- --------------------------------------------------------
-
---
--- Table structure for table `ContentSpecMetaData`
---
-
-CREATE TABLE IF NOT EXISTS `ContentSpecMetaData` (
-  `ContentSpecMetaDataID` int(11) NOT NULL AUTO_INCREMENT,
-  `MetaDataDescription` text,
-  `MetaDataTitle` varchar(255) NOT NULL,
-  PRIMARY KEY (`ContentSpecMetaDataID`),
-  UNIQUE KEY `ContentSpecMetaDataID` (`ContentSpecMetaDataID`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8 AUTO_INCREMENT=1 ;
-
--- --------------------------------------------------------
-
---
--- Table structure for table `ContentSpecMetaData_AUD`
---
-
-CREATE TABLE IF NOT EXISTS `ContentSpecMetaData_AUD` (
-  `ContentSpecMetaDataID` int(11) NOT NULL,
-  `REV` int(11) NOT NULL,
-  `REVTYPE` tinyint(4) DEFAULT NULL,
-  `REVEND` int(11) DEFAULT NULL,
-  `MetaDataDescription` text,
-  `MetaDataTitle` varchar(255) DEFAULT NULL,
-  PRIMARY KEY (`ContentSpecMetaDataID`,`REV`),
-  KEY `FK6DBBA774DE0FB5A8` (`REVEND`),
-  KEY `FK6DBBA77415C284F3` (`REV`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8;
-
--- --------------------------------------------------------
-
---
--- Table structure for table `ContentSpecNode`
---
-
-CREATE TABLE IF NOT EXISTS `ContentSpecNode` (
-  `ContentSpecNodeID` int(11) NOT NULL AUTO_INCREMENT,
-  `NodeTitle` varchar(255) NOT NULL,
-  `NodeType` int(11) NOT NULL,
-  `NodeCondition` varchar(255) DEFAULT NULL,
-  `Flag` int(11) DEFAULT NULL,
-  `TopicID` int(11) DEFAULT NULL,
-  `TopicRevision` int(11) DEFAULT NULL,
-  `ContentSpecID` int(11) DEFAULT NULL,
-  `NextNodeID` int(11) DEFAULT NULL,
-  `ParentID` int(11) DEFAULT NULL,
-  `PreviousNodeID` int(11) DEFAULT NULL,
-  PRIMARY KEY (`ContentSpecNodeID`),
-  UNIQUE KEY `ContentSpecNodeID` (`ContentSpecNodeID`),
-  UNIQUE KEY `ContentSpecID` (`ContentSpecID`,`PreviousNodeID`),
-  UNIQUE KEY `ContentSpecID_2` (`ContentSpecID`,`NextNodeID`),
-  KEY `FKD5DB8BD6FBF105B5` (`ContentSpecID`),
-  KEY `FKD5DB8BD626ED9974` (`PreviousNodeID`),
-  KEY `FKD5DB8BD6DC587C70` (`NextNodeID`),
-  KEY `FKD5DB8BD63FF58465` (`ParentID`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8 AUTO_INCREMENT=1 ;
-
--- --------------------------------------------------------
-
---
--- Table structure for table `ContentSpecNode_AUD`
---
-
-CREATE TABLE IF NOT EXISTS `ContentSpecNode_AUD` (
-  `ContentSpecNodeID` int(11) NOT NULL,
-  `REV` int(11) NOT NULL,
-  `REVTYPE` tinyint(4) DEFAULT NULL,
-  `REVEND` int(11) DEFAULT NULL,
-  `NodeTitle` varchar(255) DEFAULT NULL,
-  `NodeType` int(11) DEFAULT NULL,
-  `NodeCondition` varchar(255) DEFAULT NULL,
-  `Flag` int(11) DEFAULT NULL,
-  `TopicID` int(11) DEFAULT NULL,
-  `TopicRevision` int(11) DEFAULT NULL,
-  `ContentSpecID` int(11) DEFAULT NULL,
-  `NextNodeID` int(11) DEFAULT NULL,
-  `ParentID` int(11) DEFAULT NULL,
-  `PreviousNodeID` int(11) DEFAULT NULL,
-  PRIMARY KEY (`ContentSpecNodeID`,`REV`),
-  KEY `FK2311DEA7DE0FB5A8` (`REVEND`),
-  KEY `FK2311DEA715C284F3` (`REV`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8;
-
--- --------------------------------------------------------
-
---
--- Table structure for table `ContentSpecToCSMetaData`
---
-
-CREATE TABLE IF NOT EXISTS `ContentSpecToCSMetaData` (
-  `ContentSpecToCSMetaDataID` int(11) NOT NULL AUTO_INCREMENT,
-  `Value` text,
-  `ContentSpecMetaDataID` int(11) NOT NULL,
-  `ContentSpecID` int(11) NOT NULL,
-  PRIMARY KEY (`ContentSpecToCSMetaDataID`),
-  UNIQUE KEY `ContentSpecToCSMetaDataID` (`ContentSpecToCSMetaDataID`),
-  KEY `FK1131266EFBF105B5` (`ContentSpecID`),
-  KEY `FK1131266EB99B22AB` (`ContentSpecMetaDataID`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8 AUTO_INCREMENT=1 ;
-
--- --------------------------------------------------------
-
---
--- Table structure for table `ContentSpecToCSMetaData_AUD`
---
-
-CREATE TABLE IF NOT EXISTS `ContentSpecToCSMetaData_AUD` (
-  `ContentSpecToCSMetaDataID` int(11) NOT NULL,
-  `REV` int(11) NOT NULL,
-  `REVTYPE` tinyint(4) DEFAULT NULL,
-  `REVEND` int(11) DEFAULT NULL,
-  `Value` text,
-  `ContentSpecMetaDataID` int(11) DEFAULT NULL,
-  `ContentSpecID` int(11) DEFAULT NULL,
-  PRIMARY KEY (`ContentSpecToCSMetaDataID`,`REV`),
-  KEY `FK2E686D3FDE0FB5A8` (`REVEND`),
-  KEY `FK2E686D3F15C284F3` (`REV`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8;
-
--- --------------------------------------------------------
-
---
--- Table structure for table `ContentSpecToProject`
---
-
-CREATE TABLE IF NOT EXISTS `ContentSpecToProject` (
-  `ContentSpecToProjectID` int(11) NOT NULL AUTO_INCREMENT,
-  `ContentSpecID` int(11) NOT NULL,
-  `ProjectID` int(11) NOT NULL,
-  PRIMARY KEY (`ContentSpecToProjectID`),
-  UNIQUE KEY `ContentSpecToProjectID` (`ContentSpecToProjectID`),
-  KEY `FKADEB4ACAFBF105B5` (`ContentSpecID`),
-  KEY `FKADEB4ACA66658A59` (`ProjectID`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8 AUTO_INCREMENT=1 ;
-
--- --------------------------------------------------------
-
---
--- Table structure for table `ContentSpecToProject_AUD`
---
-
-CREATE TABLE IF NOT EXISTS `ContentSpecToProject_AUD` (
-  `ContentSpecToProjectID` int(11) NOT NULL,
-  `REV` int(11) NOT NULL,
-  `REVTYPE` tinyint(4) DEFAULT NULL,
-  `REVEND` int(11) DEFAULT NULL,
-  `ContentSpecID` int(11) DEFAULT NULL,
-  `ProjectID` int(11) DEFAULT NULL,
-  PRIMARY KEY (`ContentSpecToProjectID`,`REV`),
-  KEY `FKDE81039BDE0FB5A8` (`REVEND`),
-  KEY `FKDE81039B15C284F3` (`REV`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8;
-
--- --------------------------------------------------------
-
---
--- Table structure for table `ContentSpecToPropertyTag`
---
-
-CREATE TABLE IF NOT EXISTS `ContentSpecToPropertyTag` (
-  `ContentSpecToPropertyTagID` int(11) NOT NULL AUTO_INCREMENT,
-  `Value` text,
-  `ContentSpecID` int(11) NOT NULL,
-  `PropertyTagID` int(11) NOT NULL,
-  PRIMARY KEY (`ContentSpecToPropertyTagID`),
-  UNIQUE KEY `ContentSpecToPropertyTagID` (`ContentSpecToPropertyTagID`),
-  KEY `FK676CDCB6FBF105B5` (`ContentSpecID`),
-  KEY `FK676CDCB6BED5AE51` (`PropertyTagID`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8 AUTO_INCREMENT=1 ;
-
--- --------------------------------------------------------
-
---
--- Table structure for table `ContentSpecToPropertyTag_AUD`
---
-
-CREATE TABLE IF NOT EXISTS `ContentSpecToPropertyTag_AUD` (
-  `ContentSpecToPropertyTagID` int(11) NOT NULL,
-  `REV` int(11) NOT NULL,
-  `REVTYPE` tinyint(4) DEFAULT NULL,
-  `REVEND` int(11) DEFAULT NULL,
-  `Value` text,
-  `ContentSpecID` int(11) DEFAULT NULL,
-  `PropertyTagID` int(11) DEFAULT NULL,
-  PRIMARY KEY (`ContentSpecToPropertyTagID`,`REV`),
-  KEY `FKF7CFBF87DE0FB5A8` (`REVEND`),
-  KEY `FKF7CFBF8715C284F3` (`REV`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8;
-
--- --------------------------------------------------------
-
---
--- Table structure for table `ContentSpecToTag`
---
-
-CREATE TABLE IF NOT EXISTS `ContentSpecToTag` (
-  `ContentSpecToTagID` int(11) NOT NULL AUTO_INCREMENT,
-  `ContentSpecID` int(11) NOT NULL,
-  `TagID` int(11) NOT NULL,
-  PRIMARY KEY (`ContentSpecToTagID`),
-  UNIQUE KEY `ContentSpecToTagID` (`ContentSpecToTagID`),
-  UNIQUE KEY `ContentSpecID` (`ContentSpecID`,`TagID`),
-  KEY `FKE5EA3FCBFBF105B5` (`ContentSpecID`),
-  KEY `FKE5EA3FCB10DDD1B` (`TagID`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8 AUTO_INCREMENT=1 ;
-
--- --------------------------------------------------------
-
---
--- Table structure for table `ContentSpecToTag_AUD`
---
-
-CREATE TABLE IF NOT EXISTS `ContentSpecToTag_AUD` (
-  `ContentSpecToTagID` int(11) NOT NULL,
-  `REV` int(11) NOT NULL,
-  `REVTYPE` tinyint(4) DEFAULT NULL,
-  `REVEND` int(11) DEFAULT NULL,
-  `ContentSpecID` int(11) DEFAULT NULL,
-  `TagID` int(11) DEFAULT NULL,
-  PRIMARY KEY (`ContentSpecToTagID`,`REV`),
-  KEY `FK640B901CDE0FB5A8` (`REVEND`),
-  KEY `FK640B901C15C284F3` (`REV`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8;
-
--- --------------------------------------------------------
-
---
--- Table structure for table `ContentSpec_AUD`
---
-
-CREATE TABLE IF NOT EXISTS `ContentSpec_AUD` (
-  `ContentSpecID` int(11) NOT NULL,
-  `REV` int(11) NOT NULL,
-  `REVTYPE` tinyint(4) DEFAULT NULL,
-  `REVEND` int(11) DEFAULT NULL,
-  `ContentSpecTitle` varchar(255) DEFAULT NULL,
-  `ContentSpecType` int(11) DEFAULT NULL,
-  `lastPublished` datetime DEFAULT NULL,
-  `Locale` varchar(255) DEFAULT NULL,
-  PRIMARY KEY (`ContentSpecID`,`REV`),
-  KEY `FKD5E29785DE0FB5A8` (`REVEND`),
-  KEY `FKD5E2978515C284F3` (`REV`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8;
-
--- --------------------------------------------------------
-
---
--- Table structure for table `CSMetaDataToCSTranslatedString`
---
-
-CREATE TABLE IF NOT EXISTS `CSMetaDataToCSTranslatedString` (
-  `CSMetaDataToCSTranslatedStringID` int(11) NOT NULL AUTO_INCREMENT,
-  `CSTranslatedStringID` int(11) NOT NULL,
-  `ContentSpecToCSMetaDataID` int(11) NOT NULL,
-  PRIMARY KEY (`CSMetaDataToCSTranslatedStringID`),
-  UNIQUE KEY `CSMetaDataToCSTranslatedStringID` (`CSMetaDataToCSTranslatedStringID`),
-  UNIQUE KEY `ContentSpecToCSMetaDataID` (`ContentSpecToCSMetaDataID`,`CSTranslatedStringID`),
-  KEY `FK70BF795117FF12D7` (`CSTranslatedStringID`),
-  KEY `FK70BF7951EC5E7949` (`ContentSpecToCSMetaDataID`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8 AUTO_INCREMENT=1 ;
-
--- --------------------------------------------------------
-
---
--- Table structure for table `CSMetaDataToCSTranslatedString_AUD`
---
-
-CREATE TABLE IF NOT EXISTS `CSMetaDataToCSTranslatedString_AUD` (
-  `CSMetaDataToCSTranslatedStringID` int(11) NOT NULL,
-  `REV` int(11) NOT NULL,
-  `REVTYPE` tinyint(4) DEFAULT NULL,
-  `REVEND` int(11) DEFAULT NULL,
-  `CSTranslatedStringID` int(11) DEFAULT NULL,
-  `ContentSpecToCSMetaDataID` int(11) DEFAULT NULL,
-  PRIMARY KEY (`CSMetaDataToCSTranslatedStringID`,`REV`),
-  KEY `FKA6FC96A2DE0FB5A8` (`REVEND`),
-  KEY `FKA6FC96A215C284F3` (`REV`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8;
-
--- --------------------------------------------------------
-
---
--- Table structure for table `CSNodeToCSNode`
---
-
-CREATE TABLE IF NOT EXISTS `CSNodeToCSNode` (
-  `CSNodeToCSNodeID` int(11) NOT NULL AUTO_INCREMENT,
-  `RelationshipType` int(11) NOT NULL,
-  `MainNodeID` int(11) NOT NULL,
-  `RelatedNodeID` int(11) NOT NULL,
-  PRIMARY KEY (`CSNodeToCSNodeID`),
-  UNIQUE KEY `CSNodeToCSNodeID` (`CSNodeToCSNodeID`),
-  KEY `FKC1429D7F3070C3A8` (`RelatedNodeID`),
-  KEY `FKC1429D7F43664AB6` (`MainNodeID`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8 AUTO_INCREMENT=1 ;
-
--- --------------------------------------------------------
-
---
--- Table structure for table `CSNodeToCSNode_AUD`
---
-
-CREATE TABLE IF NOT EXISTS `CSNodeToCSNode_AUD` (
-  `CSNodeToCSNodeID` int(11) NOT NULL,
-  `REV` int(11) NOT NULL,
-  `REVTYPE` tinyint(4) DEFAULT NULL,
-  `REVEND` int(11) DEFAULT NULL,
-  `RelationshipType` int(11) DEFAULT NULL,
-  `MainNodeID` int(11) DEFAULT NULL,
-  `RelatedNodeID` int(11) DEFAULT NULL,
-  PRIMARY KEY (`CSNodeToCSNodeID`,`REV`),
-  KEY `FKFBD5F3D0DE0FB5A8` (`REVEND`),
-  KEY `FKFBD5F3D015C284F3` (`REV`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8;
-
--- --------------------------------------------------------
-
---
--- Table structure for table `CSNodeToCSTranslatedString`
---
-
-CREATE TABLE IF NOT EXISTS `CSNodeToCSTranslatedString` (
-  `CSNodeToCSTranslatedStringID` int(11) NOT NULL AUTO_INCREMENT,
-  `CSNodeID` int(11) NOT NULL,
-  `CSTranslatedStringID` int(11) NOT NULL,
-  PRIMARY KEY (`CSNodeToCSTranslatedStringID`),
-  UNIQUE KEY `CSNodeToCSTranslatedStringID` (`CSNodeToCSTranslatedStringID`),
-  UNIQUE KEY `CSNodeID` (`CSNodeID`,`CSTranslatedStringID`),
-  KEY `FKEE5DA884AB6B2C2D` (`CSNodeID`),
-  KEY `FKEE5DA88417FF12D7` (`CSTranslatedStringID`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8 AUTO_INCREMENT=1 ;
-
--- --------------------------------------------------------
-
---
--- Table structure for table `CSNodeToCSTranslatedString_AUD`
---
-
-CREATE TABLE IF NOT EXISTS `CSNodeToCSTranslatedString_AUD` (
-  `CSNodeToCSTranslatedStringID` int(11) NOT NULL,
-  `REV` int(11) NOT NULL,
-  `REVTYPE` tinyint(4) DEFAULT NULL,
-  `REVEND` int(11) DEFAULT NULL,
-  `CSNodeID` int(11) DEFAULT NULL,
-  `CSTranslatedStringID` int(11) DEFAULT NULL,
-  PRIMARY KEY (`CSNodeToCSTranslatedStringID`,`REV`),
-  KEY `FKBEB9F455DE0FB5A8` (`REVEND`),
-  KEY `FKBEB9F45515C284F3` (`REV`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8;
-
--- --------------------------------------------------------
-
---
--- Table structure for table `CSNodeToPropertyTag`
---
-
-CREATE TABLE IF NOT EXISTS `CSNodeToPropertyTag` (
-  `CSNodeToPropertyTagID` int(11) NOT NULL AUTO_INCREMENT,
-  `Value` text,
-  `CSNodeID` int(11) NOT NULL,
-  `PropertyTagID` int(11) NOT NULL,
-  PRIMARY KEY (`CSNodeToPropertyTagID`),
-  UNIQUE KEY `CSNodeToPropertyTagID` (`CSNodeToPropertyTagID`),
-  KEY `FK74746698BED5AE51` (`PropertyTagID`),
-  KEY `FK74746698AB6B2C2D` (`CSNodeID`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8 AUTO_INCREMENT=1 ;
-
--- --------------------------------------------------------
-
---
--- Table structure for table `CSNodeToPropertyTag_AUD`
---
-
-CREATE TABLE IF NOT EXISTS `CSNodeToPropertyTag_AUD` (
-  `CSNodeToPropertyTagID` int(11) NOT NULL,
-  `REV` int(11) NOT NULL,
-  `REVTYPE` tinyint(4) DEFAULT NULL,
-  `REVEND` int(11) DEFAULT NULL,
-  `Value` text,
-  `CSNodeID` int(11) DEFAULT NULL,
-  `PropertyTagID` int(11) DEFAULT NULL,
-  PRIMARY KEY (`CSNodeToPropertyTagID`,`REV`),
-  KEY `FKC05B8869DE0FB5A8` (`REVEND`),
-  KEY `FKC05B886915C284F3` (`REV`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8;
-
--- --------------------------------------------------------
-
---
--- Table structure for table `CSTranslatedString`
---
-
-CREATE TABLE IF NOT EXISTS `CSTranslatedString` (
-  `CSTranslatedStringID` int(11) NOT NULL AUTO_INCREMENT,
-  `FuzzyTranslation` bit(1) NOT NULL,
-  `Locale` varchar(255) NOT NULL,
-  `OriginalString` text,
-  `TranslatedString` text,
-  PRIMARY KEY (`CSTranslatedStringID`),
-  UNIQUE KEY `CSTranslatedStringID` (`CSTranslatedStringID`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8 AUTO_INCREMENT=1 ;
-
--- --------------------------------------------------------
-
---
--- Table structure for table `CSTranslatedString_AUD`
---
-
-CREATE TABLE IF NOT EXISTS `CSTranslatedString_AUD` (
-  `CSTranslatedStringID` int(11) NOT NULL,
-  `REV` int(11) NOT NULL,
-  `REVTYPE` tinyint(4) DEFAULT NULL,
-  `REVEND` int(11) DEFAULT NULL,
-  `FuzzyTranslation` bit(1) DEFAULT NULL,
-  `Locale` varchar(255) DEFAULT NULL,
-  `OriginalString` text,
-  `TranslatedString` text,
-  PRIMARY KEY (`CSTranslatedStringID`,`REV`),
-  KEY `FK36D44368DE0FB5A8` (`REVEND`),
-  KEY `FK36D4436815C284F3` (`REV`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8;
-
--- --------------------------------------------------------
-
---
 -- Table structure for table `Filter`
 --
 
@@ -1524,7 +1083,27 @@ INSERT INTO `StringConstants` (`StringConstantsID`, `ConstantName`, `ConstantVal
 (35, 'en-US/Article_Info.xml', '<?xml version=''1.0'' encoding=''utf-8'' ?>\r\n<!DOCTYPE articleinfo PUBLIC "-//OASIS//DTD DocBook XML V4.5//EN"\r\n"http://www.oasis-open.org/docbook/xml/4.5/docbookx.dtd" [\r\n<!ENTITY % BOOK_ENTITIES SYSTEM "<<contentSpec.escapedTitle>>.ent">\r\n%BOOK_ENTITIES;\r\n]>\r\n<articleinfo id="arti-<<contentSpec.escapedTitle>>-<<contentSpec.escapedTitle>>">\r\n	<title><<contentSpec.title>></title>\r\n	<subtitle><<contentSpec.subtitle>></subtitle>\r\n	<productname><<contentSpec.product>></productname>\r\n	<productnumber><<contentSpec.version>></productnumber>\r\n	<edition><<contentSpec.edition>></edition>\r\n	<!-- Inject Abstract -->\r\n	<corpauthor>\r\n		<inlinemediaobject>\r\n	 	<imageobject>\r\n	     	<imagedata fileref="Common_Content/images/title_logo.svg" format="SVG" />\r\n	     </imageobject>\r\n	    </inlinemediaobject>\r\n	</corpauthor>\r\n	<!-- Inject Legal Notice -->\r\n	<xi:include href="Author_Group.xml" xmlns:xi="http://www.w3.org/2001/XInclude" />\r\n</articleinfo>'),
 (36, 'en-US/Article.xml', '<?xml version=''1.0'' encoding=''utf-8'' ?>\r\n<!DOCTYPE book PUBLIC "-//OASIS//DTD DocBook XML V4.5//EN" "http://www.oasis-open.org/docbook/xml/4.5/docbookx.dtd" [\r\n<!ENTITY % BOOK_ENTITIES SYSTEM "<<contentSpec.escapedTitle>>.ent">\r\n%BOOK_ENTITIES;\r\n]>\r\n<article  <<contentSpec.draft>>>\r\n	<xi:include href="Article_Info.xml" xmlns:xi="http://www.w3.org/2001/XInclude" />\r\n	<!-- Inject XIIncludes -->\r\n    <!-- Inject Revision History -->\r\n</article>'),
 (37, 'XML Element Properties', 'VERBATIM_XML_ELEMENTS=screen, programlisting, literallayout, synopsis, address\r\nINLINE_XML_ELEMENTS=code, prompt, command, firstterm, ulink, guilabel, filename, replaceable, parameter, literal, classname, sgmltag, guibutton, guimenuitem, guimenu, menuchoice, citetitle, systemitem, application, acronym, keycap, emphasis, package, quote, trademark, abbrev, phrase, anchor, citation, glossterm, link, xref, markup, tag, keycode, keycombo, accel, guisubmenu, keysym, shortcut, mousebutton, constant, errorcode, errorname, errortype, function, msgtext, property, returnvalue, symbol, token, varname, database, email, hardware, option, optional, type, methodname, interfacename, uri, productname, productversion, revnumber, date, computeroutput\r\nCONTENTS_INLINE_XML_ELEMENTS=title, term'),
-(38, 'Locales', 'ja,\r\npt-BR,\r\nfr,\r\nes,\r\nzh-Hans,\r\nen-US,\r\nde');
+(38, 'Locales', 'ja,\r\npt-BR,\r\nfr,\r\nes,\r\nzh-Hans,\r\nen-US,\r\nde'),
+(39, 'Standard Docbook Topic Template', '<section>\r\n	<para>\r\n    	Topic Template\r\n    </para>\r\n</section>'),
+(40, 'Default Locale', 'en-US'),
+(41, 'Docbook 5 Elements', 'abbrev\r\nabstract\r\naccel\r\nacknowledgements\r\nacronym\r\naddress\r\naffiliation\r\nalt\r\nanchor\r\nannotation\r\nanswer\r\nappendix\r\napplication\r\narc\r\narea\r\nareaset\r\nareaspec\r\narg\r\narticle\r\nartpagenums\r\nattribution\r\naudiodata\r\naudioobject\r\nauthor\r\nauthorgroup\r\nauthorinitials\r\nbibliocoverage\r\nbibliodiv\r\nbiblioentry\r\nbibliography\r\nbiblioid\r\nbibliolist\r\nbibliomisc\r\nbibliomixed\r\nbibliomset\r\nbiblioref\r\nbibliorelation\r\nbiblioset\r\nbibliosource\r\nblockquote\r\nbook\r\nbridgehead\r\ncallout\r\ncalloutlist\r\ncaption\r\ncaution\r\nchapter\r\ncitation\r\ncitebiblioid\r\nciterefentry\r\ncitetitle\r\ncity\r\nclassname\r\nclasssynopsis\r\nclasssynopsisinfo\r\ncmdsynopsis\r\nco\r\ncode\r\ncol\r\ncolgroup\r\ncollab\r\ncolophon\r\ncolspec\r\ncommand\r\ncomputeroutput\r\nconfdates\r\nconfgroup\r\nconfnum\r\nconfsponsor\r\nconftitle\r\nconstant\r\nconstraint\r\nconstraintdef\r\nconstructorsynopsis\r\ncontractnum\r\ncontractsponsor\r\ncontrib\r\ncopyright\r\ncoref\r\ncountry\r\ncover\r\ndatabase\r\ndate\r\ndedication\r\ndestructorsynopsis\r\nedition\r\neditor\r\nemail\r\nemphasis\r\nentry\r\nentrytbl\r\nenvar\r\nepigraph\r\nequation\r\nerrorcode\r\nerrorname\r\nerrortext\r\nerrortype\r\nexample\r\nexceptionname\r\nextendedlink\r\nfax\r\nfieldsynopsis\r\nfigure\r\nfilename\r\nfirstname\r\nfirstterm\r\nfootnote\r\nfootnoteref\r\nforeignphrase\r\nformalpara\r\nfuncdef\r\nfuncparams\r\nfuncprototype\r\nfuncsynopsis\r\nfuncsynopsisinfo\r\nfunction\r\nglossary\r\nglossdef\r\nglossdiv\r\nglossentry\r\nglosslist\r\nglosssee\r\nglossseealso\r\nglossterm\r\ngroup\r\nguibutton\r\nguiicon\r\nguilabel\r\nguimenu\r\nguimenuitem\r\nguisubmenu\r\nhardware\r\nholder\r\nhonorific\r\nimagedata\r\nimageobject\r\nimageobjectco\r\nimportant\r\nindex\r\nindexdiv\r\nindexentry\r\nindexterm\r\ninfo\r\ninformalequation\r\ninformalexample\r\ninformalfigure\r\ninformaltable\r\ninitializer\r\ninlineequation\r\ninlinemediaobject\r\ninterfacename\r\nissuenum\r\nitemizedlist\r\nitermset\r\njobtitle\r\nkeycap\r\nkeycode\r\nkeycombo\r\nkeysym\r\nkeyword\r\nkeywordset\r\nlabel\r\nlegalnotice\r\nlhs\r\nlineage\r\nlineannotation\r\nlink\r\nlistitem\r\nliteral\r\nliterallayout\r\nlocator\r\nmanvolnum\r\nmarkup\r\nmathphrase\r\nmediaobject\r\nmember\r\nmenuchoice\r\nmethodname\r\nmethodparam\r\nmethodsynopsis\r\nmodifier\r\nmousebutton\r\nmsg\r\nmsgaud\r\nmsgentry\r\nmsgexplan\r\nmsginfo\r\nmsglevel\r\nmsgmain\r\nmsgorig\r\nmsgrel\r\nmsgset\r\nmsgsub\r\nmsgtext\r\nnonterminal\r\nnote\r\nolink\r\nooclass\r\nooexception\r\noointerface\r\noption\r\noptional\r\norderedlist\r\norg\r\norgdiv\r\norgname\r\notheraddr\r\nothercredit\r\nothername\r\npackage\r\npagenums\r\npara\r\nparamdef\r\nparameter\r\npart\r\npartintro\r\nperson\r\npersonblurb\r\npersonname\r\nphone\r\nphrase\r\npob\r\npostcode\r\npreface\r\nprimary\r\nprimaryie\r\nprinthistory\r\nprocedure\r\nproduction\r\nproductionrecap\r\nproductionset\r\nproductname\r\nproductnumber\r\nprogramlisting\r\nprogramlistingco\r\nprompt\r\nproperty\r\npubdate\r\npublisher\r\npublishername\r\nqandadiv\r\nqandaentry\r\nqandaset\r\nquestion\r\nquote\r\nrefclass\r\nrefdescriptor\r\nrefentry\r\nrefentrytitle\r\nreference\r\nrefmeta\r\nrefmiscinfo\r\nrefname\r\nrefnamediv\r\nrefpurpose\r\nrefsect1\r\nrefsect2\r\nrefsect3\r\nrefsection\r\nrefsynopsisdiv\r\nreleaseinfo\r\nremark\r\nreplaceable\r\nreturnvalue\r\nrevdescription\r\nrevhistory\r\nrevision\r\nrevnumber\r\nrevremark\r\nrhs\r\nrow\r\nsbr\r\nscreen\r\nscreenco\r\nscreenshot\r\nsecondary\r\nsecondaryie\r\nsect1\r\nsect2\r\nsect3\r\nsect4\r\nsect5\r\nsection\r\nsee\r\nseealso\r\nseealsoie\r\nseeie\r\nseg\r\nseglistitem\r\nsegmentedlist\r\nsegtitle\r\nseriesvolnums\r\nset\r\nsetindex\r\nshortaffil\r\nshortcut\r\nsidebar\r\nsimpara\r\nsimplelist\r\nsimplemsgentry\r\nsimplesect\r\nspanspec\r\nstate\r\nstep\r\nstepalternatives\r\nstreet\r\nsubject\r\nsubjectset\r\nsubjectterm\r\nsubscript\r\nsubsteps\r\nsubtitle\r\nsuperscript\r\nsurname\r\nsymbol\r\nsynopfragment\r\nsynopfragmentref\r\nsynopsis\r\nsystemitem\r\ntable\r\ntag\r\ntask\r\ntaskprerequisites\r\ntaskrelated\r\ntasksummary\r\ntbody\r\ntd\r\nterm\r\ntermdef\r\ntertiary\r\ntertiaryie\r\ntextdata\r\ntextobject\r\ntfoot\r\ntgroup\r\nth\r\nthead\r\ntip\r\ntitle\r\ntitleabbrev\r\ntoc\r\ntocdiv\r\ntocentry\r\ntoken\r\ntr\r\ntrademark\r\ntype\r\nuri\r\nuserinput\r\nvarargs\r\nvariablelist\r\nvarlistentry\r\nvarname\r\nvideodata\r\nvideoobject\r\nvoid\r\nvolumenum\r\nwarning\r\nwordasword\r\nxref\r\nyear'),
+(42, 'table', '<table frame=''all''>\r\n	<title>Table Title</title>\r\n	<tgroup cols=''2'' align=''left'' colsep=''1'' rowsep=''1''>\r\n		<colspec colname=''c1''/>\r\n		<colspec colname=''c2''/>\r\n		<thead>\r\n			<row>\r\n  				<entry>Header Row 0 Col 0</entry>\r\n  				<entry>Header Row 0 Col 1</entry>\r\n			</row>\r\n		</thead>\r\n		<tfoot>\r\n			<row>\r\n  				<entry>Footer Row 3 Col 0</entry>\r\n  				<entry>Footer Row 3 Col 1</entry>\r\n			</row>\r\n		</tfoot>\r\n		<tbody>\r\n			<row>\r\n  				<entry>Row 1 Col 0</entry>\r\n  				<entry>Row 1 Col 1</entry>\r\n			</row>\r\n			<row>\r\n  				<entry>Row 2 Col 0</entry>\r\n  				<entry>Row 2 Col 1</entry>\r\n			</row>\r\n		</tbody>\r\n	</tgroup>\r\n</table>'),
+(43, 'xml templates', '42,44,45,46,47,48,49,50,51,52,53,54,55,56,57,58'),
+(44, 'figure', '<figure>\r\n	<title>Title</title>\r\n	<mediaobject>\r\n		<imageobject>\r\n			<imagedata align="center" fileref="images/1.png"/>\r\n		</imageobject>\r\n		<textobject>\r\n			<phrase>Description</phrase>\r\n		</textobject>\r\n	</mediaobject>\r\n</figure>'),
+(45, 'formalpara', '<formalpara>\r\n	<title>Title</title>\r\n    <para>Paragraph</para>\r\n</formalpara>'),
+(46, 'itemizedlist', '<itemizedlist>\r\n	<listitem>\r\n    	<para>        \r\n        </para>\r\n    </listitem>\r\n</itemizedlist>'),
+(47, 'keycombo', '<keycombo>\r\n	<keycap>CTRL</keycap>\r\n    <mousebutton>Button1</mousebutton>\r\n</keycombo>'),
+(48, 'listitem', '<listitem>\r\n   <para>\r\n      \r\n   </para>\r\n</listitem>'),
+(49, 'note', '<note>\r\n   <para>\r\n      \r\n   </para>\r\n</note>'),
+(50, 'procedure', '<procedure>\r\n   <title>Title</title>\r\n   <step>\r\n      <para>\r\n         Paragraph\r\n      </para>\r\n   </step>\r\n   <step>\r\n      <para>\r\n         Paragraph\r\n      </para>\r\n   </step>\r\n</procedure>'),
+(51, 'step', '<step>\r\n   <para>\r\n      Parahraph\r\n   </para>\r\n</step>'),
+(52, 'step - with title', '<step>\r\n        <title>Title</title>\r\n        <para>\r\n        	Paragraph\r\n        </para>\r\n</step>'),
+(53, 'variablelist', '<variablelist>\r\n   <title>Title</title>\r\n   <varlistentry>\r\n      <term>\r\n         <para>\r\n            Paragraph\r\n         </para>\r\n      </term>\r\n      <listitem>\r\n         <para>\r\n            Paragraph\r\n         </para>\r\n      </listitem>\r\n\r\n</variablelist>'),
+(54, 'orderedlist', '<orderedlist>\r\n        <listitem>\r\n                <para>\r\n                	Paragraph\r\n                </para>\r\n        </listitem>\r\n        <listitem>\r\n                <para>\r\n                   	Paragraph\r\n                </para>\r\n        </listitem>\r\n</orderedlist>'),
+(55, 'programlisting - Java', '<programlisting language="Java">\r\n<![CDATA[\r\n\r\n]]>\r\n</programlisting>'),
+(56, 'programlisting - XML', '<programlisting language="XML">\r\n<![CDATA[\r\n\r\n]]>\r\n</programlisting>'),
+(57, 'ulink', '<ulink url="http://www.example.com">Name</ulink>'),
+(58, 'xref', '<xref linkend="id" />');
 
 -- --------------------------------------------------------
 
@@ -1570,7 +1149,27 @@ INSERT INTO `StringConstants_AUD` (`StringConstantsID`, `REV`, `REVEND`, `REVTYP
 (35, 1, NULL, 0, 'en-US/Article_Info.xml', '<?xml version=''1.0'' encoding=''utf-8'' ?>\r\n<!DOCTYPE articleinfo PUBLIC "-//OASIS//DTD DocBook XML V4.5//EN"\r\n"http://www.oasis-open.org/docbook/xml/4.5/docbookx.dtd" [\r\n<!ENTITY % BOOK_ENTITIES SYSTEM "<<contentSpec.escapedTitle>>.ent">\r\n%BOOK_ENTITIES;\r\n]>\r\n<articleinfo id="arti-<<contentSpec.escapedTitle>>-<<contentSpec.escapedTitle>>">\r\n	<title><<contentSpec.title>></title>\r\n	<subtitle><<contentSpec.subtitle>></subtitle>\r\n	<productname><<contentSpec.product>></productname>\r\n	<productnumber><<contentSpec.version>></productnumber>\r\n	<edition><<contentSpec.edition>></edition>\r\n	<!-- Inject Abstract -->\r\n	<corpauthor>\r\n		<inlinemediaobject>\r\n	 	<imageobject>\r\n	     	<imagedata fileref="Common_Content/images/title_logo.svg" format="SVG" />\r\n	     </imageobject>\r\n	    </inlinemediaobject>\r\n	</corpauthor>\r\n	<!-- Inject Legal Notice -->\r\n	<xi:include href="Author_Group.xml" xmlns:xi="http://www.w3.org/2001/XInclude" />\r\n</articleinfo>'),
 (36, 1, NULL, 0, 'en-US/Article.xml', '<?xml version=''1.0'' encoding=''utf-8'' ?>\r\n<!DOCTYPE book PUBLIC "-//OASIS//DTD DocBook XML V4.5//EN" "http://www.oasis-open.org/docbook/xml/4.5/docbookx.dtd" [\r\n<!ENTITY % BOOK_ENTITIES SYSTEM "<<contentSpec.escapedTitle>>.ent">\r\n%BOOK_ENTITIES;\r\n]>\r\n<article  <<contentSpec.draft>>>\r\n	<xi:include href="Article_Info.xml" xmlns:xi="http://www.w3.org/2001/XInclude" />\r\n	<!-- Inject XIIncludes -->\r\n    <!-- Inject Revision History -->\r\n</article>'),
 (37, 1, NULL, 0, 'XML Element Properties', 'VERBATIM_XML_ELEMENTS=screen, programlisting, literallayout, synopsis, address\r\nINLINE_XML_ELEMENTS=code, prompt, command, firstterm, ulink, guilabel, filename, replaceable, parameter, literal, classname, sgmltag, guibutton, guimenuitem, guimenu, menuchoice, citetitle, systemitem, application, acronym, keycap, emphasis, package, quote, trademark, abbrev, phrase, anchor, citation, glossterm, link, xref, markup, tag, keycode, keycombo, accel, guisubmenu, keysym, shortcut, mousebutton, constant, errorcode, errorname, errortype, function, msgtext, property, returnvalue, symbol, token, varname, database, email, hardware, option, optional, type, methodname, interfacename, uri, productname, productversion, revnumber, date, computeroutput\r\nCONTENTS_INLINE_XML_ELEMENTS=title, term'),
-(38, 1, NULL, 0, 'Locales', 'ja,\r\npt-BR,\r\nfr,\r\nes,\r\nzh-Hans,\r\nen-US,\r\nde');
+(38, 1, NULL, 0, 'Locales', 'ja,\r\npt-BR,\r\nfr,\r\nes,\r\nzh-Hans,\r\nen-US,\r\nde'),
+(39, 1, NULL, 0, 'Standard Docbook Topic Template', '<section>\r\n	<para>\r\n    	Topic Template\r\n    </para>\r\n</section>'),
+(40, 1, NULL, 0, 'Default Locale', 'en-US'),
+(41, 1, NULL, 0, 'Docbook 5 Elements', 'abbrev\r\nabstract\r\naccel\r\nacknowledgements\r\nacronym\r\naddress\r\naffiliation\r\nalt\r\nanchor\r\nannotation\r\nanswer\r\nappendix\r\napplication\r\narc\r\narea\r\nareaset\r\nareaspec\r\narg\r\narticle\r\nartpagenums\r\nattribution\r\naudiodata\r\naudioobject\r\nauthor\r\nauthorgroup\r\nauthorinitials\r\nbibliocoverage\r\nbibliodiv\r\nbiblioentry\r\nbibliography\r\nbiblioid\r\nbibliolist\r\nbibliomisc\r\nbibliomixed\r\nbibliomset\r\nbiblioref\r\nbibliorelation\r\nbiblioset\r\nbibliosource\r\nblockquote\r\nbook\r\nbridgehead\r\ncallout\r\ncalloutlist\r\ncaption\r\ncaution\r\nchapter\r\ncitation\r\ncitebiblioid\r\nciterefentry\r\ncitetitle\r\ncity\r\nclassname\r\nclasssynopsis\r\nclasssynopsisinfo\r\ncmdsynopsis\r\nco\r\ncode\r\ncol\r\ncolgroup\r\ncollab\r\ncolophon\r\ncolspec\r\ncommand\r\ncomputeroutput\r\nconfdates\r\nconfgroup\r\nconfnum\r\nconfsponsor\r\nconftitle\r\nconstant\r\nconstraint\r\nconstraintdef\r\nconstructorsynopsis\r\ncontractnum\r\ncontractsponsor\r\ncontrib\r\ncopyright\r\ncoref\r\ncountry\r\ncover\r\ndatabase\r\ndate\r\ndedication\r\ndestructorsynopsis\r\nedition\r\neditor\r\nemail\r\nemphasis\r\nentry\r\nentrytbl\r\nenvar\r\nepigraph\r\nequation\r\nerrorcode\r\nerrorname\r\nerrortext\r\nerrortype\r\nexample\r\nexceptionname\r\nextendedlink\r\nfax\r\nfieldsynopsis\r\nfigure\r\nfilename\r\nfirstname\r\nfirstterm\r\nfootnote\r\nfootnoteref\r\nforeignphrase\r\nformalpara\r\nfuncdef\r\nfuncparams\r\nfuncprototype\r\nfuncsynopsis\r\nfuncsynopsisinfo\r\nfunction\r\nglossary\r\nglossdef\r\nglossdiv\r\nglossentry\r\nglosslist\r\nglosssee\r\nglossseealso\r\nglossterm\r\ngroup\r\nguibutton\r\nguiicon\r\nguilabel\r\nguimenu\r\nguimenuitem\r\nguisubmenu\r\nhardware\r\nholder\r\nhonorific\r\nimagedata\r\nimageobject\r\nimageobjectco\r\nimportant\r\nindex\r\nindexdiv\r\nindexentry\r\nindexterm\r\ninfo\r\ninformalequation\r\ninformalexample\r\ninformalfigure\r\ninformaltable\r\ninitializer\r\ninlineequation\r\ninlinemediaobject\r\ninterfacename\r\nissuenum\r\nitemizedlist\r\nitermset\r\njobtitle\r\nkeycap\r\nkeycode\r\nkeycombo\r\nkeysym\r\nkeyword\r\nkeywordset\r\nlabel\r\nlegalnotice\r\nlhs\r\nlineage\r\nlineannotation\r\nlink\r\nlistitem\r\nliteral\r\nliterallayout\r\nlocator\r\nmanvolnum\r\nmarkup\r\nmathphrase\r\nmediaobject\r\nmember\r\nmenuchoice\r\nmethodname\r\nmethodparam\r\nmethodsynopsis\r\nmodifier\r\nmousebutton\r\nmsg\r\nmsgaud\r\nmsgentry\r\nmsgexplan\r\nmsginfo\r\nmsglevel\r\nmsgmain\r\nmsgorig\r\nmsgrel\r\nmsgset\r\nmsgsub\r\nmsgtext\r\nnonterminal\r\nnote\r\nolink\r\nooclass\r\nooexception\r\noointerface\r\noption\r\noptional\r\norderedlist\r\norg\r\norgdiv\r\norgname\r\notheraddr\r\nothercredit\r\nothername\r\npackage\r\npagenums\r\npara\r\nparamdef\r\nparameter\r\npart\r\npartintro\r\nperson\r\npersonblurb\r\npersonname\r\nphone\r\nphrase\r\npob\r\npostcode\r\npreface\r\nprimary\r\nprimaryie\r\nprinthistory\r\nprocedure\r\nproduction\r\nproductionrecap\r\nproductionset\r\nproductname\r\nproductnumber\r\nprogramlisting\r\nprogramlistingco\r\nprompt\r\nproperty\r\npubdate\r\npublisher\r\npublishername\r\nqandadiv\r\nqandaentry\r\nqandaset\r\nquestion\r\nquote\r\nrefclass\r\nrefdescriptor\r\nrefentry\r\nrefentrytitle\r\nreference\r\nrefmeta\r\nrefmiscinfo\r\nrefname\r\nrefnamediv\r\nrefpurpose\r\nrefsect1\r\nrefsect2\r\nrefsect3\r\nrefsection\r\nrefsynopsisdiv\r\nreleaseinfo\r\nremark\r\nreplaceable\r\nreturnvalue\r\nrevdescription\r\nrevhistory\r\nrevision\r\nrevnumber\r\nrevremark\r\nrhs\r\nrow\r\nsbr\r\nscreen\r\nscreenco\r\nscreenshot\r\nsecondary\r\nsecondaryie\r\nsect1\r\nsect2\r\nsect3\r\nsect4\r\nsect5\r\nsection\r\nsee\r\nseealso\r\nseealsoie\r\nseeie\r\nseg\r\nseglistitem\r\nsegmentedlist\r\nsegtitle\r\nseriesvolnums\r\nset\r\nsetindex\r\nshortaffil\r\nshortcut\r\nsidebar\r\nsimpara\r\nsimplelist\r\nsimplemsgentry\r\nsimplesect\r\nspanspec\r\nstate\r\nstep\r\nstepalternatives\r\nstreet\r\nsubject\r\nsubjectset\r\nsubjectterm\r\nsubscript\r\nsubsteps\r\nsubtitle\r\nsuperscript\r\nsurname\r\nsymbol\r\nsynopfragment\r\nsynopfragmentref\r\nsynopsis\r\nsystemitem\r\ntable\r\ntag\r\ntask\r\ntaskprerequisites\r\ntaskrelated\r\ntasksummary\r\ntbody\r\ntd\r\nterm\r\ntermdef\r\ntertiary\r\ntertiaryie\r\ntextdata\r\ntextobject\r\ntfoot\r\ntgroup\r\nth\r\nthead\r\ntip\r\ntitle\r\ntitleabbrev\r\ntoc\r\ntocdiv\r\ntocentry\r\ntoken\r\ntr\r\ntrademark\r\ntype\r\nuri\r\nuserinput\r\nvarargs\r\nvariablelist\r\nvarlistentry\r\nvarname\r\nvideodata\r\nvideoobject\r\nvoid\r\nvolumenum\r\nwarning\r\nwordasword\r\nxref\r\nyear'),
+(42, 1, NULL, 0, 'table', '<table frame=''all''>\r\n	<title>Table Title</title>\r\n	<tgroup cols=''2'' align=''left'' colsep=''1'' rowsep=''1''>\r\n		<colspec colname=''c1''/>\r\n		<colspec colname=''c2''/>\r\n		<thead>\r\n			<row>\r\n  				<entry>Header Row 0 Col 0</entry>\r\n  				<entry>Header Row 0 Col 1</entry>\r\n			</row>\r\n		</thead>\r\n		<tfoot>\r\n			<row>\r\n  				<entry>Footer Row 3 Col 0</entry>\r\n  				<entry>Footer Row 3 Col 1</entry>\r\n			</row>\r\n		</tfoot>\r\n		<tbody>\r\n			<row>\r\n  				<entry>Row 1 Col 0</entry>\r\n  				<entry>Row 1 Col 1</entry>\r\n			</row>\r\n			<row>\r\n  				<entry>Row 2 Col 0</entry>\r\n  				<entry>Row 2 Col 1</entry>\r\n			</row>\r\n		</tbody>\r\n	</tgroup>\r\n</table>'),
+(43, 1, NULL, 0, 'xml templates', '42,44,45,46,47,48,49,50,51,52,53,54,55,56,57,58'),
+(44, 1, NULL, 0, 'figure', '<figure>\r\n	<title>Title</title>\r\n	<mediaobject>\r\n		<imageobject>\r\n			<imagedata align="center" fileref="images/1.png"/>\r\n		</imageobject>\r\n		<textobject>\r\n			<phrase>Description</phrase>\r\n		</textobject>\r\n	</mediaobject>\r\n</figure>'),
+(45, 1, NULL, 0, 'formalpara', '<formalpara>\r\n	<title>Title</title>\r\n    <para>Paragraph</para>\r\n</formalpara>'),
+(46, 1, NULL, 0, 'itemizedlist', '<itemizedlist>\r\n	<listitem>\r\n    	<para>        \r\n        </para>\r\n    </listitem>\r\n</itemizedlist>'),
+(47, 1, NULL, 0, 'keycombo', '<keycombo>\r\n	<keycap>CTRL</keycap>\r\n    <mousebutton>Button1</mousebutton>\r\n</keycombo>'),
+(48, 1, NULL, 0, 'listitem', '<listitem>\r\n   <para>\r\n      \r\n   </para>\r\n</listitem>'),
+(49, 1, NULL, 0, 'note', '<note>\r\n   <para>\r\n      \r\n   </para>\r\n</note>'),
+(50, 1, NULL, 0, 'procedure', '<procedure>\r\n   <title>Title</title>\r\n   <step>\r\n      <para>\r\n         Paragraph\r\n      </para>\r\n   </step>\r\n   <step>\r\n      <para>\r\n         Paragraph\r\n      </para>\r\n   </step>\r\n</procedure>'),
+(51, 1, NULL, 0, 'step', '<step>\r\n   <para>\r\n      Parahraph\r\n   </para>\r\n</step>'),
+(52, 1, NULL, 0, 'step - with title', '<step>\r\n        <title>Title</title>\r\n        <para>\r\n        	Paragraph\r\n        </para>\r\n</step>'),
+(53, 1, NULL, 0, 'variablelist', '<variablelist>\r\n   <title>Title</title>\r\n   <varlistentry>\r\n      <term>\r\n         <para>\r\n            Paragraph\r\n         </para>\r\n      </term>\r\n      <listitem>\r\n         <para>\r\n            Paragraph\r\n         </para>\r\n      </listitem>\r\n\r\n</variablelist>'),
+(54, 1, NULL, 0, 'orderedlist', '<orderedlist>\r\n        <listitem>\r\n                <para>\r\n                	Paragraph\r\n                </para>\r\n        </listitem>\r\n        <listitem>\r\n                <para>\r\n                   	Paragraph\r\n                </para>\r\n        </listitem>\r\n</orderedlist>'),
+(55, 1, NULL, 0, 'programlisting - Java', '<programlisting language="Java">\r\n<![CDATA[\r\n\r\n]]>\r\n</programlisting>'),
+(56, 1, NULL, 0, 'programlisting - XML', '<programlisting language="XML">\r\n<![CDATA[\r\n\r\n]]>\r\n</programlisting>'),
+(57, 1, NULL, 0, 'ulink', '<ulink url="http://www.example.com">Name</ulink>'),
+(58, 1, NULL, 0, 'xref', '<xref linkend="id" />');
 
 -- --------------------------------------------------------
 
@@ -2295,6 +1894,14 @@ CREATE TABLE IF NOT EXISTS `User` (
   UNIQUE KEY `index2` (`UserName`)
 ) ENGINE=InnoDB  DEFAULT CHARSET=utf8;
 
+--
+-- Dumping data for table `User`
+--
+
+INSERT INTO `User` (`UserID`, `UserName`, `Description`) VALUES
+(89, 'Unknown', 'Used by the PressGang CCMS to log changes against an unknown user.');
+
+
 -- --------------------------------------------------------
 
 --
@@ -2348,6 +1955,13 @@ CREATE TABLE IF NOT EXISTS `User_AUD` (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
 --
+-- Dumping data for table `User_AUD`
+--
+
+INSERT INTO `User_AUD` (`UserID`, `REV`, `REVEND`, `REVTYPE`, `Description`, `UserName`) VALUES
+(89, 1, NULL, 0, 'Used by the PressGang CCMS to log changes against an unknown user.', 'Unknown');
+
+--
 -- Constraints for dumped tables
 --
 
@@ -2371,155 +1985,6 @@ ALTER TABLE `BugzillaBug_AUD`
 ALTER TABLE `Category_AUD`
   ADD CONSTRAINT `FK23378FEFA7C21108` FOREIGN KEY (`REVEND`) REFERENCES `REVINFO` (`REV`),
   ADD CONSTRAINT `FK23378FEFDF74E053` FOREIGN KEY (`REV`) REFERENCES `REVINFO` (`REV`);
-
---
--- Constraints for table `ContentSpecMetaData_AUD`
---
-ALTER TABLE `ContentSpecMetaData_AUD`
-  ADD CONSTRAINT `FK6DBBA77415C284F3` FOREIGN KEY (`REV`) REFERENCES `REVINFO` (`REV`),
-  ADD CONSTRAINT `FK6DBBA774DE0FB5A8` FOREIGN KEY (`REVEND`) REFERENCES `REVINFO` (`REV`);
-
---
--- Constraints for table `ContentSpecNode`
---
-ALTER TABLE `ContentSpecNode`
-  ADD CONSTRAINT `FKD5DB8BD63FF58465` FOREIGN KEY (`ParentID`) REFERENCES `ContentSpecNode` (`ContentSpecNodeID`),
-  ADD CONSTRAINT `FKD5DB8BD626ED9974` FOREIGN KEY (`PreviousNodeID`) REFERENCES `ContentSpecNode` (`ContentSpecNodeID`),
-  ADD CONSTRAINT `FKD5DB8BD6DC587C70` FOREIGN KEY (`NextNodeID`) REFERENCES `ContentSpecNode` (`ContentSpecNodeID`),
-  ADD CONSTRAINT `FKD5DB8BD6FBF105B5` FOREIGN KEY (`ContentSpecID`) REFERENCES `ContentSpec` (`ContentSpecID`);
-
---
--- Constraints for table `ContentSpecNode_AUD`
---
-ALTER TABLE `ContentSpecNode_AUD`
-  ADD CONSTRAINT `FK2311DEA715C284F3` FOREIGN KEY (`REV`) REFERENCES `REVINFO` (`REV`),
-  ADD CONSTRAINT `FK2311DEA7DE0FB5A8` FOREIGN KEY (`REVEND`) REFERENCES `REVINFO` (`REV`);
-
---
--- Constraints for table `ContentSpecToCSMetaData`
---
-ALTER TABLE `ContentSpecToCSMetaData`
-  ADD CONSTRAINT `FK1131266EB99B22AB` FOREIGN KEY (`ContentSpecMetaDataID`) REFERENCES `ContentSpecMetaData` (`ContentSpecMetaDataID`),
-  ADD CONSTRAINT `FK1131266EFBF105B5` FOREIGN KEY (`ContentSpecID`) REFERENCES `ContentSpec` (`ContentSpecID`);
-
---
--- Constraints for table `ContentSpecToCSMetaData_AUD`
---
-ALTER TABLE `ContentSpecToCSMetaData_AUD`
-  ADD CONSTRAINT `FK2E686D3F15C284F3` FOREIGN KEY (`REV`) REFERENCES `REVINFO` (`REV`),
-  ADD CONSTRAINT `FK2E686D3FDE0FB5A8` FOREIGN KEY (`REVEND`) REFERENCES `REVINFO` (`REV`);
-
---
--- Constraints for table `ContentSpecToProject`
---
-ALTER TABLE `ContentSpecToProject`
-  ADD CONSTRAINT `FKADEB4ACA66658A59` FOREIGN KEY (`ProjectID`) REFERENCES `Project` (`ProjectID`),
-  ADD CONSTRAINT `FKADEB4ACAFBF105B5` FOREIGN KEY (`ContentSpecID`) REFERENCES `ContentSpec` (`ContentSpecID`);
-
---
--- Constraints for table `ContentSpecToProject_AUD`
---
-ALTER TABLE `ContentSpecToProject_AUD`
-  ADD CONSTRAINT `FKDE81039B15C284F3` FOREIGN KEY (`REV`) REFERENCES `REVINFO` (`REV`),
-  ADD CONSTRAINT `FKDE81039BDE0FB5A8` FOREIGN KEY (`REVEND`) REFERENCES `REVINFO` (`REV`);
-
---
--- Constraints for table `ContentSpecToPropertyTag`
---
-ALTER TABLE `ContentSpecToPropertyTag`
-  ADD CONSTRAINT `FK676CDCB6BED5AE51` FOREIGN KEY (`PropertyTagID`) REFERENCES `PropertyTag` (`PropertyTagID`),
-  ADD CONSTRAINT `FK676CDCB6FBF105B5` FOREIGN KEY (`ContentSpecID`) REFERENCES `ContentSpec` (`ContentSpecID`);
-
---
--- Constraints for table `ContentSpecToPropertyTag_AUD`
---
-ALTER TABLE `ContentSpecToPropertyTag_AUD`
-  ADD CONSTRAINT `FKF7CFBF8715C284F3` FOREIGN KEY (`REV`) REFERENCES `REVINFO` (`REV`),
-  ADD CONSTRAINT `FKF7CFBF87DE0FB5A8` FOREIGN KEY (`REVEND`) REFERENCES `REVINFO` (`REV`);
-
---
--- Constraints for table `ContentSpecToTag`
---
-ALTER TABLE `ContentSpecToTag`
-  ADD CONSTRAINT `FKE5EA3FCB10DDD1B` FOREIGN KEY (`TagID`) REFERENCES `Tag` (`TagID`),
-  ADD CONSTRAINT `FKE5EA3FCBFBF105B5` FOREIGN KEY (`ContentSpecID`) REFERENCES `ContentSpec` (`ContentSpecID`);
-
---
--- Constraints for table `ContentSpecToTag_AUD`
---
-ALTER TABLE `ContentSpecToTag_AUD`
-  ADD CONSTRAINT `FK640B901C15C284F3` FOREIGN KEY (`REV`) REFERENCES `REVINFO` (`REV`),
-  ADD CONSTRAINT `FK640B901CDE0FB5A8` FOREIGN KEY (`REVEND`) REFERENCES `REVINFO` (`REV`);
-
---
--- Constraints for table `ContentSpec_AUD`
---
-ALTER TABLE `ContentSpec_AUD`
-  ADD CONSTRAINT `FKD5E2978515C284F3` FOREIGN KEY (`REV`) REFERENCES `REVINFO` (`REV`),
-  ADD CONSTRAINT `FKD5E29785DE0FB5A8` FOREIGN KEY (`REVEND`) REFERENCES `REVINFO` (`REV`);
-
---
--- Constraints for table `CSMetaDataToCSTranslatedString`
---
-ALTER TABLE `CSMetaDataToCSTranslatedString`
-  ADD CONSTRAINT `FK70BF7951EC5E7949` FOREIGN KEY (`ContentSpecToCSMetaDataID`) REFERENCES `ContentSpecToCSMetaData` (`ContentSpecToCSMetaDataID`),
-  ADD CONSTRAINT `FK70BF795117FF12D7` FOREIGN KEY (`CSTranslatedStringID`) REFERENCES `CSTranslatedString` (`CSTranslatedStringID`);
-
---
--- Constraints for table `CSMetaDataToCSTranslatedString_AUD`
---
-ALTER TABLE `CSMetaDataToCSTranslatedString_AUD`
-  ADD CONSTRAINT `FKA6FC96A215C284F3` FOREIGN KEY (`REV`) REFERENCES `REVINFO` (`REV`),
-  ADD CONSTRAINT `FKA6FC96A2DE0FB5A8` FOREIGN KEY (`REVEND`) REFERENCES `REVINFO` (`REV`);
-
---
--- Constraints for table `CSNodeToCSNode`
---
-ALTER TABLE `CSNodeToCSNode`
-  ADD CONSTRAINT `FKC1429D7F43664AB6` FOREIGN KEY (`MainNodeID`) REFERENCES `ContentSpecNode` (`ContentSpecNodeID`),
-  ADD CONSTRAINT `FKC1429D7F3070C3A8` FOREIGN KEY (`RelatedNodeID`) REFERENCES `ContentSpecNode` (`ContentSpecNodeID`);
-
---
--- Constraints for table `CSNodeToCSNode_AUD`
---
-ALTER TABLE `CSNodeToCSNode_AUD`
-  ADD CONSTRAINT `FKFBD5F3D015C284F3` FOREIGN KEY (`REV`) REFERENCES `REVINFO` (`REV`),
-  ADD CONSTRAINT `FKFBD5F3D0DE0FB5A8` FOREIGN KEY (`REVEND`) REFERENCES `REVINFO` (`REV`);
-
---
--- Constraints for table `CSNodeToCSTranslatedString`
---
-ALTER TABLE `CSNodeToCSTranslatedString`
-  ADD CONSTRAINT `FKEE5DA88417FF12D7` FOREIGN KEY (`CSTranslatedStringID`) REFERENCES `CSTranslatedString` (`CSTranslatedStringID`),
-  ADD CONSTRAINT `FKEE5DA884AB6B2C2D` FOREIGN KEY (`CSNodeID`) REFERENCES `ContentSpecNode` (`ContentSpecNodeID`);
-
---
--- Constraints for table `CSNodeToCSTranslatedString_AUD`
---
-ALTER TABLE `CSNodeToCSTranslatedString_AUD`
-  ADD CONSTRAINT `FKBEB9F45515C284F3` FOREIGN KEY (`REV`) REFERENCES `REVINFO` (`REV`),
-  ADD CONSTRAINT `FKBEB9F455DE0FB5A8` FOREIGN KEY (`REVEND`) REFERENCES `REVINFO` (`REV`);
-
---
--- Constraints for table `CSNodeToPropertyTag`
---
-ALTER TABLE `CSNodeToPropertyTag`
-  ADD CONSTRAINT `FK74746698AB6B2C2D` FOREIGN KEY (`CSNodeID`) REFERENCES `ContentSpecNode` (`ContentSpecNodeID`),
-  ADD CONSTRAINT `FK74746698BED5AE51` FOREIGN KEY (`PropertyTagID`) REFERENCES `PropertyTag` (`PropertyTagID`);
-
---
--- Constraints for table `CSNodeToPropertyTag_AUD`
---
-ALTER TABLE `CSNodeToPropertyTag_AUD`
-  ADD CONSTRAINT `FKC05B886915C284F3` FOREIGN KEY (`REV`) REFERENCES `REVINFO` (`REV`),
-  ADD CONSTRAINT `FKC05B8869DE0FB5A8` FOREIGN KEY (`REVEND`) REFERENCES `REVINFO` (`REV`);
-
---
--- Constraints for table `CSTranslatedString_AUD`
---
-ALTER TABLE `CSTranslatedString_AUD`
-  ADD CONSTRAINT `FK36D4436815C284F3` FOREIGN KEY (`REV`) REFERENCES `REVINFO` (`REV`),
-  ADD CONSTRAINT `FK36D44368DE0FB5A8` FOREIGN KEY (`REVEND`) REFERENCES `REVINFO` (`REV`);
 
 --
 -- Constraints for table `FilterCategory`

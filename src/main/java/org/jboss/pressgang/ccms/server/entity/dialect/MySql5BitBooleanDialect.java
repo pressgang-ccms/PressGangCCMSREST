@@ -1,8 +1,8 @@
 package org.jboss.pressgang.ccms.server.entity.dialect;
 
-import org.hibernate.dialect.MySQL5InnoDBDialect;
-
 import java.sql.Types;
+
+import org.hibernate.dialect.MySQL5InnoDBDialect;
 
 /**
  * @author kamiller@redhat.com (Katie Miller)

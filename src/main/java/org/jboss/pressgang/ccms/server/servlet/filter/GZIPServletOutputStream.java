@@ -1,18 +1,18 @@
 package org.jboss.pressgang.ccms.server.servlet.filter;
 
+import javax.servlet.ServletOutputStream;
+import javax.servlet.http.HttpServletResponse;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.util.zip.GZIPOutputStream;
-
-import javax.servlet.ServletOutputStream;
-import javax.servlet.http.HttpServletResponse;
 
 /**
  * A wrapper class to allow using a {@link java.util.zip.GZIPOutputStream GZIPOutputStream} as a
  * {@link javax.servlet.ServletOutputStream ServletOutputStream}. <br />
  * <br />
  * See: <a href=
- * "http://stackoverflow.com/questions/4755302/which-compression-is-gzip-the-most-popular-servlet-filter-would-you-suggest/11068672#11068672"
+ * "http://stackoverflow.com/questions/4755302/which-compression-is-gzip-the-most-popular-servlet-filter-would-you-suggest/11068672
+ * #11068672"
  * >which-compression-is-gzip-the-most-popular-servlet-filter-would-you-suggest</a> and <a
  * href="https://github.com/geoserver/geoserver/tree/master/src/main/src/main/java/org/geoserver/filters"
  * >https://github.com/geoserver/geoserver/</a> for details on where this implementation came from.

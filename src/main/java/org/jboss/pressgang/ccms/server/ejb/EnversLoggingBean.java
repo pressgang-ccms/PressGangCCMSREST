@@ -1,9 +1,8 @@
 package org.jboss.pressgang.ccms.server.ejb;
 
-import java.io.Serializable;
-
 import javax.enterprise.context.RequestScoped;
 import javax.inject.Named;
+import java.io.Serializable;
 
 import org.jboss.pressgang.ccms.server.envers.LoggingRevisionEntity;
 
@@ -11,12 +10,10 @@ import org.jboss.pressgang.ccms.server.envers.LoggingRevisionEntity;
  * This java bean provides a mechanism to provide information to a 
  * 
  * @author lnewson
- *
  */
 @RequestScoped
 @Named("enversLoggingBean")
 public class EnversLoggingBean implements Serializable {
-
     private static final long serialVersionUID = 7455302626872967710L;
     
     private String logMessage = null;
@@ -29,9 +26,8 @@ public class EnversLoggingBean implements Serializable {
         return logMessage;
     }
     
-    public void setLogMessage(final String message)
-    {
-        this.logMessage = message;
+    public void setLogMessage(final String logMessage) {
+        this.logMessage = logMessage;
     }
     
     public void setLogMessage(final String message, final int flag)

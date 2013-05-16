@@ -1,17 +1,18 @@
 package org.jboss.pressgang.ccms.server.utils;
 
+import javax.faces.context.FacesContext;
+import javax.persistence.EntityManager;
+import javax.persistence.Query;
+import javax.persistence.criteria.CriteriaQuery;
+import javax.ws.rs.core.MultivaluedMap;
+import java.io.UnsupportedEncodingException;
 import java.net.URLDecoder;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import javax.faces.context.FacesContext;
-import javax.persistence.EntityManager;
-import javax.persistence.Query;
-import javax.persistence.criteria.CriteriaQuery;
-import javax.ws.rs.core.MultivaluedMap;
-
+import com.redhat.contentspec.processor.ContentSpecParser;
 import org.apache.lucene.queryParser.QueryParser;
 import org.apache.lucene.util.Version;
 import org.hibernate.Session;
@@ -21,8 +22,8 @@ import org.hibernate.envers.query.AuditEntity;
 import org.hibernate.envers.query.AuditQuery;
 import org.hibernate.search.FullTextSession;
 import org.hibernate.search.Search;
-import org.jboss.pressgang.ccms.utils.common.CollectionUtilities;
-import org.jboss.pressgang.ccms.utils.constants.CommonConstants;
+import org.jboss.pressgang.ccms.filter.base.IFieldFilter;
+import org.jboss.pressgang.ccms.filter.builder.TopicFilterQueryBuilder;
 import org.jboss.pressgang.ccms.model.BlobConstants;
 import org.jboss.pressgang.ccms.model.Category;
 import org.jboss.pressgang.ccms.model.Filter;
@@ -42,15 +43,13 @@ import org.jboss.pressgang.ccms.model.TopicToPropertyTag;
 import org.jboss.pressgang.ccms.model.TranslatedTopicData;
 import org.jboss.pressgang.ccms.model.User;
 import org.jboss.pressgang.ccms.rest.v1.constants.CommonFilterConstants;
-import org.jboss.pressgang.ccms.server.filter.base.IFieldFilter;
-import org.jboss.pressgang.ccms.server.filter.builder.TopicFilterQueryBuilder;
+import org.jboss.pressgang.ccms.utils.common.CollectionUtilities;
+import org.jboss.pressgang.ccms.utils.constants.CommonConstants;
 import org.joda.time.DateTime;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.redhat.contentspec.processor.ContentSpecParser;
-
-public class EntityUtilities {
+public class EntityUtilities extends EntityUtilities {
     private static final Logger log = LoggerFactory.getLogger(EntityUtilities.class);
 
     public static byte[] loadBlobConstant(final EntityManager entityManager, final Integer id) {
@@ -111,7 +110,7 @@ public class EntityUtilities {
         final Map<String, String> newParamMap = new HashMap<String, String>();
         for (final String key : paramMap.keySet()) {
             try {
-                newParamMap.put(key, URLDecoder.decode(paramMap.getFirst(key), "UTF-8").replace("%3B", ";"));
+                newParamMap.put(key, paramMap.getFirst(key).replace("%25", "%"));
             } catch (final Exception ex) {
                 log.warn("The URL query parameter " + key + " with value " + paramMap.getFirst(key)
                         + " could not be URLDecoded", ex);
@@ -119,7 +118,19 @@ public class EntityUtilities {
         }
         return populateFilter(entityManager, newParamMap, filterName, tagPrefix, groupTagPrefix, categoryInternalPrefix,
                 categoryExternalPrefix, localePrefix, fieldFilter);
+    }
 
+    protected static Map<String, String> decodeUrlParameters(final Map<String, String> params) {
+        final Map<String, String> newParamMap = new HashMap<String, String>();
+        for (Map.Entry<String, String> entry : params.entrySet()) {
+            try {
+                newParamMap.put(entry.getKey(), URLDecoder.decode(entry.getValue(), "UTF-8"));
+            } catch (UnsupportedEncodingException e) {
+                log.warn("The URL query parameter " + entry.getKey() + " with value " + entry.getValue() + " could not be URLDecoded", e);
+    }
+        }
+
+        return newParamMap;
     }
 
     /**
@@ -128,10 +139,13 @@ public class EntityUtilities {
     public static Filter populateFilter(final EntityManager entityManager, final Map<String, String> paramMap, final String filterName, final String tagPrefix,
             final String groupTagPrefix, final String categoryInternalPrefix, final String categoryExternalPrefix,
             final String localePrefix, final IFieldFilter fieldFilter) {
+        // decode the url parameters
+        final Map<String, String> fixedParamMap = decodeUrlParameters(paramMap);
+
         // attempt to get the filter id from the url
         Integer filterId = null;
-        if (paramMap.containsKey(filterName)) {
-            final String filterQueryParam = paramMap.get(filterName);
+        if (fixedParamMap.containsKey(filterName)) {
+            final String filterQueryParam = fixedParamMap.get(filterName);
 
             try {
                 filterId = Integer.parseInt(filterQueryParam);
@@ -155,13 +169,13 @@ public class EntityUtilities {
         if (filter == null) {
             filter = new Filter();
 
-            for (final String key : paramMap.keySet()) {
+            for (final String key : fixedParamMap.keySet()) {
                 final boolean tagVar = tagPrefix != null && key.startsWith(tagPrefix);
                 final boolean groupTagVar = groupTagPrefix != null && key.startsWith(groupTagPrefix);
                 final boolean catIntVar = categoryInternalPrefix != null && key.startsWith(categoryInternalPrefix);
                 final boolean catExtVar = categoryExternalPrefix != null && key.startsWith(categoryExternalPrefix);
                 final boolean localeVar = localePrefix != null && key.matches("^" + localePrefix + "\\d*$");
-                final String state = paramMap.get(key);
+                final String state = fixedParamMap.get(key);
 
                 // add the filter category states
                 if (catIntVar || catExtVar) {
@@ -205,15 +219,11 @@ public class EntityUtilities {
                     Integer dbState;
 
                     if (catIntVar) {
-                        if (state.equals(Constants.AND_LOGIC))
-                            dbState = CommonFilterConstants.CATEGORY_INTERNAL_AND_STATE;
-                        else
-                            dbState = CommonFilterConstants.CATEGORY_INTERNAL_OR_STATE;
+                        if (state.equals(CommonFilterConstants.AND_LOGIC)) dbState = CommonFilterConstants.CATEGORY_INTERNAL_AND_STATE;
+                        else dbState = CommonFilterConstants.CATEGORY_INTERNAL_OR_STATE;
                     } else {
-                        if (state.equals(Constants.AND_LOGIC))
-                            dbState = CommonFilterConstants.CATEGORY_EXTERNAL_AND_STATE;
-                        else
-                            dbState = CommonFilterConstants.CATEGORY_EXTERNAL_OR_STATE;
+                        if (state.equals(CommonFilterConstants.AND_LOGIC)) dbState = CommonFilterConstants.CATEGORY_EXTERNAL_AND_STATE;
+                        else dbState = CommonFilterConstants.CATEGORY_EXTERNAL_OR_STATE;
                     }
 
                     final FilterCategory filterCategory = new FilterCategory();
@@ -242,7 +252,7 @@ public class EntityUtilities {
                             filter.getFilterTags().add(filterTag);
                         }
                     } catch (final Exception ex) {
-                        log.debug("Probably an invalid tag query pramater. Parameter: " + key + " Value: " + state, ex);
+                        log.debug("Probably an invalid tag query parameter. Parameter: " + key + " Value: " + state, ex);
                     }
                 }
 
@@ -271,7 +281,7 @@ public class EntityUtilities {
                         filterLocale.setFilter(filter);
                         filter.getFilterLocales().add(filterLocale);
                     } catch (final Exception ex) {
-                        log.debug("Probably an invalid locale query pramater. Parameter: " + key + " Value: " + state, ex);
+                        log.debug("Probably an invalid locale query parameter. Parameter: " + key + " Value: " + state, ex);
                     }
                 }
 
@@ -317,35 +327,8 @@ public class EntityUtilities {
         return retValue;
     }
 
-    /**
-     * @return A comma separated list of topic ids that have been included in a content spec
-     * @throws Exception
-     */
-    public static List<Integer> getTopicsInContentSpec(final EntityManager entityManager, final Integer contentSpecTopicID) {
-        try {
-            final Topic contentSpec = entityManager.find(Topic.class, contentSpecTopicID);
-
-            if (contentSpec == null)
-                return null;
-
-            final ContentSpecParser csp = new ContentSpecParser("http://localhost:8080/TopicIndex/");
-            if (csp.parse(contentSpec.getTopicXML())) {
-                final List<Integer> topicIds = csp.getReferencedTopicIds();
-                if (topicIds.size() == 0)
-                    return CollectionUtilities.toArrayList(Constants.NULL_TOPIC_ID);
-
-                return topicIds;
-            }
-        } catch (final Exception ex) {
-            log.warn(
-                    "An invalid Topic ID was stored for a Content Spec in the database, or the topic was not a valid content spec",
-                    ex);
-        }
-
-        return null;
-    }
-
-    public static String getTopicsInContentSpecString(final EntityManager entityManager, final Integer contentSpecTopicID) throws Exception {
+    public static String getTopicsInContentSpecString(final EntityManager entityManager,
+            final Integer contentSpecTopicID) throws Exception {
         final List<Integer> topics = getTopicsInContentSpec(entityManager, contentSpecTopicID);
         if (topics == null || topics.size() == 0)
             return Constants.NULL_TOPIC_ID_STRING;
@@ -378,10 +361,11 @@ public class EntityUtilities {
     }
 
     @SuppressWarnings("unchecked")
-    public static List<Integer> getTopicsWithPropertyTag(final EntityManager entityManager, final Integer propertyTagIdInt, final String propertyTagValue) {
-        final Query query = entityManager
-                .createQuery(TopicToPropertyTag.SELECT_ALL_QUERY
-                        + " WHERE topicToPropertyTag.propertyTag.propertyTagId = :propTagId AND topicToPropertyTag.value = :propTagValue");
+    public static List<Integer> getTopicsWithPropertyTag(final EntityManager entityManager, final Integer propertyTagIdInt,
+            final String propertyTagValue) {
+        final Query query = entityManager.createQuery(
+                TopicToPropertyTag.SELECT_ALL_QUERY + " WHERE topicToPropertyTag.propertyTag.propertyTagId = :propTagId AND " +
+                        "topicToPropertyTag.value = :propTagValue");
         query.setParameter("propTagId", propertyTagIdInt);
         query.setParameter("propTagValue", propertyTagValue);
         final List<TopicToPropertyTag> mappings = query.getResultList();
@@ -406,8 +390,9 @@ public class EntityUtilities {
 
     @SuppressWarnings("unchecked")
     public static List<Integer> getTagsWithPropertyTag(final EntityManager entityManager, final Integer propertyTagIdInt, final String propertyTagValue) {
-        final Query query = entityManager.createQuery(TagToPropertyTag.SELECT_ALL_QUERY
-                + " WHERE tagToPropertyTag.propertyTag.propertyTagId = :propTagId AND tagToPropertyTag.value = :propTagValue");
+        final Query query = entityManager.createQuery(
+                TagToPropertyTag.SELECT_ALL_QUERY + " WHERE tagToPropertyTag.propertyTag.propertyTagId = :propTagId AND tagToPropertyTag" +
+                        ".value = :propTagValue");
         query.setParameter("propTagId", propertyTagIdInt);
         query.setParameter("propTagValue", propertyTagValue);
         final List<TagToPropertyTag> mappings = query.getResultList();
@@ -441,85 +426,12 @@ public class EntityUtilities {
         return CollectionUtilities.toSeperatedString(topics);
     }
 
-    @SuppressWarnings("unchecked")
-    public static <E> List<Integer> getEditedEntities(final EntityManager entityManager, final Class<E> type, final String pkColumnName, final DateTime startDate,
-            final DateTime endDate) {
-        if (startDate == null && endDate == null)
-            return null;
-
-        final AuditReader reader = AuditReaderFactory.get(entityManager);
-
-        final AuditQuery query = reader.createQuery().forRevisionsOfEntity(type, true, false)
-                .addOrder(AuditEntity.revisionProperty("timestamp").asc())
-                .addProjection(AuditEntity.property("originalId." + pkColumnName).distinct());
-
-        if (startDate != null)
-            query.add(AuditEntity.revisionProperty("timestamp").ge(startDate.toDate().getTime()));
-
-        if (endDate != null)
-            query.add(AuditEntity.revisionProperty("timestamp").le(endDate.toDate().getTime()));
-
-        final List<Integer> entityIds = query.getResultList();
-
-        return entityIds;
-    }
-
-    public static <E> String getEditedEntitiesString(final EntityManager entityManager, final Class<E> type, final String pkColumnName, final DateTime startDate,
-            final DateTime endDate) {
+    public static <E> String getEditedEntitiesString(final EntityManager entityManager, final Class<E> type, final String pkColumnName,
+            final DateTime startDate, final DateTime endDate) {
         final List<Integer> ids = getEditedEntities(entityManager, type, pkColumnName, startDate, endDate);
         if (ids != null && ids.size() != 0)
             return CollectionUtilities.toSeperatedString(ids);
         return Constants.NULL_TOPIC_ID_STRING;
-    }
-
-    @SuppressWarnings("unchecked")
-    public static List<Integer> getTextSearchTopicMatch(final EntityManager entityManager, final String phrase) {
-        final List<Integer> retValue = new ArrayList<Integer>();
-
-        try {
-            // get the Hibernate session from the EntityManager
-            final Session session = (Session) entityManager.getDelegate();
-            // get a Hibernate full text session. we use the Hibernate version,
-            // instead of the JPA version,
-            // because we can use the Hibernate versions to do projections
-            final FullTextSession fullTextSession = Search.getFullTextSession(session);
-            // create a query parser
-            final QueryParser parser = new QueryParser(Version.LUCENE_31, "TopicSearchText", fullTextSession.getSearchFactory()
-                    .getAnalyzer(Topic.class));
-            // parse the query string
-            final org.apache.lucene.search.Query query = parser.parse(phrase);
-
-            // build a lucene query
-            /*
-             * final org.apache.lucene.search.Query query = qb .keyword() .onFields("TopicSearchText") .matching(phrase)
-             * .createQuery();
-             */
-
-            // build a hibernate query
-            final org.hibernate.search.FullTextQuery hibQuery = fullTextSession.createFullTextQuery(query, Topic.class);
-            // set the projection to return the id's of any topic's that match
-            // the query
-            hibQuery.setProjection("topicId");
-            // get the results. because we setup a projection, there is no trip
-            // to the database
-            final List<Object[]> results = hibQuery.list();
-            // extract the data into the List<Integer>
-            for (final Object[] projection : results) {
-                final Integer id = (Integer) projection[0];
-                retValue.add(id);
-            }
-        } catch (final Exception ex) {
-            log.error("Probably an error using Lucene", ex);
-        }
-
-        /*
-         * an empty list will be interpreted as no restriction as opposed to return none. so add a non existent topic id so no
-         * matches are made
-         */
-        if (retValue.size() == 0)
-            retValue.add(-1);
-
-        return retValue;
     }
 
     @SuppressWarnings("unchecked")
@@ -593,32 +505,6 @@ public class EntityUtilities {
         return input.replaceAll("[^a-zA-Z]", "");
     }
 
-    public static List<Integer> getOutgoingRelatedTopicIDs(final EntityManager entityManager, final Integer topicRelatedTo) {
-        try {
-            if (topicRelatedTo != null) {
-                final Topic topic = entityManager.find(Topic.class, topicRelatedTo);
-                return topic.getRelatedTopicIDs();
-            }
-        } catch (final Exception ex) {
-            log.error(topicRelatedTo + " is probably not a valid Topic ID", ex);
-        }
-
-        return null;
-    }
-
-    public static List<Integer> getIncomingRelatedTopicIDs(final EntityManager entityManager, final Integer topicRelatedFrom) {
-        try {
-            if (topicRelatedFrom != null) {
-                final Topic topic = entityManager.find(Topic.class, topicRelatedFrom);
-                return topic.getIncomingRelatedTopicIDs();
-            }
-        } catch (final Exception ex) {
-            log.error(topicRelatedFrom + " is probably not a valid Topic ID", ex);
-        }
-
-        return null;
-    }
-
     public static String getIncomingRelationshipsTo(final EntityManager entityManager, final Integer topicId) {
         final List<Integer> ids = getIncomingRelatedTopicIDs(entityManager, topicId);
         if (ids != null && ids.size() != 0)
@@ -646,7 +532,9 @@ public class EntityUtilities {
     @SuppressWarnings("unchecked")
     public static List<Integer> getLatestTranslatedTopics(final EntityManager entityManager) {
         String query = TranslatedTopicData.SELECT_ALL_QUERY;
-        query += " where translatedTopicData.translatedTopic.topicRevision = (Select MAX(B.translatedTopic.topicRevision) FROM TranslatedTopicData B WHERE translatedTopicData.translatedTopic.topicId = B.translatedTopic.topicId AND B.translationLocale = translatedTopicData.translationLocale GROUP BY B.translatedTopic.topicId)";
+        query += " where translatedTopicData.translatedTopic.topicRevision = (Select MAX(B.translatedTopic.topicRevision) FROM " +
+                "TranslatedTopicData B WHERE translatedTopicData.translatedTopic.topicId = B.translatedTopic.topicId AND B" +
+                ".translationLocale = translatedTopicData.translationLocale GROUP BY B.translatedTopic.topicId)";
         final List<TranslatedTopicData> results = entityManager.createQuery(query).getResultList();
         final List<Integer> retValue = new ArrayList<Integer>();
         for (final TranslatedTopicData topic : results)
@@ -658,7 +546,10 @@ public class EntityUtilities {
     @SuppressWarnings("unchecked")
     public static List<Integer> getLatestCompletedTranslatedTopics(final EntityManager entityManager) {
         String query = TranslatedTopicData.SELECT_ALL_QUERY;
-        query += " where translatedTopicData.translatedTopic.topicRevision = (Select MAX(B.translatedTopic.topicRevision) FROM TranslatedTopicData B WHERE translatedTopicData.translatedTopic.topicId = B.translatedTopic.topicId AND B.translationLocale = translatedTopicData.translationLocale AND B.translationPercentage >= 100 GROUP BY B.translatedTopic.topicId)";
+        query += " where translatedTopicData.translatedTopic.topicRevision = (Select MAX(B.translatedTopic.topicRevision) FROM " +
+                "TranslatedTopicData B WHERE translatedTopicData.translatedTopic.topicId = B.translatedTopic.topicId AND B" +
+                ".translationLocale = translatedTopicData.translationLocale AND B.translationPercentage >= 100 GROUP BY B.translatedTopic" +
+                ".topicId)";
         final List<TranslatedTopicData> results = entityManager.createQuery(query).getResultList();
         final List<Integer> retValue = new ArrayList<Integer>();
         for (final TranslatedTopicData topic : results)
@@ -697,8 +588,8 @@ public class EntityUtilities {
 
     @SuppressWarnings("unchecked")
     public static List<Integer> getImagesWithFileName(final EntityManager entityManager, final String filename) {
-        final Query query = entityManager.createQuery(LanguageImage.SELECT_ALL_QUERY
-                + " WHERE LOWER(languageImage.originalFileName) LIKE LOWER(:filename)");
+        final Query query = entityManager.createQuery(
+                LanguageImage.SELECT_ALL_QUERY + (" WHERE LOWER(languageImage.originalFileName) LIKE LOWER(:filename)"));
         query.setParameter("filename", "%" + filename + "%");
         final List<LanguageImage> mappings = query.getResultList();
         if (mappings.size() == 0)

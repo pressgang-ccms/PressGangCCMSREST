@@ -1,5 +1,8 @@
 package org.jboss.pressgang.ccms.server.servlet.filter;
 
+import javax.servlet.ServletOutputStream;
+import javax.servlet.http.HttpServletResponse;
+import javax.servlet.http.HttpServletResponseWrapper;
 import java.io.IOException;
 import java.io.OutputStreamWriter;
 import java.io.PrintWriter;
@@ -8,17 +11,6 @@ import java.util.Set;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import javax.servlet.ServletOutputStream;
-import javax.servlet.http.HttpServletResponse;
-import javax.servlet.http.HttpServletResponseWrapper;
-
-/**
- * A wrapper class to handle ServetResponse and compress the output.
- * <br /><br />
- * See: <a href="http://stackoverflow.com/questions/4755302/which-compression-is-gzip-the-most-popular-servlet-filter-would-you-suggest/11068672#11068672">which-compression-is-gzip-the-most-popular-servlet-filter-would-you-suggest</a>
- * and <a href="https://github.com/geoserver/geoserver/tree/master/src/main/src/main/java/org/geoserver/filters">https://github.com/geoserver/geoserver/</a>
- * for details on where this implementation came from.
- */
 public class GZIPResponseWrapper extends HttpServletResponseWrapper {
 
     private GZIPServletOutputStream GZIPStream = null;
@@ -110,7 +102,7 @@ public class GZIPResponseWrapper extends HttpServletResponseWrapper {
      */
     protected boolean isCompressible(final String contentType) {
         if (contentType == null) {
-            return false;
+            return true;
         }
         // Strip away any extra details that are after the mime type
         final String stripped = stripParams(contentType);

@@ -1,11 +1,10 @@
 package org.jboss.pressgang.ccms.server.envers;
 
-import java.util.Set;
-
 import javax.enterprise.context.spi.CreationalContext;
 import javax.enterprise.inject.spi.Bean;
 import javax.enterprise.inject.spi.BeanManager;
 import javax.naming.NamingException;
+import java.util.Set;
 
 import org.hibernate.envers.RevisionListener;
 import org.jboss.pressgang.ccms.server.ejb.EnversLoggingBean;
@@ -18,10 +17,8 @@ import org.slf4j.LoggerFactory;
  * Data from the RequestScoped EnversLoggingBean.
  * 
  * @author lnewson
- * 
  */
 public class LoggingRevisionListener implements RevisionListener {
-
     private static final Logger log = LoggerFactory.getLogger(LoggingRevisionListener.class);
     
     /**
@@ -67,5 +64,4 @@ public class LoggingRevisionListener implements RevisionListener {
 
         return null;
     }
-
 }

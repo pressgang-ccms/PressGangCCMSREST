@@ -1,9 +1,8 @@
 package org.jboss.pressgang.ccms.server.rest.v1.base;
 
+import javax.persistence.EntityManager;
 import java.util.ArrayList;
 import java.util.List;
-
-import javax.persistence.EntityManager;
 
 import org.jboss.pressgang.ccms.model.PropertyTagToPropertyTagCategory;
 import org.jboss.pressgang.ccms.model.base.ToPropertyTag;
