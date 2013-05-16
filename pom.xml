@@ -8,23 +8,23 @@
     </parent>
     <groupId>org.jboss.pressgang.ccms</groupId>
     <artifactId>pressgang-ccms-server</artifactId>
-    <version>1.1-SNAPSHOT</version>
+    <version>1.0-SNAPSHOT</version>
     <name>PressGang CCMS Server</name>
     <packaging>war</packaging>
 
     <properties>
+        <pressgang.ccms.version>1.0-SNAPSHOT</pressgang.ccms.version>
         <jboss.bom.version>1.0.2.Final</jboss.bom.version>
         <jboss.spec.verison>3.0.1.Final</jboss.spec.verison>
         <jbossasplugin.version>7.1.1.Final</jbossasplugin.version>
-        <deployplugin.version>2.7</deployplugin.version>
-        <installplugin.version>2.4</installplugin.version>
         <jackson.version>1.9.8</jackson.version>
         <xalan.version>2.7.1</xalan.version>
         <xerces.version>2.9.1</xerces.version>
         <resteasy.version>2.3.2.Final</resteasy.version>
-        <jodatime.version>2.1</jodatime.version>
-        <jdal.core.version>1.2.0</jdal.core.version>
+        <log4j.version>1.2.16</log4j.version>
         <slf4j.version>1.6.4</slf4j.version>
+        <csprocessor.version>0.0.6-SNAPSHOT</csprocessor.version>
+        <j2bugzilla.version>1.1-SNAPSHOT</j2bugzilla.version>
         <arquillian.version>1.0.3.Final</arquillian.version>
         <jbossarquillian.version>7.1.1.Final</jbossarquillian.version>
         <arquillianbom.version>1.0.0.Final</arquillianbom.version>
@@ -36,6 +36,7 @@
         <javamelody.version>1.41.0</javamelody.version>
         <xstream.version>1.4.2</xstream.version>
         <itext.version>2.1.7</itext.version>
+        <liquibase.version>2.0.5</liquibase.version>
     </properties>
 
     <dependencyManagement>
@@ -78,6 +79,21 @@
                 <groupId>org.jboss.as.plugins</groupId>
                 <artifactId>jboss-as-maven-plugin</artifactId>
                 <version>${jbossasplugin.version}</version>
+            </plugin>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-war-plugin</artifactId>
+                <version>${warplugin.version}</version>
+                <configuration>
+                    <archive>
+                        <manifest>
+                            <addDefaultImplementationEntries>true</addDefaultImplementationEntries>
+                        </manifest>
+                        <manifestEntries>
+                            <Implementation-Build>${maven.build.timestamp}</Implementation-Build>
+                        </manifestEntries>
+                    </archive>
+                </configuration>
             </plugin>
         </plugins>
         <pluginManagement>
@@ -199,52 +215,52 @@
         <dependency>
             <groupId>org.jboss.pressgang.ccms</groupId>
             <artifactId>pressgang-ccms-model</artifactId>
-            <version>1.1-SNAPSHOT</version>
+            <version>${pressgang.ccms.version}</version>
         </dependency>
         <dependency>
             <groupId>org.jboss.pressgang.ccms</groupId>
             <artifactId>pressgang-ccms-utils</artifactId>
-            <version>1.0-SNAPSHOT</version>
+            <version>${pressgang.ccms.version}</version>
         </dependency>
         <dependency>
             <groupId>org.jboss.pressgang.ccms</groupId>
             <artifactId>pressgang-ccms-contentspec</artifactId>
-            <version>1.0-SNAPSHOT</version>
+            <version>${pressgang.ccms.version}</version>
         </dependency>
         <dependency>
             <groupId>org.jboss.pressgang.ccms</groupId>
             <artifactId>pressgang-ccms-zanata</artifactId>
-            <version>1.0-SNAPSHOT</version>
+            <version>${pressgang.ccms.version}</version>
         </dependency>
         <dependency>
             <groupId>org.jboss.pressgang.ccms</groupId>
             <artifactId>pressgang-ccms-rest</artifactId>
-            <version>1.0-SNAPSHOT</version>
+            <version>${pressgang.ccms.version}</version>
         </dependency>
         <dependency>
             <groupId>org.jboss.pressgang.ccms</groupId>
             <artifactId>pressgang-ccms-restv1</artifactId>
-            <version>1.0-SNAPSHOT</version>
+            <version>${pressgang.ccms.version}</version>
         </dependency>
         <dependency>
             <groupId>org.jboss.pressgang.ccms.contentspec</groupId>
-            <artifactId>csprocessor</artifactId>
-            <version>0.0.4-SNAPSHOT</version>
+            <artifactId>processor</artifactId>
+            <version>0.0.6-SNAPSHOT</version>
         </dependency>
         <dependency>
             <groupId>org.jboss.pressgang.ccms</groupId>
-            <artifactId>j2bugzilla-extended</artifactId>
-            <version>1.1-SNAPSHOT</version>
+            <artifactId>j2bugzilla-pressgang</artifactId>
+            <version>${j2bugzilla.version}</version>
         </dependency>
 
-        <!-- Belay Library -->
+        <!-- Apache -->
         <dependency>
-            <groupId>org.jboss.pressgang.belay</groupId>
-            <artifactId>resource-server-provider</artifactId>
-            <version>1.0-SNAPSHOT</version>
+            <groupId>commons-io</groupId>
+            <artifactId>commons-io</artifactId>
+            <version>2.4</version>
         </dependency>
 
-        <!-- JavaMelody monitoring -->
+        <!-- Java Melody -->
         <dependency>
             <groupId>net.bull.javamelody</groupId>
             <artifactId>javamelody-core</artifactId>
@@ -276,165 +292,20 @@
             </exclusions>
         </dependency>
 
-        <!-- Other Library Dependencies -->
+        <!-- Liquibase -->
         <dependency>
-            <groupId>joda-time</groupId>
-            <artifactId>joda-time</artifactId>
-            <version>${jodatime.version}</version>
-        </dependency>
-
-        <!-- We only need the jdal-core JAR itself so exclude all it's dependencies -->
-        <dependency>
-            <groupId>org.jdal</groupId>
-            <artifactId>jdal-core</artifactId>
-            <version>${jdal.core.version}</version>
-            <exclusions>
-                <exclusion>
-                    <artifactId>hibernate-jpa-2.0-api</artifactId>
-                    <groupId>org.hibernate.javax.persistence</groupId>
-                </exclusion>
-                <exclusion>
-                    <artifactId>spring-context</artifactId>
-                    <groupId>org.springframework</groupId>
-                </exclusion>
-                <exclusion>
-                    <artifactId>spring-aspects</artifactId>
-                    <groupId>org.springframework</groupId>
-                </exclusion>
-                <exclusion>
-                    <artifactId>commons-logging</artifactId>
-                    <groupId>commons-logging</groupId>
-                </exclusion>
-                <exclusion>
-                    <artifactId>json-lib</artifactId>
-                    <groupId>net.sf.json-lib</groupId>
-                </exclusion>
-                <exclusion>
-                    <artifactId>ehcache-core</artifactId>
-                    <groupId>net.sf.ehcache</groupId>
-                </exclusion>
-                <exclusion>
-                    <artifactId>jts</artifactId>
-                    <groupId>com.vividsolutions</groupId>
-                </exclusion>
-                <exclusion>
-                    <artifactId>spring-tx</artifactId>
-                    <groupId>org.springframework</groupId>
-                </exclusion>
-                <exclusion>
-                    <artifactId>xercesImpl</artifactId>
-                    <groupId>xerces</groupId>
-                </exclusion>
-                <exclusion>
-                    <artifactId>commons-io</artifactId>
-                    <groupId>commons-io</groupId>
-                </exclusion>
-                <exclusion>
-                    <artifactId>jibx-bind</artifactId>
-                    <groupId>org.jibx</groupId>
-                </exclusion>
-                <exclusion>
-                    <artifactId>mybatis</artifactId>
-                    <groupId>org.mybatis</groupId>
-                </exclusion>
-                <exclusion>
-                    <artifactId>aspectjweaver</artifactId>
-                    <groupId>org.aspectj</groupId>
-                </exclusion>
-                <exclusion>
-                    <artifactId>spring-web</artifactId>
-                    <groupId>org.springframework</groupId>
-                </exclusion>
-                <exclusion>
-                    <artifactId>spring-beans</artifactId>
-                    <groupId>org.springframework</groupId>
-                </exclusion>
-                <exclusion>
-                    <artifactId>jasperreports</artifactId>
-                    <groupId>net.sf.jasperreports</groupId>
-                </exclusion>
-                <exclusion>
-                    <artifactId>jsr250-api</artifactId>
-                    <groupId>javax.annotation</groupId>
-                </exclusion>
-                <exclusion>
-                    <artifactId>servlet-api</artifactId>
-                    <groupId>javax.servlet</groupId>
-                </exclusion>
-                <exclusion>
-                    <artifactId>spring-context-support</artifactId>
-                    <groupId>org.springframework</groupId>
-                </exclusion>
-                <exclusion>
-                    <artifactId>log4j</artifactId>
-                    <groupId>log4j</groupId>
-                </exclusion>
-                <exclusion>
-                    <artifactId>poi-scratchpad</artifactId>
-                    <groupId>org.apache.poi</groupId>
-                </exclusion>
-                <exclusion>
-                    <artifactId>spring-jdbc</artifactId>
-                    <groupId>org.springframework</groupId>
-                </exclusion>
-                <exclusion>
-                    <artifactId>groovy-all</artifactId>
-                    <groupId>org.codehaus.groovy</groupId>
-                </exclusion>
-                <exclusion>
-                    <artifactId>castor-xml</artifactId>
-                    <groupId>org.codehaus.castor</groupId>
-                </exclusion>
-                <exclusion>
-                    <artifactId>easymock</artifactId>
-                    <groupId>org.easymock</groupId>
-                </exclusion>
-                <exclusion>
-                    <artifactId>commons-beanutils</artifactId>
-                    <groupId>commons-beanutils</groupId>
-                </exclusion>
-                <exclusion>
-                    <artifactId>hibernate-ehcache</artifactId>
-                    <groupId>org.hibernate</groupId>
-                </exclusion>
-                <exclusion>
-                    <artifactId>spring-core</artifactId>
-                    <groupId>org.springframework</groupId>
-                </exclusion>
-                <exclusion>
-                    <artifactId>hibernate-core</artifactId>
-                    <groupId>org.hibernate</groupId>
-                </exclusion>
-                <exclusion>
-                    <artifactId>cglib-nodep</artifactId>
-                    <groupId>cglib</groupId>
-                </exclusion>
-                <exclusion>
-                    <artifactId>spring-aop</artifactId>
-                    <groupId>org.springframework</groupId>
-                </exclusion>
-                <exclusion>
-                    <artifactId>hibernate-entitymanager</artifactId>
-                    <groupId>org.hibernate</groupId>
-                </exclusion>
-                <exclusion>
-                    <artifactId>javassist</artifactId>
-                    <groupId>javassist</groupId>
-                </exclusion>
-                <exclusion>
-                    <artifactId>
-                        commons-beanutils-bean-collections
-                    </artifactId>
-                    <groupId>commons-beanutils</groupId>
-                </exclusion>
-                <exclusion>
-                    <artifactId>spring-orm</artifactId>
-                    <groupId>org.springframework</groupId>
-                </exclusion>
-            </exclusions>
+            <groupId>org.liquibase</groupId>
+            <artifactId>liquibase-core</artifactId>
+            <version>${liquibase.version}</version>
         </dependency>
 
         <!-- Logging Libraries -->
+        <dependency>
+            <groupId>log4j</groupId>
+            <artifactId>log4j</artifactId>
+            <version>${log4j.version}</version>
+            <scope>provided</scope>
+        </dependency>
         <dependency>
             <groupId>org.slf4j</groupId>
             <artifactId>slf4j-log4j12</artifactId>
@@ -512,94 +383,19 @@
             <version>${junit.version}</version>
             <scope>test</scope>
         </dependency>
-        <!-- <dependency>
-            <groupId>com.h2database</groupId>
-            <artifactId>h2</artifactId>
-            <version>1.3.168</version>
-            <scope>test</scope>
-        </dependency>
-        <dependency>
-            <groupId>com.carrotsearch</groupId>
-            <artifactId>junit-benchmarks</artifactId>
-            <version>0.3.0</version>
-            <scope>test</scope>
-        </dependency>-->
     </dependencies>
 
     <profiles>
-        <!-- A Separate Profile to allow compiling, installing and deploying
-            the rest server with a JAR file so that the server could be used as a library. -->
         <profile>
-            <id>include-jar</id>
-            <build>
-                <plugins>
-                    <plugin>
-                        <groupId>org.apache.maven.plugins</groupId>
-                        <artifactId>maven-jar-plugin</artifactId>
-                        <version>${jarplugin.version}</version>
-                        <executions>
-                            <execution>
-                                <id>make-a-jar</id>
-                                <phase>compile</phase>
-                                <goals>
-                                    <goal>jar</goal>
-                                </goals>
-                            </execution>
-                        </executions>
-                        <configuration>
-                            <excludes>
-                                <exclude>**/import.sql</exclude>
-                                <exclude>**/persistence.xml</exclude>
-                                <exclude>**/log4j.properties</exclude>
-                            </excludes>
-                        </configuration>
-                    </plugin>
-                    <plugin>
-                        <groupId>org.apache.maven.plugins</groupId>
-                        <artifactId>maven-install-plugin</artifactId>
-                        <version>${installplugin.version}</version>
-                        <executions>
-                            <execution>
-                                <phase>install</phase>
-                                <goals>
-                                    <goal>install-file</goal>
-                                </goals>
-                                <configuration>
-                                    <packaging>jar</packaging>
-                                    <artifactId>${project.artifactId}</artifactId>
-                                    <groupId>${project.groupId}</groupId>
-                                    <version>${project.version}</version>
-                                    <file>
-                                        ${project.build.directory}/${project.artifactId}-${project.version}.jar
-                                    </file>
-                                </configuration>
-                            </execution>
-                        </executions>
-                    </plugin>
-                    <plugin>
-                        <groupId>org.apache.maven.plugins</groupId>
-                        <artifactId>maven-deploy-plugin</artifactId>
-                        <version>${deployplugin.version}</version>
-                        <executions>
-                            <execution>
-                                <phase>deploy</phase>
-                                <goals>
-                                    <goal>deploy-file</goal>
-                                </goals>
-                                <configuration>
-                                    <packaging>jar</packaging>
-                                    <generatePom>true</generatePom>
-                                    <url>${project.distributionManagement.repository.url}</url>
-                                    <artifactId>${project.artifactId}</artifactId>
-                                    <groupId>${project.groupId}</groupId>
-                                    <version>${project.version}</version>
-                                    <file>${project.build.directory}/${project.artifactId}-${project.version}.jar</file>
-                                </configuration>
-                            </execution>
-                        </executions>
-                    </plugin>
-                </plugins>
-            </build>
+            <id>belay</id>
+            <dependencies>
+                <!-- Belay Library -->
+                <dependency>
+                    <groupId>org.jboss.pressgang.belay</groupId>
+                    <artifactId>resource-server-provider</artifactId>
+                    <version>1.0-SNAPSHOT</version>
+                </dependency>
+            </dependencies>
         </profile>
         <profile>
             <!-- When built in OpenShift the 'openshift' profile will be 
@@ -801,6 +597,14 @@
                     </plugin>
                 </plugins>
             </build>
+            <dependencies>
+                <!-- Belay Library -->
+                <dependency>
+                    <groupId>org.jboss.pressgang.belay</groupId>
+                    <artifactId>resource-server-provider</artifactId>
+                    <version>1.0-SNAPSHOT</version>
+                </dependency>
+            </dependencies>
         </profile>
     </profiles>
 </project>
