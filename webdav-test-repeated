@@ -1,0 +1,10 @@
+#!/bin/bash
+
+# Run the tests in a continuous loop until one fails.
+
+while 'true'
+do
+    TIME=$(date)
+    echo "********************* Tests Started ${TIME} *********************"
+    ./webdav-test
+done
