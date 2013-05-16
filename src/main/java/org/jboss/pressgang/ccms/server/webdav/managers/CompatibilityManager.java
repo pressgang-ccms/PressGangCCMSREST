@@ -36,15 +36,16 @@ import org.jboss.pressgang.ccms.server.webdav.constants.WebDavConstants;
  */
 @ApplicationScoped
 public class CompatibilityManager {
-
-    /**
-     * TODO: make an object to represent a delete request
-     * A resource type mapped to a remote address mapped to an id mapped to a deletion time.
-     */
     final Map<ResourceData, Calendar> deletedResources = new HashMap<ResourceData, Calendar>();
     final Map<ResourceData, Calendar> createdResources = new HashMap<ResourceData, Calendar>();
     final Map<ResourceData, DataCache> databaseCache = new HashMap<ResourceData, DataCache>();
 
+    /**
+     * @param resourceType      The type of resource
+     * @param remoteAddress     The clients remote address
+     * @param id                The id of the resource
+     * @return true if this resource is supposed to be deleted, and false otherwise
+     */
     synchronized public boolean isDeleted(@NotNull final ResourceTypes resourceType, @NotNull final String remoteAddress, @NotNull final Integer id) {
 
         final ResourceData resourceData = new ResourceData(resourceType, remoteAddress, id);
@@ -67,6 +68,12 @@ public class CompatibilityManager {
         return false;
     }
 
+    /**
+     * Marks the resource as being deleted.
+     * @param resourceType      The type of resource
+     * @param remoteAddress     The clients remote address
+     * @param id                The id of the resource
+     */
     synchronized public void delete(@NotNull final ResourceTypes resourceType, @NotNull final String remoteAddress,
             @NotNull final Integer id) {
         final ResourceData resourceData = new ResourceData(resourceType, remoteAddress, id);
@@ -77,7 +84,9 @@ public class CompatibilityManager {
     /**
      * Deleted files that are recreated with an empty put (e.g. where they are touched) need to have an updated
      * last modified date to invalidate the clients cache.
-     *
+     * @param resourceType      The type of resource
+     * @param remoteAddress     The clients remote address
+     * @param id                The id of the resource
      * @return The date that this file was recreated, or null if it has not been recreated.
      */
     @Nullable
@@ -93,6 +102,12 @@ public class CompatibilityManager {
         return null;
     }
 
+    /**
+     * Marks the resource as being not deleted.
+     * @param resourceType      The type of resource
+     * @param remoteAddress     The clients remote address
+     * @param id                The id of the resource
+     */
     synchronized public void create(@NotNull final ResourceTypes resourceType, @NotNull final String remoteAddress,
             @NotNull final Integer id) {
 
@@ -107,12 +122,32 @@ public class CompatibilityManager {
         createdResources.put(resourceData, now);
     }
 
+    /**
+     * Saves the uploaded data in a cache against the data that was actually saved in the database. This cache can then
+     * be used to return the uploaded data, so the client doesn't see the formatting going on in the background.
+     * @param resourceType      The type of resource
+     * @param remoteAddress     The clients remote address
+     * @param id                The id of the resource
+     * @param databaseData      The value that was eventually put in the database (after formatting, validation etc)
+     * @param originalData      The value that was saved to the database
+     */
     synchronized public void put(@NotNull final ResourceTypes resourceType, @NotNull final String remoteAddress, @NotNull final Integer id, @NotNull final byte[] databaseData, @NotNull final byte[] originalData) {
         final ResourceData resourceData = new ResourceData(resourceType, remoteAddress, id);
         final DataCache dataCache = new DataCache(originalData, databaseData, Calendar.getInstance());
         databaseCache.put(resourceData, dataCache);
     }
 
+    /**
+     * When returning data for a file, we try to send back what the client sent us, regardless of any formatting that
+     * may have taken place when the data was actually saved in the database. This is to prevent "The file has changed"
+     * messages after a save has taken place.
+     *
+     * @param resourceType      The type of resource
+     * @param remoteAddress     The clients remote address
+     * @param id                The id of the resource
+     * @param databaseData      The current value of the data from the database
+     * @return The originally uploaded data if it is in the cache, or the database data if the cache is not valid
+     */
     synchronized public byte[] get(@NotNull final ResourceTypes resourceType, @NotNull final String remoteAddress, @NotNull final Integer id, @NotNull final byte[] databaseData) {
 
         final ResourceData resourceData = new ResourceData(resourceType, remoteAddress, id);
