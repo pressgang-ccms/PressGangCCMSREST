@@ -75,9 +75,7 @@ fi
 # mv test 2
 echo Starting mv test 2
 echo '<!-- mv test 2 -->' > "${TEST_DOC}.move"
-echo -e "\tmv"
 mv "${TEST_DOC}.move" "${TEST_DOC}.move1"
-echo -e "\ttest"
 if [ -f "${TEST_DOC}.move" ]
 then
 	echo "************ mv test 2 failed - item not deleted ************"
@@ -459,8 +457,13 @@ fi
 echo Starting saxon test 1
 echo '<article><title>test</title><para>hi</para></article>' > "${TEMP_DOC}"
 echo '<article><title>test</title><para>hi</para></article>' > "${TEST_DOC}"
-saxon-xslt -o:/tmp/docbook1.html "${TEMP_DOC}" "${DOCBOOK_HTML_XSL}" 2> /dev/null
-saxon-xslt -o:/tmp/docbook2.html "${TEST_DOC}" "${DOCBOOK_HTML_XSL}" 2> /dev/null
+
+#echo 'saxon-xslt -o /tmp/docbook1.html "'${TEMP_DOC}'" "'${DOCBOOK_HTML_XSL}'" 2> /dev/null'
+#echo 'saxon-xslt -o /tmp/docbook2.html "'${TEST_DOC}'" "'${DOCBOOK_HTML_XSL}'" 2> /dev/null'
+
+saxon-xslt -o /tmp/docbook1.html "${TEMP_DOC}" "${DOCBOOK_HTML_XSL}" 2> /dev/null
+saxon-xslt -o /tmp/docbook2.html "${TEST_DOC}" "${DOCBOOK_HTML_XSL}" 2> /dev/null
+
 diff /tmp/docbook1.html /tmp/docbook2.html
 
 if [[ $? -ne 0 ]]
