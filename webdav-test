@@ -195,11 +195,9 @@ sleep ${UPLOAD_DELAY}
 echo "    Cat the file"
 cat "${TEST_DOC}"
 sleep 2
-cat "${TEST_DOC}"
-sleep 2
 
 # the test doc should be formatted, while the temp doc will not be
-diff "${TEST_DOC}" "${TEST_DOC}"
+diff "${TEST_DOC}" "${TEMP_DOC}"
 
 if [[ $? -eq 0 ]]
 then
