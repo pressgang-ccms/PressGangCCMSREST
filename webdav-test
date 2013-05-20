@@ -5,6 +5,9 @@
 
 # The default delay between a file being saved, and it being uploaded by davfs (plus a small margin)
 UPLOAD_DELAY=12
+
+DOWNLOAD_DELAY=20
+
 MOUNT_DIR="/mnt/pressgang/TOPICS"
 TEST_FILENAME=3737.xml
 TEST_DIR="${MOUNT_DIR}/3/7/3/7/TOPIC3737"
@@ -25,6 +28,8 @@ XML_FORMAT_LOCATION=/opt/xmlformat-1.04
 # start with a clean directory
 cd "${TEST_DIR}"
 find * -maxdepth 0 -name '3737.xml' -prune -o -exec rm -rf '{}' ';'
+
+
 
 # cp test 1
 echo Starting cp test 1
@@ -132,24 +137,48 @@ then
 fi
 
 # touch test 1
+
+# This is a tricky situation, because we are doing something that the file system does
+# not expect. we create, delete and touch a file to simulate the "deletion" and
+# reappearance of a file. The file was never deleted, but the caching done by davfs2
+# makes it seem that way. Hence all the sleeps
+
 echo Starting touch test 1
+echo "    Redirect an echo"
 echo '<!-- rm test 1 -->' > "${TEST_DOC}"
 echo '<!-- rm test 1 -->' > "${TEMP_DOC}"
 
+# wait for echo above to be uploaded to the server
 sleep ${UPLOAD_DELAY}
 
+# delete the file and wait for the delete to be propagated to the server
+echo "    Delete and touch the file"
 rm "${TEST_DOC}"
-sleep ${UPLOAD_DELAY}
 
+# create an empty file and wait for the creation to be propagated to the server
 touch "${TEST_DOC}"
 sleep ${UPLOAD_DELAY}
 
+# update the directory listing
+#ls -la  "${TEST_DIR}"
+#sleep ${UPLOAD_DELAY}
+
+# This combination of calls refreshes the davfs cache. I don't actually know why this works
+# but you need to open the file twice with at least a 2 second delay in-between before
+# the files contents from the server is available.
+echo "    Cat the file"
+cat "${TEST_DOC}"
+sleep 2
+cat "${TEST_DOC}"
+sleep 2
+
+echo "    Diff the file"
 diff "${TEST_DOC}" "${TEMP_DOC}"
 
 if [[ $? -ne 0 ]]
 then
-	echo "************ touch test 1 failed  ************"
-	read -n 1 -s
+    echo "************ touch test 1 failed  ************"
+    read -n 1 -s
 fi
 
 # touch test 2
@@ -161,11 +190,13 @@ sleep ${UPLOAD_DELAY}
 
 # touching the file should clear the cache
 > "${TEST_DOC}"
-
 sleep ${UPLOAD_DELAY}
 
-cat "${TEST_DOC}" > /dev/null
-sleep ${UPLOAD_DELAY}
+echo "    Cat the file"
+cat "${TEST_DOC}"
+sleep 2
+cat "${TEST_DOC}"
+sleep 2
 
 # the test doc should be formatted, while the temp doc will not be
 diff "${TEST_DOC}" "${TEST_DOC}"
