@@ -95,6 +95,7 @@ public class CompatibilityManager {
      * @param resourceType      The type of resource
      * @param remoteAddress     The clients remote address
      * @param id                The id of the resource
+     * @param lastModifiedDate  The last modified date of the database entity
      * @return The date that this file was recreated, or null if it has not been recreated.
      */
     @Nullable

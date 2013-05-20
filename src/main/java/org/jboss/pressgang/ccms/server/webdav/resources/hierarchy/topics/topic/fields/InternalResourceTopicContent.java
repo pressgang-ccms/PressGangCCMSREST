@@ -224,13 +224,11 @@ public class InternalResourceTopicContent extends InternalResource {
         final DisplayName displayName = new DisplayName(topic.getId() + ".xml");
         final SupportedLock supportedLock = new SupportedLock();
         final LockDiscovery lockDiscovery = new LockDiscovery();
-        final Prop prop = new Prop(creationDate, getLastModified, getContentType, getContentLength, displayName, supportedLock,
-                lockDiscovery);
+        final Prop prop = new Prop(creationDate, getLastModified, getContentType, getContentLength, displayName, supportedLock, lockDiscovery);
         final Status status = new Status((javax.ws.rs.core.Response.StatusType) OK);
         final PropStat propStat = new PropStat(prop, status);
 
-        final net.java.dev.webdav.jaxrs.xml.elements.Response davFile = new net.java.dev.webdav.jaxrs.xml.elements.Response(hRef, null,
-                null, null, propStat);
+        final net.java.dev.webdav.jaxrs.xml.elements.Response davFile = new net.java.dev.webdav.jaxrs.xml.elements.Response(hRef, null, null, null, propStat);
 
         return davFile;
     }
