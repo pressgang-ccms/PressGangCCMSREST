@@ -210,11 +210,14 @@ public class InternalResourceTopicContent extends InternalResource {
     public static net.java.dev.webdav.jaxrs.xml.elements.Response getProperties(@NotNull final CompatibilityManager compatibilityManager,
             @NotNull final String remoteAddress, @NotNull final UriInfo uriInfo, @NotNull final Topic topic, final boolean local) {
 
-        final Calendar lastCreatedDate = compatibilityManager.lastCreatedDate(ResourceTypes.TOPIC_CONTENTS, remoteAddress, topic.getId());
-        final Calendar lastCreatedDateFixed = lastCreatedDate == null ? Calendar.getInstance() : lastCreatedDate;
-        final Date lastModifiedDate = topic.getLastModifiedDate() == null ? new Date() : topic.getLastModifiedDate();
-        final GetLastModified getLastModified = new GetLastModified(
-                lastCreatedDateFixed.after(lastModifiedDate) ? lastCreatedDateFixed.getTime() : lastModifiedDate);
+
+        final Date lastModifiedDate = topic.getLastModifiedDate();
+        final Date lastModifiedDateFixed = lastModifiedDate == null ? new Date() : topic.getLastModifiedDate();
+
+        final Date lastCreatedDate = compatibilityManager.lastCreatedDate(ResourceTypes.TOPIC_CONTENTS, remoteAddress, topic.getId(), lastModifiedDate);
+        final Date lastCreatedDateFixed = lastCreatedDate == null ? new Date() : lastCreatedDate;
+
+        final GetLastModified getLastModified = new GetLastModified(lastCreatedDateFixed);
 
         final HRef hRef = local ? new HRef(uriInfo.getRequestUri()) : new HRef(
                 uriInfo.getRequestUriBuilder().path(topic.getId() + ".xml").build());

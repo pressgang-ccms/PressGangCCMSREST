@@ -3,10 +3,7 @@ package org.jboss.pressgang.ccms.server.webdav.managers;
 import javax.annotation.Nullable;
 import javax.enterprise.context.ApplicationScoped;
 import javax.validation.constraints.NotNull;
-import java.util.Arrays;
-import java.util.Calendar;
-import java.util.HashMap;
-import java.util.Map;
+import java.util.*;
 import java.util.concurrent.TimeUnit;
 
 import com.google.common.cache.Cache;
@@ -88,7 +85,10 @@ public class CompatibilityManager {
             @NotNull final Integer id) {
         final ResourceData resourceData = new ResourceData(resourceType, remoteAddress, id);
         deletedResources.put(resourceData, Calendar.getInstance());
+
+        /* The data and creation date caches are cleared */
         databaseCache.invalidate(resourceData);
+        createdResources.remove(resourceData);
     }
 
     /**
@@ -100,13 +100,24 @@ public class CompatibilityManager {
      * @return The date that this file was recreated, or null if it has not been recreated.
      */
     @Nullable
-    synchronized public Calendar lastCreatedDate(@NotNull final ResourceTypes resourceType, @NotNull final String remoteAddress,
-            @NotNull final Integer id) {
+    synchronized public Date lastCreatedDate(@NotNull final ResourceTypes resourceType, @NotNull final String remoteAddress,
+            @NotNull final Integer id, @Nullable final Date lastModifiedDate) {
 
         final ResourceData resourceData = new ResourceData(resourceType, remoteAddress, id);
 
         if (createdResources.containsKey(resourceData)) {
-            createdResources.get(resourceData);
+            final Calendar date = createdResources.get(resourceData);
+
+            /**
+             * The file has been modified after it was recreated, so simply return the original
+             * last modified date.
+             */
+            if (lastModifiedDate != null && date.before(lastModifiedDate)) {
+                createdResources.remove(resourceData);
+                return lastModifiedDate;
+            }
+
+            return date.getTime();
         }
 
         return null;
@@ -125,11 +136,11 @@ public class CompatibilityManager {
 
         if (deletedResources.containsKey(resourceData)) {
             deletedResources.remove(resourceData);
-        }
 
-        final Calendar now = Calendar.getInstance();
-        now.add(1, Calendar.SECOND);
-        createdResources.put(resourceData, now);
+            final Calendar now = Calendar.getInstance();
+            now.add(1, Calendar.SECOND);
+            createdResources.put(resourceData, now);
+        }
     }
 
     /**
@@ -179,14 +190,15 @@ public class CompatibilityManager {
 
         /*
             If the cache has expired, clear the cache and return the database text.
+            Now done by Guava cache.
          */
-        final Calendar window = Calendar.getInstance();
+        /*final Calendar window = Calendar.getInstance();
         window.add(Calendar.SECOND, -WebDavConstants.DELETE_WINDOW);
 
         if (dataCache.getTime().before(window)) {
             databaseCache.invalidate(resourceData);
             return databaseData;
-        }
+        }*/
 
         /*
             If we have arrived at this point the client has requested database text that is
