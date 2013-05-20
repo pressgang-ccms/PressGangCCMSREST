@@ -73,6 +73,8 @@ fi
 echo Starting mv test 1
 echo '<!-- cp test 1 -->' > "${TEST_DOC}"
 cp "${TEST_DOC}" "${TEST_DOC}".copy
+sleep ${UPLOAD_DELAY}
+
 mv "${TEST_DOC}".copy "${TEST_DOC}".move
 sleep ${UPLOAD_DELAY}
 
@@ -88,6 +90,7 @@ fi
 echo Starting mv test 2
 echo '<!-- mv test 2 -->' > "${TEST_DOC}.move"
 sleep ${UPLOAD_DELAY}
+
 mv "${TEST_DOC}.move" "${TEST_DOC}.move1"
 sleep ${UPLOAD_DELAY}
 
