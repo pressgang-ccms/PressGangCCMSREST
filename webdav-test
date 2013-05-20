@@ -3,6 +3,8 @@
 # These tests are designed to test the WebDAV server's capabilities against
 # multiple common tools.
 
+# The default delay between a file being saved, and it being uploaded by davfs (plus a small margin)
+UPLOAD_DELAY=12
 MOUNT_DIR="/mnt/pressgang/TOPICS"
 TEST_FILENAME=3737.xml
 TEST_DIR="${MOUNT_DIR}/3/7/3/7/TOPIC3737"
@@ -39,6 +41,8 @@ fi
 echo Starting cp test 2
 echo '<!-- cp test 2 -->' > "${TEMP_DOC}"
 cp "${TEMP_DOC}" "${TEST_DIR}"
+sleep ${UPLOAD_DELAY}
+
 diff "${TEST_DOC}" "${TEMP_DOC}"
 
 if [[ $? -ne 0 ]]
@@ -51,6 +55,8 @@ fi
 echo Starting cp test 3
 echo '<!-- cp test 3 -->' > "${TEST_DOC}"
 cp "${TEST_DOC}" "${TEST_DOC}".copy
+sleep ${UPLOAD_DELAY}
+
 diff "${TEST_DOC}" "${TEST_DOC}".copy
 
 if [[ $? -ne 0 ]]
@@ -64,6 +70,8 @@ echo Starting mv test 1
 echo '<!-- cp test 1 -->' > "${TEST_DOC}"
 cp "${TEST_DOC}" "${TEST_DOC}".copy
 mv "${TEST_DOC}".copy "${TEST_DOC}".move
+sleep ${UPLOAD_DELAY}
+
 diff "${TEST_DOC}" "${TEST_DOC}".move
 
 if [[ $? -ne 0 ]]
@@ -76,6 +84,8 @@ fi
 echo Starting mv test 2
 echo '<!-- mv test 2 -->' > "${TEST_DOC}.move"
 mv "${TEST_DOC}.move" "${TEST_DOC}.move1"
+sleep ${UPLOAD_DELAY}
+
 if [ -f "${TEST_DOC}.move" ]
 then
 	echo "************ mv test 2 failed - item not deleted ************"
@@ -93,6 +103,8 @@ echo Starting rm test 1
 echo '<!-- rm test 1 -->' > "${TEST_DOC}".delete
 rm "${TEST_DOC}".delete
 
+sleep ${UPLOAD_DELAY}
+
 if [ -f "${TEST_DOC}".delete ]
 then
 	echo "************ rm test 1 failed - item not deleted ************"
@@ -103,6 +115,7 @@ fi
 echo Starting rm test 2
 echo '<!-- rm test 1 -->' > "${TEST_DOC}"
 rm "${TEST_DOC}"
+sleep ${UPLOAD_DELAY}
 
 if [ -f "${TEST_DOC}" ]
 then
@@ -114,10 +127,15 @@ fi
 echo Starting touch test 1
 echo '<!-- rm test 1 -->' > "${TEST_DOC}"
 echo '<!-- rm test 1 -->' > "${TEMP_DOC}"
+
+sleep ${UPLOAD_DELAY}
+
 rm "${TEST_DOC}"
 touch "${TEST_DOC}"
 
-diff "${TEST_DOC}" "${TEST_DOC}"
+sleep ${UPLOAD_DELAY}
+
+diff "${TEST_DOC}" "${TEMP_DOC}"
 
 if [[ $? -ne 0 ]]
 then
@@ -125,9 +143,31 @@ then
 	read -n 1 -s
 fi
 
+# touch test 2
+echo Starting touch test 2
+echo '<section><title>test</title><para>hi</para></section>' > "${TEMP_DOC}"
+echo '<section><title>test</title><para>hi</para></section>' > "${TEST_DOC}"
+
+sleep ${UPLOAD_DELAY}
+
+# touching the file should clear the cache
+> "${TEST_DOC}"
+
+sleep ${UPLOAD_DELAY}
+
+# the test doc should be formatted, while the temp doc will not be
+diff "${TEST_DOC}" "${TEST_DOC}"
+
+if [[ $? -eq 0 ]]
+then
+	echo "************ touch test 2 failed  ************"
+	read -n 1 -s
+fi
+
 # cat test 1
 echo Starting cat test 1
 echo '<!-- cp test 1 -->' > "${TEST_DOC}".cat
+sleep ${UPLOAD_DELAY}
 
 if [ ! -f "${TEST_DOC}".cat ]
 then
@@ -139,8 +179,11 @@ fi
 echo Starting cat test 2
 echo '<!-- cat test 2 -->' > "${TEMP_DOC}"
 echo '<!-- cat test 2 -->' > "${TEST_DOC}"
+sleep ${UPLOAD_DELAY}
+
 cat "${TEMP_DOC}" > /tmp/cattest1
 cat "${TEST_DOC}" > /tmp/cattest2
+
 diff /tmp/cattest1 /tmp/cattest2
 
 if [[ $? -ne 0 ]]
@@ -153,6 +196,8 @@ fi
 echo Starting redirect test 1
 echo '<!-- redirect test 1 -->' > "${TEMP_DOC}"
 echo '<!-- redirect test 1 -->' > "${TEST_DOC}"
+sleep ${UPLOAD_DELAY}
+
 diff "${TEST_DOC}" "${TEMP_DOC}"
 
 if [[ $? -ne 0 ]]
@@ -170,6 +215,7 @@ dd if=/dev/urandom of=/tmp/rsynctmp/a2.log bs=1K count=75 > /dev/null 2>&1
 dd if=/dev/urandom of=/tmp/rsynctmp/a3.log bs=1K count=100 > /dev/null 2>&1
 echo -e "I love rsync\nrsync is the best" > /tmp/rsynctmp/3737.xml
 rsync -vr /tmp/rsynctmp/ /mnt/pressgang/TOPICS/3/7/3/7/TOPIC3737 > /dev/null 2>&1
+sleep ${UPLOAD_DELAY}
 
 diff /tmp/rsynctmp/3737.xml /mnt/pressgang/TOPICS/3/7/3/7/TOPIC3737/3737.xml
 
@@ -178,6 +224,7 @@ then
 	echo "************ rsync test 1 failed - 3737.xml ************"
 	read -n 1 -s
 fi
+
 
 diff /tmp/rsynctmp/a1.log /mnt/pressgang/TOPICS/3/7/3/7/TOPIC3737/a1.log
 
@@ -207,6 +254,9 @@ fi
 echo Starting grep test 1
 echo -e "I love grep\ngrep is the best" > "${TEMP_DOC}"
 echo -e "I love grep\ngrep is the best" > "${TEST_DOC}"
+
+sleep ${UPLOAD_DELAY}
+
 grep grep "${TEMP_DOC}" > /tmp/grep1.tmp
 grep grep "${TEST_DOC}" > /tmp/grep2.tmp
 
@@ -222,6 +272,9 @@ fi
 echo Starting tail test 1
 echo -e "100  Thomas  Manager    Sales       $5,000\n200  Jason   Developer  Technology  $5,500\n300  Sanjay  Sysadmin   Technology  $7,000\n400  Nisha   Manager    Marketing   $9,500\n500  Randy   DBA        Technology  $6,000" > "${TEMP_DOC}"
 echo -e "100  Thomas  Manager    Sales       $5,000\n200  Jason   Developer  Technology  $5,500\n300  Sanjay  Sysadmin   Technology  $7,000\n400  Nisha   Manager    Marketing   $9,500\n500  Randy   DBA        Technology  $6,000" > "${TEST_DOC}"
+
+sleep ${UPLOAD_DELAY}
+
 tail "${TEMP_DOC}" > /tmp/tail1.tmp
 tail "${TEST_DOC}" > /tmp/tail2.tmp
 
@@ -237,6 +290,9 @@ fi
 echo Starting xmllint test 1
 echo '<section></section1>' > "${TEMP_DOC}"
 echo '<section></section1>' > "${TEST_DOC}"
+
+sleep ${UPLOAD_DELAY}
+
 xmllint --valid "${TEMP_DOC}" 2> /tmp/xml1.tmp
 xmllint --valid "${TEST_DOC}" 2> /tmp/xml2.tmp
 
@@ -255,6 +311,9 @@ fi
 echo Starting xmllint test 2
 echo '<section></section>' > "${TEMP_DOC}"
 echo '<section></section>' > "${TEST_DOC}"
+
+sleep ${UPLOAD_DELAY}
+
 xmllint --output "${TEMP_DOC}" "${TEMP_DOC}"
 xmllint --output "${TEST_DOC}" "${TEST_DOC}"
 
@@ -270,6 +329,9 @@ fi
 echo Starting sed test 1
 echo '<!-- sed test -->' > "${TEMP_DOC}"
 echo '<!-- sed test -->' > "${TEST_DOC}"
+
+sleep ${UPLOAD_DELAY}
+
 sed -i -e 's/test/sedreplaced/g' "${TEMP_DOC}"
 sed -i -e 's/test/sedreplaced/g' "${TEST_DOC}"
 diff "${TEST_DOC}" "${TEMP_DOC}"
@@ -284,6 +346,9 @@ fi
 echo Starting sponge test 1
 echo '<!-- sponge test -->' > "${TEMP_DOC}"
 echo '<!-- sponge test -->' > "${TEST_DOC}"
+
+sleep ${UPLOAD_DELAY}
+
 sed -e 's/test/sedreplaced/g' "${TEMP_DOC}" | sponge "${TEMP_DOC}"
 sed -e 's/test/sedreplaced/g' "${TEST_DOC}" | sponge "${TEST_DOC}"
 diff "${TEST_DOC}" "${TEMP_DOC}"
@@ -299,6 +364,8 @@ echo Starting imagemagick test 1
 convert -size 100x100  gradient:blue "${TEST_DIR}/gradient_range1.jpg"
 convert -size 100x100  gradient:blue "${TEMP_DIR}/gradient_range1.jpg"
 
+sleep ${UPLOAD_DELAY}
+
 diff "${TEST_DIR}/gradient_range1.jpg" "${TEMP_DIR}/gradient_range1.jpg"
 
 if [[ $? -ne 0 ]]
@@ -312,6 +379,8 @@ echo Starting imagemagick test 2
 convert "${TEST_DIR}/gradient_range1.jpg" -virtual-pixel tile  -blur 0x1  -auto-level  "${TEST_DIR}/gradient_range1_blurred.jpg"
 convert "${TEMP_DIR}/gradient_range1.jpg" -virtual-pixel tile  -blur 0x1  -auto-level  "${TEMP_DIR}/gradient_range1_blurred.jpg"
 
+sleep ${UPLOAD_DELAY}
+
 diff "${TEST_DIR}/gradient_range1_blurred.jpg" "${TEMP_DIR}/gradient_range1_blurred.jpg"
 
 if [[ $? -ne 0 ]]
@@ -324,6 +393,8 @@ fi
 echo Starting awk test 1
 echo -e "100  Thomas  Manager    Sales       $5,000\n200  Jason   Developer  Technology  $5,500\n300  Sanjay  Sysadmin   Technology  $7,000\n400  Nisha   Manager    Marketing   $9,500\n500  Randy   DBA        Technology  $6,000" > "${TEMP_DOC}"
 echo -e "100  Thomas  Manager    Sales       $5,000\n200  Jason   Developer  Technology  $5,500\n300  Sanjay  Sysadmin   Technology  $7,000\n400  Nisha   Manager    Marketing   $9,500\n500  Randy   DBA        Technology  $6,000" > "${TEST_DOC}"
+
+sleep ${UPLOAD_DELAY}
 
 awk '{print $2,$5;}' "${TEMP_DOC}" > /tmp/awk1.tmp
 awk '{print $2,$5;}' "${TEST_DOC}" > /tmp/awk2.tmp
@@ -342,6 +413,8 @@ echo Starting bz2 test 1
 echo '<!-- bzip2 test -->' > "${TEMP_DOC}"
 echo '<!-- bzip2 test -->' > "${TEST_DOC}"
 
+sleep ${UPLOAD_DELAY}
+
 bzip2 -k -f "${TEMP_DOC}"
 bzip2 -k -f "${TEST_DOC}"
 
@@ -357,6 +430,9 @@ fi
 echo Starting tar test 1
 echo '<!-- tar test -->' > "${TEMP_DOC}"
 echo '<!-- tar test -->' > "${TEST_DOC}"
+
+sleep ${UPLOAD_DELAY}
+
 tar -C "${TEMP_DIR}" -cjf /tmp/tar1.tar.bz2 "${TEST_FILENAME}"
 tar -C "${TEST_DIR}" -cjf /tmp/tar2.tar.bz2 "${TEST_FILENAME}"
 
@@ -375,6 +451,8 @@ mkdir /tmp/temp2
 
 cd /tmp/temp; tar -xjf /tmp/tar1.tar.bz2
 cd /tmp/temp2; tar -xjf /tmp/tar2.tar.bz2
+
+sleep ${UPLOAD_DELAY}
 
 diff "/tmp/temp/${TEST_FILENAME}" "/tmp/temp2/${TEST_FILENAME}"
 
@@ -403,6 +481,8 @@ echo Starting nodejs test 1
 echo 'console.log("Hello World from NodeJS")' > "${TEMP_DOC}"
 echo 'console.log("Hello World from NodeJS")' > "${TEST_DOC}"
 
+sleep ${UPLOAD_DELAY}
+
 nodejs "${TEMP_DOC}" > /tmp/nodejs1.tmp
 nodejs "${TEST_DOC}" > /tmp/nodejs2.tmp
 
@@ -418,6 +498,9 @@ fi
 echo Starting vi test 1
 echo '<article><title>test</title><para>hi</para></article>' > "${TEMP_DOC}"
 echo '<article><title>test</title><para>hi</para></article>' > "${TEST_DOC}"
+
+sleep ${UPLOAD_DELAY}
+
 vi -E -s "${TEMP_DOC}" << EOF
    :%substitute/hi/there/
    :update
@@ -442,6 +525,9 @@ fi
 echo Starting hunspell test 1
 echo 'mispealled word' > "${TEMP_DOC}"
 echo 'mispealled word' > "${TEST_DOC}"
+
+sleep ${UPLOAD_DELAY}
+
 hunspell -L "${TEMP_DOC}" > /tmp/hunspell1.tmp
 hunspell -L "${TEST_DOC}" > /tmp/hunspell2.tmp
 diff /tmp/hunspell1.tmp /tmp/hunspell2.tmp
@@ -461,6 +547,8 @@ echo '<article><title>test</title><para>hi</para></article>' > "${TEST_DOC}"
 #echo 'saxon-xslt -o /tmp/docbook1.html "'${TEMP_DOC}'" "'${DOCBOOK_HTML_XSL}'" 2> /dev/null'
 #echo 'saxon-xslt -o /tmp/docbook2.html "'${TEST_DOC}'" "'${DOCBOOK_HTML_XSL}'" 2> /dev/null'
 
+sleep ${UPLOAD_DELAY}
+
 saxon-xslt -o /tmp/docbook1.html "${TEMP_DOC}" "${DOCBOOK_HTML_XSL}" 2> /dev/null
 saxon-xslt -o /tmp/docbook2.html "${TEST_DOC}" "${DOCBOOK_HTML_XSL}" 2> /dev/null
 
@@ -476,6 +564,9 @@ fi
 echo Starting xsltproc test 1
 echo '<article><title>test</title><para>hi</para></article>' > "${TEMP_DOC}"
 echo '<article><title>test</title><para>hi</para></article>' > "${TEST_DOC}"
+
+sleep ${UPLOAD_DELAY}
+
 xsltproc -o /tmp/docbook1.html "${DOCBOOK_HTML_XSL}" "${TEMP_DOC}" 
 xsltproc -o /tmp/docbook2.html "${DOCBOOK_HTML_XSL}" "${TEST_DOC}" 
 
@@ -495,6 +586,9 @@ fi
 echo Starting xmlformat test 1
 echo '<article><title>test</title><para>hi</para></article>' > "${TEMP_DOC}"
 echo '<article><title>test</title><para>hi</para></article>' > "${TEST_DOC}"
+
+sleep ${UPLOAD_DELAY}
+
 ${XML_FORMAT_LOCATION}/xmlformat.pl -i "${TEMP_DOC}" 
 ${XML_FORMAT_LOCATION}/xmlformat.pl -i "${TEST_DOC}" 
 
@@ -511,6 +605,8 @@ echo Starting publican test 1
 
 echo '<section><title>Test</title><para>hi</para></section>' > "${TEMP_DOC}"
 echo '<section><title>Test</title><para>hi</para></section>' > "${TEST_DOC}"
+
+sleep ${UPLOAD_DELAY}
 
 cd /tmp
 rm -rf book
@@ -569,6 +665,8 @@ java -jar "${JING_JAR}" "${TEST_DOC}" "${DOCBOOK_DTD}" > /tmp/jing2.tmp
 # The file names change
 sed -i -e 's#'${TEMP_DOC}'##g' /tmp/jing1.tmp
 sed -i -e 's#'${TEST_DOC}'##g' /tmp/jing2.tmp
+
+sleep ${UPLOAD_DELAY}
 
 diff /tmp/jing1.tmp /tmp/jing2.tmp
 

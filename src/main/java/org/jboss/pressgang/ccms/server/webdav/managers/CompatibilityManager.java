@@ -40,13 +40,13 @@ public class CompatibilityManager {
     /**
      * Used to override the last modified date for resources that were deleted and then created.
      */
-    final Cache<ResourceData, Calendar> createdResources = CacheBuilder.newBuilder()
+    final Cache<ResourceData, Date> createdResources = CacheBuilder.newBuilder()
             .expireAfterWrite(WebDavConstants.DELETE_WINDOW, TimeUnit.SECONDS)
             .build();
     /**
      * Used to identify resources that were marked as deleted.
      */
-    final Cache<ResourceData, Calendar> deletedResources = CacheBuilder.newBuilder()
+    final Cache<ResourceData, Date> deletedResources = CacheBuilder.newBuilder()
             .expireAfterWrite(WebDavConstants.DELETE_WINDOW, TimeUnit.SECONDS)
             .build();
     /**
@@ -69,7 +69,7 @@ public class CompatibilityManager {
     synchronized public boolean isDeleted(@NotNull final ResourceTypes resourceType, @NotNull final String remoteAddress, @NotNull final Integer id) {
 
         final ResourceData resourceData = new ResourceData(resourceType, remoteAddress, id);
-        final Calendar deletedDate = deletedResources.getIfPresent(resourceData);
+        final Date deletedDate = deletedResources.getIfPresent(resourceData);
         return deletedDate != null;
     }
 
@@ -82,7 +82,7 @@ public class CompatibilityManager {
     synchronized public void delete(@NotNull final ResourceTypes resourceType, @NotNull final String remoteAddress,
             @NotNull final Integer id) {
         final ResourceData resourceData = new ResourceData(resourceType, remoteAddress, id);
-        deletedResources.put(resourceData, Calendar.getInstance());
+        deletedResources.put(resourceData, new Date());
 
         /* The data and creation date caches are cleared */
         databaseCache.invalidate(resourceData);
@@ -90,55 +90,19 @@ public class CompatibilityManager {
     }
 
     /**
-     * Deleted files that are recreated with an empty put (e.g. where they are touched) need to have an updated
-     * last modified date to invalidate the clients cache.
-     * @param resourceType      The type of resource
-     * @param remoteAddress     The clients remote address
-     * @param id                The id of the resource
-     * @param lastModifiedDate  The last modified date of the database entity
-     * @return The date that this file was recreated, or null if it has not been recreated.
-     */
-    @Nullable
-    synchronized public Date lastCreatedDate(@NotNull final ResourceTypes resourceType, @NotNull final String remoteAddress,
-            @NotNull final Integer id, @Nullable final Date lastModifiedDate) {
-
-        final ResourceData resourceData = new ResourceData(resourceType, remoteAddress, id);
-        final Calendar date = createdResources.getIfPresent(resourceData);
-
-        if (date != null) {
-            /**
-             * The file has been modified after it was recreated, so simply return the original
-             * last modified date.
-             */
-            if (lastModifiedDate != null && date.before(lastModifiedDate)) {
-                createdResources.invalidate(resourceData);
-                return lastModifiedDate;
-            }
-
-            return date.getTime();
-        }
-
-        return lastModifiedDate;
-    }
-
-    /**
      * Marks the resource as being not deleted if it was previously marked as deleted.
-     * @param resourceType      The type of resource
-     * @param remoteAddress     The clients remote address
-     * @param id                The id of the resource
+     * @param resourceType          The type of resource
+     * @param remoteAddress         The clients remote address
+     * @param id                    The id of the resource
      */
     synchronized public void create(@NotNull final ResourceTypes resourceType, @NotNull final String remoteAddress,
             @NotNull final Integer id) {
 
         final ResourceData resourceData = new ResourceData(resourceType, remoteAddress, id);
-        final Calendar deletedDate = deletedResources.getIfPresent(resourceData);
+        final boolean deletedDateExists = deletedResources.getIfPresent(resourceData) != null;
 
-        if (deletedDate != null) {
+        if (deletedDateExists) {
             deletedResources.invalidate(resourceData);
-
-            final Calendar now = Calendar.getInstance();
-            now.add(1, Calendar.SECOND);
-            createdResources.put(resourceData, now);
         }
     }
 

@@ -210,11 +210,7 @@ public class InternalResourceTopicContent extends InternalResource {
             @NotNull final String remoteAddress, @NotNull final UriInfo uriInfo, @NotNull final Topic topic, final boolean local) {
 
         final Date lastModifiedDate = topic.getLastModifiedDate();
-
-        final Date lastCreatedDate = compatibilityManager.lastCreatedDate(ResourceTypes.TOPIC_CONTENTS, remoteAddress, topic.getId(), lastModifiedDate);
-        final Date lastCreatedDateFixed = lastCreatedDate == null ? new Date() : lastCreatedDate;
-
-        final GetLastModified getLastModified = new GetLastModified(lastCreatedDateFixed);
+        final GetLastModified getLastModified = new GetLastModified(lastModifiedDate == null ? new Date() : lastModifiedDate);
 
         final HRef hRef = local ? new HRef(uriInfo.getRequestUri()) : new HRef(uriInfo.getRequestUriBuilder().path(topic.getId() + ".xml").build());
         final FixedCreationDate creationDate = new FixedCreationDate(topic.getTopicTimeStamp() == null ? new Date() : topic.getTopicTimeStamp());
