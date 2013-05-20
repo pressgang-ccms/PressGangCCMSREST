@@ -37,8 +37,10 @@ import org.jboss.pressgang.ccms.server.webdav.constants.WebDavConstants;
  */
 @ApplicationScoped
 public class CompatibilityManager {
-    final Map<ResourceData, Calendar> deletedResources = new HashMap<ResourceData, Calendar>();
     final Map<ResourceData, Calendar> createdResources = new HashMap<ResourceData, Calendar>();
+    final Cache<ResourceData, Calendar> deletedResources = CacheBuilder.newBuilder()
+            .expireAfterWrite(WebDavConstants.DELETE_WINDOW, TimeUnit.SECONDS)
+            .build();
     final Cache<ResourceData, DataCache> databaseCache = CacheBuilder.newBuilder()
             .expireAfterWrite(WebDavConstants.DELETE_WINDOW, TimeUnit.SECONDS)
             .build();
@@ -56,23 +58,8 @@ public class CompatibilityManager {
     synchronized public boolean isDeleted(@NotNull final ResourceTypes resourceType, @NotNull final String remoteAddress, @NotNull final Integer id) {
 
         final ResourceData resourceData = new ResourceData(resourceType, remoteAddress, id);
-
-        if (deletedResources.containsKey(resourceData)) {
-
-            final Calendar deletionDate = deletedResources.get(resourceData);
-            final Calendar window = Calendar.getInstance();
-            window.add(Calendar.SECOND, -WebDavConstants.DELETE_WINDOW);
-
-            if (deletionDate.before(window)) {
-                deletedResources.remove(resourceData);
-                return false;
-            }
-
-            return true;
-
-        }
-
-        return false;
+        final Calendar deletedDate = deletedResources.getIfPresent(resourceData);
+        return deletedDate != null;
     }
 
     /**
@@ -124,7 +111,7 @@ public class CompatibilityManager {
     }
 
     /**
-     * Marks the resource as being not deleted.
+     * Marks the resource as being not deleted if it was previously marked as deleted.
      * @param resourceType      The type of resource
      * @param remoteAddress     The clients remote address
      * @param id                The id of the resource
@@ -133,9 +120,10 @@ public class CompatibilityManager {
             @NotNull final Integer id) {
 
         final ResourceData resourceData = new ResourceData(resourceType, remoteAddress, id);
+        final Calendar deletedDate = deletedResources.getIfPresent(resourceData);
 
-        if (deletedResources.containsKey(resourceData)) {
-            deletedResources.remove(resourceData);
+        if (deletedDate != null) {
+            deletedResources.invalidate(resourceData);
 
             final Calendar now = Calendar.getInstance();
             now.add(1, Calendar.SECOND);
