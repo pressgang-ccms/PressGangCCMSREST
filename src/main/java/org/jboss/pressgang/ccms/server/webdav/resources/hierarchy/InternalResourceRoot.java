@@ -8,7 +8,7 @@ import java.util.List;
 
 import net.java.dev.webdav.jaxrs.xml.elements.MultiStatus;
 import net.java.dev.webdav.jaxrs.xml.elements.Response;
-import org.jboss.pressgang.ccms.server.webdav.managers.DeleteManager;
+import org.jboss.pressgang.ccms.server.webdav.managers.CompatibilityManager;
 import org.jboss.pressgang.ccms.server.webdav.resources.InternalResource;
 import org.jboss.pressgang.ccms.server.webdav.resources.MultiStatusReturnValue;
 import org.jboss.pressgang.ccms.server.webdav.resources.hierarchy.topics.InternalResourceTopicVirtualFolder;
@@ -17,9 +17,9 @@ import org.jboss.pressgang.ccms.server.webdav.resources.hierarchy.topics.Interna
  * The root folder of the WebDAV hierarchy.
  */
 public class InternalResourceRoot extends InternalResource {
-    public InternalResourceRoot(@NotNull final UriInfo uriInfo, @NotNull final DeleteManager deleteManager,
+    public InternalResourceRoot(@NotNull final UriInfo uriInfo, @NotNull final CompatibilityManager compatibilityManager,
             @Nullable final String remoteAddress, @NotNull final String stringId) {
-        super(uriInfo, deleteManager, remoteAddress, stringId);
+        super(uriInfo, compatibilityManager, remoteAddress, stringId);
     }
 
     @Override

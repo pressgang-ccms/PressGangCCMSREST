@@ -529,6 +529,8 @@ public class TopicUtilities {
             }
         } catch (SAXException e) {
             topic.setTopicXMLErrors(e.getMessage());
+        } catch (Exception e) {
+            topic.setTopicXMLErrors(e.getMessage());
         }
     }
 
