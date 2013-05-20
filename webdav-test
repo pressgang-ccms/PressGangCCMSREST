@@ -54,6 +54,9 @@ rm "${TEST_DOC}"
 touch "${TEST_DOC}"
 sleep ${UPLOAD_DELAY}
 
+# I don't know why this works, but it does. Two reads with two second delays between will
+# cause the local cache to sync.
+
 cat "${TEST_DOC}" > /dev/null
 sleep 2
 cat "${TEST_DOC}" > /dev/null
@@ -640,6 +643,8 @@ sleep ${UPLOAD_DELAY}
 
 ${XML_FORMAT_LOCATION}/xmlformat.pl -i "${TEMP_DOC}" 
 ${XML_FORMAT_LOCATION}/xmlformat.pl -i "${TEST_DOC}" 
+
+sleep ${UPLOAD_DELAY}
 
 diff "${TEMP_DOC}" "${TEST_DOC}"
 
