@@ -22,6 +22,10 @@ XML_FORMAT_LOCATION=/opt/xmlformat-1.04
 
 #sudo mount.davfs http://skynet-dev.usersys.redhat.com:8080/pressgang-ccms-webdav /mnt/pressgang -o uid=matthew
 
+# start with a clean directory
+cd "${TEST_DIR}"
+find * -maxdepth 0 -name '3737.xml' -prune -o -exec rm -rf '{}' ';'
+
 # cp test 1
 echo Starting cp test 1
 # it is possible that this file was deleted by some other script
@@ -132,8 +136,9 @@ echo '<!-- rm test 1 -->' > "${TEMP_DOC}"
 sleep ${UPLOAD_DELAY}
 
 rm "${TEST_DOC}"
-touch "${TEST_DOC}"
+sleep ${UPLOAD_DELAY}
 
+touch "${TEST_DOC}"
 sleep ${UPLOAD_DELAY}
 
 diff "${TEST_DOC}" "${TEMP_DOC}"
@@ -154,6 +159,9 @@ sleep ${UPLOAD_DELAY}
 # touching the file should clear the cache
 > "${TEST_DOC}"
 
+sleep ${UPLOAD_DELAY}
+
+cat "${TEST_DOC}" > /dev/null
 sleep ${UPLOAD_DELAY}
 
 # the test doc should be formatted, while the temp doc will not be
