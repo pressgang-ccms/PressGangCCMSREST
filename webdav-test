@@ -511,6 +511,8 @@ fi
 echo Starting python test 1
 echo 'print "Hello WebDAV"' > "${TEMP_DOC}"
 echo 'print "Hello WebDAV"' > "${TEST_DOC}"
+sleep ${UPLOAD_DELAY}
+
 python "${TEMP_DOC}" > /tmp/python1.tmp
 python "${TEST_DOC}" > /tmp/python2.tmp
 diff /tmp/python1.tmp /tmp/python2.tmp
@@ -557,6 +559,8 @@ vi -E -s "${TEST_DOC}" << EOF
    :update
    :quit
 EOF
+
+sleep ${UPLOAD_DELAY}
 
 diff "${TEMP_DOC}" "${TEST_DOC}"
 
