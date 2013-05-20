@@ -210,19 +210,15 @@ public class InternalResourceTopicContent extends InternalResource {
     public static net.java.dev.webdav.jaxrs.xml.elements.Response getProperties(@NotNull final CompatibilityManager compatibilityManager,
             @NotNull final String remoteAddress, @NotNull final UriInfo uriInfo, @NotNull final Topic topic, final boolean local) {
 
-
         final Date lastModifiedDate = topic.getLastModifiedDate();
-        final Date lastModifiedDateFixed = lastModifiedDate == null ? new Date() : topic.getLastModifiedDate();
 
         final Date lastCreatedDate = compatibilityManager.lastCreatedDate(ResourceTypes.TOPIC_CONTENTS, remoteAddress, topic.getId(), lastModifiedDate);
         final Date lastCreatedDateFixed = lastCreatedDate == null ? new Date() : lastCreatedDate;
 
         final GetLastModified getLastModified = new GetLastModified(lastCreatedDateFixed);
 
-        final HRef hRef = local ? new HRef(uriInfo.getRequestUri()) : new HRef(
-                uriInfo.getRequestUriBuilder().path(topic.getId() + ".xml").build());
-        final FixedCreationDate creationDate = new FixedCreationDate(
-                topic.getTopicTimeStamp() == null ? new Date() : topic.getTopicTimeStamp());
+        final HRef hRef = local ? new HRef(uriInfo.getRequestUri()) : new HRef(uriInfo.getRequestUriBuilder().path(topic.getId() + ".xml").build());
+        final FixedCreationDate creationDate = new FixedCreationDate(topic.getTopicTimeStamp() == null ? new Date() : topic.getTopicTimeStamp());
         final GetContentType getContentType = new GetContentType(MediaType.APPLICATION_OCTET_STREAM);
         final GetContentLength getContentLength = new GetContentLength(topic.getTopicXML() == null ? 0 : topic.getTopicXML().length());
         final DisplayName displayName = new DisplayName(topic.getId() + ".xml");

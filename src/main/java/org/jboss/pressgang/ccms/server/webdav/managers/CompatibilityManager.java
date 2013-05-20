@@ -117,7 +117,7 @@ public class CompatibilityManager {
             return date.getTime();
         }
 
-        return null;
+        return lastModifiedDate;
     }
 
     /**
