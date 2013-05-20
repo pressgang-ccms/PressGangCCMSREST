@@ -10,7 +10,6 @@ import javax.validation.constraints.NotNull;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.UriInfo;
-import java.util.Calendar;
 import java.util.Date;
 
 import net.java.dev.webdav.jaxrs.xml.elements.HRef;
