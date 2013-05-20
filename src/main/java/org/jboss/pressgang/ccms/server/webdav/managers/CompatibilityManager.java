@@ -43,9 +43,15 @@ public class CompatibilityManager {
     final Cache<ResourceData, Calendar> createdResources = CacheBuilder.newBuilder()
             .expireAfterWrite(WebDavConstants.DELETE_WINDOW, TimeUnit.SECONDS)
             .build();
+    /**
+     * Used to identify resources that were marked as deleted.
+     */
     final Cache<ResourceData, Calendar> deletedResources = CacheBuilder.newBuilder()
             .expireAfterWrite(WebDavConstants.DELETE_WINDOW, TimeUnit.SECONDS)
             .build();
+    /**
+     * Used to return the unformatted contents of a file.
+     */
     final Cache<ResourceData, DataCache> databaseCache = CacheBuilder.newBuilder()
             .expireAfterWrite(WebDavConstants.DELETE_WINDOW, TimeUnit.SECONDS)
             .build();
