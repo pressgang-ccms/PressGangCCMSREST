@@ -53,7 +53,11 @@ rm "${TEST_DOC}"
 # create an empty file and wait for the creation to be propagated to the server
 touch "${TEST_DOC}"
 sleep ${UPLOAD_DELAY}
-sleep ${DOWNLOAD_DELAY}
+
+cat "${TEST_DOC}" > /dev/null
+sleep 2
+cat "${TEST_DOC}" > /dev/null
+sleep 2
 
 echo "    Diff the file"
 diff "${TEST_DOC}" "${TEMP_DOC}"
@@ -75,7 +79,11 @@ sleep ${UPLOAD_DELAY}
 # touching the file should clear the cache
 > "${TEST_DOC}"
 sleep ${UPLOAD_DELAY}
-sleep ${DOWNLOAD_DELAY}
+
+cat "${TEST_DOC}" > /dev/null
+sleep 2
+cat "${TEST_DOC}" > /dev/null
+sleep 2
 
 # the test doc should be formatted, while the temp doc will not be
 diff "${TEST_DOC}" "${TEMP_DOC}"
