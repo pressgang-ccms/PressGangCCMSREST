@@ -86,7 +86,7 @@ cat "${TEST_DOC}" > /dev/null
 sleep 2
 
 # the test doc should be formatted, while the temp doc will not be
-diff "${TEST_DOC}" "${TEMP_DOC}"
+diff "${TEST_DOC}" "${TEMP_DOC}" > /dev/null
 
 if [[ $? -eq 0 ]]
 then
@@ -94,7 +94,7 @@ then
 	read -n 1 -s
 fi
 
-diff "${TEST_DOC}" /tmp/empty
+diff "${TEST_DOC}" /tmp/empty > /dev/null
 
 if [[ $? -eq 0 ]]
 then
