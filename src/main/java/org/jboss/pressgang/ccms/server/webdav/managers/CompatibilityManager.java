@@ -100,9 +100,14 @@ public class CompatibilityManager {
 
         final ResourceData resourceData = new ResourceData(resourceType, remoteAddress, id);
         final boolean deletedDateExists = deletedResources.getIfPresent(resourceData) != null;
+        final boolean clearCacheRequired = databaseCache.getIfPresent(resourceData) != null;
 
         if (deletedDateExists) {
             deletedResources.invalidate(resourceData);
+        }
+
+        if (clearCacheRequired) {
+            databaseCache.invalidate(resourceData);
         }
     }
 

@@ -28,6 +28,8 @@ XML_FORMAT_LOCATION=/opt/xmlformat-1.04
 # start with a clean directory
 cd "${TEST_DIR}"
 find * -maxdepth 0 -name '3737.xml' -prune -o -exec rm -rf '{}' ';'
+echo '<!-- Clean Slate -->' > "${TEST_DOC}"
+sleep ${UPLOAD_DELAY}
 
 # touch test 1
 
@@ -66,6 +68,7 @@ fi
 echo Starting touch test 2
 echo '<section><title>test</title><para>hi</para></section>' > "${TEMP_DOC}"
 echo '<section><title>test</title><para>hi</para></section>' > "${TEST_DOC}"
+> /tmp/empty
 
 sleep ${UPLOAD_DELAY}
 
@@ -76,6 +79,14 @@ sleep ${DOWNLOAD_DELAY}
 
 # the test doc should be formatted, while the temp doc will not be
 diff "${TEST_DOC}" "${TEMP_DOC}"
+
+if [[ $? -eq 0 ]]
+then
+	echo "************ touch test 2 failed  ************"
+	read -n 1 -s
+fi
+
+diff "${TEST_DOC}" /tmp/empty
 
 if [[ $? -eq 0 ]]
 then
