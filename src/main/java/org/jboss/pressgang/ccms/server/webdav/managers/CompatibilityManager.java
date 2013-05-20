@@ -37,7 +37,12 @@ import org.jboss.pressgang.ccms.server.webdav.constants.WebDavConstants;
  */
 @ApplicationScoped
 public class CompatibilityManager {
-    final Map<ResourceData, Calendar> createdResources = new HashMap<ResourceData, Calendar>();
+    /**
+     * Used to override the last modified date for resources that were deleted and then created.
+     */
+    final Cache<ResourceData, Calendar> createdResources = CacheBuilder.newBuilder()
+            .expireAfterWrite(WebDavConstants.DELETE_WINDOW, TimeUnit.SECONDS)
+            .build();
     final Cache<ResourceData, Calendar> deletedResources = CacheBuilder.newBuilder()
             .expireAfterWrite(WebDavConstants.DELETE_WINDOW, TimeUnit.SECONDS)
             .build();
@@ -75,7 +80,7 @@ public class CompatibilityManager {
 
         /* The data and creation date caches are cleared */
         databaseCache.invalidate(resourceData);
-        createdResources.remove(resourceData);
+        createdResources.invalidate(resourceData);
     }
 
     /**
@@ -91,16 +96,15 @@ public class CompatibilityManager {
             @NotNull final Integer id, @Nullable final Date lastModifiedDate) {
 
         final ResourceData resourceData = new ResourceData(resourceType, remoteAddress, id);
+        final Calendar date = createdResources.getIfPresent(resourceData);
 
-        if (createdResources.containsKey(resourceData)) {
-            final Calendar date = createdResources.get(resourceData);
-
+        if (date != null) {
             /**
              * The file has been modified after it was recreated, so simply return the original
              * last modified date.
              */
             if (lastModifiedDate != null && date.before(lastModifiedDate)) {
-                createdResources.remove(resourceData);
+                createdResources.invalidate(resourceData);
                 return lastModifiedDate;
             }
 
