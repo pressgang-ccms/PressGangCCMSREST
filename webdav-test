@@ -551,6 +551,14 @@ echo '<article><title>test</title><para>Hello World</para></article>' > "${TEST_
 
 sleep ${UPLOAD_DELAY}
 
+diff "${TEMP_DOC}" "${TEST_DOC}"
+
+if [[ $? -ne 0 ]]
+then
+	echo "************ vi test 1 failed - source files not equal ************"
+	read -n 1 -s
+fi
+
 vi -E -s "${TEMP_DOC}" << EOF
    :%substitute/Hello/Hi/
    :update
