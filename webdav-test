@@ -546,19 +546,19 @@ fi
 
 # vi test 1
 echo Starting vi test 1
-echo '<article><title>test</title><para>hi</para></article>' > "${TEMP_DOC}"
-echo '<article><title>test</title><para>hi</para></article>' > "${TEST_DOC}"
+echo '<article><title>test</title><para>Hello World</para></article>' > "${TEMP_DOC}"
+echo '<article><title>test</title><para>Hello World</para></article>' > "${TEST_DOC}"
 
 sleep ${UPLOAD_DELAY}
 
 vi -E -s "${TEMP_DOC}" << EOF
-   :%substitute/hi/there/
+   :%substitute/Hello/Hi/
    :update
    :quit
 EOF
 
 vi -E -s "${TEST_DOC}" << EOF
-   :%substitute/hi/there/
+   :%substitute/Hello/Hi/
    :update
    :quit
 EOF
