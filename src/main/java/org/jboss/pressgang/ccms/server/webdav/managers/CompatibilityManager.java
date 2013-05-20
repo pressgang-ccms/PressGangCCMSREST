@@ -7,7 +7,11 @@ import java.util.Arrays;
 import java.util.Calendar;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.concurrent.TimeUnit;
 
+import com.google.common.cache.Cache;
+import com.google.common.cache.CacheBuilder;
+import com.google.common.cache.LoadingCache;
 import org.jboss.pressgang.ccms.server.webdav.constants.WebDavConstants;
 
 /**
@@ -38,7 +42,13 @@ import org.jboss.pressgang.ccms.server.webdav.constants.WebDavConstants;
 public class CompatibilityManager {
     final Map<ResourceData, Calendar> deletedResources = new HashMap<ResourceData, Calendar>();
     final Map<ResourceData, Calendar> createdResources = new HashMap<ResourceData, Calendar>();
-    final Map<ResourceData, DataCache> databaseCache = new HashMap<ResourceData, DataCache>();
+    final Cache<ResourceData, DataCache> databaseCache = CacheBuilder.newBuilder()
+            .expireAfterWrite(WebDavConstants.DELETE_WINDOW, TimeUnit.SECONDS)
+            .build();
+
+    public CompatibilityManager() {
+
+    }
 
     /**
      * @param resourceType      The type of resource
@@ -78,7 +88,7 @@ public class CompatibilityManager {
             @NotNull final Integer id) {
         final ResourceData resourceData = new ResourceData(resourceType, remoteAddress, id);
         deletedResources.put(resourceData, Calendar.getInstance());
-        databaseCache.remove(resourceData);
+        databaseCache.invalidate(resourceData);
     }
 
     /**
@@ -152,18 +162,18 @@ public class CompatibilityManager {
 
         final ResourceData resourceData = new ResourceData(resourceType, remoteAddress, id);
 
-        if (!databaseCache.containsKey(resourceData)) {
+        final DataCache dataCache = databaseCache.getIfPresent(resourceData);
+
+        if (dataCache == null) {
             return databaseData;
         }
-
-        final DataCache dataCache = databaseCache.get(resourceData);
 
         /*
             If the database data does not equal what was saved in response to the original data, clear the cache
             and return the database text.
          */
         if (!Arrays.equals(databaseData, dataCache.getDatabase())) {
-            databaseCache.remove(resourceData);
+            databaseCache.invalidate(resourceData);
             return databaseData;
         }
 
@@ -174,7 +184,7 @@ public class CompatibilityManager {
         window.add(Calendar.SECOND, -WebDavConstants.DELETE_WINDOW);
 
         if (dataCache.getTime().before(window)) {
-            databaseCache.remove(resourceData);
+            databaseCache.invalidate(resourceData);
             return databaseData;
         }
 
