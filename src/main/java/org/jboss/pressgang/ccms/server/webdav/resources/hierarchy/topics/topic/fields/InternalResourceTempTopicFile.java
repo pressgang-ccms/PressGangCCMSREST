@@ -28,7 +28,7 @@ import net.java.dev.webdav.jaxrs.xml.properties.SupportedLock;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.IOUtils;
 import org.jboss.pressgang.ccms.server.webdav.constants.WebDavConstants;
-import org.jboss.pressgang.ccms.server.webdav.managers.DeleteManager;
+import org.jboss.pressgang.ccms.server.webdav.managers.CompatibilityManager;
 import org.jboss.pressgang.ccms.server.webdav.resources.ByteArrayReturnValue;
 import org.jboss.pressgang.ccms.server.webdav.resources.InternalResource;
 import org.jboss.pressgang.ccms.server.webdav.resources.MultiStatusReturnValue;
@@ -41,9 +41,9 @@ import org.slf4j.LoggerFactory;
 public class InternalResourceTempTopicFile extends InternalResource {
     private static final Logger LOGGER = LoggerFactory.getLogger(InternalResourceTempTopicFile.class);
 
-    public InternalResourceTempTopicFile(@NotNull final UriInfo uriInfo, @NotNull final DeleteManager deleteManager,
+    public InternalResourceTempTopicFile(@NotNull final UriInfo uriInfo, @NotNull final CompatibilityManager compatibilityManager,
             @Nullable final String remoteAddress, @NotNull final String path) {
-        super(uriInfo, deleteManager, remoteAddress, path);
+        super(uriInfo, compatibilityManager, remoteAddress, path);
     }
 
     @Override

@@ -10,7 +10,6 @@ import javax.validation.constraints.NotNull;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.UriInfo;
-import java.util.Calendar;
 import java.util.Date;
 
 import net.java.dev.webdav.jaxrs.xml.elements.HRef;
@@ -29,7 +28,7 @@ import org.jboss.pressgang.ccms.docbook.constants.DocbookBuilderConstants;
 import org.jboss.pressgang.ccms.model.Topic;
 import org.jboss.pressgang.ccms.server.utils.JNDIUtilities;
 import org.jboss.pressgang.ccms.server.utils.TopicUtilities;
-import org.jboss.pressgang.ccms.server.webdav.managers.DeleteManager;
+import org.jboss.pressgang.ccms.server.webdav.managers.CompatibilityManager;
 import org.jboss.pressgang.ccms.server.webdav.managers.ResourceTypes;
 import org.jboss.pressgang.ccms.server.webdav.resources.ByteArrayReturnValue;
 import org.jboss.pressgang.ccms.server.webdav.resources.InternalResource;
@@ -43,9 +42,9 @@ import org.slf4j.LoggerFactory;
 public class InternalResourceTopicContent extends InternalResource {
     private static final Logger LOGGER = LoggerFactory.getLogger(InternalResourceTopicContent.class.getName());
 
-    public InternalResourceTopicContent(@NotNull final UriInfo uriInfo, @NotNull final DeleteManager deleteManager,
+    public InternalResourceTopicContent(@NotNull final UriInfo uriInfo, @NotNull final CompatibilityManager compatibilityManager,
             @NotNull final String remoteAddress, @NotNull final Integer intId) {
-        super(uriInfo, deleteManager, remoteAddress, intId);
+        super(uriInfo, compatibilityManager, remoteAddress, intId);
     }
 
     @Override
@@ -60,7 +59,7 @@ public class InternalResourceTopicContent extends InternalResource {
             If we are not actually saving any content, just mark the file as visible and return.
          */
         if (contents.length == 0) {
-            getDeleteManager().create(ResourceTypes.TOPIC_CONTENTS, getRemoteAddress(), getIntId());
+            getCompatibilityManager().create(ResourceTypes.TOPIC_CONTENTS, getRemoteAddress(), getIntId());
             return Response.Status.NO_CONTENT.getStatusCode();
         }
 
@@ -89,7 +88,8 @@ public class InternalResourceTopicContent extends InternalResource {
                 entityManager.flush();
                 transactionManager.commit();
 
-                getDeleteManager().create(ResourceTypes.TOPIC_CONTENTS, getRemoteAddress(), getIntId());
+                getCompatibilityManager().create(ResourceTypes.TOPIC_CONTENTS, getRemoteAddress(), getIntId());
+                getCompatibilityManager().put(ResourceTypes.TOPIC_CONTENTS, getRemoteAddress(), getIntId(), topic.getTopicXML().getBytes(), contents);
 
                 return Response.Status.NO_CONTENT.getStatusCode();
             }
@@ -117,7 +117,7 @@ public class InternalResourceTopicContent extends InternalResource {
     public ByteArrayReturnValue get() {
         LOGGER.debug("ENTER InternalResourceTopicContent.get() " + getIntId());
 
-        if (getDeleteManager().isDeleted(ResourceTypes.TOPIC_CONTENTS, getRemoteAddress(), getIntId())) {
+        if (getCompatibilityManager().isDeleted(ResourceTypes.TOPIC_CONTENTS, getRemoteAddress(), getIntId())) {
             LOGGER.debug("Deletion Manager says this file is deleted");
             return new ByteArrayReturnValue(Response.Status.NOT_FOUND.getStatusCode(), null);
         }
@@ -131,8 +131,11 @@ public class InternalResourceTopicContent extends InternalResource {
 
             final Topic topic = entityManager.find(Topic.class, getIntId());
 
+            /* get the data from the cache if it exists */
+            final byte[] retValue = getCompatibilityManager().get(ResourceTypes.TOPIC_CONTENTS, getRemoteAddress(), getIntId(), topic.getTopicXML().getBytes());
+
             if (topic != null) {
-                return new ByteArrayReturnValue(Response.Status.OK.getStatusCode(), topic.getTopicXML().getBytes());
+                return new ByteArrayReturnValue(Response.Status.OK.getStatusCode(), retValue);
             }
 
         } catch (final Exception ex) {
@@ -150,12 +153,12 @@ public class InternalResourceTopicContent extends InternalResource {
     public int delete() {
         LOGGER.debug("ENTER InternalResourceTopicContent.delete() " + getIntId() + " " + getRemoteAddress());
 
-        if (getDeleteManager().isDeleted(ResourceTypes.TOPIC_CONTENTS, getRemoteAddress(), getIntId())) {
+        if (getCompatibilityManager().isDeleted(ResourceTypes.TOPIC_CONTENTS, getRemoteAddress(), getIntId())) {
             LOGGER.debug("Deletion Manager says this file is already deleted");
             return Response.Status.NOT_FOUND.getStatusCode();
         }
 
-        getDeleteManager().delete(ResourceTypes.TOPIC_CONTENTS, getRemoteAddress(), getIntId());
+        getCompatibilityManager().delete(ResourceTypes.TOPIC_CONTENTS, getRemoteAddress(), getIntId());
 
         /* pretend to be deleted */
         return Response.Status.NO_CONTENT.getStatusCode();
@@ -177,7 +180,7 @@ public class InternalResourceTopicContent extends InternalResource {
             final Topic topic = entityManager.find(Topic.class, getIntId());
 
             if (topic != null) {
-                final net.java.dev.webdav.jaxrs.xml.elements.Response response = getProperties(getDeleteManager(), getRemoteAddress(),
+                final net.java.dev.webdav.jaxrs.xml.elements.Response response = getProperties(getCompatibilityManager(), getRemoteAddress(),
                         getUriInfo(), topic, true);
                 final MultiStatus st = new MultiStatus(response);
                 return new MultiStatusReturnValue(207, st);
@@ -203,19 +206,18 @@ public class InternalResourceTopicContent extends InternalResource {
      *                properties for a child resource.
      * @return
      */
-    public static net.java.dev.webdav.jaxrs.xml.elements.Response getProperties(@NotNull final DeleteManager deleteManager,
+    public static net.java.dev.webdav.jaxrs.xml.elements.Response getProperties(@NotNull final CompatibilityManager compatibilityManager,
             @NotNull final String remoteAddress, @NotNull final UriInfo uriInfo, @NotNull final Topic topic, final boolean local) {
 
-        final Calendar lastCreatedDate = deleteManager.lastCreatedDate(ResourceTypes.TOPIC_CONTENTS, remoteAddress, topic.getId());
-        final Calendar lastCreatedDateFixed = lastCreatedDate == null ? Calendar.getInstance() : lastCreatedDate;
-        final Date lastModifiedDate = topic.getLastModifiedDate() == null ? new Date() : topic.getLastModifiedDate();
-        final GetLastModified getLastModified = new GetLastModified(
-                lastCreatedDateFixed.after(lastModifiedDate) ? lastCreatedDateFixed.getTime() : lastModifiedDate);
+        final Date lastModifiedDate = topic.getLastModifiedDate();
 
-        final HRef hRef = local ? new HRef(uriInfo.getRequestUri()) : new HRef(
-                uriInfo.getRequestUriBuilder().path(topic.getId() + ".xml").build());
-        final FixedCreationDate creationDate = new FixedCreationDate(
-                topic.getTopicTimeStamp() == null ? new Date() : topic.getTopicTimeStamp());
+        final Date lastCreatedDate = compatibilityManager.lastCreatedDate(ResourceTypes.TOPIC_CONTENTS, remoteAddress, topic.getId(), lastModifiedDate);
+        final Date lastCreatedDateFixed = lastCreatedDate == null ? new Date() : lastCreatedDate;
+
+        final GetLastModified getLastModified = new GetLastModified(lastCreatedDateFixed);
+
+        final HRef hRef = local ? new HRef(uriInfo.getRequestUri()) : new HRef(uriInfo.getRequestUriBuilder().path(topic.getId() + ".xml").build());
+        final FixedCreationDate creationDate = new FixedCreationDate(topic.getTopicTimeStamp() == null ? new Date() : topic.getTopicTimeStamp());
         final GetContentType getContentType = new GetContentType(MediaType.APPLICATION_OCTET_STREAM);
         final GetContentLength getContentLength = new GetContentLength(topic.getTopicXML() == null ? 0 : topic.getTopicXML().length());
         final DisplayName displayName = new DisplayName(topic.getId() + ".xml");

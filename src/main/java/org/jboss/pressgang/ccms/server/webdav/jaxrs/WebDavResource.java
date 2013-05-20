@@ -49,7 +49,7 @@ import net.java.dev.webdav.jaxrs.methods.MOVE;
 import net.java.dev.webdav.jaxrs.methods.PROPFIND;
 import net.java.dev.webdav.jaxrs.methods.PROPPATCH;
 import org.jboss.pressgang.ccms.server.webdav.constants.WebDavConstants;
-import org.jboss.pressgang.ccms.server.webdav.managers.DeleteManager;
+import org.jboss.pressgang.ccms.server.webdav.managers.CompatibilityManager;
 import org.jboss.pressgang.ccms.server.webdav.resources.ByteArrayReturnValue;
 import org.jboss.pressgang.ccms.server.webdav.resources.InternalResource;
 import org.jboss.pressgang.ccms.server.webdav.utils.WebDavUtils;
@@ -68,13 +68,13 @@ public class WebDavResource {
     private static final Logger LOGGER = LoggerFactory.getLogger(WebDavResource.class.getName());
 
     @Inject
-    protected DeleteManager deleteManager;
+    protected CompatibilityManager compatibilityManager;
 
     @GET
     @Produces(MediaType.APPLICATION_OCTET_STREAM)
     public javax.ws.rs.core.Response get(@Context final UriInfo uriInfo, @Context final HttpServletRequest req,
             @HeaderParam(WebDavConstants.X_FORWARD_FOR_HEADER) final String xForwardForHeader) {
-        final ByteArrayReturnValue stringValueReturn = InternalResource.get(deleteManager,
+        final ByteArrayReturnValue stringValueReturn = InternalResource.get(compatibilityManager,
                 WebDavUtils.getRemoteAddress(req, xForwardForHeader), uriInfo);
         if (stringValueReturn.getStatusCode() != javax.ws.rs.core.Response.Status.OK.getStatusCode()) {
             return javax.ws.rs.core.Response.status(stringValueReturn.getStatusCode()).build();
@@ -88,7 +88,7 @@ public class WebDavResource {
     public javax.ws.rs.core.Response put(@Context final UriInfo uriInfo, @Context final HttpServletRequest req,
             @HeaderParam(WebDavConstants.X_FORWARD_FOR_HEADER) final String xForwardForHeader,
             final InputStream entityStream) throws IOException, URISyntaxException {
-        return InternalResource.put(deleteManager, WebDavUtils.getRemoteAddress(req, xForwardForHeader), uriInfo, entityStream);
+        return InternalResource.put(compatibilityManager, WebDavUtils.getRemoteAddress(req, xForwardForHeader), uriInfo, entityStream);
     }
 
     @MKCOL
@@ -103,7 +103,7 @@ public class WebDavResource {
             @HeaderParam(WebDavConstants.X_FORWARD_FOR_HEADER) final String xForwardForHeader,
             @HeaderParam(DEPTH) final int depth) throws URISyntaxException, IOException {
         LOGGER.debug("ENTER WebDavResource.propfind()");
-        return InternalResource.propfind(deleteManager, WebDavUtils.getRemoteAddress(req, xForwardForHeader), uriInfo, depth);
+        return InternalResource.propfind(compatibilityManager, WebDavUtils.getRemoteAddress(req, xForwardForHeader), uriInfo, depth);
     }
 
     @PROPPATCH
@@ -118,7 +118,7 @@ public class WebDavResource {
     public javax.ws.rs.core.Response copy(@Context final UriInfo uriInfo, @Context final HttpServletRequest req,
             @HeaderParam(WebDavConstants.X_FORWARD_FOR_HEADER) final String xForwardForHeader,
             @HeaderParam(OVERWRITE) final String overwriteStr, @HeaderParam(DESTINATION) final String destination) {
-        return InternalResource.copy(deleteManager, WebDavUtils.getRemoteAddress(req, xForwardForHeader), uriInfo, overwriteStr,
+        return InternalResource.copy(compatibilityManager, WebDavUtils.getRemoteAddress(req, xForwardForHeader), uriInfo, overwriteStr,
                 destination);
     }
 
@@ -137,14 +137,14 @@ public class WebDavResource {
             @HeaderParam(WebDavConstants.X_FORWARD_FOR_HEADER) final String xForwardForHeader,
             @HeaderParam(OVERWRITE) final String overwriteStr,
             @HeaderParam(DESTINATION) final String destination) throws URISyntaxException {
-        return InternalResource.move(deleteManager, WebDavUtils.getRemoteAddress(req, xForwardForHeader), uriInfo, overwriteStr,
+        return InternalResource.move(compatibilityManager, WebDavUtils.getRemoteAddress(req, xForwardForHeader), uriInfo, overwriteStr,
                 destination);
     }
 
     @DELETE
     public javax.ws.rs.core.Response delete(@Context final UriInfo uriInfo,
             @HeaderParam(WebDavConstants.X_FORWARD_FOR_HEADER) final String xForwardForHeader, @Context final HttpServletRequest req) {
-        return InternalResource.delete(deleteManager, WebDavUtils.getRemoteAddress(req, xForwardForHeader), uriInfo);
+        return InternalResource.delete(compatibilityManager, WebDavUtils.getRemoteAddress(req, xForwardForHeader), uriInfo);
     }
 
     @OPTIONS

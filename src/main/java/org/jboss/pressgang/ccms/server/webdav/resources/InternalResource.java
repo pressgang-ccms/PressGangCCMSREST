@@ -20,7 +20,7 @@ import net.java.dev.webdav.jaxrs.xml.elements.Prop;
 import net.java.dev.webdav.jaxrs.xml.elements.PropStat;
 import net.java.dev.webdav.jaxrs.xml.elements.Status;
 import org.apache.commons.io.IOUtils;
-import org.jboss.pressgang.ccms.server.webdav.managers.DeleteManager;
+import org.jboss.pressgang.ccms.server.webdav.managers.CompatibilityManager;
 import org.jboss.pressgang.ccms.server.webdav.resources.hierarchy.InternalResourceRoot;
 import org.jboss.pressgang.ccms.server.webdav.resources.hierarchy.topics.InternalResourceTopicVirtualFolder;
 import org.jboss.pressgang.ccms.server.webdav.resources.hierarchy.topics.topic.InternalResourceTopic;
@@ -93,24 +93,24 @@ public abstract class InternalResource {
     /**
      * The manager responsible for determining if a resource is deleted or not
      */
-    @NotNull private final DeleteManager deleteManager;
+    @NotNull private final CompatibilityManager compatibilityManager;
 
-    protected InternalResource(@Nullable final UriInfo uriInfo, @NotNull final DeleteManager deleteManager,
+    protected InternalResource(@Nullable final UriInfo uriInfo, @NotNull final CompatibilityManager compatibilityManager,
             @NotNull final String remoteAddress, @NotNull final Integer intId) {
         this.intId = intId;
         this.stringId = null;
         this.uriInfo = uriInfo;
         this.remoteAddress = remoteAddress;
-        this.deleteManager = deleteManager;
+        this.compatibilityManager = compatibilityManager;
     }
 
-    protected InternalResource(@Nullable final UriInfo uriInfo, @NotNull final DeleteManager deleteManager,
+    protected InternalResource(@Nullable final UriInfo uriInfo, @NotNull final CompatibilityManager compatibilityManager,
             @NotNull final String remoteAddress, @NotNull final String stringId) {
         this.intId = null;
         this.stringId = stringId;
         this.uriInfo = uriInfo;
         this.remoteAddress = remoteAddress;
-        this.deleteManager = deleteManager;
+        this.compatibilityManager = compatibilityManager;
     }
 
     public int write(@NotNull final byte[] contents) {
@@ -129,11 +129,11 @@ public abstract class InternalResource {
         throw new UnsupportedOperationException();
     }
 
-    public static javax.ws.rs.core.Response propfind(@NotNull final DeleteManager deleteManager, @NotNull final String remoteAddress,
+    public static javax.ws.rs.core.Response propfind(@NotNull final CompatibilityManager compatibilityManager, @NotNull final String remoteAddress,
             @NotNull final UriInfo uriInfo, final int depth) {
         LOGGER.debug("ENTER InternalResource.propfind() " + uriInfo.getPath() + " " + depth + " " + remoteAddress);
 
-        final InternalResource sourceResource = InternalResource.getInternalResource(uriInfo, deleteManager, remoteAddress,
+        final InternalResource sourceResource = InternalResource.getInternalResource(uriInfo, compatibilityManager, remoteAddress,
                 uriInfo.getPath());
 
         if (sourceResource != null) {
@@ -149,7 +149,7 @@ public abstract class InternalResource {
         return javax.ws.rs.core.Response.status(javax.ws.rs.core.Response.Status.NOT_FOUND).build();
     }
 
-    public static javax.ws.rs.core.Response copy(@NotNull final DeleteManager deleteManager, @NotNull final String remoteAddress,
+    public static javax.ws.rs.core.Response copy(@NotNull final CompatibilityManager compatibilityManager, @NotNull final String remoteAddress,
             @NotNull final UriInfo uriInfo, @NotNull final String overwriteStr, @NotNull final String destination) {
         LOGGER.debug("ENTER InternalResource.copy() " + uriInfo.getPath() + " " + destination + " " + remoteAddress);
 
@@ -157,9 +157,9 @@ public abstract class InternalResource {
             final HRef destHRef = new HRef(destination);
             final URI destUriInfo = destHRef.getURI();
 
-            final InternalResource destinationResource = InternalResource.getInternalResource(null, deleteManager, remoteAddress,
+            final InternalResource destinationResource = InternalResource.getInternalResource(null, compatibilityManager, remoteAddress,
                     destUriInfo.getPath());
-            final InternalResource sourceResource = InternalResource.getInternalResource(uriInfo, deleteManager, remoteAddress,
+            final InternalResource sourceResource = InternalResource.getInternalResource(uriInfo, compatibilityManager, remoteAddress,
                     uriInfo.getPath());
 
             if (destinationResource != null && sourceResource != null) {
@@ -185,7 +185,7 @@ public abstract class InternalResource {
         return javax.ws.rs.core.Response.status(javax.ws.rs.core.Response.Status.NOT_FOUND).build();
     }
 
-    public static javax.ws.rs.core.Response move(@NotNull final DeleteManager deleteManager, @NotNull final String remoteAddress,
+    public static javax.ws.rs.core.Response move(@NotNull final CompatibilityManager compatibilityManager, @NotNull final String remoteAddress,
             @NotNull final UriInfo uriInfo, @NotNull final String overwriteStr, @NotNull final String destination) {
         LOGGER.debug("ENTER InternalResource.move() " + uriInfo.getPath() + " " + destination + " " + remoteAddress);
 
@@ -194,9 +194,9 @@ public abstract class InternalResource {
             return javax.ws.rs.core.Response.status(Response.Status.NOT_FOUND).build();
         }
 
-        final InternalResource destinationResource = InternalResource.getInternalResource(null, deleteManager, remoteAddress,
+        final InternalResource destinationResource = InternalResource.getInternalResource(null, compatibilityManager, remoteAddress,
                 "/" + destination.replaceFirst(uriInfo.getBaseUri().toString(), ""));
-        final InternalResource sourceResource = InternalResource.getInternalResource(uriInfo, deleteManager, remoteAddress,
+        final InternalResource sourceResource = InternalResource.getInternalResource(uriInfo, compatibilityManager, remoteAddress,
                 uriInfo.getPath());
 
         if (destinationResource != null && sourceResource != null) {
@@ -222,11 +222,11 @@ public abstract class InternalResource {
         return javax.ws.rs.core.Response.status(javax.ws.rs.core.Response.Status.NOT_FOUND).build();
     }
 
-    public static javax.ws.rs.core.Response delete(@NotNull final DeleteManager deleteManager, @NotNull final String remoteAddress,
+    public static javax.ws.rs.core.Response delete(@NotNull final CompatibilityManager compatibilityManager, @NotNull final String remoteAddress,
             @NotNull final UriInfo uriInfo) {
         LOGGER.debug("ENTER InternalResource.delete() " + uriInfo.getPath() + " " + remoteAddress);
 
-        final InternalResource sourceResource = InternalResource.getInternalResource(uriInfo, deleteManager, remoteAddress,
+        final InternalResource sourceResource = InternalResource.getInternalResource(uriInfo, compatibilityManager, remoteAddress,
                 uriInfo.getPath());
 
         if (sourceResource != null) {
@@ -236,11 +236,11 @@ public abstract class InternalResource {
         return javax.ws.rs.core.Response.status(javax.ws.rs.core.Response.Status.NOT_FOUND).build();
     }
 
-    public static ByteArrayReturnValue get(@NotNull final DeleteManager deleteManager, @NotNull final String remoteAddress,
+    public static ByteArrayReturnValue get(@NotNull final CompatibilityManager compatibilityManager, @NotNull final String remoteAddress,
             @NotNull final UriInfo uriInfo) {
         LOGGER.debug("ENTER InternalResource.get() " + uriInfo.getPath() + " " + remoteAddress);
 
-        final InternalResource sourceResource = InternalResource.getInternalResource(uriInfo, deleteManager, remoteAddress,
+        final InternalResource sourceResource = InternalResource.getInternalResource(uriInfo, compatibilityManager, remoteAddress,
                 uriInfo.getPath());
 
         if (sourceResource != null) {
@@ -255,12 +255,12 @@ public abstract class InternalResource {
         return new ByteArrayReturnValue(javax.ws.rs.core.Response.Status.NOT_FOUND.getStatusCode(), null);
     }
 
-    public static javax.ws.rs.core.Response put(@NotNull final DeleteManager deleteManager, @NotNull final String remoteAddress,
+    public static javax.ws.rs.core.Response put(@NotNull final CompatibilityManager compatibilityManager, @NotNull final String remoteAddress,
             @NotNull final UriInfo uriInfo, @NotNull final InputStream entityStream) {
         LOGGER.debug("ENTER InternalResource.put() " + uriInfo.getPath() + " " + remoteAddress);
 
         try {
-            final InternalResource sourceResource = InternalResource.getInternalResource(uriInfo, deleteManager, remoteAddress,
+            final InternalResource sourceResource = InternalResource.getInternalResource(uriInfo, compatibilityManager, remoteAddress,
                     uriInfo.getPath());
 
             if (sourceResource != null) {
@@ -284,7 +284,7 @@ public abstract class InternalResource {
      * @param uri The request URI
      * @return The object to handle the response, or null if the URL is invalid.
      */
-    public static InternalResource getInternalResource(@Nullable final UriInfo uri, @NotNull final DeleteManager deleteManager,
+    public static InternalResource getInternalResource(@Nullable final UriInfo uri, @NotNull final CompatibilityManager compatibilityManager,
             @NotNull final String remoteAddress, @NotNull final String requestPath) {
         LOGGER.debug("ENTER InternalResource.getInternalResource() " + requestPath);
 
@@ -298,31 +298,31 @@ public abstract class InternalResource {
         final Matcher topicContents = TOPIC_CONTENTS_RE.matcher(requestPath);
         if (topicContents.matches()) {
             LOGGER.debug("Matched InternalResourceTopicContent");
-            return new InternalResourceTopicContent(uri, deleteManager, remoteAddress, Integer.parseInt(topicContents.group("TopicID")));
+            return new InternalResourceTopicContent(uri, compatibilityManager, remoteAddress, Integer.parseInt(topicContents.group("TopicID")));
         }
 
         final Matcher topicFolder = TOPIC_FOLDER_RE.matcher(requestPath);
         if (topicFolder.matches()) {
             LOGGER.debug("Matched InternalResourceTopicVirtualFolder");
-            return new InternalResourceTopicVirtualFolder(uri, deleteManager, remoteAddress, requestPath);
+            return new InternalResourceTopicVirtualFolder(uri, compatibilityManager, remoteAddress, requestPath);
         }
 
         final Matcher rootFolder = ROOT_FOLDER_RE.matcher(requestPath);
         if (rootFolder.matches()) {
             LOGGER.debug("Matched InternalResourceRoot");
-            return new InternalResourceRoot(uri, deleteManager, remoteAddress, requestPath);
+            return new InternalResourceRoot(uri, compatibilityManager, remoteAddress, requestPath);
         }
 
         final Matcher topic = TOPIC_RE.matcher(requestPath);
         if (topic.matches()) {
             LOGGER.debug("Matched InternalResourceTopic");
-            return new InternalResourceTopic(uri, deleteManager, remoteAddress, Integer.parseInt(topic.group("TopicID")));
+            return new InternalResourceTopic(uri, compatibilityManager, remoteAddress, Integer.parseInt(topic.group("TopicID")));
         }
 
         final Matcher topicTemp = TOPIC_TEMP_FILE_RE.matcher(requestPath);
         if (topicTemp.matches()) {
             LOGGER.debug("Matched InternalResourceTempTopicFile");
-            return new InternalResourceTempTopicFile(uri, deleteManager, remoteAddress, requestPath);
+            return new InternalResourceTempTopicFile(uri, compatibilityManager, remoteAddress, requestPath);
         }
 
         LOGGER.debug("None matched");
@@ -418,7 +418,7 @@ public abstract class InternalResource {
     }
 
     @NotNull
-    public DeleteManager getDeleteManager() {
-        return deleteManager;
+    public CompatibilityManager getCompatibilityManager() {
+        return compatibilityManager;
     }
 }

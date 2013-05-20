@@ -16,7 +16,7 @@ import org.jboss.pressgang.ccms.model.Topic;
 import org.jboss.pressgang.ccms.server.utils.EnversUtilities;
 import org.jboss.pressgang.ccms.server.utils.JNDIUtilities;
 import org.jboss.pressgang.ccms.server.webdav.constants.WebDavConstants;
-import org.jboss.pressgang.ccms.server.webdav.managers.DeleteManager;
+import org.jboss.pressgang.ccms.server.webdav.managers.CompatibilityManager;
 import org.jboss.pressgang.ccms.server.webdav.managers.ResourceTypes;
 import org.jboss.pressgang.ccms.server.webdav.resources.InternalResource;
 import org.jboss.pressgang.ccms.server.webdav.resources.MultiStatusReturnValue;
@@ -27,9 +27,9 @@ import org.jboss.pressgang.ccms.server.webdav.resources.hierarchy.topics.topic.f
  * Represents the available fields and temporary files associated with a topic.
  */
 public class InternalResourceTopic extends InternalResource {
-    public InternalResourceTopic(@NotNull final UriInfo uriInfo, @NotNull final DeleteManager deleteManager,
+    public InternalResourceTopic(@NotNull final UriInfo uriInfo, @NotNull final CompatibilityManager compatibilityManager,
             @Nullable final String remoteAddress, @NotNull final Integer intId) {
-        super(uriInfo, deleteManager, remoteAddress, intId);
+        super(uriInfo, compatibilityManager, remoteAddress, intId);
     }
 
     @Override
@@ -64,9 +64,9 @@ public class InternalResourceTopic extends InternalResource {
                     topic.setLastModifiedDate(EnversUtilities.getFixedLastModifiedDate(entityManager, topic));
 
                     /* Don't list the contents if it is "deleted" */
-                    if (!getDeleteManager().isDeleted(ResourceTypes.TOPIC_CONTENTS, getRemoteAddress(), topic.getId())) {
+                    if (!getCompatibilityManager().isDeleted(ResourceTypes.TOPIC_CONTENTS, getRemoteAddress(), topic.getId())) {
                         responses.add(
-                                InternalResourceTopicContent.getProperties(getDeleteManager(), getRemoteAddress(), getUriInfo(), topic,
+                                InternalResourceTopicContent.getProperties(getCompatibilityManager(), getRemoteAddress(), getUriInfo(), topic,
                                         false));
                     }
                 }
