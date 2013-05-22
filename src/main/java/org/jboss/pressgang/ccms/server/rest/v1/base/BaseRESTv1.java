@@ -71,6 +71,7 @@ import org.jboss.pressgang.ccms.server.rest.v1.ContentSpecV1Factory;
 import org.jboss.pressgang.ccms.server.utils.Constants;
 import org.jboss.pressgang.ccms.server.utils.EntityUtilities;
 import org.jboss.pressgang.ccms.server.utils.JNDIUtilities;
+import org.jboss.pressgang.ccms.server.utils.ProviderUtilities;
 import org.jboss.resteasy.plugins.providers.atom.Content;
 import org.jboss.resteasy.plugins.providers.atom.Entry;
 import org.jboss.resteasy.plugins.providers.atom.Feed;
@@ -1101,7 +1102,8 @@ public class BaseRESTv1 {
             // Store the log details into the Logging Java Bean
             setLogDetails(entityManager, logDetails);
 
-            final DBProviderFactory providerFactory = DBProviderFactory.create(entityManager, transactionManager);
+            final DBProviderFactory providerFactory = ProviderUtilities.getDBProviderFactory(entityManager, transactionManager,
+                    enversLoggingBean);
             final ProcessingOptions processingOptions = new ProcessingOptions();
 
             final ContentSpecParser parser = new ContentSpecParser(providerFactory, loggerManager);

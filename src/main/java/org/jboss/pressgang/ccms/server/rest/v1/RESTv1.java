@@ -121,6 +121,7 @@ import org.jboss.pressgang.ccms.rest.v1.jaxrsinterfaces.RESTBaseInterfaceV1;
 import org.jboss.pressgang.ccms.rest.v1.jaxrsinterfaces.RESTInterfaceAdvancedV1;
 import org.jboss.pressgang.ccms.server.rest.v1.base.BaseRESTv1;
 import org.jboss.pressgang.ccms.server.utils.ContentSpecUtilities;
+import org.jboss.pressgang.ccms.server.utils.ProviderUtilities;
 import org.jboss.pressgang.ccms.server.utils.TopicUtilities;
 import org.jboss.pressgang.ccms.utils.common.CollectionUtilities;
 import org.jboss.pressgang.ccms.utils.common.DocBookUtilities;
@@ -3852,7 +3853,7 @@ public class RESTv1 extends BaseRESTv1 implements RESTBaseInterfaceV1, RESTInter
         final EntityManager entityManager = getEntityManager();
         response.getOutputHeaders().putSingle("Content-Disposition", "filename=ContentSpecs.zip");
 
-        final DBProviderFactory providerFactory = DBProviderFactory.create(entityManager);
+        final DBProviderFactory providerFactory = ProviderUtilities.getDBProviderFactory(entityManager);
         final CollectionWrapper<ContentSpecWrapper> contentSpecs = providerFactory.getProvider(
                 ContentSpecProvider.class).getContentSpecsWithQuery(query.toString());
         final CSTransformer transformer = new CSTransformer();

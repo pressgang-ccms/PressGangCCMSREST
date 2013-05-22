@@ -14,7 +14,7 @@ public class ContentSpecUtilities {
     }
 
     public static String getContentSpecText(final Integer id, final Integer revision, final EntityManager entityManager) {
-        final DBProviderFactory providerFactory = DBProviderFactory.create(entityManager);
+        final DBProviderFactory providerFactory = ProviderUtilities.getDBProviderFactory(entityManager);
         final ContentSpecWrapper entity;
         if (revision == null) {
             entity = providerFactory.getProvider(ContentSpecProvider.class).getContentSpec(id);
