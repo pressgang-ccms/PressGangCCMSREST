@@ -19,7 +19,7 @@
         <jbossasplugin.version>7.1.1.Final</jbossasplugin.version>
         <jackson.version>1.9.8</jackson.version>
         <xalan.version>2.7.1</xalan.version>
-        <xerces.version>2.9.1</xerces.version>
+        <xerces.version>2.11.0</xerces.version>
         <resteasy.version>2.3.2.Final</resteasy.version>
         <log4j.version>1.2.16</log4j.version>
         <slf4j.version>1.6.4</slf4j.version>
