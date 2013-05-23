@@ -259,11 +259,11 @@
         </dependency>
 
         <!-- WebDAV for JAX-RS -->
-        <dependency>
+        <!--<dependency>
             <groupId>net.java.dev.webdav</groupId>
             <artifactId>webdav-interop</artifactId>
             <version>[1.2.1,1.3)</version>
-        </dependency>
+        </dependency> -->
 
         <!-- Apache -->
         <dependency>
