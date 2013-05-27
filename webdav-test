@@ -54,6 +54,9 @@ rm "${TEST_DOC}"
 touch "${TEST_DOC}"
 sleep ${UPLOAD_DELAY}
 
+# I don't know why this works, but it does. Two reads with two second delays between will
+# cause the local cache to sync.
+
 cat "${TEST_DOC}" > /dev/null
 sleep 2
 cat "${TEST_DOC}" > /dev/null
@@ -86,7 +89,7 @@ cat "${TEST_DOC}" > /dev/null
 sleep 2
 
 # the test doc should be formatted, while the temp doc will not be
-diff "${TEST_DOC}" "${TEMP_DOC}"
+diff "${TEST_DOC}" "${TEMP_DOC}" > /dev/null
 
 if [[ $? -eq 0 ]]
 then
@@ -94,7 +97,7 @@ then
 	read -n 1 -s
 fi
 
-diff "${TEST_DOC}" /tmp/empty
+diff "${TEST_DOC}" /tmp/empty > /dev/null
 
 if [[ $? -eq 0 ]]
 then
@@ -511,6 +514,8 @@ fi
 echo Starting python test 1
 echo 'print "Hello WebDAV"' > "${TEMP_DOC}"
 echo 'print "Hello WebDAV"' > "${TEST_DOC}"
+sleep ${UPLOAD_DELAY}
+
 python "${TEMP_DOC}" > /tmp/python1.tmp
 python "${TEST_DOC}" > /tmp/python2.tmp
 diff /tmp/python1.tmp /tmp/python2.tmp
@@ -541,22 +546,32 @@ fi
 
 # vi test 1
 echo Starting vi test 1
-echo '<article><title>test</title><para>hi</para></article>' > "${TEMP_DOC}"
-echo '<article><title>test</title><para>hi</para></article>' > "${TEST_DOC}"
+echo '<article><title>test</title><para>Hello World</para></article>' > "${TEMP_DOC}"
+echo '<article><title>test</title><para>Hello World</para></article>' > "${TEST_DOC}"
 
 sleep ${UPLOAD_DELAY}
 
+diff "${TEMP_DOC}" "${TEST_DOC}"
+
+if [[ $? -ne 0 ]]
+then
+	echo "************ vi test 1 failed - source files not equal ************"
+	read -n 1 -s
+fi
+
 vi -E -s "${TEMP_DOC}" << EOF
-   :%substitute/hi/there/
+   :%substitute/Hello/Hi/
    :update
    :quit
 EOF
 
 vi -E -s "${TEST_DOC}" << EOF
-   :%substitute/hi/there/
+   :%substitute/Hello/Hi/
    :update
    :quit
 EOF
+
+sleep ${UPLOAD_DELAY}
 
 diff "${TEMP_DOC}" "${TEST_DOC}"
 
@@ -636,6 +651,8 @@ sleep ${UPLOAD_DELAY}
 
 ${XML_FORMAT_LOCATION}/xmlformat.pl -i "${TEMP_DOC}" 
 ${XML_FORMAT_LOCATION}/xmlformat.pl -i "${TEST_DOC}" 
+
+sleep ${UPLOAD_DELAY}
 
 diff "${TEMP_DOC}" "${TEST_DOC}"
 
