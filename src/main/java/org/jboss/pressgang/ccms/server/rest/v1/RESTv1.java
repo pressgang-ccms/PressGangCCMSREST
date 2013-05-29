@@ -1,16 +1,11 @@
 package org.jboss.pressgang.ccms.server.rest.v1;
 
 import javax.persistence.EntityManager;
-import javax.ws.rs.HeaderParam;
-import javax.ws.rs.OPTIONS;
 import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
 import javax.ws.rs.core.Context;
 import javax.ws.rs.core.PathSegment;
 import javax.ws.rs.core.Response;
-import javax.ws.rs.core.Response.ResponseBuilder;
-import javax.ws.rs.ext.Provider;
-import java.io.IOException;
 import java.util.List;
 import java.util.Set;
 
@@ -96,65 +91,26 @@ import org.jboss.pressgang.ccms.rest.v1.expansion.ExpandDataTrunk;
 import org.jboss.pressgang.ccms.rest.v1.jaxrsinterfaces.RESTBaseInterfaceV1;
 import org.jboss.pressgang.ccms.rest.v1.jaxrsinterfaces.RESTInterfaceAdvancedV1;
 import org.jboss.pressgang.ccms.server.rest.v1.base.BaseRESTv1;
+import org.jboss.pressgang.ccms.server.utils.Constants;
 import org.jboss.pressgang.ccms.server.utils.TopicUtilities;
 import org.jboss.pressgang.ccms.utils.common.CollectionUtilities;
 import org.jboss.pressgang.ccms.utils.common.DocBookUtilities;
 import org.jboss.pressgang.ccms.utils.constants.CommonConstants;
-import org.jboss.resteasy.annotations.interception.ServerInterceptor;
 import org.jboss.resteasy.plugins.providers.atom.Feed;
 import org.jboss.resteasy.spi.BadRequestException;
 import org.jboss.resteasy.spi.HttpResponse;
 import org.jboss.resteasy.spi.InternalServerErrorException;
-import org.jboss.resteasy.spi.interception.MessageBodyWriterContext;
-import org.jboss.resteasy.spi.interception.MessageBodyWriterInterceptor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
- * The Skynet REST interface implementation
+ * The PressGang REST interface implementation
  */
-@Provider
-@ServerInterceptor
-@Path("/rest/1")
-public class RESTv1 extends BaseRESTv1 implements RESTBaseInterfaceV1, RESTInterfaceAdvancedV1, MessageBodyWriterInterceptor {
+@Path(Constants.BASE_REST_PATH + "/1")
+public class RESTv1 extends BaseRESTv1 implements RESTBaseInterfaceV1, RESTInterfaceAdvancedV1 {
     private static final Logger log = LoggerFactory.getLogger(RESTv1.class);
 
     @Context HttpResponse response;
-
-    /**
-     * This method is used to allow all remote clients to access the REST interface via CORS.
-     */
-    @Override
-    public void write(final MessageBodyWriterContext context) throws IOException {
-        /* allow all origins for simple CORS requests */
-        context.getHeaders().add(RESTBaseInterfaceV1.ACCESS_CONTROL_ALLOW_ORIGIN_HEADER, "*");
-        context.proceed();
-    }
-
-    /**
-     * This method will match any preflight CORS request, and can be used as a central location to manage cross origin requests.
-     * <p/>
-     * Since the browser restrictions on cross site requests are a very insecure way to prevent cross site access (you can just
-     * setup a proxy), this method simply accepts all CORS requests.
-     *
-     * @param requestMethod  The Access-Control-Request-Method header
-     * @param requestHeaders The Access-Control-Request-Headers header
-     * @return A HTTP response that indicates that all CORS requests are valid.
-     */
-    @OPTIONS
-    @Path("/{path:.*}")
-    public Response handleCORSRequest(@HeaderParam(RESTBaseInterfaceV1.ACCESS_CONTROL_REQUEST_METHOD) final String requestMethod,
-            @HeaderParam(RESTBaseInterfaceV1.ACCESS_CONTROL_REQUEST_HEADERS) final String requestHeaders) {
-        final ResponseBuilder retValue = Response.ok();
-
-        if (requestHeaders != null) retValue.header(RESTBaseInterfaceV1.ACCESS_CONTROL_ALLOW_HEADERS, requestHeaders);
-
-        if (requestMethod != null) retValue.header(RESTBaseInterfaceV1.ACCESS_CONTROL_ALLOW_METHODS, requestMethod);
-
-        retValue.header(RESTBaseInterfaceV1.ACCESS_CONTROL_ALLOW_ORIGIN_HEADER, "*");
-
-        return retValue.build();
-    }
 
     /* SYSTEM FUNCTIONS */
     @Override

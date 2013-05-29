@@ -17,10 +17,8 @@ import javax.transaction.TransactionManager;
 import javax.validation.ConstraintViolation;
 import javax.validation.ConstraintViolationException;
 import javax.validation.ValidationException;
-import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.MultivaluedMap;
-import javax.ws.rs.core.UriInfo;
 import java.io.IOException;
 import java.net.URI;
 import java.sql.BatchUpdateException;
@@ -43,7 +41,6 @@ import org.jboss.pressgang.ccms.model.Filter;
 import org.jboss.pressgang.ccms.model.User;
 import org.jboss.pressgang.ccms.model.base.AuditedEntity;
 import org.jboss.pressgang.ccms.model.exceptions.CustomConstraintViolationException;
-import org.jboss.pressgang.ccms.model.utils.EnversUtilities;
 import org.jboss.pressgang.ccms.rest.v1.collections.RESTTopicCollectionV1;
 import org.jboss.pressgang.ccms.rest.v1.collections.base.RESTBaseCollectionItemV1;
 import org.jboss.pressgang.ccms.rest.v1.collections.base.RESTBaseCollectionV1;
@@ -55,8 +52,8 @@ import org.jboss.pressgang.ccms.rest.v1.entities.base.RESTBaseEntityV1;
 import org.jboss.pressgang.ccms.rest.v1.entities.base.RESTLogDetailsV1;
 import org.jboss.pressgang.ccms.rest.v1.expansion.ExpandDataTrunk;
 import org.jboss.pressgang.ccms.server.ejb.EnversLoggingBean;
+import org.jboss.pressgang.ccms.server.rest.BaseREST;
 import org.jboss.pressgang.ccms.server.rest.DatabaseOperation;
-import org.jboss.pressgang.ccms.server.utils.Constants;
 import org.jboss.pressgang.ccms.server.utils.EntityUtilities;
 import org.jboss.pressgang.ccms.server.utils.JNDIUtilities;
 import org.jboss.resteasy.plugins.providers.atom.Content;
@@ -65,8 +62,6 @@ import org.jboss.resteasy.plugins.providers.atom.Feed;
 import org.jboss.resteasy.spi.BadRequestException;
 import org.jboss.resteasy.spi.Failure;
 import org.jboss.resteasy.spi.InternalServerErrorException;
-import org.jboss.resteasy.spi.NotFoundException;
-import org.jboss.resteasy.spi.UnauthorizedException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -75,7 +70,7 @@ import org.slf4j.LoggerFactory;
  * extend BaseRESTv1 to provide expose REST functions.
  */
 @RequestScoped
-public class BaseRESTv1 {
+public class BaseRESTv1 extends BaseREST {
     private static final Logger log = LoggerFactory.getLogger(BaseRESTv1.class);
     /**
      * The format for dates passed and returned by the REST Interface
@@ -87,11 +82,6 @@ public class BaseRESTv1 {
      */
     private final ObjectMapper mapper = new ObjectMapper();
     /**
-     * The Uri Information for the REST Request
-     */
-    @Context
-    private UriInfo uriInfo;
-    /**
      * The Java Bean used for logging information to Envers
      */
     @Inject
@@ -101,37 +91,6 @@ public class BaseRESTv1 {
      */
     @PersistenceUnit
     private EntityManagerFactory entityManagerFactory;
-
-    /**
-     * Get the URL of the root REST endpoint using UriInfo from a request.
-     *
-     * @return The URL of the root REST endpoint.
-     */
-    protected String getBaseUrl() {
-        final String fullPath = uriInfo.getAbsolutePath().toString();
-        final int index = fullPath.indexOf(Constants.BASE_REST_PATH);
-        if (index != -1) return fullPath.substring(0, index + Constants.BASE_REST_PATH.length());
-
-        return null;
-    }
-
-    /**
-     * Get the URL of the REST endpoint from the calling request.
-     *
-     * @return The URL of the endpoint that was called for the request.
-     */
-    protected String getUrl() {
-        return uriInfo.getAbsolutePath().toString();
-    }
-
-    /**
-     * Get the URL of the REST endpoint from the calling request.
-     *
-     * @return The URL of the endpoint that was called for the request.
-     */
-    protected String getRequestUrl() {
-        return uriInfo.getRequestUri().toString();
-    }
 
     /**
      * Converts a Collection of Topics into an ATOM Feed.
