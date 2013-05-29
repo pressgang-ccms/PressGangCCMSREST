@@ -42,4 +42,19 @@
     <listener>
         <listener-class>liquibase.integration.servlet.LiquibaseServletListener</listener-class>
     </listener>
+
+    <!-- WebDAV Interop filter for Microsoft clients -->
+    <filter>
+        <filter-name>InteropFilter</filter-name>
+        <filter-class>net.java.dev.webdav.interop.WindowsRedirectorPatchResourceFilter</filter-class>
+        <!--<init-param>
+            <param-name>interop-xslt</param-name>
+            <param-value>xml/prefix.xsl</param-value>
+        </init-param>-->
+    </filter>
+
+    <filter-mapping>
+        <filter-name>InteropFilter</filter-name>
+        <url-pattern>/webdav/*</url-pattern>
+    </filter-mapping>
 </web-app>

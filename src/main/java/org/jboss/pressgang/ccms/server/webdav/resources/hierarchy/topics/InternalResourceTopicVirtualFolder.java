@@ -93,6 +93,7 @@ public class InternalResourceTopicVirtualFolder extends InternalResource {
 
                 /* the response collection */
                 final List<Response> responses = new ArrayList<Response>();
+                responses.add(getFolderProperties(getUriInfo()));
 
                 /*
                     The only purpose of the directory /TOPICS/0 is to list TOPIC0.

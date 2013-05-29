@@ -16,6 +16,7 @@ import java.util.Set;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.regex.Pattern;
 
+import org.jboss.pressgang.ccms.server.utils.Constants;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -38,7 +39,7 @@ import org.slf4j.LoggerFactory;
     <url-pattern>/*</url-pattern>
 </filter-mapping>}</pre>
  */
-@WebFilter(urlPatterns = "/rest/*")
+@WebFilter(urlPatterns = Constants.BASE_REST_PATH + "/*")
 public class GZIPCompressionFilter implements Filter {
     private static Logger log = LoggerFactory.getLogger(GZIPCompressionFilter.class);
     private static AtomicBoolean initialised = new AtomicBoolean(false);

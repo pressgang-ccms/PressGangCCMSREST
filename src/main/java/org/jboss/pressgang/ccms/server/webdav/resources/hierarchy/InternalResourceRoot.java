@@ -38,6 +38,7 @@ public class InternalResourceRoot extends InternalResource {
             final List<Response> responses = new ArrayList<Response>();
 
             /* The topic collection */
+            responses.add(getFolderProperties(getUriInfo()));
             responses.add(getFolderProperties(getUriInfo(), InternalResourceTopicVirtualFolder.RESOURCE_NAME));
 
             final MultiStatus st = new MultiStatus(responses.toArray(new Response[responses.size()]));

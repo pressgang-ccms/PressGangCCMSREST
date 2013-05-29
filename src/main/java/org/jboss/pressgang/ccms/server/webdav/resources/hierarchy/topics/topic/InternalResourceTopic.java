@@ -55,6 +55,7 @@ public class InternalResourceTopic extends InternalResource {
                 final Topic topic = entityManager.find(Topic.class, getIntId());
 
                 final List<Response> responses = new ArrayList<Response>();
+                responses.add(getFolderProperties(getUriInfo()));
 
                 /*
                     List the field of the topic
