@@ -55,6 +55,6 @@
 
     <filter-mapping>
         <filter-name>InteropFilter</filter-name>
-        <url-pattern>/*</url-pattern>
+        <url-pattern>/webdav/*</url-pattern>
     </filter-mapping>
 </web-app>
