@@ -62,6 +62,7 @@ import org.jboss.resteasy.plugins.providers.atom.Feed;
 import org.jboss.resteasy.spi.BadRequestException;
 import org.jboss.resteasy.spi.Failure;
 import org.jboss.resteasy.spi.InternalServerErrorException;
+import org.jboss.resteasy.spi.NotFoundException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -737,7 +738,7 @@ public class BaseRESTv1 extends BaseREST {
 
     protected <U> U getEntity(final EntityManager entityManager, final Class<U> type, final Object id) {
         final U entity = entityManager.find(type, id);
-        if (entity == null) throw new BadRequestException("No entity was found with the primary key " + id);
+        if (entity == null) throw new NotFoundException("No entity was found with the primary key " + id);
 
         return entity;
     }
@@ -756,14 +757,14 @@ public class BaseRESTv1 extends BaseREST {
             // Get the Revision Entity using an envers lookup.
             entity = reader.find(type, id, closestRevision);
 
-            if (entity == null) throw new BadRequestException("No entity was found with the primary key " + id);
+            if (entity == null) throw new NotFoundException("No entity was found with the primary key " + id);
 
             // Set the entities last modified date to the information assoicated with the revision.
             final Date revisionLastModified = reader.getRevisionDate(closestRevision);
             entity.setLastModifiedDate(revisionLastModified);
         } else {
             entity = entityManager.find(type, id);
-            if (entity == null) throw new BadRequestException("No entity was found with the primary key " + id);
+            if (entity == null) throw new NotFoundException("No entity was found with the primary key " + id);
         }
         return entity;
     }
