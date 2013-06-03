@@ -6,9 +6,6 @@ import javax.ws.rs.PathParam;
 import javax.ws.rs.core.Context;
 import javax.ws.rs.core.PathSegment;
 import javax.ws.rs.core.Response;
-import javax.ws.rs.core.Response.ResponseBuilder;
-import javax.ws.rs.ext.Provider;
-import java.io.IOException;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Set;
@@ -21,6 +18,7 @@ import org.jboss.pressgang.ccms.filter.BlobConstantFieldFilter;
 import org.jboss.pressgang.ccms.filter.CategoryFieldFilter;
 import org.jboss.pressgang.ccms.filter.ContentSpecFieldFilter;
 import org.jboss.pressgang.ccms.filter.ContentSpecNodeFieldFilter;
+import org.jboss.pressgang.ccms.filter.FileFieldFilter;
 import org.jboss.pressgang.ccms.filter.FilterFieldFilter;
 import org.jboss.pressgang.ccms.filter.ImageFieldFilter;
 import org.jboss.pressgang.ccms.filter.IntegerConstantFieldFilter;
@@ -38,6 +36,7 @@ import org.jboss.pressgang.ccms.filter.builder.BlobConstantFilterQueryBuilder;
 import org.jboss.pressgang.ccms.filter.builder.CategoryFilterQueryBuilder;
 import org.jboss.pressgang.ccms.filter.builder.ContentSpecFilterQueryBuilder;
 import org.jboss.pressgang.ccms.filter.builder.ContentSpecNodeFilterQueryBuilder;
+import org.jboss.pressgang.ccms.filter.builder.FileFilterQueryBuilder;
 import org.jboss.pressgang.ccms.filter.builder.FilterFilterQueryBuilder;
 import org.jboss.pressgang.ccms.filter.builder.ImageFilterQueryBuilder;
 import org.jboss.pressgang.ccms.filter.builder.IntegerConstantFilterQueryBuilder;
@@ -54,6 +53,7 @@ import org.jboss.pressgang.ccms.filter.builder.TranslatedTopicDataFilterQueryBui
 import org.jboss.pressgang.ccms.filter.builder.UserFilterQueryBuilder;
 import org.jboss.pressgang.ccms.model.BlobConstants;
 import org.jboss.pressgang.ccms.model.Category;
+import org.jboss.pressgang.ccms.model.File;
 import org.jboss.pressgang.ccms.model.Filter;
 import org.jboss.pressgang.ccms.model.ImageFile;
 import org.jboss.pressgang.ccms.model.IntegerConstants;
@@ -75,6 +75,7 @@ import org.jboss.pressgang.ccms.provider.ContentSpecProvider;
 import org.jboss.pressgang.ccms.provider.DBProviderFactory;
 import org.jboss.pressgang.ccms.rest.v1.collections.RESTBlobConstantCollectionV1;
 import org.jboss.pressgang.ccms.rest.v1.collections.RESTCategoryCollectionV1;
+import org.jboss.pressgang.ccms.rest.v1.collections.RESTFileCollectionV1;
 import org.jboss.pressgang.ccms.rest.v1.collections.RESTFilterCollectionV1;
 import org.jboss.pressgang.ccms.rest.v1.collections.RESTImageCollectionV1;
 import org.jboss.pressgang.ccms.rest.v1.collections.RESTIntegerConstantCollectionV1;
@@ -95,6 +96,7 @@ import org.jboss.pressgang.ccms.rest.v1.components.ComponentTopicV1;
 import org.jboss.pressgang.ccms.rest.v1.constants.RESTv1Constants;
 import org.jboss.pressgang.ccms.rest.v1.entities.RESTBlobConstantV1;
 import org.jboss.pressgang.ccms.rest.v1.entities.RESTCategoryV1;
+import org.jboss.pressgang.ccms.rest.v1.entities.RESTFileV1;
 import org.jboss.pressgang.ccms.rest.v1.entities.RESTFilterV1;
 import org.jboss.pressgang.ccms.rest.v1.entities.RESTImageV1;
 import org.jboss.pressgang.ccms.rest.v1.entities.RESTIntegerConstantV1;
@@ -128,7 +130,6 @@ import org.jboss.pressgang.ccms.utils.common.ZipUtilities;
 import org.jboss.pressgang.ccms.utils.constants.CommonConstants;
 import org.jboss.pressgang.ccms.wrapper.ContentSpecWrapper;
 import org.jboss.pressgang.ccms.wrapper.collection.CollectionWrapper;
-import org.jboss.resteasy.annotations.interception.ServerInterceptor;
 import org.jboss.resteasy.plugins.providers.atom.Feed;
 import org.jboss.resteasy.specimpl.PathSegmentImpl;
 import org.jboss.resteasy.spi.BadRequestException;
@@ -4513,5 +4514,232 @@ public class RESTv1 extends BaseRESTv1 implements RESTBaseInterfaceV1, RESTInter
 
         return deleteJSONEntities(RESTTranslatedCSNodeCollectionV1.class, TranslatedCSNode.class, factory, dbEntityIds,
                 RESTv1Constants.CONTENT_SPEC_TRANSLATED_NODE_EXPANSION_NAME, expand, logDetails);
+    }
+
+    /* FILE FUNCTIONS */
+    /* JSONP FUNCTIONS */
+    @Override
+    public String getJSONPFile(final Integer id, final String expand, final String callback) {
+        if (callback == null) throw new BadRequestException("The callback parameter can not be null");
+
+        try {
+            return wrapJsonInPadding(callback, convertObjectToJSON(getJSONFile(id, expand)));
+        } catch (final Exception ex) {
+            throw new InternalServerErrorException("Could not marshall return value into JSON");
+        }
+    }
+
+    @Override
+    public String getJSONPFileRevision(final Integer id, final Integer revision, final String expand, final String callback) {
+        if (callback == null) throw new BadRequestException("The callback parameter can not be null");
+
+        try {
+            return wrapJsonInPadding(callback, convertObjectToJSON(getJSONFileRevision(id, revision, expand)));
+        } catch (final Exception ex) {
+            throw new InternalServerErrorException("Could not marshall return value into JSON");
+        }
+    }
+
+    @Override
+    public String getJSONPFiles(final String expand, final String callback) {
+        if (callback == null) throw new BadRequestException("The callback parameter can not be null");
+
+        try {
+            return wrapJsonInPadding(callback, convertObjectToJSON(getJSONFiles(expand)));
+        } catch (final Exception ex) {
+            throw new InternalServerErrorException("Could not marshall return value into JSON");
+        }
+    }
+
+    @Override
+    public String getJSONPFilesWithQuery(final PathSegment query, final String expand, final String callback) {
+        if (callback == null) throw new BadRequestException("The callback parameter can not be null");
+
+        try {
+            return wrapJsonInPadding(callback, convertObjectToJSON(getJSONFilesWithQuery(query, expand)));
+        } catch (final Exception ex) {
+            throw new InternalServerErrorException("Could not marshall return value into JSON");
+        }
+    }
+
+    @Override
+    public String updateJSONPFile(final String expand, final RESTFileV1 dataObject, final String message, final Integer flag,
+            final String userId, final String callback) {
+        if (callback == null) throw new BadRequestException("The callback parameter can not be null");
+
+        try {
+            return wrapJsonInPadding(callback, convertObjectToJSON(updateJSONFile(expand, dataObject, message, flag, userId)));
+        } catch (final Exception ex) {
+            throw new InternalServerErrorException("Could not marshall return value into JSON");
+        }
+    }
+
+    @Override
+    public String updateJSONPFiles(final String expand, final RESTFileCollectionV1 dataObjects, final String message, final Integer flag,
+            final String userId, final String callback) {
+        if (callback == null) throw new BadRequestException("The callback parameter can not be null");
+
+        try {
+            return wrapJsonInPadding(callback, convertObjectToJSON(updateJSONFiles(expand, dataObjects, message, flag, userId)));
+        } catch (final Exception ex) {
+            throw new InternalServerErrorException("Could not marshall return value into JSON");
+        }
+    }
+
+    @Override
+    public String createJSONPFile(final String expand, final RESTFileV1 dataObject, final String message, final Integer flag,
+            final String userId, final String callback) {
+        if (callback == null) throw new BadRequestException("The callback parameter can not be null");
+
+        try {
+            return wrapJsonInPadding(callback, convertObjectToJSON(createJSONFile(expand, dataObject, message, flag, userId)));
+        } catch (final Exception ex) {
+            throw new InternalServerErrorException("Could not marshall return value into JSON");
+        }
+    }
+
+    @Override
+    public String createJSONPFiles(final String expand, final RESTFileCollectionV1 dataObjects, final String message, final Integer flag,
+            final String userId, final String callback) {
+        if (callback == null) throw new BadRequestException("The callback parameter can not be null");
+
+        try {
+            return wrapJsonInPadding(callback, convertObjectToJSON(createJSONFiles(expand, dataObjects, message, flag, userId)));
+        } catch (final Exception ex) {
+            throw new InternalServerErrorException("Could not marshall return value into JSON");
+        }
+    }
+
+    @Override
+    public String deleteJSONPFile(final Integer id, final String message, final Integer flag, final String userId, final String expand,
+            final String callback) {
+        if (callback == null) throw new BadRequestException("The callback parameter can not be null");
+
+        try {
+            return wrapJsonInPadding(callback, convertObjectToJSON(deleteJSONFile(id, message, flag, userId, expand)));
+        } catch (final Exception ex) {
+            throw new InternalServerErrorException("Could not marshall return value into JSON");
+        }
+    }
+
+    @Override
+    public String deleteJSONPFiles(final PathSegment ids, final String message, final Integer flag, final String userId,
+            final String expand, final String callback) {
+        if (callback == null) throw new BadRequestException("The callback parameter can not be null");
+
+        try {
+            return wrapJsonInPadding(callback, convertObjectToJSON(deleteJSONFiles(ids, message, flag, userId, expand)));
+        } catch (final Exception ex) {
+            throw new InternalServerErrorException("Could not marshall return value into JSON");
+        }
+    }
+
+    /* JSON FUNCTIONS */
+    @Override
+    public RESTFileV1 getJSONFile(final Integer id, final String expand) {
+        if (id == null) throw new BadRequestException("The id parameter can not be null");
+
+        return getJSONResource(File.class, new FileV1Factory(), id, expand);
+    }
+
+    @Override
+    public RESTFileV1 getJSONFileRevision(final Integer id, Integer revision, final String expand) {
+        if (id == null) throw new BadRequestException("The id parameter can not be null");
+
+        if (revision == null) throw new BadRequestException("The revision parameter can not be null");
+
+        return getJSONResource(File.class, new FileV1Factory(), id, revision, expand);
+    }
+
+    @Override
+    public RESTFileCollectionV1 getJSONFiles(final String expand) {
+        /*
+         * Construct a collection with the given expansion name. The user will have to expand the collection to get the details
+         * of the items in it.
+         */
+        return getJSONResources(RESTFileCollectionV1.class, File.class, new FileV1Factory(), RESTv1Constants.FILES_EXPANSION_NAME,
+                expand);
+    }
+
+    @Override
+    public RESTFileCollectionV1 getJSONFilesWithQuery(final PathSegment query, final String expand) {
+        return this.getJSONResourcesFromQuery(RESTFileCollectionV1.class, query.getMatrixParameters(), FileFilterQueryBuilder.class,
+                new FileFieldFilter(), new FileV1Factory(), RESTv1Constants.FILES_EXPANSION_NAME, expand);
+    }
+
+    @Override
+    public RESTFileV1 updateJSONFile(final String expand, final RESTFileV1 dataObject, final String message, final Integer flag,
+            final String userId) {
+        if (dataObject == null) throw new BadRequestException("The dataObject parameter can not be null");
+
+        if (dataObject.getId() == null) throw new BadRequestException("The dataObject.getId() parameter can not be null");
+
+        final FileV1Factory factory = new FileV1Factory();
+        final RESTLogDetailsV1 logDetails = generateLogDetails(message, flag, userId);
+
+        return updateJSONEntity(File.class, dataObject, factory, expand, logDetails);
+    }
+
+    @Override
+    public RESTFileCollectionV1 updateJSONFiles(final String expand, final RESTFileCollectionV1 dataObjects, final String message,
+            final Integer flag, final String userId) {
+        if (dataObjects == null) throw new BadRequestException("The dataObjects parameter can not be null");
+
+        if (dataObjects.getItems() == null) throw new BadRequestException("The dataObjects.getItems() parameter can not be null");
+
+        final FileV1Factory factory = new FileV1Factory();
+        final RESTLogDetailsV1 logDetails = generateLogDetails(message, flag, userId);
+
+        return updateJSONEntities(RESTFileCollectionV1.class, File.class, dataObjects, factory, RESTv1Constants.FILES_EXPANSION_NAME,
+                expand, logDetails);
+    }
+
+    @Override
+    public RESTFileV1 createJSONFile(final String expand, final RESTFileV1 dataObject, final String message, final Integer flag,
+            final String userId) {
+        if (dataObject == null) throw new BadRequestException("The dataObject parameter can not be null");
+
+        final FileV1Factory factory = new FileV1Factory();
+        final RESTLogDetailsV1 logDetails = generateLogDetails(message, flag, userId);
+
+        return createJSONEntity(File.class, dataObject, factory, expand, logDetails);
+    }
+
+    @Override
+    public RESTFileCollectionV1 createJSONFiles(final String expand, final RESTFileCollectionV1 dataObjects, final String message,
+            final Integer flag, final String userId) {
+        if (dataObjects == null) throw new BadRequestException("The dataObjects parameter can not be null");
+
+        if (dataObjects.getItems() == null) throw new BadRequestException("The dataObjects.getItems() parameter can not be null");
+
+        final FileV1Factory factory = new FileV1Factory();
+        final RESTLogDetailsV1 logDetails = generateLogDetails(message, flag, userId);
+
+        return createJSONEntities(RESTFileCollectionV1.class, File.class, dataObjects, factory, RESTv1Constants.FILES_EXPANSION_NAME,
+                expand, logDetails);
+    }
+
+    @Override
+    public RESTFileV1 deleteJSONFile(final Integer id, final String message, final Integer flag, final String userId,
+            final String expand) {
+        if (id == null) throw new BadRequestException("The id parameter can not be null");
+
+        final FileV1Factory factory = new FileV1Factory();
+        final RESTLogDetailsV1 logDetails = generateLogDetails(message, flag, userId);
+
+        return deleteJSONEntity(File.class, factory, id, expand, logDetails);
+    }
+
+    @Override
+    public RESTFileCollectionV1 deleteJSONFiles(final PathSegment ids, final String message, final Integer flag, final String userId,
+            final String expand) {
+        if (ids == null) throw new BadRequestException("The ids parameter can not be null");
+
+        final Set<String> dbEntityIds = ids.getMatrixParameters().keySet();
+        final FileV1Factory factory = new FileV1Factory();
+        final RESTLogDetailsV1 logDetails = generateLogDetails(message, flag, userId);
+
+        return deleteJSONEntities(RESTFileCollectionV1.class, File.class, factory, dbEntityIds, RESTv1Constants.FILES_EXPANSION_NAME,
+                expand, logDetails);
     }
 }

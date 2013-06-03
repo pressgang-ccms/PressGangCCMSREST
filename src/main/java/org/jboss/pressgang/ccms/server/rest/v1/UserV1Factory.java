@@ -3,9 +3,11 @@ package org.jboss.pressgang.ccms.server.rest.v1;
 import javax.persistence.EntityManager;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
 import org.jboss.pressgang.ccms.model.Role;
 import org.jboss.pressgang.ccms.model.User;
+import org.jboss.pressgang.ccms.model.base.AuditedEntity;
 import org.jboss.pressgang.ccms.rest.v1.collections.RESTRoleCollectionV1;
 import org.jboss.pressgang.ccms.rest.v1.collections.RESTUserCollectionV1;
 import org.jboss.pressgang.ccms.rest.v1.collections.items.RESTRoleCollectionItemV1;
@@ -18,6 +20,7 @@ import org.jboss.pressgang.ccms.rest.v1.entities.base.RESTBaseEntityV1;
 import org.jboss.pressgang.ccms.rest.v1.expansion.ExpandDataTrunk;
 import org.jboss.pressgang.ccms.server.rest.v1.base.RESTDataObjectCollectionFactory;
 import org.jboss.pressgang.ccms.server.rest.v1.base.RESTDataObjectFactory;
+import org.jboss.pressgang.ccms.server.rest.v1.utils.RESTv1Utilities;
 import org.jboss.pressgang.ccms.server.utils.EnversUtilities;
 import org.jboss.resteasy.spi.BadRequestException;
 
@@ -66,14 +69,21 @@ public class UserV1Factory extends RESTDataObjectFactory<RESTUserV1, User, RESTU
     }
 
     @Override
-    public void syncDBEntityWithRESTEntity(final EntityManager entityManager, final User entity, final RESTUserV1 dataObject) {
+    public void syncDBEntityWithRESTEntityFirstPass(final EntityManager entityManager,
+            Map<RESTBaseEntityV1<?, ?, ?>, AuditedEntity> newEntityCache, final User entity, final RESTUserV1 dataObject) {
         if (dataObject.hasParameterSet(RESTUserV1.DESCRIPTION_NAME))
             entity.setDescription(dataObject.getDescription());
         if (dataObject.hasParameterSet(RESTUserV1.NAME_NAME))
             entity.setUserName(dataObject.getName());
 
         entityManager.persist(entity);
+    }
 
+    @Override
+    public void syncDBEntityWithRESTEntitySecondPass(EntityManager entityManager,
+            Map<RESTBaseEntityV1<?, ?, ?>, AuditedEntity> newEntityCache, User entity, RESTUserV1 dataObject) {
+
+        // Many to Many
         if (dataObject.hasParameterSet(
                 RESTUserV1.ROLES_NAME) && dataObject.getRoles() != null && dataObject.getRoles().getItems() != null) {
             dataObject.getRoles().removeInvalidChangeItemRequests();
@@ -82,7 +92,7 @@ public class UserV1Factory extends RESTDataObjectFactory<RESTUserV1, User, RESTU
                 final RESTRoleV1 restEntity = restEntityItem.getItem();
 
                 if (restEntityItem.returnIsAddItem() || restEntityItem.returnIsRemoveItem()) {
-                    final Role dbEntity = entityManager.find(Role.class, restEntity.getId());
+                    final Role dbEntity = RESTv1Utilities.findEntity(entityManager, newEntityCache, restEntity, Role.class);
                     if (dbEntity == null)
                         throw new BadRequestException("No entity was found with the primary key " + restEntity.getId());
 

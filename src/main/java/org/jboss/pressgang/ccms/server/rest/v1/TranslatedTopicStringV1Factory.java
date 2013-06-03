@@ -3,8 +3,10 @@ package org.jboss.pressgang.ccms.server.rest.v1;
 import javax.persistence.EntityManager;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
 import org.jboss.pressgang.ccms.model.TranslatedTopicString;
+import org.jboss.pressgang.ccms.model.base.AuditedEntity;
 import org.jboss.pressgang.ccms.rest.v1.collections.RESTTranslatedTopicStringCollectionV1;
 import org.jboss.pressgang.ccms.rest.v1.collections.items.RESTTranslatedTopicStringCollectionItemV1;
 import org.jboss.pressgang.ccms.rest.v1.entities.RESTTopicV1;
@@ -66,7 +68,8 @@ public class TranslatedTopicStringV1Factory extends RESTDataObjectFactory<RESTTr
     }
 
     @Override
-    public void syncDBEntityWithRESTEntity(final EntityManager entityManager, final TranslatedTopicString entity,
+    public void syncDBEntityWithRESTEntityFirstPass(final EntityManager entityManager,
+            final Map<RESTBaseEntityV1<?, ?, ?>, AuditedEntity> newEntityCache, final TranslatedTopicString entity,
             final RESTTranslatedTopicStringV1 dataObject) {
         if (dataObject.hasParameterSet(RESTTranslatedTopicStringV1.ORIGINALSTRING_NAME))
             entity.setOriginalString(dataObject.getOriginalString());

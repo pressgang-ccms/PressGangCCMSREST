@@ -3,8 +3,10 @@ package org.jboss.pressgang.ccms.server.rest.v1;
 import javax.persistence.EntityManager;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
 import org.jboss.pressgang.ccms.model.TopicSourceUrl;
+import org.jboss.pressgang.ccms.model.base.AuditedEntity;
 import org.jboss.pressgang.ccms.rest.v1.collections.RESTTopicSourceUrlCollectionV1;
 import org.jboss.pressgang.ccms.rest.v1.collections.items.RESTTopicSourceUrlCollectionItemV1;
 import org.jboss.pressgang.ccms.rest.v1.entities.RESTTopicSourceUrlV1;
@@ -54,7 +56,8 @@ public class TopicSourceUrlV1Factory extends RESTDataObjectFactory<RESTTopicSour
     }
 
     @Override
-    public void syncDBEntityWithRESTEntity(final EntityManager entityManager, final TopicSourceUrl entity,
+    public void syncDBEntityWithRESTEntityFirstPass(final EntityManager entityManager,
+            final Map<RESTBaseEntityV1<?, ?, ?>, AuditedEntity> newEntityCache, final TopicSourceUrl entity,
             final RESTTopicSourceUrlV1 dataObject) {
         if (dataObject.hasParameterSet(RESTTopicSourceUrlV1.TITLE_NAME)) entity.setTitle(dataObject.getTitle());
         if (dataObject.hasParameterSet(RESTTopicSourceUrlV1.DESCRIPTION_NAME)) entity.setDescription(dataObject.getDescription());
@@ -62,5 +65,4 @@ public class TopicSourceUrlV1Factory extends RESTDataObjectFactory<RESTTopicSour
 
         entityManager.persist(entity);
     }
-
 }

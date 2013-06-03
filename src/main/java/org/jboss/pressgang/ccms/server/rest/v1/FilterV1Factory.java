@@ -3,12 +3,14 @@ package org.jboss.pressgang.ccms.server.rest.v1;
 import javax.persistence.EntityManager;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
 import org.jboss.pressgang.ccms.model.Filter;
 import org.jboss.pressgang.ccms.model.FilterCategory;
 import org.jboss.pressgang.ccms.model.FilterField;
 import org.jboss.pressgang.ccms.model.FilterLocale;
 import org.jboss.pressgang.ccms.model.FilterTag;
+import org.jboss.pressgang.ccms.model.base.AuditedEntity;
 import org.jboss.pressgang.ccms.rest.v1.collections.RESTFilterCategoryCollectionV1;
 import org.jboss.pressgang.ccms.rest.v1.collections.RESTFilterCollectionV1;
 import org.jboss.pressgang.ccms.rest.v1.collections.RESTFilterFieldCollectionV1;
@@ -29,10 +31,16 @@ import org.jboss.pressgang.ccms.rest.v1.entities.base.RESTBaseEntityV1;
 import org.jboss.pressgang.ccms.rest.v1.expansion.ExpandDataTrunk;
 import org.jboss.pressgang.ccms.server.rest.v1.base.RESTDataObjectCollectionFactory;
 import org.jboss.pressgang.ccms.server.rest.v1.base.RESTDataObjectFactory;
+import org.jboss.pressgang.ccms.server.rest.v1.utils.RESTv1Utilities;
 import org.jboss.pressgang.ccms.server.utils.EnversUtilities;
 import org.jboss.resteasy.spi.BadRequestException;
 
 public class FilterV1Factory extends RESTDataObjectFactory<RESTFilterV1, Filter, RESTFilterCollectionV1, RESTFilterCollectionItemV1> {
+    private final FilterTagV1Factory filterTagFactory = new FilterTagV1Factory();
+    private final FilterFieldV1Factory filterFieldFactory = new FilterFieldV1Factory();
+    private final FilterLocaleV1Factory filterLocaleFactory = new FilterLocaleV1Factory();
+    private final FilterCategoryV1Factory filterCategoryFactory = new FilterCategoryV1Factory();
+
     public FilterV1Factory() {
         super(Filter.class);
     }
@@ -108,7 +116,8 @@ public class FilterV1Factory extends RESTDataObjectFactory<RESTFilterV1, Filter,
     }
 
     @Override
-    public void syncDBEntityWithRESTEntity(final EntityManager entityManager, final Filter entity, final RESTFilterV1 dataObject) {
+    public void syncDBEntityWithRESTEntityFirstPass(final EntityManager entityManager,
+            Map<RESTBaseEntityV1<?, ?, ?>, AuditedEntity> newEntityCache, final Filter entity, final RESTFilterV1 dataObject) {
         if (dataObject.hasParameterSet(RESTFilterV1.NAME_NAME)) entity.setFilterName(dataObject.getName());
         if (dataObject.hasParameterSet(RESTFilterV1.DESCRIPTION_NAME)) entity.setFilterDescription(dataObject.getDescription());
 
@@ -131,9 +140,8 @@ public class FilterV1Factory extends RESTDataObjectFactory<RESTFilterV1, Filter,
                     entity.removeFilterTag(dbEntity);
                     entityManager.remove(dbEntity);
                 } else if (restEntityItem.returnIsAddItem()) {
-                    final FilterTag dbEntity = new FilterTag();
+                    final FilterTag dbEntity = filterTagFactory.createDBEntityFromRESTEntity(entityManager, newEntityCache, restEntity);
                     entity.addFilterTag(dbEntity);
-                    new FilterTagV1Factory().syncDBEntityWithRESTEntity(entityManager, dbEntity, restEntity);
                 } else if (restEntityItem.returnIsUpdateItem()) {
                     final FilterTag dbEntity = entityManager.find(FilterTag.class, restEntity.getId());
                     if (dbEntity == null)
@@ -142,7 +150,7 @@ public class FilterV1Factory extends RESTDataObjectFactory<RESTFilterV1, Filter,
                         throw new BadRequestException("No FilterTag entity was found with the primary key " + restEntity.getId() + " for " +
                                 "Filter " + entity.getId());
 
-                    new FilterTagV1Factory().syncDBEntityWithRESTEntity(entityManager, dbEntity, restEntity);
+                    filterTagFactory.syncDBEntityWithRESTEntityFirstPass(entityManager, newEntityCache, dbEntity, restEntity);
                 }
             }
         }
@@ -164,9 +172,9 @@ public class FilterV1Factory extends RESTDataObjectFactory<RESTFilterV1, Filter,
                     entity.removeFilterLocale(dbEntity);
                     entityManager.remove(dbEntity);
                 } else if (restEntityItem.returnIsAddItem()) {
-                    final FilterLocale dbEntity = new FilterLocale();
+                    final FilterLocale dbEntity = filterLocaleFactory.createDBEntityFromRESTEntity(entityManager, newEntityCache,
+                            restEntity);
                     entity.addFilterLocale(dbEntity);
-                    new FilterLocaleV1Factory().syncDBEntityWithRESTEntity(entityManager, dbEntity, restEntity);
                 } else if (restEntityItem.returnIsUpdateItem()) {
                     final FilterLocale dbEntity = entityManager.find(FilterLocale.class, restEntity.getId());
                     if (dbEntity == null)
@@ -175,7 +183,7 @@ public class FilterV1Factory extends RESTDataObjectFactory<RESTFilterV1, Filter,
                             "No FilterLocale entity was found with the primary key " + restEntity.getId() + " for Filter " + entity.getId
                                     ());
 
-                    new FilterLocaleV1Factory().syncDBEntityWithRESTEntity(entityManager, dbEntity, restEntity);
+                    filterLocaleFactory.syncDBEntityWithRESTEntityFirstPass(entityManager, newEntityCache, dbEntity, restEntity);
                 }
             }
         }
@@ -197,9 +205,9 @@ public class FilterV1Factory extends RESTDataObjectFactory<RESTFilterV1, Filter,
                     entity.removeFilterCategory(dbEntity);
                     entityManager.remove(dbEntity);
                 } else if (restEntityItem.returnIsAddItem()) {
-                    final FilterCategory dbEntity = new FilterCategory();
+                    final FilterCategory dbEntity = filterCategoryFactory.createDBEntityFromRESTEntity(entityManager,
+                            newEntityCache, restEntity);
                     entity.addFilterCategory(dbEntity);
-                    new FilterCategoryV1Factory().syncDBEntityWithRESTEntity(entityManager, dbEntity, restEntity);
                 } else if (restEntityItem.returnIsUpdateItem()) {
                     final FilterCategory dbEntity = entityManager.find(FilterCategory.class, restEntity.getId());
                     if (dbEntity == null)
@@ -208,7 +216,7 @@ public class FilterV1Factory extends RESTDataObjectFactory<RESTFilterV1, Filter,
                             "No FilterCategory entity was found with the primary key " + restEntity.getId() + " for Filter " + entity
                                     .getId());
 
-                    new FilterCategoryV1Factory().syncDBEntityWithRESTEntity(entityManager, dbEntity, restEntity);
+                    filterCategoryFactory.syncDBEntityWithRESTEntityFirstPass(entityManager, newEntityCache, dbEntity, restEntity);
                 }
             }
         }
@@ -230,9 +238,8 @@ public class FilterV1Factory extends RESTDataObjectFactory<RESTFilterV1, Filter,
                     entity.removeFilterField(dbEntity);
                     entityManager.remove(dbEntity);
                 } else if (restEntityItem.returnIsAddItem()) {
-                    final FilterField dbEntity = new FilterField();
+                    final FilterField dbEntity = filterFieldFactory.createDBEntityFromRESTEntity(entityManager, newEntityCache, restEntity);
                     entity.addFilterField(dbEntity);
-                    new FilterFieldV1Factory().syncDBEntityWithRESTEntity(entityManager, dbEntity, restEntity);
                 } else if (restEntityItem.returnIsUpdateItem()) {
                     final FilterField dbEntity = entityManager.find(FilterField.class, restEntity.getId());
                     if (dbEntity == null)
@@ -240,10 +247,89 @@ public class FilterV1Factory extends RESTDataObjectFactory<RESTFilterV1, Filter,
                     if (!entity.getFilterFields().contains(dbEntity)) throw new BadRequestException(
                             "No FilterField entity was found with the primary key " + restEntity.getId() + " for Filter " + entity.getId());
 
-                    new FilterFieldV1Factory().syncDBEntityWithRESTEntity(entityManager, dbEntity, restEntity);
+                    filterFieldFactory.syncDBEntityWithRESTEntityFirstPass(entityManager, newEntityCache, dbEntity, restEntity);
                 }
             }
         }
     }
 
+    @Override
+    public void syncDBEntityWithRESTEntitySecondPass(final EntityManager entityManager,
+            Map<RESTBaseEntityV1<?, ?, ?>, AuditedEntity> newEntityCache, final Filter entity, final RESTFilterV1 dataObject) {
+        // One To Many - Do the second pass on the update and add items
+        if (dataObject.hasParameterSet(
+                RESTFilterV1.FILTER_TAGS_NAME) && dataObject.getFilterTags_OTM() != null && dataObject.getFilterTags_OTM().getItems() !=
+                null) {
+            dataObject.getFilterTags_OTM().removeInvalidChangeItemRequests();
+
+            for (final RESTFilterTagCollectionItemV1 restEntityItem : dataObject.getFilterTags_OTM().getItems()) {
+                final RESTFilterTagV1 restEntity = restEntityItem.getItem();
+
+                if (restEntityItem.returnIsAddItem() || restEntityItem.returnIsUpdateItem()) {
+                    final FilterTag dbEntity = RESTv1Utilities.findEntity(entityManager, newEntityCache, restEntity, FilterTag.class);
+                    if (dbEntity == null)
+                        throw new BadRequestException("No FilterTag entity was found with the primary key " + restEntity.getId());
+
+                    filterTagFactory.syncDBEntityWithRESTEntitySecondPass(entityManager, newEntityCache, dbEntity, restEntity);
+                }
+            }
+        }
+
+        // One To Many - Do the second pass on the update and add items
+        if (dataObject.hasParameterSet(
+                RESTFilterV1.FILTER_LOCALES_NAME) && dataObject.getFilterLocales_OTM() != null && dataObject.getFilterLocales_OTM()
+                .getItems() != null) {
+            dataObject.getFilterLocales_OTM().removeInvalidChangeItemRequests();
+
+            for (final RESTFilterLocaleCollectionItemV1 restEntityItem : dataObject.getFilterLocales_OTM().getItems()) {
+                final RESTFilterLocaleV1 restEntity = restEntityItem.getItem();
+
+                if (restEntityItem.returnIsAddItem() || restEntityItem.returnIsUpdateItem()) {
+                    final FilterLocale dbEntity = RESTv1Utilities.findEntity(entityManager, newEntityCache, restEntity, FilterLocale.class);
+                    if (dbEntity == null)
+                        throw new BadRequestException("No FilterLocale entity was found with the primary key " + restEntity.getId());
+
+                    filterLocaleFactory.syncDBEntityWithRESTEntitySecondPass(entityManager, newEntityCache, dbEntity, restEntity);
+                }
+            }
+        }
+
+        // One To Many - Do the second pass on the update and add items
+        if (dataObject.hasParameterSet(
+                RESTFilterV1.FILTER_CATEGORIES_NAME) && dataObject.getFilterCategories_OTM() != null && dataObject
+                .getFilterCategories_OTM().getItems() != null) {
+            dataObject.getFilterCategories_OTM().removeInvalidChangeItemRequests();
+
+            for (final RESTFilterCategoryCollectionItemV1 restEntityItem : dataObject.getFilterCategories_OTM().getItems()) {
+                final RESTFilterCategoryV1 restEntity = restEntityItem.getItem();
+
+                if (restEntityItem.returnIsAddItem() || restEntityItem.returnIsUpdateItem()) {
+                    final FilterCategory dbEntity = entityManager.find(FilterCategory.class, restEntity.getId());
+                    if (dbEntity == null)
+                        throw new BadRequestException("No FilterCategory entity was found with the primary key " + restEntity.getId());
+
+                    filterCategoryFactory.syncDBEntityWithRESTEntitySecondPass(entityManager, newEntityCache, dbEntity, restEntity);
+                }
+            }
+        }
+
+        // One To Many - Do the second pass on the update and add items
+        if (dataObject.hasParameterSet(
+                RESTFilterV1.FILTER_FIELDS_NAME) && dataObject.getFilterFields_OTM() != null && dataObject.getFilterFields_OTM().getItems
+                () != null) {
+            dataObject.getFilterFields_OTM().removeInvalidChangeItemRequests();
+
+            for (final RESTFilterFieldCollectionItemV1 restEntityItem : dataObject.getFilterFields_OTM().getItems()) {
+                final RESTFilterFieldV1 restEntity = restEntityItem.getItem();
+
+                if (restEntityItem.returnIsAddItem() || restEntityItem.returnIsUpdateItem()) {
+                    final FilterField dbEntity = entityManager.find(FilterField.class, restEntity.getId());
+                    if (dbEntity == null)
+                        throw new BadRequestException("No FilterField entity was found with the primary key " + restEntity.getId());
+
+                    filterFieldFactory.syncDBEntityWithRESTEntitySecondPass(entityManager, newEntityCache, dbEntity, restEntity);
+                }
+            }
+        }
+    }
 }

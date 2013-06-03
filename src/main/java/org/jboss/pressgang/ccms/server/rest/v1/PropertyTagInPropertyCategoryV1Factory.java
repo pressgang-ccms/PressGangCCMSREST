@@ -3,8 +3,10 @@ package org.jboss.pressgang.ccms.server.rest.v1;
 import javax.persistence.EntityManager;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
 import org.jboss.pressgang.ccms.model.PropertyTagToPropertyTagCategory;
+import org.jboss.pressgang.ccms.model.base.AuditedEntity;
 import org.jboss.pressgang.ccms.rest.v1.collections.items.join.RESTPropertyCategoryInPropertyTagCollectionItemV1;
 import org.jboss.pressgang.ccms.rest.v1.collections.items.join.RESTPropertyTagInPropertyCategoryCollectionItemV1;
 import org.jboss.pressgang.ccms.rest.v1.collections.join.RESTPropertyCategoryInPropertyTagCollectionV1;
@@ -75,7 +77,8 @@ public class PropertyTagInPropertyCategoryV1Factory extends RESTDataObjectFactor
     }
 
     @Override
-    public void syncDBEntityWithRESTEntity(final EntityManager entityManager, final PropertyTagToPropertyTagCategory entity,
+    public void syncDBEntityWithRESTEntityFirstPass(final EntityManager entityManager,
+            Map<RESTBaseEntityV1<?, ?, ?>, AuditedEntity> newEntityCache, final PropertyTagToPropertyTagCategory entity,
             final RESTPropertyTagInPropertyCategoryV1 dataObject) {
         if (dataObject.hasParameterSet(RESTPropertyTagInPropertyCategoryV1.RELATIONSHIP_SORT_NAME))
             entity.setSorting(dataObject.getRelationshipSort());

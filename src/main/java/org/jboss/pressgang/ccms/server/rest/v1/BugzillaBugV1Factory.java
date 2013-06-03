@@ -3,8 +3,10 @@ package org.jboss.pressgang.ccms.server.rest.v1;
 import javax.persistence.EntityManager;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
 import org.jboss.pressgang.ccms.model.BugzillaBug;
+import org.jboss.pressgang.ccms.model.base.AuditedEntity;
 import org.jboss.pressgang.ccms.rest.v1.collections.RESTBugzillaBugCollectionV1;
 import org.jboss.pressgang.ccms.rest.v1.collections.items.RESTBugzillaBugCollectionItemV1;
 import org.jboss.pressgang.ccms.rest.v1.entities.RESTBugzillaBugV1;
@@ -53,11 +55,10 @@ public class BugzillaBugV1Factory extends RESTDataObjectFactory<RESTBugzillaBugV
     }
 
     @Override
-    public void syncDBEntityWithRESTEntity(final EntityManager entityManager, final BugzillaBug entity,
-            final RESTBugzillaBugV1 dataObject) {
+    public void syncDBEntityWithRESTEntityFirstPass(final EntityManager entityManager,
+            Map<RESTBaseEntityV1<?, ?, ?>, AuditedEntity> newEntityCache, final BugzillaBug entity, final RESTBugzillaBugV1 dataObject) {
         if (dataObject.hasParameterSet(RESTBugzillaBugV1.BUG_ID)) entity.setBugzillaBugBugzillaId(dataObject.getBugId());
         if (dataObject.hasParameterSet(RESTBugzillaBugV1.BUG_ISOPEN)) entity.setBugzillaBugOpen(dataObject.getIsOpen());
         if (dataObject.hasParameterSet(RESTBugzillaBugV1.BUG_SUMMARY)) entity.setBugzillaBugSummary(dataObject.getSummary());
     }
-
 }

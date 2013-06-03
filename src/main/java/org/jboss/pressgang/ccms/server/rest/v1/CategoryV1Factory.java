@@ -3,10 +3,12 @@ package org.jboss.pressgang.ccms.server.rest.v1;
 import javax.persistence.EntityManager;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
 import org.jboss.pressgang.ccms.model.Category;
 import org.jboss.pressgang.ccms.model.Tag;
 import org.jboss.pressgang.ccms.model.TagToCategory;
+import org.jboss.pressgang.ccms.model.base.AuditedEntity;
 import org.jboss.pressgang.ccms.rest.v1.collections.RESTCategoryCollectionV1;
 import org.jboss.pressgang.ccms.rest.v1.collections.items.RESTCategoryCollectionItemV1;
 import org.jboss.pressgang.ccms.rest.v1.collections.items.join.RESTTagInCategoryCollectionItemV1;
@@ -19,11 +21,15 @@ import org.jboss.pressgang.ccms.rest.v1.entities.join.RESTTagInCategoryV1;
 import org.jboss.pressgang.ccms.rest.v1.expansion.ExpandDataTrunk;
 import org.jboss.pressgang.ccms.server.rest.v1.base.RESTDataObjectCollectionFactory;
 import org.jboss.pressgang.ccms.server.rest.v1.base.RESTDataObjectFactory;
+import org.jboss.pressgang.ccms.server.rest.v1.utils.RESTv1Utilities;
 import org.jboss.pressgang.ccms.server.utils.EnversUtilities;
 import org.jboss.resteasy.spi.BadRequestException;
 
-class CategoryV1Factory extends RESTDataObjectFactory<RESTCategoryV1, Category, RESTCategoryCollectionV1, RESTCategoryCollectionItemV1> {
-    CategoryV1Factory() {
+public class CategoryV1Factory extends RESTDataObjectFactory<RESTCategoryV1, Category, RESTCategoryCollectionV1,
+        RESTCategoryCollectionItemV1> {
+    private final TagInCategoryV1Factory tagInCategoryFactory = new TagInCategoryV1Factory();
+
+    public CategoryV1Factory() {
         super(Category.class);
     }
 
@@ -73,7 +79,8 @@ class CategoryV1Factory extends RESTDataObjectFactory<RESTCategoryV1, Category, 
     }
 
     @Override
-    public void syncDBEntityWithRESTEntity(final EntityManager entityManager, final Category entity, final RESTCategoryV1 dataObject) {
+    public void syncDBEntityWithRESTEntityFirstPass(final EntityManager entityManager,
+            Map<RESTBaseEntityV1<?, ?, ?>, AuditedEntity> newEntityCache, final Category entity, final RESTCategoryV1 dataObject) {
         if (dataObject.hasParameterSet(RESTCategoryV1.DESCRIPTION_NAME)) entity.setCategoryDescription(dataObject.getDescription());
         if (dataObject.hasParameterSet(RESTCategoryV1.MUTUALLYEXCLUSIVE_NAME))
             entity.setMutuallyExclusive(dataObject.getMutuallyExclusive());
@@ -82,7 +89,7 @@ class CategoryV1Factory extends RESTDataObjectFactory<RESTCategoryV1, Category, 
 
         entityManager.persist(entity);
 
-        /* Many To Many - Add will create a mapping */
+        // Many To Many - Add will create a mapping
         if (dataObject.hasParameterSet(
                 RESTCategoryV1.TAGS_NAME) && dataObject.getTags() != null && dataObject.getTags().getItems() != null) {
             dataObject.getTags().removeInvalidChangeItemRequests();
@@ -90,17 +97,46 @@ class CategoryV1Factory extends RESTDataObjectFactory<RESTCategoryV1, Category, 
             for (final RESTTagInCategoryCollectionItemV1 restEntityItem : dataObject.getTags().getItems()) {
                 final RESTTagInCategoryV1 restEntity = restEntityItem.getItem();
 
-                if (restEntityItem.returnIsAddItem() || restEntityItem.returnIsRemoveItem()) {
+                if (restEntityItem.returnIsRemoveItem()) {
                     final Tag dbEntity = entityManager.find(Tag.class, restEntity.getId());
                     if (dbEntity == null)
                         throw new BadRequestException("No Tag entity was found with the primary key " + restEntity.getId());
 
-                    if (restEntityItem.returnIsAddItem()) {
-                        if (restEntity.hasParameterSet(RESTCategoryInTagV1.RELATIONSHIP_SORT_NAME))
-                            entity.addTagRelationship(dbEntity, restEntity.getRelationshipSort());
-                        else entity.addTagRelationship(dbEntity);
-                    } else if (restEntityItem.returnIsRemoveItem()) {
-                        entity.removeTagRelationship(dbEntity);
+                    entity.removeTagRelationship(dbEntity);
+                } else if (restEntityItem.returnIsUpdateItem()) {
+                    final TagToCategory dbEntity = entityManager.find(TagToCategory.class, restEntity.getRelationshipId());
+                    if (dbEntity == null) throw new BadRequestException(
+                            "No TagToCategory entity was found with the primary key " + restEntity.getRelationshipId());
+                    if (!entity.getTagToCategories().contains(dbEntity)) throw new BadRequestException(
+                            "No TagToCategory entity was found with the primary key " + restEntity.getRelationshipId() + " for Category "
+                                    + entity.getId());
+
+                    tagInCategoryFactory.syncDBEntityWithRESTEntityFirstPass(entityManager, newEntityCache, dbEntity, restEntity);
+                }
+            }
+        }
+    }
+
+    @Override
+    public void syncDBEntityWithRESTEntitySecondPass(EntityManager entityManager,
+            Map<RESTBaseEntityV1<?, ?, ?>, AuditedEntity> newEntityCache, Category entity, RESTCategoryV1 dataObject) {
+        // Many To Many - Add will create a mapping
+        if (dataObject.hasParameterSet(
+                RESTCategoryV1.TAGS_NAME) && dataObject.getTags() != null && dataObject.getTags().getItems() != null) {
+            dataObject.getTags().removeInvalidChangeItemRequests();
+
+            for (final RESTTagInCategoryCollectionItemV1 restEntityItem : dataObject.getTags().getItems()) {
+                final RESTTagInCategoryV1 restEntity = restEntityItem.getItem();
+
+                if (restEntityItem.returnIsAddItem()) {
+                    final Tag dbEntity = RESTv1Utilities.findEntity(entityManager, newEntityCache, restEntity, Tag.class);
+                    if (dbEntity == null)
+                        throw new BadRequestException("No Tag entity was found with the primary key " + restEntity.getId());
+
+                    if (restEntity.hasParameterSet(RESTCategoryInTagV1.RELATIONSHIP_SORT_NAME)) {
+                        entity.addTagRelationship(dbEntity, restEntity.getRelationshipSort());
+                    } else {
+                        entity.addTagRelationship(dbEntity);
                     }
                 } else if (restEntityItem.returnIsUpdateItem()) {
                     final TagToCategory dbEntity = entityManager.find(TagToCategory.class, restEntity.getRelationshipId());
@@ -110,7 +146,7 @@ class CategoryV1Factory extends RESTDataObjectFactory<RESTCategoryV1, Category, 
                             "No TagToCategory entity was found with the primary key " + restEntity.getRelationshipId() + " for Category "
                                     + entity.getId());
 
-                    new TagInCategoryV1Factory().syncDBEntityWithRESTEntity(entityManager, dbEntity, restEntity);
+                    tagInCategoryFactory.syncDBEntityWithRESTEntitySecondPass(entityManager, newEntityCache, dbEntity, restEntity);
                 }
             }
         }

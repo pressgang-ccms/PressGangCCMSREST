@@ -3,9 +3,11 @@ package org.jboss.pressgang.ccms.server.rest.v1;
 import javax.persistence.EntityManager;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
 import org.jboss.pressgang.ccms.model.FilterTag;
 import org.jboss.pressgang.ccms.model.Tag;
+import org.jboss.pressgang.ccms.model.base.AuditedEntity;
 import org.jboss.pressgang.ccms.rest.v1.collections.RESTFilterTagCollectionV1;
 import org.jboss.pressgang.ccms.rest.v1.collections.items.RESTFilterTagCollectionItemV1;
 import org.jboss.pressgang.ccms.rest.v1.entities.RESTFilterTagV1;
@@ -14,6 +16,7 @@ import org.jboss.pressgang.ccms.rest.v1.entities.base.RESTBaseEntityV1;
 import org.jboss.pressgang.ccms.rest.v1.expansion.ExpandDataTrunk;
 import org.jboss.pressgang.ccms.server.rest.v1.base.RESTDataObjectCollectionFactory;
 import org.jboss.pressgang.ccms.server.rest.v1.base.RESTDataObjectFactory;
+import org.jboss.pressgang.ccms.server.rest.v1.utils.RESTv1Utilities;
 import org.jboss.pressgang.ccms.server.utils.EnversUtilities;
 import org.jboss.resteasy.spi.BadRequestException;
 
@@ -67,17 +70,21 @@ public class FilterTagV1Factory extends RESTDataObjectFactory<RESTFilterTagV1, F
     }
 
     @Override
-    public void syncDBEntityWithRESTEntity(final EntityManager entityManager, final FilterTag entity,
-            final RESTFilterTagV1 dataObject) {
+    public void syncDBEntityWithRESTEntityFirstPass(final EntityManager entityManager,
+            Map<RESTBaseEntityV1<?, ?, ?>, AuditedEntity> newEntityCache, final FilterTag entity, final RESTFilterTagV1 dataObject) {
         if (dataObject.hasParameterSet(RESTFilterTagV1.STATE_NAME))
             entity.setTagState(dataObject.getState());
+    }
 
+    @Override
+    public void syncDBEntityWithRESTEntitySecondPass(EntityManager entityManager,
+            Map<RESTBaseEntityV1<?, ?, ?>, AuditedEntity> newEntityCache, FilterTag entity, RESTFilterTagV1 dataObject) {
         /* Set the Tag for the FilterTag */
         if (dataObject.hasParameterSet(RESTFilterTagV1.TAG_NAME)) {
             final RESTTagV1 restEntity = dataObject.getTag();
 
             if (restEntity != null) {
-                final Tag dbEntity = entityManager.find(Tag.class, restEntity.getId());
+                final Tag dbEntity = RESTv1Utilities.findEntity(entityManager, newEntityCache, restEntity, Tag.class);
                 if (dbEntity == null)
                     throw new BadRequestException("No Tag entity was found with the primary key " + restEntity.getId());
 
@@ -86,7 +93,5 @@ public class FilterTagV1Factory extends RESTDataObjectFactory<RESTFilterTagV1, F
                 entity.setTag(null);
             }
         }
-
     }
-
 }

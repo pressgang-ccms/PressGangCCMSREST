@@ -3,9 +3,11 @@ package org.jboss.pressgang.ccms.server.rest.v1;
 import javax.persistence.EntityManager;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
 import org.jboss.pressgang.ccms.model.PropertyTag;
 import org.jboss.pressgang.ccms.model.Tag;
+import org.jboss.pressgang.ccms.model.base.AuditedEntity;
 import org.jboss.pressgang.ccms.model.contentspec.CSNode;
 import org.jboss.pressgang.ccms.model.contentspec.ContentSpec;
 import org.jboss.pressgang.ccms.model.contentspec.ContentSpecToPropertyTag;
@@ -31,12 +33,15 @@ import org.jboss.pressgang.ccms.rest.v1.entities.join.RESTAssignedPropertyTagV1;
 import org.jboss.pressgang.ccms.rest.v1.expansion.ExpandDataTrunk;
 import org.jboss.pressgang.ccms.server.rest.v1.base.RESTDataObjectCollectionFactory;
 import org.jboss.pressgang.ccms.server.rest.v1.base.RESTDataObjectFactory;
+import org.jboss.pressgang.ccms.server.rest.v1.utils.RESTv1Utilities;
 import org.jboss.pressgang.ccms.server.utils.ContentSpecUtilities;
 import org.jboss.pressgang.ccms.server.utils.EnversUtilities;
 import org.jboss.resteasy.spi.BadRequestException;
 
 public class ContentSpecV1Factory extends RESTDataObjectFactory<RESTContentSpecV1, ContentSpec, RESTContentSpecCollectionV1,
         RESTContentSpecCollectionItemV1> {
+    private final CSNodeV1Factory csNodeFactory = new CSNodeV1Factory();
+    private final ContentSpecPropertyTagV1Factory csNodePropertyTagFactory = new ContentSpecPropertyTagV1Factory();
 
     public ContentSpecV1Factory() {
         super(ContentSpec.class);
@@ -125,8 +130,8 @@ public class ContentSpecV1Factory extends RESTDataObjectFactory<RESTContentSpecV
     }
 
     @Override
-    public void syncDBEntityWithRESTEntity(final EntityManager entityManager, final ContentSpec entity,
-            final RESTContentSpecV1 dataObject) {
+    public void syncDBEntityWithRESTEntityFirstPass(final EntityManager entityManager,
+            Map<RESTBaseEntityV1<?, ?, ?>, AuditedEntity> newEntityCache, final ContentSpec entity, final RESTContentSpecV1 dataObject) {
         // If the Text is being set then don't do anything else.
         if (dataObject.hasParameterSet(RESTContentSpecV1.TEXT_NAME)) return;
 
@@ -139,14 +144,50 @@ public class ContentSpecV1Factory extends RESTDataObjectFactory<RESTContentSpecV
         if (dataObject.hasParameterSet(RESTContentSpecV1.TYPE_NAME))
             entity.setContentSpecType(RESTContentSpecTypeV1.getContentSpecTypeId(dataObject.getType()));
 
+        // Remove any error content
+        entity.setErrors(null);
+        entity.setFailedContentSpec(null);
+
         entityManager.persist(entity);
 
-        /* Many To Many */
+        // One To Many - Add will create a new mapping
+        if (dataObject.hasParameterSet(
+                RESTContentSpecV1.CHILDREN_NAME) && dataObject.getChildren_OTM() != null && dataObject.getChildren_OTM().getItems() !=
+                null) {
+            dataObject.getChildren_OTM().removeInvalidChangeItemRequests();
+
+            for (final RESTCSNodeCollectionItemV1 restEntityItem : dataObject.getChildren_OTM().getItems()) {
+                final RESTCSNodeV1 restEntity = restEntityItem.getItem();
+
+                if (restEntityItem.returnIsRemoveItem()) {
+                    final CSNode dbEntity = entityManager.find(CSNode.class, restEntity.getId());
+                    if (dbEntity == null)
+                        throw new BadRequestException("No CSNode entity was found with the primary key " + restEntity.getId());
+
+                    entity.removeChild(dbEntity);
+                    entityManager.remove(dbEntity);
+                } else if (restEntityItem.returnIsAddItem()) {
+                    final CSNode dbEntity = new CSNodeV1Factory().createDBEntityFromRESTEntity(entityManager, newEntityCache, restEntity);
+                    dbEntity.setParent(null);
+                    entity.addChild(dbEntity);
+                } else if (restEntityItem.returnIsUpdateItem()) {
+                    final CSNode dbEntity = entityManager.find(CSNode.class, restEntity.getId());
+                    if (dbEntity == null)
+                        throw new BadRequestException("No CSNode entity was found with the primary key " + restEntity.getId());
+                    if (!entity.getTopCSNodes().contains(dbEntity))
+                        throw new BadRequestException("No CSNode entity was found with the primary key " + restEntity.getId() + " for " +
+                                "ContentSpec " + entity.getId());
+
+                    csNodeFactory.syncDBEntityWithRESTEntityFirstPass(entityManager, newEntityCache, dbEntity, restEntity);
+                }
+            }
+        }
+
+        // Many to Many
         if (dataObject.hasParameterSet(
                 RESTContentSpecV1.PROPERTIES_NAME) && dataObject.getProperties() != null && dataObject.getProperties().getItems() != null) {
             dataObject.getProperties().removeInvalidChangeItemRequests();
 
-            /* remove children first */
             for (final RESTAssignedPropertyTagCollectionItemV1 restEntityItem : dataObject.getProperties().getItems()) {
                 final RESTAssignedPropertyTagV1 restEntity = restEntityItem.getItem();
 
@@ -156,8 +197,53 @@ public class ContentSpecV1Factory extends RESTDataObjectFactory<RESTContentSpecV
                         throw new BadRequestException("No PropertyTag entity was found with the primary key " + restEntity.getId());
 
                     entity.removePropertyTag(dbEntity, restEntity.getValue());
-                } else if (restEntityItem.returnIsAddItem()) {
-                    final PropertyTag dbEntity = entityManager.find(PropertyTag.class, restEntity.getId());
+                } else if (restEntityItem.returnIsUpdateItem()) {
+                    final ContentSpecToPropertyTag dbEntity = entityManager.find(ContentSpecToPropertyTag.class,
+                            restEntity.getRelationshipId());
+                    if (dbEntity == null) throw new BadRequestException(
+                            "No ContentSpecToPropertyTag entity was found with the primary key " + restEntity.getRelationshipId());
+                    if (!entity.getContentSpecToPropertyTags().contains(dbEntity)) throw new BadRequestException(
+                            "No ContentSpecToPropertyTag entity was found with the primary key " + restEntity.getRelationshipId() + " for" +
+                                    " ContentSpec " + entity.getId());
+
+                    csNodePropertyTagFactory.syncDBEntityWithRESTEntityFirstPass(entityManager, newEntityCache, dbEntity, restEntity);
+                }
+            }
+        }
+    }
+
+    @Override
+    public void syncDBEntityWithRESTEntitySecondPass(EntityManager entityManager,
+            Map<RESTBaseEntityV1<?, ?, ?>, AuditedEntity> newEntityCache, ContentSpec entity, RESTContentSpecV1 dataObject) {
+        // One To Many - Add will create a new mapping
+        if (dataObject.hasParameterSet(
+                RESTContentSpecV1.CHILDREN_NAME) && dataObject.getChildren_OTM() != null && dataObject.getChildren_OTM().getItems() !=
+                null) {
+            dataObject.getChildren_OTM().removeInvalidChangeItemRequests();
+
+            for (final RESTCSNodeCollectionItemV1 restEntityItem : dataObject.getChildren_OTM().getItems()) {
+                final RESTCSNodeV1 restEntity = restEntityItem.getItem();
+
+                if (restEntityItem.returnIsAddItem() || restEntityItem.returnIsUpdateItem()) {
+                    final CSNode dbEntity = RESTv1Utilities.findEntity(entityManager, newEntityCache, restEntity, CSNode.class);
+                    if (dbEntity == null)
+                        throw new BadRequestException("No CSNode entity was found with the primary key " + restEntity.getId());
+
+                    csNodeFactory.syncDBEntityWithRESTEntitySecondPass(entityManager, newEntityCache, dbEntity, restEntity);
+                }
+            }
+        }
+
+        // Many to Many
+        if (dataObject.hasParameterSet(
+                RESTContentSpecV1.PROPERTIES_NAME) && dataObject.getProperties() != null && dataObject.getProperties().getItems() != null) {
+            dataObject.getProperties().removeInvalidChangeItemRequests();
+
+            for (final RESTAssignedPropertyTagCollectionItemV1 restEntityItem : dataObject.getProperties().getItems()) {
+                final RESTAssignedPropertyTagV1 restEntity = restEntityItem.getItem();
+
+                if (restEntityItem.returnIsAddItem()) {
+                    final PropertyTag dbEntity = RESTv1Utilities.findEntity(entityManager, newEntityCache, restEntity, PropertyTag.class);
                     if (dbEntity == null)
                         throw new BadRequestException("No PropertyTag entity was found with the primary key " + restEntity.getId());
 
@@ -168,14 +254,15 @@ public class ContentSpecV1Factory extends RESTDataObjectFactory<RESTContentSpecV
                     if (dbEntity == null) throw new BadRequestException(
                             "No ContentSpecToPropertyTag entity was found with the primary key " + restEntity.getRelationshipId());
                     if (!entity.getContentSpecToPropertyTags().contains(dbEntity)) throw new BadRequestException(
-                            "No ContentSpecToPropertyTag entity was found with the primary key " + restEntity.getId() + " for " +
-                                    "ContentSpec " + entity.getId());
+                            "No ContentSpecToPropertyTag entity was found with the primary key " + restEntity.getRelationshipId() + " for" +
+                                    " ContentSpec " + entity.getId());
 
-                    new ContentSpecPropertyTagV1Factory().syncDBEntityWithRESTEntity(entityManager, dbEntity, restEntity);
+                    csNodePropertyTagFactory.syncDBEntityWithRESTEntityFirstPass(entityManager, newEntityCache, dbEntity, restEntity);
                 }
             }
         }
 
+        // Many to Many
         if (dataObject.hasParameterSet(
                 RESTContentSpecV1.TAGS_NAME) && dataObject.getTags() != null && dataObject.getTags().getItems() != null) {
             dataObject.getTags().removeInvalidChangeItemRequests();
@@ -197,45 +284,11 @@ public class ContentSpecV1Factory extends RESTDataObjectFactory<RESTContentSpecV
                 final RESTTagV1 restEntity = restEntityItem.getItem();
 
                 if (restEntityItem.returnIsAddItem()) {
-                    final Tag dbEntity = entityManager.find(Tag.class, restEntity.getId());
+                    final Tag dbEntity = RESTv1Utilities.findEntity(entityManager, newEntityCache, restEntity, Tag.class);
                     if (dbEntity == null)
                         throw new BadRequestException("No Tag entity was found with the primary key " + restEntity.getId());
 
                     entity.addTag(dbEntity);
-                }
-            }
-        }
-
-        // One To Many - Add will create a new mapping
-        if (dataObject.hasParameterSet(
-                RESTContentSpecV1.CHILDREN_NAME) && dataObject.getChildren_OTM() != null && dataObject.getChildren_OTM().getItems() !=
-                null) {
-            dataObject.getChildren_OTM().removeInvalidChangeItemRequests();
-
-            for (final RESTCSNodeCollectionItemV1 restEntityItem : dataObject.getChildren_OTM().getItems()) {
-                final RESTCSNodeV1 restEntity = restEntityItem.getItem();
-
-                if (restEntityItem.returnIsRemoveItem()) {
-                    final CSNode dbEntity = entityManager.find(CSNode.class, restEntity.getId());
-                    if (dbEntity == null)
-                        throw new BadRequestException("No CSNode entity was found with the primary key " + restEntity.getId());
-
-                    entity.removeChild(dbEntity);
-                    entityManager.remove(dbEntity);
-                } else if (restEntityItem.returnIsAddItem()) {
-                    final CSNode dbEntity = new CSNodeV1Factory().createDBEntityFromRESTEntity(entityManager, restEntity);
-                    dbEntity.setParent(null);
-                    entityManager.persist(dbEntity);
-                    entity.addChild(dbEntity);
-                } else if (restEntityItem.returnIsUpdateItem()) {
-                    final CSNode dbEntity = entityManager.find(CSNode.class, restEntity.getId());
-                    if (dbEntity == null)
-                        throw new BadRequestException("No CSNode entity was found with the primary key " + restEntity.getId());
-                    if (!entity.getTopCSNodes().contains(dbEntity))
-                        throw new BadRequestException("No CSNode entity was found with the primary key " + restEntity.getId() + " for " +
-                                "ContentSpec " + entity.getId());
-
-                    new CSNodeV1Factory().syncDBEntityWithRESTEntity(entityManager, dbEntity, restEntity);
                 }
             }
         }

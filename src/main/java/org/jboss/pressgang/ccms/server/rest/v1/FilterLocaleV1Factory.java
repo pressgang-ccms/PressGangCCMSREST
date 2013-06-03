@@ -3,19 +3,18 @@ package org.jboss.pressgang.ccms.server.rest.v1;
 import javax.persistence.EntityManager;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
-import org.jboss.pressgang.ccms.model.Filter;
 import org.jboss.pressgang.ccms.model.FilterLocale;
+import org.jboss.pressgang.ccms.model.base.AuditedEntity;
 import org.jboss.pressgang.ccms.rest.v1.collections.RESTFilterLocaleCollectionV1;
 import org.jboss.pressgang.ccms.rest.v1.collections.items.RESTFilterLocaleCollectionItemV1;
 import org.jboss.pressgang.ccms.rest.v1.entities.RESTFilterLocaleV1;
-import org.jboss.pressgang.ccms.rest.v1.entities.RESTFilterV1;
 import org.jboss.pressgang.ccms.rest.v1.entities.base.RESTBaseEntityV1;
 import org.jboss.pressgang.ccms.rest.v1.expansion.ExpandDataTrunk;
 import org.jboss.pressgang.ccms.server.rest.v1.base.RESTDataObjectCollectionFactory;
 import org.jboss.pressgang.ccms.server.rest.v1.base.RESTDataObjectFactory;
 import org.jboss.pressgang.ccms.server.utils.EnversUtilities;
-import org.jboss.resteasy.spi.BadRequestException;
 
 public class FilterLocaleV1Factory extends RESTDataObjectFactory<RESTFilterLocaleV1, FilterLocale, RESTFilterLocaleCollectionV1,
         RESTFilterLocaleCollectionItemV1> {
@@ -62,24 +61,12 @@ public class FilterLocaleV1Factory extends RESTDataObjectFactory<RESTFilterLocal
     }
 
     @Override
-    public void syncDBEntityWithRESTEntity(final EntityManager entityManager, final FilterLocale entity,
-            final RESTFilterLocaleV1 dataObject) {
+    public void syncDBEntityWithRESTEntityFirstPass(final EntityManager entityManager,
+            Map<RESTBaseEntityV1<?, ?, ?>, AuditedEntity> newEntityCache, final FilterLocale entity, final RESTFilterLocaleV1 dataObject) {
         if (dataObject.hasParameterSet(RESTFilterLocaleV1.LOCALE_NAME))
             entity.setLocaleName(dataObject.getLocale());
         if (dataObject.hasParameterSet(RESTFilterLocaleV1.STATE_NAME))
             entity.setLocaleState(dataObject.getState());
-
-        if (dataObject.hasParameterSet(RESTFilterLocaleV1.FILTER_NAME)) {
-            final RESTFilterV1 restEntity = dataObject.getFilter();
-
-            if (restEntity != null) {
-                final Filter dbEntity = entityManager.find(Filter.class, restEntity.getId());
-                if (dbEntity == null)
-                    throw new BadRequestException("No Filter entity was found with the primary key " + restEntity.getId());
-
-                entity.setFilter(dbEntity);
-            }
-        }
 
         entityManager.persist(entity);
     }

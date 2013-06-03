@@ -25,7 +25,9 @@ import java.sql.BatchUpdateException;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
 import org.codehaus.jackson.map.ObjectMapper;
@@ -67,7 +69,6 @@ import org.jboss.pressgang.ccms.server.ejb.EnversLoggingBean;
 import org.jboss.pressgang.ccms.server.rest.BaseREST;
 import org.jboss.pressgang.ccms.server.rest.DatabaseOperation;
 import org.jboss.pressgang.ccms.server.rest.v1.ContentSpecV1Factory;
-import org.jboss.pressgang.ccms.server.utils.Constants;
 import org.jboss.pressgang.ccms.server.utils.EntityUtilities;
 import org.jboss.pressgang.ccms.server.utils.JNDIUtilities;
 import org.jboss.pressgang.ccms.server.utils.ProviderUtilities;
@@ -366,6 +367,10 @@ public class BaseRESTv1 extends BaseREST {
             // Store the log details into the Logging Java Bean
             setLogDetails(entityManager, logDetails);
 
+            // Create the map to be used as a new entity cache
+            final Map<RESTBaseEntityV1<?, ?, ?>, AuditedEntity> newEntityCache = new HashMap<RESTBaseEntityV1<?, ?, ?>,
+                    AuditedEntity>();
+
             /*
              * The difference between creating or updating an entity is that we create a new instance of U, or find an existing
              * instance of U.
@@ -380,11 +385,13 @@ public class BaseRESTv1 extends BaseREST {
                 if (entity == null) throw new BadRequestException("No entity was found with the primary key " + restEntity.getId());
 
                 // Sync the changes from the REST Entity to the Database.
-                factory.syncDBEntityWithRESTEntity(entityManager, entity, restEntity);
+                factory.syncDBEntityWithRESTEntityFirstPass(entityManager, newEntityCache, entity, restEntity);
+                factory.syncDBEntityWithRESTEntitySecondPass(entityManager, newEntityCache, entity, restEntity);
 
             } else if (operation == DatabaseOperation.CREATE) {
                 // Create a new Database Entity using the REST Entity.
-                entity = factory.createDBEntityFromRESTEntity(entityManager, restEntity);
+                entity = factory.createDBEntityFromRESTEntity(entityManager, newEntityCache, restEntity);
+                factory.syncDBEntityWithRESTEntitySecondPass(entityManager, newEntityCache, entity, restEntity);
 
                 // Check that a entity was able to be successfully created.
                 if (entity == null) throw new BadRequestException("The entity could not be created");
@@ -546,6 +553,10 @@ public class BaseRESTv1 extends BaseREST {
             // Store the log details into the Logging Java Bean
             setLogDetails(entityManager, logDetails);
 
+            // Create the map to be used as a new entity cache
+            final Map<RESTBaseEntityV1<?, ?, ?>, AuditedEntity> newEntityCache = new HashMap<RESTBaseEntityV1<?, ?, ?>,
+                    AuditedEntity>();
+
             final List<U> retValue = new ArrayList<U>();
             for (final T restEntity : entities.returnItems()) {
 
@@ -563,10 +574,12 @@ public class BaseRESTv1 extends BaseREST {
                     if (entity == null) throw new BadRequestException("No entity was found with the primary key " + restEntity.getId());
 
                     // Sync the database entity with the REST Entity
-                    factory.syncDBEntityWithRESTEntity(entityManager, entity, restEntity);
+                    factory.syncDBEntityWithRESTEntityFirstPass(entityManager, newEntityCache, entity, restEntity);
+                    factory.syncDBEntityWithRESTEntitySecondPass(entityManager, newEntityCache, entity, restEntity);
                 } else if (operation == DatabaseOperation.CREATE) {
                     // Create a Database Entity using the information from the REST Entity.
-                    entity = factory.createDBEntityFromRESTEntity(entityManager, restEntity);
+                    entity = factory.createDBEntityFromRESTEntity(entityManager, newEntityCache, restEntity);
+                    factory.syncDBEntityWithRESTEntitySecondPass(entityManager, newEntityCache, entity, restEntity);
 
                     // Check that the entity was successfully created
                     if (entity == null) throw new BadRequestException("The entity could not be created");
@@ -1353,6 +1366,8 @@ public class BaseRESTv1 extends BaseREST {
      * @return A RESTEasy Exception containing the details of the Error.
      */
     public Failure processError(final TransactionManager transactionManager, final Throwable ex) {
+        log.error("Failed to process REST request", ex);
+
         // Rollback if a transaction is active
         try {
             if (transactionManager != null) {

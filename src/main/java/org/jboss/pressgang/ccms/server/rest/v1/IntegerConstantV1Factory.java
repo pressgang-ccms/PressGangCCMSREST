@@ -3,8 +3,10 @@ package org.jboss.pressgang.ccms.server.rest.v1;
 import javax.persistence.EntityManager;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
 import org.jboss.pressgang.ccms.model.IntegerConstants;
+import org.jboss.pressgang.ccms.model.base.AuditedEntity;
 import org.jboss.pressgang.ccms.rest.v1.collections.RESTIntegerConstantCollectionV1;
 import org.jboss.pressgang.ccms.rest.v1.collections.items.RESTIntegerConstantCollectionItemV1;
 import org.jboss.pressgang.ccms.rest.v1.constants.RESTv1Constants;
@@ -56,7 +58,8 @@ public class IntegerConstantV1Factory extends RESTDataObjectFactory<RESTIntegerC
     }
 
     @Override
-    public void syncDBEntityWithRESTEntity(final EntityManager entityManager, final IntegerConstants entity,
+    public void syncDBEntityWithRESTEntityFirstPass(final EntityManager entityManager,
+            Map<RESTBaseEntityV1<?, ?, ?>, AuditedEntity> newEntityCache, final IntegerConstants entity,
             final RESTIntegerConstantV1 dataObject) {
         if (dataObject.hasParameterSet(RESTStringConstantV1.NAME_NAME))
             entity.setConstantName(dataObject.getName());

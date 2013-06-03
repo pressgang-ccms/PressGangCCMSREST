@@ -3,8 +3,10 @@ package org.jboss.pressgang.ccms.server.rest.v1;
 import javax.persistence.EntityManager;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
 import org.jboss.pressgang.ccms.model.LanguageImage;
+import org.jboss.pressgang.ccms.model.base.AuditedEntity;
 import org.jboss.pressgang.ccms.rest.v1.collections.RESTLanguageImageCollectionV1;
 import org.jboss.pressgang.ccms.rest.v1.collections.items.RESTLanguageImageCollectionItemV1;
 import org.jboss.pressgang.ccms.rest.v1.entities.RESTLanguageImageV1;
@@ -31,7 +33,7 @@ public class LanguageImageV1Factory extends RESTDataObjectFactory<RESTLanguageIm
         final List<String> expandOptions = new ArrayList<String>();
         expandOptions.add(RESTLanguageImageV1.IMAGEDATA_NAME);
         expandOptions.add(RESTLanguageImageV1.IMAGEDATABASE64_NAME);
-        expandOptions.add(RESTLanguageImageV1.IMAGEDATABASE64_NAME);
+        expandOptions.add(RESTLanguageImageV1.THUMBNAIL_NAME);
         expandOptions.add(RESTBaseEntityV1.LOG_DETAILS_NAME);
 
         if (revision == null) expandOptions.add(RESTBaseEntityV1.REVISIONS_NAME);
@@ -70,8 +72,8 @@ public class LanguageImageV1Factory extends RESTDataObjectFactory<RESTLanguageIm
     }
 
     @Override
-    public void syncDBEntityWithRESTEntity(final EntityManager entityManager, final LanguageImage entity,
-            final RESTLanguageImageV1 dataObject) {
+    public void syncDBEntityWithRESTEntityFirstPass(final EntityManager entityManager,
+            Map<RESTBaseEntityV1<?, ?, ?>, AuditedEntity> newEntityCache, final LanguageImage entity, final RESTLanguageImageV1 dataObject) {
         if (dataObject.hasParameterSet(RESTLanguageImageV1.LOCALE_NAME))
             entity.setLocale(dataObject.getLocale());
         if (dataObject.hasParameterSet(RESTLanguageImageV1.IMAGEDATA_NAME))
@@ -79,5 +81,4 @@ public class LanguageImageV1Factory extends RESTDataObjectFactory<RESTLanguageIm
         if (dataObject.hasParameterSet(RESTLanguageImageV1.FILENAME_NAME))
             entity.setOriginalFileName(dataObject.getFilename());
     }
-
 }

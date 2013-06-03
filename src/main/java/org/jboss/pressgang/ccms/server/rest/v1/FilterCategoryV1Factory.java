@@ -3,10 +3,12 @@ package org.jboss.pressgang.ccms.server.rest.v1;
 import javax.persistence.EntityManager;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
 import org.jboss.pressgang.ccms.model.Category;
 import org.jboss.pressgang.ccms.model.FilterCategory;
 import org.jboss.pressgang.ccms.model.Project;
+import org.jboss.pressgang.ccms.model.base.AuditedEntity;
 import org.jboss.pressgang.ccms.rest.v1.collections.RESTFilterCategoryCollectionV1;
 import org.jboss.pressgang.ccms.rest.v1.collections.items.RESTFilterCategoryCollectionItemV1;
 import org.jboss.pressgang.ccms.rest.v1.entities.RESTCategoryV1;
@@ -16,6 +18,7 @@ import org.jboss.pressgang.ccms.rest.v1.entities.base.RESTBaseEntityV1;
 import org.jboss.pressgang.ccms.rest.v1.expansion.ExpandDataTrunk;
 import org.jboss.pressgang.ccms.server.rest.v1.base.RESTDataObjectCollectionFactory;
 import org.jboss.pressgang.ccms.server.rest.v1.base.RESTDataObjectFactory;
+import org.jboss.pressgang.ccms.server.rest.v1.utils.RESTv1Utilities;
 import org.jboss.pressgang.ccms.server.utils.EnversUtilities;
 import org.jboss.resteasy.spi.BadRequestException;
 
@@ -76,17 +79,22 @@ public class FilterCategoryV1Factory extends RESTDataObjectFactory<RESTFilterCat
     }
 
     @Override
-    public void syncDBEntityWithRESTEntity(final EntityManager entityManager, final FilterCategory entity,
+    public void syncDBEntityWithRESTEntityFirstPass(final EntityManager entityManager,
+            Map<RESTBaseEntityV1<?, ?, ?>, AuditedEntity> newEntityCache, final FilterCategory entity,
             final RESTFilterCategoryV1 dataObject) {
 
         if (dataObject.hasParameterSet(RESTFilterCategoryV1.STATE_NAME)) entity.setCategoryState(dataObject.getState());
+    }
 
+    @Override
+    public void syncDBEntityWithRESTEntitySecondPass(EntityManager entityManager,
+            Map<RESTBaseEntityV1<?, ?, ?>, AuditedEntity> newEntityCache, FilterCategory entity, RESTFilterCategoryV1 dataObject) {
         /* Set the Category for the FilterCategory */
         if (dataObject.hasParameterSet(RESTFilterCategoryV1.CATEGORY_NAME)) {
             final RESTCategoryV1 restEntity = dataObject.getCategory();
 
             if (restEntity != null) {
-                final Category dbEntity = entityManager.find(Category.class, restEntity.getId());
+                final Category dbEntity = RESTv1Utilities.findEntity(entityManager, newEntityCache, restEntity, Category.class);
                 if (dbEntity == null)
                     throw new BadRequestException("No Category entity was found with the primary key " + restEntity.getId());
 
@@ -101,7 +109,7 @@ public class FilterCategoryV1Factory extends RESTDataObjectFactory<RESTFilterCat
             final RESTProjectV1 restEntity = dataObject.getProject();
 
             if (restEntity != null) {
-                final Project dbEntity = entityManager.find(Project.class, restEntity.getId());
+                final Project dbEntity = RESTv1Utilities.findEntity(entityManager, newEntityCache, restEntity, Project.class);
                 if (dbEntity == null)
                     throw new BadRequestException("No Project entity was found with the primary key " + restEntity.getId());
 
@@ -110,6 +118,7 @@ public class FilterCategoryV1Factory extends RESTDataObjectFactory<RESTFilterCat
                 entity.setProject(null);
             }
         }
+
     }
 
 }

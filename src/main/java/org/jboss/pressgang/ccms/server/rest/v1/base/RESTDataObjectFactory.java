@@ -1,6 +1,7 @@
 package org.jboss.pressgang.ccms.server.rest.v1.base;
 
 import javax.persistence.EntityManager;
+import java.util.Map;
 
 import org.jboss.pressgang.ccms.model.base.AuditedEntity;
 import org.jboss.pressgang.ccms.model.utils.EnversUtilities;
@@ -123,26 +124,55 @@ public abstract class RESTDataObjectFactory<T extends RESTBaseEntityV1<T, V, W>,
             final ExpandDataTrunk expand, final Number revision, final boolean expandParentReferences, final EntityManager entityManager);
 
     /**
-     * Populates the values of a database entity from a REST entity
+     * Populates the values of a database entity from a REST entity. This step should iterate over "One to Many" or "Many to Many"
+     * collections and do the following:<br />
+     * <br />
+     * 1. Process any Remove items.<br />
+     * 2. Create any "One to Many" Add items and do the First Pass on the new entities.<br />
+     * 3. Do the First Pass on any Update items.<br />
      *
-     * @param entityManager The EntityManager object used to look up the entity and any extra information.
-     * @param entity        The database entity to be synced from the REST Entity.
-     * @param dataObject    The REST entity object.
+     * @param entityManager  The EntityManager object used to look up the entity and any extra information.
+     * @param newEntityCache
+     * @param entity         The database entity to be synced from the REST Entity.
+     * @param dataObject     The REST entity object.
      */
-    public abstract void syncDBEntityWithRESTEntity(final EntityManager entityManager, final U entity,
-            final T dataObject);
+    public abstract void syncDBEntityWithRESTEntityFirstPass(final EntityManager entityManager,
+            final Map<RESTBaseEntityV1<?, ?, ?>, AuditedEntity> newEntityCache, final U entity, final T dataObject);
+
+    /**
+     * Populates the entities for new entities, that were created in the first pass. This step should iterate over "One to Many" or "Many
+     * to Many"
+     * collections and do the following:<br />
+     * <br />
+     * 1. Do the Second Pass "One to Many" Add items.<br />
+     * 2. Add the "Many to Many" Add items.<br />
+     * 3. Do the Second Pass on any Update items.<br />
+     * 4. Set the singular entities, so new entities can be found.<br />
+     *
+     * @param entityManager  The EntityManager object used to look up the entity and any extra information.
+     * @param newEntityCache
+     * @param entity         The database entity to be synced from the REST Entity.
+     * @param dataObject     The REST entity object.
+     */
+    public void syncDBEntityWithRESTEntitySecondPass(final EntityManager entityManager,
+            final Map<RESTBaseEntityV1<?, ?, ?>, AuditedEntity> newEntityCache, final U entity, final T dataObject) {
+
+    }
 
     /**
      * Creates, populates and returns a new database entity from a REST entity
      *
-     * @param entityManager The EntityManager object used to look up the entity and any extra information.
-     * @param dataObject    The REST entity used to populate the database entity's values
-     * @return A new database entity with the values supplied from the dataObject
+     * @param entityManager  The EntityManager object used to look up the entity and any extra information.
+     * @param newEntityCache
+     * @param dataObject     The REST entity used to populate the database entity's values  @return A new database entity with the values
+     *                       supplied from the dataObject
      */
-    public U createDBEntityFromRESTEntity(final EntityManager entityManager, final T dataObject) {
+    public U createDBEntityFromRESTEntity(final EntityManager entityManager,
+            final Map<RESTBaseEntityV1<?, ?, ?>, AuditedEntity> newEntityCache, final T dataObject) {
         try {
             final U entity = databaseClass.newInstance();
-            this.syncDBEntityWithRESTEntity(entityManager, entity, dataObject);
+            newEntityCache.put(dataObject, entity);
+            syncDBEntityWithRESTEntityFirstPass(entityManager, newEntityCache, entity, dataObject);
             return entity;
         } catch (InstantiationException e) {
             throw new InternalServerErrorException(e);

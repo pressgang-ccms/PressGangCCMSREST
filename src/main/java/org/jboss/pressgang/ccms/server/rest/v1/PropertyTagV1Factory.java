@@ -3,10 +3,12 @@ package org.jboss.pressgang.ccms.server.rest.v1;
 import javax.persistence.EntityManager;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
 import org.jboss.pressgang.ccms.model.PropertyTag;
 import org.jboss.pressgang.ccms.model.PropertyTagCategory;
 import org.jboss.pressgang.ccms.model.PropertyTagToPropertyTagCategory;
+import org.jboss.pressgang.ccms.model.base.AuditedEntity;
 import org.jboss.pressgang.ccms.rest.v1.collections.RESTPropertyTagCollectionV1;
 import org.jboss.pressgang.ccms.rest.v1.collections.items.RESTPropertyTagCollectionItemV1;
 import org.jboss.pressgang.ccms.rest.v1.collections.items.join.RESTPropertyCategoryInPropertyTagCollectionItemV1;
@@ -19,11 +21,15 @@ import org.jboss.pressgang.ccms.rest.v1.entities.join.RESTPropertyTagInPropertyC
 import org.jboss.pressgang.ccms.rest.v1.expansion.ExpandDataTrunk;
 import org.jboss.pressgang.ccms.server.rest.v1.base.RESTDataObjectCollectionFactory;
 import org.jboss.pressgang.ccms.server.rest.v1.base.RESTDataObjectFactory;
+import org.jboss.pressgang.ccms.server.rest.v1.utils.RESTv1Utilities;
 import org.jboss.pressgang.ccms.server.utils.EnversUtilities;
 import org.jboss.resteasy.spi.BadRequestException;
 
 public class PropertyTagV1Factory extends RESTDataObjectFactory<RESTPropertyTagV1, PropertyTag, RESTPropertyTagCollectionV1,
         RESTPropertyTagCollectionItemV1> {
+    private final PropertyCategoryInPropertyTagV1Factory propertyCategoryInPropertyTagFactory = new
+            PropertyCategoryInPropertyTagV1Factory();
+
     public PropertyTagV1Factory() {
         super(PropertyTag.class);
     }
@@ -75,8 +81,8 @@ public class PropertyTagV1Factory extends RESTDataObjectFactory<RESTPropertyTagV
     }
 
     @Override
-    public void syncDBEntityWithRESTEntity(final EntityManager entityManager, final PropertyTag entity,
-            final RESTPropertyTagV1 dataObject) {
+    public void syncDBEntityWithRESTEntityFirstPass(final EntityManager entityManager,
+            Map<RESTBaseEntityV1<?, ?, ?>, AuditedEntity> newEntityCache, final PropertyTag entity, final RESTPropertyTagV1 dataObject) {
         if (dataObject.hasParameterSet(RESTPropertyTagV1.DESCRIPTION_NAME)) entity.setPropertyTagDescription(dataObject.getDescription());
         if (dataObject.hasParameterSet(RESTPropertyTagV1.CANBENULL_NAME)) entity.setPropertyTagCanBeNull(dataObject.getCanBeNull());
         if (dataObject.hasParameterSet(RESTPropertyTagV1.NAME_NAME)) entity.setPropertyTagName(dataObject.getName());
@@ -85,6 +91,7 @@ public class PropertyTagV1Factory extends RESTDataObjectFactory<RESTPropertyTagV
 
         entityManager.persist(entity);
 
+        // Many to Many
         if (dataObject.hasParameterSet(
                 RESTPropertyTagV1.PROPERTY_CATEGORIES_NAME) && dataObject.getPropertyCategories() != null && dataObject
                 .getPropertyCategories().getItems() != null) {
@@ -93,16 +100,12 @@ public class PropertyTagV1Factory extends RESTDataObjectFactory<RESTPropertyTagV
             for (final RESTPropertyCategoryInPropertyTagCollectionItemV1 restEntityItem : dataObject.getPropertyCategories().getItems()) {
                 final RESTPropertyCategoryInPropertyTagV1 restEntity = restEntityItem.getItem();
 
-                if (restEntityItem.returnIsAddItem() || restEntityItem.returnIsRemoveItem()) {
+                if (restEntityItem.returnIsRemoveItem()) {
                     final PropertyTagCategory dbEntity = entityManager.find(PropertyTagCategory.class, restEntity.getId());
                     if (dbEntity == null)
                         throw new BadRequestException("No PropertyTagCategory entity was found with the primary key " + restEntity.getId());
 
-                    if (restEntityItem.returnIsAddItem()) {
-                        entity.addPropertyTagCategory(dbEntity);
-                    } else if (restEntityItem.returnIsRemoveItem()) {
-                        entity.removePropertyTagCategory(dbEntity);
-                    }
+                    entity.removePropertyTagCategory(dbEntity);
                 } else if (restEntityItem.returnIsUpdateItem()) {
                     final PropertyTagToPropertyTagCategory dbEntity = entityManager.find(PropertyTagToPropertyTagCategory.class,
                             restEntity.getRelationshipId());
@@ -112,7 +115,40 @@ public class PropertyTagV1Factory extends RESTDataObjectFactory<RESTPropertyTagV
                             "No PropertyTagToPropertyTagCategory entity was found with the primary key " + restEntity.getRelationshipId()
                                     + " for PropertyTag " + entity.getId());
 
-                    new PropertyCategoryInPropertyTagV1Factory().syncDBEntityWithRESTEntity(entityManager, dbEntity, restEntity);
+                    propertyCategoryInPropertyTagFactory.syncDBEntityWithRESTEntityFirstPass(entityManager, newEntityCache, dbEntity,
+                            restEntity);
+                }
+            }
+        }
+    }
+
+    @Override
+    public void syncDBEntityWithRESTEntitySecondPass(EntityManager entityManager,
+            Map<RESTBaseEntityV1<?, ?, ?>, AuditedEntity> newEntityCache, PropertyTag entity, RESTPropertyTagV1 dataObject) {
+        // Many to Many
+        if (dataObject.hasParameterSet(
+                RESTPropertyTagV1.PROPERTY_CATEGORIES_NAME) && dataObject.getPropertyCategories() != null && dataObject
+                .getPropertyCategories().getItems() != null) {
+            dataObject.getPropertyCategories().removeInvalidChangeItemRequests();
+
+            for (final RESTPropertyCategoryInPropertyTagCollectionItemV1 restEntityItem : dataObject.getPropertyCategories().getItems()) {
+                final RESTPropertyCategoryInPropertyTagV1 restEntity = restEntityItem.getItem();
+
+                if (restEntityItem.returnIsAddItem()) {
+                    final PropertyTagCategory dbEntity = RESTv1Utilities.findEntity(entityManager, newEntityCache, restEntity,
+                            PropertyTagCategory.class);
+                    if (dbEntity == null)
+                        throw new BadRequestException("No PropertyTagCategory entity was found with the primary key " + restEntity.getId());
+
+                    entity.addPropertyTagCategory(dbEntity);
+                } else if (restEntityItem.returnIsUpdateItem()) {
+                    final PropertyTagToPropertyTagCategory dbEntity = entityManager.find(PropertyTagToPropertyTagCategory.class,
+                            restEntity.getRelationshipId());
+                    if (dbEntity == null) throw new BadRequestException(
+                            "No PropertyTagToPropertyTagCategory entity was found with the primary key " + restEntity.getRelationshipId());
+
+                    propertyCategoryInPropertyTagFactory.syncDBEntityWithRESTEntitySecondPass(entityManager, newEntityCache, dbEntity,
+                            restEntity);
                 }
             }
         }
