@@ -1074,6 +1074,8 @@ public class BaseRESTv1 extends BaseREST {
      * @return A RESTEasy Exception containing the details of the Error.
      */
     public Failure processError(final TransactionManager transactionManager, final Throwable ex) {
+        log.debug("", ex);
+
         // Rollback if a transaction is active
         try {
             if (transactionManager != null) {
