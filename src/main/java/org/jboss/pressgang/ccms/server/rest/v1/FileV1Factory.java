@@ -50,6 +50,7 @@ public class FileV1Factory extends RESTDataObjectFactory<RESTFileV1, File, RESTF
         retValue.setDescription(entity.getDescription());
         retValue.setFileName(entity.getFileName());
         retValue.setFilePath(entity.getFilePath());
+        retValue.setExplodeArchive(entity.getExplodeArchive());
 
         // REVISIONS
         if (revision == null && expand != null && expand.contains(RESTBaseEntityV1.REVISIONS_NAME)) {
@@ -77,6 +78,9 @@ public class FileV1Factory extends RESTDataObjectFactory<RESTFileV1, File, RESTF
     public void syncDBEntityWithRESTEntityFirstPass(final EntityManager entityManager,
             Map<RESTBaseEntityV1<?, ?, ?>, AuditedEntity> newEntityCache, final File entity, final RESTFileV1 dataObject) {
         if (dataObject.hasParameterSet(RESTFileV1.DESCRIPTION_NAME)) entity.setDescription(dataObject.getDescription());
+        if (dataObject.hasParameterSet(RESTFileV1.FILE_NAME)) entity.setFileName(dataObject.getFileName());
+        if (dataObject.hasParameterSet(RESTFileV1.FILE_PATH_NAME)) entity.setFilePath(dataObject.getFilePath());
+        if (dataObject.hasParameterSet(RESTFileV1.EXPLODE_ARCHIVE_NAME)) entity.setExplodeArchive(dataObject.getExplodeArchive());
 
         /* One To Many - Add will create a child entity */
         if (dataObject.hasParameterSet(
