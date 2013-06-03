@@ -24,6 +24,7 @@ import org.jboss.pressgang.ccms.rest.v1.entities.base.RESTBaseEntityV1;
 import org.jboss.pressgang.ccms.rest.v1.entities.contentspec.RESTCSNodeV1;
 import org.jboss.pressgang.ccms.rest.v1.entities.contentspec.RESTContentSpecV1;
 import org.jboss.pressgang.ccms.rest.v1.entities.contentspec.RESTTranslatedCSNodeV1;
+import org.jboss.pressgang.ccms.rest.v1.entities.contentspec.enums.RESTCSNodeRelationshipTypeV1;
 import org.jboss.pressgang.ccms.rest.v1.entities.contentspec.enums.RESTCSNodeTypeV1;
 import org.jboss.pressgang.ccms.rest.v1.entities.contentspec.join.RESTCSRelatedNodeV1;
 import org.jboss.pressgang.ccms.rest.v1.entities.join.RESTAssignedPropertyTagV1;
@@ -36,6 +37,7 @@ import org.jboss.resteasy.spi.BadRequestException;
 
 public class CSNodeV1Factory extends RESTDataObjectFactory<RESTCSNodeV1, CSNode, RESTCSNodeCollectionV1, RESTCSNodeCollectionItemV1> {
     private final CSNodePropertyTagV1Factory csNodePropertyTagFactory = new CSNodePropertyTagV1Factory();
+    private final CSRelatedNodeV1Factory csRelatedNodeFactory = new CSRelatedNodeV1Factory();
 
     public CSNodeV1Factory() {
         super(CSNode.class);
@@ -223,6 +225,62 @@ public class CSNodeV1Factory extends RESTDataObjectFactory<RESTCSNodeV1, CSNode,
                 }
             }
         }
+
+        // Many to Many
+        if (dataObject.hasParameterSet(
+                RESTCSNodeV1.RELATED_TO_NAME) && dataObject.getRelatedToNodes() != null && dataObject.getRelatedToNodes().getItems() !=
+                null) {
+            dataObject.getRelatedToNodes().removeInvalidChangeItemRequests();
+
+            for (final RESTCSRelatedNodeCollectionItemV1 restEntityItem : dataObject.getRelatedToNodes().getItems()) {
+                final RESTCSRelatedNodeV1 restEntity = restEntityItem.getItem();
+
+                if (restEntityItem.returnIsRemoveItem()) {
+                    final CSNodeToCSNode dbEntity = entityManager.find(CSNodeToCSNode.class, restEntity.getRelationshipId());
+                    if (dbEntity == null) throw new BadRequestException(
+                            "No CSNodeToCSNode entity was found with the primary key " + restEntity.getRelationshipId());
+
+                    entity.removeRelatedTo(dbEntity);
+                } else if (restEntityItem.returnIsUpdateItem()) {
+                    final CSNodeToCSNode dbEntity = entityManager.find(CSNodeToCSNode.class, restEntity.getRelationshipId());
+                    if (dbEntity == null) throw new BadRequestException(
+                            "No CSNodeToCSNode entity was found with the primary key " + restEntity.getRelationshipId());
+                    if (!entity.getRelatedToNodes().contains(dbEntity)) throw new BadRequestException(
+                            "No CSNodeToCSNode entity was found with the primary key " + restEntity.getRelationshipId() + " for " +
+                                    "CSNode " + entity.getId());
+
+                    csRelatedNodeFactory.syncDBEntityWithRESTEntityFirstPass(entityManager, newEntityCache, dbEntity, restEntity);
+                }
+            }
+        }
+
+        // Many to Many
+        if (dataObject.hasParameterSet(
+                RESTCSNodeV1.RELATED_FROM_NAME) && dataObject.getRelatedFromNodes() != null && dataObject.getRelatedFromNodes().getItems
+                () != null) {
+            dataObject.getRelatedFromNodes().removeInvalidChangeItemRequests();
+
+            for (final RESTCSRelatedNodeCollectionItemV1 restEntityItem : dataObject.getRelatedFromNodes().getItems()) {
+                final RESTCSRelatedNodeV1 restEntity = restEntityItem.getItem();
+
+                if (restEntityItem.returnIsRemoveItem()) {
+                    final CSNodeToCSNode dbEntity = entityManager.find(CSNodeToCSNode.class, restEntity.getRelationshipId());
+                    if (dbEntity == null) throw new BadRequestException(
+                            "No CSNodeToCSNode entity was found with the primary key " + restEntity.getRelationshipId());
+
+                    entity.removeRelatedFrom(dbEntity);
+                } else if (restEntityItem.returnIsUpdateItem()) {
+                    final CSNodeToCSNode dbEntity = entityManager.find(CSNodeToCSNode.class, restEntity.getRelationshipId());
+                    if (dbEntity == null) throw new BadRequestException(
+                            "No CSNodeToCSNode entity was found with the primary key " + restEntity.getRelationshipId());
+                    if (!entity.getRelatedFromNodes().contains(dbEntity)) throw new BadRequestException(
+                            "No CSNodeToCSNode entity was found with the primary key " + restEntity.getRelationshipId() + " for " +
+                                    "CSNode " + entity.getId());
+
+                    csRelatedNodeFactory.syncDBEntityWithRESTEntityFirstPass(entityManager, newEntityCache, dbEntity, restEntity);
+                }
+            }
+        }
     }
 
     @Override
@@ -284,6 +342,62 @@ public class CSNodeV1Factory extends RESTDataObjectFactory<RESTCSNodeV1, CSNode,
                             "No CSNodeToPropertyTag entity was found with the primary key " + restEntity.getRelationshipId());
 
                     csNodePropertyTagFactory.syncDBEntityWithRESTEntitySecondPass(entityManager, newEntityCache, dbEntity, restEntity);
+                }
+            }
+        }
+
+        // Many to Many
+        if (dataObject.hasParameterSet(
+                RESTCSNodeV1.RELATED_TO_NAME) && dataObject.getRelatedToNodes() != null && dataObject.getRelatedToNodes().getItems() !=
+                null) {
+            dataObject.getRelatedToNodes().removeInvalidChangeItemRequests();
+
+            for (final RESTCSRelatedNodeCollectionItemV1 restEntityItem : dataObject.getRelatedToNodes().getItems()) {
+                final RESTCSRelatedNodeV1 restEntity = restEntityItem.getItem();
+
+                if (restEntityItem.returnIsAddItem()) {
+                    final CSNode dbEntity = RESTv1Utilities.findEntity(entityManager, newEntityCache, restEntity, CSNode.class);
+                    if (dbEntity == null)
+                        throw new BadRequestException("No CSNode entity was found with the primary key " + restEntity.getId());
+
+                    entity.addRelatedTo(dbEntity, RESTCSNodeRelationshipTypeV1.getRelationshipTypeId(restEntity.getRelationshipType()));
+                } else if (restEntityItem.returnIsUpdateItem()) {
+                    final CSNodeToCSNode dbEntity = entityManager.find(CSNodeToCSNode.class, restEntity.getRelationshipId());
+                    if (dbEntity == null) throw new BadRequestException(
+                            "No CSNodeToCSNode entity was found with the primary key " + restEntity.getRelationshipId());
+                    if (!entity.getRelatedToNodes().contains(dbEntity)) throw new BadRequestException(
+                            "No CSNodeToCSNode entity was found with the primary key " + restEntity.getRelationshipId() + " for" +
+                                    " ContentSpec " + entity.getId());
+
+                    csRelatedNodeFactory.syncDBEntityWithRESTEntityFirstPass(entityManager, newEntityCache, dbEntity, restEntity);
+                }
+            }
+        }
+
+        // Many to Many
+        if (dataObject.hasParameterSet(
+                RESTCSNodeV1.RELATED_FROM_NAME) && dataObject.getRelatedFromNodes() != null && dataObject.getRelatedFromNodes().getItems
+                () != null) {
+            dataObject.getRelatedFromNodes().removeInvalidChangeItemRequests();
+
+            for (final RESTCSRelatedNodeCollectionItemV1 restEntityItem : dataObject.getRelatedFromNodes().getItems()) {
+                final RESTCSRelatedNodeV1 restEntity = restEntityItem.getItem();
+
+                if (restEntityItem.returnIsAddItem()) {
+                    final CSNode dbEntity = RESTv1Utilities.findEntity(entityManager, newEntityCache, restEntity, CSNode.class);
+                    if (dbEntity == null)
+                        throw new BadRequestException("No CSNode entity was found with the primary key " + restEntity.getId());
+
+                    entity.addRelatedFrom(dbEntity, RESTCSNodeRelationshipTypeV1.getRelationshipTypeId(restEntity.getRelationshipType()));
+                } else if (restEntityItem.returnIsUpdateItem()) {
+                    final CSNodeToCSNode dbEntity = entityManager.find(CSNodeToCSNode.class, restEntity.getRelationshipId());
+                    if (dbEntity == null) throw new BadRequestException(
+                            "No CSNodeToCSNode entity was found with the primary key " + restEntity.getRelationshipId());
+                    if (!entity.getRelatedFromNodes().contains(dbEntity)) throw new BadRequestException(
+                            "No CSNodeToCSNode entity was found with the primary key " + restEntity.getRelationshipId() + " for" +
+                                    " ContentSpec " + entity.getId());
+
+                    csRelatedNodeFactory.syncDBEntityWithRESTEntityFirstPass(entityManager, newEntityCache, dbEntity, restEntity);
                 }
             }
         }
