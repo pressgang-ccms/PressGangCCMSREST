@@ -229,15 +229,17 @@ public class TagV1Factory extends RESTDataObjectFactory<RESTTagV1, Tag, RESTTagC
                 final RESTAssignedPropertyTagV1 restEntity = restEntityItem.getItem();
 
                 if (restEntityItem.returnIsAddItem() || restEntityItem.returnIsRemoveItem()) {
+                    final TagToPropertyTag dbEntity = entityManager.find(TagToPropertyTag.class, restEntity.getRelationshipId());
+                    if (dbEntity == null) throw new BadRequestException(
+                            "No TagToPropertyTag entity was found with the primary key " + restEntity.getRelationshipId());
+
+                    entity.removePropertyTag(dbEntity);
+                } else if (restEntityItem.returnIsAddItem()) {
                     final PropertyTag dbEntity = entityManager.find(PropertyTag.class, restEntity.getId());
                     if (dbEntity == null)
                         throw new BadRequestException("No PropertyTag entity was found with the primary key " + restEntity.getId());
 
-                    if (restEntityItem.returnIsAddItem()) {
-                        entity.addPropertyTag(dbEntity, restEntity.getValue());
-                    } else if (restEntityItem.returnIsRemoveItem()) {
-                        entity.removePropertyTag(dbEntity, restEntity.getValue());
-                    }
+                    entity.addPropertyTag(dbEntity, restEntity.getValue());
                 } else if (restEntityItem.returnIsUpdateItem()) {
                     final TagToPropertyTag dbEntity = entityManager.find(TagToPropertyTag.class, restEntity.getRelationshipId());
                     if (dbEntity == null) throw new BadRequestException(
