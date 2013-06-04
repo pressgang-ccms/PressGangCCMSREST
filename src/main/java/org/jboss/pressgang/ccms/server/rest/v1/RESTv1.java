@@ -3,6 +3,7 @@ package org.jboss.pressgang.ccms.server.rest.v1;
 import javax.persistence.EntityManager;
 import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
+import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.Context;
 import javax.ws.rs.core.PathSegment;
 import javax.ws.rs.core.Response;
@@ -57,6 +58,7 @@ import org.jboss.pressgang.ccms.model.File;
 import org.jboss.pressgang.ccms.model.Filter;
 import org.jboss.pressgang.ccms.model.ImageFile;
 import org.jboss.pressgang.ccms.model.IntegerConstants;
+import org.jboss.pressgang.ccms.model.LanguageFile;
 import org.jboss.pressgang.ccms.model.LanguageImage;
 import org.jboss.pressgang.ccms.model.Project;
 import org.jboss.pressgang.ccms.model.PropertyTag;
@@ -391,6 +393,29 @@ public class RESTv1 extends BaseRESTv1 implements RESTBaseInterfaceV1, RESTInter
 
         return deleteJSONEntities(RESTBlobConstantCollectionV1.class, BlobConstants.class, factory, dbEntityIds,
                 RESTv1Constants.BLOBCONSTANTS_EXPANSION_NAME, expand, logDetails);
+    }
+
+    @Override
+    public byte[] getRAWBlobConstant(@PathParam("id") Integer id) {
+        if (id == null) throw new BadRequestException("The id parameter can not be null");
+
+        final EntityManager entityManager = getEntityManager();
+        final BlobConstants entity = getEntity(entityManager, BlobConstants.class, id);
+
+        response.getOutputHeaders().putSingle("Content-Disposition", "filename=" + entity.getConstantName());
+        return entity.getConstantValue();
+    }
+
+    @Override
+    public byte[] getRAWBlobConstantRevision(@PathParam("id") Integer id, @PathParam("rev") Integer revision) {
+        if (id == null) throw new BadRequestException("The id parameter can not be null");
+        if (revision == null) throw new BadRequestException("The revision parameter can not be null");
+
+        final EntityManager entityManager = getEntityManager();
+        final BlobConstants entity = getEntity(entityManager, BlobConstants.class, id, revision);
+
+        response.getOutputHeaders().putSingle("Content-Disposition", "filename=" + entity.getConstantName());
+        return entity.getConstantValue();
     }
 
     /* PROJECT FUNCTIONS */
@@ -2666,13 +2691,6 @@ public class RESTv1 extends BaseRESTv1 implements RESTBaseInterfaceV1, RESTInter
             }
         }
 
-        /* If the specified locale can't be found then use the default */
-        for (final LanguageImage languageImage : entity.getLanguageImages()) {
-            if (CommonConstants.DEFAULT_LOCALE.equalsIgnoreCase(languageImage.getLocale())) {
-                return Response.ok(languageImage.getImageData(), languageImage.getMimeType()).build();
-            }
-        }
-
         throw new BadRequestException("No image exists for the " + fixedLocale + " locale.");
     }
 
@@ -2687,13 +2705,6 @@ public class RESTv1 extends BaseRESTv1 implements RESTBaseInterfaceV1, RESTInter
         /* Try and find the locale specified first */
         for (final LanguageImage languageImage : entity.getLanguageImages()) {
             if (fixedLocale.equalsIgnoreCase(languageImage.getLocale())) {
-                return Response.ok(languageImage.getThumbnailData(), languageImage.getMimeType()).build();
-            }
-        }
-
-        /* If the specified locale can't be found then use the default */
-        for (final LanguageImage languageImage : entity.getLanguageImages()) {
-            if (CommonConstants.DEFAULT_LOCALE.equalsIgnoreCase(languageImage.getLocale())) {
                 return Response.ok(languageImage.getThumbnailData(), languageImage.getMimeType()).build();
             }
         }
@@ -4741,5 +4752,44 @@ public class RESTv1 extends BaseRESTv1 implements RESTBaseInterfaceV1, RESTInter
 
         return deleteJSONEntities(RESTFileCollectionV1.class, File.class, factory, dbEntityIds, RESTv1Constants.FILES_EXPANSION_NAME,
                 expand, logDetails);
+    }
+
+    @Override
+    public byte[] getRAWFile(@PathParam("id") Integer id, @QueryParam("lang") String locale) {
+        if (id == null) throw new BadRequestException("The id parameter can not be null");
+
+        final EntityManager entityManager = getEntityManager();
+        final File entity = getEntity(entityManager, File.class, id);
+        final String fixedLocale = locale == null ? CommonConstants.DEFAULT_LOCALE : locale;
+
+        /* Try and find the locale specified first */
+        for (final LanguageFile languageFile : entity.getLanguageFiles()) {
+            if (fixedLocale.equalsIgnoreCase(languageFile.getLocale())) {
+                response.getOutputHeaders().putSingle("Content-Disposition", "filename=" + entity.getFileName());
+                return languageFile.getFileData();
+            }
+        }
+
+        throw new BadRequestException("No file exists for the " + fixedLocale + " locale.");
+    }
+
+    @Override
+    public byte[] getRAWFileRevision(@PathParam("id") Integer id, @PathParam("rev") Integer revision, @QueryParam("lang") String locale) {
+        if (id == null) throw new BadRequestException("The id parameter can not be null");
+        if (revision == null) throw new BadRequestException("The revision parameter can not be null");
+
+        final EntityManager entityManager = getEntityManager();
+        final File entity = getEntity(entityManager, File.class, id, revision);
+        final String fixedLocale = locale == null ? CommonConstants.DEFAULT_LOCALE : locale;
+
+        /* Try and find the locale specified first */
+        for (final LanguageFile languageFile : entity.getLanguageFiles()) {
+            if (fixedLocale.equalsIgnoreCase(languageFile.getLocale())) {
+                response.getOutputHeaders().putSingle("Content-Disposition", "filename=" + entity.getFileName());
+                return languageFile.getFileData();
+            }
+        }
+
+        throw new BadRequestException("No file exists for the " + fixedLocale + " locale.");
     }
 }
