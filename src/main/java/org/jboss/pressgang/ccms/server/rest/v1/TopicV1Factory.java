@@ -262,11 +262,11 @@ public class TopicV1Factory extends RESTDataObjectFactory<RESTTopicV1, Topic, RE
                 final RESTAssignedPropertyTagV1 restEntity = restEntityItem.getItem();
 
                 if (restEntityItem.returnIsRemoveItem()) {
-                    final PropertyTag dbEntity = entityManager.find(PropertyTag.class, restEntity.getId());
-                    if (dbEntity == null)
-                        throw new BadRequestException("No PropertyTag entity was found with the primary key " + restEntity.getId());
+                    final TopicToPropertyTag dbEntity = entityManager.find(TopicToPropertyTag.class, restEntity.getRelationshipId());
+                    if (dbEntity == null) throw new BadRequestException(
+                            "No TopicToPropertyTag entity was found with the primary key " + restEntity.getRelationshipId());
 
-                    entity.removePropertyTag(dbEntity, restEntity.getValue());
+                    entity.removePropertyTag(dbEntity);
                 } else if (restEntityItem.returnIsUpdateItem()) {
                     final TopicToPropertyTag dbEntity = entityManager.find(TopicToPropertyTag.class, restEntity.getRelationshipId());
                     if (dbEntity == null) throw new BadRequestException(

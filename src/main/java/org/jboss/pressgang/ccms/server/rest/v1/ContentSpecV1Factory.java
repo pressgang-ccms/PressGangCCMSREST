@@ -192,11 +192,12 @@ public class ContentSpecV1Factory extends RESTDataObjectFactory<RESTContentSpecV
                 final RESTAssignedPropertyTagV1 restEntity = restEntityItem.getItem();
 
                 if (restEntityItem.returnIsRemoveItem()) {
-                    final PropertyTag dbEntity = entityManager.find(PropertyTag.class, restEntity.getId());
-                    if (dbEntity == null)
-                        throw new BadRequestException("No PropertyTag entity was found with the primary key " + restEntity.getId());
+                    final ContentSpecToPropertyTag dbEntity = entityManager.find(ContentSpecToPropertyTag.class,
+                            restEntity.getRelationshipId());
+                    if (dbEntity == null) throw new BadRequestException(
+                            "No ContentSpecToPropertyTag entity was found with the primary key " + restEntity.getRelationshipId());
 
-                    entity.removePropertyTag(dbEntity, restEntity.getValue());
+                    entity.removePropertyTag(dbEntity);
                 } else if (restEntityItem.returnIsUpdateItem()) {
                     final ContentSpecToPropertyTag dbEntity = entityManager.find(ContentSpecToPropertyTag.class,
                             restEntity.getRelationshipId());
