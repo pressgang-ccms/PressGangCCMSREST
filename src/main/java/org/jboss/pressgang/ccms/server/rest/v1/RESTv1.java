@@ -182,78 +182,6 @@ public class RESTv1 extends BaseRESTv1 implements RESTBaseInterfaceV1, RESTInter
         }
     }
 
-    @Override
-    public String updateJSONPBlobConstant(final String expand, final RESTBlobConstantV1 dataObject, final String message,
-            final Integer flag, final String userId, final String callback) {
-        if (callback == null) throw new BadRequestException("The callback parameter can not be null");
-
-        try {
-            return wrapJsonInPadding(callback, convertObjectToJSON(updateJSONBlobConstant(expand, dataObject, message, flag, userId)));
-        } catch (final Exception ex) {
-            throw new InternalServerErrorException("Could not marshall return value into JSON");
-        }
-    }
-
-    @Override
-    public String updateJSONPBlobConstants(final String expand, final RESTBlobConstantCollectionV1 dataObjects, final String message,
-            final Integer flag, final String userId, final String callback) {
-        if (callback == null) throw new BadRequestException("The callback parameter can not be null");
-
-        try {
-            return wrapJsonInPadding(callback, convertObjectToJSON(updateJSONBlobConstants(expand, dataObjects, message, flag, userId)));
-        } catch (final Exception ex) {
-            throw new InternalServerErrorException("Could not marshall return value into JSON");
-        }
-    }
-
-    @Override
-    public String createJSONPBlobConstant(final String expand, final RESTBlobConstantV1 dataObject, final String message,
-            final Integer flag, final String userId, final String callback) {
-        if (callback == null) throw new BadRequestException("The callback parameter can not be null");
-
-        try {
-            return wrapJsonInPadding(callback, convertObjectToJSON(createJSONBlobConstant(expand, dataObject, message, flag, userId)));
-        } catch (final Exception ex) {
-            throw new InternalServerErrorException("Could not marshall return value into JSON");
-        }
-    }
-
-    @Override
-    public String createJSONPBlobConstants(final String expand, final RESTBlobConstantCollectionV1 dataObjects, final String message,
-            final Integer flag, final String userId, final String callback) {
-        if (callback == null) throw new BadRequestException("The callback parameter can not be null");
-
-        try {
-            return wrapJsonInPadding(callback, convertObjectToJSON(createJSONBlobConstants(expand, dataObjects, message, flag, userId)));
-        } catch (final Exception ex) {
-            throw new InternalServerErrorException("Could not marshall return value into JSON");
-        }
-    }
-
-    @Override
-    public String deleteJSONPBlobConstant(final Integer id, final String message, final Integer flag, final String userId,
-            final String expand, final String callback) {
-        if (callback == null) throw new BadRequestException("The callback parameter can not be null");
-
-        try {
-            return wrapJsonInPadding(callback, convertObjectToJSON(deleteJSONBlobConstant(id, message, flag, userId, expand)));
-        } catch (final Exception ex) {
-            throw new InternalServerErrorException("Could not marshall return value into JSON");
-        }
-    }
-
-    @Override
-    public String deleteJSONPBlobConstants(final PathSegment ids, final String message, final Integer flag, final String userId,
-            final String expand, final String callback) {
-        if (callback == null) throw new BadRequestException("The callback parameter can not be null");
-
-        try {
-            return wrapJsonInPadding(callback, convertObjectToJSON(deleteJSONBlobConstants(ids, message, flag, userId, expand)));
-        } catch (final Exception ex) {
-            throw new InternalServerErrorException("Could not marshall return value into JSON");
-        }
-    }
-
     /* JSON FUNCTIONS */
     @Override
     public RESTBlobConstantV1 getJSONBlobConstant(final Integer id, final String expand) {
@@ -358,6 +286,30 @@ public class RESTv1 extends BaseRESTv1 implements RESTBaseInterfaceV1, RESTInter
                 RESTv1Constants.BLOBCONSTANTS_EXPANSION_NAME, expand, logDetails);
     }
 
+    /* RAW FUNCTIONS */
+    @Override
+    public byte[] getRAWBlobConstant(@PathParam("id") Integer id) {
+        if (id == null) throw new BadRequestException("The id parameter can not be null");
+
+        final EntityManager entityManager = getEntityManager();
+        final BlobConstants entity = getEntity(entityManager, BlobConstants.class, id);
+
+        response.getOutputHeaders().putSingle("Content-Disposition", "filename=" + entity.getConstantName());
+        return entity.getConstantValue();
+    }
+
+    @Override
+    public byte[] getRAWBlobConstantRevision(@PathParam("id") Integer id, @PathParam("rev") Integer revision) {
+        if (id == null) throw new BadRequestException("The id parameter can not be null");
+        if (revision == null) throw new BadRequestException("The revision parameter can not be null");
+
+        final EntityManager entityManager = getEntityManager();
+        final BlobConstants entity = getEntity(entityManager, BlobConstants.class, id, revision);
+
+        response.getOutputHeaders().putSingle("Content-Disposition", "filename=" + entity.getConstantName());
+        return entity.getConstantValue();
+    }
+
     /* PROJECT FUNCTIONS */
     /* JSONP FUNCTIONS */
     @Override
@@ -399,78 +351,6 @@ public class RESTv1 extends BaseRESTv1 implements RESTBaseInterfaceV1, RESTInter
 
         try {
             return wrapJsonInPadding(callback, convertObjectToJSON(getJSONProjectsWithQuery(query, expand)));
-        } catch (final Exception ex) {
-            throw new InternalServerErrorException("Could not marshall return value into JSON");
-        }
-    }
-
-    @Override
-    public String updateJSONPProject(final String expand, final RESTProjectV1 dataObject, final String message, final Integer flag,
-            final String userId, final String callback) {
-        if (callback == null) throw new BadRequestException("The callback parameter can not be null");
-
-        try {
-            return wrapJsonInPadding(callback, convertObjectToJSON(updateJSONProject(expand, dataObject, message, flag, userId)));
-        } catch (final Exception ex) {
-            throw new InternalServerErrorException("Could not marshall return value into JSON");
-        }
-    }
-
-    @Override
-    public String updateJSONPProjects(final String expand, final RESTProjectCollectionV1 dataObjects, final String message,
-            final Integer flag, final String userId, final String callback) {
-        if (callback == null) throw new BadRequestException("The callback parameter can not be null");
-
-        try {
-            return wrapJsonInPadding(callback, convertObjectToJSON(updateJSONProjects(expand, dataObjects, message, flag, userId)));
-        } catch (final Exception ex) {
-            throw new InternalServerErrorException("Could not marshall return value into JSON");
-        }
-    }
-
-    @Override
-    public String createJSONPProject(final String expand, final RESTProjectV1 dataObject, final String message, final Integer flag,
-            final String userId, final String callback) {
-        if (callback == null) throw new BadRequestException("The callback parameter can not be null");
-
-        try {
-            return wrapJsonInPadding(callback, convertObjectToJSON(createJSONProject(expand, dataObject, message, flag, userId)));
-        } catch (final Exception ex) {
-            throw new InternalServerErrorException("Could not marshall return value into JSON");
-        }
-    }
-
-    @Override
-    public String createJSONPProjects(final String expand, final RESTProjectCollectionV1 dataObjects, final String message,
-            final Integer flag, final String userId, final String callback) {
-        if (callback == null) throw new BadRequestException("The callback parameter can not be null");
-
-        try {
-            return wrapJsonInPadding(callback, convertObjectToJSON(createJSONProjects(expand, dataObjects, message, flag, userId)));
-        } catch (final Exception ex) {
-            throw new InternalServerErrorException("Could not marshall return value into JSON");
-        }
-    }
-
-    @Override
-    public String deleteJSONPProject(final Integer id, final String message, final Integer flag, final String userId, final String expand,
-            final String callback) {
-        if (callback == null) throw new BadRequestException("The callback parameter can not be null");
-
-        try {
-            return wrapJsonInPadding(callback, convertObjectToJSON(deleteJSONProject(id, message, flag, userId, expand)));
-        } catch (final Exception ex) {
-            throw new InternalServerErrorException("Could not marshall return value into JSON");
-        }
-    }
-
-    @Override
-    public String deleteJSONPProjects(final PathSegment ids, final String message, final Integer flag, final String userId,
-            final String expand, final String callback) {
-        if (callback == null) throw new BadRequestException("The callback parameter can not be null");
-
-        try {
-            return wrapJsonInPadding(callback, convertObjectToJSON(deleteJSONProjects(ids, message, flag, userId, expand)));
         } catch (final Exception ex) {
             throw new InternalServerErrorException("Could not marshall return value into JSON");
         }
@@ -621,78 +501,6 @@ public class RESTv1 extends BaseRESTv1 implements RESTBaseInterfaceV1, RESTInter
 
         try {
             return wrapJsonInPadding(callback, convertObjectToJSON(getJSONPropertyTagsWithQuery(query, expand)));
-        } catch (final Exception ex) {
-            throw new InternalServerErrorException("Could not marshall return value into JSON");
-        }
-    }
-
-    @Override
-    public String updateJSONPPropertyTag(final String expand, final RESTPropertyTagV1 dataObject, final String message, final Integer flag,
-            final String userId, final String callback) {
-        if (callback == null) throw new BadRequestException("The callback parameter can not be null");
-
-        try {
-            return wrapJsonInPadding(callback, convertObjectToJSON(updateJSONPropertyTag(expand, dataObject, message, flag, userId)));
-        } catch (final Exception ex) {
-            throw new InternalServerErrorException("Could not marshall return value into JSON");
-        }
-    }
-
-    @Override
-    public String updateJSONPPropertyTags(final String expand, final RESTPropertyTagCollectionV1 dataObjects, final String message,
-            final Integer flag, final String userId, final String callback) {
-        if (callback == null) throw new BadRequestException("The callback parameter can not be null");
-
-        try {
-            return wrapJsonInPadding(callback, convertObjectToJSON(updateJSONPropertyTags(expand, dataObjects, message, flag, userId)));
-        } catch (final Exception ex) {
-            throw new InternalServerErrorException("Could not marshall return value into JSON");
-        }
-    }
-
-    @Override
-    public String createJSONPPropertyTag(final String expand, final RESTPropertyTagV1 dataObject, final String message, final Integer flag,
-            final String userId, final String callback) {
-        if (callback == null) throw new BadRequestException("The callback parameter can not be null");
-
-        try {
-            return wrapJsonInPadding(callback, convertObjectToJSON(createJSONPropertyTag(expand, dataObject, message, flag, userId)));
-        } catch (final Exception ex) {
-            throw new InternalServerErrorException("Could not marshall return value into JSON");
-        }
-    }
-
-    @Override
-    public String createJSONPPropertyTags(final String expand, final RESTPropertyTagCollectionV1 dataObjects, final String message,
-            final Integer flag, final String userId, final String callback) {
-        if (callback == null) throw new BadRequestException("The callback parameter can not be null");
-
-        try {
-            return wrapJsonInPadding(callback, convertObjectToJSON(createJSONPropertyTags(expand, dataObjects, message, flag, userId)));
-        } catch (final Exception ex) {
-            throw new InternalServerErrorException("Could not marshall return value into JSON");
-        }
-    }
-
-    @Override
-    public String deleteJSONPPropertyTag(final Integer id, final String message, final Integer flag, final String userId,
-            final String expand, final String callback) {
-        if (callback == null) throw new BadRequestException("The callback parameter can not be null");
-
-        try {
-            return wrapJsonInPadding(callback, convertObjectToJSON(deleteJSONPropertyTag(id, message, flag, userId, expand)));
-        } catch (final Exception ex) {
-            throw new InternalServerErrorException("Could not marshall return value into JSON");
-        }
-    }
-
-    @Override
-    public String deleteJSONPPropertyTags(final PathSegment ids, final String message, final Integer flag, final String userId,
-            final String expand, final String callback) {
-        if (callback == null) throw new BadRequestException("The callback parameter can not be null");
-
-        try {
-            return wrapJsonInPadding(callback, convertObjectToJSON(deleteJSONPropertyTags(ids, message, flag, userId, expand)));
         } catch (final Exception ex) {
             throw new InternalServerErrorException("Could not marshall return value into JSON");
         }
@@ -850,80 +658,6 @@ public class RESTv1 extends BaseRESTv1 implements RESTBaseInterfaceV1, RESTInter
         }
     }
 
-    @Override
-    public String updateJSONPPropertyCategory(final String expand, final RESTPropertyCategoryV1 dataObject, final String message,
-            final Integer flag, final String userId, final String callback) {
-        if (callback == null) throw new BadRequestException("The callback parameter can not be null");
-
-        try {
-            return wrapJsonInPadding(callback, convertObjectToJSON(updateJSONPropertyCategory(expand, dataObject, message, flag, userId)));
-        } catch (final Exception ex) {
-            throw new InternalServerErrorException("Could not marshall return value into JSON");
-        }
-    }
-
-    @Override
-    public String updateJSONPPropertyCategories(final String expand, final RESTPropertyCategoryCollectionV1 dataObjects,
-            final String message, final Integer flag, final String userId, final String callback) {
-        if (callback == null) throw new BadRequestException("The callback parameter can not be null");
-
-        try {
-            return wrapJsonInPadding(callback,
-                    convertObjectToJSON(updateJSONPropertyCategories(expand, dataObjects, message, flag, userId)));
-        } catch (final Exception ex) {
-            throw new InternalServerErrorException("Could not marshall return value into JSON");
-        }
-    }
-
-    @Override
-    public String createJSONPPropertyCategory(final String expand, final RESTPropertyCategoryV1 dataObject, final String message,
-            final Integer flag, final String userId, final String callback) {
-        if (callback == null) throw new BadRequestException("The callback parameter can not be null");
-
-        try {
-            return wrapJsonInPadding(callback, convertObjectToJSON(createJSONPropertyCategory(expand, dataObject, message, flag, userId)));
-        } catch (final Exception ex) {
-            throw new InternalServerErrorException("Could not marshall return value into JSON");
-        }
-    }
-
-    @Override
-    public String createJSONPPropertyCategories(final String expand, final RESTPropertyCategoryCollectionV1 dataObjects,
-            final String message, final Integer flag, final String userId, final String callback) {
-        if (callback == null) throw new BadRequestException("The callback parameter can not be null");
-
-        try {
-            return wrapJsonInPadding(callback,
-                    convertObjectToJSON(createJSONPropertyCategories(expand, dataObjects, message, flag, userId)));
-        } catch (final Exception ex) {
-            throw new InternalServerErrorException("Could not marshall return value into JSON");
-        }
-    }
-
-    @Override
-    public String deleteJSONPPropertyCategory(final Integer id, final String message, final Integer flag, final String userId,
-            final String expand, final String callback) {
-        if (callback == null) throw new BadRequestException("The callback parameter can not be null");
-
-        try {
-            return wrapJsonInPadding(callback, convertObjectToJSON(deleteJSONPropertyCategory(id, message, flag, userId, expand)));
-        } catch (final Exception ex) {
-            throw new InternalServerErrorException("Could not marshall return value into JSON");
-        }
-    }
-
-    @Override
-    public String deleteJSONPPropertyCategories(final PathSegment ids, final String message, final Integer flag, final String userId,
-            final String expand, final String callback) {
-        if (callback == null) throw new BadRequestException("The callback parameter can not be null");
-
-        try {
-            return wrapJsonInPadding(callback, convertObjectToJSON(deleteJSONPropertyCategories(ids, message, flag, userId, expand)));
-        } catch (final Exception ex) {
-            throw new InternalServerErrorException("Could not marshall return value into JSON");
-        }
-    }
-
     /* JSON FUNCTIONS */
     @Override
     public RESTPropertyCategoryV1 getJSONPropertyCategory(final Integer id, final String expand) {
@@ -1076,78 +810,6 @@ public class RESTv1 extends BaseRESTv1 implements RESTBaseInterfaceV1, RESTInter
         }
     }
 
-    @Override
-    public String updateJSONPRole(final String expand, final RESTRoleV1 dataObject, final String message, final Integer flag,
-            final String userId, final String callback) {
-        if (callback == null) throw new BadRequestException("The callback parameter can not be null");
-
-        try {
-            return wrapJsonInPadding(callback, convertObjectToJSON(updateJSONRole(expand, dataObject, message, flag, userId)));
-        } catch (final Exception ex) {
-            throw new InternalServerErrorException("Could not marshall return value into JSON");
-        }
-    }
-
-    @Override
-    public String updateJSONPRoles(final String expand, final RESTRoleCollectionV1 dataObjects, final String message, final Integer flag,
-            final String userId, final String callback) {
-        if (callback == null) throw new BadRequestException("The callback parameter can not be null");
-
-        try {
-            return wrapJsonInPadding(callback, convertObjectToJSON(updateJSONRoles(expand, dataObjects, message, flag, userId)));
-        } catch (final Exception ex) {
-            throw new InternalServerErrorException("Could not marshall return value into JSON");
-        }
-    }
-
-    @Override
-    public String createJSONPRole(final String expand, final RESTRoleV1 dataObject, final String message, final Integer flag,
-            final String userId, final String callback) {
-        if (callback == null) throw new BadRequestException("The callback parameter can not be null");
-
-        try {
-            return wrapJsonInPadding(callback, convertObjectToJSON(createJSONRole(expand, dataObject, message, flag, userId)));
-        } catch (final Exception ex) {
-            throw new InternalServerErrorException("Could not marshall return value into JSON");
-        }
-    }
-
-    @Override
-    public String createJSONPRoles(final String expand, final RESTRoleCollectionV1 dataObjects, final String message, final Integer flag,
-            final String userId, final String callback) {
-        if (callback == null) throw new BadRequestException("The callback parameter can not be null");
-
-        try {
-            return wrapJsonInPadding(callback, convertObjectToJSON(createJSONRoles(expand, dataObjects, message, flag, userId)));
-        } catch (final Exception ex) {
-            throw new InternalServerErrorException("Could not marshall return value into JSON");
-        }
-    }
-
-    @Override
-    public String deleteJSONPRole(final Integer id, final String message, final Integer flag, final String userId, final String expand,
-            final String callback) {
-        if (callback == null) throw new BadRequestException("The callback parameter can not be null");
-
-        try {
-            return wrapJsonInPadding(callback, convertObjectToJSON(deleteJSONRole(id, message, flag, userId, expand)));
-        } catch (final Exception ex) {
-            throw new InternalServerErrorException("Could not marshall return value into JSON");
-        }
-    }
-
-    @Override
-    public String deleteJSONPRoles(final PathSegment ids, final String message, final Integer flag, final String userId,
-            final String expand, final String callback) {
-        if (callback == null) throw new BadRequestException("The callback parameter can not be null");
-
-        try {
-            return wrapJsonInPadding(callback, convertObjectToJSON(deleteJSONRoles(ids, message, flag, userId, expand)));
-        } catch (final Exception ex) {
-            throw new InternalServerErrorException("Could not marshall return value into JSON");
-        }
-    }
-
     /* JSON FUNCTIONS */
     @Override
     public RESTRoleV1 getJSONRole(final Integer id, final String expand) {
@@ -1292,78 +954,6 @@ public class RESTv1 extends BaseRESTv1 implements RESTBaseInterfaceV1, RESTInter
 
         try {
             return wrapJsonInPadding(callback, convertObjectToJSON(getJSONTranslatedTopicsWithQuery(query, expand)));
-        } catch (final Exception ex) {
-            throw new InternalServerErrorException("Could not marshall return value into JSON");
-        }
-    }
-
-    @Override
-    public String updateJSONPTranslatedTopic(final String expand, final RESTTranslatedTopicV1 dataObject, final String message,
-            final Integer flag, final String userId, final String callback) {
-        if (callback == null) throw new BadRequestException("The callback parameter can not be null");
-
-        try {
-            return wrapJsonInPadding(callback, convertObjectToJSON(updateJSONTranslatedTopic(expand, dataObject, message, flag, userId)));
-        } catch (final Exception ex) {
-            throw new InternalServerErrorException("Could not marshall return value into JSON");
-        }
-    }
-
-    @Override
-    public String updateJSONPTranslatedTopics(final String expand, final RESTTranslatedTopicCollectionV1 dataObjects, final String message,
-            final Integer flag, final String userId, final String callback) {
-        if (callback == null) throw new BadRequestException("The callback parameter can not be null");
-
-        try {
-            return wrapJsonInPadding(callback, convertObjectToJSON(updateJSONTranslatedTopics(expand, dataObjects, message, flag, userId)));
-        } catch (final Exception ex) {
-            throw new InternalServerErrorException("Could not marshall return value into JSON");
-        }
-    }
-
-    @Override
-    public String createJSONPTranslatedTopic(final String expand, final RESTTranslatedTopicV1 dataObject, final String message,
-            final Integer flag, final String userId, final String callback) {
-        if (callback == null) throw new BadRequestException("The callback parameter can not be null");
-
-        try {
-            return wrapJsonInPadding(callback, convertObjectToJSON(createJSONTranslatedTopic(expand, dataObject, message, flag, userId)));
-        } catch (final Exception ex) {
-            throw new InternalServerErrorException("Could not marshall return value into JSON");
-        }
-    }
-
-    @Override
-    public String createJSONPTranslatedTopics(final String expand, final RESTTranslatedTopicCollectionV1 dataObjects, final String message,
-            final Integer flag, final String userId, final String callback) {
-        if (callback == null) throw new BadRequestException("The callback parameter can not be null");
-
-        try {
-            return wrapJsonInPadding(callback, convertObjectToJSON(createJSONTranslatedTopics(expand, dataObjects, message, flag, userId)));
-        } catch (final Exception ex) {
-            throw new InternalServerErrorException("Could not marshall return value into JSON");
-        }
-    }
-
-    @Override
-    public String deleteJSONPTranslatedTopic(final Integer id, final String message, final Integer flag, final String userId,
-            final String expand, final String callback) {
-        if (callback == null) throw new BadRequestException("The callback parameter can not be null");
-
-        try {
-            return wrapJsonInPadding(callback, convertObjectToJSON(deleteJSONTranslatedTopic(id, message, flag, userId, expand)));
-        } catch (final Exception ex) {
-            throw new InternalServerErrorException("Could not marshall return value into JSON");
-        }
-    }
-
-    @Override
-    public String deleteJSONPTranslatedTopics(final PathSegment ids, final String message, final Integer flag, final String userId,
-            final String expand, final String callback) {
-        if (callback == null) throw new BadRequestException("The callback parameter can not be null");
-
-        try {
-            return wrapJsonInPadding(callback, convertObjectToJSON(deleteJSONTranslatedTopics(ids, message, flag, userId, expand)));
         } catch (final Exception ex) {
             throw new InternalServerErrorException("Could not marshall return value into JSON");
         }
@@ -1521,78 +1111,6 @@ public class RESTv1 extends BaseRESTv1 implements RESTBaseInterfaceV1, RESTInter
         }
     }
 
-    @Override
-    public String updateJSONPStringConstant(final String expand, final RESTStringConstantV1 dataObject, final String message,
-            final Integer flag, final String userId, final String callback) {
-        if (callback == null) throw new BadRequestException("The callback parameter can not be null");
-
-        try {
-            return wrapJsonInPadding(callback, convertObjectToJSON(updateJSONStringConstant(expand, dataObject, message, flag, userId)));
-        } catch (final Exception ex) {
-            throw new InternalServerErrorException("Could not marshall return value into JSON");
-        }
-    }
-
-    @Override
-    public String updateJSONPStringConstants(final String expand, final RESTStringConstantCollectionV1 dataObjects, final String message,
-            final Integer flag, final String userId, final String callback) {
-        if (callback == null) throw new BadRequestException("The callback parameter can not be null");
-
-        try {
-            return wrapJsonInPadding(callback, convertObjectToJSON(updateJSONStringConstants(expand, dataObjects, message, flag, userId)));
-        } catch (final Exception ex) {
-            throw new InternalServerErrorException("Could not marshall return value into JSON");
-        }
-    }
-
-    @Override
-    public String createJSONPStringConstant(final String expand, final RESTStringConstantV1 dataObject, final String message,
-            final Integer flag, final String userId, final String callback) {
-        if (callback == null) throw new BadRequestException("The callback parameter can not be null");
-
-        try {
-            return wrapJsonInPadding(callback, convertObjectToJSON(createJSONStringConstant(expand, dataObject, message, flag, userId)));
-        } catch (final Exception ex) {
-            throw new InternalServerErrorException("Could not marshall return value into JSON");
-        }
-    }
-
-    @Override
-    public String createJSONPStringConstants(final String expand, final RESTStringConstantCollectionV1 dataObjects, final String message,
-            final Integer flag, final String userId, final String callback) {
-        if (callback == null) throw new BadRequestException("The callback parameter can not be null");
-
-        try {
-            return wrapJsonInPadding(callback, convertObjectToJSON(createJSONStringConstants(expand, dataObjects, message, flag, userId)));
-        } catch (final Exception ex) {
-            throw new InternalServerErrorException("Could not marshall return value into JSON");
-        }
-    }
-
-    @Override
-    public String deleteJSONPStringConstant(final Integer id, final String message, final Integer flag, final String userId,
-            final String expand, final String callback) {
-        if (callback == null) throw new BadRequestException("The callback parameter can not be null");
-
-        try {
-            return wrapJsonInPadding(callback, convertObjectToJSON(deleteJSONStringConstant(id, message, flag, userId, expand)));
-        } catch (final Exception ex) {
-            throw new InternalServerErrorException("Could not marshall return value into JSON");
-        }
-    }
-
-    @Override
-    public String deleteJSONPStringConstants(final PathSegment ids, final String message, final Integer flag, final String userId,
-            final String expand, final String callback) {
-        if (callback == null) throw new BadRequestException("The callback parameter can not be null");
-
-        try {
-            return wrapJsonInPadding(callback, convertObjectToJSON(deleteJSONStringConstants(ids, message, flag, userId, expand)));
-        } catch (final Exception ex) {
-            throw new InternalServerErrorException("Could not marshall return value into JSON");
-        }
-    }
-
     /* JSON FUNCTIONS */
     @Override
     public RESTStringConstantV1 getJSONStringConstant(final Integer id, final String expand) {
@@ -1739,78 +1257,6 @@ public class RESTv1 extends BaseRESTv1 implements RESTBaseInterfaceV1, RESTInter
 
         try {
             return wrapJsonInPadding(callback, convertObjectToJSON(getJSONUsersWithQuery(query, expand)));
-        } catch (final Exception ex) {
-            throw new InternalServerErrorException("Could not marshall return value into JSON");
-        }
-    }
-
-    @Override
-    public String updateJSONPUser(final String expand, final RESTUserV1 dataObject, final String message, final Integer flag,
-            final String userId, final String callback) {
-        if (callback == null) throw new BadRequestException("The callback parameter can not be null");
-
-        try {
-            return wrapJsonInPadding(callback, convertObjectToJSON(updateJSONUser(expand, dataObject, message, flag, userId)));
-        } catch (final Exception ex) {
-            throw new InternalServerErrorException("Could not marshall return value into JSON");
-        }
-    }
-
-    @Override
-    public String updateJSONPUsers(final String expand, final RESTUserCollectionV1 dataObjects, final String message, final Integer flag,
-            final String userId, final String callback) {
-        if (callback == null) throw new BadRequestException("The callback parameter can not be null");
-
-        try {
-            return wrapJsonInPadding(callback, convertObjectToJSON(updateJSONUsers(expand, dataObjects, message, flag, userId)));
-        } catch (final Exception ex) {
-            throw new InternalServerErrorException("Could not marshall return value into JSON");
-        }
-    }
-
-    @Override
-    public String createJSONPUser(final String expand, final RESTUserV1 dataObject, final String message, final Integer flag,
-            final String userId, final String callback) {
-        if (callback == null) throw new BadRequestException("The callback parameter can not be null");
-
-        try {
-            return wrapJsonInPadding(callback, convertObjectToJSON(createJSONUser(expand, dataObject, message, flag, userId)));
-        } catch (final Exception ex) {
-            throw new InternalServerErrorException("Could not marshall return value into JSON");
-        }
-    }
-
-    @Override
-    public String createJSONPUsers(final String expand, final RESTUserCollectionV1 dataObjects, final String message, final Integer flag,
-            final String userId, final String callback) {
-        if (callback == null) throw new BadRequestException("The callback parameter can not be null");
-
-        try {
-            return wrapJsonInPadding(callback, convertObjectToJSON(createJSONUsers(expand, dataObjects, message, flag, userId)));
-        } catch (final Exception ex) {
-            throw new InternalServerErrorException("Could not marshall return value into JSON");
-        }
-    }
-
-    @Override
-    public String deleteJSONPUser(final Integer id, final String message, final Integer flag, final String userId, final String expand,
-            final String callback) {
-        if (callback == null) throw new BadRequestException("The callback parameter can not be null");
-
-        try {
-            return wrapJsonInPadding(callback, convertObjectToJSON(deleteJSONUser(id, message, flag, userId, expand)));
-        } catch (final Exception ex) {
-            throw new InternalServerErrorException("Could not marshall return value into JSON");
-        }
-    }
-
-    @Override
-    public String deleteJSONPUsers(final PathSegment ids, final String message, final Integer flag, final String userId,
-            final String expand, final String callback) {
-        if (callback == null) throw new BadRequestException("The callback parameter can not be null");
-
-        try {
-            return wrapJsonInPadding(callback, convertObjectToJSON(deleteJSONUsers(ids, message, flag, userId, expand)));
         } catch (final Exception ex) {
             throw new InternalServerErrorException("Could not marshall return value into JSON");
         }
@@ -1965,78 +1411,6 @@ public class RESTv1 extends BaseRESTv1 implements RESTBaseInterfaceV1, RESTInter
         }
     }
 
-    @Override
-    public String updateJSONPTag(final String expand, final RESTTagV1 dataObject, final String message, final Integer flag,
-            final String userId, final String callback) {
-        if (callback == null) throw new BadRequestException("The callback parameter can not be null");
-
-        try {
-            return wrapJsonInPadding(callback, convertObjectToJSON(updateJSONTag(expand, dataObject, message, flag, userId)));
-        } catch (final Exception ex) {
-            throw new InternalServerErrorException("Could not marshall return value into JSON");
-        }
-    }
-
-    @Override
-    public String updateJSONPTags(final String expand, final RESTTagCollectionV1 dataObjects, final String message, final Integer flag,
-            final String userId, final String callback) {
-        if (callback == null) throw new BadRequestException("The callback parameter can not be null");
-
-        try {
-            return wrapJsonInPadding(callback, convertObjectToJSON(updateJSONTags(expand, dataObjects, message, flag, userId)));
-        } catch (final Exception ex) {
-            throw new InternalServerErrorException("Could not marshall return value into JSON");
-        }
-    }
-
-    @Override
-    public String createJSONPTag(final String expand, final RESTTagV1 dataObject, final String message, final Integer flag,
-            final String userId, final String callback) {
-        if (callback == null) throw new BadRequestException("The callback parameter can not be null");
-
-        try {
-            return wrapJsonInPadding(callback, convertObjectToJSON(createJSONTag(expand, dataObject, message, flag, userId)));
-        } catch (final Exception ex) {
-            throw new InternalServerErrorException("Could not marshall return value into JSON");
-        }
-    }
-
-    @Override
-    public String createJSONPTags(final String expand, final RESTTagCollectionV1 dataObjects, final String message, final Integer flag,
-            final String userId, final String callback) {
-        if (callback == null) throw new BadRequestException("The callback parameter can not be null");
-
-        try {
-            return wrapJsonInPadding(callback, convertObjectToJSON(createJSONTags(expand, dataObjects, message, flag, userId)));
-        } catch (final Exception ex) {
-            throw new InternalServerErrorException("Could not marshall return value into JSON");
-        }
-    }
-
-    @Override
-    public String deleteJSONPTag(final Integer id, final String message, final Integer flag, final String userId, final String expand,
-            final String callback) {
-        if (callback == null) throw new BadRequestException("The callback parameter can not be null");
-
-        try {
-            return wrapJsonInPadding(callback, convertObjectToJSON(deleteJSONTag(id, message, flag, userId, expand)));
-        } catch (final Exception ex) {
-            throw new InternalServerErrorException("Could not marshall return value into JSON");
-        }
-    }
-
-    @Override
-    public String deleteJSONPTags(final PathSegment ids, final String message, final Integer flag, final String userId, final String expand,
-            final String callback) {
-        if (callback == null) throw new BadRequestException("The callback parameter can not be null");
-
-        try {
-            return wrapJsonInPadding(callback, convertObjectToJSON(deleteJSONTags(ids, message, flag, userId, expand)));
-        } catch (final Exception ex) {
-            throw new InternalServerErrorException("Could not marshall return value into JSON");
-        }
-    }
-
     /* JSON FUNCTIONS */
     @Override
     public RESTTagV1 getJSONTag(final Integer id, final String expand) {
@@ -2180,78 +1554,6 @@ public class RESTv1 extends BaseRESTv1 implements RESTBaseInterfaceV1, RESTInter
 
         try {
             return wrapJsonInPadding(callback, convertObjectToJSON(getJSONCategoriesWithQuery(query, expand)));
-        } catch (final Exception ex) {
-            throw new InternalServerErrorException("Could not marshall return value into JSON");
-        }
-    }
-
-    @Override
-    public String updateJSONPCategory(final String expand, final RESTCategoryV1 dataObject, final String message, final Integer flag,
-            final String userId, final String callback) {
-        if (callback == null) throw new BadRequestException("The callback parameter can not be null");
-
-        try {
-            return wrapJsonInPadding(callback, convertObjectToJSON(updateJSONCategory(expand, dataObject, message, flag, userId)));
-        } catch (final Exception ex) {
-            throw new InternalServerErrorException("Could not marshall return value into JSON");
-        }
-    }
-
-    @Override
-    public String updateJSONPCategories(final String expand, final RESTCategoryCollectionV1 dataObjects, final String message,
-            final Integer flag, final String userId, final String callback) {
-        if (callback == null) throw new BadRequestException("The callback parameter can not be null");
-
-        try {
-            return wrapJsonInPadding(callback, convertObjectToJSON(updateJSONCategories(expand, dataObjects, message, flag, userId)));
-        } catch (final Exception ex) {
-            throw new InternalServerErrorException("Could not marshall return value into JSON");
-        }
-    }
-
-    @Override
-    public String createJSONPCategory(final String expand, final RESTCategoryV1 dataObject, final String message, final Integer flag,
-            final String userId, final String callback) {
-        if (callback == null) throw new BadRequestException("The callback parameter can not be null");
-
-        try {
-            return wrapJsonInPadding(callback, convertObjectToJSON(createJSONCategory(expand, dataObject, message, flag, userId)));
-        } catch (final Exception ex) {
-            throw new InternalServerErrorException("Could not marshall return value into JSON");
-        }
-    }
-
-    @Override
-    public String createJSONPCategories(final String expand, final RESTCategoryCollectionV1 dataObjects, final String message,
-            final Integer flag, final String userId, final String callback) {
-        if (callback == null) throw new BadRequestException("The callback parameter can not be null");
-
-        try {
-            return wrapJsonInPadding(callback, convertObjectToJSON(createJSONCategories(expand, dataObjects, message, flag, userId)));
-        } catch (final Exception ex) {
-            throw new InternalServerErrorException("Could not marshall return value into JSON");
-        }
-    }
-
-    @Override
-    public String deleteJSONPCategory(final Integer id, final String message, final Integer flag, final String userId, final String expand,
-            final String callback) {
-        if (callback == null) throw new BadRequestException("The callback parameter can not be null");
-
-        try {
-            return wrapJsonInPadding(callback, convertObjectToJSON(deleteJSONCategory(id, message, flag, userId, expand)));
-        } catch (final Exception ex) {
-            throw new InternalServerErrorException("Could not marshall return value into JSON");
-        }
-    }
-
-    @Override
-    public String deleteJSONPCategories(final PathSegment ids, final String message, final Integer flag, final String userId,
-            final String expand, final String callback) {
-        if (callback == null) throw new BadRequestException("The callback parameter can not be null");
-
-        try {
-            return wrapJsonInPadding(callback, convertObjectToJSON(deleteJSONCategories(ids, message, flag, userId, expand)));
         } catch (final Exception ex) {
             throw new InternalServerErrorException("Could not marshall return value into JSON");
         }
@@ -2403,78 +1705,6 @@ public class RESTv1 extends BaseRESTv1 implements RESTBaseInterfaceV1, RESTInter
 
         try {
             return wrapJsonInPadding(callback, convertObjectToJSON(getJSONImagesWithQuery(query, expand)));
-        } catch (final Exception ex) {
-            throw new InternalServerErrorException("Could not marshall return value into JSON");
-        }
-    }
-
-    @Override
-    public String updateJSONPImage(final String expand, final RESTImageV1 dataObject, final String message, final Integer flag,
-            final String userId, final String callback) {
-        if (callback == null) throw new BadRequestException("The callback parameter can not be null");
-
-        try {
-            return wrapJsonInPadding(callback, convertObjectToJSON(updateJSONImage(expand, dataObject, message, flag, userId)));
-        } catch (final Exception ex) {
-            throw new InternalServerErrorException("Could not marshall return value into JSON");
-        }
-    }
-
-    @Override
-    public String updateJSONPImages(final String expand, final RESTImageCollectionV1 dataObjects, final String message, final Integer flag,
-            final String userId, final String callback) {
-        if (callback == null) throw new BadRequestException("The callback parameter can not be null");
-
-        try {
-            return wrapJsonInPadding(callback, convertObjectToJSON(updateJSONImages(expand, dataObjects, message, flag, userId)));
-        } catch (final Exception ex) {
-            throw new InternalServerErrorException("Could not marshall return value into JSON");
-        }
-    }
-
-    @Override
-    public String createJSONPImage(final String expand, final RESTImageV1 dataObject, final String message, final Integer flag,
-            final String userId, final String callback) {
-        if (callback == null) throw new BadRequestException("The callback parameter can not be null");
-
-        try {
-            return wrapJsonInPadding(callback, convertObjectToJSON(createJSONImage(expand, dataObject, message, flag, userId)));
-        } catch (final Exception ex) {
-            throw new InternalServerErrorException("Could not marshall return value into JSON");
-        }
-    }
-
-    @Override
-    public String createJSONPImages(final String expand, final RESTImageCollectionV1 dataObjects, final String message, final Integer flag,
-            final String userId, final String callback) {
-        if (callback == null) throw new BadRequestException("The callback parameter can not be null");
-
-        try {
-            return wrapJsonInPadding(callback, convertObjectToJSON(createJSONImages(expand, dataObjects, message, flag, userId)));
-        } catch (final Exception ex) {
-            throw new InternalServerErrorException("Could not marshall return value into JSON");
-        }
-    }
-
-    @Override
-    public String deleteJSONPImage(final Integer id, final String message, final Integer flag, final String userId, final String expand,
-            final String callback) {
-        if (callback == null) throw new BadRequestException("The callback parameter can not be null");
-
-        try {
-            return wrapJsonInPadding(callback, convertObjectToJSON(deleteJSONImage(id, message, flag, userId, expand)));
-        } catch (final Exception ex) {
-            throw new InternalServerErrorException("Could not marshall return value into JSON");
-        }
-    }
-
-    @Override
-    public String deleteJSONPImages(final PathSegment ids, final String message, final Integer flag, final String userId,
-            final String expand, final String callback) {
-        if (callback == null) throw new BadRequestException("The callback parameter can not be null");
-
-        try {
-            return wrapJsonInPadding(callback, convertObjectToJSON(deleteJSONImages(ids, message, flag, userId, expand)));
         } catch (final Exception ex) {
             throw new InternalServerErrorException("Could not marshall return value into JSON");
         }
@@ -2707,78 +1937,6 @@ public class RESTv1 extends BaseRESTv1 implements RESTBaseInterfaceV1, RESTInter
 
         try {
             return wrapJsonInPadding(callback, convertObjectToJSON(getJSONTopicRevision(id, revision, expand)));
-        } catch (final Exception ex) {
-            throw new InternalServerErrorException("Could not marshall return value into JSON");
-        }
-    }
-
-    @Override
-    public String updateJSONPTopic(final String expand, final RESTTopicV1 dataObject, final String message, final Integer flag,
-            final String userId, final String callback) {
-        if (callback == null) throw new BadRequestException("The callback parameter can not be null");
-
-        try {
-            return wrapJsonInPadding(callback, convertObjectToJSON(updateJSONTopic(expand, dataObject, message, flag, userId)));
-        } catch (final Exception ex) {
-            throw new InternalServerErrorException("Could not marshall return value into JSON");
-        }
-    }
-
-    @Override
-    public String updateJSONPTopics(final String expand, final RESTTopicCollectionV1 dataObjects, final String message, final Integer flag,
-            final String userId, final String callback) {
-        if (callback == null) throw new BadRequestException("The callback parameter can not be null");
-
-        try {
-            return wrapJsonInPadding(callback, convertObjectToJSON(updateJSONTopics(expand, dataObjects, message, flag, userId)));
-        } catch (final Exception ex) {
-            throw new InternalServerErrorException("Could not marshall return value into JSON");
-        }
-    }
-
-    @Override
-    public String createJSONPTopic(final String expand, final RESTTopicV1 dataObject, final String message, final Integer flag,
-            final String userId, final String callback) {
-        if (callback == null) throw new BadRequestException("The callback parameter can not be null");
-
-        try {
-            return wrapJsonInPadding(callback, convertObjectToJSON(createJSONTopic(expand, dataObject, message, flag, userId)));
-        } catch (final Exception ex) {
-            throw new InternalServerErrorException("Could not marshall return value into JSON");
-        }
-    }
-
-    @Override
-    public String createJSONPTopics(final String expand, final RESTTopicCollectionV1 dataObjects, final String message, final Integer flag,
-            final String userId, final String callback) {
-        if (callback == null) throw new BadRequestException("The callback parameter can not be null");
-
-        try {
-            return wrapJsonInPadding(callback, convertObjectToJSON(createJSONTopics(expand, dataObjects, message, flag, userId)));
-        } catch (final Exception ex) {
-            throw new InternalServerErrorException("Could not marshall return value into JSON");
-        }
-    }
-
-    @Override
-    public String deleteJSONPTopic(final Integer id, final String message, final Integer flag, final String userId, final String expand,
-            final String callback) {
-        if (callback == null) throw new BadRequestException("The callback parameter can not be null");
-
-        try {
-            return wrapJsonInPadding(callback, convertObjectToJSON(deleteJSONTopic(id, message, flag, userId, expand)));
-        } catch (final Exception ex) {
-            throw new InternalServerErrorException("Could not marshall return value into JSON");
-        }
-    }
-
-    @Override
-    public String deleteJSONPTopics(final PathSegment ids, final String message, final Integer flag, final String userId,
-            final String expand, final String callback) {
-        if (callback == null) throw new BadRequestException("The callback parameter can not be null");
-
-        try {
-            return wrapJsonInPadding(callback, convertObjectToJSON(deleteJSONTopics(ids, message, flag, userId, expand)));
         } catch (final Exception ex) {
             throw new InternalServerErrorException("Could not marshall return value into JSON");
         }
@@ -3092,78 +2250,6 @@ public class RESTv1 extends BaseRESTv1 implements RESTBaseInterfaceV1, RESTInter
         }
     }
 
-    @Override
-    public String updateJSONPFilter(final String expand, final RESTFilterV1 dataObject, final String message, final Integer flag,
-            final String userId, final String callback) {
-        if (callback == null) throw new BadRequestException("The callback parameter can not be null");
-
-        try {
-            return wrapJsonInPadding(callback, convertObjectToJSON(updateJSONFilter(expand, dataObject, message, flag, userId)));
-        } catch (final Exception ex) {
-            throw new InternalServerErrorException("Could not marshall return value into JSON");
-        }
-    }
-
-    @Override
-    public String updateJSONPFilters(final String expand, final RESTFilterCollectionV1 dataObjects, final String message,
-            final Integer flag, final String userId, final String callback) {
-        if (callback == null) throw new BadRequestException("The callback parameter can not be null");
-
-        try {
-            return wrapJsonInPadding(callback, convertObjectToJSON(updateJSONFilters(expand, dataObjects, message, flag, userId)));
-        } catch (final Exception ex) {
-            throw new InternalServerErrorException("Could not marshall return value into JSON");
-        }
-    }
-
-    @Override
-    public String createJSONPFilter(final String expand, final RESTFilterV1 dataObject, final String message, final Integer flag,
-            final String userId, final String callback) {
-        if (callback == null) throw new BadRequestException("The callback parameter can not be null");
-
-        try {
-            return wrapJsonInPadding(callback, convertObjectToJSON(createJSONFilter(expand, dataObject, message, flag, userId)));
-        } catch (final Exception ex) {
-            throw new InternalServerErrorException("Could not marshall return value into JSON");
-        }
-    }
-
-    @Override
-    public String createJSONPFilters(final String expand, final RESTFilterCollectionV1 dataObjects, final String message,
-            final Integer flag, final String userId, final String callback) {
-        if (callback == null) throw new BadRequestException("The callback parameter can not be null");
-
-        try {
-            return wrapJsonInPadding(callback, convertObjectToJSON(createJSONFilters(expand, dataObjects, message, flag, userId)));
-        } catch (final Exception ex) {
-            throw new InternalServerErrorException("Could not marshall return value into JSON");
-        }
-    }
-
-    @Override
-    public String deleteJSONPFilter(final Integer id, final String message, final Integer flag, final String userId, final String expand,
-            final String callback) {
-        if (callback == null) throw new BadRequestException("The callback parameter can not be null");
-
-        try {
-            return wrapJsonInPadding(callback, convertObjectToJSON(deleteJSONFilter(id, message, flag, userId, expand)));
-        } catch (final Exception ex) {
-            throw new InternalServerErrorException("Could not marshall return value into JSON");
-        }
-    }
-
-    @Override
-    public String deleteJSONPFilters(final PathSegment ids, final String message, final Integer flag, final String userId,
-            final String expand, final String callback) {
-        if (callback == null) throw new BadRequestException("The callback parameter can not be null");
-
-        try {
-            return wrapJsonInPadding(callback, convertObjectToJSON(deleteJSONFilters(ids, message, flag, userId, expand)));
-        } catch (final Exception ex) {
-            throw new InternalServerErrorException("Could not marshall return value into JSON");
-        }
-    }
-
     /* JSON FUNCTIONS */
     @Override
     public RESTFilterV1 getJSONFilter(final Integer id, final String expand) {
@@ -3314,78 +2400,6 @@ public class RESTv1 extends BaseRESTv1 implements RESTBaseInterfaceV1, RESTInter
 
         try {
             return wrapJsonInPadding(callback, convertObjectToJSON(getJSONIntegerConstantsWithQuery(query, expand)));
-        } catch (final Exception ex) {
-            throw new InternalServerErrorException("Could not marshall return value into JSON");
-        }
-    }
-
-    @Override
-    public String updateJSONPIntegerConstant(final String expand, final RESTIntegerConstantV1 dataObject, final String message,
-            final Integer flag, final String userId, final String callback) {
-        if (callback == null) throw new BadRequestException("The callback parameter can not be null");
-
-        try {
-            return wrapJsonInPadding(callback, convertObjectToJSON(updateJSONIntegerConstant(expand, dataObject, message, flag, userId)));
-        } catch (final Exception ex) {
-            throw new InternalServerErrorException("Could not marshall return value into JSON");
-        }
-    }
-
-    @Override
-    public String updateJSONPIntegerConstants(final String expand, final RESTIntegerConstantCollectionV1 dataObjects, final String message,
-            final Integer flag, final String userId, final String callback) {
-        if (callback == null) throw new BadRequestException("The callback parameter can not be null");
-
-        try {
-            return wrapJsonInPadding(callback, convertObjectToJSON(updateJSONIntegerConstants(expand, dataObjects, message, flag, userId)));
-        } catch (final Exception ex) {
-            throw new InternalServerErrorException("Could not marshall return value into JSON");
-        }
-    }
-
-    @Override
-    public String createJSONPIntegerConstant(final String expand, final RESTIntegerConstantV1 dataObject, final String message,
-            final Integer flag, final String userId, final String callback) {
-        if (callback == null) throw new BadRequestException("The callback parameter can not be null");
-
-        try {
-            return wrapJsonInPadding(callback, convertObjectToJSON(createJSONIntegerConstant(expand, dataObject, message, flag, userId)));
-        } catch (final Exception ex) {
-            throw new InternalServerErrorException("Could not marshall return value into JSON");
-        }
-    }
-
-    @Override
-    public String createJSONPIntegerConstants(final String expand, final RESTIntegerConstantCollectionV1 dataObjects, final String message,
-            final Integer flag, final String userId, final String callback) {
-        if (callback == null) throw new BadRequestException("The callback parameter can not be null");
-
-        try {
-            return wrapJsonInPadding(callback, convertObjectToJSON(createJSONIntegerConstants(expand, dataObjects, message, flag, userId)));
-        } catch (final Exception ex) {
-            throw new InternalServerErrorException("Could not marshall return value into JSON");
-        }
-    }
-
-    @Override
-    public String deleteJSONPIntegerConstant(final Integer id, final String message, final Integer flag, final String userId,
-            final String expand, final String callback) {
-        if (callback == null) throw new BadRequestException("The callback parameter can not be null");
-
-        try {
-            return wrapJsonInPadding(callback, convertObjectToJSON(deleteJSONIntegerConstant(id, message, flag, userId, expand)));
-        } catch (final Exception ex) {
-            throw new InternalServerErrorException("Could not marshall return value into JSON");
-        }
-    }
-
-    @Override
-    public String deleteJSONPIntegerConstants(final PathSegment ids, final String message, final Integer flag, final String userId,
-            final String expand, final String callback) {
-        if (callback == null) throw new BadRequestException("The callback parameter can not be null");
-
-        try {
-            return wrapJsonInPadding(callback, convertObjectToJSON(deleteJSONIntegerConstants(ids, message, flag, userId, expand)));
         } catch (final Exception ex) {
             throw new InternalServerErrorException("Could not marshall return value into JSON");
         }

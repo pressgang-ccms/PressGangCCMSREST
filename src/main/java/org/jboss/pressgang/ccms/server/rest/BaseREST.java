@@ -7,7 +7,7 @@ import javax.ws.rs.core.Context;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.UriInfo;
 
-import org.jboss.pressgang.ccms.rest.v1.jaxrsinterfaces.RESTBaseInterfaceV1;
+import org.jboss.pressgang.ccms.rest.v1.constants.RESTv1Constants;
 import org.jboss.pressgang.ccms.server.utils.Constants;
 
 public abstract class BaseREST {
@@ -60,16 +60,16 @@ public abstract class BaseREST {
      */
     @OPTIONS
     @Path("/{path:.*}")
-    public Response handleCORSRequest(@HeaderParam(RESTBaseInterfaceV1.ACCESS_CONTROL_REQUEST_METHOD) final String requestMethod,
-            @HeaderParam(RESTBaseInterfaceV1.ACCESS_CONTROL_REQUEST_HEADERS) final String requestHeaders) {
+    public Response handleCORSRequest(@HeaderParam(RESTv1Constants.ACCESS_CONTROL_REQUEST_METHOD) final String requestMethod,
+            @HeaderParam(RESTv1Constants.ACCESS_CONTROL_REQUEST_HEADERS) final String requestHeaders) {
         final Response.ResponseBuilder retValue = Response.ok();
 
         if (Constants.CORS_ALLOW_ORIGIN_HEADER != null) {
-            if (requestHeaders != null) retValue.header(RESTBaseInterfaceV1.ACCESS_CONTROL_ALLOW_HEADERS, requestHeaders);
+            if (requestHeaders != null) retValue.header(RESTv1Constants.ACCESS_CONTROL_ALLOW_HEADERS, requestHeaders);
 
-            if (requestMethod != null) retValue.header(RESTBaseInterfaceV1.ACCESS_CONTROL_ALLOW_METHODS, requestMethod);
+            if (requestMethod != null) retValue.header(RESTv1Constants.ACCESS_CONTROL_ALLOW_METHODS, requestMethod);
 
-            retValue.header(RESTBaseInterfaceV1.ACCESS_CONTROL_ALLOW_ORIGIN_HEADER, Constants.CORS_ALLOW_ORIGIN_HEADER);
+            retValue.header(RESTv1Constants.ACCESS_CONTROL_ALLOW_ORIGIN_HEADER, Constants.CORS_ALLOW_ORIGIN_HEADER);
         }
 
         return retValue.build();
