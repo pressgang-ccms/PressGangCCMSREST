@@ -4,7 +4,6 @@ import javax.persistence.EntityManager;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.jboss.pressgang.ccms.docbook.constants.DocbookBuilderConstants;
 import org.jboss.pressgang.ccms.model.BugzillaBug;
 import org.jboss.pressgang.ccms.model.PropertyTag;
 import org.jboss.pressgang.ccms.model.Tag;
@@ -38,6 +37,7 @@ import org.jboss.pressgang.ccms.server.rest.v1.base.RESTDataObjectCollectionFact
 import org.jboss.pressgang.ccms.server.rest.v1.base.RESTDataObjectFactory;
 import org.jboss.pressgang.ccms.server.utils.EnversUtilities;
 import org.jboss.pressgang.ccms.server.utils.TopicUtilities;
+import org.jboss.pressgang.ccms.utils.constants.CommonConstants;
 import org.jboss.resteasy.spi.BadRequestException;
 
 public class TopicV1Factory extends RESTDataObjectFactory<RESTTopicV1, Topic, RESTTopicCollectionV1, RESTTopicCollectionItemV1> {
@@ -227,7 +227,7 @@ public class TopicV1Factory extends RESTDataObjectFactory<RESTTopicV1, Topic, RE
 
         /* This method will set the XML errors field */
         TopicUtilities.syncXML(entityManager, entity);
-        TopicUtilities.validateXML(entityManager, entity, DocbookBuilderConstants.ROCBOOK_DTD_BLOB_ID);
+        TopicUtilities.validateXML(entityManager, entity, CommonConstants.ROCBOOK_DTD_BLOB_ID);
 
         /*
          * Persist the entity before adding anything else as they require an id for the topic
