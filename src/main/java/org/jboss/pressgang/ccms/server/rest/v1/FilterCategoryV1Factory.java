@@ -49,9 +49,7 @@ public class FilterCategoryV1Factory extends RESTDataObjectFactory<RESTFilterCat
         // REVISIONS
         if (revision == null && expand != null && expand.contains(RESTBaseEntityV1.REVISIONS_NAME)) {
             retValue.setRevisions(
-                    new RESTDataObjectCollectionFactory<RESTFilterCategoryV1, FilterCategory, RESTFilterCategoryCollectionV1,
-                            RESTFilterCategoryCollectionItemV1>().create(
-                            RESTFilterCategoryCollectionV1.class, new FilterCategoryV1Factory(), entity,
+                    RESTDataObjectCollectionFactory.create(RESTFilterCategoryCollectionV1.class, new FilterCategoryV1Factory(), entity,
                             EnversUtilities.getRevisions(entityManager, entity), RESTBaseEntityV1.REVISIONS_NAME, dataType, expand, baseUrl,
                             entityManager));
         }

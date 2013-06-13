@@ -46,9 +46,7 @@ public class BlobConstantV1Factory extends RESTDataObjectFactory<RESTBlobConstan
         // REVISIONS
         if (revision == null && expand != null && expand.contains(RESTBaseEntityV1.REVISIONS_NAME)) {
             retValue.setRevisions(
-                    new RESTDataObjectCollectionFactory<RESTBlobConstantV1, BlobConstants, RESTBlobConstantCollectionV1,
-                            RESTBlobConstantCollectionItemV1>().create(
-                            RESTBlobConstantCollectionV1.class, new BlobConstantV1Factory(), entity,
+                    RESTDataObjectCollectionFactory.create(RESTBlobConstantCollectionV1.class, new BlobConstantV1Factory(), entity,
                             EnversUtilities.getRevisions(entityManager, entity), RESTBaseEntityV1.REVISIONS_NAME, dataType, expand, baseUrl,
                             entityManager));
         }

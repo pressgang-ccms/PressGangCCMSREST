@@ -42,9 +42,7 @@ public class BugzillaBugV1Factory extends RESTDataObjectFactory<RESTBugzillaBugV
         // REVISIONS
         if (revision == null && expand != null && expand.contains(RESTBaseEntityV1.REVISIONS_NAME)) {
             retValue.setRevisions(
-                    new RESTDataObjectCollectionFactory<RESTBugzillaBugV1, BugzillaBug, RESTBugzillaBugCollectionV1,
-                            RESTBugzillaBugCollectionItemV1>().create(
-                            RESTBugzillaBugCollectionV1.class, new BugzillaBugV1Factory(), entity,
+                    RESTDataObjectCollectionFactory.create(RESTBugzillaBugCollectionV1.class, new BugzillaBugV1Factory(), entity,
                             EnversUtilities.getRevisions(entityManager, entity), RESTBaseEntityV1.REVISIONS_NAME, dataType, expand, baseUrl,
                             entityManager));
         }

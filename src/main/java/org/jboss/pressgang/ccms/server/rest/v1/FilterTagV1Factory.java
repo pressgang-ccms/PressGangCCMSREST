@@ -43,12 +43,9 @@ public class FilterTagV1Factory extends RESTDataObjectFactory<RESTFilterTagV1, F
 
         // REVISIONS
         if (revision == null && expand != null && expand.contains(RESTBaseEntityV1.REVISIONS_NAME)) {
-            retValue.setRevisions(
-                    new RESTDataObjectCollectionFactory<RESTFilterTagV1, FilterTag, RESTFilterTagCollectionV1,
-                            RESTFilterTagCollectionItemV1>().create(
-                            RESTFilterTagCollectionV1.class, new FilterTagV1Factory(), entity,
-                            EnversUtilities.getRevisions(entityManager, entity), RESTBaseEntityV1.REVISIONS_NAME, dataType, expand, baseUrl,
-                            entityManager));
+            retValue.setRevisions(RESTDataObjectCollectionFactory.create(RESTFilterTagCollectionV1.class, new FilterTagV1Factory(), entity,
+                    EnversUtilities.getRevisions(entityManager, entity), RESTBaseEntityV1.REVISIONS_NAME, dataType, expand, baseUrl,
+                    entityManager));
         }
 
         // PARENT
@@ -67,10 +64,8 @@ public class FilterTagV1Factory extends RESTDataObjectFactory<RESTFilterTagV1, F
     }
 
     @Override
-    public void syncDBEntityWithRESTEntity(final EntityManager entityManager, final FilterTag entity,
-            final RESTFilterTagV1 dataObject) {
-        if (dataObject.hasParameterSet(RESTFilterTagV1.STATE_NAME))
-            entity.setTagState(dataObject.getState());
+    public void syncDBEntityWithRESTEntity(final EntityManager entityManager, final FilterTag entity, final RESTFilterTagV1 dataObject) {
+        if (dataObject.hasParameterSet(RESTFilterTagV1.STATE_NAME)) entity.setTagState(dataObject.getState());
 
         /* Set the Tag for the FilterTag */
         if (dataObject.hasParameterSet(RESTFilterTagV1.TAG_NAME)) {
@@ -78,8 +73,7 @@ public class FilterTagV1Factory extends RESTDataObjectFactory<RESTFilterTagV1, F
 
             if (restEntity != null) {
                 final Tag dbEntity = entityManager.find(Tag.class, restEntity.getId());
-                if (dbEntity == null)
-                    throw new BadRequestException("No Tag entity was found with the primary key " + restEntity.getId());
+                if (dbEntity == null) throw new BadRequestException("No Tag entity was found with the primary key " + restEntity.getId());
 
                 entity.setTag(dbEntity);
             } else {

@@ -43,9 +43,7 @@ public class IntegerConstantV1Factory extends RESTDataObjectFactory<RESTIntegerC
         // REVISIONS
         if (revision == null && expand != null && expand.contains(RESTBaseEntityV1.REVISIONS_NAME)) {
             retValue.setRevisions(
-                    new RESTDataObjectCollectionFactory<RESTIntegerConstantV1, IntegerConstants, RESTIntegerConstantCollectionV1,
-                            RESTIntegerConstantCollectionItemV1>().create(
-                            RESTIntegerConstantCollectionV1.class, new IntegerConstantV1Factory(), entity,
+                    RESTDataObjectCollectionFactory.create(RESTIntegerConstantCollectionV1.class, new IntegerConstantV1Factory(), entity,
                             EnversUtilities.getRevisions(entityManager, entity), RESTBaseEntityV1.REVISIONS_NAME, dataType, expand, baseUrl,
                             entityManager));
         }
@@ -58,10 +56,8 @@ public class IntegerConstantV1Factory extends RESTDataObjectFactory<RESTIntegerC
     @Override
     public void syncDBEntityWithRESTEntity(final EntityManager entityManager, final IntegerConstants entity,
             final RESTIntegerConstantV1 dataObject) {
-        if (dataObject.hasParameterSet(RESTStringConstantV1.NAME_NAME))
-            entity.setConstantName(dataObject.getName());
-        if (dataObject.hasParameterSet(RESTStringConstantV1.VALUE_NAME))
-            entity.setConstantValue(dataObject.getValue());
+        if (dataObject.hasParameterSet(RESTStringConstantV1.NAME_NAME)) entity.setConstantName(dataObject.getName());
+        if (dataObject.hasParameterSet(RESTStringConstantV1.VALUE_NAME)) entity.setConstantValue(dataObject.getValue());
 
         entityManager.persist(entity);
     }

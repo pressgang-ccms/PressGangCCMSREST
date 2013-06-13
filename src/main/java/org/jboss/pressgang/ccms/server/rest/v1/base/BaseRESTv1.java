@@ -212,7 +212,7 @@ public class BaseRESTv1 extends BaseREST {
             final List<U> entities = jpaQuery.getResultList();
 
             // Create and initialise the Collection using the specified REST Object Factory
-            final V retValue = new RESTDataObjectCollectionFactory<T, U, V, W>().create(collectionClass, dataObjectFactory, entities,
+            final V retValue = RESTDataObjectCollectionFactory.create(collectionClass, dataObjectFactory, entities,
                     expandName, dataType, expandDataTrunk, getBaseUrl(), entityManager);
 
             return retValue;
@@ -480,7 +480,7 @@ public class BaseRESTv1 extends BaseREST {
             entityManager.flush();
             transactionManager.commit();
 
-            return new RESTDataObjectCollectionFactory<T, U, V, W>().create(collectionClass, factory, retValue, expandName, dataType,
+            return RESTDataObjectCollectionFactory.create(collectionClass, factory, retValue, expandName, dataType,
                     expandDataTrunk, getBaseUrl(), true, entityManager);
         } catch (final Throwable e) {
             throw processError(transactionManager, e);
@@ -566,7 +566,7 @@ public class BaseRESTv1 extends BaseREST {
             entityManager.flush();
             transactionManager.commit();
 
-            return new RESTDataObjectCollectionFactory<T, U, V, W>().create(collectionClass, factory, retValue, expandName, dataType,
+            return RESTDataObjectCollectionFactory.create(collectionClass, factory, retValue, expandName, dataType,
                     expandDataTrunk, getBaseUrl(), true, entityManager);
         } catch (final Throwable e) {
             throw processError(transactionManager, e);
@@ -818,7 +818,7 @@ public class BaseRESTv1 extends BaseREST {
             final List<U> result = getEntities(entityManager, type);
 
             // Create and initialise the Collection using the specified REST Object Factory
-            final V retValue = new RESTDataObjectCollectionFactory<T, U, V, W>().create(collectionClass, dataObjectFactory, result,
+            final V retValue = RESTDataObjectCollectionFactory.create(collectionClass, dataObjectFactory, result,
                     expandName, dataType, expandDataTrunk, getBaseUrl(), true, entityManager);
 
             return retValue;
@@ -887,7 +887,7 @@ public class BaseRESTv1 extends BaseREST {
             final List<U> result = getEntitiesFromQuery(entityManager, queryParams, filterQueryBuilder, entityFieldFilter);
 
             // Create the Collection Class and populate it with data using the query result data
-            final V retValue = new RESTDataObjectCollectionFactory<T, U, V, W>().create(collectionClass, dataObjectFactory, result,
+            final V retValue = RESTDataObjectCollectionFactory.create(collectionClass, dataObjectFactory, result,
                     expandName, dataType, expandDataTrunk, getBaseUrl(), true, entityManager);
 
             return retValue;

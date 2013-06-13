@@ -59,47 +59,39 @@ public class FilterV1Factory extends RESTDataObjectFactory<RESTFilterV1, Filter,
 
         // REVISIONS
         if (revision == null && expand != null && expand.contains(RESTBaseEntityV1.REVISIONS_NAME)) {
-            retValue.setRevisions(
-                    new RESTDataObjectCollectionFactory<RESTFilterV1, Filter, RESTFilterCollectionV1, RESTFilterCollectionItemV1>().create(
-                            RESTFilterCollectionV1.class, new FilterV1Factory(), entity,
-                            EnversUtilities.getRevisions(entityManager, entity), RESTBaseEntityV1.REVISIONS_NAME, dataType, expand, baseUrl,
-                            entityManager));
+            retValue.setRevisions(RESTDataObjectCollectionFactory.create(RESTFilterCollectionV1.class, new FilterV1Factory(), entity,
+                    EnversUtilities.getRevisions(entityManager, entity), RESTBaseEntityV1.REVISIONS_NAME, dataType, expand, baseUrl,
+                    entityManager));
         }
 
         // FILTER TAGS
         if (expand != null && expand.contains(RESTFilterV1.FILTER_TAGS_NAME)) {
-            retValue.setFilterTags_OTM(
-                    new RESTDataObjectCollectionFactory<RESTFilterTagV1, FilterTag, RESTFilterTagCollectionV1,
-                            RESTFilterTagCollectionItemV1>().create(
-                            RESTFilterTagCollectionV1.class, new FilterTagV1Factory(), entity.getFilterTagsList(),
-                            RESTFilterV1.FILTER_TAGS_NAME, dataType, expand, baseUrl, false, entityManager));
+            retValue.setFilterTags_OTM(RESTDataObjectCollectionFactory.create(RESTFilterTagCollectionV1.class, new FilterTagV1Factory(),
+                    entity.getFilterTagsList(), RESTFilterV1.FILTER_TAGS_NAME, dataType, expand, baseUrl, false, entityManager));
         }
 
         // FILTER LOCALES
         if (expand != null && expand.contains(RESTFilterV1.FILTER_LOCALES_NAME)) {
             retValue.setFilterLocales_OTM(
-                    new RESTDataObjectCollectionFactory<RESTFilterLocaleV1, FilterLocale, RESTFilterLocaleCollectionV1,
-                            RESTFilterLocaleCollectionItemV1>().create(
-                            RESTFilterLocaleCollectionV1.class, new FilterLocaleV1Factory(), entity.getFilterLocalesList(),
-                            RESTFilterV1.FILTER_LOCALES_NAME, dataType, expand, baseUrl, false, entityManager));
+                    RESTDataObjectCollectionFactory.create(RESTFilterLocaleCollectionV1.class, new FilterLocaleV1Factory(),
+                            entity.getFilterLocalesList(), RESTFilterV1.FILTER_LOCALES_NAME, dataType, expand, baseUrl, false,
+                            entityManager));
         }
 
         // FILTER CATEGORIES
         if (expand != null && expand.contains(RESTFilterV1.FILTER_CATEGORIES_NAME)) {
             retValue.setFilterCategories_OTM(
-                    new RESTDataObjectCollectionFactory<RESTFilterCategoryV1, FilterCategory, RESTFilterCategoryCollectionV1,
-                            RESTFilterCategoryCollectionItemV1>().create(
-                            RESTFilterCategoryCollectionV1.class, new FilterCategoryV1Factory(), entity.getFilterCategoriesList(),
-                            RESTFilterV1.FILTER_CATEGORIES_NAME, dataType, expand, baseUrl, false, entityManager));
+                    RESTDataObjectCollectionFactory.create(RESTFilterCategoryCollectionV1.class, new FilterCategoryV1Factory(),
+                            entity.getFilterCategoriesList(), RESTFilterV1.FILTER_CATEGORIES_NAME, dataType, expand, baseUrl, false,
+                            entityManager));
         }
 
         // FILTER FIELDS
         if (expand != null && expand.contains(RESTFilterV1.FILTER_FIELDS_NAME)) {
             retValue.setFilterFields_OTM(
-                    new RESTDataObjectCollectionFactory<RESTFilterFieldV1, FilterField, RESTFilterFieldCollectionV1,
-                            RESTFilterFieldCollectionItemV1>().create(
-                            RESTFilterFieldCollectionV1.class, new FilterFieldV1Factory(), entity.getFilterFieldsList(),
-                            RESTFilterV1.FILTER_FIELDS_NAME, dataType, expand, baseUrl, false, entityManager));
+                    RESTDataObjectCollectionFactory.create(RESTFilterFieldCollectionV1.class, new FilterFieldV1Factory(),
+                            entity.getFilterFieldsList(), RESTFilterV1.FILTER_FIELDS_NAME, dataType, expand, baseUrl, false,
+                            entityManager));
         }
 
         retValue.setLinks(baseUrl, RESTv1Constants.FILTER_URL_NAME, dataType, retValue.getId());

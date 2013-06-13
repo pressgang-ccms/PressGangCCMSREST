@@ -45,9 +45,7 @@ public class FilterLocaleV1Factory extends RESTDataObjectFactory<RESTFilterLocal
         // REVISIONS
         if (revision == null && expand != null && expand.contains(RESTBaseEntityV1.REVISIONS_NAME)) {
             retValue.setRevisions(
-                    new RESTDataObjectCollectionFactory<RESTFilterLocaleV1, FilterLocale, RESTFilterLocaleCollectionV1,
-                            RESTFilterLocaleCollectionItemV1>().create(
-                            RESTFilterLocaleCollectionV1.class, new FilterLocaleV1Factory(), entity,
+                    RESTDataObjectCollectionFactory.create(RESTFilterLocaleCollectionV1.class, new FilterLocaleV1Factory(), entity,
                             EnversUtilities.getRevisions(entityManager, entity), RESTBaseEntityV1.REVISIONS_NAME, dataType, expand, baseUrl,
                             entityManager));
         }
@@ -64,10 +62,8 @@ public class FilterLocaleV1Factory extends RESTDataObjectFactory<RESTFilterLocal
     @Override
     public void syncDBEntityWithRESTEntity(final EntityManager entityManager, final FilterLocale entity,
             final RESTFilterLocaleV1 dataObject) {
-        if (dataObject.hasParameterSet(RESTFilterLocaleV1.LOCALE_NAME))
-            entity.setLocaleName(dataObject.getLocale());
-        if (dataObject.hasParameterSet(RESTFilterLocaleV1.STATE_NAME))
-            entity.setLocaleState(dataObject.getState());
+        if (dataObject.hasParameterSet(RESTFilterLocaleV1.LOCALE_NAME)) entity.setLocaleName(dataObject.getLocale());
+        if (dataObject.hasParameterSet(RESTFilterLocaleV1.STATE_NAME)) entity.setLocaleState(dataObject.getState());
 
         if (dataObject.hasParameterSet(RESTFilterLocaleV1.FILTER_NAME)) {
             final RESTFilterV1 restEntity = dataObject.getFilter();

@@ -55,8 +55,7 @@ public class TranslatedTopicStringV1Factory extends RESTDataObjectFactory<RESTTr
         // REVISIONS
         if (revision == null && expand != null && expand.contains(RESTTopicV1.REVISIONS_NAME)) {
             retValue.setRevisions(
-                    new RESTDataObjectCollectionFactory<RESTTranslatedTopicStringV1, TranslatedTopicString,
-                            RESTTranslatedTopicStringCollectionV1, RESTTranslatedTopicStringCollectionItemV1>().create(
+                    RESTDataObjectCollectionFactory.create(
                             RESTTranslatedTopicStringCollectionV1.class, new TranslatedTopicStringV1Factory(), entity,
                             EnversUtilities.getRevisions(entityManager, entity), RESTBaseEntityV1.REVISIONS_NAME, dataType, expand, baseUrl,
                             entityManager));

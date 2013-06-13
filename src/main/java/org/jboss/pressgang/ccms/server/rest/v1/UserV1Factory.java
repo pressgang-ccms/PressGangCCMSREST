@@ -47,7 +47,7 @@ public class UserV1Factory extends RESTDataObjectFactory<RESTUserV1, User, RESTU
         // REVISIONS
         if (revision == null && expand != null && expand.contains(RESTTopicV1.REVISIONS_NAME)) {
             retValue.setRevisions(
-                    new RESTDataObjectCollectionFactory<RESTUserV1, User, RESTUserCollectionV1, RESTUserCollectionItemV1>().create(
+                    RESTDataObjectCollectionFactory.create(
                             RESTUserCollectionV1.class, new UserV1Factory(), entity, EnversUtilities.getRevisions(entityManager, entity),
                             RESTBaseEntityV1.REVISIONS_NAME, dataType, expand, baseUrl, entityManager));
         }
@@ -55,7 +55,7 @@ public class UserV1Factory extends RESTDataObjectFactory<RESTUserV1, User, RESTU
         // ROLES
         if (expand != null && expand.contains(RESTUserV1.ROLES_NAME)) {
             retValue.setRoles(
-                    new RESTDataObjectCollectionFactory<RESTRoleV1, Role, RESTRoleCollectionV1, RESTRoleCollectionItemV1>().create(
+                    RESTDataObjectCollectionFactory.create(
                             RESTRoleCollectionV1.class, new RoleV1Factory(), entity.getRoles(), RESTUserV1.ROLES_NAME, dataType, expand,
                             baseUrl, entityManager));
         }

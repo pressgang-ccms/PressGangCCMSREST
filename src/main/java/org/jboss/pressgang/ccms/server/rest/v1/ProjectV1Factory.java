@@ -46,19 +46,15 @@ public class ProjectV1Factory extends RESTDataObjectFactory<RESTProjectV1, Proje
 
         // REVISIONS
         if (revision == null && expand != null && expand.contains(RESTBaseEntityV1.REVISIONS_NAME)) {
-            retValue.setRevisions(
-                    new RESTDataObjectCollectionFactory<RESTProjectV1, Project, RESTProjectCollectionV1,
-                            RESTProjectCollectionItemV1>().create(
-                            RESTProjectCollectionV1.class, new ProjectV1Factory(), entity,
-                            EnversUtilities.getRevisions(entityManager, entity), RESTBaseEntityV1.REVISIONS_NAME, dataType, expand, baseUrl,
-                            entityManager));
+            retValue.setRevisions(RESTDataObjectCollectionFactory.create(RESTProjectCollectionV1.class, new ProjectV1Factory(), entity,
+                    EnversUtilities.getRevisions(entityManager, entity), RESTBaseEntityV1.REVISIONS_NAME, dataType, expand, baseUrl,
+                    entityManager));
         }
 
         // TAGS
         if (expand != null && expand.contains(RESTProjectV1.TAGS_NAME)) {
-            retValue.setTags(new RESTDataObjectCollectionFactory<RESTTagV1, Tag, RESTTagCollectionV1, RESTTagCollectionItemV1>().create(
-                    RESTTagCollectionV1.class, new TagV1Factory(), entity.getTags(), RESTProjectV1.TAGS_NAME, dataType, expand, baseUrl,
-                    entityManager));
+            retValue.setTags(RESTDataObjectCollectionFactory.create(RESTTagCollectionV1.class, new TagV1Factory(), entity.getTags(),
+                    RESTProjectV1.TAGS_NAME, dataType, expand, baseUrl, entityManager));
         }
 
         retValue.setLinks(baseUrl, RESTv1Constants.PROJECT_URL_NAME, dataType, retValue.getId());
@@ -67,12 +63,9 @@ public class ProjectV1Factory extends RESTDataObjectFactory<RESTProjectV1, Proje
     }
 
     @Override
-    public void syncDBEntityWithRESTEntity(final EntityManager entityManager, final Project entity,
-            final RESTProjectV1 dataObject) {
-        if (dataObject.hasParameterSet(RESTProjectV1.DESCRIPTION_NAME))
-            entity.setProjectDescription(dataObject.getDescription());
-        if (dataObject.hasParameterSet(RESTProjectV1.NAME_NAME))
-            entity.setProjectName(dataObject.getName());
+    public void syncDBEntityWithRESTEntity(final EntityManager entityManager, final Project entity, final RESTProjectV1 dataObject) {
+        if (dataObject.hasParameterSet(RESTProjectV1.DESCRIPTION_NAME)) entity.setProjectDescription(dataObject.getDescription());
+        if (dataObject.hasParameterSet(RESTProjectV1.NAME_NAME)) entity.setProjectName(dataObject.getName());
 
         entityManager.persist(entity);
 
@@ -87,8 +80,7 @@ public class ProjectV1Factory extends RESTDataObjectFactory<RESTProjectV1, Proje
                 if (restEntityItem.returnIsAddItem() || restEntityItem.returnIsRemoveItem()) {
                     final Tag dbEntity = entityManager.find(Tag.class, restEntity.getId());
                     if (dbEntity == null)
-                        throw new BadRequestException("No Tag entity was found with the primary key "
-                                + restEntity.getId());
+                        throw new BadRequestException("No Tag entity was found with the primary key " + restEntity.getId());
 
                     if (restEntityItem.returnIsAddItem()) {
                         entity.addRelationshipTo(dbEntity);

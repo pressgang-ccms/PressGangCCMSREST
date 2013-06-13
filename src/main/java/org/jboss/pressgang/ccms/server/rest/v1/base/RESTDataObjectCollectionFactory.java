@@ -11,37 +11,35 @@ import org.jboss.pressgang.ccms.rest.v1.expansion.ExpandDataDetails;
 import org.jboss.pressgang.ccms.rest.v1.expansion.ExpandDataTrunk;
 import org.jboss.pressgang.ccms.server.utils.EnversUtilities;
 import org.jboss.resteasy.spi.InternalServerErrorException;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 /**
  * A factory used to create collections of REST entity objects
- *
- * @param <T> The type of REST entity to work with
- * @param <U> The type of database entity to work with
- * @param <V> The type of REST collection to work with
  */
-public class RESTDataObjectCollectionFactory<T extends RESTBaseEntityV1<T, V, W>, U extends AuditedEntity,
-        V extends RESTBaseCollectionV1<T, V, W>, W extends RESTBaseCollectionItemV1<T, V, W>> {
-    private static final Logger log = LoggerFactory.getLogger(RESTDataObjectCollectionFactory.class);
+public class RESTDataObjectCollectionFactory {
 
-    public V create(final Class<V> clazz, final RESTDataObjectFactory<T, U, V, W> dataObjectFactory, final List<U> entities,
+    public static <T extends RESTBaseEntityV1<T, V, W>, U extends AuditedEntity, V extends RESTBaseCollectionV1<T, V, W>,
+            W extends RESTBaseCollectionItemV1<T, V, W>> V create(
+            final Class<V> clazz, final RESTDataObjectFactory<T, U, V, W> dataObjectFactory, final List<U> entities,
             final String expandName, final String dataType, final ExpandDataTrunk parentExpand, final String baseUrl,
             final EntityManager entityManager) {
         return create(clazz, dataObjectFactory, entities, null, null, null, expandName, dataType, parentExpand, baseUrl, true,
                 entityManager);
     }
 
-    public V create(final Class<V> clazz, final RESTDataObjectFactory<T, U, V, W> dataObjectFactory, final List<U> entities,
+    public static <T extends RESTBaseEntityV1<T, V, W>, U extends AuditedEntity, V extends RESTBaseCollectionV1<T, V, W>,
+            W extends RESTBaseCollectionItemV1<T, V, W>> V create(
+            final Class<V> clazz, final RESTDataObjectFactory<T, U, V, W> dataObjectFactory, final List<U> entities,
             final String expandName, final String dataType, final ExpandDataTrunk parentExpand, final String baseUrl, final Number revision,
             final EntityManager entityManager) {
         return create(clazz, dataObjectFactory, entities, null, revision, null, expandName, dataType, parentExpand, baseUrl, true,
                 entityManager);
     }
 
-    public V create(final Class<V> clazz, final RESTDataObjectFactory<T, U, V, W> dataObjectFactory, final U parent,
-            final List<Number> revisions, final String expandName, final String dataType, final ExpandDataTrunk parentExpand,
-            final String baseUrl, final EntityManager entityManager) {
+    public static <T extends RESTBaseEntityV1<T, V, W>, U extends AuditedEntity, V extends RESTBaseCollectionV1<T, V, W>,
+            W extends RESTBaseCollectionItemV1<T, V, W>> V create(
+            final Class<V> clazz, final RESTDataObjectFactory<T, U, V, W> dataObjectFactory, final U parent, final List<Number> revisions,
+            final String expandName, final String dataType, final ExpandDataTrunk parentExpand, final String baseUrl,
+            final EntityManager entityManager) {
         return create(clazz, dataObjectFactory, null, parent, null, revisions, expandName, dataType, parentExpand, baseUrl, true,
                 entityManager);
     }
@@ -61,9 +59,11 @@ public class RESTDataObjectCollectionFactory<T extends RESTBaseEntityV1<T, V, W>
      * @param entityManager     The EntityManager being used to provide data for the collection.
      * @return A REST collection from a collection of database entities.
      */
-    public V create(final Class<V> clazz, final RESTDataObjectFactory<T, U, V, W> dataObjectFactory, final U parent,
-            final List<Number> revisions, final String expandName, final String dataType, final ExpandDataTrunk parentExpand,
-            final String baseUrl, final Number revision, final EntityManager entityManager) {
+    public static <T extends RESTBaseEntityV1<T, V, W>, U extends AuditedEntity, V extends RESTBaseCollectionV1<T, V, W>,
+            W extends RESTBaseCollectionItemV1<T, V, W>> V create(
+            final Class<V> clazz, final RESTDataObjectFactory<T, U, V, W> dataObjectFactory, final U parent, final List<Number> revisions,
+            final String expandName, final String dataType, final ExpandDataTrunk parentExpand, final String baseUrl, final Number revision,
+            final EntityManager entityManager) {
         return create(clazz, dataObjectFactory, null, parent, revision, revisions, expandName, dataType, parentExpand, baseUrl, true,
                 entityManager);
     }
@@ -83,7 +83,9 @@ public class RESTDataObjectCollectionFactory<T extends RESTBaseEntityV1<T, V, W>
      * @param entityManager          The EntityManager being used to provide data for the collection.
      * @return a REST collection from a collection of database entities.
      */
-    public V create(final Class<V> clazz, final RESTDataObjectFactory<T, U, V, W> dataObjectFactory, final List<U> entities,
+    public static <T extends RESTBaseEntityV1<T, V, W>, U extends AuditedEntity, V extends RESTBaseCollectionV1<T, V, W>,
+            W extends RESTBaseCollectionItemV1<T, V, W>> V create(
+            final Class<V> clazz, final RESTDataObjectFactory<T, U, V, W> dataObjectFactory, final List<U> entities,
             final String expandName, final String dataType, final ExpandDataTrunk parentExpand, final String baseUrl,
             final boolean expandParentReferences, final EntityManager entityManager) {
         return create(clazz, dataObjectFactory, entities, null, null, null, expandName, dataType, parentExpand, baseUrl,
@@ -106,7 +108,9 @@ public class RESTDataObjectCollectionFactory<T extends RESTBaseEntityV1<T, V, W>
      * @param entityManager          The EntityManager being used to provide data for the collection.
      * @return a REST collection from a collection of database entities.
      */
-    public V create(final Class<V> clazz, final RESTDataObjectFactory<T, U, V, W> dataObjectFactory, final List<U> entities,
+    public static <T extends RESTBaseEntityV1<T, V, W>, U extends AuditedEntity, V extends RESTBaseCollectionV1<T, V, W>,
+            W extends RESTBaseCollectionItemV1<T, V, W>> V create(
+            final Class<V> clazz, final RESTDataObjectFactory<T, U, V, W> dataObjectFactory, final List<U> entities,
             final String expandName, final String dataType, final ExpandDataTrunk parentExpand, final String baseUrl, final Number revision,
             final boolean expandParentReferences, final EntityManager entityManager) {
         return create(clazz, dataObjectFactory, entities, null, revision, null, expandName, dataType, parentExpand, baseUrl,
@@ -131,7 +135,9 @@ public class RESTDataObjectCollectionFactory<T extends RESTBaseEntityV1<T, V, W>
      * @param entityManager          The EntityManager being used to provide data for the collection.
      * @return a REST collection from a collection of database entities.
      */
-    public V create(final Class<V> clazz, final RESTDataObjectFactory<T, U, V, W> dataObjectFactory, final List<U> entities, final U parent,
+    public static <T extends RESTBaseEntityV1<T, V, W>, U extends AuditedEntity, V extends RESTBaseCollectionV1<T, V, W>,
+            W extends RESTBaseCollectionItemV1<T, V, W>> V create(
+            final Class<V> clazz, final RESTDataObjectFactory<T, U, V, W> dataObjectFactory, final List<U> entities, final U parent,
             final Number parentRevision, final List<Number> revisions, final String expandName, final String dataType,
             final ExpandDataTrunk parentExpand, final String baseUrl, final boolean expandParentReferences,
             final EntityManager entityManager) {
@@ -226,8 +232,8 @@ public class RESTDataObjectCollectionFactory<T extends RESTBaseEntityV1<T, V, W>
 
                     // If the entity was found then create the REST Entity
                     if (dbEntity != null) {
-                        final T restEntity = dataObjectFactory.createRESTEntityFromDBEntity(dbEntity, baseUrl, dataType, expand,
-                                revision, expandParentReferences, entityManager);
+                        final T restEntity = dataObjectFactory.createRESTEntityFromDBEntity(dbEntity, baseUrl, dataType, expand, revision,
+                                expandParentReferences, entityManager);
 
                         // Add the item to the return value
                         retValue.addItem(restEntity);

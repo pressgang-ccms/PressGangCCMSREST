@@ -43,12 +43,10 @@ public class LanguageImageV1Factory extends RESTDataObjectFactory<RESTLanguageIm
         retValue.setFilename(entity.getOriginalFileName());
 
         /* potentially large fields need to be expanded manually */
-        if (expand != null && expand.contains(RESTLanguageImageV1.IMAGEDATA_NAME))
-            retValue.setImageData(entity.getImageData());
+        if (expand != null && expand.contains(RESTLanguageImageV1.IMAGEDATA_NAME)) retValue.setImageData(entity.getImageData());
         if (expand != null && expand.contains(RESTLanguageImageV1.IMAGEDATABASE64_NAME))
             retValue.setImageDataBase64(entity.getImageDataBase64());
-        if (expand != null && expand.contains(RESTLanguageImageV1.THUMBNAIL_NAME))
-            retValue.setThumbnail(entity.getThumbnailData());
+        if (expand != null && expand.contains(RESTLanguageImageV1.THUMBNAIL_NAME)) retValue.setThumbnail(entity.getThumbnailData());
 
         /* Set the object references */
         if (expandParentReferences && expand != null && expand.contains(RESTLanguageImageV1.IMAGE_NAME) && entity.getImageFile() != null) {
@@ -59,9 +57,7 @@ public class LanguageImageV1Factory extends RESTDataObjectFactory<RESTLanguageIm
         // REVISIONS
         if (revision == null && expand != null && expand.contains(RESTBaseEntityV1.REVISIONS_NAME)) {
             retValue.setRevisions(
-                    new RESTDataObjectCollectionFactory<RESTLanguageImageV1, LanguageImage, RESTLanguageImageCollectionV1,
-                            RESTLanguageImageCollectionItemV1>().create(
-                            RESTLanguageImageCollectionV1.class, new LanguageImageV1Factory(), entity,
+                    RESTDataObjectCollectionFactory.create(RESTLanguageImageCollectionV1.class, new LanguageImageV1Factory(), entity,
                             EnversUtilities.getRevisions(entityManager, entity), RESTBaseEntityV1.REVISIONS_NAME, dataType, expand, baseUrl,
                             entityManager));
         }
@@ -72,12 +68,9 @@ public class LanguageImageV1Factory extends RESTDataObjectFactory<RESTLanguageIm
     @Override
     public void syncDBEntityWithRESTEntity(final EntityManager entityManager, final LanguageImage entity,
             final RESTLanguageImageV1 dataObject) {
-        if (dataObject.hasParameterSet(RESTLanguageImageV1.LOCALE_NAME))
-            entity.setLocale(dataObject.getLocale());
-        if (dataObject.hasParameterSet(RESTLanguageImageV1.IMAGEDATA_NAME))
-            entity.setImageData(dataObject.getImageData());
-        if (dataObject.hasParameterSet(RESTLanguageImageV1.FILENAME_NAME))
-            entity.setOriginalFileName(dataObject.getFilename());
+        if (dataObject.hasParameterSet(RESTLanguageImageV1.LOCALE_NAME)) entity.setLocale(dataObject.getLocale());
+        if (dataObject.hasParameterSet(RESTLanguageImageV1.IMAGEDATA_NAME)) entity.setImageData(dataObject.getImageData());
+        if (dataObject.hasParameterSet(RESTLanguageImageV1.FILENAME_NAME)) entity.setOriginalFileName(dataObject.getFilename());
     }
 
 }

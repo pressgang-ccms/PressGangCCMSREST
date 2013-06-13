@@ -10,7 +10,6 @@ import org.jboss.pressgang.ccms.model.Tag;
 import org.jboss.pressgang.ccms.model.Topic;
 import org.jboss.pressgang.ccms.model.TopicSourceUrl;
 import org.jboss.pressgang.ccms.model.TopicToPropertyTag;
-import org.jboss.pressgang.ccms.model.TranslatedTopicData;
 import org.jboss.pressgang.ccms.rest.v1.collections.RESTBugzillaBugCollectionV1;
 import org.jboss.pressgang.ccms.rest.v1.collections.RESTTagCollectionV1;
 import org.jboss.pressgang.ccms.rest.v1.collections.RESTTopicCollectionV1;
@@ -20,7 +19,6 @@ import org.jboss.pressgang.ccms.rest.v1.collections.items.RESTBugzillaBugCollect
 import org.jboss.pressgang.ccms.rest.v1.collections.items.RESTTagCollectionItemV1;
 import org.jboss.pressgang.ccms.rest.v1.collections.items.RESTTopicCollectionItemV1;
 import org.jboss.pressgang.ccms.rest.v1.collections.items.RESTTopicSourceUrlCollectionItemV1;
-import org.jboss.pressgang.ccms.rest.v1.collections.items.RESTTranslatedTopicCollectionItemV1;
 import org.jboss.pressgang.ccms.rest.v1.collections.items.join.RESTAssignedPropertyTagCollectionItemV1;
 import org.jboss.pressgang.ccms.rest.v1.collections.join.RESTAssignedPropertyTagCollectionV1;
 import org.jboss.pressgang.ccms.rest.v1.constants.RESTv1Constants;
@@ -28,7 +26,6 @@ import org.jboss.pressgang.ccms.rest.v1.entities.RESTBugzillaBugV1;
 import org.jboss.pressgang.ccms.rest.v1.entities.RESTTagV1;
 import org.jboss.pressgang.ccms.rest.v1.entities.RESTTopicSourceUrlV1;
 import org.jboss.pressgang.ccms.rest.v1.entities.RESTTopicV1;
-import org.jboss.pressgang.ccms.rest.v1.entities.RESTTranslatedTopicV1;
 import org.jboss.pressgang.ccms.rest.v1.entities.base.RESTBaseEntityV1;
 import org.jboss.pressgang.ccms.rest.v1.entities.enums.RESTXMLDoctype;
 import org.jboss.pressgang.ccms.rest.v1.entities.join.RESTAssignedPropertyTagV1;
@@ -79,41 +76,33 @@ public class TopicV1Factory extends RESTDataObjectFactory<RESTTopicV1, Topic, RE
 
         // REVISIONS
         if (revision == null && expand != null && expand.contains(RESTTopicV1.REVISIONS_NAME)) {
-            retValue.setRevisions(
-                    new RESTDataObjectCollectionFactory<RESTTopicV1, Topic, RESTTopicCollectionV1, RESTTopicCollectionItemV1>().create(
-                            RESTTopicCollectionV1.class, new TopicV1Factory(), entity, EnversUtilities.getRevisions(entityManager, entity),
-                            RESTBaseEntityV1.REVISIONS_NAME, dataType, expand, baseUrl, entityManager));
+            retValue.setRevisions(RESTDataObjectCollectionFactory.create(RESTTopicCollectionV1.class, new TopicV1Factory(), entity,
+                    EnversUtilities.getRevisions(entityManager, entity), RESTBaseEntityV1.REVISIONS_NAME, dataType, expand, baseUrl,
+                    entityManager));
         }
 
         // TAGS
         if (expand != null && expand.contains(RESTTopicV1.TAGS_NAME)) {
-            retValue.setTags(new RESTDataObjectCollectionFactory<RESTTagV1, Tag, RESTTagCollectionV1, RESTTagCollectionItemV1>().create(
-                    RESTTagCollectionV1.class, new TagV1Factory(), entity.getTags(), RESTv1Constants.TAGS_EXPANSION_NAME, dataType, expand,
-                    baseUrl, entityManager));
+            retValue.setTags(RESTDataObjectCollectionFactory.create(RESTTagCollectionV1.class, new TagV1Factory(), entity.getTags(),
+                    RESTv1Constants.TAGS_EXPANSION_NAME, dataType, expand, baseUrl, entityManager));
         }
 
         // OUTGOING RELATIONSHIPS
         if (expand != null && expand.contains(RESTTopicV1.OUTGOING_NAME)) {
-            retValue.setOutgoingRelationships(
-                    new RESTDataObjectCollectionFactory<RESTTopicV1, Topic, RESTTopicCollectionV1, RESTTopicCollectionItemV1>().create(
-                            RESTTopicCollectionV1.class, new TopicV1Factory(), entity.getOutgoingRelatedTopicsArray(),
-                            RESTTopicV1.OUTGOING_NAME, dataType, expand, baseUrl, revision, entityManager));
+            retValue.setOutgoingRelationships(RESTDataObjectCollectionFactory.create(RESTTopicCollectionV1.class, new TopicV1Factory(),
+                    entity.getOutgoingRelatedTopicsArray(), RESTTopicV1.OUTGOING_NAME, dataType, expand, baseUrl, revision, entityManager));
         }
 
         // INCOMING RELATIONSHIPS
         if (expand != null && expand.contains(RESTTopicV1.INCOMING_NAME)) {
-            retValue.setIncomingRelationships(
-                    new RESTDataObjectCollectionFactory<RESTTopicV1, Topic, RESTTopicCollectionV1, RESTTopicCollectionItemV1>().create(
-                            RESTTopicCollectionV1.class, new TopicV1Factory(), entity.getIncomingRelatedTopicsArray(),
-                            RESTTopicV1.INCOMING_NAME, dataType, expand, baseUrl, revision, entityManager));
+            retValue.setIncomingRelationships(RESTDataObjectCollectionFactory.create(RESTTopicCollectionV1.class, new TopicV1Factory(),
+                    entity.getIncomingRelatedTopicsArray(), RESTTopicV1.INCOMING_NAME, dataType, expand, baseUrl, revision, entityManager));
         }
 
         // PROPERTIES
         if (expand != null && expand.contains(RESTTopicV1.PROPERTIES_NAME)) {
             retValue.setProperties(
-                    new RESTDataObjectCollectionFactory<RESTAssignedPropertyTagV1, TopicToPropertyTag,
-                            RESTAssignedPropertyTagCollectionV1, RESTAssignedPropertyTagCollectionItemV1>().create(
-                            RESTAssignedPropertyTagCollectionV1.class, new TopicPropertyTagV1Factory(),
+                    RESTDataObjectCollectionFactory.create(RESTAssignedPropertyTagCollectionV1.class, new TopicPropertyTagV1Factory(),
                             entity.getTopicToPropertyTagsArray(), RESTTopicV1.PROPERTIES_NAME, dataType, expand, baseUrl, revision,
                             entityManager));
         }
@@ -121,27 +110,23 @@ public class TopicV1Factory extends RESTDataObjectFactory<RESTTopicV1, Topic, RE
         // SOURCE URLS
         if (expand != null && expand.contains(RESTTopicV1.SOURCE_URLS_NAME)) {
             retValue.setSourceUrls_OTM(
-                    new RESTDataObjectCollectionFactory<RESTTopicSourceUrlV1, TopicSourceUrl, RESTTopicSourceUrlCollectionV1,
-                            RESTTopicSourceUrlCollectionItemV1>().create(
-                            RESTTopicSourceUrlCollectionV1.class, new TopicSourceUrlV1Factory(), entity.getTopicSourceUrls(),
-                            RESTTopicV1.SOURCE_URLS_NAME, dataType, expand, baseUrl, revision, false, entityManager));
+                    RESTDataObjectCollectionFactory.create(RESTTopicSourceUrlCollectionV1.class, new TopicSourceUrlV1Factory(),
+                            entity.getTopicSourceUrls(), RESTTopicV1.SOURCE_URLS_NAME, dataType, expand, baseUrl, revision, false,
+                            entityManager));
         }
 
         // BUGZILLA BUGS
         if (expand != null && expand.contains(RESTTopicV1.BUGZILLABUGS_NAME)) {
             retValue.setBugzillaBugs_OTM(
-                    new RESTDataObjectCollectionFactory<RESTBugzillaBugV1, BugzillaBug, RESTBugzillaBugCollectionV1,
-                            RESTBugzillaBugCollectionItemV1>().create(
-                            RESTBugzillaBugCollectionV1.class, new BugzillaBugV1Factory(), entity.getBugzillaBugs(),
-                            RESTTopicV1.BUGZILLABUGS_NAME, dataType, expand, baseUrl, revision, false, entityManager));
+                    RESTDataObjectCollectionFactory.create(RESTBugzillaBugCollectionV1.class, new BugzillaBugV1Factory(),
+                            entity.getBugzillaBugs(), RESTTopicV1.BUGZILLABUGS_NAME, dataType, expand, baseUrl, revision, false,
+                            entityManager));
         }
 
         // TRANSLATED TOPICS
         if (expand != null && expand.contains(RESTTopicV1.TRANSLATEDTOPICS_NAME)) {
             retValue.setTranslatedTopics_OTM(
-                    new RESTDataObjectCollectionFactory<RESTTranslatedTopicV1, TranslatedTopicData, RESTTranslatedTopicCollectionV1,
-                            RESTTranslatedTopicCollectionItemV1>().create(
-                            RESTTranslatedTopicCollectionV1.class, new TranslatedTopicV1Factory(),
+                    RESTDataObjectCollectionFactory.create(RESTTranslatedTopicCollectionV1.class, new TranslatedTopicV1Factory(),
                             entity.getTranslatedTopics(entityManager, revision), RESTTopicV1.TRANSLATEDTOPICS_NAME, dataType, expand,
                             baseUrl, revision, false, entityManager));
         }

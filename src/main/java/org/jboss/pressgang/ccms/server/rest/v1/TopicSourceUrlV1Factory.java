@@ -43,9 +43,7 @@ public class TopicSourceUrlV1Factory extends RESTDataObjectFactory<RESTTopicSour
         // REVISIONS
         if (revision == null && expand != null && expand.contains(RESTTopicV1.REVISIONS_NAME)) {
             retValue.setRevisions(
-                    new RESTDataObjectCollectionFactory<RESTTopicSourceUrlV1, TopicSourceUrl, RESTTopicSourceUrlCollectionV1,
-                            RESTTopicSourceUrlCollectionItemV1>().create(
-                            RESTTopicSourceUrlCollectionV1.class, new TopicSourceUrlV1Factory(), entity,
+                    RESTDataObjectCollectionFactory.create(RESTTopicSourceUrlCollectionV1.class, new TopicSourceUrlV1Factory(), entity,
                             EnversUtilities.getRevisions(entityManager, entity), RESTBaseEntityV1.REVISIONS_NAME, dataType, expand, baseUrl,
                             entityManager));
         }

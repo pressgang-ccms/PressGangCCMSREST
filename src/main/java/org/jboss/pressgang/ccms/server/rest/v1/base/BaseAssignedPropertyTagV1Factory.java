@@ -60,8 +60,7 @@ public abstract class BaseAssignedPropertyTagV1Factory<T extends ToPropertyTag<T
 
             }
             retValue.setRevisions(
-                    new RESTDataObjectCollectionFactory<RESTAssignedPropertyTagV1, T, RESTAssignedPropertyTagCollectionV1,
-                            RESTAssignedPropertyTagCollectionItemV1>().create(
+                    RESTDataObjectCollectionFactory.create(
                             RESTAssignedPropertyTagCollectionV1.class, factory, entity, EnversUtilities.getRevisions(entityManager, entity),
                             RESTBaseEntityV1.REVISIONS_NAME, dataType, expand, baseUrl, entityManager));
         }
@@ -69,8 +68,7 @@ public abstract class BaseAssignedPropertyTagV1Factory<T extends ToPropertyTag<T
         // PROPERTY CATEGORIES
         if (expand != null && expand.contains(RESTBasePropertyTagV1.PROPERTY_CATEGORIES_NAME)) {
             retValue.setPropertyCategories(
-                    new RESTDataObjectCollectionFactory<RESTPropertyCategoryInPropertyTagV1, PropertyTagToPropertyTagCategory,
-                            RESTPropertyCategoryInPropertyTagCollectionV1, RESTPropertyCategoryInPropertyTagCollectionItemV1>().create(
+                    RESTDataObjectCollectionFactory.create(
                             RESTPropertyCategoryInPropertyTagCollectionV1.class, new PropertyCategoryInPropertyTagV1Factory(),
                             entity.getPropertyTag().getPropertyTagToPropertyTagCategoriesList(),
                             RESTBasePropertyTagV1.PROPERTY_CATEGORIES_NAME, dataType, expand, baseUrl, revision, false, entityManager));
