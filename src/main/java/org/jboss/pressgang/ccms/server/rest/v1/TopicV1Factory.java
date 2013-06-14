@@ -290,7 +290,7 @@ public class TopicV1Factory extends RESTDataObjectFactory<RESTTopicV1, Topic, RE
 
                     entity.removeTopicSourceUrl(restEntity.getId());
                 } else if (restEntityItem.returnIsAddItem()) {
-                    final TopicSourceUrl dbEntity = new TopicSourceUrlV1Factory().createDBEntityFromRESTEntity(restEntity);
+                    final TopicSourceUrl dbEntity = topicSourceUrlFactory.createDBEntityFromRESTEntity(restEntity);
                     entity.addTopicSourceUrl(dbEntity);
                 } else if (restEntityItem.returnIsUpdateItem()) {
                     final TopicSourceUrl dbEntity = entityManager.find(TopicSourceUrl.class, restEntity.getId());

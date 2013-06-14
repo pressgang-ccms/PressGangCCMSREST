@@ -51,6 +51,15 @@ public class EntityCache {
         return entities;
     }
 
+    public List<Object> getAllEntities() {
+        final List<Object> entities = new ArrayList<Object>();
+        for (final Map.Entry<RESTBaseEntityV1, Pair<Object, Integer>> entry : this.entities.entrySet()) {
+            entities.add(entry.getValue().getFirst());
+        }
+
+        return entities;
+    }
+
     protected <U> List<U> getEntitiesWithState(final Class<U> clazz, final Integer state) {
         final List<U> entities = new ArrayList<U>();
         for (final Map.Entry<RESTBaseEntityV1, Pair<Object, Integer>> entry : this.entities.entrySet()) {

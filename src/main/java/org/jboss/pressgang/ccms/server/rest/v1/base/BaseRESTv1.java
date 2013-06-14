@@ -414,7 +414,10 @@ public class BaseRESTv1 extends BaseREST {
 
             assert entity != null : "entity should not be null";
 
+            // Persist the changes
             entityManager.persist(entity);
+
+            // Flush the changes to the database and commit the transaction
             entityManager.flush();
             transactionManager.commit();
 
@@ -1126,13 +1129,16 @@ public class BaseRESTv1 extends BaseREST {
         return new InternalServerErrorException(ex);
     }
 
+    /**
+     * Do any actions that are required after a create or update event.
+     */
     protected void doPostCreateOrUpdateActions() {
         // Process the topic source urls and set their titles
         final List<TopicSourceUrl> topicSourceUrls = entityCache.getEntities(TopicSourceUrl.class);
         if (!topicSourceUrls.isEmpty()) {
             try {
                 final TopicSourceURLTitleThread workerThread = new TopicSourceURLTitleThread(topicSourceUrls);
-                workerThread.run();
+                workerThread.start();
             } catch (NamingException e) {
                 throw new InternalServerErrorException(e);
             }

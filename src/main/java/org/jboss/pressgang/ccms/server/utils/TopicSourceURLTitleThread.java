@@ -81,6 +81,7 @@ public class TopicSourceURLTitleThread extends Thread {
         for (final TopicSourceUrl topicSourceUrl : topicSourceUrls) {
             if (topicSourceUrl.getTitle() == null || topicSourceUrl.getTitle().trim().isEmpty() && (topicSourceUrl.getSourceUrl() !=
                     null && !topicSourceUrl.getSourceUrl().trim().isEmpty())) {
+                setTitle(topicSourceUrl);
                 updatedTopicSourceUrls.add(topicSourceUrl);
             }
         }
