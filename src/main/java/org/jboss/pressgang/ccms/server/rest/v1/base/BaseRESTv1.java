@@ -3,6 +3,7 @@ package org.jboss.pressgang.ccms.server.rest.v1.base;
 import javax.annotation.Resource;
 import javax.enterprise.context.RequestScoped;
 import javax.inject.Inject;
+import javax.naming.NamingException;
 import javax.persistence.EntityManager;
 import javax.persistence.EntityNotFoundException;
 import javax.persistence.PersistenceException;
@@ -36,6 +37,7 @@ import org.jboss.pressgang.ccms.filter.base.IFilterQueryBuilder;
 import org.jboss.pressgang.ccms.filter.base.ITagFilterQueryBuilder;
 import org.jboss.pressgang.ccms.filter.utils.FilterUtilities;
 import org.jboss.pressgang.ccms.model.Filter;
+import org.jboss.pressgang.ccms.model.TopicSourceUrl;
 import org.jboss.pressgang.ccms.model.User;
 import org.jboss.pressgang.ccms.model.base.AuditedEntity;
 import org.jboss.pressgang.ccms.model.exceptions.CustomConstraintViolationException;
@@ -67,6 +69,7 @@ import org.jboss.pressgang.ccms.server.rest.v1.TopicV1Factory;
 import org.jboss.pressgang.ccms.server.rest.v1.TranslatedTopicV1Factory;
 import org.jboss.pressgang.ccms.server.rest.v1.UserV1Factory;
 import org.jboss.pressgang.ccms.server.utils.EntityUtilities;
+import org.jboss.pressgang.ccms.server.utils.TopicSourceURLTitleThread;
 import org.jboss.resteasy.plugins.providers.atom.Content;
 import org.jboss.resteasy.plugins.providers.atom.Entry;
 import org.jboss.resteasy.plugins.providers.atom.Feed;
@@ -108,6 +111,11 @@ public class BaseRESTv1 extends BaseREST {
      */
     @Inject
     protected EntityManager entityManager;
+    /**
+     * The cache used to store new and updated entities.
+     */
+    @Inject
+    protected EntityCache entityCache;
 
     /* START ENTITY FACTORIES */
     @Inject
@@ -365,6 +373,8 @@ public class BaseRESTv1 extends BaseREST {
         assert restEntity != null : "restEntity should not be null";
         assert factory != null : "factory should not be null";
 
+        T retValue = null;
+
         try {
             // Unmarshall the expand string into the ExpandDataTrunk object.
             final ExpandDataTrunk expandDataTrunk = unmarshallExpand(expand);
@@ -408,10 +418,15 @@ public class BaseRESTv1 extends BaseREST {
             entityManager.flush();
             transactionManager.commit();
 
-            return factory.createRESTEntityFromDBEntity(entity, getBaseUrl(), dataType, expandDataTrunk, null, true);
+            retValue = factory.createRESTEntityFromDBEntity(entity, getBaseUrl(), dataType, expandDataTrunk, null, true);
         } catch (final Throwable e) {
             throw processError(transactionManager, e);
         }
+
+        // Do Post create or update actions
+        doPostCreateOrUpdateActions();
+
+        return retValue;
     }
 
     protected <T extends RESTBaseEntityV1<T, V, W>, U extends AuditedEntity, V extends RESTBaseCollectionV1<T, V, W>,
@@ -532,6 +547,8 @@ public class BaseRESTv1 extends BaseREST {
         assert entities != null : "dataObject should not be null";
         assert factory != null : "factory should not be null";
 
+        V retValue = null;
+
         try {
             // Unmarshall the expand string into the ExpandDataTrunk object.
             final ExpandDataTrunk expandDataTrunk = unmarshallExpand(expand);
@@ -545,7 +562,7 @@ public class BaseRESTv1 extends BaseREST {
             // Store the log details into the Logging Java Bean
             setLogDetails(entityManager, logDetails);
 
-            final List<U> retValue = new ArrayList<U>();
+            final List<U> returnEntities = new ArrayList<U>();
             for (final T restEntity : entities.returnItems()) {
 
                 /*
@@ -574,18 +591,23 @@ public class BaseRESTv1 extends BaseREST {
                 // Save the created/updated entity
                 entityManager.persist(entity);
 
-                retValue.add(entity);
+                returnEntities.add(entity);
             }
 
             // Flush and commit the changes to the database.
             entityManager.flush();
             transactionManager.commit();
 
-            return RESTDataObjectCollectionFactory.create(collectionClass, factory, retValue, expandName, dataType, expandDataTrunk,
-                    getBaseUrl(), true, entityManager);
+            retValue = RESTDataObjectCollectionFactory.create(collectionClass, factory, returnEntities, expandName, dataType,
+                    expandDataTrunk, getBaseUrl(), true, entityManager);
         } catch (final Throwable e) {
             throw processError(transactionManager, e);
         }
+
+        // Do Post create or update actions
+        doPostCreateOrUpdateActions();
+
+        return retValue;
     }
 
     /**
@@ -746,8 +768,8 @@ public class BaseRESTv1 extends BaseREST {
      * Gets the latest Entity for a specific ID
      *
      * @param type The Entity type.
-     * @param id The Entity ID.
-     * @param <U> The Entity class.
+     * @param id   The Entity ID.
+     * @param <U>  The Entity class.
      * @return The Entity that matches the type and ID
      */
     protected <U> U getEntity(final Class<U> type, final Object id) {
@@ -760,10 +782,10 @@ public class BaseRESTv1 extends BaseREST {
     /**
      * Gets an Entity for a specific ID and Revision.
      *
-     * @param type The Entity type.
-     * @param id The Entity ID.
+     * @param type     The Entity type.
+     * @param id       The Entity ID.
      * @param revision The entities revision, or null to get the latest version.
-     * @param <U> The Entity class.
+     * @param <U>      The Entity class.
      * @return The Entity that matches the type, ID and Revision
      */
     protected <U extends AuditedEntity> U getEntity(final Class<U> type, final Object id, final Integer revision) {
@@ -795,7 +817,7 @@ public class BaseRESTv1 extends BaseREST {
      * Gets a Query that can be used to get all of entities for a specified entity type.
      *
      * @param type The type to get all Entities for.
-     * @param <U> The Entity class.
+     * @param <U>  The Entity class.
      * @return A CriteriaQuery that can be used to get all of the Entities for an Entity type.
      */
     protected <U extends AuditedEntity> CriteriaQuery<U> getAllEntitiesQuery(final Class<U> type) {
@@ -811,7 +833,7 @@ public class BaseRESTv1 extends BaseREST {
      * Gets a List of all entities for a specified entity type.
      *
      * @param type The type to get all Entities for.
-     * @param <U> The Entity class.
+     * @param <U>  The Entity class.
      * @return A list of all the Entities for an Entity type.
      */
     protected <U extends AuditedEntity> List<U> getAllEntities(final Class<U> type) {
@@ -1065,7 +1087,8 @@ public class BaseRESTv1 extends BaseREST {
         while (cause != null) {
             if (cause instanceof Failure) {
                 return (Failure) cause;
-            } else if (cause instanceof ValidationException || cause instanceof CustomConstraintViolationException || cause instanceof org.hibernate.exception.ConstraintViolationException) {
+            } else if (cause instanceof ValidationException || cause instanceof CustomConstraintViolationException || cause instanceof
+                    org.hibernate.exception.ConstraintViolationException) {
                 break;
             } else if (cause instanceof PersistenceException) {
                 if (cause.getCause() != null && cause.getCause() instanceof org.hibernate.exception.ConstraintViolationException) {
@@ -1103,4 +1126,16 @@ public class BaseRESTv1 extends BaseREST {
         return new InternalServerErrorException(ex);
     }
 
+    protected void doPostCreateOrUpdateActions() {
+        // Process the topic source urls and set their titles
+        final List<TopicSourceUrl> topicSourceUrls = entityCache.getEntities(TopicSourceUrl.class);
+        if (!topicSourceUrls.isEmpty()) {
+            try {
+                final TopicSourceURLTitleThread workerThread = new TopicSourceURLTitleThread(topicSourceUrls);
+                workerThread.run();
+            } catch (NamingException e) {
+                throw new InternalServerErrorException(e);
+            }
+        }
+    }
 }
