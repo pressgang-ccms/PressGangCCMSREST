@@ -1,6 +1,6 @@
 package org.jboss.pressgang.ccms.server.rest.v1;
 
-import javax.persistence.EntityManager;
+import javax.enterprise.context.ApplicationScoped;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -15,17 +15,12 @@ import org.jboss.pressgang.ccms.server.rest.v1.base.RESTDataObjectCollectionFact
 import org.jboss.pressgang.ccms.server.rest.v1.base.RESTDataObjectFactory;
 import org.jboss.pressgang.ccms.server.utils.EnversUtilities;
 
+@ApplicationScoped
 public class StringConstantV1Factory extends RESTDataObjectFactory<RESTStringConstantV1, StringConstants, RESTStringConstantCollectionV1,
         RESTStringConstantCollectionItemV1> {
-
-    public StringConstantV1Factory() {
-        super(StringConstants.class);
-    }
-
     @Override
     public RESTStringConstantV1 createRESTEntityFromDBEntityInternal(final StringConstants entity, final String baseUrl,
-            final String dataType, final ExpandDataTrunk expand, final Number revision, final boolean expandParentReferences,
-            final EntityManager entityManager) {
+            final String dataType, final ExpandDataTrunk expand, final Number revision, final boolean expandParentReferences) {
         assert entity != null : "Parameter entity can not be null";
         assert baseUrl != null : "Parameter baseUrl can not be null";
 
@@ -43,7 +38,7 @@ public class StringConstantV1Factory extends RESTDataObjectFactory<RESTStringCon
         // REVISIONS
         if (revision == null && expand != null && expand.contains(RESTBaseEntityV1.REVISIONS_NAME)) {
             retValue.setRevisions(
-                    RESTDataObjectCollectionFactory.create(RESTStringConstantCollectionV1.class, new StringConstantV1Factory(), entity,
+                    RESTDataObjectCollectionFactory.create(RESTStringConstantCollectionV1.class, this, entity,
                             EnversUtilities.getRevisions(entityManager, entity), RESTBaseEntityV1.REVISIONS_NAME, dataType, expand, baseUrl,
                             entityManager));
         }
@@ -54,11 +49,15 @@ public class StringConstantV1Factory extends RESTDataObjectFactory<RESTStringCon
     }
 
     @Override
-    public void syncDBEntityWithRESTEntity(final EntityManager entityManager, final StringConstants entity,
-            final RESTStringConstantV1 dataObject) {
+    public void syncDBEntityWithRESTEntity(final StringConstants entity, final RESTStringConstantV1 dataObject) {
         if (dataObject.hasParameterSet(RESTStringConstantV1.NAME_NAME)) entity.setConstantName(dataObject.getName());
         if (dataObject.hasParameterSet(RESTStringConstantV1.VALUE_NAME)) entity.setConstantValue(dataObject.getValue());
 
         entityManager.persist(entity);
+    }
+
+    @Override
+    protected Class<StringConstants> getDatabaseClass() {
+        return StringConstants.class;
     }
 }

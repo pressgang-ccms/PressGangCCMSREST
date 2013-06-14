@@ -1,6 +1,7 @@
 package org.jboss.pressgang.ccms.server.rest.v1;
 
-import javax.persistence.EntityManager;
+import javax.enterprise.context.ApplicationScoped;
+import javax.inject.Inject;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -17,15 +18,17 @@ import org.jboss.pressgang.ccms.server.rest.v1.base.RESTDataObjectFactory;
 import org.jboss.pressgang.ccms.server.utils.EnversUtilities;
 import org.jboss.resteasy.spi.BadRequestException;
 
+@ApplicationScoped
 public class FilterTagV1Factory extends RESTDataObjectFactory<RESTFilterTagV1, FilterTag, RESTFilterTagCollectionV1,
         RESTFilterTagCollectionItemV1> {
-    public FilterTagV1Factory() {
-        super(FilterTag.class);
-    }
+    @Inject
+    protected FilterV1Factory filterFactory;
+    @Inject
+    protected TagV1Factory tagFactory;
 
     @Override
     public RESTFilterTagV1 createRESTEntityFromDBEntityInternal(final FilterTag entity, final String baseUrl, final String dataType,
-            final ExpandDataTrunk expand, final Number revision, boolean expandParentReferences, final EntityManager entityManager) {
+            final ExpandDataTrunk expand, final Number revision, boolean expandParentReferences) {
         assert entity != null : "Parameter entity can not be null";
         assert baseUrl != null : "Parameter baseUrl can not be null";
 
@@ -50,21 +53,21 @@ public class FilterTagV1Factory extends RESTDataObjectFactory<RESTFilterTagV1, F
 
         // PARENT
         if (expandParentReferences && expand != null && expand.contains(RESTFilterTagV1.FILTER_NAME) && entity.getFilter() != null) {
-            retValue.setFilter(new FilterV1Factory().createRESTEntityFromDBEntity(entity.getFilter(), baseUrl, dataType,
-                    expand.get(RESTFilterTagV1.FILTER_NAME), revision, expandParentReferences, entityManager));
+            retValue.setFilter(filterFactory.createRESTEntityFromDBEntity(entity.getFilter(), baseUrl, dataType,
+                    expand.get(RESTFilterTagV1.FILTER_NAME), revision, expandParentReferences));
         }
 
         // FILTER TAG
         if (expand != null && expand.contains(RESTFilterTagV1.TAG_NAME) && entity.getTag() != null) {
-            retValue.setTag(new TagV1Factory().createRESTEntityFromDBEntity(entity.getTag(), baseUrl, dataType,
-                    expand.get(RESTFilterTagV1.TAG_NAME), revision, expandParentReferences, entityManager));
+            retValue.setTag(tagFactory.createRESTEntityFromDBEntity(entity.getTag(), baseUrl, dataType,
+                    expand.get(RESTFilterTagV1.TAG_NAME), revision, expandParentReferences));
         }
 
         return retValue;
     }
 
     @Override
-    public void syncDBEntityWithRESTEntity(final EntityManager entityManager, final FilterTag entity, final RESTFilterTagV1 dataObject) {
+    public void syncDBEntityWithRESTEntity(final FilterTag entity, final RESTFilterTagV1 dataObject) {
         if (dataObject.hasParameterSet(RESTFilterTagV1.STATE_NAME)) entity.setTagState(dataObject.getState());
 
         /* Set the Tag for the FilterTag */
@@ -72,8 +75,9 @@ public class FilterTagV1Factory extends RESTDataObjectFactory<RESTFilterTagV1, F
             final RESTTagV1 restEntity = dataObject.getTag();
 
             if (restEntity != null) {
-                final Tag dbEntity = entityManager.find(Tag.class, restEntity.getId());
-                if (dbEntity == null) throw new BadRequestException("No Tag entity was found with the primary key " + restEntity.getId());
+                final Tag dbEntity = entityManager.getReference(Tag.class, restEntity.getId());
+                if (dbEntity == null)
+                    throw new BadRequestException("No Tag entity was found with the primary key " + restEntity.getId());
 
                 entity.setTag(dbEntity);
             } else {
@@ -81,6 +85,11 @@ public class FilterTagV1Factory extends RESTDataObjectFactory<RESTFilterTagV1, F
             }
         }
 
+    }
+
+    @Override
+    protected Class<FilterTag> getDatabaseClass() {
+        return FilterTag.class;
     }
 
 }

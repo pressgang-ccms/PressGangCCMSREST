@@ -1,6 +1,7 @@
 package org.jboss.pressgang.ccms.server.rest.v1;
 
-import javax.persistence.EntityManager;
+import javax.enterprise.context.ApplicationScoped;
+import javax.inject.Inject;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -14,16 +15,15 @@ import org.jboss.pressgang.ccms.server.rest.v1.base.RESTDataObjectCollectionFact
 import org.jboss.pressgang.ccms.server.rest.v1.base.RESTDataObjectFactory;
 import org.jboss.pressgang.ccms.server.utils.EnversUtilities;
 
+@ApplicationScoped
 public class FilterFieldV1Factory extends RESTDataObjectFactory<RESTFilterFieldV1, FilterField, RESTFilterFieldCollectionV1,
         RESTFilterFieldCollectionItemV1> {
-
-    public FilterFieldV1Factory() {
-        super(FilterField.class);
-    }
+    @Inject
+    protected FilterV1Factory filterFactory;
 
     @Override
     public RESTFilterFieldV1 createRESTEntityFromDBEntityInternal(final FilterField entity, final String baseUrl, final String dataType,
-            final ExpandDataTrunk expand, final Number revision, boolean expandParentReferences, final EntityManager entityManager) {
+            final ExpandDataTrunk expand, final Number revision, boolean expandParentReferences) {
         assert entity != null : "Parameter entity can not be null";
         assert baseUrl != null : "Parameter baseUrl can not be null";
 
@@ -43,28 +43,32 @@ public class FilterFieldV1Factory extends RESTDataObjectFactory<RESTFilterFieldV
         // REVISIONS
         if (revision == null && expand != null && expand.contains(RESTBaseEntityV1.REVISIONS_NAME)) {
             retValue.setRevisions(
-                    RESTDataObjectCollectionFactory.create(RESTFilterFieldCollectionV1.class, new FilterFieldV1Factory(), entity,
+                    RESTDataObjectCollectionFactory.create(RESTFilterFieldCollectionV1.class, this, entity,
                             EnversUtilities.getRevisions(entityManager, entity), RESTBaseEntityV1.REVISIONS_NAME, dataType, expand, baseUrl,
                             entityManager));
         }
 
         // PARENT
         if (expandParentReferences && expand != null && expand.contains(RESTFilterFieldV1.FILTER_NAME) && entity.getFilter() != null) {
-            retValue.setFilter(new FilterV1Factory().createRESTEntityFromDBEntity(entity.getFilter(), baseUrl, dataType,
-                    expand.get(RESTFilterFieldV1.FILTER_NAME), revision, expandParentReferences, entityManager));
+            retValue.setFilter(filterFactory.createRESTEntityFromDBEntity(entity.getFilter(), baseUrl, dataType,
+                    expand.get(RESTFilterFieldV1.FILTER_NAME), revision, expandParentReferences));
         }
 
         return retValue;
     }
 
     @Override
-    public void syncDBEntityWithRESTEntity(final EntityManager entityManager, final FilterField entity,
-            final RESTFilterFieldV1 dataObject) {
+    public void syncDBEntityWithRESTEntity(final FilterField entity, final RESTFilterFieldV1 dataObject) {
         if (dataObject.hasParameterSet(RESTFilterFieldV1.DESCRIPTION_NAME)) entity.setDescription(dataObject.getDescription());
         if (dataObject.hasParameterSet(RESTFilterFieldV1.NAME_NAME)) entity.setField(dataObject.getName());
         if (dataObject.hasParameterSet(RESTFilterFieldV1.VALUE_NAME)) entity.setValue(dataObject.getValue());
 
         entityManager.persist(entity);
+    }
+
+    @Override
+    protected Class<FilterField> getDatabaseClass() {
+        return FilterField.class;
     }
 
 }

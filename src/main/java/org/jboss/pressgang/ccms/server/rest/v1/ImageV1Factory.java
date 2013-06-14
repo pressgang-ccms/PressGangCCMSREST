@@ -1,6 +1,6 @@
 package org.jboss.pressgang.ccms.server.rest.v1;
 
-import javax.persistence.EntityManager;
+import javax.enterprise.context.ApplicationScoped;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -20,14 +20,11 @@ import org.jboss.pressgang.ccms.server.rest.v1.base.RESTDataObjectFactory;
 import org.jboss.pressgang.ccms.server.utils.EnversUtilities;
 import org.jboss.resteasy.spi.BadRequestException;
 
+@ApplicationScoped
 public class ImageV1Factory extends RESTDataObjectFactory<RESTImageV1, ImageFile, RESTImageCollectionV1, RESTImageCollectionItemV1> {
-    ImageV1Factory() {
-        super(ImageFile.class);
-    }
-
     @Override
     public RESTImageV1 createRESTEntityFromDBEntityInternal(final ImageFile entity, final String baseUrl, final String dataType,
-            final ExpandDataTrunk expand, final Number revision, final boolean expandParentReferences, final EntityManager entityManager) {
+            final ExpandDataTrunk expand, final Number revision, final boolean expandParentReferences) {
         assert entity != null : "Parameter entity can not be null";
         assert baseUrl != null : "Parameter baseUrl can not be null";
 
@@ -65,7 +62,7 @@ public class ImageV1Factory extends RESTDataObjectFactory<RESTImageV1, ImageFile
     }
 
     @Override
-    public void syncDBEntityWithRESTEntity(final EntityManager entityManager, final ImageFile entity, final RESTImageV1 dataObject) {
+    public void syncDBEntityWithRESTEntity(final ImageFile entity, final RESTImageV1 dataObject) {
         if (dataObject.hasParameterSet(RESTImageV1.DESCRIPTION_NAME)) entity.setDescription(dataObject.getDescription());
 
         /* One To Many - Add will create a child entity */
@@ -81,7 +78,7 @@ public class ImageV1Factory extends RESTDataObjectFactory<RESTImageV1, ImageFile
                     if (restEntityItem.returnIsAddItem()) {
                         final LanguageImage dbEntity = new LanguageImage();
                         dbEntity.setImageFile(entity);
-                        new LanguageImageV1Factory().syncDBEntityWithRESTEntity(entityManager, dbEntity, restEntity);
+                        new LanguageImageV1Factory().syncDBEntityWithRESTEntity(dbEntity, restEntity);
                         entity.getLanguageImages().add(dbEntity);
                     } else if (restEntityItem.returnIsRemoveItem()) {
                         final LanguageImage dbEntity = entityManager.find(LanguageImage.class, restEntity.getId());
@@ -99,11 +96,16 @@ public class ImageV1Factory extends RESTDataObjectFactory<RESTImageV1, ImageFile
                             "No LanguageImage entity was found with the primary key " + restEntity.getId() + " for Image " + entity.getId
                                     ());
 
-                    new LanguageImageV1Factory().syncDBEntityWithRESTEntity(entityManager, dbEntity, restEntity);
+                    new LanguageImageV1Factory().syncDBEntityWithRESTEntity(dbEntity, restEntity);
                 }
             }
         }
 
         entityManager.persist(entity);
+    }
+
+    @Override
+    protected Class<ImageFile> getDatabaseClass() {
+        return ImageFile.class;
     }
 }

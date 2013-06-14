@@ -1,6 +1,6 @@
 package org.jboss.pressgang.ccms.server.rest.v1;
 
-import javax.persistence.EntityManager;
+import javax.persistence.criteria.CriteriaQuery;
 import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
 import javax.ws.rs.core.Context;
@@ -116,7 +116,6 @@ public class RESTv1 extends BaseRESTv1 implements RESTBaseInterfaceV1, RESTInter
     @Override
     public void reIndexLuceneDatabase() {
         try {
-            final EntityManager entityManager = getEntityManager();
             final Session session = (Session) entityManager.getDelegate();
             final FullTextSession fullTextSession = Search.getFullTextSession(session);
             fullTextSession.createIndexer(Topic.class).start();
@@ -187,7 +186,7 @@ public class RESTv1 extends BaseRESTv1 implements RESTBaseInterfaceV1, RESTInter
     public RESTBlobConstantV1 getJSONBlobConstant(final Integer id, final String expand) {
         if (id == null) throw new BadRequestException("The id parameter can not be null");
 
-        return getJSONResource(BlobConstants.class, new BlobConstantV1Factory(), id, expand);
+        return getJSONResource(BlobConstants.class, blobConstantFactory, id, expand);
     }
 
     @Override
@@ -195,19 +194,19 @@ public class RESTv1 extends BaseRESTv1 implements RESTBaseInterfaceV1, RESTInter
         if (id == null) throw new BadRequestException("The id parameter can not be null");
         if (revision == null) throw new BadRequestException("The revision parameter can not be null");
 
-        return getJSONResource(BlobConstants.class, new BlobConstantV1Factory(), id, revision, expand);
+        return getJSONResource(BlobConstants.class, blobConstantFactory, id, revision, expand);
     }
 
     @Override
     public RESTBlobConstantCollectionV1 getJSONBlobConstants(final String expand) {
-        return getJSONResources(RESTBlobConstantCollectionV1.class, BlobConstants.class, new BlobConstantV1Factory(),
+        return getJSONResources(RESTBlobConstantCollectionV1.class, BlobConstants.class, blobConstantFactory,
                 RESTv1Constants.BLOBCONSTANTS_EXPANSION_NAME, expand);
     }
 
     @Override
     public RESTBlobConstantCollectionV1 getJSONBlobConstantsWithQuery(final PathSegment query, final String expand) {
         return getJSONResourcesFromQuery(RESTBlobConstantCollectionV1.class, query.getMatrixParameters(),
-                BlobConstantFilterQueryBuilder.class, new BlobConstantFieldFilter(), new BlobConstantV1Factory(),
+                BlobConstantFilterQueryBuilder.class, new BlobConstantFieldFilter(), blobConstantFactory,
                 RESTv1Constants.BLOBCONSTANTS_EXPANSION_NAME, expand);
     }
 
@@ -215,13 +214,10 @@ public class RESTv1 extends BaseRESTv1 implements RESTBaseInterfaceV1, RESTInter
     public RESTBlobConstantV1 updateJSONBlobConstant(final String expand, final RESTBlobConstantV1 dataObject, final String message,
             final Integer flag, final String userId) {
         if (dataObject == null) throw new BadRequestException("The dataObject parameter can not be null");
-
         if (dataObject.getId() == null) throw new BadRequestException("The dataObject.getId() parameter can not be null");
 
-        final BlobConstantV1Factory factory = new BlobConstantV1Factory();
         final RESTLogDetailsV1 logDetails = generateLogDetails(message, flag, userId);
-
-        return updateJSONEntity(BlobConstants.class, dataObject, factory, expand, logDetails);
+        return updateJSONEntity(BlobConstants.class, dataObject, blobConstantFactory, expand, logDetails);
     }
 
     @Override
@@ -230,10 +226,8 @@ public class RESTv1 extends BaseRESTv1 implements RESTBaseInterfaceV1, RESTInter
         if (dataObjects == null) throw new BadRequestException("The dataObjects parameter can not be null");
         if (dataObjects.getItems() == null) throw new BadRequestException("The dataObjects.getItems() parameter can not be null");
 
-        final BlobConstantV1Factory factory = new BlobConstantV1Factory();
         final RESTLogDetailsV1 logDetails = generateLogDetails(message, flag, userId);
-
-        return updateJSONEntities(RESTBlobConstantCollectionV1.class, BlobConstants.class, dataObjects, factory,
+        return updateJSONEntities(RESTBlobConstantCollectionV1.class, BlobConstants.class, dataObjects, blobConstantFactory,
                 RESTv1Constants.BLOBCONSTANTS_EXPANSION_NAME, expand, logDetails);
     }
 
@@ -242,23 +236,18 @@ public class RESTv1 extends BaseRESTv1 implements RESTBaseInterfaceV1, RESTInter
             final Integer flag, final String userId) {
         if (dataObject == null) throw new BadRequestException("The dataObject parameter can not be null");
 
-        final BlobConstantV1Factory factory = new BlobConstantV1Factory();
         final RESTLogDetailsV1 logDetails = generateLogDetails(message, flag, userId);
-
-        return createJSONEntity(BlobConstants.class, dataObject, factory, expand, logDetails);
+        return createJSONEntity(BlobConstants.class, dataObject, blobConstantFactory, expand, logDetails);
     }
 
     @Override
     public RESTBlobConstantCollectionV1 createJSONBlobConstants(final String expand, final RESTBlobConstantCollectionV1 dataObjects,
             final String message, final Integer flag, final String userId) {
         if (dataObjects == null) throw new BadRequestException("The dataObjects parameter can not be null");
-
         if (dataObjects.getItems() == null) throw new BadRequestException("The dataObjects.getItems() parameter can not be null");
 
-        final BlobConstantV1Factory factory = new BlobConstantV1Factory();
         final RESTLogDetailsV1 logDetails = generateLogDetails(message, flag, userId);
-
-        return createJSONEntities(RESTBlobConstantCollectionV1.class, BlobConstants.class, dataObjects, factory,
+        return createJSONEntities(RESTBlobConstantCollectionV1.class, BlobConstants.class, dataObjects, blobConstantFactory,
                 RESTv1Constants.BLOBCONSTANTS_EXPANSION_NAME, expand, logDetails);
     }
 
@@ -267,10 +256,8 @@ public class RESTv1 extends BaseRESTv1 implements RESTBaseInterfaceV1, RESTInter
             final String expand) {
         if (id == null) throw new BadRequestException("The dataObject parameter can not be null");
 
-        final BlobConstantV1Factory factory = new BlobConstantV1Factory();
         final RESTLogDetailsV1 logDetails = generateLogDetails(message, flag, userId);
-
-        return deleteJSONEntity(BlobConstants.class, factory, id, expand, logDetails);
+        return deleteJSONEntity(BlobConstants.class, blobConstantFactory, id, expand, logDetails);
     }
 
     @Override
@@ -279,10 +266,8 @@ public class RESTv1 extends BaseRESTv1 implements RESTBaseInterfaceV1, RESTInter
         if (ids == null) throw new BadRequestException("The dataObjects parameter can not be null");
 
         final Set<String> dbEntityIds = ids.getMatrixParameters().keySet();
-        final BlobConstantV1Factory factory = new BlobConstantV1Factory();
         final RESTLogDetailsV1 logDetails = generateLogDetails(message, flag, userId);
-
-        return deleteJSONEntities(RESTBlobConstantCollectionV1.class, BlobConstants.class, factory, dbEntityIds,
+        return deleteJSONEntities(RESTBlobConstantCollectionV1.class, BlobConstants.class, blobConstantFactory, dbEntityIds,
                 RESTv1Constants.BLOBCONSTANTS_EXPANSION_NAME, expand, logDetails);
     }
 
@@ -291,8 +276,7 @@ public class RESTv1 extends BaseRESTv1 implements RESTBaseInterfaceV1, RESTInter
     public byte[] getRAWBlobConstant(@PathParam("id") Integer id) {
         if (id == null) throw new BadRequestException("The id parameter can not be null");
 
-        final EntityManager entityManager = getEntityManager();
-        final BlobConstants entity = getEntity(entityManager, BlobConstants.class, id);
+        final BlobConstants entity = getEntity(BlobConstants.class, id);
 
         response.getOutputHeaders().putSingle("Content-Disposition", "filename=" + entity.getConstantName());
         return entity.getConstantValue();
@@ -303,8 +287,7 @@ public class RESTv1 extends BaseRESTv1 implements RESTBaseInterfaceV1, RESTInter
         if (id == null) throw new BadRequestException("The id parameter can not be null");
         if (revision == null) throw new BadRequestException("The revision parameter can not be null");
 
-        final EntityManager entityManager = getEntityManager();
-        final BlobConstants entity = getEntity(entityManager, BlobConstants.class, id, revision);
+        final BlobConstants entity = getEntity(BlobConstants.class, id, revision);
 
         response.getOutputHeaders().putSingle("Content-Disposition", "filename=" + entity.getConstantName());
         return entity.getConstantValue();
@@ -361,7 +344,7 @@ public class RESTv1 extends BaseRESTv1 implements RESTBaseInterfaceV1, RESTInter
     public RESTProjectV1 getJSONProject(final Integer id, final String expand) {
         if (id == null) throw new BadRequestException("The id parameter can not be null");
 
-        return getJSONResource(Project.class, new ProjectV1Factory(), id, expand);
+        return getJSONResource(Project.class, projectFactory, id, expand);
     }
 
     @Override
@@ -369,45 +352,39 @@ public class RESTv1 extends BaseRESTv1 implements RESTBaseInterfaceV1, RESTInter
         if (id == null) throw new BadRequestException("The id parameter can not be null");
         if (revision == null) throw new BadRequestException("The revision parameter can not be null");
 
-        return getJSONResource(Project.class, new ProjectV1Factory(), id, revision, expand);
+        return getJSONResource(Project.class, projectFactory, id, revision, expand);
     }
 
     @Override
     public RESTProjectCollectionV1 getJSONProjects(final String expand) {
-        return getJSONResources(RESTProjectCollectionV1.class, Project.class, new ProjectV1Factory(),
-                RESTv1Constants.PROJECTS_EXPANSION_NAME, expand);
+        return getJSONResources(RESTProjectCollectionV1.class, Project.class, projectFactory, RESTv1Constants.PROJECTS_EXPANSION_NAME,
+                expand);
     }
 
     @Override
     public RESTProjectCollectionV1 getJSONProjectsWithQuery(final PathSegment query, final String expand) {
         return getJSONResourcesFromQuery(RESTProjectCollectionV1.class, query.getMatrixParameters(), ProjectFilterQueryBuilder.class,
-                new ProjectFieldFilter(), new ProjectV1Factory(), RESTv1Constants.PROJECTS_EXPANSION_NAME, expand);
+                new ProjectFieldFilter(), projectFactory, RESTv1Constants.PROJECTS_EXPANSION_NAME, expand);
     }
 
     @Override
     public RESTProjectV1 updateJSONProject(final String expand, final RESTProjectV1 dataObject, final String message, final Integer flag,
             final String userId) {
         if (dataObject == null) throw new BadRequestException("The dataObject parameter can not be null");
-
         if (dataObject.getId() == null) throw new BadRequestException("The dataObject.getId() parameter can not be null");
 
-        final ProjectV1Factory factory = new ProjectV1Factory();
         final RESTLogDetailsV1 logDetails = generateLogDetails(message, flag, userId);
-
-        return updateJSONEntity(Project.class, dataObject, factory, expand, logDetails);
+        return updateJSONEntity(Project.class, dataObject, projectFactory, expand, logDetails);
     }
 
     @Override
     public RESTProjectCollectionV1 updateJSONProjects(final String expand, final RESTProjectCollectionV1 dataObjects, final String message,
             final Integer flag, final String userId) {
         if (dataObjects == null) throw new BadRequestException("The dataObjects parameter can not be null");
-
         if (dataObjects.getItems() == null) throw new BadRequestException("The dataObjects.getItems() parameter can not be null");
 
-        final ProjectV1Factory factory = new ProjectV1Factory();
         final RESTLogDetailsV1 logDetails = generateLogDetails(message, flag, userId);
-
-        return updateJSONEntities(RESTProjectCollectionV1.class, Project.class, dataObjects, factory,
+        return updateJSONEntities(RESTProjectCollectionV1.class, Project.class, dataObjects, projectFactory,
                 RESTv1Constants.PROJECTS_EXPANSION_NAME, expand, logDetails);
     }
 
@@ -416,23 +393,18 @@ public class RESTv1 extends BaseRESTv1 implements RESTBaseInterfaceV1, RESTInter
             final String userId) {
         if (dataObject == null) throw new BadRequestException("The dataObject parameter can not be null");
 
-        final ProjectV1Factory factory = new ProjectV1Factory();
         final RESTLogDetailsV1 logDetails = generateLogDetails(message, flag, userId);
-
-        return createJSONEntity(Project.class, dataObject, factory, expand, logDetails);
+        return createJSONEntity(Project.class, dataObject, projectFactory, expand, logDetails);
     }
 
     @Override
     public RESTProjectCollectionV1 createJSONProjects(final String expand, final RESTProjectCollectionV1 dataObjects, final String message,
             final Integer flag, final String userId) {
         if (dataObjects == null) throw new BadRequestException("The dataObjects parameter can not be null");
-
         if (dataObjects.getItems() == null) throw new BadRequestException("The dataObjects.getItems() parameter can not be null");
 
-        final ProjectV1Factory factory = new ProjectV1Factory();
         final RESTLogDetailsV1 logDetails = generateLogDetails(message, flag, userId);
-
-        return createJSONEntities(RESTProjectCollectionV1.class, Project.class, dataObjects, factory,
+        return createJSONEntities(RESTProjectCollectionV1.class, Project.class, dataObjects, projectFactory,
                 RESTv1Constants.PROJECTS_EXPANSION_NAME, expand, logDetails);
     }
 
@@ -441,10 +413,8 @@ public class RESTv1 extends BaseRESTv1 implements RESTBaseInterfaceV1, RESTInter
             final String expand) {
         if (id == null) throw new BadRequestException("The dataObject parameter can not be null");
 
-        final ProjectV1Factory factory = new ProjectV1Factory();
         final RESTLogDetailsV1 logDetails = generateLogDetails(message, flag, userId);
-
-        return deleteJSONEntity(Project.class, factory, id, expand, logDetails);
+        return deleteJSONEntity(Project.class, projectFactory, id, expand, logDetails);
     }
 
     @Override
@@ -453,10 +423,8 @@ public class RESTv1 extends BaseRESTv1 implements RESTBaseInterfaceV1, RESTInter
         if (ids == null) throw new BadRequestException("The dataObjects parameter can not be null");
 
         final Set<String> dbEntityIds = ids.getMatrixParameters().keySet();
-        final ProjectV1Factory factory = new ProjectV1Factory();
         final RESTLogDetailsV1 logDetails = generateLogDetails(message, flag, userId);
-
-        return deleteJSONEntities(RESTProjectCollectionV1.class, Project.class, factory, dbEntityIds,
+        return deleteJSONEntities(RESTProjectCollectionV1.class, Project.class, projectFactory, dbEntityIds,
                 RESTv1Constants.PROJECTS_EXPANSION_NAME, expand, logDetails);
     }
 
@@ -511,7 +479,7 @@ public class RESTv1 extends BaseRESTv1 implements RESTBaseInterfaceV1, RESTInter
     public RESTPropertyTagV1 getJSONPropertyTag(final Integer id, final String expand) {
         if (id == null) throw new BadRequestException("The id parameter can not be null");
 
-        return getJSONResource(PropertyTag.class, new PropertyTagV1Factory(), id, expand);
+        return getJSONResource(PropertyTag.class, propertyTagFactory, id, expand);
     }
 
     @Override
@@ -519,19 +487,19 @@ public class RESTv1 extends BaseRESTv1 implements RESTBaseInterfaceV1, RESTInter
         if (id == null) throw new BadRequestException("The id parameter can not be null");
         if (revision == null) throw new BadRequestException("The revision parameter can not be null");
 
-        return getJSONResource(PropertyTag.class, new PropertyTagV1Factory(), id, revision, expand);
+        return getJSONResource(PropertyTag.class, propertyTagFactory, id, revision, expand);
     }
 
     @Override
     public RESTPropertyTagCollectionV1 getJSONPropertyTags(final String expand) {
-        return getJSONResources(RESTPropertyTagCollectionV1.class, PropertyTag.class, new PropertyTagV1Factory(),
+        return getJSONResources(RESTPropertyTagCollectionV1.class, PropertyTag.class, propertyTagFactory,
                 RESTv1Constants.PROPERTYTAGS_EXPANSION_NAME, expand);
     }
 
     @Override
     public RESTPropertyTagCollectionV1 getJSONPropertyTagsWithQuery(final PathSegment query, final String expand) {
-        return this.getJSONResourcesFromQuery(RESTPropertyTagCollectionV1.class, query.getMatrixParameters(),
-                PropertyTagFilterQueryBuilder.class, new PropertyTagFieldFilter(), new PropertyTagV1Factory(),
+        return getJSONResourcesFromQuery(RESTPropertyTagCollectionV1.class, query.getMatrixParameters(),
+                PropertyTagFilterQueryBuilder.class, new PropertyTagFieldFilter(), propertyTagFactory,
                 RESTv1Constants.PROPERTYTAGS_EXPANSION_NAME, expand);
     }
 
@@ -539,26 +507,20 @@ public class RESTv1 extends BaseRESTv1 implements RESTBaseInterfaceV1, RESTInter
     public RESTPropertyTagV1 updateJSONPropertyTag(final String expand, final RESTPropertyTagV1 dataObject, final String message,
             final Integer flag, final String userId) {
         if (dataObject == null) throw new BadRequestException("The dataObject parameter can not be null");
-
         if (dataObject.getId() == null) throw new BadRequestException("The dataObject.getId() parameter can not be null");
 
-        final PropertyTagV1Factory factory = new PropertyTagV1Factory();
         final RESTLogDetailsV1 logDetails = generateLogDetails(message, flag, userId);
-
-        return updateJSONEntity(PropertyTag.class, dataObject, factory, expand, logDetails);
+        return updateJSONEntity(PropertyTag.class, dataObject, propertyTagFactory, expand, logDetails);
     }
 
     @Override
     public RESTPropertyTagCollectionV1 updateJSONPropertyTags(final String expand, final RESTPropertyTagCollectionV1 dataObjects,
             final String message, final Integer flag, final String userId) {
         if (dataObjects == null) throw new BadRequestException("The dataObjects parameter can not be null");
-
         if (dataObjects.getItems() == null) throw new BadRequestException("The dataObjects.getItems() parameter can not be null");
 
-        final PropertyTagV1Factory factory = new PropertyTagV1Factory();
         final RESTLogDetailsV1 logDetails = generateLogDetails(message, flag, userId);
-
-        return updateJSONEntities(RESTPropertyTagCollectionV1.class, PropertyTag.class, dataObjects, factory,
+        return updateJSONEntities(RESTPropertyTagCollectionV1.class, PropertyTag.class, dataObjects, propertyTagFactory,
                 RESTv1Constants.PROPERTYTAGS_EXPANSION_NAME, expand, logDetails);
     }
 
@@ -567,23 +529,18 @@ public class RESTv1 extends BaseRESTv1 implements RESTBaseInterfaceV1, RESTInter
             final Integer flag, final String userId) {
         if (dataObject == null) throw new BadRequestException("The dataObject parameter can not be null");
 
-        final PropertyTagV1Factory factory = new PropertyTagV1Factory();
         final RESTLogDetailsV1 logDetails = generateLogDetails(message, flag, userId);
-
-        return createJSONEntity(PropertyTag.class, dataObject, factory, expand, logDetails);
+        return createJSONEntity(PropertyTag.class, dataObject, propertyTagFactory, expand, logDetails);
     }
 
     @Override
     public RESTPropertyTagCollectionV1 createJSONPropertyTags(final String expand, final RESTPropertyTagCollectionV1 dataObjects,
             final String message, final Integer flag, final String userId) {
         if (dataObjects == null) throw new BadRequestException("The dataObjects parameter can not be null");
-
         if (dataObjects.getItems() == null) throw new BadRequestException("The dataObjects.getItems() parameter can not be null");
 
-        final PropertyTagV1Factory factory = new PropertyTagV1Factory();
         final RESTLogDetailsV1 logDetails = generateLogDetails(message, flag, userId);
-
-        return createJSONEntities(RESTPropertyTagCollectionV1.class, PropertyTag.class, dataObjects, factory,
+        return createJSONEntities(RESTPropertyTagCollectionV1.class, PropertyTag.class, dataObjects, propertyTagFactory,
                 RESTv1Constants.PROPERTYTAGS_EXPANSION_NAME, expand, logDetails);
     }
 
@@ -592,10 +549,8 @@ public class RESTv1 extends BaseRESTv1 implements RESTBaseInterfaceV1, RESTInter
             final String expand) {
         if (id == null) throw new BadRequestException("The dataObject parameter can not be null");
 
-        final PropertyTagV1Factory factory = new PropertyTagV1Factory();
         final RESTLogDetailsV1 logDetails = generateLogDetails(message, flag, userId);
-
-        return deleteJSONEntity(PropertyTag.class, factory, id, expand, logDetails);
+        return deleteJSONEntity(PropertyTag.class, propertyTagFactory, id, expand, logDetails);
     }
 
     @Override
@@ -604,11 +559,8 @@ public class RESTv1 extends BaseRESTv1 implements RESTBaseInterfaceV1, RESTInter
         if (ids == null) throw new BadRequestException("The dataObjects parameter can not be null");
 
         final Set<String> dbEntityIds = ids.getMatrixParameters().keySet();
-
-        final PropertyTagV1Factory factory = new PropertyTagV1Factory();
         final RESTLogDetailsV1 logDetails = generateLogDetails(message, flag, userId);
-
-        return deleteJSONEntities(RESTPropertyTagCollectionV1.class, PropertyTag.class, factory, dbEntityIds,
+        return deleteJSONEntities(RESTPropertyTagCollectionV1.class, PropertyTag.class, propertyTagFactory, dbEntityIds,
                 RESTv1Constants.PROPERTYTAGS_EXPANSION_NAME, expand, logDetails);
     }
 
@@ -663,7 +615,7 @@ public class RESTv1 extends BaseRESTv1 implements RESTBaseInterfaceV1, RESTInter
     public RESTPropertyCategoryV1 getJSONPropertyCategory(final Integer id, final String expand) {
         if (id == null) throw new BadRequestException("The id parameter can not be null");
 
-        return getJSONResource(PropertyTagCategory.class, new PropertyCategoryV1Factory(), id, expand);
+        return getJSONResource(PropertyTagCategory.class, propertyCategoryFactory, id, expand);
     }
 
     @Override
@@ -671,19 +623,19 @@ public class RESTv1 extends BaseRESTv1 implements RESTBaseInterfaceV1, RESTInter
         if (id == null) throw new BadRequestException("The id parameter can not be null");
         if (revision == null) throw new BadRequestException("The revision parameter can not be null");
 
-        return getJSONResource(PropertyTagCategory.class, new PropertyCategoryV1Factory(), id, revision, expand);
+        return getJSONResource(PropertyTagCategory.class, propertyCategoryFactory, id, revision, expand);
     }
 
     @Override
     public RESTPropertyCategoryCollectionV1 getJSONPropertyCategories(final String expand) {
-        return getJSONResources(RESTPropertyCategoryCollectionV1.class, PropertyTagCategory.class, new PropertyCategoryV1Factory(),
+        return getJSONResources(RESTPropertyCategoryCollectionV1.class, PropertyTagCategory.class, propertyCategoryFactory,
                 RESTv1Constants.PROPERTY_CATEGORIES_EXPANSION_NAME, expand);
     }
 
     @Override
     public RESTPropertyCategoryCollectionV1 getJSONPropertyCategoriesWithQuery(final PathSegment query, final String expand) {
-        return this.getJSONResourcesFromQuery(RESTPropertyCategoryCollectionV1.class, query.getMatrixParameters(),
-                PropertyTagCategoryFilterQueryBuilder.class, new PropertyTagCategoryFieldFilter(), new PropertyCategoryV1Factory(),
+        return getJSONResourcesFromQuery(RESTPropertyCategoryCollectionV1.class, query.getMatrixParameters(),
+                PropertyTagCategoryFilterQueryBuilder.class, new PropertyTagCategoryFieldFilter(), propertyCategoryFactory,
                 RESTv1Constants.PROPERTY_CATEGORIES_EXPANSION_NAME, expand);
     }
 
@@ -691,26 +643,20 @@ public class RESTv1 extends BaseRESTv1 implements RESTBaseInterfaceV1, RESTInter
     public RESTPropertyCategoryV1 updateJSONPropertyCategory(final String expand, final RESTPropertyCategoryV1 dataObject,
             final String message, final Integer flag, final String userId) {
         if (dataObject == null) throw new BadRequestException("The dataObject parameter can not be null");
-
         if (dataObject.getId() == null) throw new BadRequestException("The dataObject.getId() parameter can not be null");
 
-        final PropertyCategoryV1Factory factory = new PropertyCategoryV1Factory();
         final RESTLogDetailsV1 logDetails = generateLogDetails(message, flag, userId);
-
-        return updateJSONEntity(PropertyTagCategory.class, dataObject, factory, expand, logDetails);
+        return updateJSONEntity(PropertyTagCategory.class, dataObject, propertyCategoryFactory, expand, logDetails);
     }
 
     @Override
     public RESTPropertyCategoryCollectionV1 updateJSONPropertyCategories(final String expand,
             final RESTPropertyCategoryCollectionV1 dataObjects, final String message, final Integer flag, final String userId) {
         if (dataObjects == null) throw new BadRequestException("The dataObjects parameter can not be null");
-
         if (dataObjects.getItems() == null) throw new BadRequestException("The dataObjects.getItems() parameter can not be null");
 
-        final PropertyCategoryV1Factory factory = new PropertyCategoryV1Factory();
         final RESTLogDetailsV1 logDetails = generateLogDetails(message, flag, userId);
-
-        return updateJSONEntities(RESTPropertyCategoryCollectionV1.class, PropertyTagCategory.class, dataObjects, factory,
+        return updateJSONEntities(RESTPropertyCategoryCollectionV1.class, PropertyTagCategory.class, dataObjects, propertyCategoryFactory,
                 RESTv1Constants.PROPERTY_CATEGORIES_EXPANSION_NAME, expand, logDetails);
     }
 
@@ -719,23 +665,18 @@ public class RESTv1 extends BaseRESTv1 implements RESTBaseInterfaceV1, RESTInter
             final String message, final Integer flag, final String userId) {
         if (dataObject == null) throw new BadRequestException("The dataObject parameter can not be null");
 
-        final PropertyCategoryV1Factory factory = new PropertyCategoryV1Factory();
         final RESTLogDetailsV1 logDetails = generateLogDetails(message, flag, userId);
-
-        return createJSONEntity(PropertyTagCategory.class, dataObject, factory, expand, logDetails);
+        return createJSONEntity(PropertyTagCategory.class, dataObject, propertyCategoryFactory, expand, logDetails);
     }
 
     @Override
     public RESTPropertyCategoryCollectionV1 createJSONPropertyCategories(final String expand,
             final RESTPropertyCategoryCollectionV1 dataObjects, final String message, final Integer flag, final String userId) {
         if (dataObjects == null) throw new BadRequestException("The dataObjects parameter can not be null");
-
         if (dataObjects.getItems() == null) throw new BadRequestException("The dataObjects.getItems() parameter can not be null");
 
-        final PropertyCategoryV1Factory factory = new PropertyCategoryV1Factory();
         final RESTLogDetailsV1 logDetails = generateLogDetails(message, flag, userId);
-
-        return createJSONEntities(RESTPropertyCategoryCollectionV1.class, PropertyTagCategory.class, dataObjects, factory,
+        return createJSONEntities(RESTPropertyCategoryCollectionV1.class, PropertyTagCategory.class, dataObjects, propertyCategoryFactory,
                 RESTv1Constants.PROPERTY_CATEGORIES_EXPANSION_NAME, expand, logDetails);
     }
 
@@ -744,10 +685,8 @@ public class RESTv1 extends BaseRESTv1 implements RESTBaseInterfaceV1, RESTInter
             final String userId, final String expand) {
         if (id == null) throw new BadRequestException("The dataObject parameter can not be null");
 
-        final PropertyCategoryV1Factory factory = new PropertyCategoryV1Factory();
         final RESTLogDetailsV1 logDetails = generateLogDetails(message, flag, userId);
-
-        return deleteJSONEntity(PropertyTagCategory.class, factory, id, expand, logDetails);
+        return deleteJSONEntity(PropertyTagCategory.class, propertyCategoryFactory, id, expand, logDetails);
     }
 
     @Override
@@ -756,11 +695,8 @@ public class RESTv1 extends BaseRESTv1 implements RESTBaseInterfaceV1, RESTInter
         if (ids == null) throw new BadRequestException("The dataObjects parameter can not be null");
 
         final Set<String> dbEntityIds = ids.getMatrixParameters().keySet();
-
-        final PropertyCategoryV1Factory factory = new PropertyCategoryV1Factory();
         final RESTLogDetailsV1 logDetails = generateLogDetails(message, flag, userId);
-
-        return deleteJSONEntities(RESTPropertyCategoryCollectionV1.class, PropertyTagCategory.class, factory, dbEntityIds,
+        return deleteJSONEntities(RESTPropertyCategoryCollectionV1.class, PropertyTagCategory.class, propertyCategoryFactory, dbEntityIds,
                 RESTv1Constants.PROPERTY_CATEGORIES_EXPANSION_NAME, expand, logDetails);
     }
 
@@ -815,7 +751,7 @@ public class RESTv1 extends BaseRESTv1 implements RESTBaseInterfaceV1, RESTInter
     public RESTRoleV1 getJSONRole(final Integer id, final String expand) {
         if (id == null) throw new BadRequestException("The id parameter can not be null");
 
-        return getJSONResource(Role.class, new RoleV1Factory(), id, expand);
+        return getJSONResource(Role.class, roleFactory, id, expand);
     }
 
     @Override
@@ -823,44 +759,38 @@ public class RESTv1 extends BaseRESTv1 implements RESTBaseInterfaceV1, RESTInter
         if (id == null) throw new BadRequestException("The id parameter can not be null");
         if (revision == null) throw new BadRequestException("The revision parameter can not be null");
 
-        return getJSONResource(Role.class, new RoleV1Factory(), id, expand);
+        return getJSONResource(Role.class, roleFactory, id, expand);
     }
 
     @Override
     public RESTRoleCollectionV1 getJSONRoles(final String expand) {
-        return getJSONResources(RESTRoleCollectionV1.class, Role.class, new RoleV1Factory(), RESTv1Constants.ROLES_EXPANSION_NAME, expand);
+        return getJSONResources(RESTRoleCollectionV1.class, Role.class, roleFactory, RESTv1Constants.ROLES_EXPANSION_NAME, expand);
     }
 
     @Override
     public RESTRoleCollectionV1 getJSONRolesWithQuery(final PathSegment query, final String expand) {
         return getJSONResourcesFromQuery(RESTRoleCollectionV1.class, query.getMatrixParameters(), RoleFilterQueryBuilder.class,
-                new RoleFieldFilter(), new RoleV1Factory(), RESTv1Constants.ROLES_EXPANSION_NAME, expand);
+                new RoleFieldFilter(), roleFactory, RESTv1Constants.ROLES_EXPANSION_NAME, expand);
     }
 
     @Override
     public RESTRoleV1 updateJSONRole(final String expand, final RESTRoleV1 dataObject, final String message, final Integer flag,
             final String userId) {
         if (dataObject == null) throw new BadRequestException("The dataObject parameter can not be null");
-
         if (dataObject.getId() == null) throw new BadRequestException("The dataObject.getId() parameter can not be null");
 
-        final RoleV1Factory factory = new RoleV1Factory();
         final RESTLogDetailsV1 logDetails = generateLogDetails(message, flag, userId);
-
-        return updateJSONEntity(Role.class, dataObject, factory, expand, logDetails);
+        return updateJSONEntity(Role.class, dataObject, roleFactory, expand, logDetails);
     }
 
     @Override
     public RESTRoleCollectionV1 updateJSONRoles(final String expand, final RESTRoleCollectionV1 dataObjects, final String message,
             final Integer flag, final String userId) {
         if (dataObjects == null) throw new BadRequestException("The dataObjects parameter can not be null");
-
         if (dataObjects.getItems() == null) throw new BadRequestException("The dataObjects.getItems() parameter can not be null");
 
-        final RoleV1Factory factory = new RoleV1Factory();
         final RESTLogDetailsV1 logDetails = generateLogDetails(message, flag, userId);
-
-        return updateJSONEntities(RESTRoleCollectionV1.class, Role.class, dataObjects, factory, RESTv1Constants.ROLES_EXPANSION_NAME,
+        return updateJSONEntities(RESTRoleCollectionV1.class, Role.class, dataObjects, roleFactory, RESTv1Constants.ROLES_EXPANSION_NAME,
                 expand, logDetails);
     }
 
@@ -869,23 +799,18 @@ public class RESTv1 extends BaseRESTv1 implements RESTBaseInterfaceV1, RESTInter
             final String userId) {
         if (dataObject == null) throw new BadRequestException("The dataObject parameter can not be null");
 
-        final RoleV1Factory factory = new RoleV1Factory();
         final RESTLogDetailsV1 logDetails = generateLogDetails(message, flag, userId);
-
-        return createJSONEntity(Role.class, dataObject, factory, expand, logDetails);
+        return createJSONEntity(Role.class, dataObject, roleFactory, expand, logDetails);
     }
 
     @Override
     public RESTRoleCollectionV1 createJSONRoles(final String expand, final RESTRoleCollectionV1 dataObjects, final String message,
             final Integer flag, final String userId) {
         if (dataObjects == null) throw new BadRequestException("The dataObjects parameter can not be null");
-
         if (dataObjects.getItems() == null) throw new BadRequestException("The dataObjects.getItems() parameter can not be null");
 
-        final RoleV1Factory factory = new RoleV1Factory();
         final RESTLogDetailsV1 logDetails = generateLogDetails(message, flag, userId);
-
-        return createJSONEntities(RESTRoleCollectionV1.class, Role.class, dataObjects, factory, RESTv1Constants.ROLES_EXPANSION_NAME,
+        return createJSONEntities(RESTRoleCollectionV1.class, Role.class, dataObjects, roleFactory, RESTv1Constants.ROLES_EXPANSION_NAME,
                 expand, logDetails);
     }
 
@@ -893,10 +818,8 @@ public class RESTv1 extends BaseRESTv1 implements RESTBaseInterfaceV1, RESTInter
     public RESTRoleV1 deleteJSONRole(final Integer id, final String message, final Integer flag, final String userId, final String expand) {
         if (id == null) throw new BadRequestException("The dataObject parameter can not be null");
 
-        final RoleV1Factory factory = new RoleV1Factory();
         final RESTLogDetailsV1 logDetails = generateLogDetails(message, flag, userId);
-
-        return deleteJSONEntity(Role.class, factory, id, expand, logDetails);
+        return deleteJSONEntity(Role.class, roleFactory, id, expand, logDetails);
     }
 
     @Override
@@ -905,11 +828,8 @@ public class RESTv1 extends BaseRESTv1 implements RESTBaseInterfaceV1, RESTInter
         if (ids == null) throw new BadRequestException("The dataObjects parameter can not be null");
 
         final Set<String> dbEntityIds = ids.getMatrixParameters().keySet();
-
-        final RoleV1Factory factory = new RoleV1Factory();
         final RESTLogDetailsV1 logDetails = generateLogDetails(message, flag, userId);
-
-        return deleteJSONEntities(RESTRoleCollectionV1.class, Role.class, factory, dbEntityIds, RESTv1Constants.ROLES_EXPANSION_NAME,
+        return deleteJSONEntities(RESTRoleCollectionV1.class, Role.class, roleFactory, dbEntityIds, RESTv1Constants.ROLES_EXPANSION_NAME,
                 expand, logDetails);
     }
 
@@ -964,7 +884,7 @@ public class RESTv1 extends BaseRESTv1 implements RESTBaseInterfaceV1, RESTInter
     public RESTTranslatedTopicV1 getJSONTranslatedTopic(final Integer id, final String expand) {
         if (id == null) throw new BadRequestException("The id parameter can not be null");
 
-        return getJSONResource(TranslatedTopicData.class, new TranslatedTopicV1Factory(), id, expand);
+        return getJSONResource(TranslatedTopicData.class, translatedTopicFactory, id, expand);
     }
 
     @Override
@@ -972,19 +892,19 @@ public class RESTv1 extends BaseRESTv1 implements RESTBaseInterfaceV1, RESTInter
         if (id == null) throw new BadRequestException("The id parameter can not be null");
         if (revision == null) throw new BadRequestException("The revision parameter can not be null");
 
-        return getJSONResource(TranslatedTopicData.class, new TranslatedTopicV1Factory(), id, revision, expand);
+        return getJSONResource(TranslatedTopicData.class, translatedTopicFactory, id, revision, expand);
     }
 
     @Override
     public RESTTranslatedTopicCollectionV1 getJSONTranslatedTopicsWithQuery(PathSegment query, final String expand) {
         return getJSONResourcesFromQuery(RESTTranslatedTopicCollectionV1.class, query.getMatrixParameters(),
-                TranslatedTopicDataFilterQueryBuilder.class, new TopicFieldFilter(), new TranslatedTopicV1Factory(),
+                TranslatedTopicDataFilterQueryBuilder.class, new TopicFieldFilter(), translatedTopicFactory,
                 RESTv1Constants.TRANSLATEDTOPICS_EXPANSION_NAME, expand);
     }
 
     @Override
     public RESTTranslatedTopicCollectionV1 getJSONTranslatedTopics(final String expand) {
-        return getJSONResources(RESTTranslatedTopicCollectionV1.class, TranslatedTopicData.class, new TranslatedTopicV1Factory(),
+        return getJSONResources(RESTTranslatedTopicCollectionV1.class, TranslatedTopicData.class, translatedTopicFactory,
                 RESTv1Constants.TRANSLATEDTOPICS_EXPANSION_NAME, expand);
     }
 
@@ -992,26 +912,20 @@ public class RESTv1 extends BaseRESTv1 implements RESTBaseInterfaceV1, RESTInter
     public RESTTranslatedTopicV1 updateJSONTranslatedTopic(final String expand, final RESTTranslatedTopicV1 dataObject,
             final String message, final Integer flag, final String userId) {
         if (dataObject == null) throw new BadRequestException("The dataObject parameter can not be null");
-
         if (dataObject.getId() == null) throw new BadRequestException("The dataObject.getId() parameter can not be null");
 
-        final TranslatedTopicV1Factory factory = new TranslatedTopicV1Factory();
         final RESTLogDetailsV1 logDetails = generateLogDetails(message, flag, userId);
-
-        return updateJSONEntity(TranslatedTopicData.class, dataObject, factory, expand, logDetails);
+        return updateJSONEntity(TranslatedTopicData.class, dataObject, translatedTopicFactory, expand, logDetails);
     }
 
     @Override
     public RESTTranslatedTopicCollectionV1 updateJSONTranslatedTopics(final String expand,
             final RESTTranslatedTopicCollectionV1 dataObjects, final String message, final Integer flag, final String userId) {
         if (dataObjects == null) throw new BadRequestException("The dataObjects parameter can not be null");
-
         if (dataObjects.getItems() == null) throw new BadRequestException("The dataObjects.getItems() parameter can not be null");
 
-        final TranslatedTopicV1Factory factory = new TranslatedTopicV1Factory();
         final RESTLogDetailsV1 logDetails = generateLogDetails(message, flag, userId);
-
-        return updateJSONEntities(RESTTranslatedTopicCollectionV1.class, TranslatedTopicData.class, dataObjects, factory,
+        return updateJSONEntities(RESTTranslatedTopicCollectionV1.class, TranslatedTopicData.class, dataObjects, translatedTopicFactory,
                 RESTv1Constants.TRANSLATEDTOPICS_EXPANSION_NAME, expand, logDetails);
     }
 
@@ -1020,10 +934,8 @@ public class RESTv1 extends BaseRESTv1 implements RESTBaseInterfaceV1, RESTInter
             final String message, final Integer flag, final String userId) {
         if (dataObject == null) throw new BadRequestException("The dataObject parameter can not be null");
 
-        final TranslatedTopicV1Factory factory = new TranslatedTopicV1Factory();
         final RESTLogDetailsV1 logDetails = generateLogDetails(message, flag, userId);
-
-        return createJSONEntity(TranslatedTopicData.class, dataObject, factory, expand, logDetails);
+        return createJSONEntity(TranslatedTopicData.class, dataObject, translatedTopicFactory, expand, logDetails);
     }
 
     @Override
@@ -1033,10 +945,8 @@ public class RESTv1 extends BaseRESTv1 implements RESTBaseInterfaceV1, RESTInter
 
         if (dataObjects.getItems() == null) throw new BadRequestException("The dataObjects.getItems() parameter can not be null");
 
-        final TranslatedTopicV1Factory factory = new TranslatedTopicV1Factory();
         final RESTLogDetailsV1 logDetails = generateLogDetails(message, flag, userId);
-
-        return createJSONEntities(RESTTranslatedTopicCollectionV1.class, TranslatedTopicData.class, dataObjects, factory,
+        return createJSONEntities(RESTTranslatedTopicCollectionV1.class, TranslatedTopicData.class, dataObjects, translatedTopicFactory,
                 RESTv1Constants.TRANSLATEDTOPICS_EXPANSION_NAME, expand, logDetails);
     }
 
@@ -1045,10 +955,8 @@ public class RESTv1 extends BaseRESTv1 implements RESTBaseInterfaceV1, RESTInter
             final String expand) {
         if (id == null) throw new BadRequestException("The dataObject parameter can not be null");
 
-        final TranslatedTopicV1Factory factory = new TranslatedTopicV1Factory();
         final RESTLogDetailsV1 logDetails = generateLogDetails(message, flag, userId);
-
-        return deleteJSONEntity(TranslatedTopicData.class, factory, id, expand, logDetails);
+        return deleteJSONEntity(TranslatedTopicData.class, translatedTopicFactory, id, expand, logDetails);
     }
 
     @Override
@@ -1057,11 +965,8 @@ public class RESTv1 extends BaseRESTv1 implements RESTBaseInterfaceV1, RESTInter
         if (ids == null) throw new BadRequestException("The dataObjects parameter can not be null");
 
         final Set<String> dbEntityIds = ids.getMatrixParameters().keySet();
-
-        final TranslatedTopicV1Factory factory = new TranslatedTopicV1Factory();
         final RESTLogDetailsV1 logDetails = generateLogDetails(message, flag, userId);
-
-        return deleteJSONEntities(RESTTranslatedTopicCollectionV1.class, TranslatedTopicData.class, factory, dbEntityIds,
+        return deleteJSONEntities(RESTTranslatedTopicCollectionV1.class, TranslatedTopicData.class, translatedTopicFactory, dbEntityIds,
                 RESTv1Constants.TRANSLATEDTOPICS_EXPANSION_NAME, expand, logDetails);
     }
 
@@ -1116,7 +1021,7 @@ public class RESTv1 extends BaseRESTv1 implements RESTBaseInterfaceV1, RESTInter
     public RESTStringConstantV1 getJSONStringConstant(final Integer id, final String expand) {
         if (id == null) throw new BadRequestException("The id parameter can not be null");
 
-        return getJSONResource(StringConstants.class, new StringConstantV1Factory(), id, expand);
+        return getJSONResource(StringConstants.class, stringConstantFactory, id, expand);
     }
 
     @Override
@@ -1124,19 +1029,19 @@ public class RESTv1 extends BaseRESTv1 implements RESTBaseInterfaceV1, RESTInter
         if (id == null) throw new BadRequestException("The id parameter can not be null");
         if (revision == null) throw new BadRequestException("The revision parameter can not be null");
 
-        return getJSONResource(StringConstants.class, new StringConstantV1Factory(), id, revision, expand);
+        return getJSONResource(StringConstants.class, stringConstantFactory, id, revision, expand);
     }
 
     @Override
     public RESTStringConstantCollectionV1 getJSONStringConstants(final String expand) {
-        return getJSONResources(RESTStringConstantCollectionV1.class, StringConstants.class, new StringConstantV1Factory(),
+        return getJSONResources(RESTStringConstantCollectionV1.class, StringConstants.class, stringConstantFactory,
                 RESTv1Constants.STRINGCONSTANTS_EXPANSION_NAME, expand);
     }
 
     @Override
     public RESTStringConstantCollectionV1 getJSONStringConstantsWithQuery(final PathSegment query, final String expand) {
         return getJSONResourcesFromQuery(RESTStringConstantCollectionV1.class, query.getMatrixParameters(),
-                StringConstantFilterQueryBuilder.class, new StringConstantFieldFilter(), new StringConstantV1Factory(),
+                StringConstantFilterQueryBuilder.class, new StringConstantFieldFilter(), stringConstantFactory,
                 RESTv1Constants.STRINGCONSTANTS_EXPANSION_NAME, expand);
     }
 
@@ -1144,26 +1049,20 @@ public class RESTv1 extends BaseRESTv1 implements RESTBaseInterfaceV1, RESTInter
     public RESTStringConstantV1 updateJSONStringConstant(final String expand, final RESTStringConstantV1 dataObject, final String message,
             final Integer flag, final String userId) {
         if (dataObject == null) throw new BadRequestException("The dataObject parameter can not be null");
-
         if (dataObject.getId() == null) throw new BadRequestException("The dataObject.getId() parameter can not be null");
 
-        final StringConstantV1Factory factory = new StringConstantV1Factory();
         final RESTLogDetailsV1 logDetails = generateLogDetails(message, flag, userId);
-
-        return updateJSONEntity(StringConstants.class, dataObject, factory, expand, logDetails);
+        return updateJSONEntity(StringConstants.class, dataObject, stringConstantFactory, expand, logDetails);
     }
 
     @Override
     public RESTStringConstantCollectionV1 updateJSONStringConstants(final String expand, final RESTStringConstantCollectionV1 dataObjects,
             final String message, final Integer flag, final String userId) {
         if (dataObjects == null) throw new BadRequestException("The dataObjects parameter can not be null");
-
         if (dataObjects.getItems() == null) throw new BadRequestException("The dataObjects.getItems() parameter can not be null");
 
-        final StringConstantV1Factory factory = new StringConstantV1Factory();
         final RESTLogDetailsV1 logDetails = generateLogDetails(message, flag, userId);
-
-        return updateJSONEntities(RESTStringConstantCollectionV1.class, StringConstants.class, dataObjects, factory,
+        return updateJSONEntities(RESTStringConstantCollectionV1.class, StringConstants.class, dataObjects, stringConstantFactory,
                 RESTv1Constants.STRINGCONSTANTS_EXPANSION_NAME, expand, logDetails);
     }
 
@@ -1172,23 +1071,18 @@ public class RESTv1 extends BaseRESTv1 implements RESTBaseInterfaceV1, RESTInter
             final Integer flag, final String userId) {
         if (dataObject == null) throw new BadRequestException("The dataObject parameter can not be null");
 
-        final StringConstantV1Factory factory = new StringConstantV1Factory();
         final RESTLogDetailsV1 logDetails = generateLogDetails(message, flag, userId);
-
-        return createJSONEntity(StringConstants.class, dataObject, factory, expand, logDetails);
+        return createJSONEntity(StringConstants.class, dataObject, stringConstantFactory, expand, logDetails);
     }
 
     @Override
     public RESTStringConstantCollectionV1 createJSONStringConstants(final String expand, final RESTStringConstantCollectionV1 dataObjects,
             final String message, final Integer flag, final String userId) {
         if (dataObjects == null) throw new BadRequestException("The dataObjects parameter can not be null");
-
         if (dataObjects.getItems() == null) throw new BadRequestException("The dataObjects.getItems() parameter can not be null");
 
-        final StringConstantV1Factory factory = new StringConstantV1Factory();
         final RESTLogDetailsV1 logDetails = generateLogDetails(message, flag, userId);
-
-        return createJSONEntities(RESTStringConstantCollectionV1.class, StringConstants.class, dataObjects, factory,
+        return createJSONEntities(RESTStringConstantCollectionV1.class, StringConstants.class, dataObjects, stringConstantFactory,
                 RESTv1Constants.STRINGCONSTANTS_EXPANSION_NAME, expand, logDetails);
     }
 
@@ -1197,10 +1091,8 @@ public class RESTv1 extends BaseRESTv1 implements RESTBaseInterfaceV1, RESTInter
             final String expand) {
         if (id == null) throw new BadRequestException("The id parameter can not be null");
 
-        final StringConstantV1Factory factory = new StringConstantV1Factory();
         final RESTLogDetailsV1 logDetails = generateLogDetails(message, flag, userId);
-
-        return deleteJSONEntity(StringConstants.class, factory, id, expand, logDetails);
+        return deleteJSONEntity(StringConstants.class, stringConstantFactory, id, expand, logDetails);
     }
 
     @Override
@@ -1209,10 +1101,8 @@ public class RESTv1 extends BaseRESTv1 implements RESTBaseInterfaceV1, RESTInter
         if (ids == null) throw new BadRequestException("The ids parameter can not be null");
 
         final Set<String> dbEntityIds = ids.getMatrixParameters().keySet();
-        final StringConstantV1Factory factory = new StringConstantV1Factory();
         final RESTLogDetailsV1 logDetails = generateLogDetails(message, flag, userId);
-
-        return deleteJSONEntities(RESTStringConstantCollectionV1.class, StringConstants.class, factory, dbEntityIds,
+        return deleteJSONEntities(RESTStringConstantCollectionV1.class, StringConstants.class, stringConstantFactory, dbEntityIds,
                 RESTv1Constants.STRINGCONSTANTS_EXPANSION_NAME, expand, logDetails);
     }
 
@@ -1267,7 +1157,7 @@ public class RESTv1 extends BaseRESTv1 implements RESTBaseInterfaceV1, RESTInter
     public RESTUserV1 getJSONUser(final Integer id, final String expand) {
         if (id == null) throw new BadRequestException("The id parameter can not be null");
 
-        return getJSONResource(User.class, new UserV1Factory(), id, expand);
+        return getJSONResource(User.class, userFactory, id, expand);
     }
 
     @Override
@@ -1275,44 +1165,38 @@ public class RESTv1 extends BaseRESTv1 implements RESTBaseInterfaceV1, RESTInter
         if (id == null) throw new BadRequestException("The id parameter can not be null");
         if (revision == null) throw new BadRequestException("The revision parameter can not be null");
 
-        return getJSONResource(User.class, new UserV1Factory(), id, revision, expand);
+        return getJSONResource(User.class, userFactory, id, revision, expand);
     }
 
     @Override
     public RESTUserCollectionV1 getJSONUsers(final String expand) {
-        return getJSONResources(RESTUserCollectionV1.class, User.class, new UserV1Factory(), RESTv1Constants.USERS_EXPANSION_NAME, expand);
+        return getJSONResources(RESTUserCollectionV1.class, User.class, userFactory, RESTv1Constants.USERS_EXPANSION_NAME, expand);
     }
 
     @Override
     public RESTUserCollectionV1 getJSONUsersWithQuery(final PathSegment query, final String expand) {
         return this.getJSONResourcesFromQuery(RESTUserCollectionV1.class, query.getMatrixParameters(), UserFilterQueryBuilder.class,
-                new UserFieldFilter(), new UserV1Factory(), RESTv1Constants.USERS_EXPANSION_NAME, expand);
+                new UserFieldFilter(), userFactory, RESTv1Constants.USERS_EXPANSION_NAME, expand);
     }
 
     @Override
     public RESTUserV1 updateJSONUser(final String expand, final RESTUserV1 dataObject, final String message, final Integer flag,
             final String userId) {
         if (dataObject == null) throw new BadRequestException("The dataObject parameter can not be null");
-
         if (dataObject.getId() == null) throw new BadRequestException("The dataObject.getId() parameter can not be null");
 
-        final UserV1Factory factory = new UserV1Factory();
         final RESTLogDetailsV1 logDetails = generateLogDetails(message, flag, userId);
-
-        return updateJSONEntity(User.class, dataObject, factory, expand, logDetails);
+        return updateJSONEntity(User.class, dataObject, userFactory, expand, logDetails);
     }
 
     @Override
     public RESTUserCollectionV1 updateJSONUsers(final String expand, final RESTUserCollectionV1 dataObjects, final String message,
             final Integer flag, final String userId) {
         if (dataObjects == null) throw new BadRequestException("The dataObjects parameter can not be null");
-
         if (dataObjects.getItems() == null) throw new BadRequestException("The dataObjects.getItems() parameter can not be null");
 
-        final UserV1Factory factory = new UserV1Factory();
         final RESTLogDetailsV1 logDetails = generateLogDetails(message, flag, userId);
-
-        return updateJSONEntities(RESTUserCollectionV1.class, User.class, dataObjects, factory, RESTv1Constants.USERS_EXPANSION_NAME,
+        return updateJSONEntities(RESTUserCollectionV1.class, User.class, dataObjects, userFactory, RESTv1Constants.USERS_EXPANSION_NAME,
                 expand, logDetails);
     }
 
@@ -1321,10 +1205,8 @@ public class RESTv1 extends BaseRESTv1 implements RESTBaseInterfaceV1, RESTInter
             final String userId) {
         if (dataObject == null) throw new BadRequestException("The dataObject parameter can not be null");
 
-        final UserV1Factory factory = new UserV1Factory();
         final RESTLogDetailsV1 logDetails = generateLogDetails(message, flag, userId);
-
-        return createJSONEntity(User.class, dataObject, factory, expand, logDetails);
+        return createJSONEntity(User.class, dataObject, userFactory, expand, logDetails);
     }
 
     @Override
@@ -1334,10 +1216,8 @@ public class RESTv1 extends BaseRESTv1 implements RESTBaseInterfaceV1, RESTInter
 
         if (dataObjects.getItems() == null) throw new BadRequestException("The dataObjects.getItems() parameter can not be null");
 
-        final UserV1Factory factory = new UserV1Factory();
         final RESTLogDetailsV1 logDetails = generateLogDetails(message, flag, userId);
-
-        return createJSONEntities(RESTUserCollectionV1.class, User.class, dataObjects, factory, RESTv1Constants.USERS_EXPANSION_NAME,
+        return createJSONEntities(RESTUserCollectionV1.class, User.class, dataObjects, userFactory, RESTv1Constants.USERS_EXPANSION_NAME,
                 expand, logDetails);
     }
 
@@ -1345,23 +1225,18 @@ public class RESTv1 extends BaseRESTv1 implements RESTBaseInterfaceV1, RESTInter
     public RESTUserV1 deleteJSONUser(final Integer id, final String message, final Integer flag, final String userId, final String expand) {
         if (id == null) throw new BadRequestException("The id parameter can not be null");
 
-        final UserV1Factory factory = new UserV1Factory();
         final RESTLogDetailsV1 logDetails = generateLogDetails(message, flag, userId);
-
-        return deleteJSONEntity(User.class, factory, id, expand, logDetails);
+        return deleteJSONEntity(User.class, userFactory, id, expand, logDetails);
     }
 
     @Override
     public RESTUserCollectionV1 deleteJSONUsers(final PathSegment ids, final String message, final Integer flag, final String userId,
             final String expand) {
         if (ids == null) throw new BadRequestException("The ids parameter can not be null");
-
         final Set<String> dbEntityIds = ids.getMatrixParameters().keySet();
 
-        final UserV1Factory factory = new UserV1Factory();
         final RESTLogDetailsV1 logDetails = generateLogDetails(message, flag, userId);
-
-        return deleteJSONEntities(RESTUserCollectionV1.class, User.class, factory, dbEntityIds, RESTv1Constants.USERS_EXPANSION_NAME,
+        return deleteJSONEntities(RESTUserCollectionV1.class, User.class, userFactory, dbEntityIds, RESTv1Constants.USERS_EXPANSION_NAME,
                 expand, logDetails);
     }
 
@@ -1416,7 +1291,7 @@ public class RESTv1 extends BaseRESTv1 implements RESTBaseInterfaceV1, RESTInter
     public RESTTagV1 getJSONTag(final Integer id, final String expand) {
         if (id == null) throw new BadRequestException("The id parameter can not be null");
 
-        return getJSONResource(Tag.class, new TagV1Factory(), id, expand);
+        return getJSONResource(Tag.class, tagFactory, id, expand);
     }
 
     @Override
@@ -1424,45 +1299,39 @@ public class RESTv1 extends BaseRESTv1 implements RESTBaseInterfaceV1, RESTInter
         if (id == null) throw new BadRequestException("The id parameter can not be null");
         if (revision == null) throw new BadRequestException("The revision parameter can not be null");
 
-        return getJSONResource(Tag.class, new TagV1Factory(), id, revision, expand);
+        return getJSONResource(Tag.class, tagFactory, id, revision, expand);
     }
 
     @Override
     public RESTTagCollectionV1 getJSONTags(final String expand) {
-        return getJSONResources(RESTTagCollectionV1.class, Tag.class, new TagV1Factory(), RESTv1Constants.TAGS_EXPANSION_NAME, expand);
+        return getJSONResources(RESTTagCollectionV1.class, Tag.class, tagFactory, RESTv1Constants.TAGS_EXPANSION_NAME, expand);
     }
 
     @Override
     public RESTTagCollectionV1 getJSONTagsWithQuery(final PathSegment query, final String expand) {
         return getJSONResourcesFromQuery(RESTTagCollectionV1.class, query.getMatrixParameters(), TagFilterQueryBuilder.class,
-                new TagFieldFilter(), new TagV1Factory(), RESTv1Constants.TAGS_EXPANSION_NAME, expand);
+                new TagFieldFilter(), tagFactory, RESTv1Constants.TAGS_EXPANSION_NAME, expand);
     }
 
     @Override
     public RESTTagV1 updateJSONTag(final String expand, final RESTTagV1 dataObject, final String message, final Integer flag,
             final String userId) {
         if (dataObject == null) throw new BadRequestException("The dataObject parameter can not be null");
-
         if (dataObject.getId() == null) throw new BadRequestException("The dataObject.getId() parameter can not be null");
 
-        final TagV1Factory factory = new TagV1Factory();
         final RESTLogDetailsV1 logDetails = generateLogDetails(message, flag, userId);
-
-        return updateJSONEntity(Tag.class, dataObject, factory, expand, logDetails);
+        return updateJSONEntity(Tag.class, dataObject, tagFactory, expand, logDetails);
     }
 
     @Override
     public RESTTagCollectionV1 updateJSONTags(final String expand, final RESTTagCollectionV1 dataObjects, final String message,
             final Integer flag, final String userId) {
         if (dataObjects == null) throw new BadRequestException("The dataObjects parameter can not be null");
-
         if (dataObjects.getItems() == null) throw new BadRequestException("The dataObjects.getItems() parameter can not be null");
 
-        final TagV1Factory factory = new TagV1Factory();
         final RESTLogDetailsV1 logDetails = generateLogDetails(message, flag, userId);
-
-        return updateJSONEntities(RESTTagCollectionV1.class, Tag.class, dataObjects, factory, RESTv1Constants.TAGS_EXPANSION_NAME, expand,
-                logDetails);
+        return updateJSONEntities(RESTTagCollectionV1.class, Tag.class, dataObjects, tagFactory, RESTv1Constants.TAGS_EXPANSION_NAME,
+                expand, logDetails);
     }
 
     @Override
@@ -1470,34 +1339,27 @@ public class RESTv1 extends BaseRESTv1 implements RESTBaseInterfaceV1, RESTInter
             final String userId) {
         if (dataObject == null) throw new BadRequestException("The dataObject parameter can not be null");
 
-        final TagV1Factory factory = new TagV1Factory();
         final RESTLogDetailsV1 logDetails = generateLogDetails(message, flag, userId);
-
-        return createJSONEntity(Tag.class, dataObject, factory, expand, logDetails);
+        return createJSONEntity(Tag.class, dataObject, tagFactory, expand, logDetails);
     }
 
     @Override
     public RESTTagCollectionV1 createJSONTags(final String expand, final RESTTagCollectionV1 dataObjects, final String message,
             final Integer flag, final String userId) {
         if (dataObjects == null) throw new BadRequestException("The dataObjects parameter can not be null");
-
         if (dataObjects.getItems() == null) throw new BadRequestException("The dataObjects.getItems() parameter can not be null");
 
-        final TagV1Factory factory = new TagV1Factory();
         final RESTLogDetailsV1 logDetails = generateLogDetails(message, flag, userId);
-
-        return createJSONEntities(RESTTagCollectionV1.class, Tag.class, dataObjects, factory, RESTv1Constants.TAGS_EXPANSION_NAME, expand,
-                logDetails);
+        return createJSONEntities(RESTTagCollectionV1.class, Tag.class, dataObjects, tagFactory, RESTv1Constants.TAGS_EXPANSION_NAME,
+                expand, logDetails);
     }
 
     @Override
     public RESTTagV1 deleteJSONTag(final Integer id, final String message, final Integer flag, final String userId, final String expand) {
         if (id == null) throw new BadRequestException("The id parameter can not be null");
 
-        final TagV1Factory factory = new TagV1Factory();
         final RESTLogDetailsV1 logDetails = generateLogDetails(message, flag, userId);
-
-        return deleteJSONEntity(Tag.class, factory, id, expand, logDetails);
+        return deleteJSONEntity(Tag.class, tagFactory, id, expand, logDetails);
     }
 
     @Override
@@ -1506,11 +1368,9 @@ public class RESTv1 extends BaseRESTv1 implements RESTBaseInterfaceV1, RESTInter
         if (ids == null) throw new BadRequestException("The ids parameter can not be null");
 
         final Set<String> dbEntityIds = ids.getMatrixParameters().keySet();
-        final TagV1Factory factory = new TagV1Factory();
         final RESTLogDetailsV1 logDetails = generateLogDetails(message, flag, userId);
-
-        return deleteJSONEntities(RESTTagCollectionV1.class, Tag.class, factory, dbEntityIds, RESTv1Constants.TAGS_EXPANSION_NAME, expand,
-                logDetails);
+        return deleteJSONEntities(RESTTagCollectionV1.class, Tag.class, tagFactory, dbEntityIds, RESTv1Constants.TAGS_EXPANSION_NAME,
+                expand, logDetails);
     }
 
     /* CATEGORY FUNCTIONS */
@@ -1562,15 +1422,15 @@ public class RESTv1 extends BaseRESTv1 implements RESTBaseInterfaceV1, RESTInter
     /* JSON FUNCTIONS */
     @Override
     public RESTCategoryCollectionV1 getJSONCategories(final String expand) {
-        return getJSONResources(RESTCategoryCollectionV1.class, Category.class, new CategoryV1Factory(),
-                RESTv1Constants.CATEGORIES_EXPANSION_NAME, expand);
+        return getJSONResources(RESTCategoryCollectionV1.class, Category.class, categoryFactory, RESTv1Constants.CATEGORIES_EXPANSION_NAME,
+                expand);
     }
 
     @Override
     public RESTCategoryV1 getJSONCategory(final Integer id, final String expand) {
         if (id == null) throw new BadRequestException("The id parameter can not be null");
 
-        return getJSONResource(Category.class, new CategoryV1Factory(), id, expand);
+        return getJSONResource(Category.class, categoryFactory, id, expand);
     }
 
     @Override
@@ -1578,39 +1438,33 @@ public class RESTv1 extends BaseRESTv1 implements RESTBaseInterfaceV1, RESTInter
         if (id == null) throw new BadRequestException("The id parameter can not be null");
         if (revision == null) throw new BadRequestException("The revision parameter can not be null");
 
-        return getJSONResource(Category.class, new CategoryV1Factory(), id, revision, expand);
+        return getJSONResource(Category.class, categoryFactory, id, revision, expand);
     }
 
     @Override
     public RESTCategoryCollectionV1 getJSONCategoriesWithQuery(final PathSegment query, final String expand) {
         return getJSONResourcesFromQuery(RESTCategoryCollectionV1.class, query.getMatrixParameters(), CategoryFilterQueryBuilder.class,
-                new CategoryFieldFilter(), new CategoryV1Factory(), RESTv1Constants.CATEGORIES_EXPANSION_NAME, expand);
+                new CategoryFieldFilter(), categoryFactory, RESTv1Constants.CATEGORIES_EXPANSION_NAME, expand);
     }
 
     @Override
     public RESTCategoryV1 updateJSONCategory(final String expand, final RESTCategoryV1 dataObject, final String message, final Integer flag,
             final String userId) {
         if (dataObject == null) throw new BadRequestException("The dataObject parameter can not be null");
-
         if (dataObject.getId() == null) throw new BadRequestException("The dataObject.getId() parameter can not be null");
 
-        final CategoryV1Factory factory = new CategoryV1Factory();
         final RESTLogDetailsV1 logDetails = generateLogDetails(message, flag, userId);
-
-        return updateJSONEntity(Category.class, dataObject, factory, expand, logDetails);
+        return updateJSONEntity(Category.class, dataObject, categoryFactory, expand, logDetails);
     }
 
     @Override
     public RESTCategoryCollectionV1 updateJSONCategories(final String expand, final RESTCategoryCollectionV1 dataObjects,
             final String message, final Integer flag, final String userId) {
         if (dataObjects == null) throw new BadRequestException("The dataObjects parameter can not be null");
-
         if (dataObjects.getItems() == null) throw new BadRequestException("The dataObjects.getItems() parameter can not be null");
 
-        final CategoryV1Factory factory = new CategoryV1Factory();
         final RESTLogDetailsV1 logDetails = generateLogDetails(message, flag, userId);
-
-        return updateJSONEntities(RESTCategoryCollectionV1.class, Category.class, dataObjects, factory,
+        return updateJSONEntities(RESTCategoryCollectionV1.class, Category.class, dataObjects, categoryFactory,
                 RESTv1Constants.CATEGORIES_EXPANSION_NAME, expand, logDetails);
     }
 
@@ -1619,23 +1473,18 @@ public class RESTv1 extends BaseRESTv1 implements RESTBaseInterfaceV1, RESTInter
             final String userId) {
         if (dataObject == null) throw new BadRequestException("The dataObject parameter can not be null");
 
-        final CategoryV1Factory factory = new CategoryV1Factory();
         final RESTLogDetailsV1 logDetails = generateLogDetails(message, flag, userId);
-
-        return createJSONEntity(Category.class, dataObject, factory, expand, logDetails);
+        return createJSONEntity(Category.class, dataObject, categoryFactory, expand, logDetails);
     }
 
     @Override
     public RESTCategoryCollectionV1 createJSONCategories(final String expand, final RESTCategoryCollectionV1 dataObjects,
             final String message, final Integer flag, final String userId) {
         if (dataObjects == null) throw new BadRequestException("The dataObjects parameter can not be null");
-
         if (dataObjects.getItems() == null) throw new BadRequestException("The dataObjects.getItems() parameter can not be null");
 
-        final CategoryV1Factory factory = new CategoryV1Factory();
         final RESTLogDetailsV1 logDetails = generateLogDetails(message, flag, userId);
-
-        return createJSONEntities(RESTCategoryCollectionV1.class, Category.class, dataObjects, factory,
+        return createJSONEntities(RESTCategoryCollectionV1.class, Category.class, dataObjects, categoryFactory,
                 RESTv1Constants.CATEGORIES_EXPANSION_NAME, expand, logDetails);
     }
 
@@ -1644,10 +1493,8 @@ public class RESTv1 extends BaseRESTv1 implements RESTBaseInterfaceV1, RESTInter
             final String expand) {
         if (id == null) throw new BadRequestException("The id parameter can not be null");
 
-        final CategoryV1Factory factory = new CategoryV1Factory();
         final RESTLogDetailsV1 logDetails = generateLogDetails(message, flag, userId);
-
-        return deleteJSONEntity(Category.class, factory, id, expand, logDetails);
+        return deleteJSONEntity(Category.class, categoryFactory, id, expand, logDetails);
     }
 
     @Override
@@ -1656,11 +1503,8 @@ public class RESTv1 extends BaseRESTv1 implements RESTBaseInterfaceV1, RESTInter
         if (ids == null) throw new BadRequestException("The ids parameter can not be null");
 
         final Set<String> dbEntityIds = ids.getMatrixParameters().keySet();
-
-        final CategoryV1Factory factory = new CategoryV1Factory();
         final RESTLogDetailsV1 logDetails = generateLogDetails(message, flag, userId);
-
-        return deleteJSONEntities(RESTCategoryCollectionV1.class, Category.class, factory, dbEntityIds,
+        return deleteJSONEntities(RESTCategoryCollectionV1.class, Category.class, categoryFactory, dbEntityIds,
                 RESTv1Constants.CATEGORIES_EXPANSION_NAME, expand, logDetails);
     }
 
@@ -1715,59 +1559,47 @@ public class RESTv1 extends BaseRESTv1 implements RESTBaseInterfaceV1, RESTInter
     public RESTImageV1 getJSONImage(final Integer id, final String expand) {
         if (id == null) throw new BadRequestException("The id parameter can not be null");
 
-        return getJSONResource(ImageFile.class, new ImageV1Factory(), id, expand);
+        return getJSONResource(ImageFile.class, imageFactory, id, expand);
     }
 
     @Override
     public RESTImageV1 getJSONImageRevision(final Integer id, Integer revision, final String expand) {
         if (id == null) throw new BadRequestException("The id parameter can not be null");
-
         if (revision == null) throw new BadRequestException("The revision parameter can not be null");
 
-        return getJSONResource(ImageFile.class, new ImageV1Factory(), id, revision, expand);
+        return getJSONResource(ImageFile.class, imageFactory, id, revision, expand);
     }
 
     @Override
     public RESTImageCollectionV1 getJSONImages(final String expand) {
-        /*
-         * Construct a collection with the given expansion name. The user will have to expand the collection to get the details
-         * of the items in it.
-         */
-        return getJSONResources(RESTImageCollectionV1.class, ImageFile.class, new ImageV1Factory(), RESTv1Constants.IMAGES_EXPANSION_NAME,
-                expand);
+        return getJSONResources(RESTImageCollectionV1.class, ImageFile.class, imageFactory, RESTv1Constants.IMAGES_EXPANSION_NAME, expand);
     }
 
     @Override
     public RESTImageCollectionV1 getJSONImagesWithQuery(final PathSegment query, final String expand) {
-        return this.getJSONResourcesFromQuery(RESTImageCollectionV1.class, query.getMatrixParameters(), ImageFilterQueryBuilder.class,
-                new ImageFieldFilter(), new ImageV1Factory(), RESTv1Constants.IMAGES_EXPANSION_NAME, expand);
+        return getJSONResourcesFromQuery(RESTImageCollectionV1.class, query.getMatrixParameters(), ImageFilterQueryBuilder.class,
+                new ImageFieldFilter(), imageFactory, RESTv1Constants.IMAGES_EXPANSION_NAME, expand);
     }
 
     @Override
     public RESTImageV1 updateJSONImage(final String expand, final RESTImageV1 dataObject, final String message, final Integer flag,
             final String userId) {
         if (dataObject == null) throw new BadRequestException("The dataObject parameter can not be null");
-
         if (dataObject.getId() == null) throw new BadRequestException("The dataObject.getId() parameter can not be null");
 
-        final ImageV1Factory factory = new ImageV1Factory();
         final RESTLogDetailsV1 logDetails = generateLogDetails(message, flag, userId);
-
-        return updateJSONEntity(ImageFile.class, dataObject, factory, expand, logDetails);
+        return updateJSONEntity(ImageFile.class, dataObject, imageFactory, expand, logDetails);
     }
 
     @Override
     public RESTImageCollectionV1 updateJSONImages(final String expand, final RESTImageCollectionV1 dataObjects, final String message,
             final Integer flag, final String userId) {
         if (dataObjects == null) throw new BadRequestException("The dataObjects parameter can not be null");
-
         if (dataObjects.getItems() == null) throw new BadRequestException("The dataObjects.getItems() parameter can not be null");
 
-        final ImageV1Factory factory = new ImageV1Factory();
         final RESTLogDetailsV1 logDetails = generateLogDetails(message, flag, userId);
-
-        return updateJSONEntities(RESTImageCollectionV1.class, ImageFile.class, dataObjects, factory, RESTv1Constants.IMAGES_EXPANSION_NAME,
-                expand, logDetails);
+        return updateJSONEntities(RESTImageCollectionV1.class, ImageFile.class, dataObjects, imageFactory,
+                RESTv1Constants.IMAGES_EXPANSION_NAME, expand, logDetails);
     }
 
     @Override
@@ -1775,24 +1607,19 @@ public class RESTv1 extends BaseRESTv1 implements RESTBaseInterfaceV1, RESTInter
             final String userId) {
         if (dataObject == null) throw new BadRequestException("The dataObject parameter can not be null");
 
-        final ImageV1Factory factory = new ImageV1Factory();
         final RESTLogDetailsV1 logDetails = generateLogDetails(message, flag, userId);
-
-        return createJSONEntity(ImageFile.class, dataObject, factory, expand, logDetails);
+        return createJSONEntity(ImageFile.class, dataObject, imageFactory, expand, logDetails);
     }
 
     @Override
     public RESTImageCollectionV1 createJSONImages(final String expand, final RESTImageCollectionV1 dataObjects, final String message,
             final Integer flag, final String userId) {
         if (dataObjects == null) throw new BadRequestException("The dataObjects parameter can not be null");
-
         if (dataObjects.getItems() == null) throw new BadRequestException("The dataObjects.getItems() parameter can not be null");
 
-        final ImageV1Factory factory = new ImageV1Factory();
         final RESTLogDetailsV1 logDetails = generateLogDetails(message, flag, userId);
-
-        return createJSONEntities(RESTImageCollectionV1.class, ImageFile.class, dataObjects, factory, RESTv1Constants.IMAGES_EXPANSION_NAME,
-                expand, logDetails);
+        return createJSONEntities(RESTImageCollectionV1.class, ImageFile.class, dataObjects, imageFactory,
+                RESTv1Constants.IMAGES_EXPANSION_NAME, expand, logDetails);
     }
 
     @Override
@@ -1800,10 +1627,8 @@ public class RESTv1 extends BaseRESTv1 implements RESTBaseInterfaceV1, RESTInter
             final String expand) {
         if (id == null) throw new BadRequestException("The id parameter can not be null");
 
-        final ImageV1Factory factory = new ImageV1Factory();
         final RESTLogDetailsV1 logDetails = generateLogDetails(message, flag, userId);
-
-        return deleteJSONEntity(ImageFile.class, factory, id, expand, logDetails);
+        return deleteJSONEntity(ImageFile.class, imageFactory, id, expand, logDetails);
     }
 
     @Override
@@ -1812,11 +1637,9 @@ public class RESTv1 extends BaseRESTv1 implements RESTBaseInterfaceV1, RESTInter
         if (ids == null) throw new BadRequestException("The ids parameter can not be null");
 
         final Set<String> dbEntityIds = ids.getMatrixParameters().keySet();
-        final ImageV1Factory factory = new ImageV1Factory();
         final RESTLogDetailsV1 logDetails = generateLogDetails(message, flag, userId);
-
-        return deleteJSONEntities(RESTImageCollectionV1.class, ImageFile.class, factory, dbEntityIds, RESTv1Constants.IMAGES_EXPANSION_NAME,
-                expand, logDetails);
+        return deleteJSONEntities(RESTImageCollectionV1.class, ImageFile.class, imageFactory, dbEntityIds,
+                RESTv1Constants.IMAGES_EXPANSION_NAME, expand, logDetails);
     }
 
     /* RAW FUNCTIONS */
@@ -1824,8 +1647,7 @@ public class RESTv1 extends BaseRESTv1 implements RESTBaseInterfaceV1, RESTInter
     public Response getRAWImage(final Integer id, final String locale) {
         if (id == null) throw new BadRequestException("The id parameter can not be null");
 
-        final EntityManager entityManager = getEntityManager();
-        final ImageFile entity = getEntity(entityManager, ImageFile.class, id);
+        final ImageFile entity = getEntity(ImageFile.class, id);
         final String fixedLocale = locale == null ? CommonConstants.DEFAULT_LOCALE : locale;
 
         /* Try and find the locale specified first */
@@ -1850,8 +1672,7 @@ public class RESTv1 extends BaseRESTv1 implements RESTBaseInterfaceV1, RESTInter
         if (id == null) throw new BadRequestException("The id parameter can not be null");
         if (revision == null) throw new BadRequestException("The revision parameter can not be null");
 
-        final EntityManager entityManager = getEntityManager();
-        final ImageFile entity = getEntity(entityManager, ImageFile.class, id, revision);
+        final ImageFile entity = getEntity(ImageFile.class, id, revision);
         final String fixedLocale = locale == null ? CommonConstants.DEFAULT_LOCALE : locale;
 
         /* Try and find the locale specified first */
@@ -1875,8 +1696,7 @@ public class RESTv1 extends BaseRESTv1 implements RESTBaseInterfaceV1, RESTInter
     public Response getRAWImageThumbnail(final Integer id, final String locale) {
         if (id == null) throw new BadRequestException("The id parameter can not be null");
 
-        final EntityManager entityManager = getEntityManager();
-        final ImageFile entity = getEntity(entityManager, ImageFile.class, id);
+        final ImageFile entity = getEntity(ImageFile.class, id);
         final String fixedLocale = locale == null ? CommonConstants.DEFAULT_LOCALE : locale;
 
         /* Try and find the locale specified first */
@@ -1945,27 +1765,26 @@ public class RESTv1 extends BaseRESTv1 implements RESTBaseInterfaceV1, RESTInter
     /* JSON FUNCTIONS */
     @Override
     public RESTTopicCollectionV1 getJSONTopics(final String expand) {
-        return getJSONResources(RESTTopicCollectionV1.class, Topic.class, new TopicV1Factory(), RESTv1Constants.TOPICS_EXPANSION_NAME,
-                expand);
+        return getJSONResources(RESTTopicCollectionV1.class, Topic.class, topicFactory, RESTv1Constants.TOPICS_EXPANSION_NAME, expand);
     }
 
     @Override
     public RESTTopicCollectionV1 getJSONTopicsWithQuery(PathSegment query, final String expand) {
         return getJSONResourcesFromQuery(RESTTopicCollectionV1.class, query.getMatrixParameters(), TopicFilterQueryBuilder.class,
-                new TopicFieldFilter(), new TopicV1Factory(), RESTv1Constants.TOPICS_EXPANSION_NAME, expand);
+                new TopicFieldFilter(), topicFactory, RESTv1Constants.TOPICS_EXPANSION_NAME, expand);
     }
 
     @Override
     public Feed getATOMTopicsWithQuery(PathSegment query, final String expand) {
         final RESTTopicCollectionV1 topics = getJSONTopicsWithQuery(query, expand);
-        return this.convertTopicsIntoFeed(topics, "Topic Query (" + topics.getSize() + " items)");
+        return convertTopicsIntoFeed(topics, "Topic Query (" + topics.getSize() + " items)");
     }
 
     @Override
     public RESTTopicV1 getJSONTopic(final Integer id, final String expand) {
         assert id != null : "The id parameter can not be null";
 
-        return getJSONResource(Topic.class, new TopicV1Factory(), id, expand);
+        return getJSONResource(Topic.class, topicFactory, id, expand);
     }
 
     @Override
@@ -1973,34 +1792,28 @@ public class RESTv1 extends BaseRESTv1 implements RESTBaseInterfaceV1, RESTInter
         assert id != null : "The id parameter can not be null";
         assert revision != null : "The revision parameter can not be null";
 
-        return getJSONResource(Topic.class, new TopicV1Factory(), id, revision, expand);
+        return getJSONResource(Topic.class, topicFactory, id, revision, expand);
     }
 
     @Override
     public RESTTopicV1 updateJSONTopic(final String expand, final RESTTopicV1 dataObject, final String message, final Integer flag,
             final String userId) {
         if (dataObject == null) throw new BadRequestException("The dataObject parameter can not be null");
-
         if (dataObject.getId() == null) throw new BadRequestException("The dataObject.getId() parameter can not be null");
 
-        final TopicV1Factory factory = new TopicV1Factory();
         final RESTLogDetailsV1 logDetails = generateLogDetails(message, flag, userId);
-
-        return updateJSONEntity(Topic.class, dataObject, factory, expand, logDetails);
+        return updateJSONEntity(Topic.class, dataObject, topicFactory, expand, logDetails);
     }
 
     @Override
     public RESTTopicCollectionV1 updateJSONTopics(final String expand, final RESTTopicCollectionV1 dataObjects, final String message,
             final Integer flag, final String userId) {
         if (dataObjects == null) throw new BadRequestException("The dataObjects parameter can not be null");
-
         if (dataObjects.getItems() == null) throw new BadRequestException("The dataObjects.getItems() parameter can not be null");
 
-        final TopicV1Factory factory = new TopicV1Factory();
         final RESTLogDetailsV1 logDetails = generateLogDetails(message, flag, userId);
-
-        return updateJSONEntities(RESTTopicCollectionV1.class, Topic.class, dataObjects, factory, RESTv1Constants.TOPICS_EXPANSION_NAME,
-                expand, logDetails);
+        return updateJSONEntities(RESTTopicCollectionV1.class, Topic.class, dataObjects, topicFactory,
+                RESTv1Constants.TOPICS_EXPANSION_NAME, expand, logDetails);
     }
 
     @Override
@@ -2008,24 +1821,19 @@ public class RESTv1 extends BaseRESTv1 implements RESTBaseInterfaceV1, RESTInter
             final String userId) {
         if (dataObject == null) throw new BadRequestException("The dataObject parameter can not be null");
 
-        final TopicV1Factory factory = new TopicV1Factory();
         final RESTLogDetailsV1 logDetails = generateLogDetails(message, flag, userId);
-
-        return createJSONEntity(Topic.class, dataObject, factory, expand, logDetails);
+        return createJSONEntity(Topic.class, dataObject, topicFactory, expand, logDetails);
     }
 
     @Override
     public RESTTopicCollectionV1 createJSONTopics(final String expand, final RESTTopicCollectionV1 dataObjects, final String message,
             final Integer flag, final String userId) {
         if (dataObjects == null) throw new BadRequestException("The dataObjects parameter can not be null");
-
         if (dataObjects.getItems() == null) throw new BadRequestException("The dataObjects.getItems() parameter can not be null");
 
-        final TopicV1Factory factory = new TopicV1Factory();
         final RESTLogDetailsV1 logDetails = generateLogDetails(message, flag, userId);
-
-        return createJSONEntities(RESTTopicCollectionV1.class, Topic.class, dataObjects, factory, RESTv1Constants.TOPICS_EXPANSION_NAME,
-                expand, logDetails);
+        return createJSONEntities(RESTTopicCollectionV1.class, Topic.class, dataObjects, topicFactory,
+                RESTv1Constants.TOPICS_EXPANSION_NAME, expand, logDetails);
     }
 
     @Override
@@ -2033,10 +1841,8 @@ public class RESTv1 extends BaseRESTv1 implements RESTBaseInterfaceV1, RESTInter
             final String expand) {
         if (id == null) throw new BadRequestException("The id parameter can not be null");
 
-        final TopicV1Factory factory = new TopicV1Factory();
         final RESTLogDetailsV1 logDetails = generateLogDetails(message, flag, userId);
-
-        return deleteJSONEntity(Topic.class, factory, id, expand, logDetails);
+        return deleteJSONEntity(Topic.class, topicFactory, id, expand, logDetails);
     }
 
     @Override
@@ -2045,41 +1851,37 @@ public class RESTv1 extends BaseRESTv1 implements RESTBaseInterfaceV1, RESTInter
         if (ids == null) throw new BadRequestException("The ids parameter can not be null");
 
         final Set<String> dbEntityIds = ids.getMatrixParameters().keySet();
-
-        final TopicV1Factory factory = new TopicV1Factory();
         final RESTLogDetailsV1 logDetails = generateLogDetails(message, flag, userId);
-
-        return deleteJSONEntities(RESTTopicCollectionV1.class, Topic.class, factory, dbEntityIds, RESTv1Constants.TOPICS_EXPANSION_NAME,
-                expand, logDetails);
+        return deleteJSONEntities(RESTTopicCollectionV1.class, Topic.class, topicFactory, dbEntityIds,
+                RESTv1Constants.TOPICS_EXPANSION_NAME, expand, logDetails);
     }
 
     // XML TOPIC FUNCTIONS
 
     @Override
     public RESTTopicCollectionV1 getXMLTopics(final String expand) {
-        return getXMLResources(RESTTopicCollectionV1.class, Topic.class, new TopicV1Factory(), RESTv1Constants.TOPICS_EXPANSION_NAME,
-                expand);
+        return getXMLResources(RESTTopicCollectionV1.class, Topic.class, topicFactory, RESTv1Constants.TOPICS_EXPANSION_NAME, expand);
     }
 
     @Override
     public RESTTopicV1 getXMLTopic(final Integer id) {
         assert id != null : "The id parameter can not be null";
 
-        return getXMLResource(Topic.class, new TopicV1Factory(), id, null);
+        return getXMLResource(Topic.class, topicFactory, id, null);
     }
 
     @Override
     public RESTTopicV1 getXMLTopicRevision(final Integer id, final Integer revision) {
         assert id != null : "The id parameter can not be null";
 
-        return getXMLResource(Topic.class, new TopicV1Factory(), id, revision, null);
+        return getXMLResource(Topic.class, topicFactory, id, revision, null);
     }
 
     @Override
     public String getXMLTopicXML(final Integer id) {
         assert id != null : "The id parameter can not be null";
 
-        final RESTTopicV1 entity = getXMLResource(Topic.class, new TopicV1Factory(), id, null);
+        final RESTTopicV1 entity = getXMLResource(Topic.class, topicFactory, id, null);
         if (entity.getXmlDoctype() != null) {
             if (entity.getXmlDoctype() == RESTXMLDoctype.DOCBOOK_45) {
                 return DocBookUtilities.addDocbook45XMLDoctype(entity.getXml(), null, "section");
@@ -2096,7 +1898,6 @@ public class RESTv1 extends BaseRESTv1 implements RESTBaseInterfaceV1, RESTInter
         if (xml == null) throw new BadRequestException("The xml parameter can not be null");
         if (id == null) throw new BadRequestException("The id parameter can not be null");
 
-        final TopicV1Factory factory = new TopicV1Factory();
         final RESTLogDetailsV1 logDetails = generateLogDetails(message, flag, userId);
 
         // Create the topic data object that will be saved
@@ -2104,7 +1905,7 @@ public class RESTv1 extends BaseRESTv1 implements RESTBaseInterfaceV1, RESTInter
         topic.setId(id);
         topic.explicitSetXml(xml);
 
-        RESTTopicV1 updatedTopic = updateJSONEntity(Topic.class, topic, factory, "", logDetails);
+        RESTTopicV1 updatedTopic = updateJSONEntity(Topic.class, topic, topicFactory, "", logDetails);
         return updatedTopic == null ? null : updatedTopic.getXml();
     }
 
@@ -2113,7 +1914,7 @@ public class RESTv1 extends BaseRESTv1 implements RESTBaseInterfaceV1, RESTInter
         assert id != null : "The id parameter can not be null";
         assert revision != null : "The revision parameter can not be null";
 
-        final RESTTopicV1 entity = getXMLResource(Topic.class, new TopicV1Factory(), id, revision, null);
+        final RESTTopicV1 entity = getXMLResource(Topic.class, topicFactory, id, revision, null);
         if (entity.getXmlDoctype() != null) {
             if (entity.getXmlDoctype() == RESTXMLDoctype.DOCBOOK_45) {
                 return DocBookUtilities.addDocbook45XMLDoctype(entity.getXml(), null, "section");
@@ -2130,14 +1931,14 @@ public class RESTv1 extends BaseRESTv1 implements RESTBaseInterfaceV1, RESTInter
         assert id != null : "The id parameter can not be null";
         assert containerName != null : "The containerName parameter can not be null";
 
-        return ComponentTopicV1.returnXMLWithNewContainer(getXMLResource(Topic.class, new TopicV1Factory(), id, null), containerName);
+        return ComponentTopicV1.returnXMLWithNewContainer(getXMLResource(Topic.class, topicFactory, id, null), containerName);
     }
 
     @Override
     public String getXMLTopicXMLNoContainer(final Integer id, final Boolean includeTitle) {
         assert id != null : "The id parameter can not be null";
 
-        final String retValue = ComponentTopicV1.returnXMLWithNoContainer(getXMLResource(Topic.class, new TopicV1Factory(), id, null),
+        final String retValue = ComponentTopicV1.returnXMLWithNoContainer(getXMLResource(Topic.class, topicFactory, id, null),
                 includeTitle);
         return retValue;
     }
@@ -2148,22 +1949,21 @@ public class RESTv1 extends BaseRESTv1 implements RESTBaseInterfaceV1, RESTInter
     public String getHTMLTopicHTML(final Integer id) {
         assert id != null : "The id parameter can not be null";
 
-        return getXMLResource(Topic.class, new TopicV1Factory(), id, null).getHtml();
+        return getXMLResource(Topic.class, topicFactory, id, null).getHtml();
     }
 
     @Override
     public String getHTMLTopicRevisionHTML(final Integer id, final Integer revision) {
         assert id != null : "The id parameter can not be null";
 
-        return getXMLResource(Topic.class, new TopicV1Factory(), id, revision, null).getHtml();
+        return getXMLResource(Topic.class, topicFactory, id, revision, null).getHtml();
     }
 
     // CSV TOPIC FUNCTIONS
 
     @Override
     public String getCSVTopics() {
-        final EntityManager entityManager = getEntityManager();
-        final List<Topic> topicList = getEntities(entityManager, Topic.class);
+        final List<Topic> topicList = getAllEntities(Topic.class);
 
         response.getOutputHeaders().putSingle("Content-Disposition", "filename=Topics.csv");
 
@@ -2172,9 +1972,9 @@ public class RESTv1 extends BaseRESTv1 implements RESTBaseInterfaceV1, RESTInter
 
     @Override
     public String getCSVTopicsWithQuery(@PathParam("query") PathSegment query) {
-        final EntityManager entityManager = getEntityManager();
-        final List<Topic> topicList = getEntitiesFromQuery(entityManager, query.getMatrixParameters(),
+        final CriteriaQuery<Topic> criteriaQuery = getEntitiesFromQuery(query.getMatrixParameters(),
                 new TopicFilterQueryBuilder(entityManager), new TopicFieldFilter());
+        final List<Topic> topicList = entityManager.createQuery(criteriaQuery).getResultList();
 
         response.getOutputHeaders().putSingle("Content-Disposition", "filename=Topics.csv");
 
@@ -2185,8 +1985,7 @@ public class RESTv1 extends BaseRESTv1 implements RESTBaseInterfaceV1, RESTInter
 
     @Override
     public byte[] getZIPTopics() {
-        final EntityManager entityManager = getEntityManager();
-        final List<Topic> topicList = getEntities(entityManager, Topic.class);
+        final List<Topic> topicList = getAllEntities(Topic.class);
 
         response.getOutputHeaders().putSingle("Content-Disposition", "filename=XML.zip");
 
@@ -2195,9 +1994,9 @@ public class RESTv1 extends BaseRESTv1 implements RESTBaseInterfaceV1, RESTInter
 
     @Override
     public byte[] getZIPTopicsWithQuery(PathSegment query) {
-        final EntityManager entityManager = getEntityManager();
-        final List<Topic> topicList = getEntitiesFromQuery(entityManager, query.getMatrixParameters(),
+        final CriteriaQuery<Topic> criteriaQuery = getEntitiesFromQuery(query.getMatrixParameters(),
                 new TopicFilterQueryBuilder(entityManager), new TopicFieldFilter());
+        final List<Topic> topicList = entityManager.createQuery(criteriaQuery).getResultList();
 
         response.getOutputHeaders().putSingle("Content-Disposition", "filename=XML.zip");
 
@@ -2255,59 +2054,47 @@ public class RESTv1 extends BaseRESTv1 implements RESTBaseInterfaceV1, RESTInter
     public RESTFilterV1 getJSONFilter(final Integer id, final String expand) {
         if (id == null) throw new BadRequestException("The id parameter can not be null");
 
-        return getJSONResource(Filter.class, new FilterV1Factory(), id, expand);
+        return getJSONResource(Filter.class, filterFactory, id, expand);
     }
 
     @Override
     public RESTFilterV1 getJSONFilterRevision(final Integer id, final Integer revision, final String expand) {
         if (id == null) throw new BadRequestException("The id parameter can not be null");
-
         if (revision == null) throw new BadRequestException("The revision parameter can not be null");
 
-        return getJSONResource(Filter.class, new FilterV1Factory(), id, revision, expand);
+        return getJSONResource(Filter.class, filterFactory, id, revision, expand);
     }
 
     @Override
     public RESTFilterCollectionV1 getJSONFilters(final String expand) {
-        /*
-         * Construct a collection with the given expansion name. The user will have to expand the collection to get the details
-         * of the items in it.
-         */
-        return getJSONResources(RESTFilterCollectionV1.class, Filter.class, new FilterV1Factory(), RESTv1Constants.FILTERS_EXPANSION_NAME,
-                expand);
+        return getJSONResources(RESTFilterCollectionV1.class, Filter.class, filterFactory, RESTv1Constants.FILTERS_EXPANSION_NAME, expand);
     }
 
     @Override
     public RESTFilterCollectionV1 getJSONFiltersWithQuery(final PathSegment query, final String expand) {
         return getJSONResourcesFromQuery(RESTFilterCollectionV1.class, query.getMatrixParameters(), FilterFilterQueryBuilder.class,
-                new FilterFieldFilter(), new FilterV1Factory(), RESTv1Constants.FILTERS_EXPANSION_NAME, expand);
+                new FilterFieldFilter(), filterFactory, RESTv1Constants.FILTERS_EXPANSION_NAME, expand);
     }
 
     @Override
     public RESTFilterV1 updateJSONFilter(final String expand, final RESTFilterV1 dataObject, final String message, final Integer flag,
             final String userId) {
         if (dataObject == null) throw new BadRequestException("The dataObject parameter can not be null");
-
         if (dataObject.getId() == null) throw new BadRequestException("The dataObject.getId() parameter can not be null");
 
-        final FilterV1Factory factory = new FilterV1Factory();
         final RESTLogDetailsV1 logDetails = generateLogDetails(message, flag, userId);
-
-        return updateJSONEntity(Filter.class, dataObject, factory, expand, logDetails);
+        return updateJSONEntity(Filter.class, dataObject, filterFactory, expand, logDetails);
     }
 
     @Override
     public RESTFilterCollectionV1 updateJSONFilters(final String expand, final RESTFilterCollectionV1 dataObjects, final String message,
             final Integer flag, final String userId) {
         if (dataObjects == null) throw new BadRequestException("The dataObjects parameter can not be null");
-
         if (dataObjects.getItems() == null) throw new BadRequestException("The dataObjects.getItems() parameter can not be null");
 
-        final FilterV1Factory factory = new FilterV1Factory();
         final RESTLogDetailsV1 logDetails = generateLogDetails(message, flag, userId);
-
-        return updateJSONEntities(RESTFilterCollectionV1.class, Filter.class, dataObjects, factory, RESTv1Constants.FILTERS_EXPANSION_NAME,
-                expand, logDetails);
+        return updateJSONEntities(RESTFilterCollectionV1.class, Filter.class, dataObjects, filterFactory,
+                RESTv1Constants.FILTERS_EXPANSION_NAME, expand, logDetails);
     }
 
     @Override
@@ -2315,24 +2102,19 @@ public class RESTv1 extends BaseRESTv1 implements RESTBaseInterfaceV1, RESTInter
             final String userId) {
         if (dataObject == null) throw new BadRequestException("The dataObject parameter can not be null");
 
-        final FilterV1Factory factory = new FilterV1Factory();
         final RESTLogDetailsV1 logDetails = generateLogDetails(message, flag, userId);
-
-        return createJSONEntity(Filter.class, dataObject, factory, expand, logDetails);
+        return createJSONEntity(Filter.class, dataObject, filterFactory, expand, logDetails);
     }
 
     @Override
     public RESTFilterCollectionV1 createJSONFilters(final String expand, final RESTFilterCollectionV1 dataObjects, final String message,
             final Integer flag, final String userId) {
         if (dataObjects == null) throw new BadRequestException("The dataObjects parameter can not be null");
-
         if (dataObjects.getItems() == null) throw new BadRequestException("The dataObjects.getItems() parameter can not be null");
 
-        final FilterV1Factory factory = new FilterV1Factory();
         final RESTLogDetailsV1 logDetails = generateLogDetails(message, flag, userId);
-
-        return createJSONEntities(RESTFilterCollectionV1.class, Filter.class, dataObjects, factory, RESTv1Constants.FILTERS_EXPANSION_NAME,
-                expand, logDetails);
+        return createJSONEntities(RESTFilterCollectionV1.class, Filter.class, dataObjects, filterFactory,
+                RESTv1Constants.FILTERS_EXPANSION_NAME, expand, logDetails);
     }
 
     @Override
@@ -2340,10 +2122,8 @@ public class RESTv1 extends BaseRESTv1 implements RESTBaseInterfaceV1, RESTInter
             final String expand) {
         if (id == null) throw new BadRequestException("The id parameter can not be null");
 
-        final FilterV1Factory factory = new FilterV1Factory();
         final RESTLogDetailsV1 logDetails = generateLogDetails(message, flag, userId);
-
-        return deleteJSONEntity(Filter.class, factory, id, expand, logDetails);
+        return deleteJSONEntity(Filter.class, filterFactory, id, expand, logDetails);
     }
 
     @Override
@@ -2352,10 +2132,8 @@ public class RESTv1 extends BaseRESTv1 implements RESTBaseInterfaceV1, RESTInter
         if (ids == null) throw new BadRequestException("The ids parameter can not be null");
 
         final Set<String> dbEntityIds = ids.getMatrixParameters().keySet();
-        final FilterV1Factory factory = new FilterV1Factory();
         final RESTLogDetailsV1 logDetails = generateLogDetails(message, flag, userId);
-
-        return deleteJSONEntities(RESTFilterCollectionV1.class, Filter.class, factory, dbEntityIds, RESTv1Constants.FILTERS_EXPANSION_NAME,
+        return deleteJSONEntities(RESTFilterCollectionV1.class, Filter.class, filterFactory, dbEntityIds, RESTv1Constants.FILTERS_EXPANSION_NAME,
                 expand, logDetails);
     }
 
@@ -2410,7 +2188,7 @@ public class RESTv1 extends BaseRESTv1 implements RESTBaseInterfaceV1, RESTInter
     public RESTIntegerConstantV1 getJSONIntegerConstant(final Integer id, final String expand) {
         if (id == null) throw new BadRequestException("The id parameter can not be null");
 
-        return getJSONResource(IntegerConstants.class, new IntegerConstantV1Factory(), id, expand);
+        return getJSONResource(IntegerConstants.class, integerConstantFactory, id, expand);
     }
 
     @Override
@@ -2418,19 +2196,19 @@ public class RESTv1 extends BaseRESTv1 implements RESTBaseInterfaceV1, RESTInter
         if (id == null) throw new BadRequestException("The id parameter can not be null");
         if (revision == null) throw new BadRequestException("The revision parameter can not be null");
 
-        return getJSONResource(IntegerConstants.class, new IntegerConstantV1Factory(), id, revision, expand);
+        return getJSONResource(IntegerConstants.class, integerConstantFactory, id, revision, expand);
     }
 
     @Override
     public RESTIntegerConstantCollectionV1 getJSONIntegerConstants(final String expand) {
-        return getJSONResources(RESTIntegerConstantCollectionV1.class, IntegerConstants.class, new IntegerConstantV1Factory(),
+        return getJSONResources(RESTIntegerConstantCollectionV1.class, IntegerConstants.class, integerConstantFactory,
                 RESTv1Constants.INTEGERCONSTANTS_EXPANSION_NAME, expand);
     }
 
     @Override
     public RESTIntegerConstantCollectionV1 getJSONIntegerConstantsWithQuery(final PathSegment query, final String expand) {
         return getJSONResourcesFromQuery(RESTIntegerConstantCollectionV1.class, query.getMatrixParameters(),
-                IntegerConstantFilterQueryBuilder.class, new IntegerConstantFieldFilter(), new IntegerConstantV1Factory(),
+                IntegerConstantFilterQueryBuilder.class, new IntegerConstantFieldFilter(), integerConstantFactory,
                 RESTv1Constants.INTEGERCONSTANTS_EXPANSION_NAME, expand);
     }
 
@@ -2438,26 +2216,20 @@ public class RESTv1 extends BaseRESTv1 implements RESTBaseInterfaceV1, RESTInter
     public RESTIntegerConstantV1 updateJSONIntegerConstant(final String expand, final RESTIntegerConstantV1 dataObject,
             final String message, final Integer flag, final String userId) {
         if (dataObject == null) throw new BadRequestException("The dataObject parameter can not be null");
-
         if (dataObject.getId() == null) throw new BadRequestException("The dataObject.getId() parameter can not be null");
 
-        final IntegerConstantV1Factory factory = new IntegerConstantV1Factory();
         final RESTLogDetailsV1 logDetails = generateLogDetails(message, flag, userId);
-
-        return updateJSONEntity(IntegerConstants.class, dataObject, factory, expand, logDetails);
+        return updateJSONEntity(IntegerConstants.class, dataObject, integerConstantFactory, expand, logDetails);
     }
 
     @Override
     public RESTIntegerConstantCollectionV1 updateJSONIntegerConstants(final String expand,
             final RESTIntegerConstantCollectionV1 dataObjects, final String message, final Integer flag, final String userId) {
         if (dataObjects == null) throw new BadRequestException("The dataObjects parameter can not be null");
-
         if (dataObjects.getItems() == null) throw new BadRequestException("The dataObjects.getItems() parameter can not be null");
 
-        final IntegerConstantV1Factory factory = new IntegerConstantV1Factory();
         final RESTLogDetailsV1 logDetails = generateLogDetails(message, flag, userId);
-
-        return updateJSONEntities(RESTIntegerConstantCollectionV1.class, IntegerConstants.class, dataObjects, factory,
+        return updateJSONEntities(RESTIntegerConstantCollectionV1.class, IntegerConstants.class, dataObjects, integerConstantFactory,
                 RESTv1Constants.INTEGERCONSTANTS_EXPANSION_NAME, expand, logDetails);
     }
 
@@ -2466,23 +2238,18 @@ public class RESTv1 extends BaseRESTv1 implements RESTBaseInterfaceV1, RESTInter
             final String message, final Integer flag, final String userId) {
         if (dataObject == null) throw new BadRequestException("The dataObject parameter can not be null");
 
-        final IntegerConstantV1Factory factory = new IntegerConstantV1Factory();
         final RESTLogDetailsV1 logDetails = generateLogDetails(message, flag, userId);
-
-        return createJSONEntity(IntegerConstants.class, dataObject, factory, expand, logDetails);
+        return createJSONEntity(IntegerConstants.class, dataObject, integerConstantFactory, expand, logDetails);
     }
 
     @Override
     public RESTIntegerConstantCollectionV1 createJSONIntegerConstants(final String expand,
             final RESTIntegerConstantCollectionV1 dataObjects, final String message, final Integer flag, final String userId) {
         if (dataObjects == null) throw new BadRequestException("The dataObjects parameter can not be null");
-
         if (dataObjects.getItems() == null) throw new BadRequestException("The dataObjects.getItems() parameter can not be null");
 
-        final IntegerConstantV1Factory factory = new IntegerConstantV1Factory();
         final RESTLogDetailsV1 logDetails = generateLogDetails(message, flag, userId);
-
-        return createJSONEntities(RESTIntegerConstantCollectionV1.class, IntegerConstants.class, dataObjects, factory,
+        return createJSONEntities(RESTIntegerConstantCollectionV1.class, IntegerConstants.class, dataObjects, integerConstantFactory,
                 RESTv1Constants.INTEGERCONSTANTS_EXPANSION_NAME, expand, logDetails);
     }
 
@@ -2491,10 +2258,8 @@ public class RESTv1 extends BaseRESTv1 implements RESTBaseInterfaceV1, RESTInter
             final String expand) {
         if (id == null) throw new BadRequestException("The id parameter can not be null");
 
-        final IntegerConstantV1Factory factory = new IntegerConstantV1Factory();
         final RESTLogDetailsV1 logDetails = generateLogDetails(message, flag, userId);
-
-        return deleteJSONEntity(IntegerConstants.class, factory, id, expand, logDetails);
+        return deleteJSONEntity(IntegerConstants.class, integerConstantFactory, id, expand, logDetails);
     }
 
     @Override
@@ -2503,10 +2268,8 @@ public class RESTv1 extends BaseRESTv1 implements RESTBaseInterfaceV1, RESTInter
         if (ids == null) throw new BadRequestException("The ids parameter can not be null");
 
         final Set<String> dbEntityIds = ids.getMatrixParameters().keySet();
-        final IntegerConstantV1Factory factory = new IntegerConstantV1Factory();
         final RESTLogDetailsV1 logDetails = generateLogDetails(message, flag, userId);
-
-        return deleteJSONEntities(RESTIntegerConstantCollectionV1.class, IntegerConstants.class, factory, dbEntityIds,
+        return deleteJSONEntities(RESTIntegerConstantCollectionV1.class, IntegerConstants.class, integerConstantFactory, dbEntityIds,
                 RESTv1Constants.INTEGERCONSTANTS_EXPANSION_NAME, expand, logDetails);
     }
 }

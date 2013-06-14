@@ -1,6 +1,7 @@
 package org.jboss.pressgang.ccms.server.rest.v1;
 
-import javax.persistence.EntityManager;
+import javax.enterprise.context.ApplicationScoped;
+import javax.inject.Inject;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -22,15 +23,15 @@ import org.jboss.pressgang.ccms.server.rest.v1.base.RESTDataObjectFactory;
 import org.jboss.pressgang.ccms.server.utils.EnversUtilities;
 import org.jboss.resteasy.spi.BadRequestException;
 
+@ApplicationScoped
 public class PropertyTagV1Factory extends RESTDataObjectFactory<RESTPropertyTagV1, PropertyTag, RESTPropertyTagCollectionV1,
         RESTPropertyTagCollectionItemV1> {
-    public PropertyTagV1Factory() {
-        super(PropertyTag.class);
-    }
+    @Inject
+    protected PropertyCategoryInPropertyTagV1Factory propertyCategoryInPropertyTagFactory;
 
     @Override
     public RESTPropertyTagV1 createRESTEntityFromDBEntityInternal(final PropertyTag entity, final String baseUrl, final String dataType,
-            final ExpandDataTrunk expand, final Number revision, final boolean expandParentReferences, final EntityManager entityManager) {
+            final ExpandDataTrunk expand, final Number revision, final boolean expandParentReferences) {
         assert entity != null : "Parameter entity can not be null";
         assert baseUrl != null : "Parameter baseUrl can not be null";
 
@@ -51,16 +52,15 @@ public class PropertyTagV1Factory extends RESTDataObjectFactory<RESTPropertyTagV
 
         // REVISIONS
         if (revision == null && expand != null && expand.contains(RESTBaseEntityV1.REVISIONS_NAME)) {
-            retValue.setRevisions(
-                    RESTDataObjectCollectionFactory.create(RESTPropertyTagCollectionV1.class, new PropertyTagV1Factory(), entity,
-                            EnversUtilities.getRevisions(entityManager, entity), RESTBaseEntityV1.REVISIONS_NAME, dataType, expand, baseUrl,
-                            entityManager));
+            retValue.setRevisions(RESTDataObjectCollectionFactory.create(RESTPropertyTagCollectionV1.class, this, entity,
+                    EnversUtilities.getRevisions(entityManager, entity), RESTBaseEntityV1.REVISIONS_NAME, dataType, expand, baseUrl,
+                    entityManager));
         }
 
         // PROPERTY CATEGORIES
         if (expand != null && expand.contains(RESTPropertyTagV1.PROPERTY_CATEGORIES_NAME)) {
             retValue.setPropertyCategories(RESTDataObjectCollectionFactory.create(RESTPropertyCategoryInPropertyTagCollectionV1.class,
-                    new PropertyCategoryInPropertyTagV1Factory(), entity.getPropertyTagToPropertyTagCategoriesList(),
+                    propertyCategoryInPropertyTagFactory, entity.getPropertyTagToPropertyTagCategoriesList(),
                     RESTPropertyTagV1.PROPERTY_CATEGORIES_NAME, dataType, expand, baseUrl, revision, false, entityManager));
         }
 
@@ -70,8 +70,7 @@ public class PropertyTagV1Factory extends RESTDataObjectFactory<RESTPropertyTagV
     }
 
     @Override
-    public void syncDBEntityWithRESTEntity(final EntityManager entityManager, final PropertyTag entity,
-            final RESTPropertyTagV1 dataObject) {
+    public void syncDBEntityWithRESTEntity(final PropertyTag entity, final RESTPropertyTagV1 dataObject) {
         if (dataObject.hasParameterSet(RESTPropertyTagV1.DESCRIPTION_NAME)) entity.setPropertyTagDescription(dataObject.getDescription());
         if (dataObject.hasParameterSet(RESTPropertyTagV1.CANBENULL_NAME)) entity.setPropertyTagCanBeNull(dataObject.getCanBeNull());
         if (dataObject.hasParameterSet(RESTPropertyTagV1.NAME_NAME)) entity.setPropertyTagName(dataObject.getName());
@@ -107,9 +106,14 @@ public class PropertyTagV1Factory extends RESTDataObjectFactory<RESTPropertyTagV
                             "No PropertyTagToPropertyTagCategory entity was found with the primary key " + restEntity.getRelationshipId()
                                     + " for PropertyTag " + entity.getId());
 
-                    new PropertyCategoryInPropertyTagV1Factory().syncDBEntityWithRESTEntity(entityManager, dbEntity, restEntity);
+                    propertyCategoryInPropertyTagFactory.syncDBEntityWithRESTEntity(dbEntity, restEntity);
                 }
             }
         }
+    }
+
+    @Override
+    protected Class<PropertyTag> getDatabaseClass() {
+        return PropertyTag.class;
     }
 }

@@ -1,13 +1,11 @@
 package org.jboss.pressgang.ccms.server.rest.v1.base;
 
+import javax.annotation.Resource;
 import javax.enterprise.context.RequestScoped;
 import javax.inject.Inject;
-import javax.naming.NamingException;
 import javax.persistence.EntityManager;
-import javax.persistence.EntityManagerFactory;
-import javax.persistence.FlushModeType;
+import javax.persistence.EntityNotFoundException;
 import javax.persistence.PersistenceException;
-import javax.persistence.PersistenceUnit;
 import javax.persistence.TypedQuery;
 import javax.persistence.criteria.CriteriaBuilder;
 import javax.persistence.criteria.CriteriaQuery;
@@ -54,8 +52,21 @@ import org.jboss.pressgang.ccms.rest.v1.expansion.ExpandDataTrunk;
 import org.jboss.pressgang.ccms.server.ejb.EnversLoggingBean;
 import org.jboss.pressgang.ccms.server.rest.BaseREST;
 import org.jboss.pressgang.ccms.server.rest.DatabaseOperation;
+import org.jboss.pressgang.ccms.server.rest.v1.BlobConstantV1Factory;
+import org.jboss.pressgang.ccms.server.rest.v1.CategoryV1Factory;
+import org.jboss.pressgang.ccms.server.rest.v1.FilterV1Factory;
+import org.jboss.pressgang.ccms.server.rest.v1.ImageV1Factory;
+import org.jboss.pressgang.ccms.server.rest.v1.IntegerConstantV1Factory;
+import org.jboss.pressgang.ccms.server.rest.v1.ProjectV1Factory;
+import org.jboss.pressgang.ccms.server.rest.v1.PropertyCategoryV1Factory;
+import org.jboss.pressgang.ccms.server.rest.v1.PropertyTagV1Factory;
+import org.jboss.pressgang.ccms.server.rest.v1.RoleV1Factory;
+import org.jboss.pressgang.ccms.server.rest.v1.StringConstantV1Factory;
+import org.jboss.pressgang.ccms.server.rest.v1.TagV1Factory;
+import org.jboss.pressgang.ccms.server.rest.v1.TopicV1Factory;
+import org.jboss.pressgang.ccms.server.rest.v1.TranslatedTopicV1Factory;
+import org.jboss.pressgang.ccms.server.rest.v1.UserV1Factory;
 import org.jboss.pressgang.ccms.server.utils.EntityUtilities;
-import org.jboss.pressgang.ccms.server.utils.JNDIUtilities;
 import org.jboss.resteasy.plugins.providers.atom.Content;
 import org.jboss.resteasy.plugins.providers.atom.Entry;
 import org.jboss.resteasy.plugins.providers.atom.Feed;
@@ -88,10 +99,46 @@ public class BaseRESTv1 extends BaseREST {
     @Inject
     private EnversLoggingBean enversLoggingBean;
     /**
-     * The Factory used to create EntityManagers
+     * The JBoss Transaction Manager
      */
-    @PersistenceUnit
-    private EntityManagerFactory entityManagerFactory;
+    @Resource(lookup = "java:jboss/TransactionManager")
+    protected TransactionManager transactionManager;
+    /**
+     * The EntityManager to use for this request
+     */
+    @Inject
+    protected EntityManager entityManager;
+
+    /* START ENTITY FACTORIES */
+    @Inject
+    protected BlobConstantV1Factory blobConstantFactory;
+    @Inject
+    protected CategoryV1Factory categoryFactory;
+    @Inject
+    protected FilterV1Factory filterFactory;
+    @Inject
+    protected ImageV1Factory imageFactory;
+    @Inject
+    protected IntegerConstantV1Factory integerConstantFactory;
+    @Inject
+    protected ProjectV1Factory projectFactory;
+    @Inject
+    protected PropertyCategoryV1Factory propertyCategoryFactory;
+    @Inject
+    protected PropertyTagV1Factory propertyTagFactory;
+    @Inject
+    protected RoleV1Factory roleFactory;
+    @Inject
+    protected StringConstantV1Factory stringConstantFactory;
+    @Inject
+    protected TagV1Factory tagFactory;
+    @Inject
+    protected TopicV1Factory topicFactory;
+    @Inject
+    protected TranslatedTopicV1Factory translatedTopicFactory;
+    @Inject
+    protected UserV1Factory userFactory;
+    /* END ENTITY FACTORIES */
 
     /**
      * Converts a Collection of Topics into an ATOM Feed.
@@ -104,7 +151,7 @@ public class BaseRESTv1 extends BaseREST {
         try {
             final Feed feed = new Feed();
 
-            feed.setId(new URI(this.getRequestUrl()));
+            feed.setId(new URI(getRequestUrl()));
             feed.setTitle(title);
             feed.setUpdated(new Date());
 
@@ -182,14 +229,9 @@ public class BaseRESTv1 extends BaseREST {
             final Date date) {
         assert date != null : "The date parameter can not be null";
 
-        EntityManager entityManager = null;
-
         try {
             // Unmarshall the expand string into the ExpandDataTrunk object.
             final ExpandDataTrunk expandDataTrunk = unmarshallExpand(expand);
-
-            // Get an EntityManager instance
-            entityManager = getEntityManager();
 
             // Get the list of entity ids that were edited after the selected date
             final AuditReader reader = AuditReaderFactory.get(entityManager);
@@ -212,17 +254,14 @@ public class BaseRESTv1 extends BaseREST {
             final List<U> entities = jpaQuery.getResultList();
 
             // Create and initialise the Collection using the specified REST Object Factory
-            final V retValue = RESTDataObjectCollectionFactory.create(collectionClass, dataObjectFactory, entities,
-                    expandName, dataType, expandDataTrunk, getBaseUrl(), entityManager);
+            final V retValue = RESTDataObjectCollectionFactory.create(collectionClass, dataObjectFactory, entities, expandName, dataType,
+                    expandDataTrunk, getBaseUrl(), entityManager);
 
             return retValue;
         } catch (final Exception ex) {
             log.error("Probably an issue querying Envers", ex);
             throw new InternalServerErrorException("There was an error running the query");
-        } finally {
-            if (entityManager != null) entityManager.close();
         }
-
     }
 
     protected <T extends RESTBaseEntityV1<T, V, W>, U extends AuditedEntity, V extends RESTBaseCollectionV1<T, V, W>,
@@ -249,26 +288,22 @@ public class BaseRESTv1 extends BaseREST {
             final String expand, final RESTLogDetailsV1 logDetails) {
         assert id != null : "id should not be null";
 
-        TransactionManager transactionManager = null;
-        EntityManager entityManager = null;
-
         try {
             // Unmarshall the expand string into the ExpandDataTrunk object.
             final ExpandDataTrunk expandDataTrunk = unmarshallExpand(expand);
 
-            // Get the TransactionManager and start a Transaction
-            transactionManager = JNDIUtilities.lookupJBossTransactionManager();
+            // Start a Transaction
             transactionManager.begin();
 
-            // Get an EntityManager instance
-            entityManager = getEntityManager();
+            // Join the transaction we just started
+            entityManager.joinTransaction();
 
             // Store the log details into the Logging Java Bean
             setLogDetails(entityManager, logDetails);
 
             // Find the specified entity and make sure that it exists
             final U entity = entityManager.find(type, id);
-            if (entity == null) throw new BadRequestException("No entity was found with the id " + id);
+            if (entity == null) throw new NotFoundException("No entity was found with the id " + id);
 
             // Remove the entity from the persistence context
             entityManager.remove(entity);
@@ -277,11 +312,9 @@ public class BaseRESTv1 extends BaseREST {
             entityManager.flush();
             transactionManager.commit();
 
-            return factory.createRESTEntityFromDBEntity(entity, getBaseUrl(), dataType, expandDataTrunk, entityManager);
+            return factory.createRESTEntityFromDBEntity(entity, getBaseUrl(), dataType, expandDataTrunk);
         } catch (final Throwable e) {
             throw processError(transactionManager, e);
-        } finally {
-            if (entityManager != null) entityManager.close();
         }
     }
 
@@ -332,20 +365,15 @@ public class BaseRESTv1 extends BaseREST {
         assert restEntity != null : "restEntity should not be null";
         assert factory != null : "factory should not be null";
 
-        TransactionManager transactionManager = null;
-        EntityManager entityManager = null;
-
         try {
             // Unmarshall the expand string into the ExpandDataTrunk object.
             final ExpandDataTrunk expandDataTrunk = unmarshallExpand(expand);
 
-            // Get the TransactionManager and start a Transaction
-            transactionManager = JNDIUtilities.lookupJBossTransactionManager();
+            // Start a Transaction
             transactionManager.begin();
 
-            // Get an EntityManager instance
-            entityManager = getEntityManager();
-            entityManager.setFlushMode(FlushModeType.AUTO);
+            // Join the transaction we just started
+            entityManager.joinTransaction();
 
             // Store the log details into the Logging Java Bean
             setLogDetails(entityManager, logDetails);
@@ -364,11 +392,11 @@ public class BaseRESTv1 extends BaseREST {
                 if (entity == null) throw new BadRequestException("No entity was found with the primary key " + restEntity.getId());
 
                 // Sync the changes from the REST Entity to the Database.
-                factory.syncDBEntityWithRESTEntity(entityManager, entity, restEntity);
+                factory.syncDBEntityWithRESTEntity(entity, restEntity);
 
             } else if (operation == DatabaseOperation.CREATE) {
                 // Create a new Database Entity using the REST Entity.
-                entity = factory.createDBEntityFromRESTEntity(entityManager, restEntity);
+                entity = factory.createDBEntityFromRESTEntity(restEntity);
 
                 // Check that a entity was able to be successfully created.
                 if (entity == null) throw new BadRequestException("The entity could not be created");
@@ -379,11 +407,9 @@ public class BaseRESTv1 extends BaseREST {
             entityManager.flush();
             transactionManager.commit();
 
-            return factory.createRESTEntityFromDBEntity(entity, this.getBaseUrl(), dataType, expandDataTrunk, null, true, entityManager);
+            return factory.createRESTEntityFromDBEntity(entity, getBaseUrl(), dataType, expandDataTrunk, null, true);
         } catch (final Throwable e) {
             throw processError(transactionManager, e);
-        } finally {
-            if (entityManager != null) entityManager.close();
         }
     }
 
@@ -436,20 +462,15 @@ public class BaseRESTv1 extends BaseREST {
         assert ids != null : "ids should not be null";
         assert factory != null : "factory should not be null";
 
-        TransactionManager transactionManager = null;
-        EntityManager entityManager = null;
-
         try {
             // Unmarshall the expand string into the ExpandDataTrunk object.
             final ExpandDataTrunk expandDataTrunk = unmarshallExpand(expand);
 
-            // Get the TransactionManager and start a Transaction
-            transactionManager = JNDIUtilities.lookupJBossTransactionManager();
+            // Start a Transaction
             transactionManager.begin();
 
-            // Get an EntityManager instance
-            entityManager = getEntityManager();
-            entityManager.setFlushMode(FlushModeType.AUTO);
+            // Join the transaction we just started
+            entityManager.joinTransaction();
 
             // Store the log details into the Logging Java Bean
             setLogDetails(entityManager, logDetails);
@@ -480,12 +501,10 @@ public class BaseRESTv1 extends BaseREST {
             entityManager.flush();
             transactionManager.commit();
 
-            return RESTDataObjectCollectionFactory.create(collectionClass, factory, retValue, expandName, dataType,
-                    expandDataTrunk, getBaseUrl(), true, entityManager);
+            return RESTDataObjectCollectionFactory.create(collectionClass, factory, retValue, expandName, dataType, expandDataTrunk,
+                    getBaseUrl(), true, entityManager);
         } catch (final Throwable e) {
             throw processError(transactionManager, e);
-        } finally {
-            if (entityManager != null) entityManager.close();
         }
     }
 
@@ -512,20 +531,15 @@ public class BaseRESTv1 extends BaseREST {
         assert entities != null : "dataObject should not be null";
         assert factory != null : "factory should not be null";
 
-        TransactionManager transactionManager = null;
-        EntityManager entityManager = null;
-
         try {
             // Unmarshall the expand string into the ExpandDataTrunk object.
             final ExpandDataTrunk expandDataTrunk = unmarshallExpand(expand);
 
-            // Get the TransactionManager and start a Transaction
-            transactionManager = JNDIUtilities.lookupJBossTransactionManager();
+            // Start a Transaction
             transactionManager.begin();
 
-            // Get an EntityManager instance
-            entityManager = getEntityManager();
-            entityManager.setFlushMode(FlushModeType.AUTO);
+            // Join the transaction we just started
+            entityManager.joinTransaction();
 
             // Store the log details into the Logging Java Bean
             setLogDetails(entityManager, logDetails);
@@ -547,10 +561,10 @@ public class BaseRESTv1 extends BaseREST {
                     if (entity == null) throw new BadRequestException("No entity was found with the primary key " + restEntity.getId());
 
                     // Sync the database entity with the REST Entity
-                    factory.syncDBEntityWithRESTEntity(entityManager, entity, restEntity);
+                    factory.syncDBEntityWithRESTEntity(entity, restEntity);
                 } else if (operation == DatabaseOperation.CREATE) {
                     // Create a Database Entity using the information from the REST Entity.
-                    entity = factory.createDBEntityFromRESTEntity(entityManager, restEntity);
+                    entity = factory.createDBEntityFromRESTEntity(restEntity);
 
                     // Check that the entity was successfully created
                     if (entity == null) throw new BadRequestException("The entity could not be created");
@@ -566,12 +580,10 @@ public class BaseRESTv1 extends BaseREST {
             entityManager.flush();
             transactionManager.commit();
 
-            return RESTDataObjectCollectionFactory.create(collectionClass, factory, retValue, expandName, dataType,
-                    expandDataTrunk, getBaseUrl(), true, entityManager);
+            return RESTDataObjectCollectionFactory.create(collectionClass, factory, retValue, expandName, dataType, expandDataTrunk,
+                    getBaseUrl(), true, entityManager);
         } catch (final Throwable e) {
             throw processError(transactionManager, e);
-        } finally {
-            if (entityManager != null) entityManager.close();
         }
     }
 
@@ -687,14 +699,9 @@ public class BaseRESTv1 extends BaseREST {
         boolean usingRevisions = revision != null;
         Number closestRevision = null;
 
-        EntityManager entityManager = null;
-
         try {
             // Unmarshall the expand string into the ExpandDataTrunk object.
             final ExpandDataTrunk expandDataTrunk = unmarshallExpand(expand);
-
-            // Get an EntityManager instance
-            entityManager = getEntityManager();
 
             /*
              * Load the Entity from the Database. If we aren't getting revision information then we can just use a normal
@@ -713,7 +720,7 @@ public class BaseRESTv1 extends BaseREST {
                 // Get the Revision Entity using an envers lookup.
                 entity = reader.find(type, id, closestRevision);
 
-                if (entity == null) throw new BadRequestException("No entity was found with the primary key " + id);
+                if (entity == null) throw new NotFoundException("No entity was found with the primary key " + id);
 
                 // Set the entities last modified date to the information associated with the revision.
                 final Date revisionLastModified = reader.getRevisionDate(closestRevision);
@@ -722,29 +729,43 @@ public class BaseRESTv1 extends BaseREST {
                 entity = entityManager.find(type, id);
             }
 
-            if (entity == null) throw new BadRequestException("No entity was found with the primary key " + id);
+            if (entity == null) throw new NotFoundException("No entity was found with the primary key " + id);
 
             // Create the REST representation of the topic
-            final T restRepresentation = dataObjectFactory.createRESTEntityFromDBEntity(entity, this.getBaseUrl(), dataType,
-                    expandDataTrunk, closestRevision, true, entityManager);
+            final T restRepresentation = dataObjectFactory.createRESTEntityFromDBEntity(entity, getBaseUrl(), dataType, expandDataTrunk,
+                    closestRevision, true);
 
             return restRepresentation;
         } catch (final Throwable e) {
             throw processError(null, e);
-        } finally {
-            if (entityManager != null) entityManager.close();
         }
     }
 
-    protected <U> U getEntity(final EntityManager entityManager, final Class<U> type, final Object id) {
+    /**
+     * Gets the latest Entity for a specific ID
+     *
+     * @param type The Entity type.
+     * @param id The Entity ID.
+     * @param <U> The Entity class.
+     * @return The Entity that matches the type and ID
+     */
+    protected <U> U getEntity(final Class<U> type, final Object id) {
         final U entity = entityManager.find(type, id);
         if (entity == null) throw new NotFoundException("No entity was found with the primary key " + id);
 
         return entity;
     }
 
-    protected <U extends AuditedEntity> U getEntity(final EntityManager entityManager, final Class<U> type, final Object id,
-            final Integer revision) {
+    /**
+     * Gets an Entity for a specific ID and Revision.
+     *
+     * @param type The Entity type.
+     * @param id The Entity ID.
+     * @param revision The entities revision, or null to get the latest version.
+     * @param <U> The Entity class.
+     * @return The Entity that matches the type, ID and Revision
+     */
+    protected <U extends AuditedEntity> U getEntity(final Class<U> type, final Object id, final Integer revision) {
         final U entity;
 
         if (revision != null) {
@@ -769,16 +790,33 @@ public class BaseRESTv1 extends BaseREST {
         return entity;
     }
 
-    protected <U extends AuditedEntity> List<U> getEntities(final EntityManager entityManager, final Class<U> type) {
+    /**
+     * Gets a Query that can be used to get all of entities for a specified entity type.
+     *
+     * @param type The type to get all Entities for.
+     * @param <U> The Entity class.
+     * @return A CriteriaQuery that can be used to get all of the Entities for an Entity type.
+     */
+    protected <U extends AuditedEntity> CriteriaQuery<U> getAllEntitiesQuery(final Class<U> type) {
         // Create the select all query
         final CriteriaBuilder criteriaBuilder = entityManager.getCriteriaBuilder();
         final CriteriaQuery<U> criteriaQuery = criteriaBuilder.createQuery(type);
         criteriaQuery.from(type);
 
-        /*
-         * TODO This really should be constrained to the data that we need using the setMaxResults() and setFirstResult()
-         * method. It should also only be executed if the expand is specified.
-         */
+        return criteriaQuery;
+    }
+
+    /**
+     * Gets a List of all entities for a specified entity type.
+     *
+     * @param type The type to get all Entities for.
+     * @param <U> The Entity class.
+     * @return A list of all the Entities for an Entity type.
+     */
+    protected <U extends AuditedEntity> List<U> getAllEntities(final Class<U> type) {
+        // Get the query to be used
+        final CriteriaQuery<U> criteriaQuery = getAllEntitiesQuery(type);
+
         // Execute the query and retrieve the results from the database
         final TypedQuery<U> query = entityManager.createQuery(criteriaQuery);
         return query.getResultList();
@@ -805,27 +843,20 @@ public class BaseRESTv1 extends BaseREST {
         assert type != null : "The type parameter can not be null";
         assert dataObjectFactory != null : "The dataObjectFactory parameter can not be null";
 
-        EntityManager entityManager = null;
-
         try {
             // Unmarshall the expand string into the ExpandDataTrunk object.
             final ExpandDataTrunk expandDataTrunk = unmarshallExpand(expand);
 
-            // Get an EntityManager instance
-            entityManager = getEntityManager();
-
             // Get all the entities
-            final List<U> result = getEntities(entityManager, type);
+            final CriteriaQuery<U> query = getAllEntitiesQuery(type);
 
             // Create and initialise the Collection using the specified REST Object Factory
-            final V retValue = RESTDataObjectCollectionFactory.create(collectionClass, dataObjectFactory, result,
-                    expandName, dataType, expandDataTrunk, getBaseUrl(), true, entityManager);
+            final V retValue = RESTDataObjectCollectionFactory.create(collectionClass, dataObjectFactory, query, expandName, dataType,
+                    expandDataTrunk, getBaseUrl(), true, entityManager);
 
             return retValue;
         } catch (Throwable e) {
             throw processError(null, e);
-        } finally {
-            if (entityManager != null) entityManager.close();
         }
     }
 
@@ -872,45 +903,35 @@ public class BaseRESTv1 extends BaseREST {
         assert dataObjectFactory != null : "The dataObjectFactory parameter can not be null";
         assert uriInfo != null : "uriInfo can not be null";
 
-        EntityManager entityManager = null;
-
         try {
             // Unmarshall the expand string into the ExpandDataTrunk object.
             final ExpandDataTrunk expandDataTrunk = unmarshallExpand(expand);
 
-            // Get an EntityManager instance
-            entityManager = getEntityManager();
-
             // Get the Filter Entities
             final IFilterQueryBuilder<U> filterQueryBuilder = filterQueryBuilderClass.getConstructor(EntityManager.class).newInstance(
                     entityManager);
-            final List<U> result = getEntitiesFromQuery(entityManager, queryParams, filterQueryBuilder, entityFieldFilter);
+            final CriteriaQuery<U> query = getEntitiesFromQuery(queryParams, filterQueryBuilder, entityFieldFilter);
 
             // Create the Collection Class and populate it with data using the query result data
-            final V retValue = RESTDataObjectCollectionFactory.create(collectionClass, dataObjectFactory, result,
-                    expandName, dataType, expandDataTrunk, getBaseUrl(), true, entityManager);
+            final V retValue = RESTDataObjectCollectionFactory.create(collectionClass, dataObjectFactory, query, expandName, dataType,
+                    expandDataTrunk, getBaseUrl(), true, entityManager);
 
             return retValue;
         } catch (Throwable e) {
             throw processError(null, e);
-        } finally {
-            if (entityManager != null) entityManager.close();
         }
     }
 
     /**
      * Gets the resulting Entities from a Filter Query.
      *
-     * @param entityManager      The entity manager to lookup entities.
      * @param queryParams        The Query Parameters for the filter.
      * @param filterQueryBuilder The Filter Query Builder to create the SQL query.
      * @param entityFieldFilter  The entity field filter, to filter out incorrect fields.
-     * @param <U>                The Entity Class Type.
      * @return A list of entities for the filter query.
      */
-    protected <U extends AuditedEntity> List<U> getEntitiesFromQuery(final EntityManager entityManager,
-            final MultivaluedMap<String, String> queryParams, final IFilterQueryBuilder<U> filterQueryBuilder,
-            final IFieldFilter entityFieldFilter) {
+    protected <U extends AuditedEntity> CriteriaQuery<U> getEntitiesFromQuery(final MultivaluedMap<String, String> queryParams,
+            final IFilterQueryBuilder<U> filterQueryBuilder, final IFieldFilter entityFieldFilter) {
         // build up a Filter object from the URL variables
         final Filter filter;
         if (filterQueryBuilder instanceof ITagFilterQueryBuilder) {
@@ -923,13 +944,7 @@ public class BaseRESTv1 extends BaseREST {
 
         // Build the query to be used to get the resources
         final CriteriaQuery<U> query = FilterUtilities.buildQuery(filter, filterQueryBuilder);
-
-        /*
-         * TODO This really should be constrained to the data that we need using the setMaxResults() and setFirstResult()
-         * method. It should also only be executed if the expand is specified.
-         */
-        // Retrieve the results using the generated query.
-        return entityManager.createQuery(query).getResultList();
+        return query;
     }
 
     /**
@@ -984,9 +999,7 @@ public class BaseRESTv1 extends BaseREST {
                 user.setId(Integer.parseInt(userId));
                 logDetails.explicitSetUser(user);
             } else {
-                EntityManager entityManager = null;
                 try {
-                    entityManager = getEntityManager();
                     final User userEntity = EntityUtilities.getUserFromUsername(entityManager, userId);
                     if (userEntity == null) throw new BadRequestException("No user was found with the username " + userId);
 
@@ -995,10 +1008,6 @@ public class BaseRESTv1 extends BaseREST {
                     logDetails.explicitSetUser(user);
                 } catch (Throwable e) {
                     throw processError(null, e);
-                } finally {
-                    if (entityManager != null) {
-                        entityManager.close();
-                    }
                 }
             }
         }
@@ -1029,44 +1038,6 @@ public class BaseRESTv1 extends BaseREST {
     }
 
     /**
-     * Get an EntityManager instance from the EntityManagerFactory. If the Factory hasn't been looked up yet, then perform the
-     * lookup as well.
-     * <p/>
-     * Note: This method won't join any active Transactions.
-     *
-     * @return An initialised EntityManager object.
-     */
-    protected EntityManager getEntityManager() {
-        return getEntityManager(false);
-    }
-
-    /**
-     * Get an EntityManager instance from the EntityManagerFactory. If the Factory hasn't been looked up yet, then perform the
-     * lookup as well. *
-     *
-     * @param joinTransaction Whether or not the EntityManager should attempt to join any active Transactions.
-     * @return An initialised EntityManager object.
-     */
-    protected EntityManager getEntityManager(boolean joinTransaction) {
-        if (entityManagerFactory == null) {
-            try {
-                entityManagerFactory = JNDIUtilities.lookupJBossEntityManagerFactory();
-            } catch (NamingException e) {
-                throw new InternalServerErrorException("Could not find the EntityManagerFactory");
-            }
-        }
-
-        final EntityManager entityManager = entityManagerFactory.createEntityManager();
-        if (entityManager == null) throw new InternalServerErrorException("Could not create an EntityManager");
-
-        if (joinTransaction) {
-            entityManager.joinTransaction();
-        }
-
-        return entityManager;
-    }
-
-    /**
      * Process an Error/Exception and generate a RESTEasy Exception based on the error/exception produced.
      *
      * @param transactionManager The transaction manager to handle rolling back changes.
@@ -1093,9 +1064,14 @@ public class BaseRESTv1 extends BaseREST {
         while (cause != null) {
             if (cause instanceof Failure) {
                 return (Failure) cause;
-            } else if (cause instanceof ValidationException || cause instanceof PersistenceException || cause instanceof
-                    CustomConstraintViolationException) {
+            } else if (cause instanceof ValidationException || cause instanceof CustomConstraintViolationException || cause instanceof org.hibernate.exception.ConstraintViolationException) {
                 break;
+            } else if (cause instanceof PersistenceException) {
+                if (cause.getCause() != null && cause.getCause() instanceof org.hibernate.exception.ConstraintViolationException) {
+                    cause = cause.getCause();
+                } else {
+                    break;
+                }
             } else if (cause instanceof BatchUpdateException) {
                 cause = ((SQLException) cause).getNextException();
             } else {
@@ -1110,12 +1086,16 @@ public class BaseRESTv1 extends BaseREST {
 
             // Construct a "readable" message outlining the validation errors
             for (ConstraintViolation invalidValue : e.getConstraintViolations())
-                stringBuilder.append(invalidValue.getMessage()).append("\n");
+                stringBuilder.append(invalidValue.getPropertyPath()).append(invalidValue.getMessage()).append("\n");
 
             return new BadRequestException(stringBuilder.toString(), cause);
+        } else if (cause instanceof EntityNotFoundException) {
+            return new NotFoundException(cause);
+        } else if (cause instanceof org.hibernate.exception.ConstraintViolationException) {
+            return new BadRequestException(cause.getMessage());
         } else if (cause instanceof ValidationException || cause instanceof PersistenceException || cause instanceof
                 CustomConstraintViolationException) {
-            return new BadRequestException(ex);
+            return new BadRequestException(cause);
         }
 
         // If it's not some validation error then it must be an internal error.

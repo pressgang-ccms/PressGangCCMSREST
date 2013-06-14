@@ -1,6 +1,7 @@
 package org.jboss.pressgang.ccms.server.rest.v1;
 
-import javax.persistence.EntityManager;
+import javax.enterprise.context.ApplicationScoped;
+import javax.inject.Inject;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -27,16 +28,16 @@ import org.jboss.resteasy.spi.BadRequestException;
  * 
  * Lee
  */
+@ApplicationScoped
 public class RoleV1Factory extends RESTDataObjectFactory<RESTRoleV1, Role, RESTRoleCollectionV1, RESTRoleCollectionItemV1> {
     private static final Integer ROLE_TO_ROLE_ID = 1;
 
-    public RoleV1Factory() {
-        super(Role.class);
-    }
+    @Inject
+    protected UserV1Factory userFactory;
 
     @Override
     public RESTRoleV1 createRESTEntityFromDBEntityInternal(final Role entity, final String baseUrl, final String dataType,
-            final ExpandDataTrunk expand, final Number revision, final boolean expandParentReferences, final EntityManager entityManager) {
+            final ExpandDataTrunk expand, final Number revision, final boolean expandParentReferences) {
         assert entity != null : "Parameter topic can not be null";
         assert baseUrl != null : "Parameter baseUrl can not be null";
 
@@ -57,28 +58,28 @@ public class RoleV1Factory extends RESTDataObjectFactory<RESTRoleV1, Role, RESTR
 
         // REVISIONS
         if (revision == null && expand != null && expand.contains(RESTBaseEntityV1.REVISIONS_NAME)) {
-            retValue.setRevisions(RESTDataObjectCollectionFactory.create(RESTRoleCollectionV1.class, new RoleV1Factory(), entity,
+            retValue.setRevisions(RESTDataObjectCollectionFactory.create(RESTRoleCollectionV1.class, this, entity,
                     EnversUtilities.getRevisions(entityManager, entity), RESTBaseEntityV1.REVISIONS_NAME, dataType, expand, baseUrl,
                     entityManager));
         }
 
         // USERS
         if (expand != null && expand.contains(RESTRoleV1.USERS_NAME)) {
-            retValue.setUsers(RESTDataObjectCollectionFactory.create(RESTUserCollectionV1.class, new UserV1Factory(), entity.getUsers(),
+            retValue.setUsers(RESTDataObjectCollectionFactory.create(RESTUserCollectionV1.class, userFactory, entity.getUsers(),
                     RESTRoleV1.USERS_NAME, dataType, expand, baseUrl, entityManager));
         }
 
         // PARENT ROLES
         if (expand != null && expand.contains(RESTRoleV1.PARENTROLES_NAME)) {
             retValue.setParentRoles(
-                    RESTDataObjectCollectionFactory.create(RESTRoleCollectionV1.class, new RoleV1Factory(), entity.getParentRoles(),
+                    RESTDataObjectCollectionFactory.create(RESTRoleCollectionV1.class, this, entity.getParentRoles(),
                             RESTRoleV1.PARENTROLES_NAME, dataType, expand, baseUrl, entityManager));
         }
 
         // CHILD ROLES
         if (expand != null && expand.contains(RESTRoleV1.CHILDROLES_NAME)) {
             retValue.setChildRoles(
-                    RESTDataObjectCollectionFactory.create(RESTRoleCollectionV1.class, new RoleV1Factory(), entity.getChildRoles(),
+                    RESTDataObjectCollectionFactory.create(RESTRoleCollectionV1.class, this, entity.getChildRoles(),
                             RESTRoleV1.CHILDROLES_NAME, dataType, expand, baseUrl, entityManager));
         }
 
@@ -88,7 +89,7 @@ public class RoleV1Factory extends RESTDataObjectFactory<RESTRoleV1, Role, RESTR
     }
 
     @Override
-    public void syncDBEntityWithRESTEntity(final EntityManager entityManager, final Role entity, final RESTRoleV1 dataObject) {
+    public void syncDBEntityWithRESTEntity(final Role entity, final RESTRoleV1 dataObject) {
         if (dataObject.hasParameterSet(RESTUserV1.DESCRIPTION_NAME)) entity.setDescription(dataObject.getDescription());
         if (dataObject.hasParameterSet(RESTUserV1.NAME_NAME)) entity.setRoleName(dataObject.getName());
 
@@ -158,5 +159,10 @@ public class RoleV1Factory extends RESTDataObjectFactory<RESTRoleV1, Role, RESTR
                 }
             }
         }
+    }
+
+    @Override
+    protected Class<Role> getDatabaseClass() {
+        return Role.class;
     }
 }

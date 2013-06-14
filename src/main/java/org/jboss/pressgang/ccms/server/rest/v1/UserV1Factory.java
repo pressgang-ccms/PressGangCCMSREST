@@ -1,6 +1,7 @@
 package org.jboss.pressgang.ccms.server.rest.v1;
 
-import javax.persistence.EntityManager;
+import javax.enterprise.context.ApplicationScoped;
+import javax.inject.Inject;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -21,14 +22,14 @@ import org.jboss.pressgang.ccms.server.rest.v1.base.RESTDataObjectFactory;
 import org.jboss.pressgang.ccms.server.utils.EnversUtilities;
 import org.jboss.resteasy.spi.BadRequestException;
 
+@ApplicationScoped
 public class UserV1Factory extends RESTDataObjectFactory<RESTUserV1, User, RESTUserCollectionV1, RESTUserCollectionItemV1> {
-    public UserV1Factory() {
-        super(User.class);
-    }
+    @Inject
+    protected RoleV1Factory roleFactory;
 
     @Override
     public RESTUserV1 createRESTEntityFromDBEntityInternal(final User entity, final String baseUrl, final String dataType,
-            final ExpandDataTrunk expand, final Number revision, final boolean expandParentReferences, final EntityManager entityManager) {
+            final ExpandDataTrunk expand, final Number revision, final boolean expandParentReferences) {
         assert entity != null : "Parameter entity can not be null";
         assert baseUrl != null : "Parameter baseUrl can not be null";
 
@@ -47,17 +48,16 @@ public class UserV1Factory extends RESTDataObjectFactory<RESTUserV1, User, RESTU
         // REVISIONS
         if (revision == null && expand != null && expand.contains(RESTTopicV1.REVISIONS_NAME)) {
             retValue.setRevisions(
-                    RESTDataObjectCollectionFactory.create(
-                            RESTUserCollectionV1.class, new UserV1Factory(), entity, EnversUtilities.getRevisions(entityManager, entity),
-                            RESTBaseEntityV1.REVISIONS_NAME, dataType, expand, baseUrl, entityManager));
+                    RESTDataObjectCollectionFactory.create(RESTUserCollectionV1.class, this, entity,
+                            EnversUtilities.getRevisions(entityManager, entity), RESTBaseEntityV1.REVISIONS_NAME, dataType, expand, baseUrl,
+                            entityManager));
         }
 
         // ROLES
         if (expand != null && expand.contains(RESTUserV1.ROLES_NAME)) {
             retValue.setRoles(
-                    RESTDataObjectCollectionFactory.create(
-                            RESTRoleCollectionV1.class, new RoleV1Factory(), entity.getRoles(), RESTUserV1.ROLES_NAME, dataType, expand,
-                            baseUrl, entityManager));
+                    RESTDataObjectCollectionFactory.create(RESTRoleCollectionV1.class, roleFactory, entity.getRoles(),
+                            RESTUserV1.ROLES_NAME, dataType, expand, baseUrl, entityManager));
         }
 
         retValue.setLinks(baseUrl, RESTv1Constants.USER_URL_NAME, dataType, retValue.getId());
@@ -66,7 +66,7 @@ public class UserV1Factory extends RESTDataObjectFactory<RESTUserV1, User, RESTU
     }
 
     @Override
-    public void syncDBEntityWithRESTEntity(final EntityManager entityManager, final User entity, final RESTUserV1 dataObject) {
+    public void syncDBEntityWithRESTEntity(final User entity, final RESTUserV1 dataObject) {
         if (dataObject.hasParameterSet(RESTUserV1.DESCRIPTION_NAME))
             entity.setDescription(dataObject.getDescription());
         if (dataObject.hasParameterSet(RESTUserV1.NAME_NAME))
@@ -82,9 +82,12 @@ public class UserV1Factory extends RESTDataObjectFactory<RESTUserV1, User, RESTU
                 final RESTRoleV1 restEntity = restEntityItem.getItem();
 
                 if (restEntityItem.returnIsAddItem() || restEntityItem.returnIsRemoveItem()) {
-                    final Role dbEntity = entityManager.find(Role.class, restEntity.getId());
-                    if (dbEntity == null)
-                        throw new BadRequestException("No entity was found with the primary key " + restEntity.getId());
+                    final Role dbEntity;
+                    try {
+                        dbEntity = entityManager.getReference(Role.class, restEntity.getId());
+                    } catch (Exception e) {
+                        throw new BadRequestException("No entity was found with the primary key " + restEntity.getId(), e);
+                    }
 
                     if (restEntityItem.returnIsAddItem()) {
                         entity.addRole(dbEntity);
@@ -94,5 +97,10 @@ public class UserV1Factory extends RESTDataObjectFactory<RESTUserV1, User, RESTU
                 }
             }
         }
+    }
+
+    @Override
+    protected Class<User> getDatabaseClass() {
+        return User.class;
     }
 }

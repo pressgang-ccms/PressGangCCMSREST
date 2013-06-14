@@ -1,6 +1,7 @@
 package org.jboss.pressgang.ccms.server.rest.v1;
 
-import javax.persistence.EntityManager;
+import javax.enterprise.context.ApplicationScoped;
+import javax.inject.Inject;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -22,14 +23,15 @@ import org.jboss.pressgang.ccms.server.rest.v1.base.RESTDataObjectFactory;
 import org.jboss.pressgang.ccms.server.utils.EnversUtilities;
 import org.jboss.resteasy.spi.BadRequestException;
 
-class CategoryV1Factory extends RESTDataObjectFactory<RESTCategoryV1, Category, RESTCategoryCollectionV1, RESTCategoryCollectionItemV1> {
-    CategoryV1Factory() {
-        super(Category.class);
-    }
+@ApplicationScoped
+public class CategoryV1Factory extends RESTDataObjectFactory<RESTCategoryV1, Category, RESTCategoryCollectionV1,
+        RESTCategoryCollectionItemV1> {
+    @Inject
+    protected TagInCategoryV1Factory tagInCategoryFactory;
 
     @Override
     public RESTCategoryV1 createRESTEntityFromDBEntityInternal(final Category entity, final String baseUrl, final String dataType,
-            final ExpandDataTrunk expand, final Number revision, final boolean expandParentReferences, final EntityManager entityManager) {
+            final ExpandDataTrunk expand, final Number revision, final boolean expandParentReferences) {
         assert entity != null : "Parameter entity can not be null";
         assert baseUrl != null : "Parameter baseUrl can not be null";
 
@@ -50,14 +52,14 @@ class CategoryV1Factory extends RESTDataObjectFactory<RESTCategoryV1, Category, 
 
         // REVISIONS
         if (revision == null && expand != null && expand.contains(RESTBaseEntityV1.REVISIONS_NAME)) {
-            retValue.setRevisions(RESTDataObjectCollectionFactory.create(RESTCategoryCollectionV1.class, new CategoryV1Factory(), entity,
+            retValue.setRevisions(RESTDataObjectCollectionFactory.create(RESTCategoryCollectionV1.class, this, entity,
                     EnversUtilities.getRevisions(entityManager, entity), RESTBaseEntityV1.REVISIONS_NAME, dataType, expand, baseUrl,
                     entityManager));
         }
 
         // TAGS
         if (expand != null && expand.contains(RESTCategoryV1.TAGS_NAME)) {
-            retValue.setTags(RESTDataObjectCollectionFactory.create(RESTTagInCategoryCollectionV1.class, new TagInCategoryV1Factory(),
+            retValue.setTags(RESTDataObjectCollectionFactory.create(RESTTagInCategoryCollectionV1.class, tagInCategoryFactory,
                     entity.getTagToCategoriesArray(), RESTCategoryV1.TAGS_NAME, dataType, expand, baseUrl, entityManager));
         }
 
@@ -67,7 +69,7 @@ class CategoryV1Factory extends RESTDataObjectFactory<RESTCategoryV1, Category, 
     }
 
     @Override
-    public void syncDBEntityWithRESTEntity(final EntityManager entityManager, final Category entity, final RESTCategoryV1 dataObject) {
+    public void syncDBEntityWithRESTEntity(final Category entity, final RESTCategoryV1 dataObject) {
         if (dataObject.hasParameterSet(RESTCategoryV1.DESCRIPTION_NAME)) entity.setCategoryDescription(dataObject.getDescription());
         if (dataObject.hasParameterSet(RESTCategoryV1.MUTUALLYEXCLUSIVE_NAME))
             entity.setMutuallyExclusive(dataObject.getMutuallyExclusive());
@@ -104,9 +106,14 @@ class CategoryV1Factory extends RESTDataObjectFactory<RESTCategoryV1, Category, 
                             "No TagToCategory entity was found with the primary key " + restEntity.getRelationshipId() + " for Category "
                                     + entity.getId());
 
-                    new TagInCategoryV1Factory().syncDBEntityWithRESTEntity(entityManager, dbEntity, restEntity);
+                    tagInCategoryFactory.syncDBEntityWithRESTEntity(dbEntity, restEntity);
                 }
             }
         }
+    }
+
+    @Override
+    protected Class<Category> getDatabaseClass() {
+        return Category.class;
     }
 }

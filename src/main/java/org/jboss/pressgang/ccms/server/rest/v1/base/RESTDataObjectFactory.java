@@ -1,5 +1,6 @@
 package org.jboss.pressgang.ccms.server.rest.v1.base;
 
+import javax.inject.Inject;
 import javax.persistence.EntityManager;
 
 import org.jboss.pressgang.ccms.model.base.AuditedEntity;
@@ -22,11 +23,10 @@ import org.jboss.resteasy.spi.InternalServerErrorException;
  */
 public abstract class RESTDataObjectFactory<T extends RESTBaseEntityV1<T, V, W>, U extends AuditedEntity,
         V extends RESTBaseCollectionV1<T, V, W>, W extends RESTBaseCollectionItemV1<T, V, W>> {
-    final Class<U> databaseClass;
-
-    public RESTDataObjectFactory(final Class<U> databaseClass) {
-        this.databaseClass = databaseClass;
-    }
+    @Inject
+    protected EntityManager entityManager;
+    @Inject
+    protected LogDetailsV1Factory logDetailsFactory;
 
     /**
      * Create a REST Entity representation from Database Entity specified by it's Primary Key.
@@ -39,46 +39,46 @@ public abstract class RESTDataObjectFactory<T extends RESTBaseEntityV1<T, V, W>,
      */
     public T createRESTEntityFromDBPK(final Object primaryKey, final String baseUrl, final String dataType, final ExpandDataTrunk expand,
             final Number revision, final EntityManager entityManager) {
-        final U entity = entityManager.find(databaseClass, primaryKey);
+        final U entity = entityManager.find(getDatabaseClass(), primaryKey);
 
         if (entity == null) throw new BadRequestException("No entity was found with the id " + primaryKey);
 
-        return createRESTEntityFromDBEntity(entity, baseUrl, dataType, expand, revision, entityManager);
+        return createRESTEntityFromDBEntity(entity, baseUrl, dataType, expand, revision);
     }
 
     /**
      * Create a REST Entity representation from Database Entity.
      *
+     *
      * @param entity        The entity that is to be transformed into a REST Entity.
      * @param baseUrl       The REST url that was used to access this REST entity
      * @param dataType      The type of the returned data (XML or JSON)
      * @param expand        The Object that contains details about what fields should be expanded.
-     * @param entityManager The EntityManager object used to look up the entity and any extra information.
      * @return A new REST entity populated with the values in a database entity
      */
-    public T createRESTEntityFromDBEntity(final U entity, final String baseUrl, final String dataType, final ExpandDataTrunk expand,
-            final EntityManager entityManager) {
-        return createRESTEntityFromDBEntity(entity, baseUrl, dataType, expand, null, true, entityManager);
+    public T createRESTEntityFromDBEntity(final U entity, final String baseUrl, final String dataType, final ExpandDataTrunk expand) {
+        return createRESTEntityFromDBEntity(entity, baseUrl, dataType, expand, null, true);
     }
 
     /**
      * Create a REST Entity representation from Database Entity.
+     *
      *
      * @param entity        The entity that is to be transformed into a REST Entity.
      * @param baseUrl       The REST url that was used to access this REST entity
      * @param dataType      The type of the returned data (XML or JSON)
      * @param expand        The Object that contains details about what fields should be expanded.
      * @param revision      The revision number of the entity.
-     * @param entityManager The EntityManager object used to look up the entity and any extra information.
      * @return A new REST entity populated with the values in a database entity
      */
     public T createRESTEntityFromDBEntity(final U entity, final String baseUrl, final String dataType, final ExpandDataTrunk expand,
-            final Number revision, final EntityManager entityManager) {
-        return createRESTEntityFromDBEntity(entity, baseUrl, dataType, expand, revision, true, entityManager);
+            final Number revision) {
+        return createRESTEntityFromDBEntity(entity, baseUrl, dataType, expand, revision, true);
     }
 
     /**
      * Create a REST Entity representation from Database Entity.
+     *
      *
      * @param entity                 The entity that is to be transformed into a REST Entity.
      * @param baseUrl                The REST url that was used to access this REST entity
@@ -86,14 +86,12 @@ public abstract class RESTDataObjectFactory<T extends RESTBaseEntityV1<T, V, W>,
      * @param expand                 The Object that contains details about what fields should be expanded.
      * @param revision               The revision number of the entity.
      * @param expandParentReferences If parent entities in children entities should be expanded.
-     * @param entityManager          The EntityManager object used to look up the entity and any extra information.
      * @return A new REST entity populated with the values in a database entity
      */
     public T createRESTEntityFromDBEntity(final U entity, final String baseUrl, final String dataType, final ExpandDataTrunk expand,
-            final Number revision, final boolean expandParentReferences, final EntityManager entityManager) {
+            final Number revision, final boolean expandParentReferences) {
 
-        final T retValue = createRESTEntityFromDBEntityInternal(entity, baseUrl, dataType, expand, revision, expandParentReferences,
-                entityManager);
+        final T retValue = createRESTEntityFromDBEntityInternal(entity, baseUrl, dataType, expand, revision, expandParentReferences);
 
         // Set the entities revision
         final Number fixedRevision = revision == null ? EnversUtilities.getLatestRevision(entityManager, entity) : revision;
@@ -101,8 +99,7 @@ public abstract class RESTDataObjectFactory<T extends RESTBaseEntityV1<T, V, W>,
 
         // Add the log details
         retValue.setLogDetails(
-                new LogDetailsV1Factory().create(entity, fixedRevision, RESTBaseEntityV1.LOG_DETAILS_NAME, expand, dataType, baseUrl,
-                        entityManager));
+                logDetailsFactory.create(entity, fixedRevision, RESTBaseEntityV1.LOG_DETAILS_NAME, expand, dataType, baseUrl));
 
         return retValue;
     }
@@ -110,39 +107,37 @@ public abstract class RESTDataObjectFactory<T extends RESTBaseEntityV1<T, V, W>,
     /**
      * Create a REST Entity representation from Database Entity.
      *
+     *
      * @param entity                 The entity that is to be transformed into a REST Entity.
      * @param baseUrl                The REST url that was used to access this REST entity
      * @param dataType               The type of the returned data (XML or JSON)
      * @param expand                 The Object that contains details about what fields should be expanded.
      * @param revision               The revision number of the entity.
      * @param expandParentReferences If parent entities in children entities should be expanded.
-     * @param entityManager          The EntityManager object used to look up the entity and any extra information.
      * @return A new REST entity populated with the values in a database entity
      */
     protected abstract T createRESTEntityFromDBEntityInternal(final U entity, final String baseUrl, final String dataType,
-            final ExpandDataTrunk expand, final Number revision, final boolean expandParentReferences, final EntityManager entityManager);
+            final ExpandDataTrunk expand, final Number revision, final boolean expandParentReferences);
 
     /**
      * Populates the values of a database entity from a REST entity
      *
-     * @param entityManager The EntityManager object used to look up the entity and any extra information.
      * @param entity        The database entity to be synced from the REST Entity.
      * @param dataObject    The REST entity object.
      */
-    public abstract void syncDBEntityWithRESTEntity(final EntityManager entityManager, final U entity,
-            final T dataObject);
+    public abstract void syncDBEntityWithRESTEntity(final U entity, final T dataObject);
 
     /**
      * Creates, populates and returns a new database entity from a REST entity
      *
-     * @param entityManager The EntityManager object used to look up the entity and any extra information.
+     *
      * @param dataObject    The REST entity used to populate the database entity's values
      * @return A new database entity with the values supplied from the dataObject
      */
-    public U createDBEntityFromRESTEntity(final EntityManager entityManager, final T dataObject) {
+    public U createDBEntityFromRESTEntity(final T dataObject) {
         try {
-            final U entity = databaseClass.newInstance();
-            this.syncDBEntityWithRESTEntity(entityManager, entity, dataObject);
+            final U entity = getDatabaseClass().newInstance();
+            syncDBEntityWithRESTEntity(entity, dataObject);
             return entity;
         } catch (InstantiationException e) {
             throw new InternalServerErrorException(e);
@@ -150,4 +145,11 @@ public abstract class RESTDataObjectFactory<T extends RESTBaseEntityV1<T, V, W>,
             throw new InternalServerErrorException(e);
         }
     }
+
+    /**
+     * Get the Database class for the factory.
+     *
+     * @return The Database class
+     */
+    protected abstract Class<U> getDatabaseClass();
 }

@@ -1,6 +1,6 @@
 package org.jboss.pressgang.ccms.server.rest.v1;
 
-import javax.persistence.EntityManager;
+import javax.enterprise.context.ApplicationScoped;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -15,16 +15,13 @@ import org.jboss.pressgang.ccms.server.rest.v1.base.RESTDataObjectCollectionFact
 import org.jboss.pressgang.ccms.server.rest.v1.base.RESTDataObjectFactory;
 import org.jboss.pressgang.ccms.server.utils.EnversUtilities;
 
+@ApplicationScoped
 public class TopicSourceUrlV1Factory extends RESTDataObjectFactory<RESTTopicSourceUrlV1, TopicSourceUrl, RESTTopicSourceUrlCollectionV1,
         RESTTopicSourceUrlCollectionItemV1> {
 
-    public TopicSourceUrlV1Factory() {
-        super(TopicSourceUrl.class);
-    }
-
     @Override
     public RESTTopicSourceUrlV1 createRESTEntityFromDBEntityInternal(final TopicSourceUrl entity, final String baseUrl, String dataType,
-            final ExpandDataTrunk expand, final Number revision, final boolean expandParentReferences, final EntityManager entityManager) {
+            final ExpandDataTrunk expand, final Number revision, final boolean expandParentReferences) {
         assert entity != null : "Parameter entity can not be null";
         assert baseUrl != null : "Parameter baseUrl can not be null";
 
@@ -43,7 +40,7 @@ public class TopicSourceUrlV1Factory extends RESTDataObjectFactory<RESTTopicSour
         // REVISIONS
         if (revision == null && expand != null && expand.contains(RESTTopicV1.REVISIONS_NAME)) {
             retValue.setRevisions(
-                    RESTDataObjectCollectionFactory.create(RESTTopicSourceUrlCollectionV1.class, new TopicSourceUrlV1Factory(), entity,
+                    RESTDataObjectCollectionFactory.create(RESTTopicSourceUrlCollectionV1.class, this, entity,
                             EnversUtilities.getRevisions(entityManager, entity), RESTBaseEntityV1.REVISIONS_NAME, dataType, expand, baseUrl,
                             entityManager));
         }
@@ -52,13 +49,17 @@ public class TopicSourceUrlV1Factory extends RESTDataObjectFactory<RESTTopicSour
     }
 
     @Override
-    public void syncDBEntityWithRESTEntity(final EntityManager entityManager, final TopicSourceUrl entity,
-            final RESTTopicSourceUrlV1 dataObject) {
+    public void syncDBEntityWithRESTEntity(final TopicSourceUrl entity, final RESTTopicSourceUrlV1 dataObject) {
         if (dataObject.hasParameterSet(RESTTopicSourceUrlV1.TITLE_NAME)) entity.setTitle(dataObject.getTitle());
         if (dataObject.hasParameterSet(RESTTopicSourceUrlV1.DESCRIPTION_NAME)) entity.setDescription(dataObject.getDescription());
         if (dataObject.hasParameterSet(RESTTopicSourceUrlV1.URL_NAME)) entity.setSourceUrl(dataObject.getUrl());
 
         entityManager.persist(entity);
+    }
+
+    @Override
+    protected Class<TopicSourceUrl> getDatabaseClass() {
+        return TopicSourceUrl.class;
     }
 
 }

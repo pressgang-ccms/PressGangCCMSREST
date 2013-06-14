@@ -1,6 +1,6 @@
 package org.jboss.pressgang.ccms.server.rest.v1;
 
-import javax.persistence.EntityManager;
+import javax.enterprise.context.ApplicationScoped;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -14,16 +14,12 @@ import org.jboss.pressgang.ccms.server.rest.v1.base.RESTDataObjectCollectionFact
 import org.jboss.pressgang.ccms.server.rest.v1.base.RESTDataObjectFactory;
 import org.jboss.pressgang.ccms.server.utils.EnversUtilities;
 
+@ApplicationScoped
 public class BugzillaBugV1Factory extends RESTDataObjectFactory<RESTBugzillaBugV1, BugzillaBug, RESTBugzillaBugCollectionV1,
         RESTBugzillaBugCollectionItemV1> {
-
-    public BugzillaBugV1Factory() {
-        super(BugzillaBug.class);
-    }
-
     @Override
     public RESTBugzillaBugV1 createRESTEntityFromDBEntityInternal(final BugzillaBug entity, final String baseUrl, String dataType,
-            final ExpandDataTrunk expand, final Number revision, final boolean expandParentReferences, final EntityManager entityManager) {
+            final ExpandDataTrunk expand, final Number revision, final boolean expandParentReferences) {
         assert entity != null : "Parameter entity can not be null";
         assert baseUrl != null : "Parameter baseUrl can not be null";
 
@@ -42,7 +38,7 @@ public class BugzillaBugV1Factory extends RESTDataObjectFactory<RESTBugzillaBugV
         // REVISIONS
         if (revision == null && expand != null && expand.contains(RESTBaseEntityV1.REVISIONS_NAME)) {
             retValue.setRevisions(
-                    RESTDataObjectCollectionFactory.create(RESTBugzillaBugCollectionV1.class, new BugzillaBugV1Factory(), entity,
+                    RESTDataObjectCollectionFactory.create(RESTBugzillaBugCollectionV1.class, this, entity,
                             EnversUtilities.getRevisions(entityManager, entity), RESTBaseEntityV1.REVISIONS_NAME, dataType, expand, baseUrl,
                             entityManager));
         }
@@ -51,11 +47,15 @@ public class BugzillaBugV1Factory extends RESTDataObjectFactory<RESTBugzillaBugV
     }
 
     @Override
-    public void syncDBEntityWithRESTEntity(final EntityManager entityManager, final BugzillaBug entity,
-            final RESTBugzillaBugV1 dataObject) {
+    public void syncDBEntityWithRESTEntity(final BugzillaBug entity, final RESTBugzillaBugV1 dataObject) {
         if (dataObject.hasParameterSet(RESTBugzillaBugV1.BUG_ID)) entity.setBugzillaBugBugzillaId(dataObject.getBugId());
         if (dataObject.hasParameterSet(RESTBugzillaBugV1.BUG_ISOPEN)) entity.setBugzillaBugOpen(dataObject.getIsOpen());
         if (dataObject.hasParameterSet(RESTBugzillaBugV1.BUG_SUMMARY)) entity.setBugzillaBugSummary(dataObject.getSummary());
+    }
+
+    @Override
+    protected Class<BugzillaBug> getDatabaseClass() {
+        return BugzillaBug.class;
     }
 
 }

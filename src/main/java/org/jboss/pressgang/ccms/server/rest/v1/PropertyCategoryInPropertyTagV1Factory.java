@@ -1,6 +1,7 @@
 package org.jboss.pressgang.ccms.server.rest.v1;
 
-import javax.persistence.EntityManager;
+import javax.enterprise.context.ApplicationScoped;
+import javax.inject.Inject;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -17,17 +18,17 @@ import org.jboss.pressgang.ccms.server.rest.v1.base.RESTDataObjectCollectionFact
 import org.jboss.pressgang.ccms.server.rest.v1.base.RESTDataObjectFactory;
 import org.jboss.pressgang.ccms.server.utils.EnversUtilities;
 
+@ApplicationScoped
 public class PropertyCategoryInPropertyTagV1Factory extends RESTDataObjectFactory<RESTPropertyCategoryInPropertyTagV1,
         PropertyTagToPropertyTagCategory, RESTPropertyCategoryInPropertyTagCollectionV1,
         RESTPropertyCategoryInPropertyTagCollectionItemV1> {
-    public PropertyCategoryInPropertyTagV1Factory() {
-        super(PropertyTagToPropertyTagCategory.class);
-    }
+    @Inject
+    protected PropertyTagInPropertyCategoryV1Factory propertyTagInPropertyCategoryFactory;
 
     @Override
     public RESTPropertyCategoryInPropertyTagV1 createRESTEntityFromDBEntityInternal(final PropertyTagToPropertyTagCategory entity,
             final String baseUrl, final String dataType, final ExpandDataTrunk expand, final Number revision,
-            final boolean expandParentReferences, final EntityManager entityManager) {
+            final boolean expandParentReferences) {
         assert entity != null : "Parameter entity can not be null";
         assert baseUrl != null : "Parameter baseUrl can not be null";
 
@@ -47,15 +48,15 @@ public class PropertyCategoryInPropertyTagV1Factory extends RESTDataObjectFactor
 
         // REVISIONS
         if (revision == null && expand != null && expand.contains(RESTBaseEntityV1.REVISIONS_NAME)) {
-            retValue.setRevisions(RESTDataObjectCollectionFactory.create(RESTPropertyCategoryInPropertyTagCollectionV1.class,
-                    new PropertyCategoryInPropertyTagV1Factory(), entity, EnversUtilities.getRevisions(entityManager, entity),
-                    RESTBaseEntityV1.REVISIONS_NAME, dataType, expand, baseUrl, entityManager));
+            retValue.setRevisions(RESTDataObjectCollectionFactory.create(RESTPropertyCategoryInPropertyTagCollectionV1.class, this, entity,
+                    EnversUtilities.getRevisions(entityManager, entity), RESTBaseEntityV1.REVISIONS_NAME, dataType, expand, baseUrl,
+                    entityManager));
         }
 
         // PROPERTY TAGS
         if (expand != null && expand.contains(RESTPropertyCategoryInPropertyTagV1.PROPERTY_TAGS_NAME)) {
             retValue.setPropertyTags(RESTDataObjectCollectionFactory.create(RESTPropertyTagInPropertyCategoryCollectionV1.class,
-                    new PropertyTagInPropertyCategoryV1Factory(),
+                    propertyTagInPropertyCategoryFactory,
                     entity.getPropertyTagCategory().getPropertyTagToPropertyTagCategoriesList(),
                     RESTPropertyCategoryInPropertyTagV1.PROPERTY_TAGS_NAME, dataType, expand, baseUrl, revision, false, entityManager));
         }
@@ -66,11 +67,16 @@ public class PropertyCategoryInPropertyTagV1Factory extends RESTDataObjectFactor
     }
 
     @Override
-    public void syncDBEntityWithRESTEntity(final EntityManager entityManager, final PropertyTagToPropertyTagCategory entity,
+    public void syncDBEntityWithRESTEntity(final PropertyTagToPropertyTagCategory entity,
             final RESTPropertyCategoryInPropertyTagV1 dataObject) {
         if (dataObject.hasParameterSet(RESTPropertyCategoryInPropertyTagV1.RELATIONSHIP_SORT_NAME))
             entity.setSorting(dataObject.getRelationshipSort());
 
         entityManager.persist(entity);
+    }
+
+    @Override
+    protected Class<PropertyTagToPropertyTagCategory> getDatabaseClass() {
+        return PropertyTagToPropertyTagCategory.class;
     }
 }

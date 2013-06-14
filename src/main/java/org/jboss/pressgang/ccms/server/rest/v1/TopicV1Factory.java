@@ -1,6 +1,7 @@
 package org.jboss.pressgang.ccms.server.rest.v1;
 
-import javax.persistence.EntityManager;
+import javax.enterprise.context.ApplicationScoped;
+import javax.inject.Inject;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -37,14 +38,22 @@ import org.jboss.pressgang.ccms.server.utils.TopicUtilities;
 import org.jboss.pressgang.ccms.utils.constants.CommonConstants;
 import org.jboss.resteasy.spi.BadRequestException;
 
+@ApplicationScoped
 public class TopicV1Factory extends RESTDataObjectFactory<RESTTopicV1, Topic, RESTTopicCollectionV1, RESTTopicCollectionItemV1> {
-    public TopicV1Factory() {
-        super(Topic.class);
-    }
+    @Inject
+    protected TagV1Factory tagFactory;
+    @Inject
+    protected TopicPropertyTagV1Factory topicPropertyTagFactory;
+    @Inject
+    protected TopicSourceUrlV1Factory topicSourceUrlFactory;
+    @Inject
+    protected BugzillaBugV1Factory bugzillaBugFactory;
+    @Inject
+    protected TranslatedTopicV1Factory translatedTopicFactory;
 
     @Override
     public RESTTopicV1 createRESTEntityFromDBEntityInternal(final Topic entity, final String baseUrl, final String dataType,
-            final ExpandDataTrunk expand, final Number revision, final boolean expandParentReferences, final EntityManager entityManager) {
+            final ExpandDataTrunk expand, final Number revision, final boolean expandParentReferences) {
         assert entity != null : "Parameter entity can not be null";
         assert baseUrl != null : "Parameter baseUrl can not be null";
 
@@ -76,33 +85,33 @@ public class TopicV1Factory extends RESTDataObjectFactory<RESTTopicV1, Topic, RE
 
         // REVISIONS
         if (revision == null && expand != null && expand.contains(RESTTopicV1.REVISIONS_NAME)) {
-            retValue.setRevisions(RESTDataObjectCollectionFactory.create(RESTTopicCollectionV1.class, new TopicV1Factory(), entity,
+            retValue.setRevisions(RESTDataObjectCollectionFactory.create(RESTTopicCollectionV1.class, this, entity,
                     EnversUtilities.getRevisions(entityManager, entity), RESTBaseEntityV1.REVISIONS_NAME, dataType, expand, baseUrl,
                     entityManager));
         }
 
         // TAGS
         if (expand != null && expand.contains(RESTTopicV1.TAGS_NAME)) {
-            retValue.setTags(RESTDataObjectCollectionFactory.create(RESTTagCollectionV1.class, new TagV1Factory(), entity.getTags(),
+            retValue.setTags(RESTDataObjectCollectionFactory.create(RESTTagCollectionV1.class, tagFactory, entity.getTags(),
                     RESTv1Constants.TAGS_EXPANSION_NAME, dataType, expand, baseUrl, entityManager));
         }
 
         // OUTGOING RELATIONSHIPS
         if (expand != null && expand.contains(RESTTopicV1.OUTGOING_NAME)) {
-            retValue.setOutgoingRelationships(RESTDataObjectCollectionFactory.create(RESTTopicCollectionV1.class, new TopicV1Factory(),
+            retValue.setOutgoingRelationships(RESTDataObjectCollectionFactory.create(RESTTopicCollectionV1.class, this,
                     entity.getOutgoingRelatedTopicsArray(), RESTTopicV1.OUTGOING_NAME, dataType, expand, baseUrl, revision, entityManager));
         }
 
         // INCOMING RELATIONSHIPS
         if (expand != null && expand.contains(RESTTopicV1.INCOMING_NAME)) {
-            retValue.setIncomingRelationships(RESTDataObjectCollectionFactory.create(RESTTopicCollectionV1.class, new TopicV1Factory(),
+            retValue.setIncomingRelationships(RESTDataObjectCollectionFactory.create(RESTTopicCollectionV1.class, this,
                     entity.getIncomingRelatedTopicsArray(), RESTTopicV1.INCOMING_NAME, dataType, expand, baseUrl, revision, entityManager));
         }
 
         // PROPERTIES
         if (expand != null && expand.contains(RESTTopicV1.PROPERTIES_NAME)) {
             retValue.setProperties(
-                    RESTDataObjectCollectionFactory.create(RESTAssignedPropertyTagCollectionV1.class, new TopicPropertyTagV1Factory(),
+                    RESTDataObjectCollectionFactory.create(RESTAssignedPropertyTagCollectionV1.class, topicPropertyTagFactory,
                             entity.getTopicToPropertyTagsArray(), RESTTopicV1.PROPERTIES_NAME, dataType, expand, baseUrl, revision,
                             entityManager));
         }
@@ -110,7 +119,7 @@ public class TopicV1Factory extends RESTDataObjectFactory<RESTTopicV1, Topic, RE
         // SOURCE URLS
         if (expand != null && expand.contains(RESTTopicV1.SOURCE_URLS_NAME)) {
             retValue.setSourceUrls_OTM(
-                    RESTDataObjectCollectionFactory.create(RESTTopicSourceUrlCollectionV1.class, new TopicSourceUrlV1Factory(),
+                    RESTDataObjectCollectionFactory.create(RESTTopicSourceUrlCollectionV1.class, topicSourceUrlFactory,
                             entity.getTopicSourceUrls(), RESTTopicV1.SOURCE_URLS_NAME, dataType, expand, baseUrl, revision, false,
                             entityManager));
         }
@@ -118,7 +127,7 @@ public class TopicV1Factory extends RESTDataObjectFactory<RESTTopicV1, Topic, RE
         // BUGZILLA BUGS
         if (expand != null && expand.contains(RESTTopicV1.BUGZILLABUGS_NAME)) {
             retValue.setBugzillaBugs_OTM(
-                    RESTDataObjectCollectionFactory.create(RESTBugzillaBugCollectionV1.class, new BugzillaBugV1Factory(),
+                    RESTDataObjectCollectionFactory.create(RESTBugzillaBugCollectionV1.class, bugzillaBugFactory,
                             entity.getBugzillaBugs(), RESTTopicV1.BUGZILLABUGS_NAME, dataType, expand, baseUrl, revision, false,
                             entityManager));
         }
@@ -126,7 +135,7 @@ public class TopicV1Factory extends RESTDataObjectFactory<RESTTopicV1, Topic, RE
         // TRANSLATED TOPICS
         if (expand != null && expand.contains(RESTTopicV1.TRANSLATEDTOPICS_NAME)) {
             retValue.setTranslatedTopics_OTM(
-                    RESTDataObjectCollectionFactory.create(RESTTranslatedTopicCollectionV1.class, new TranslatedTopicV1Factory(),
+                    RESTDataObjectCollectionFactory.create(RESTTranslatedTopicCollectionV1.class, translatedTopicFactory,
                             entity.getTranslatedTopics(entityManager, revision), RESTTopicV1.TRANSLATEDTOPICS_NAME, dataType, expand,
                             baseUrl, revision, false, entityManager));
         }
@@ -137,7 +146,7 @@ public class TopicV1Factory extends RESTDataObjectFactory<RESTTopicV1, Topic, RE
     }
 
     @Override
-    public void syncDBEntityWithRESTEntity(final EntityManager entityManager, final Topic entity, final RESTTopicV1 dataObject) {
+    public void syncDBEntityWithRESTEntity(final Topic entity, final RESTTopicV1 dataObject) {
 
         /* sync the basic properties */
         if (dataObject.hasParameterSet(RESTTopicV1.TITLE_NAME)) entity.setTopicTitle(dataObject.getTitle());
@@ -205,7 +214,7 @@ public class TopicV1Factory extends RESTDataObjectFactory<RESTTopicV1, Topic, RE
                             "No TopicToPropertyTag entity was found with the primary key " + restEntity.getRelationshipId() +
                                     " for Topic " + entity.getId());
 
-                    new TopicPropertyTagV1Factory().syncDBEntityWithRESTEntity(entityManager, dbEntity, restEntity);
+                    topicPropertyTagFactory.syncDBEntityWithRESTEntity(dbEntity, restEntity);
                 }
             }
         }
@@ -286,7 +295,7 @@ public class TopicV1Factory extends RESTDataObjectFactory<RESTTopicV1, Topic, RE
 
                     entity.removeTopicSourceUrl(restEntity.getId());
                 } else if (restEntityItem.returnIsAddItem()) {
-                    final TopicSourceUrl dbEntity = new TopicSourceUrlV1Factory().createDBEntityFromRESTEntity(entityManager, restEntity);
+                    final TopicSourceUrl dbEntity = new TopicSourceUrlV1Factory().createDBEntityFromRESTEntity(restEntity);
                     entityManager.persist(dbEntity);
                     entity.addTopicSourceUrl(dbEntity);
                 } else if (restEntityItem.returnIsUpdateItem()) {
@@ -297,7 +306,7 @@ public class TopicV1Factory extends RESTDataObjectFactory<RESTTopicV1, Topic, RE
                         throw new BadRequestException("No TopicSourceUrl entity was found with the primary key " + restEntity.getId() +
                                 " for Topic " + entity.getId());
 
-                    new TopicSourceUrlV1Factory().syncDBEntityWithRESTEntity(entityManager, dbEntity, restEntity);
+                    topicSourceUrlFactory.syncDBEntityWithRESTEntity(dbEntity, restEntity);
                 }
             }
         }
@@ -318,7 +327,7 @@ public class TopicV1Factory extends RESTDataObjectFactory<RESTTopicV1, Topic, RE
 
                     entity.removeBugzillaBug(restEntity.getId());
                 } else if (restEntityItem.returnIsAddItem()) {
-                    final BugzillaBug dbEntity = new BugzillaBugV1Factory().createDBEntityFromRESTEntity(entityManager, restEntity);
+                    final BugzillaBug dbEntity = new BugzillaBugV1Factory().createDBEntityFromRESTEntity(restEntity);
                     entityManager.persist(dbEntity);
                     entity.addBugzillaBug(dbEntity);
                 } else if (restEntityItem.returnIsUpdateItem()) {
@@ -329,9 +338,14 @@ public class TopicV1Factory extends RESTDataObjectFactory<RESTTopicV1, Topic, RE
                         throw new BadRequestException("No BugzillaBug entity was found with the primary key " + restEntity.getId() +
                                 " for Topic " + entity.getId());
 
-                    new BugzillaBugV1Factory().syncDBEntityWithRESTEntity(entityManager, dbEntity, restEntity);
+                    bugzillaBugFactory.syncDBEntityWithRESTEntity(dbEntity, restEntity);
                 }
             }
         }
+    }
+
+    @Override
+    protected Class<Topic> getDatabaseClass() {
+        return Topic.class;
     }
 }
