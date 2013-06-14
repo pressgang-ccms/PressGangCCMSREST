@@ -1,6 +1,7 @@
 package org.jboss.pressgang.ccms.server.rest.v1;
 
 import javax.enterprise.context.ApplicationScoped;
+import javax.inject.Inject;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -22,6 +23,9 @@ import org.jboss.resteasy.spi.BadRequestException;
 
 @ApplicationScoped
 public class ImageV1Factory extends RESTDataObjectFactory<RESTImageV1, ImageFile, RESTImageCollectionV1, RESTImageCollectionItemV1> {
+    @Inject
+    protected LanguageImageV1Factory languageImageFactory;
+
     @Override
     public RESTImageV1 createRESTEntityFromDBEntityInternal(final ImageFile entity, final String baseUrl, final String dataType,
             final ExpandDataTrunk expand, final Number revision, final boolean expandParentReferences) {
@@ -76,9 +80,8 @@ public class ImageV1Factory extends RESTDataObjectFactory<RESTImageV1, ImageFile
 
                 if (restEntityItem.returnIsAddItem() || restEntityItem.returnIsRemoveItem()) {
                     if (restEntityItem.returnIsAddItem()) {
-                        final LanguageImage dbEntity = new LanguageImage();
+                        final LanguageImage dbEntity = languageImageFactory.createDBEntityFromRESTEntity(restEntity);
                         dbEntity.setImageFile(entity);
-                        new LanguageImageV1Factory().syncDBEntityWithRESTEntity(dbEntity, restEntity);
                         entity.getLanguageImages().add(dbEntity);
                     } else if (restEntityItem.returnIsRemoveItem()) {
                         final LanguageImage dbEntity = entityManager.find(LanguageImage.class, restEntity.getId());
@@ -96,7 +99,7 @@ public class ImageV1Factory extends RESTDataObjectFactory<RESTImageV1, ImageFile
                             "No LanguageImage entity was found with the primary key " + restEntity.getId() + " for Image " + entity.getId
                                     ());
 
-                    new LanguageImageV1Factory().syncDBEntityWithRESTEntity(dbEntity, restEntity);
+                    languageImageFactory.syncDBEntityWithRESTEntity(dbEntity, restEntity);
                 }
             }
         }
