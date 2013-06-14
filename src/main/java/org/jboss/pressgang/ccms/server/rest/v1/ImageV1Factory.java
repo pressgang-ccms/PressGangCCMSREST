@@ -99,7 +99,7 @@ public class ImageV1Factory extends RESTDataObjectFactory<RESTImageV1, ImageFile
                             "No LanguageImage entity was found with the primary key " + restEntity.getId() + " for Image " + entity.getId
                                     ());
 
-                    languageImageFactory.syncDBEntityWithRESTEntity(dbEntity, restEntity);
+                    languageImageFactory.updateDBEntityFromRESTEntity(dbEntity, restEntity);
                 }
             }
         }

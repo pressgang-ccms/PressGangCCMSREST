@@ -138,7 +138,7 @@ public class FilterV1Factory extends RESTDataObjectFactory<RESTFilterV1, Filter,
                         throw new BadRequestException("No FilterTag entity was found with the primary key " + restEntity.getId() + " for " +
                                 "Filter " + entity.getId());
 
-                    filterTagFactory.syncDBEntityWithRESTEntity(dbEntity, restEntity);
+                    filterTagFactory.updateDBEntityFromRESTEntity(dbEntity, restEntity);
                 }
             }
         }
@@ -170,7 +170,7 @@ public class FilterV1Factory extends RESTDataObjectFactory<RESTFilterV1, Filter,
                             "No FilterLocale entity was found with the primary key " + restEntity.getId() + " for Filter " + entity.getId
                                     ());
 
-                    filterLocaleFactory.syncDBEntityWithRESTEntity(dbEntity, restEntity);
+                    filterLocaleFactory.updateDBEntityFromRESTEntity(dbEntity, restEntity);
                 }
             }
         }
@@ -202,7 +202,7 @@ public class FilterV1Factory extends RESTDataObjectFactory<RESTFilterV1, Filter,
                             "No FilterCategory entity was found with the primary key " + restEntity.getId() + " for Filter " + entity
                                     .getId());
 
-                    filterCategoryFactory.syncDBEntityWithRESTEntity(dbEntity, restEntity);
+                    filterCategoryFactory.updateDBEntityFromRESTEntity(dbEntity, restEntity);
                 }
             }
         }
@@ -233,7 +233,7 @@ public class FilterV1Factory extends RESTDataObjectFactory<RESTFilterV1, Filter,
                     if (!entity.getFilterFields().contains(dbEntity)) throw new BadRequestException(
                             "No FilterField entity was found with the primary key " + restEntity.getId() + " for Filter " + entity.getId());
 
-                    filterFieldFactory.syncDBEntityWithRESTEntity(dbEntity, restEntity);
+                    filterFieldFactory.updateDBEntityFromRESTEntity(dbEntity, restEntity);
                 }
             }
         }

@@ -104,7 +104,7 @@ public class CategoryV1Factory extends RESTDataObjectFactory<RESTCategoryV1, Cat
                             "No TagToCategory entity was found with the primary key " + restEntity.getRelationshipId() + " for Category "
                                     + entity.getId());
 
-                    tagInCategoryFactory.syncDBEntityWithRESTEntity(dbEntity, restEntity);
+                    tagInCategoryFactory.updateDBEntityFromRESTEntity(dbEntity, restEntity);
                 }
             }
         }

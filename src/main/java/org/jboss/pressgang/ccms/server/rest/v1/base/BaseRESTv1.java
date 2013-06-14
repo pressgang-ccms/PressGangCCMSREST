@@ -392,7 +392,7 @@ public class BaseRESTv1 extends BaseREST {
                 if (entity == null) throw new BadRequestException("No entity was found with the primary key " + restEntity.getId());
 
                 // Sync the changes from the REST Entity to the Database.
-                factory.syncDBEntityWithRESTEntity(entity, restEntity);
+                factory.updateDBEntityFromRESTEntity(entity, restEntity);
 
             } else if (operation == DatabaseOperation.CREATE) {
                 // Create a new Database Entity using the REST Entity.
@@ -562,7 +562,7 @@ public class BaseRESTv1 extends BaseREST {
                     if (entity == null) throw new BadRequestException("No entity was found with the primary key " + restEntity.getId());
 
                     // Sync the database entity with the REST Entity
-                    factory.syncDBEntityWithRESTEntity(entity, restEntity);
+                    factory.updateDBEntityFromRESTEntity(entity, restEntity);
                 } else if (operation == DatabaseOperation.CREATE) {
                     // Create a Database Entity using the information from the REST Entity.
                     entity = factory.createDBEntityFromRESTEntity(restEntity);
@@ -1102,4 +1102,5 @@ public class BaseRESTv1 extends BaseREST {
         // If it's not some validation error then it must be an internal error.
         return new InternalServerErrorException(ex);
     }
+
 }

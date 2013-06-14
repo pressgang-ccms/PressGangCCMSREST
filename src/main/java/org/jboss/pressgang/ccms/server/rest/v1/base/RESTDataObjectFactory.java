@@ -24,6 +24,8 @@ import org.jboss.resteasy.spi.InternalServerErrorException;
 public abstract class RESTDataObjectFactory<T extends RESTBaseEntityV1<T, V, W>, U extends AuditedEntity,
         V extends RESTBaseCollectionV1<T, V, W>, W extends RESTBaseCollectionItemV1<T, V, W>> {
     @Inject
+    protected EntityCache entityCache;
+    @Inject
     protected EntityManager entityManager;
     @Inject
     protected LogDetailsV1Factory logDetailsFactory;
@@ -49,11 +51,10 @@ public abstract class RESTDataObjectFactory<T extends RESTBaseEntityV1<T, V, W>,
     /**
      * Create a REST Entity representation from Database Entity.
      *
-     *
-     * @param entity        The entity that is to be transformed into a REST Entity.
-     * @param baseUrl       The REST url that was used to access this REST entity
-     * @param dataType      The type of the returned data (XML or JSON)
-     * @param expand        The Object that contains details about what fields should be expanded.
+     * @param entity   The entity that is to be transformed into a REST Entity.
+     * @param baseUrl  The REST url that was used to access this REST entity
+     * @param dataType The type of the returned data (XML or JSON)
+     * @param expand   The Object that contains details about what fields should be expanded.
      * @return A new REST entity populated with the values in a database entity
      */
     public T createRESTEntityFromDBEntity(final U entity, final String baseUrl, final String dataType, final ExpandDataTrunk expand) {
@@ -63,12 +64,11 @@ public abstract class RESTDataObjectFactory<T extends RESTBaseEntityV1<T, V, W>,
     /**
      * Create a REST Entity representation from Database Entity.
      *
-     *
-     * @param entity        The entity that is to be transformed into a REST Entity.
-     * @param baseUrl       The REST url that was used to access this REST entity
-     * @param dataType      The type of the returned data (XML or JSON)
-     * @param expand        The Object that contains details about what fields should be expanded.
-     * @param revision      The revision number of the entity.
+     * @param entity   The entity that is to be transformed into a REST Entity.
+     * @param baseUrl  The REST url that was used to access this REST entity
+     * @param dataType The type of the returned data (XML or JSON)
+     * @param expand   The Object that contains details about what fields should be expanded.
+     * @param revision The revision number of the entity.
      * @return A new REST entity populated with the values in a database entity
      */
     public T createRESTEntityFromDBEntity(final U entity, final String baseUrl, final String dataType, final ExpandDataTrunk expand,
@@ -78,7 +78,6 @@ public abstract class RESTDataObjectFactory<T extends RESTBaseEntityV1<T, V, W>,
 
     /**
      * Create a REST Entity representation from Database Entity.
-     *
      *
      * @param entity                 The entity that is to be transformed into a REST Entity.
      * @param baseUrl                The REST url that was used to access this REST entity
@@ -107,7 +106,6 @@ public abstract class RESTDataObjectFactory<T extends RESTBaseEntityV1<T, V, W>,
     /**
      * Create a REST Entity representation from Database Entity.
      *
-     *
      * @param entity                 The entity that is to be transformed into a REST Entity.
      * @param baseUrl                The REST url that was used to access this REST entity
      * @param dataType               The type of the returned data (XML or JSON)
@@ -122,28 +120,39 @@ public abstract class RESTDataObjectFactory<T extends RESTBaseEntityV1<T, V, W>,
     /**
      * Populates the values of a database entity from a REST entity
      *
-     * @param entity        The database entity to be synced from the REST Entity.
-     * @param dataObject    The REST entity object.
+     * @param entity     The database entity to be synced from the REST Entity.
+     * @param dataObject The REST entity object.
      */
-    public abstract void syncDBEntityWithRESTEntity(final U entity, final T dataObject);
+    protected abstract void syncDBEntityWithRESTEntity(final U entity, final T dataObject);
 
     /**
      * Creates, populates and returns a new database entity from a REST entity
      *
-     *
-     * @param dataObject    The REST entity used to populate the database entity's values
+     * @param dataObject The REST entity used to populate the database entity's values
      * @return A new database entity with the values supplied from the dataObject
      */
     public U createDBEntityFromRESTEntity(final T dataObject) {
         try {
             final U entity = getDatabaseClass().newInstance();
             syncDBEntityWithRESTEntity(entity, dataObject);
+            entityCache.addNew(dataObject, entity);
             return entity;
         } catch (InstantiationException e) {
             throw new InternalServerErrorException(e);
         } catch (IllegalAccessException e) {
             throw new InternalServerErrorException(e);
         }
+    }
+
+    /**
+     * Updates a database entity from a REST entity
+     *
+     * @param entity     The database entity to be synced from the REST Entity.
+     * @param dataObject The REST entity used to populate the database entity's values
+     */
+    public void updateDBEntityFromRESTEntity(final U entity, final T dataObject) {
+        syncDBEntityWithRESTEntity(entity, dataObject);
+        entityCache.addUpdated(dataObject, entity);
     }
 
     /**

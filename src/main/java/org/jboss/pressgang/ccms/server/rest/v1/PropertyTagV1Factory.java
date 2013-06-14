@@ -104,7 +104,7 @@ public class PropertyTagV1Factory extends RESTDataObjectFactory<RESTPropertyTagV
                             "No PropertyTagToPropertyTagCategory entity was found with the primary key " + restEntity.getRelationshipId()
                                     + " for PropertyTag " + entity.getId());
 
-                    propertyCategoryInPropertyTagFactory.syncDBEntityWithRESTEntity(dbEntity, restEntity);
+                    propertyCategoryInPropertyTagFactory.updateDBEntityFromRESTEntity(dbEntity, restEntity);
                 }
             }
         }

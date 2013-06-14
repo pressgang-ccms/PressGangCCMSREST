@@ -142,7 +142,7 @@ public class TagV1Factory extends RESTDataObjectFactory<RESTTagV1, Tag, RESTTagC
                             "No TagToCategory entity was found with the primary key " + restEntity.getRelationshipId() + " for Tag " +
                                     entity.getId());
 
-                    categoryInTagFactory.syncDBEntityWithRESTEntity(dbEntity, restEntity);
+                    categoryInTagFactory.updateDBEntityFromRESTEntity(dbEntity, restEntity);
                 }
             }
         }
@@ -237,7 +237,7 @@ public class TagV1Factory extends RESTDataObjectFactory<RESTTagV1, Tag, RESTTagC
                             "No TagToPropertyTag entity was found with the primary key " + restEntity.getRelationshipId() + " for Tag " +
                                     entity.getId());
 
-                    tagPropertyTagFactory.syncDBEntityWithRESTEntity(dbEntity, restEntity);
+                    tagPropertyTagFactory.updateDBEntityFromRESTEntity(dbEntity, restEntity);
                 }
             }
         }

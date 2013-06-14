@@ -214,7 +214,7 @@ public class TopicV1Factory extends RESTDataObjectFactory<RESTTopicV1, Topic, RE
                             "No TopicToPropertyTag entity was found with the primary key " + restEntity.getRelationshipId() +
                                     " for Topic " + entity.getId());
 
-                    topicPropertyTagFactory.syncDBEntityWithRESTEntity(dbEntity, restEntity);
+                    topicPropertyTagFactory.updateDBEntityFromRESTEntity(dbEntity, restEntity);
                 }
             }
         }
@@ -291,7 +291,6 @@ public class TopicV1Factory extends RESTDataObjectFactory<RESTTopicV1, Topic, RE
                     entity.removeTopicSourceUrl(restEntity.getId());
                 } else if (restEntityItem.returnIsAddItem()) {
                     final TopicSourceUrl dbEntity = new TopicSourceUrlV1Factory().createDBEntityFromRESTEntity(restEntity);
-                    entityManager.persist(dbEntity);
                     entity.addTopicSourceUrl(dbEntity);
                 } else if (restEntityItem.returnIsUpdateItem()) {
                     final TopicSourceUrl dbEntity = entityManager.find(TopicSourceUrl.class, restEntity.getId());
@@ -301,7 +300,7 @@ public class TopicV1Factory extends RESTDataObjectFactory<RESTTopicV1, Topic, RE
                         throw new BadRequestException("No TopicSourceUrl entity was found with the primary key " + restEntity.getId() +
                                 " for Topic " + entity.getId());
 
-                    topicSourceUrlFactory.syncDBEntityWithRESTEntity(dbEntity, restEntity);
+                    topicSourceUrlFactory.updateDBEntityFromRESTEntity(dbEntity, restEntity);
                 }
             }
         }
@@ -323,7 +322,6 @@ public class TopicV1Factory extends RESTDataObjectFactory<RESTTopicV1, Topic, RE
                     entity.removeBugzillaBug(restEntity.getId());
                 } else if (restEntityItem.returnIsAddItem()) {
                     final BugzillaBug dbEntity = new BugzillaBugV1Factory().createDBEntityFromRESTEntity(restEntity);
-                    entityManager.persist(dbEntity);
                     entity.addBugzillaBug(dbEntity);
                 } else if (restEntityItem.returnIsUpdateItem()) {
                     final BugzillaBug dbEntity = entityManager.find(BugzillaBug.class, restEntity.getId());
@@ -333,7 +331,7 @@ public class TopicV1Factory extends RESTDataObjectFactory<RESTTopicV1, Topic, RE
                         throw new BadRequestException("No BugzillaBug entity was found with the primary key " + restEntity.getId() +
                                 " for Topic " + entity.getId());
 
-                    bugzillaBugFactory.syncDBEntityWithRESTEntity(dbEntity, restEntity);
+                    bugzillaBugFactory.updateDBEntityFromRESTEntity(dbEntity, restEntity);
                 }
             }
         }
