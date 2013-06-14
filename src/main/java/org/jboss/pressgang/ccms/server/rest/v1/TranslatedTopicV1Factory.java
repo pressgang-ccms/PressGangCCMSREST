@@ -206,10 +206,6 @@ public class TranslatedTopicV1Factory extends RESTDataObjectFactory<RESTTranslat
 
         translatedTopic.getTranslatedTopicDatas().add(entity);
 
-        // Save the changes done to the translated topic
-        entityManager.persist(translatedTopic);
-        entityManager.persist(entity);
-
         // One To Many - Add will create a child entity
         if (dataObject.hasParameterSet(
                 RESTTranslatedTopicV1.TRANSLATEDTOPICSTRING_NAME) && dataObject.getTranslatedTopicStrings_OTM() != null && dataObject

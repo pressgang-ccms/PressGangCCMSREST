@@ -69,8 +69,6 @@ public class ProjectV1Factory extends RESTDataObjectFactory<RESTProjectV1, Proje
         if (dataObject.hasParameterSet(RESTProjectV1.DESCRIPTION_NAME)) entity.setProjectDescription(dataObject.getDescription());
         if (dataObject.hasParameterSet(RESTProjectV1.NAME_NAME)) entity.setProjectName(dataObject.getName());
 
-        entityManager.persist(entity);
-
         /* Many To Many - Add will create a mapping */
         if (dataObject.hasParameterSet(
                 RESTProjectV1.TAGS_NAME) && dataObject.getTags() != null && dataObject.getTags().getItems() != null) {

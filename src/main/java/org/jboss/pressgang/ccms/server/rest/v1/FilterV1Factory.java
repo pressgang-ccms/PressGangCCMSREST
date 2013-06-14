@@ -111,8 +111,6 @@ public class FilterV1Factory extends RESTDataObjectFactory<RESTFilterV1, Filter,
         if (dataObject.hasParameterSet(RESTFilterV1.NAME_NAME)) entity.setFilterName(dataObject.getName());
         if (dataObject.hasParameterSet(RESTFilterV1.DESCRIPTION_NAME)) entity.setFilterDescription(dataObject.getDescription());
 
-        entityManager.persist(entity);
-
         /* One To Many - Add will create a child entity */
         if (dataObject.hasParameterSet(
                 RESTFilterV1.FILTER_TAGS_NAME) && dataObject.getFilterTags_OTM() != null && dataObject.getFilterTags_OTM().getItems() !=

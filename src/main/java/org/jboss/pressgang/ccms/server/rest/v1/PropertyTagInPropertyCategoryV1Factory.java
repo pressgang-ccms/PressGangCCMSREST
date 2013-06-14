@@ -72,8 +72,6 @@ public class PropertyTagInPropertyCategoryV1Factory extends RESTDataObjectFactor
             final RESTPropertyTagInPropertyCategoryV1 dataObject) {
         if (dataObject.hasParameterSet(RESTPropertyTagInPropertyCategoryV1.RELATIONSHIP_SORT_NAME))
             entity.setSorting(dataObject.getRelationshipSort());
-
-        entityManager.persist(entity);
     }
 
     @Override

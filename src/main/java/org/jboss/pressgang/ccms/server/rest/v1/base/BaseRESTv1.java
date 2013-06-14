@@ -404,6 +404,7 @@ public class BaseRESTv1 extends BaseREST {
 
             assert entity != null : "entity should not be null";
 
+            entityManager.persist(entity);
             entityManager.flush();
             transactionManager.commit();
 
@@ -1045,7 +1046,7 @@ public class BaseRESTv1 extends BaseREST {
      * @return A RESTEasy Exception containing the details of the Error.
      */
     public Failure processError(final TransactionManager transactionManager, final Throwable ex) {
-        log.debug("", ex);
+        log.error("", ex);
 
         // Rollback if a transaction is active
         try {

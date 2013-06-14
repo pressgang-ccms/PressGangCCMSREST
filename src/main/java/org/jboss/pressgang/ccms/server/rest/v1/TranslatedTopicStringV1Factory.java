@@ -70,8 +70,6 @@ public class TranslatedTopicStringV1Factory extends RESTDataObjectFactory<RESTTr
             entity.setTranslatedString(dataObject.getTranslatedString());
         if (dataObject.hasParameterSet(RESTTranslatedTopicStringV1.FUZZY_TRANSLATION_NAME))
             entity.setFuzzyTranslation(dataObject.getFuzzyTranslation());
-
-        entityManager.persist(entity);
     }
 
     @Override

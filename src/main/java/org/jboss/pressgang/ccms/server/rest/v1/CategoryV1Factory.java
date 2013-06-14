@@ -76,8 +76,6 @@ public class CategoryV1Factory extends RESTDataObjectFactory<RESTCategoryV1, Cat
         if (dataObject.hasParameterSet(RESTCategoryV1.NAME_NAME)) entity.setCategoryName(dataObject.getName());
         if (dataObject.hasParameterSet(RESTCategoryV1.SORT_NAME)) entity.setCategorySort(dataObject.getSort());
 
-        entityManager.persist(entity);
-
         /* Many To Many - Add will create a mapping */
         if (dataObject.hasParameterSet(
                 RESTCategoryV1.TAGS_NAME) && dataObject.getTags() != null && dataObject.getTags().getItems() != null) {

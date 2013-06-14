@@ -52,8 +52,6 @@ public class StringConstantV1Factory extends RESTDataObjectFactory<RESTStringCon
     public void syncDBEntityWithRESTEntity(final StringConstants entity, final RESTStringConstantV1 dataObject) {
         if (dataObject.hasParameterSet(RESTStringConstantV1.NAME_NAME)) entity.setConstantName(dataObject.getName());
         if (dataObject.hasParameterSet(RESTStringConstantV1.VALUE_NAME)) entity.setConstantValue(dataObject.getValue());
-
-        entityManager.persist(entity);
     }
 
     @Override

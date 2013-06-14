@@ -65,7 +65,5 @@ public abstract class BaseAssignedPropertyTagV1Factory<T extends ToPropertyTag<T
     @Override
     public void syncDBEntityWithRESTEntity(final T entity, final RESTAssignedPropertyTagV1 dataObject) {
         if (dataObject.hasParameterSet(RESTAssignedPropertyTagV1.VALUE_NAME)) entity.setValue(dataObject.getValue());
-
-        entityManager.persist(entity);
     }
 }

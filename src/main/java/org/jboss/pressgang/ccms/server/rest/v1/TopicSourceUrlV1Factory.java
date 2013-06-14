@@ -53,8 +53,6 @@ public class TopicSourceUrlV1Factory extends RESTDataObjectFactory<RESTTopicSour
         if (dataObject.hasParameterSet(RESTTopicSourceUrlV1.TITLE_NAME)) entity.setTitle(dataObject.getTitle());
         if (dataObject.hasParameterSet(RESTTopicSourceUrlV1.DESCRIPTION_NAME)) entity.setDescription(dataObject.getDescription());
         if (dataObject.hasParameterSet(RESTTopicSourceUrlV1.URL_NAME)) entity.setSourceUrl(dataObject.getUrl());
-
-        entityManager.persist(entity);
     }
 
     @Override

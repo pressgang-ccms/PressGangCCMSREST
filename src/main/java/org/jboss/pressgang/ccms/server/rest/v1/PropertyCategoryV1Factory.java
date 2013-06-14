@@ -72,8 +72,6 @@ public class PropertyCategoryV1Factory extends RESTDataObjectFactory<RESTPropert
             entity.setPropertyTagCategoryDescription(dataObject.getDescription());
         if (dataObject.hasParameterSet(RESTPropertyCategoryV1.NAME_NAME)) entity.setPropertyTagCategoryName(dataObject.getName());
 
-        entityManager.persist(entity);
-
         if (dataObject.hasParameterSet(
                 RESTPropertyCategoryV1.PROPERTY_TAGS_NAME) && dataObject.getPropertyTags() != null && dataObject.getPropertyTags()
                 .getItems() != null) {

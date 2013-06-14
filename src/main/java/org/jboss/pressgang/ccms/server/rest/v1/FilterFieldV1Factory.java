@@ -62,8 +62,6 @@ public class FilterFieldV1Factory extends RESTDataObjectFactory<RESTFilterFieldV
         if (dataObject.hasParameterSet(RESTFilterFieldV1.DESCRIPTION_NAME)) entity.setDescription(dataObject.getDescription());
         if (dataObject.hasParameterSet(RESTFilterFieldV1.NAME_NAME)) entity.setField(dataObject.getName());
         if (dataObject.hasParameterSet(RESTFilterFieldV1.VALUE_NAME)) entity.setValue(dataObject.getValue());
-
-        entityManager.persist(entity);
     }
 
     @Override

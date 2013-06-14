@@ -223,11 +223,6 @@ public class TopicV1Factory extends RESTDataObjectFactory<RESTTopicV1, Topic, RE
         TopicUtilities.syncXML(entityManager, entity);
         TopicUtilities.validateXML(entityManager, entity, CommonConstants.ROCBOOK_DTD_BLOB_ID);
 
-        /*
-         * Persist the entity before adding anything else as they require an id for the topic
-         */
-        entityManager.persist(entity);
-
         if (dataObject.hasParameterSet(
                 RESTTopicV1.OUTGOING_NAME) && dataObject.getOutgoingRelationships() != null && dataObject.getOutgoingRelationships()
                 .getItems() != null) {

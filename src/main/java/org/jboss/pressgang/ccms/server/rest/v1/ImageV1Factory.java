@@ -100,8 +100,6 @@ public class ImageV1Factory extends RESTDataObjectFactory<RESTImageV1, ImageFile
                 }
             }
         }
-
-        entityManager.persist(entity);
     }
 
     @Override

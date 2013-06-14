@@ -77,8 +77,6 @@ public class PropertyTagV1Factory extends RESTDataObjectFactory<RESTPropertyTagV
         if (dataObject.hasParameterSet(RESTPropertyTagV1.REGEX_NAME)) entity.setPropertyTagRegex(dataObject.getRegex());
         if (dataObject.hasParameterSet(RESTPropertyTagV1.ISUNIQUE_NAME)) entity.setPropertyTagIsUnique(dataObject.getIsUnique());
 
-        entityManager.persist(entity);
-
         if (dataObject.hasParameterSet(
                 RESTPropertyTagV1.PROPERTY_CATEGORIES_NAME) && dataObject.getPropertyCategories() != null && dataObject
                 .getPropertyCategories().getItems() != null) {

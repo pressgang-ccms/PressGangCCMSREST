@@ -72,8 +72,6 @@ public class UserV1Factory extends RESTDataObjectFactory<RESTUserV1, User, RESTU
         if (dataObject.hasParameterSet(RESTUserV1.NAME_NAME))
             entity.setUserName(dataObject.getName());
 
-        entityManager.persist(entity);
-
         if (dataObject.hasParameterSet(
                 RESTUserV1.ROLES_NAME) && dataObject.getRoles() != null && dataObject.getRoles().getItems() != null) {
             dataObject.getRoles().removeInvalidChangeItemRequests();
@@ -82,12 +80,9 @@ public class UserV1Factory extends RESTDataObjectFactory<RESTUserV1, User, RESTU
                 final RESTRoleV1 restEntity = restEntityItem.getItem();
 
                 if (restEntityItem.returnIsAddItem() || restEntityItem.returnIsRemoveItem()) {
-                    final Role dbEntity;
-                    try {
-                        dbEntity = entityManager.getReference(Role.class, restEntity.getId());
-                    } catch (Exception e) {
-                        throw new BadRequestException("No entity was found with the primary key " + restEntity.getId(), e);
-                    }
+                    final Role dbEntity = entityManager.find(Role.class, restEntity.getId());
+                    if (dbEntity == null)
+                        throw new BadRequestException("No entity was found with the primary key " + restEntity.getId());
 
                     if (restEntityItem.returnIsAddItem()) {
                         entity.addRole(dbEntity);
