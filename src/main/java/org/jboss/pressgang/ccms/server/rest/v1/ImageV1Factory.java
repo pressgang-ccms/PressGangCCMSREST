@@ -1,13 +1,12 @@
 package org.jboss.pressgang.ccms.server.rest.v1;
 
-import javax.persistence.EntityManager;
+import javax.enterprise.context.ApplicationScoped;
+import javax.inject.Inject;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
 
 import org.jboss.pressgang.ccms.model.ImageFile;
 import org.jboss.pressgang.ccms.model.LanguageImage;
-import org.jboss.pressgang.ccms.model.base.AuditedEntity;
 import org.jboss.pressgang.ccms.rest.v1.collections.RESTImageCollectionV1;
 import org.jboss.pressgang.ccms.rest.v1.collections.RESTLanguageImageCollectionV1;
 import org.jboss.pressgang.ccms.rest.v1.collections.items.RESTImageCollectionItemV1;
@@ -23,16 +22,14 @@ import org.jboss.pressgang.ccms.server.rest.v1.utils.RESTv1Utilities;
 import org.jboss.pressgang.ccms.server.utils.EnversUtilities;
 import org.jboss.resteasy.spi.BadRequestException;
 
+@ApplicationScoped
 public class ImageV1Factory extends RESTDataObjectFactory<RESTImageV1, ImageFile, RESTImageCollectionV1, RESTImageCollectionItemV1> {
-    private final LanguageImageV1Factory languageImageFactory = new LanguageImageV1Factory();
-
-    public ImageV1Factory() {
-        super(ImageFile.class);
-    }
+    @Inject
+    protected LanguageImageV1Factory languageImageFactory;
 
     @Override
     public RESTImageV1 createRESTEntityFromDBEntityInternal(final ImageFile entity, final String baseUrl, final String dataType,
-            final ExpandDataTrunk expand, final Number revision, final boolean expandParentReferences, final EntityManager entityManager) {
+            final ExpandDataTrunk expand, final Number revision, final boolean expandParentReferences) {
         assert entity != null : "Parameter entity can not be null";
         assert baseUrl != null : "Parameter baseUrl can not be null";
 
@@ -51,19 +48,17 @@ public class ImageV1Factory extends RESTDataObjectFactory<RESTImageV1, ImageFile
 
         // REVISIONS
         if (revision == null && expand != null && expand.contains(RESTBaseEntityV1.REVISIONS_NAME)) {
-            retValue.setRevisions(
-                    new RESTDataObjectCollectionFactory<RESTImageV1, ImageFile, RESTImageCollectionV1, RESTImageCollectionItemV1>().create(
-                            RESTImageCollectionV1.class, new ImageV1Factory(), entity, EnversUtilities.getRevisions(entityManager, entity),
-                            RESTBaseEntityV1.REVISIONS_NAME, dataType, expand, baseUrl, entityManager));
+            retValue.setRevisions(RESTDataObjectCollectionFactory.create(RESTImageCollectionV1.class, new ImageV1Factory(), entity,
+                    EnversUtilities.getRevisions(entityManager, entity), RESTBaseEntityV1.REVISIONS_NAME, dataType, expand, baseUrl,
+                    entityManager));
         }
 
         // LANGUAGE IMAGES
         if (expand != null && expand.contains(RESTImageV1.LANGUAGEIMAGES_NAME)) {
             retValue.setLanguageImages_OTM(
-                    new RESTDataObjectCollectionFactory<RESTLanguageImageV1, LanguageImage, RESTLanguageImageCollectionV1,
-                            RESTLanguageImageCollectionItemV1>().create(
-                            RESTLanguageImageCollectionV1.class, new LanguageImageV1Factory(), entity.getLanguageImagesArray(),
-                            RESTImageV1.LANGUAGEIMAGES_NAME, dataType, expand, baseUrl, false, entityManager));
+                    RESTDataObjectCollectionFactory.create(RESTLanguageImageCollectionV1.class, languageImageFactory,
+                            entity.getLanguageImagesArray(), RESTImageV1.LANGUAGEIMAGES_NAME, dataType, expand, baseUrl, false,
+                            entityManager));
         }
 
         retValue.setLinks(baseUrl, RESTv1Constants.IMAGE_URL_NAME, dataType, retValue.getId());
@@ -72,8 +67,7 @@ public class ImageV1Factory extends RESTDataObjectFactory<RESTImageV1, ImageFile
     }
 
     @Override
-    public void syncDBEntityWithRESTEntityFirstPass(final EntityManager entityManager,
-            Map<RESTBaseEntityV1<?, ?, ?>, AuditedEntity> newEntityCache, final ImageFile entity, final RESTImageV1 dataObject) {
+    public void syncDBEntityWithRESTEntityFirstPass(final ImageFile entity, final RESTImageV1 dataObject) {
         if (dataObject.hasParameterSet(RESTImageV1.DESCRIPTION_NAME)) entity.setDescription(dataObject.getDescription());
 
         /* One To Many - Add will create a child entity */
@@ -86,8 +80,7 @@ public class ImageV1Factory extends RESTDataObjectFactory<RESTImageV1, ImageFile
                 final RESTLanguageImageV1 restEntity = restEntityItem.getItem();
 
                 if (restEntityItem.returnIsAddItem()) {
-                    final LanguageImage dbEntity = languageImageFactory.createDBEntityFromRESTEntity(entityManager, newEntityCache,
-                            restEntity);
+                    final LanguageImage dbEntity = languageImageFactory.createDBEntityFromRESTEntity(restEntity);
                     entity.addLanguageImage(dbEntity);
                 } else if (restEntityItem.returnIsRemoveItem()) {
                     final LanguageImage dbEntity = entityManager.find(LanguageImage.class, restEntity.getId());
@@ -104,17 +97,14 @@ public class ImageV1Factory extends RESTDataObjectFactory<RESTImageV1, ImageFile
                             "No LanguageImage entity was found with the primary key " + restEntity.getId() + " for Image " + entity.getId
                                     ());
 
-                    languageImageFactory.syncDBEntityWithRESTEntityFirstPass(entityManager, newEntityCache, dbEntity, restEntity);
+                    languageImageFactory.updateDBEntityFromRESTEntity(dbEntity, restEntity);
                 }
             }
         }
-
-        entityManager.persist(entity);
     }
 
     @Override
-    public void syncDBEntityWithRESTEntitySecondPass(EntityManager entityManager,
-            Map<RESTBaseEntityV1<?, ?, ?>, AuditedEntity> newEntityCache, ImageFile entity, RESTImageV1 dataObject) {
+    public void syncDBEntityWithRESTEntitySecondPass(ImageFile entity, RESTImageV1 dataObject) {
         // One To Many - Do the second pass on the add or update items
         if (dataObject.hasParameterSet(
                 RESTImageV1.LANGUAGEIMAGES_NAME) && dataObject.getLanguageImages_OTM() != null && dataObject.getLanguageImages_OTM()
@@ -125,14 +115,19 @@ public class ImageV1Factory extends RESTDataObjectFactory<RESTImageV1, ImageFile
                 final RESTLanguageImageV1 restEntity = restEntityItem.getItem();
 
                 if (restEntityItem.returnIsAddItem() || restEntityItem.returnIsUpdateItem()) {
-                    final LanguageImage dbEntity = RESTv1Utilities.findEntity(entityManager, newEntityCache, restEntity,
+                    final LanguageImage dbEntity = RESTv1Utilities.findEntity(entityManager, entityCache, restEntity,
                             LanguageImage.class);
                     if (dbEntity == null)
                         throw new BadRequestException("No LanguageImage entity was found with the primary key " + restEntity.getId());
 
-                    languageImageFactory.syncDBEntityWithRESTEntitySecondPass(entityManager, newEntityCache, dbEntity, restEntity);
+                    languageImageFactory.syncDBEntityWithRESTEntitySecondPass(dbEntity, restEntity);
                 }
             }
         }
+    }
+
+    @Override
+    protected Class<ImageFile> getDatabaseClass() {
+        return ImageFile.class;
     }
 }

@@ -1,14 +1,13 @@
 package org.jboss.pressgang.ccms.server.rest.v1;
 
-import javax.persistence.EntityManager;
+import javax.enterprise.context.ApplicationScoped;
+import javax.inject.Inject;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
 
 import org.jboss.pressgang.ccms.model.Category;
 import org.jboss.pressgang.ccms.model.FilterCategory;
 import org.jboss.pressgang.ccms.model.Project;
-import org.jboss.pressgang.ccms.model.base.AuditedEntity;
 import org.jboss.pressgang.ccms.rest.v1.collections.RESTFilterCategoryCollectionV1;
 import org.jboss.pressgang.ccms.rest.v1.collections.items.RESTFilterCategoryCollectionItemV1;
 import org.jboss.pressgang.ccms.rest.v1.entities.RESTCategoryV1;
@@ -22,17 +21,19 @@ import org.jboss.pressgang.ccms.server.rest.v1.utils.RESTv1Utilities;
 import org.jboss.pressgang.ccms.server.utils.EnversUtilities;
 import org.jboss.resteasy.spi.BadRequestException;
 
+@ApplicationScoped
 public class FilterCategoryV1Factory extends RESTDataObjectFactory<RESTFilterCategoryV1, FilterCategory, RESTFilterCategoryCollectionV1,
         RESTFilterCategoryCollectionItemV1> {
-
-    public FilterCategoryV1Factory() {
-        super(FilterCategory.class);
-    }
+    @Inject
+    protected FilterV1Factory filterFactory;
+    @Inject
+    protected CategoryV1Factory categoryFactory;
+    @Inject
+    protected ProjectV1Factory projectFactory;
 
     @Override
     public RESTFilterCategoryV1 createRESTEntityFromDBEntityInternal(final FilterCategory entity, final String baseUrl,
-            final String dataType, final ExpandDataTrunk expand, final Number revision, boolean expandParentReferences,
-            final EntityManager entityManager) {
+            final String dataType, final ExpandDataTrunk expand, final Number revision, boolean expandParentReferences) {
         assert entity != null : "Parameter entity can not be null";
         assert baseUrl != null : "Parameter baseUrl can not be null";
 
@@ -51,50 +52,43 @@ public class FilterCategoryV1Factory extends RESTDataObjectFactory<RESTFilterCat
 
         // REVISIONS
         if (revision == null && expand != null && expand.contains(RESTBaseEntityV1.REVISIONS_NAME)) {
-            retValue.setRevisions(
-                    new RESTDataObjectCollectionFactory<RESTFilterCategoryV1, FilterCategory, RESTFilterCategoryCollectionV1,
-                            RESTFilterCategoryCollectionItemV1>().create(
-                            RESTFilterCategoryCollectionV1.class, new FilterCategoryV1Factory(), entity,
-                            EnversUtilities.getRevisions(entityManager, entity), RESTBaseEntityV1.REVISIONS_NAME, dataType, expand, baseUrl,
-                            entityManager));
+            retValue.setRevisions(RESTDataObjectCollectionFactory.create(RESTFilterCategoryCollectionV1.class, this, entity,
+                    EnversUtilities.getRevisions(entityManager, entity), RESTBaseEntityV1.REVISIONS_NAME, dataType, expand, baseUrl,
+                    entityManager));
         }
 
         // PARENT
         if (expandParentReferences && expand != null && expand.contains(RESTFilterCategoryV1.FILTER_NAME) && entity.getFilter() != null) {
-            retValue.setFilter(new FilterV1Factory().createRESTEntityFromDBEntity(entity.getFilter(), baseUrl, dataType,
-                    expand.get(RESTFilterCategoryV1.FILTER_NAME), revision, expandParentReferences, entityManager));
+            retValue.setFilter(filterFactory.createRESTEntityFromDBEntity(entity.getFilter(), baseUrl, dataType,
+                    expand.get(RESTFilterCategoryV1.FILTER_NAME), revision, expandParentReferences));
         }
 
         // FILTER CATEGORY
         if (expand != null && expand.contains(RESTFilterCategoryV1.CATEGORY_NAME) && entity.getCategory() != null) retValue.setCategory(
-                new CategoryV1Factory().createRESTEntityFromDBEntity(entity.getCategory(), baseUrl, dataType,
-                        expand.get(RESTFilterCategoryV1.CATEGORY_NAME), revision, expandParentReferences, entityManager));
+                categoryFactory.createRESTEntityFromDBEntity(entity.getCategory(), baseUrl, dataType,
+                        expand.get(RESTFilterCategoryV1.CATEGORY_NAME), revision, expandParentReferences));
 
         // FILTER PROJECT
         if (expand != null && expand.contains(RESTFilterCategoryV1.PROJECT_NAME) && entity.getProject() != null) retValue.setProject(
-                new ProjectV1Factory().createRESTEntityFromDBEntity(entity.getProject(), baseUrl, dataType,
-                        expand.get(RESTFilterCategoryV1.PROJECT_NAME), revision, expandParentReferences, entityManager));
+                projectFactory.createRESTEntityFromDBEntity(entity.getProject(), baseUrl, dataType,
+                        expand.get(RESTFilterCategoryV1.PROJECT_NAME), revision, expandParentReferences));
 
         return retValue;
     }
 
     @Override
-    public void syncDBEntityWithRESTEntityFirstPass(final EntityManager entityManager,
-            Map<RESTBaseEntityV1<?, ?, ?>, AuditedEntity> newEntityCache, final FilterCategory entity,
-            final RESTFilterCategoryV1 dataObject) {
-
+    public void syncDBEntityWithRESTEntityFirstPass(final FilterCategory entity, final RESTFilterCategoryV1 dataObject) {
         if (dataObject.hasParameterSet(RESTFilterCategoryV1.STATE_NAME)) entity.setCategoryState(dataObject.getState());
     }
 
     @Override
-    public void syncDBEntityWithRESTEntitySecondPass(EntityManager entityManager,
-            Map<RESTBaseEntityV1<?, ?, ?>, AuditedEntity> newEntityCache, FilterCategory entity, RESTFilterCategoryV1 dataObject) {
-        /* Set the Category for the FilterCategory */
+    public void syncDBEntityWithRESTEntitySecondPass(final FilterCategory entity, final RESTFilterCategoryV1 dataObject) {
+        // Set the Category for the FilterCategory
         if (dataObject.hasParameterSet(RESTFilterCategoryV1.CATEGORY_NAME)) {
             final RESTCategoryV1 restEntity = dataObject.getCategory();
 
             if (restEntity != null) {
-                final Category dbEntity = RESTv1Utilities.findEntity(entityManager, newEntityCache, restEntity, Category.class);
+                final Category dbEntity = RESTv1Utilities.findEntity(entityManager, entityCache, restEntity, Category.class);
                 if (dbEntity == null)
                     throw new BadRequestException("No Category entity was found with the primary key " + restEntity.getId());
 
@@ -104,12 +98,12 @@ public class FilterCategoryV1Factory extends RESTDataObjectFactory<RESTFilterCat
             }
         }
 
-        /* Set the Project for the FilterCategory */
+        // Set the Project for the FilterCategory
         if (dataObject.hasParameterSet(RESTFilterCategoryV1.PROJECT_NAME)) {
             final RESTProjectV1 restEntity = dataObject.getProject();
 
             if (restEntity != null) {
-                final Project dbEntity = RESTv1Utilities.findEntity(entityManager, newEntityCache, restEntity, Project.class);
+                final Project dbEntity = RESTv1Utilities.findEntity(entityManager, entityCache, restEntity, Project.class);
                 if (dbEntity == null)
                     throw new BadRequestException("No Project entity was found with the primary key " + restEntity.getId());
 
@@ -118,7 +112,11 @@ public class FilterCategoryV1Factory extends RESTDataObjectFactory<RESTFilterCat
                 entity.setProject(null);
             }
         }
+    }
 
+    @Override
+    protected Class<FilterCategory> getDatabaseClass() {
+        return FilterCategory.class;
     }
 
 }

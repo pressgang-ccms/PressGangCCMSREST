@@ -1,12 +1,11 @@
 package org.jboss.pressgang.ccms.server.rest.v1;
 
-import javax.persistence.EntityManager;
+import javax.enterprise.context.ApplicationScoped;
+import javax.inject.Inject;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
 
 import org.jboss.pressgang.ccms.model.TranslatedTopicString;
-import org.jboss.pressgang.ccms.model.base.AuditedEntity;
 import org.jboss.pressgang.ccms.rest.v1.collections.RESTTranslatedTopicStringCollectionV1;
 import org.jboss.pressgang.ccms.rest.v1.collections.items.RESTTranslatedTopicStringCollectionItemV1;
 import org.jboss.pressgang.ccms.rest.v1.entities.RESTTopicV1;
@@ -17,16 +16,15 @@ import org.jboss.pressgang.ccms.server.rest.v1.base.RESTDataObjectCollectionFact
 import org.jboss.pressgang.ccms.server.rest.v1.base.RESTDataObjectFactory;
 import org.jboss.pressgang.ccms.server.utils.EnversUtilities;
 
+@ApplicationScoped
 public class TranslatedTopicStringV1Factory extends RESTDataObjectFactory<RESTTranslatedTopicStringV1, TranslatedTopicString,
         RESTTranslatedTopicStringCollectionV1, RESTTranslatedTopicStringCollectionItemV1> {
-    public TranslatedTopicStringV1Factory() {
-        super(TranslatedTopicString.class);
-    }
+    @Inject
+    protected TranslatedTopicV1Factory translatedTopicFactory;
 
     @Override
     public RESTTranslatedTopicStringV1 createRESTEntityFromDBEntityInternal(final TranslatedTopicString entity, final String baseUrl,
-            final String dataType, final ExpandDataTrunk expand, final Number revision, final boolean expandParentReferences,
-            final EntityManager entityManager) {
+            final String dataType, final ExpandDataTrunk expand, final Number revision, final boolean expandParentReferences) {
         assert entity != null : "Parameter entity can not be null";
         assert baseUrl != null : "Parameter baseUrl can not be null";
 
@@ -50,34 +48,32 @@ public class TranslatedTopicStringV1Factory extends RESTDataObjectFactory<RESTTr
         if (expandParentReferences && expand != null && expand.contains(
                 RESTTranslatedTopicStringV1.TRANSLATEDTOPIC_NAME) && entity.getTranslatedTopicData() != null) {
             retValue.setTranslatedTopic(
-                    new TranslatedTopicV1Factory().createRESTEntityFromDBEntity(entity.getTranslatedTopicData(), baseUrl, dataType,
-                            expand.get(RESTTranslatedTopicStringV1.TRANSLATEDTOPIC_NAME), revision, expandParentReferences, entityManager));
+                    translatedTopicFactory.createRESTEntityFromDBEntity(entity.getTranslatedTopicData(), baseUrl, dataType,
+                            expand.get(RESTTranslatedTopicStringV1.TRANSLATEDTOPIC_NAME), revision, expandParentReferences));
         }
 
         // REVISIONS
         if (revision == null && expand != null && expand.contains(RESTTopicV1.REVISIONS_NAME)) {
-            retValue.setRevisions(
-                    new RESTDataObjectCollectionFactory<RESTTranslatedTopicStringV1, TranslatedTopicString,
-                            RESTTranslatedTopicStringCollectionV1, RESTTranslatedTopicStringCollectionItemV1>().create(
-                            RESTTranslatedTopicStringCollectionV1.class, new TranslatedTopicStringV1Factory(), entity,
-                            EnversUtilities.getRevisions(entityManager, entity), RESTBaseEntityV1.REVISIONS_NAME, dataType, expand, baseUrl,
-                            entityManager));
+            retValue.setRevisions(RESTDataObjectCollectionFactory.create(RESTTranslatedTopicStringCollectionV1.class, this, entity,
+                    EnversUtilities.getRevisions(entityManager, entity), RESTBaseEntityV1.REVISIONS_NAME, dataType, expand, baseUrl,
+                    entityManager));
         }
 
         return retValue;
     }
 
     @Override
-    public void syncDBEntityWithRESTEntityFirstPass(final EntityManager entityManager,
-            final Map<RESTBaseEntityV1<?, ?, ?>, AuditedEntity> newEntityCache, final TranslatedTopicString entity,
-            final RESTTranslatedTopicStringV1 dataObject) {
+    public void syncDBEntityWithRESTEntityFirstPass(final TranslatedTopicString entity, final RESTTranslatedTopicStringV1 dataObject) {
         if (dataObject.hasParameterSet(RESTTranslatedTopicStringV1.ORIGINALSTRING_NAME))
             entity.setOriginalString(dataObject.getOriginalString());
         if (dataObject.hasParameterSet(RESTTranslatedTopicStringV1.TRANSLATEDSTRING_NAME))
             entity.setTranslatedString(dataObject.getTranslatedString());
         if (dataObject.hasParameterSet(RESTTranslatedTopicStringV1.FUZZY_TRANSLATION_NAME))
             entity.setFuzzyTranslation(dataObject.getFuzzyTranslation());
+    }
 
-        entityManager.persist(entity);
+    @Override
+    protected Class<TranslatedTopicString> getDatabaseClass() {
+        return TranslatedTopicString.class;
     }
 }

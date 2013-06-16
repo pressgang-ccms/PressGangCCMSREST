@@ -1,12 +1,11 @@
 package org.jboss.pressgang.ccms.server.rest.v1;
 
-import javax.persistence.EntityManager;
+import javax.enterprise.context.ApplicationScoped;
+import javax.inject.Inject;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
 
 import org.jboss.pressgang.ccms.model.LanguageFile;
-import org.jboss.pressgang.ccms.model.base.AuditedEntity;
 import org.jboss.pressgang.ccms.rest.v1.collections.RESTLanguageFileCollectionV1;
 import org.jboss.pressgang.ccms.rest.v1.collections.items.RESTLanguageFileCollectionItemV1;
 import org.jboss.pressgang.ccms.rest.v1.entities.RESTLanguageFileV1;
@@ -16,15 +15,15 @@ import org.jboss.pressgang.ccms.server.rest.v1.base.RESTDataObjectCollectionFact
 import org.jboss.pressgang.ccms.server.rest.v1.base.RESTDataObjectFactory;
 import org.jboss.pressgang.ccms.server.utils.EnversUtilities;
 
+@ApplicationScoped
 public class LanguageFileV1Factory extends RESTDataObjectFactory<RESTLanguageFileV1, LanguageFile, RESTLanguageFileCollectionV1,
         RESTLanguageFileCollectionItemV1> {
-    public LanguageFileV1Factory() {
-        super(LanguageFile.class);
-    }
+    @Inject
+    protected FileV1Factory fileFactory;
 
     @Override
     public RESTLanguageFileV1 createRESTEntityFromDBEntityInternal(final LanguageFile entity, final String baseUrl, final String dataType,
-            final ExpandDataTrunk expand, final Number revision, final boolean expandParentReferences, final EntityManager entityManager) {
+            final ExpandDataTrunk expand, final Number revision, final boolean expandParentReferences) {
         assert entity != null : "Parameter entity can not be null";
         assert baseUrl != null : "Parameter baseUrl can not be null";
 
@@ -42,34 +41,32 @@ public class LanguageFileV1Factory extends RESTDataObjectFactory<RESTLanguageFil
         retValue.setLocale(entity.getLocale());
 
         // Potentially large fields need to be expanded manually
-        if (expand != null && expand.contains(RESTLanguageFileV1.FILE_DATA_NAME))
-            retValue.setFileData(entity.getFileData());
+        if (expand != null && expand.contains(RESTLanguageFileV1.FILE_DATA_NAME)) retValue.setFileData(entity.getFileData());
 
         // Set the object references
         if (expandParentReferences && expand != null && expand.contains(RESTLanguageFileV1.FILE_NAME) && entity.getFile() != null) {
-            retValue.setFile(new FileV1Factory().createRESTEntityFromDBEntity(entity.getFile(), baseUrl, dataType,
-                    expand.get(RESTLanguageFileV1.FILE_NAME), entityManager));
+            retValue.setFile(fileFactory.createRESTEntityFromDBEntity(entity.getFile(), baseUrl, dataType,
+                    expand.get(RESTLanguageFileV1.FILE_NAME)));
         }
 
         // REVISIONS
         if (revision == null && expand != null && expand.contains(RESTBaseEntityV1.REVISIONS_NAME)) {
-            retValue.setRevisions(
-                    new RESTDataObjectCollectionFactory<RESTLanguageFileV1, LanguageFile, RESTLanguageFileCollectionV1,
-                            RESTLanguageFileCollectionItemV1>().create(
-                            RESTLanguageFileCollectionV1.class, new LanguageFileV1Factory(), entity,
-                            EnversUtilities.getRevisions(entityManager, entity), RESTBaseEntityV1.REVISIONS_NAME, dataType, expand, baseUrl,
-                            entityManager));
+            retValue.setRevisions(RESTDataObjectCollectionFactory.create(RESTLanguageFileCollectionV1.class, this, entity,
+                    EnversUtilities.getRevisions(entityManager, entity), RESTBaseEntityV1.REVISIONS_NAME, dataType, expand, baseUrl,
+                    entityManager));
         }
 
         return retValue;
     }
 
     @Override
-    public void syncDBEntityWithRESTEntityFirstPass(final EntityManager entityManager,
-            Map<RESTBaseEntityV1<?, ?, ?>, AuditedEntity> newEntityCache, final LanguageFile entity, final RESTLanguageFileV1 dataObject) {
-        if (dataObject.hasParameterSet(RESTLanguageFileV1.LOCALE_NAME))
-            entity.setLocale(dataObject.getLocale());
-        if (dataObject.hasParameterSet(RESTLanguageFileV1.FILE_DATA_NAME))
-            entity.setFileData(dataObject.getFileData());
+    public void syncDBEntityWithRESTEntityFirstPass(final LanguageFile entity, final RESTLanguageFileV1 dataObject) {
+        if (dataObject.hasParameterSet(RESTLanguageFileV1.LOCALE_NAME)) entity.setLocale(dataObject.getLocale());
+        if (dataObject.hasParameterSet(RESTLanguageFileV1.FILE_DATA_NAME)) entity.setFileData(dataObject.getFileData());
+    }
+
+    @Override
+    protected Class<LanguageFile> getDatabaseClass() {
+        return LanguageFile.class;
     }
 }

@@ -1,14 +1,13 @@
 package org.jboss.pressgang.ccms.server.rest.v1;
 
-import javax.persistence.EntityManager;
+import javax.enterprise.context.ApplicationScoped;
+import javax.inject.Inject;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
 
 import org.jboss.pressgang.ccms.model.Role;
 import org.jboss.pressgang.ccms.model.RoleToRoleRelationship;
 import org.jboss.pressgang.ccms.model.User;
-import org.jboss.pressgang.ccms.model.base.AuditedEntity;
 import org.jboss.pressgang.ccms.rest.v1.collections.RESTRoleCollectionV1;
 import org.jboss.pressgang.ccms.rest.v1.collections.RESTUserCollectionV1;
 import org.jboss.pressgang.ccms.rest.v1.collections.items.RESTRoleCollectionItemV1;
@@ -29,16 +28,16 @@ import org.jboss.resteasy.spi.BadRequestException;
  * 
  * Lee
  */
+@ApplicationScoped
 public class RoleV1Factory extends RESTDataObjectFactory<RESTRoleV1, Role, RESTRoleCollectionV1, RESTRoleCollectionItemV1> {
     private static final Integer ROLE_TO_ROLE_ID = 1;
 
-    public RoleV1Factory() {
-        super(Role.class);
-    }
+    @Inject
+    protected UserV1Factory userFactory;
 
     @Override
     public RESTRoleV1 createRESTEntityFromDBEntityInternal(final Role entity, final String baseUrl, final String dataType,
-            final ExpandDataTrunk expand, final Number revision, final boolean expandParentReferences, final EntityManager entityManager) {
+            final ExpandDataTrunk expand, final Number revision, final boolean expandParentReferences) {
         assert entity != null : "Parameter topic can not be null";
         assert baseUrl != null : "Parameter baseUrl can not be null";
 
@@ -59,34 +58,29 @@ public class RoleV1Factory extends RESTDataObjectFactory<RESTRoleV1, Role, RESTR
 
         // REVISIONS
         if (revision == null && expand != null && expand.contains(RESTBaseEntityV1.REVISIONS_NAME)) {
-            retValue.setRevisions(
-                    new RESTDataObjectCollectionFactory<RESTRoleV1, Role, RESTRoleCollectionV1, RESTRoleCollectionItemV1>().create(
-                            RESTRoleCollectionV1.class, new RoleV1Factory(), entity, EnversUtilities.getRevisions(entityManager, entity),
-                            RESTBaseEntityV1.REVISIONS_NAME, dataType, expand, baseUrl, entityManager));
+            retValue.setRevisions(RESTDataObjectCollectionFactory.create(RESTRoleCollectionV1.class, this, entity,
+                    EnversUtilities.getRevisions(entityManager, entity), RESTBaseEntityV1.REVISIONS_NAME, dataType, expand, baseUrl,
+                    entityManager));
         }
 
         // USERS
         if (expand != null && expand.contains(RESTRoleV1.USERS_NAME)) {
-            retValue.setUsers(
-                    new RESTDataObjectCollectionFactory<RESTUserV1, User, RESTUserCollectionV1, RESTUserCollectionItemV1>().create(
-                            RESTUserCollectionV1.class, new UserV1Factory(), entity.getUsers(), RESTRoleV1.USERS_NAME, dataType, expand,
-                            baseUrl, entityManager));
+            retValue.setUsers(RESTDataObjectCollectionFactory.create(RESTUserCollectionV1.class, userFactory, entity.getUsers(),
+                    RESTRoleV1.USERS_NAME, dataType, expand, baseUrl, entityManager));
         }
 
         // PARENT ROLES
         if (expand != null && expand.contains(RESTRoleV1.PARENTROLES_NAME)) {
             retValue.setParentRoles(
-                    new RESTDataObjectCollectionFactory<RESTRoleV1, Role, RESTRoleCollectionV1, RESTRoleCollectionItemV1>().create(
-                            RESTRoleCollectionV1.class, new RoleV1Factory(), entity.getParentRoles(), RESTRoleV1.PARENTROLES_NAME, dataType,
-                            expand, baseUrl, entityManager));
+                    RESTDataObjectCollectionFactory.create(RESTRoleCollectionV1.class, this, entity.getParentRoles(),
+                            RESTRoleV1.PARENTROLES_NAME, dataType, expand, baseUrl, entityManager));
         }
 
         // CHILD ROLES
         if (expand != null && expand.contains(RESTRoleV1.CHILDROLES_NAME)) {
             retValue.setChildRoles(
-                    new RESTDataObjectCollectionFactory<RESTRoleV1, Role, RESTRoleCollectionV1, RESTRoleCollectionItemV1>().create(
-                            RESTRoleCollectionV1.class, new RoleV1Factory(), entity.getChildRoles(), RESTRoleV1.CHILDROLES_NAME, dataType,
-                            expand, baseUrl, entityManager));
+                    RESTDataObjectCollectionFactory.create(RESTRoleCollectionV1.class, this, entity.getChildRoles(),
+                            RESTRoleV1.CHILDROLES_NAME, dataType, expand, baseUrl, entityManager));
         }
 
         retValue.setLinks(baseUrl, RESTv1Constants.ROLE_URL_NAME, dataType, retValue.getId());
@@ -95,19 +89,14 @@ public class RoleV1Factory extends RESTDataObjectFactory<RESTRoleV1, Role, RESTR
     }
 
     @Override
-    public void syncDBEntityWithRESTEntityFirstPass(final EntityManager entityManager,
-            Map<RESTBaseEntityV1<?, ?, ?>, AuditedEntity> newEntityCache, final Role entity, final RESTRoleV1 dataObject) {
-        if (dataObject.hasParameterSet(RESTUserV1.DESCRIPTION_NAME))
-            entity.setDescription(dataObject.getDescription());
-        if (dataObject.hasParameterSet(RESTUserV1.NAME_NAME))
-            entity.setRoleName(dataObject.getName());
+    public void syncDBEntityWithRESTEntityFirstPass(final Role entity, final RESTRoleV1 dataObject) {
+        if (dataObject.hasParameterSet(RESTUserV1.DESCRIPTION_NAME)) entity.setDescription(dataObject.getDescription());
+        if (dataObject.hasParameterSet(RESTUserV1.NAME_NAME)) entity.setRoleName(dataObject.getName());
 
-        entityManager.persist(entity);
     }
 
     @Override
-    public void syncDBEntityWithRESTEntitySecondPass(EntityManager entityManager,
-            Map<RESTBaseEntityV1<?, ?, ?>, AuditedEntity> newEntityCache, Role entity, RESTRoleV1 dataObject) {
+    public void syncDBEntityWithRESTEntitySecondPass(Role entity, RESTRoleV1 dataObject) {
         /* Many To Many - Add will create a mapping */
         if (dataObject.hasParameterSet(
                 RESTRoleV1.USERS_NAME) && dataObject.getUsers() != null && dataObject.getUsers().getItems() != null) {
@@ -142,8 +131,7 @@ public class RoleV1Factory extends RESTDataObjectFactory<RESTRoleV1, Role, RESTR
                 if (dbEntity == null)
                     throw new BadRequestException("No Role entity was found with the primary key " + restEntity.getId());
                 else if (dbRelationshipEntity == null)
-                    throw new BadRequestException("No RoleToRoleRelationship entity was found with the primary key "
-                            + ROLE_TO_ROLE_ID);
+                    throw new BadRequestException("No RoleToRoleRelationship entity was found with the primary key " + ROLE_TO_ROLE_ID);
 
                 if (restEntityItem.returnIsAddItem()) {
                     entity.addParentRole(dbEntity, dbRelationshipEntity);
@@ -177,5 +165,10 @@ public class RoleV1Factory extends RESTDataObjectFactory<RESTRoleV1, Role, RESTR
                 }
             }
         }
+    }
+
+    @Override
+    protected Class<Role> getDatabaseClass() {
+        return Role.class;
     }
 }

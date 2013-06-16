@@ -1,5 +1,7 @@
 package org.jboss.pressgang.ccms.server.rest.v1;
 
+import javax.enterprise.context.ApplicationScoped;
+import javax.inject.Inject;
 import javax.persistence.EntityManager;
 import java.util.Date;
 
@@ -11,21 +13,24 @@ import org.jboss.pressgang.ccms.server.envers.LoggingRevisionEntity;
 import org.jboss.pressgang.ccms.server.utils.EntityUtilities;
 import org.jboss.pressgang.ccms.server.utils.EnversUtilities;
 
+@ApplicationScoped
 public class LogDetailsV1Factory {
+    @Inject
+    protected EntityManager entityManager;
 
     public <T extends AuditedEntity> RESTLogDetailsV1 create(final T entity, final Number revision, final String expandName,
-            final ExpandDataTrunk expand, final String dataType, final String baseUrl, final EntityManager entityManager) {
+            final ExpandDataTrunk expand, final String dataType, final String baseUrl) {
         if (expand != null && expand.get(expandName) != null) {
             final LoggingRevisionEntity revisionEntity = EnversUtilities.getRevisionEntity(entityManager, entity, revision);
 
-            return createRESTEntityFromDBEntity(revisionEntity, expand, dataType, baseUrl, entityManager);
+            return createRESTEntityFromDBEntity(revisionEntity, expand, dataType, baseUrl);
         } else {
             return null;
         }
     }
 
     public RESTLogDetailsV1 createRESTEntityFromDBEntity(final LoggingRevisionEntity revisionEntity, final ExpandDataTrunk expand,
-            final String dataType, final String baseUrl, final EntityManager entityManager) {
+            final String dataType, final String baseUrl) {
 
         final RESTLogDetailsV1 retValue = new RESTLogDetailsV1();
 
@@ -35,7 +40,7 @@ public class LogDetailsV1Factory {
 
         final User user = EntityUtilities.getUserFromUsername(entityManager, revisionEntity.getUserName());
         if (user != null) {
-            retValue.setUser(new UserV1Factory().createRESTEntityFromDBEntity(user, baseUrl, dataType, expand, entityManager));
+            retValue.setUser(new UserV1Factory().createRESTEntityFromDBEntity(user, baseUrl, dataType, expand));
         }
 
         return retValue;

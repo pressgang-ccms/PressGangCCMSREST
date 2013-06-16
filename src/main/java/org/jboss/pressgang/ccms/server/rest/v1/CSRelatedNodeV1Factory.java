@@ -1,16 +1,13 @@
 package org.jboss.pressgang.ccms.server.rest.v1;
 
-import javax.persistence.EntityManager;
+import javax.enterprise.context.ApplicationScoped;
+import javax.inject.Inject;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
 
-import org.jboss.pressgang.ccms.model.base.AuditedEntity;
 import org.jboss.pressgang.ccms.model.contentspec.CSNodeToCSNode;
-import org.jboss.pressgang.ccms.model.contentspec.CSNodeToPropertyTag;
 import org.jboss.pressgang.ccms.rest.v1.collections.contentspec.items.join.RESTCSRelatedNodeCollectionItemV1;
 import org.jboss.pressgang.ccms.rest.v1.collections.contentspec.join.RESTCSRelatedNodeCollectionV1;
-import org.jboss.pressgang.ccms.rest.v1.collections.items.join.RESTAssignedPropertyTagCollectionItemV1;
 import org.jboss.pressgang.ccms.rest.v1.collections.join.RESTAssignedPropertyTagCollectionV1;
 import org.jboss.pressgang.ccms.rest.v1.constants.RESTv1Constants;
 import org.jboss.pressgang.ccms.rest.v1.entities.base.RESTBaseEntityV1;
@@ -18,23 +15,24 @@ import org.jboss.pressgang.ccms.rest.v1.entities.contentspec.RESTCSNodeV1;
 import org.jboss.pressgang.ccms.rest.v1.entities.contentspec.enums.RESTCSNodeRelationshipTypeV1;
 import org.jboss.pressgang.ccms.rest.v1.entities.contentspec.enums.RESTCSNodeTypeV1;
 import org.jboss.pressgang.ccms.rest.v1.entities.contentspec.join.RESTCSRelatedNodeV1;
-import org.jboss.pressgang.ccms.rest.v1.entities.join.RESTAssignedPropertyTagV1;
 import org.jboss.pressgang.ccms.rest.v1.expansion.ExpandDataTrunk;
 import org.jboss.pressgang.ccms.server.rest.v1.base.RESTDataObjectCollectionFactory;
 import org.jboss.pressgang.ccms.server.rest.v1.base.RESTDataObjectFactory;
 import org.jboss.pressgang.ccms.server.utils.EnversUtilities;
 
+@ApplicationScoped
 public class CSRelatedNodeV1Factory extends RESTDataObjectFactory<RESTCSRelatedNodeV1, CSNodeToCSNode, RESTCSRelatedNodeCollectionV1,
         RESTCSRelatedNodeCollectionItemV1> {
-
-    public CSRelatedNodeV1Factory() {
-        super(CSNodeToCSNode.class);
-    }
+    @Inject
+    protected CSNodeV1Factory csNodeFactory;
+    @Inject
+    protected ContentSpecV1Factory contentSpecFactory;
+    @Inject
+    protected CSNodePropertyTagV1Factory csNodePropertyTagFactory;
 
     @Override
     public RESTCSRelatedNodeV1 createRESTEntityFromDBEntityInternal(final CSNodeToCSNode entity, final String baseUrl,
-            final String dataType, final ExpandDataTrunk expand, final Number revision, final boolean expandParentReferences,
-            final EntityManager entityManager) {
+            final String dataType, final ExpandDataTrunk expand, final Number revision, final boolean expandParentReferences) {
         assert entity != null : "Parameter entity can not be null";
         assert baseUrl != null : "Parameter baseUrl can not be null";
 
@@ -62,33 +60,29 @@ public class CSRelatedNodeV1Factory extends RESTDataObjectFactory<RESTCSRelatedN
 
         // REVISIONS
         if (revision == null && expand != null && expand.contains(RESTBaseEntityV1.REVISIONS_NAME)) {
-            retValue.setRevisions(
-                    new RESTDataObjectCollectionFactory<RESTCSRelatedNodeV1, CSNodeToCSNode, RESTCSRelatedNodeCollectionV1,
-                            RESTCSRelatedNodeCollectionItemV1>().create(
-                            RESTCSRelatedNodeCollectionV1.class, new CSRelatedNodeV1Factory(), entity,
-                            EnversUtilities.getRevisions(entityManager, entity), RESTBaseEntityV1.REVISIONS_NAME, dataType, expand, baseUrl,
-                            entityManager));
+            retValue.setRevisions(RESTDataObjectCollectionFactory.create(RESTCSRelatedNodeCollectionV1.class, this, entity,
+                    EnversUtilities.getRevisions(entityManager, entity), RESTBaseEntityV1.REVISIONS_NAME, dataType, expand, baseUrl,
+                    entityManager));
         }
 
         // PARENT
         if (expandParentReferences && expand != null && expand.contains(
                 RESTCSRelatedNodeV1.PARENT_NAME) && entity.getRelatedNode().getParent() != null) {
-            retValue.setParent(new CSNodeV1Factory().createRESTEntityFromDBEntity(entity.getRelatedNode().getParent(), baseUrl, dataType,
-                    expand.get(RESTCSNodeV1.PARENT_NAME), entityManager));
+            retValue.setParent(csNodeFactory.createRESTEntityFromDBEntity(entity.getRelatedNode().getParent(), baseUrl, dataType,
+                    expand.get(RESTCSNodeV1.PARENT_NAME)));
         }
 
         // CONTENT SPEC
         if (expand != null && expand.contains(RESTCSRelatedNodeV1.CONTENT_SPEC_NAME) && entity.getRelatedNode().getContentSpec() != null)
             retValue.setContentSpec(
-                    new ContentSpecV1Factory().createRESTEntityFromDBEntity(entity.getRelatedNode().getContentSpec(), baseUrl, dataType,
-                            expand.get(RESTCSRelatedNodeV1.CONTENT_SPEC_NAME), revision, expandParentReferences, entityManager));
+                    contentSpecFactory.createRESTEntityFromDBEntity(entity.getRelatedNode().getContentSpec(), baseUrl, dataType,
+                            expand.get(RESTCSRelatedNodeV1.CONTENT_SPEC_NAME), revision, expandParentReferences));
 
         // PROPERTY TAGS
         if (expand != null && expand.contains(RESTCSRelatedNodeV1.PROPERTIES_NAME)) {
             retValue.setProperties(
-                    new RESTDataObjectCollectionFactory<RESTAssignedPropertyTagV1, CSNodeToPropertyTag,
-                            RESTAssignedPropertyTagCollectionV1, RESTAssignedPropertyTagCollectionItemV1>().create(
-                            RESTAssignedPropertyTagCollectionV1.class, new CSNodePropertyTagV1Factory(),
+                    RESTDataObjectCollectionFactory.create(
+                            RESTAssignedPropertyTagCollectionV1.class, csNodePropertyTagFactory,
                             entity.getRelatedNode().getCSNodeToPropertyTagsList(), RESTCSRelatedNodeV1.PROPERTIES_NAME, dataType, expand,
                             baseUrl, revision, entityManager));
         }
@@ -99,15 +93,15 @@ public class CSRelatedNodeV1Factory extends RESTDataObjectFactory<RESTCSRelatedN
     }
 
     @Override
-    public void syncDBEntityWithRESTEntityFirstPass(final EntityManager entityManager,
-            Map<RESTBaseEntityV1<?, ?, ?>, AuditedEntity> newEntityCache, final CSNodeToCSNode entity, final RESTCSRelatedNodeV1 dataObject) {
-
+    public void syncDBEntityWithRESTEntityFirstPass(final CSNodeToCSNode entity, final RESTCSRelatedNodeV1 dataObject) {
         if (dataObject.hasParameterSet(RESTCSRelatedNodeV1.RELATIONSHIP_TYPE_NAME))
             entity.setRelationshipType(RESTCSNodeRelationshipTypeV1.getRelationshipTypeId(dataObject.getRelationshipType()));
-
         if (dataObject.hasParameterSet(RESTCSRelatedNodeV1.RELATIONSHIP_SORT_NAME))
             entity.setRelationshipSort(dataObject.getRelationshipSort());
+    }
 
-        entityManager.persist(entity);
+    @Override
+    protected Class<CSNodeToCSNode> getDatabaseClass() {
+        return CSNodeToCSNode.class;
     }
 }

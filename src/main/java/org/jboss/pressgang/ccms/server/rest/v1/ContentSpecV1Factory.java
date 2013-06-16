@@ -1,24 +1,21 @@
 package org.jboss.pressgang.ccms.server.rest.v1;
 
-import javax.persistence.EntityManager;
+import javax.enterprise.context.ApplicationScoped;
+import javax.inject.Inject;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
 
 import org.jboss.pressgang.ccms.model.PropertyTag;
 import org.jboss.pressgang.ccms.model.Tag;
-import org.jboss.pressgang.ccms.model.base.AuditedEntity;
 import org.jboss.pressgang.ccms.model.contentspec.CSNode;
 import org.jboss.pressgang.ccms.model.contentspec.ContentSpec;
 import org.jboss.pressgang.ccms.model.contentspec.ContentSpecToPropertyTag;
-import org.jboss.pressgang.ccms.model.contentspec.TranslatedContentSpec;
 import org.jboss.pressgang.ccms.rest.v1.collections.RESTTagCollectionV1;
 import org.jboss.pressgang.ccms.rest.v1.collections.contentspec.RESTCSNodeCollectionV1;
 import org.jboss.pressgang.ccms.rest.v1.collections.contentspec.RESTContentSpecCollectionV1;
 import org.jboss.pressgang.ccms.rest.v1.collections.contentspec.RESTTranslatedContentSpecCollectionV1;
 import org.jboss.pressgang.ccms.rest.v1.collections.contentspec.items.RESTCSNodeCollectionItemV1;
 import org.jboss.pressgang.ccms.rest.v1.collections.contentspec.items.RESTContentSpecCollectionItemV1;
-import org.jboss.pressgang.ccms.rest.v1.collections.contentspec.items.RESTTranslatedContentSpecCollectionItemV1;
 import org.jboss.pressgang.ccms.rest.v1.collections.items.RESTTagCollectionItemV1;
 import org.jboss.pressgang.ccms.rest.v1.collections.items.join.RESTAssignedPropertyTagCollectionItemV1;
 import org.jboss.pressgang.ccms.rest.v1.collections.join.RESTAssignedPropertyTagCollectionV1;
@@ -27,7 +24,6 @@ import org.jboss.pressgang.ccms.rest.v1.entities.RESTTagV1;
 import org.jboss.pressgang.ccms.rest.v1.entities.base.RESTBaseEntityV1;
 import org.jboss.pressgang.ccms.rest.v1.entities.contentspec.RESTCSNodeV1;
 import org.jboss.pressgang.ccms.rest.v1.entities.contentspec.RESTContentSpecV1;
-import org.jboss.pressgang.ccms.rest.v1.entities.contentspec.RESTTranslatedContentSpecV1;
 import org.jboss.pressgang.ccms.rest.v1.entities.contentspec.enums.RESTContentSpecTypeV1;
 import org.jboss.pressgang.ccms.rest.v1.entities.join.RESTAssignedPropertyTagV1;
 import org.jboss.pressgang.ccms.rest.v1.expansion.ExpandDataTrunk;
@@ -38,18 +34,21 @@ import org.jboss.pressgang.ccms.server.utils.ContentSpecUtilities;
 import org.jboss.pressgang.ccms.server.utils.EnversUtilities;
 import org.jboss.resteasy.spi.BadRequestException;
 
+@ApplicationScoped
 public class ContentSpecV1Factory extends RESTDataObjectFactory<RESTContentSpecV1, ContentSpec, RESTContentSpecCollectionV1,
         RESTContentSpecCollectionItemV1> {
-    private final CSNodeV1Factory csNodeFactory = new CSNodeV1Factory();
-    private final ContentSpecPropertyTagV1Factory csNodePropertyTagFactory = new ContentSpecPropertyTagV1Factory();
-
-    public ContentSpecV1Factory() {
-        super(ContentSpec.class);
-    }
+    @Inject
+    protected CSNodeV1Factory csNodeFactory;
+    @Inject
+    protected ContentSpecPropertyTagV1Factory contentSpecPropertyTagFactory;
+    @Inject
+    protected TranslatedContentSpecV1Factory translatedContentSpecFactory;
+    @Inject
+    protected TagV1Factory tagFactory;
 
     @Override
     public RESTContentSpecV1 createRESTEntityFromDBEntityInternal(final ContentSpec entity, final String baseUrl, final String dataType,
-            final ExpandDataTrunk expand, final Number revision, final boolean expandParentReferences, final EntityManager entityManager) {
+            final ExpandDataTrunk expand, final Number revision, final boolean expandParentReferences) {
         assert entity != null : "Parameter entity can not be null";
         assert baseUrl != null : "Parameter baseUrl can not be null";
 
@@ -75,45 +74,36 @@ public class ContentSpecV1Factory extends RESTDataObjectFactory<RESTContentSpecV
 
         // REVISIONS
         if (revision == null && expand != null && expand.contains(RESTBaseEntityV1.REVISIONS_NAME)) {
-            retValue.setRevisions(
-                    new RESTDataObjectCollectionFactory<RESTContentSpecV1, ContentSpec, RESTContentSpecCollectionV1,
-                            RESTContentSpecCollectionItemV1>().create(
-                            RESTContentSpecCollectionV1.class, new ContentSpecV1Factory(), entity,
-                            EnversUtilities.getRevisions(entityManager, entity), RESTBaseEntityV1.REVISIONS_NAME, dataType, expand, baseUrl,
-                            entityManager));
+            retValue.setRevisions(RESTDataObjectCollectionFactory.create(RESTContentSpecCollectionV1.class, this, entity,
+                    EnversUtilities.getRevisions(entityManager, entity), RESTBaseEntityV1.REVISIONS_NAME, dataType, expand, baseUrl,
+                    entityManager));
         }
 
         // CHILDREN NODES
         if (expand != null && expand.contains(RESTContentSpecV1.CHILDREN_NAME)) {
             retValue.setChildren_OTM(
-                    new RESTDataObjectCollectionFactory<RESTCSNodeV1, CSNode, RESTCSNodeCollectionV1, RESTCSNodeCollectionItemV1>().create(
-                            RESTCSNodeCollectionV1.class, new CSNodeV1Factory(), entity.getTopCSNodes(), RESTContentSpecV1.CHILDREN_NAME,
-                            dataType, expand, baseUrl, expandParentReferences, entityManager));
+                    RESTDataObjectCollectionFactory.create(RESTCSNodeCollectionV1.class, csNodeFactory, entity.getTopCSNodes(),
+                            RESTContentSpecV1.CHILDREN_NAME, dataType, expand, baseUrl, expandParentReferences, entityManager));
         }
 
         // PROPERTY TAGS
         if (expand != null && expand.contains(RESTContentSpecV1.PROPERTIES_NAME)) {
             retValue.setProperties(
-                    new RESTDataObjectCollectionFactory<RESTAssignedPropertyTagV1, ContentSpecToPropertyTag,
-                            RESTAssignedPropertyTagCollectionV1, RESTAssignedPropertyTagCollectionItemV1>().create(
-                            RESTAssignedPropertyTagCollectionV1.class, new ContentSpecPropertyTagV1Factory(),
+                    RESTDataObjectCollectionFactory.create(RESTAssignedPropertyTagCollectionV1.class, contentSpecPropertyTagFactory,
                             entity.getContentSpecToPropertyTagsList(), RESTContentSpecV1.PROPERTIES_NAME, dataType, expand, baseUrl,
                             revision, entityManager));
         }
 
         // TAGS
         if (expand != null && expand.contains(RESTContentSpecV1.TAGS_NAME)) {
-            retValue.setTags(new RESTDataObjectCollectionFactory<RESTTagV1, Tag, RESTTagCollectionV1, RESTTagCollectionItemV1>().create(
-                    RESTTagCollectionV1.class, new TagV1Factory(), entity.getTags(), RESTContentSpecV1.TAGS_NAME, dataType, expand, baseUrl,
-                    entityManager));
+            retValue.setTags(RESTDataObjectCollectionFactory.create(RESTTagCollectionV1.class, tagFactory, entity.getTags(),
+                    RESTContentSpecV1.TAGS_NAME, dataType, expand, baseUrl, entityManager));
         }
 
         // TRANSLATIONS
         if (expand != null && expand.contains(RESTContentSpecV1.TRANSLATED_CONTENT_SPECS_NAME)) {
             retValue.setTranslatedContentSpecs(
-                    new RESTDataObjectCollectionFactory<RESTTranslatedContentSpecV1, TranslatedContentSpec,
-                            RESTTranslatedContentSpecCollectionV1, RESTTranslatedContentSpecCollectionItemV1>().create(
-                            RESTTranslatedContentSpecCollectionV1.class, new TranslatedContentSpecV1Factory(),
+                    RESTDataObjectCollectionFactory.create(RESTTranslatedContentSpecCollectionV1.class, translatedContentSpecFactory,
                             entity.getTranslatedContentSpecs(entityManager, revision), RESTContentSpecV1.TRANSLATED_CONTENT_SPECS_NAME,
                             dataType, expand, baseUrl, entityManager));
         }
@@ -130,8 +120,7 @@ public class ContentSpecV1Factory extends RESTDataObjectFactory<RESTContentSpecV
     }
 
     @Override
-    public void syncDBEntityWithRESTEntityFirstPass(final EntityManager entityManager,
-            Map<RESTBaseEntityV1<?, ?, ?>, AuditedEntity> newEntityCache, final ContentSpec entity, final RESTContentSpecV1 dataObject) {
+    public void syncDBEntityWithRESTEntityFirstPass(final ContentSpec entity, final RESTContentSpecV1 dataObject) {
         // If the Text is being set then don't do anything else.
         if (dataObject.hasParameterSet(RESTContentSpecV1.TEXT_NAME)) return;
 
@@ -147,8 +136,6 @@ public class ContentSpecV1Factory extends RESTDataObjectFactory<RESTContentSpecV
         // Remove any error content
         entity.setErrors(null);
         entity.setFailedContentSpec(null);
-
-        entityManager.persist(entity);
 
         // One To Many - Add will create a new mapping
         if (dataObject.hasParameterSet(
@@ -167,7 +154,7 @@ public class ContentSpecV1Factory extends RESTDataObjectFactory<RESTContentSpecV
                     entity.removeChild(dbEntity);
                     entityManager.remove(dbEntity);
                 } else if (restEntityItem.returnIsAddItem()) {
-                    final CSNode dbEntity = new CSNodeV1Factory().createDBEntityFromRESTEntity(entityManager, newEntityCache, restEntity);
+                    final CSNode dbEntity = csNodeFactory.createDBEntityFromRESTEntity(restEntity);
                     dbEntity.setParent(null);
                     entity.addChild(dbEntity);
                 } else if (restEntityItem.returnIsUpdateItem()) {
@@ -178,7 +165,7 @@ public class ContentSpecV1Factory extends RESTDataObjectFactory<RESTContentSpecV
                         throw new BadRequestException("No CSNode entity was found with the primary key " + restEntity.getId() + " for " +
                                 "ContentSpec " + entity.getId());
 
-                    csNodeFactory.syncDBEntityWithRESTEntityFirstPass(entityManager, newEntityCache, dbEntity, restEntity);
+                    csNodeFactory.updateDBEntityFromRESTEntity(dbEntity, restEntity);
                 }
             }
         }
@@ -207,15 +194,14 @@ public class ContentSpecV1Factory extends RESTDataObjectFactory<RESTContentSpecV
                             "No ContentSpecToPropertyTag entity was found with the primary key " + restEntity.getRelationshipId() + " for" +
                                     " ContentSpec " + entity.getId());
 
-                    csNodePropertyTagFactory.syncDBEntityWithRESTEntityFirstPass(entityManager, newEntityCache, dbEntity, restEntity);
+                    contentSpecPropertyTagFactory.updateDBEntityFromRESTEntity(dbEntity, restEntity);
                 }
             }
         }
     }
 
     @Override
-    public void syncDBEntityWithRESTEntitySecondPass(EntityManager entityManager,
-            Map<RESTBaseEntityV1<?, ?, ?>, AuditedEntity> newEntityCache, ContentSpec entity, RESTContentSpecV1 dataObject) {
+    public void syncDBEntityWithRESTEntitySecondPass(ContentSpec entity, RESTContentSpecV1 dataObject) {
         // One To Many - Add will create a new mapping
         if (dataObject.hasParameterSet(
                 RESTContentSpecV1.CHILDREN_NAME) && dataObject.getChildren_OTM() != null && dataObject.getChildren_OTM().getItems() !=
@@ -226,11 +212,11 @@ public class ContentSpecV1Factory extends RESTDataObjectFactory<RESTContentSpecV
                 final RESTCSNodeV1 restEntity = restEntityItem.getItem();
 
                 if (restEntityItem.returnIsAddItem() || restEntityItem.returnIsUpdateItem()) {
-                    final CSNode dbEntity = RESTv1Utilities.findEntity(entityManager, newEntityCache, restEntity, CSNode.class);
+                    final CSNode dbEntity = RESTv1Utilities.findEntity(entityManager, entityCache, restEntity, CSNode.class);
                     if (dbEntity == null)
                         throw new BadRequestException("No CSNode entity was found with the primary key " + restEntity.getId());
 
-                    csNodeFactory.syncDBEntityWithRESTEntitySecondPass(entityManager, newEntityCache, dbEntity, restEntity);
+                    csNodeFactory.syncDBEntityWithRESTEntitySecondPass(dbEntity, restEntity);
                 }
             }
         }
@@ -244,7 +230,7 @@ public class ContentSpecV1Factory extends RESTDataObjectFactory<RESTContentSpecV
                 final RESTAssignedPropertyTagV1 restEntity = restEntityItem.getItem();
 
                 if (restEntityItem.returnIsAddItem()) {
-                    final PropertyTag dbEntity = RESTv1Utilities.findEntity(entityManager, newEntityCache, restEntity, PropertyTag.class);
+                    final PropertyTag dbEntity = RESTv1Utilities.findEntity(entityManager, entityCache, restEntity, PropertyTag.class);
                     if (dbEntity == null)
                         throw new BadRequestException("No PropertyTag entity was found with the primary key " + restEntity.getId());
 
@@ -258,7 +244,7 @@ public class ContentSpecV1Factory extends RESTDataObjectFactory<RESTContentSpecV
                             "No ContentSpecToPropertyTag entity was found with the primary key " + restEntity.getRelationshipId() + " for" +
                                     " ContentSpec " + entity.getId());
 
-                    csNodePropertyTagFactory.syncDBEntityWithRESTEntityFirstPass(entityManager, newEntityCache, dbEntity, restEntity);
+                    contentSpecPropertyTagFactory.syncDBEntityWithRESTEntitySecondPass(dbEntity, restEntity);
                 }
             }
         }
@@ -285,7 +271,7 @@ public class ContentSpecV1Factory extends RESTDataObjectFactory<RESTContentSpecV
                 final RESTTagV1 restEntity = restEntityItem.getItem();
 
                 if (restEntityItem.returnIsAddItem()) {
-                    final Tag dbEntity = RESTv1Utilities.findEntity(entityManager, newEntityCache, restEntity, Tag.class);
+                    final Tag dbEntity = RESTv1Utilities.findEntity(entityManager, entityCache, restEntity, Tag.class);
                     if (dbEntity == null)
                         throw new BadRequestException("No Tag entity was found with the primary key " + restEntity.getId());
 
@@ -293,5 +279,10 @@ public class ContentSpecV1Factory extends RESTDataObjectFactory<RESTContentSpecV
                 }
             }
         }
+    }
+
+    @Override
+    protected Class<ContentSpec> getDatabaseClass() {
+        return ContentSpec.class;
     }
 }

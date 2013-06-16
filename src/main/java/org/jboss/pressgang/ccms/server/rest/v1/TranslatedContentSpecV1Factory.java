@@ -1,11 +1,10 @@
 package org.jboss.pressgang.ccms.server.rest.v1;
 
-import javax.persistence.EntityManager;
+import javax.enterprise.context.ApplicationScoped;
+import javax.inject.Inject;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
 
-import org.jboss.pressgang.ccms.model.base.AuditedEntity;
 import org.jboss.pressgang.ccms.model.contentspec.TranslatedCSNode;
 import org.jboss.pressgang.ccms.model.contentspec.TranslatedContentSpec;
 import org.jboss.pressgang.ccms.rest.v1.collections.contentspec.RESTTranslatedCSNodeCollectionV1;
@@ -23,17 +22,17 @@ import org.jboss.pressgang.ccms.server.rest.v1.utils.RESTv1Utilities;
 import org.jboss.pressgang.ccms.server.utils.EnversUtilities;
 import org.jboss.resteasy.spi.BadRequestException;
 
+@ApplicationScoped
 public class TranslatedContentSpecV1Factory extends RESTDataObjectFactory<RESTTranslatedContentSpecV1, TranslatedContentSpec,
         RESTTranslatedContentSpecCollectionV1, RESTTranslatedContentSpecCollectionItemV1> {
-    private static final TranslatedCSNodeV1Factory translatedCSNodeFactory = new TranslatedCSNodeV1Factory();
-
-    public TranslatedContentSpecV1Factory() {
-        super(TranslatedContentSpec.class);
-    }
+    @Inject
+    protected ContentSpecV1Factory contentSpecFactory;
+    @Inject
+    protected TranslatedCSNodeV1Factory translatedCSNodeFactory;
 
     @Override
     protected RESTTranslatedContentSpecV1 createRESTEntityFromDBEntityInternal(TranslatedContentSpec entity, String baseUrl,
-            String dataType, ExpandDataTrunk expand, Number revision, boolean expandParentReferences, EntityManager entityManager) {
+            String dataType, ExpandDataTrunk expand, Number revision, boolean expandParentReferences) {
         assert entity != null : "Parameter entity can not be null";
         assert baseUrl != null : "Parameter baseUrl can not be null";
 
@@ -54,28 +53,22 @@ public class TranslatedContentSpecV1Factory extends RESTDataObjectFactory<RESTTr
         if (expandParentReferences && expand != null && expand.contains(
                 RESTTranslatedContentSpecV1.CONTENT_SPEC_NAME) && entity.getEnversContentSpec(entityManager) != null) {
             retValue.setContentSpec(
-                    new ContentSpecV1Factory().createRESTEntityFromDBEntity(entity.getEnversContentSpec(entityManager), baseUrl, dataType,
-                            expand.get(RESTTranslatedContentSpecV1.CONTENT_SPEC_NAME), entity.getContentSpecRevision(), true,
-                            entityManager));
+                    contentSpecFactory.createRESTEntityFromDBEntity(entity.getEnversContentSpec(entityManager), baseUrl, dataType,
+                            expand.get(RESTTranslatedContentSpecV1.CONTENT_SPEC_NAME), entity.getContentSpecRevision(), true));
             retValue.getContentSpec().setRevision(entity.getContentSpecRevision());
         }
 
         // REVISIONS
         if (revision == null && expand != null && expand.contains(RESTBaseEntityV1.REVISIONS_NAME)) {
-            retValue.setRevisions(
-                    new RESTDataObjectCollectionFactory<RESTTranslatedContentSpecV1, TranslatedContentSpec,
-                            RESTTranslatedContentSpecCollectionV1, RESTTranslatedContentSpecCollectionItemV1>().create(
-                            RESTTranslatedContentSpecCollectionV1.class, new TranslatedContentSpecV1Factory(), entity,
-                            EnversUtilities.getRevisions(entityManager, entity), RESTBaseEntityV1.REVISIONS_NAME, dataType, expand, baseUrl,
-                            entityManager));
+            retValue.setRevisions(RESTDataObjectCollectionFactory.create(RESTTranslatedContentSpecCollectionV1.class, this, entity,
+                    EnversUtilities.getRevisions(entityManager, entity), RESTBaseEntityV1.REVISIONS_NAME, dataType, expand, baseUrl,
+                    entityManager));
         }
 
         // TRANSLATED NODES
         if (expand != null && expand.contains(RESTTranslatedContentSpecV1.TRANSLATED_NODES_NAME)) {
             retValue.setTranslatedNodes_OTM(
-                    new RESTDataObjectCollectionFactory<RESTTranslatedCSNodeV1, TranslatedCSNode, RESTTranslatedCSNodeCollectionV1,
-                            RESTTranslatedCSNodeCollectionItemV1>().create(
-                            RESTTranslatedCSNodeCollectionV1.class, new TranslatedCSNodeV1Factory(),
+                    RESTDataObjectCollectionFactory.create(RESTTranslatedCSNodeCollectionV1.class, translatedCSNodeFactory,
                             new ArrayList<TranslatedCSNode>(entity.getTranslatedCSNodes()),
                             RESTTranslatedContentSpecV1.TRANSLATED_NODES_NAME, dataType, expand, baseUrl, false, entityManager));
         }
@@ -86,9 +79,7 @@ public class TranslatedContentSpecV1Factory extends RESTDataObjectFactory<RESTTr
     }
 
     @Override
-    public void syncDBEntityWithRESTEntityFirstPass(final EntityManager entityManager,
-            final Map<RESTBaseEntityV1<?, ?, ?>, AuditedEntity> newEntityCache, final TranslatedContentSpec entity,
-            final RESTTranslatedContentSpecV1 dataObject) {
+    public void syncDBEntityWithRESTEntityFirstPass(final TranslatedContentSpec entity, final RESTTranslatedContentSpecV1 dataObject) {
         if (dataObject.hasParameterSet(RESTTranslatedContentSpecV1.CONTENT_SPEC_ID_NAME))
             entity.setContentSpecId(dataObject.getContentSpecId());
         if (dataObject.hasParameterSet(RESTTranslatedContentSpecV1.CONTENT_SPEC_REV_NAME))
@@ -113,8 +104,7 @@ public class TranslatedContentSpecV1Factory extends RESTDataObjectFactory<RESTTr
                     entity.removeTranslatedNode(dbEntity);
                     entityManager.remove(dbEntity);
                 } else if (restEntityItem.returnIsAddItem()) {
-                    final TranslatedCSNode dbEntity = translatedCSNodeFactory.createDBEntityFromRESTEntity(entityManager, newEntityCache,
-                            restEntity);
+                    final TranslatedCSNode dbEntity = translatedCSNodeFactory.createDBEntityFromRESTEntity(restEntity);
                     entity.addTranslatedNode(dbEntity);
                 } else if (restEntityItem.returnIsUpdateItem()) {
                     final TranslatedCSNode dbEntity = entityManager.find(TranslatedCSNode.class, restEntity.getId());
@@ -124,16 +114,14 @@ public class TranslatedContentSpecV1Factory extends RESTDataObjectFactory<RESTTr
                             "No TranslatedCSNode entity was found with the primary key " + restEntity.getId() + " for " +
                                     "TranslatedContentSpec " + entity.getId());
 
-                    translatedCSNodeFactory.syncDBEntityWithRESTEntityFirstPass(entityManager, newEntityCache, dbEntity, restEntity);
+                    translatedCSNodeFactory.updateDBEntityFromRESTEntity(dbEntity, restEntity);
                 }
             }
         }
     }
 
     @Override
-    public void syncDBEntityWithRESTEntitySecondPass(final EntityManager entityManager,
-            final Map<RESTBaseEntityV1<?, ?, ?>, AuditedEntity> newEntityCache, final TranslatedContentSpec entity,
-            final RESTTranslatedContentSpecV1 dataObject) {
+    public void syncDBEntityWithRESTEntitySecondPass(final TranslatedContentSpec entity, final RESTTranslatedContentSpecV1 dataObject) {
         // One To Many - perform the second pass on added/updated items
         if (dataObject.hasParameterSet(
                 RESTTranslatedContentSpecV1.TRANSLATED_NODES_NAME) && dataObject.getTranslatedNodes_OTM() != null && dataObject
@@ -144,14 +132,19 @@ public class TranslatedContentSpecV1Factory extends RESTDataObjectFactory<RESTTr
                 final RESTTranslatedCSNodeV1 restEntity = restEntityItem.getItem();
 
                 if (restEntityItem.returnIsAddItem() || restEntityItem.returnIsUpdateItem()) {
-                    final TranslatedCSNode dbEntity = RESTv1Utilities.findEntity(entityManager, newEntityCache, restEntity,
+                    final TranslatedCSNode dbEntity = RESTv1Utilities.findEntity(entityManager, entityCache, restEntity,
                             TranslatedCSNode.class);
                     if (dbEntity == null)
                         throw new BadRequestException("No TranslatedCSNode entity was found with the primary key " + restEntity.getId());
 
-                    translatedCSNodeFactory.syncDBEntityWithRESTEntitySecondPass(entityManager, newEntityCache, dbEntity, restEntity);
+                    translatedCSNodeFactory.syncDBEntityWithRESTEntitySecondPass(dbEntity, restEntity);
                 }
             }
         }
+    }
+
+    @Override
+    protected Class<TranslatedContentSpec> getDatabaseClass() {
+        return TranslatedContentSpec.class;
     }
 }

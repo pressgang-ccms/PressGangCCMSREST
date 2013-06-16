@@ -1,11 +1,10 @@
 package org.jboss.pressgang.ccms.server.rest.v1;
 
-import javax.persistence.EntityManager;
+import javax.enterprise.context.ApplicationScoped;
+import javax.inject.Inject;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
 
-import org.jboss.pressgang.ccms.model.base.AuditedEntity;
 import org.jboss.pressgang.ccms.model.contentspec.TranslatedCSNodeString;
 import org.jboss.pressgang.ccms.rest.v1.collections.contentspec.RESTTranslatedCSNodeStringCollectionV1;
 import org.jboss.pressgang.ccms.rest.v1.collections.contentspec.items.RESTTranslatedCSNodeStringCollectionItemV1;
@@ -16,16 +15,15 @@ import org.jboss.pressgang.ccms.server.rest.v1.base.RESTDataObjectCollectionFact
 import org.jboss.pressgang.ccms.server.rest.v1.base.RESTDataObjectFactory;
 import org.jboss.pressgang.ccms.server.utils.EnversUtilities;
 
-public class TranslatedCSNodeStringV1Factory extends RESTDataObjectFactory<RESTTranslatedCSNodeStringV1, TranslatedCSNodeString, RESTTranslatedCSNodeStringCollectionV1, RESTTranslatedCSNodeStringCollectionItemV1> {
-
-    public TranslatedCSNodeStringV1Factory() {
-        super(TranslatedCSNodeString.class);
-    }
+@ApplicationScoped
+public class TranslatedCSNodeStringV1Factory extends RESTDataObjectFactory<RESTTranslatedCSNodeStringV1, TranslatedCSNodeString,
+        RESTTranslatedCSNodeStringCollectionV1, RESTTranslatedCSNodeStringCollectionItemV1> {
+    @Inject
+    protected TranslatedCSNodeV1Factory translatedCSNodeFactory;
 
     @Override
     public RESTTranslatedCSNodeStringV1 createRESTEntityFromDBEntityInternal(final TranslatedCSNodeString entity, final String baseUrl,
-            final String dataType, final ExpandDataTrunk expand, final Number revision, final boolean expandParentReferences,
-            final EntityManager entityManager) {
+            final String dataType, final ExpandDataTrunk expand, final Number revision, final boolean expandParentReferences) {
         assert entity != null : "Parameter entity can not be null";
         assert baseUrl != null : "Parameter baseUrl can not be null";
 
@@ -43,27 +41,33 @@ public class TranslatedCSNodeStringV1Factory extends RESTDataObjectFactory<RESTT
 
         // REVISIONS
         if (revision == null && expand != null && expand.contains(RESTBaseEntityV1.REVISIONS_NAME)) {
-            retValue.setRevisions(
-                    new RESTDataObjectCollectionFactory<RESTTranslatedCSNodeStringV1, TranslatedCSNodeString, RESTTranslatedCSNodeStringCollectionV1, RESTTranslatedCSNodeStringCollectionItemV1>().create(
-                            RESTTranslatedCSNodeStringCollectionV1.class, new TranslatedCSNodeStringV1Factory(), entity,
-                            EnversUtilities.getRevisions(entityManager, entity), RESTBaseEntityV1.REVISIONS_NAME, dataType, expand, baseUrl,
-                            entityManager));
+            retValue.setRevisions(RESTDataObjectCollectionFactory.create(RESTTranslatedCSNodeStringCollectionV1.class, this, entity,
+                    EnversUtilities.getRevisions(entityManager, entity), RESTBaseEntityV1.REVISIONS_NAME, dataType, expand, baseUrl,
+                    entityManager));
+        }
+
+        // Set the object references
+        if (expandParentReferences && expand != null && expand.contains(
+                RESTTranslatedCSNodeStringV1.TRANSLATEDNODE_NAME) && entity.getTranslatedCSNode() != null) {
+            retValue.setTranslatedNode(translatedCSNodeFactory.createRESTEntityFromDBEntity(entity.getTranslatedCSNode(), baseUrl, dataType,
+                    expand.get(RESTTranslatedCSNodeStringV1.TRANSLATEDNODE_NAME), revision, expandParentReferences));
         }
 
         return retValue;
     }
 
     @Override
-    public void syncDBEntityWithRESTEntityFirstPass(final EntityManager entityManager,
-            final Map<RESTBaseEntityV1<?, ?, ?>, AuditedEntity> newEntityCache, final TranslatedCSNodeString entity,
-            final RESTTranslatedCSNodeStringV1 dataObject) {
+    public void syncDBEntityWithRESTEntityFirstPass(final TranslatedCSNodeString entity, final RESTTranslatedCSNodeStringV1 dataObject) {
 
         if (dataObject.hasParameterSet(RESTTranslatedCSNodeStringV1.TRANSLATEDSTRING_NAME))
             entity.setTranslatedString(dataObject.getTranslatedString());
         if (dataObject.hasParameterSet(RESTTranslatedCSNodeStringV1.FUZZY_TRANSLATION_NAME))
             entity.setFuzzyTranslation(dataObject.getFuzzyTranslation());
         if (dataObject.hasParameterSet(RESTTranslatedCSNodeStringV1.LOCALE_NAME)) entity.setLocale(dataObject.getLocale());
+    }
 
-        entityManager.persist(entity);
+    @Override
+    protected Class<TranslatedCSNodeString> getDatabaseClass() {
+        return TranslatedCSNodeString.class;
     }
 }
