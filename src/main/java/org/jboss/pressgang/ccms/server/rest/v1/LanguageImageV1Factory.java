@@ -32,7 +32,7 @@ public class LanguageImageV1Factory extends RESTDataObjectFactory<RESTLanguageIm
         final List<String> expandOptions = new ArrayList<String>();
         expandOptions.add(RESTLanguageImageV1.IMAGEDATA_NAME);
         expandOptions.add(RESTLanguageImageV1.IMAGEDATABASE64_NAME);
-        expandOptions.add(RESTLanguageImageV1.IMAGEDATABASE64_NAME);
+        expandOptions.add(RESTLanguageImageV1.THUMBNAIL_NAME);
         expandOptions.add(RESTBaseEntityV1.LOG_DETAILS_NAME);
 
         if (revision == null) expandOptions.add(RESTBaseEntityV1.REVISIONS_NAME);
