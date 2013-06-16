@@ -48,7 +48,7 @@ public class ImageV1Factory extends RESTDataObjectFactory<RESTImageV1, ImageFile
 
         // REVISIONS
         if (revision == null && expand != null && expand.contains(RESTBaseEntityV1.REVISIONS_NAME)) {
-            retValue.setRevisions(RESTDataObjectCollectionFactory.create(RESTImageCollectionV1.class, new ImageV1Factory(), entity,
+            retValue.setRevisions(RESTDataObjectCollectionFactory.create(RESTImageCollectionV1.class, this, entity,
                     EnversUtilities.getRevisions(entityManager, entity), RESTBaseEntityV1.REVISIONS_NAME, dataType, expand, baseUrl,
                     entityManager));
         }

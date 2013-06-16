@@ -17,6 +17,8 @@ import org.jboss.pressgang.ccms.server.utils.EnversUtilities;
 public class LogDetailsV1Factory {
     @Inject
     protected EntityManager entityManager;
+    @Inject
+    protected UserV1Factory userFactory;
 
     public <T extends AuditedEntity> RESTLogDetailsV1 create(final T entity, final Number revision, final String expandName,
             final ExpandDataTrunk expand, final String dataType, final String baseUrl) {
@@ -40,7 +42,7 @@ public class LogDetailsV1Factory {
 
         final User user = EntityUtilities.getUserFromUsername(entityManager, revisionEntity.getUserName());
         if (user != null) {
-            retValue.setUser(new UserV1Factory().createRESTEntityFromDBEntity(user, baseUrl, dataType, expand));
+            retValue.setUser(userFactory.createRESTEntityFromDBEntity(user, baseUrl, dataType, expand));
         }
 
         return retValue;
