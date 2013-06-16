@@ -47,7 +47,7 @@ public class ImageV1Factory extends RESTDataObjectFactory<RESTImageV1, ImageFile
 
         // REVISIONS
         if (revision == null && expand != null && expand.contains(RESTBaseEntityV1.REVISIONS_NAME)) {
-            retValue.setRevisions(RESTDataObjectCollectionFactory.create(RESTImageCollectionV1.class, new ImageV1Factory(), entity,
+            retValue.setRevisions(RESTDataObjectCollectionFactory.create(RESTImageCollectionV1.class, this, entity,
                     EnversUtilities.getRevisions(entityManager, entity), RESTBaseEntityV1.REVISIONS_NAME, dataType, expand, baseUrl,
                     entityManager));
         }
@@ -55,7 +55,7 @@ public class ImageV1Factory extends RESTDataObjectFactory<RESTImageV1, ImageFile
         // LANGUAGE IMAGES
         if (expand != null && expand.contains(RESTImageV1.LANGUAGEIMAGES_NAME)) {
             retValue.setLanguageImages_OTM(
-                    RESTDataObjectCollectionFactory.create(RESTLanguageImageCollectionV1.class, new LanguageImageV1Factory(),
+                    RESTDataObjectCollectionFactory.create(RESTLanguageImageCollectionV1.class, languageImageFactory,
                             entity.getLanguageImagesArray(), RESTImageV1.LANGUAGEIMAGES_NAME, dataType, expand, baseUrl, false,
                             entityManager));
         }

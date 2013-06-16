@@ -234,7 +234,7 @@ public class TranslatedTopicV1Factory extends RESTDataObjectFactory<RESTTranslat
                             "No TranslatedTopicString entity was found with the primary key " + restEntity.getId() + " for " +
                                     "TranslatedTopicData " + entity.getId());
 
-                    new TranslatedTopicStringV1Factory().updateDBEntityFromRESTEntity(dbEntity, restEntity);
+                    translatedTopicStringFactory.updateDBEntityFromRESTEntity(dbEntity, restEntity);
                 }
             }
         }

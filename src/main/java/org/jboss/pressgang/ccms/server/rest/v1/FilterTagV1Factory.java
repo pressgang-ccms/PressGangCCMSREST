@@ -46,7 +46,7 @@ public class FilterTagV1Factory extends RESTDataObjectFactory<RESTFilterTagV1, F
 
         // REVISIONS
         if (revision == null && expand != null && expand.contains(RESTBaseEntityV1.REVISIONS_NAME)) {
-            retValue.setRevisions(RESTDataObjectCollectionFactory.create(RESTFilterTagCollectionV1.class, new FilterTagV1Factory(), entity,
+            retValue.setRevisions(RESTDataObjectCollectionFactory.create(RESTFilterTagCollectionV1.class, this, entity,
                     EnversUtilities.getRevisions(entityManager, entity), RESTBaseEntityV1.REVISIONS_NAME, dataType, expand, baseUrl,
                     entityManager));
         }
@@ -75,7 +75,7 @@ public class FilterTagV1Factory extends RESTDataObjectFactory<RESTFilterTagV1, F
             final RESTTagV1 restEntity = dataObject.getTag();
 
             if (restEntity != null) {
-                final Tag dbEntity = entityManager.getReference(Tag.class, restEntity.getId());
+                final Tag dbEntity = entityManager.find(Tag.class, restEntity.getId());
                 if (dbEntity == null)
                     throw new BadRequestException("No Tag entity was found with the primary key " + restEntity.getId());
 

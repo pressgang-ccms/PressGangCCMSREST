@@ -121,7 +121,7 @@ public class FilterV1Factory extends RESTDataObjectFactory<RESTFilterV1, Filter,
                 final RESTFilterTagV1 restEntity = restEntityItem.getItem();
 
                 if (restEntityItem.returnIsRemoveItem()) {
-                    final FilterTag dbEntity = entityManager.getReference(FilterTag.class, restEntity.getId());
+                    final FilterTag dbEntity = entityManager.find(FilterTag.class, restEntity.getId());
                     if (dbEntity == null)
                         throw new BadRequestException("No FilterTag entity was found with the primary key " + restEntity.getId());
 
@@ -153,7 +153,7 @@ public class FilterV1Factory extends RESTDataObjectFactory<RESTFilterV1, Filter,
                 final RESTFilterLocaleV1 restEntity = restEntityItem.getItem();
 
                 if (restEntityItem.returnIsRemoveItem()) {
-                    final FilterLocale dbEntity = entityManager.getReference(FilterLocale.class, restEntity.getId());
+                    final FilterLocale dbEntity = entityManager.find(FilterLocale.class, restEntity.getId());
                     if (dbEntity == null)
                         throw new BadRequestException("No FilterLocale entity was found with the primary key " + restEntity.getId());
 
@@ -185,7 +185,7 @@ public class FilterV1Factory extends RESTDataObjectFactory<RESTFilterV1, Filter,
                 final RESTFilterCategoryV1 restEntity = restEntityItem.getItem();
 
                 if (restEntityItem.returnIsRemoveItem()) {
-                    final FilterCategory dbEntity = entityManager.getReference(FilterCategory.class, restEntity.getId());
+                    final FilterCategory dbEntity = entityManager.find(FilterCategory.class, restEntity.getId());
                     if (dbEntity == null)
                         throw new BadRequestException("No FilterCategory entity was found with the primary key " + restEntity.getId());
 
@@ -217,7 +217,7 @@ public class FilterV1Factory extends RESTDataObjectFactory<RESTFilterV1, Filter,
                 final RESTFilterFieldV1 restEntity = restEntityItem.getItem();
 
                 if (restEntityItem.returnIsRemoveItem()) {
-                    final FilterField dbEntity = entityManager.getReference(FilterField.class, restEntity.getId());
+                    final FilterField dbEntity = entityManager.find(FilterField.class, restEntity.getId());
                     if (dbEntity == null)
                         throw new BadRequestException("No FilterField entity was found with the primary key " + restEntity.getId());
 

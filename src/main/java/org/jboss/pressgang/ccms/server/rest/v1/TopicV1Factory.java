@@ -321,7 +321,7 @@ public class TopicV1Factory extends RESTDataObjectFactory<RESTTopicV1, Topic, RE
 
                     entity.removeBugzillaBug(restEntity.getId());
                 } else if (restEntityItem.returnIsAddItem()) {
-                    final BugzillaBug dbEntity = new BugzillaBugV1Factory().createDBEntityFromRESTEntity(restEntity);
+                    final BugzillaBug dbEntity = bugzillaBugFactory.createDBEntityFromRESTEntity(restEntity);
                     entity.addBugzillaBug(dbEntity);
                 } else if (restEntityItem.returnIsUpdateItem()) {
                     final BugzillaBug dbEntity = entityManager.find(BugzillaBug.class, restEntity.getId());
