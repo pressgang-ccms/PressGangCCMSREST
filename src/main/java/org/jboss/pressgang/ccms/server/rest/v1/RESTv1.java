@@ -1719,6 +1719,13 @@ public class RESTv1 extends BaseRESTv1 implements RESTBaseInterfaceV1, RESTInter
             }
         }
 
+        /* If the specified locale can't be found then use the default */
+        for (final LanguageImage languageImage : entity.getLanguageImages()) {
+            if (CommonConstants.DEFAULT_LOCALE.equalsIgnoreCase(languageImage.getLocale())) {
+                return Response.ok(languageImage.getImageData(), languageImage.getMimeType()).build();
+            }
+        }
+
         throw new BadRequestException("No image exists for the " + fixedLocale + " locale.");
     }
 
@@ -1732,6 +1739,13 @@ public class RESTv1 extends BaseRESTv1 implements RESTBaseInterfaceV1, RESTInter
         /* Try and find the locale specified first */
         for (final LanguageImage languageImage : entity.getLanguageImages()) {
             if (fixedLocale.equalsIgnoreCase(languageImage.getLocale())) {
+                return Response.ok(languageImage.getThumbnailData(), languageImage.getMimeType()).build();
+            }
+        }
+
+        /* If the specified locale can't be found then use the default */
+        for (final LanguageImage languageImage : entity.getLanguageImages()) {
+            if (CommonConstants.DEFAULT_LOCALE.equalsIgnoreCase(languageImage.getLocale())) {
                 return Response.ok(languageImage.getThumbnailData(), languageImage.getMimeType()).build();
             }
         }
@@ -3061,6 +3075,14 @@ public class RESTv1 extends BaseRESTv1 implements RESTBaseInterfaceV1, RESTInter
             }
         }
 
+        /* If the specified locale can't be found then use the default */
+        for (final LanguageFile languageFile : entity.getLanguageFiles()) {
+            if (CommonConstants.DEFAULT_LOCALE.equalsIgnoreCase(languageFile.getLocale())) {
+                response.getOutputHeaders().putSingle("Content-Disposition", "filename=" + entity.getFileName());
+                return languageFile.getFileData();
+            }
+        }
+
         throw new BadRequestException("No file exists for the " + fixedLocale + " locale.");
     }
 
@@ -3075,6 +3097,14 @@ public class RESTv1 extends BaseRESTv1 implements RESTBaseInterfaceV1, RESTInter
         /* Try and find the locale specified first */
         for (final LanguageFile languageFile : entity.getLanguageFiles()) {
             if (fixedLocale.equalsIgnoreCase(languageFile.getLocale())) {
+                response.getOutputHeaders().putSingle("Content-Disposition", "filename=" + entity.getFileName());
+                return languageFile.getFileData();
+            }
+        }
+
+        /* If the specified locale can't be found then use the default */
+        for (final LanguageFile languageFile : entity.getLanguageFiles()) {
+            if (CommonConstants.DEFAULT_LOCALE.equalsIgnoreCase(languageFile.getLocale())) {
                 response.getOutputHeaders().putSingle("Content-Disposition", "filename=" + entity.getFileName());
                 return languageFile.getFileData();
             }
