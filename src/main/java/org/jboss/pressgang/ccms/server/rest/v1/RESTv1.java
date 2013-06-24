@@ -128,6 +128,7 @@ import org.jboss.pressgang.ccms.server.utils.ProviderUtilities;
 import org.jboss.pressgang.ccms.server.utils.TopicUtilities;
 import org.jboss.pressgang.ccms.utils.common.CollectionUtilities;
 import org.jboss.pressgang.ccms.utils.common.DocBookUtilities;
+import org.jboss.pressgang.ccms.utils.common.XMLUtilities;
 import org.jboss.pressgang.ccms.utils.common.ZipUtilities;
 import org.jboss.pressgang.ccms.utils.constants.CommonConstants;
 import org.jboss.pressgang.ccms.wrapper.ContentSpecWrapper;
@@ -139,6 +140,7 @@ import org.jboss.resteasy.spi.HttpResponse;
 import org.jboss.resteasy.spi.InternalServerErrorException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.w3c.dom.Document;
 
 /**
  * The PressGang REST interface implementation
@@ -171,6 +173,22 @@ public class RESTv1 extends BaseRESTv1 implements RESTBaseInterfaceV1, RESTInter
         expand.setBranches(CollectionUtilities.toArrayList(collection));
 
         return expand;
+    }
+
+    @Override
+    public String echoXML(String xml) {
+        Document doc = null;
+        try {
+            doc = XMLUtilities.convertStringToDocument(xml);
+        } catch (Exception e) {
+            throw new BadRequestException(e);
+        }
+
+        if (doc == null) {
+            throw new BadRequestException("The input XML is not valid XML content");
+        } else {
+            return xml;
+        }
     }
 
     /* BLOBCONSTANTS FUNCTIONS */
