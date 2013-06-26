@@ -157,7 +157,7 @@ public class RESTv1 extends BaseRESTv1 implements RESTBaseInterfaceV1, RESTInter
         }
 
         // Add the xml to the cache and return the ID
-        return xmlEchoCache.addXML(xml);
+        return xmlEchoCache.addXML(xml).toString();
     }
 
     @Override
