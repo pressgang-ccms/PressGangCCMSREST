@@ -140,7 +140,7 @@ public class RESTv1 extends BaseRESTv1 implements RESTBaseInterfaceV1, RESTInter
     }
 
     @Override
-    public Integer holdXML(String xml) {
+    public String holdXML(String xml) {
         if (xml == null) throw new BadRequestException("The xml parameter cannot be null");
 
         // Parse the XML to make sure it's XML
