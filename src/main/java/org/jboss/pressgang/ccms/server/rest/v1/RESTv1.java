@@ -86,6 +86,7 @@ import org.jboss.pressgang.ccms.rest.v1.entities.RESTTranslatedTopicV1;
 import org.jboss.pressgang.ccms.rest.v1.entities.RESTUserV1;
 import org.jboss.pressgang.ccms.rest.v1.entities.base.RESTLogDetailsV1;
 import org.jboss.pressgang.ccms.rest.v1.entities.enums.RESTXMLDoctype;
+import org.jboss.pressgang.ccms.rest.v1.entities.wrapper.IntegerWrapper;
 import org.jboss.pressgang.ccms.rest.v1.expansion.ExpandDataDetails;
 import org.jboss.pressgang.ccms.rest.v1.expansion.ExpandDataTrunk;
 import org.jboss.pressgang.ccms.rest.v1.jaxrsinterfaces.RESTBaseInterfaceV1;
@@ -140,7 +141,7 @@ public class RESTv1 extends BaseRESTv1 implements RESTBaseInterfaceV1, RESTInter
     }
 
     @Override
-    public String holdXML(String xml) {
+    public IntegerWrapper holdXML(String xml) {
         if (xml == null) throw new BadRequestException("The xml parameter cannot be null");
 
         // Parse the XML to make sure it's XML
@@ -157,7 +158,10 @@ public class RESTv1 extends BaseRESTv1 implements RESTBaseInterfaceV1, RESTInter
         }
 
         // Add the xml to the cache and return the ID
-        return xmlEchoCache.addXML(xml).toString();
+        final IntegerWrapper retValue = new IntegerWrapper();
+        retValue.value = xmlEchoCache.addXML(xml);
+
+        return retValue;
     }
 
     @Override
