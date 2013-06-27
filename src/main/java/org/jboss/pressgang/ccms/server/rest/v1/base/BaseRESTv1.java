@@ -135,6 +135,8 @@ public class BaseRESTv1 extends BaseREST {
      */
     @Inject
     protected EntityCache entityCache;
+    @Inject
+    protected XMLEchoCache xmlEchoCache;
 
     /* START ENTITY FACTORIES */
     @Inject

@@ -138,6 +138,7 @@ import org.jboss.resteasy.specimpl.PathSegmentImpl;
 import org.jboss.resteasy.spi.BadRequestException;
 import org.jboss.resteasy.spi.HttpResponse;
 import org.jboss.resteasy.spi.InternalServerErrorException;
+import org.jboss.resteasy.spi.NotFoundException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.w3c.dom.Document;
@@ -176,7 +177,10 @@ public class RESTv1 extends BaseRESTv1 implements RESTBaseInterfaceV1, RESTInter
     }
 
     @Override
-    public String echoXML(String xml) {
+    public String holdXML(String xml) {
+        if (xml == null) throw new BadRequestException("The xml parameter cannot be null");
+
+        // Parse the XML to make sure it's XML
         Document doc = null;
         try {
             doc = XMLUtilities.convertStringToDocument(xml);
@@ -184,10 +188,39 @@ public class RESTv1 extends BaseRESTv1 implements RESTBaseInterfaceV1, RESTInter
             throw new BadRequestException(e);
         }
 
+        // Make sure the input was XML by seeing if it could be parsed
         if (doc == null) {
             throw new BadRequestException("The input XML is not valid XML content");
+        }
+
+        // Add the xml to the cache and return the ID
+        return xmlEchoCache.addXML(xml).toString();
+    }
+
+    @Override
+    public String echoXML(Integer id, String xml) {
+        if (id == null && xml == null) throw new BadRequestException("The id parameter field cannot be null");
+
+        if (id != null) {
+            final String foundXML = xmlEchoCache.getXML(id);
+            if (foundXML == null) {
+                throw new NotFoundException("No XML exists for the specified id");
+            } else {
+                return foundXML;
+            }
         } else {
-            return xml;
+            Document doc = null;
+            try {
+                doc = XMLUtilities.convertStringToDocument(xml);
+            } catch (Exception e) {
+                throw new BadRequestException(e);
+            }
+
+            if (doc == null) {
+                throw new BadRequestException("The input XML is not valid XML content");
+            } else {
+                return xml;
+            }
         }
     }
 
