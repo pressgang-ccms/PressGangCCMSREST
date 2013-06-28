@@ -69,6 +69,7 @@ import org.jboss.pressgang.ccms.server.rest.DatabaseOperation;
 import org.jboss.pressgang.ccms.server.rest.v1.BlobConstantV1Factory;
 import org.jboss.pressgang.ccms.server.rest.v1.CSNodeV1Factory;
 import org.jboss.pressgang.ccms.server.rest.v1.CategoryV1Factory;
+import org.jboss.pressgang.ccms.server.rest.v1.ContentSpecV1Factory;
 import org.jboss.pressgang.ccms.server.rest.v1.FileV1Factory;
 import org.jboss.pressgang.ccms.server.rest.v1.FilterV1Factory;
 import org.jboss.pressgang.ccms.server.rest.v1.ImageV1Factory;
@@ -84,10 +85,9 @@ import org.jboss.pressgang.ccms.server.rest.v1.TranslatedCSNodeV1Factory;
 import org.jboss.pressgang.ccms.server.rest.v1.TranslatedContentSpecV1Factory;
 import org.jboss.pressgang.ccms.server.rest.v1.TranslatedTopicV1Factory;
 import org.jboss.pressgang.ccms.server.rest.v1.UserV1Factory;
-import org.jboss.pressgang.ccms.server.rest.v1.ContentSpecV1Factory;
 import org.jboss.pressgang.ccms.server.utils.EntityUtilities;
-import org.jboss.pressgang.ccms.server.utils.TopicSourceURLTitleThread;
 import org.jboss.pressgang.ccms.server.utils.ProviderUtilities;
+import org.jboss.pressgang.ccms.server.utils.TopicSourceURLTitleThread;
 import org.jboss.resteasy.plugins.providers.atom.Content;
 import org.jboss.resteasy.plugins.providers.atom.Entry;
 import org.jboss.resteasy.plugins.providers.atom.Feed;
@@ -1018,7 +1018,7 @@ public class BaseRESTv1 extends BaseREST {
      */
     protected RESTContentSpecV1 createJSONContentSpecFromString(final RESTContentSpecV1 dataObject, final RESTLogDetailsV1 logDetails,
             final String expand) {
-        return createOrUpdateJSONContentSpecFromString(null, dataObject.getText(), DatabaseOperation.CREATE, logDetails, expand);
+        return createOrUpdateJSONContentSpecFromString(null, dataObject.getText(), false, DatabaseOperation.CREATE, logDetails, expand);
     }
 
     /**
@@ -1031,21 +1031,23 @@ public class BaseRESTv1 extends BaseREST {
      */
     protected RESTContentSpecV1 updateJSONContentSpecFromString(final RESTContentSpecV1 dataObject, final RESTLogDetailsV1 logDetails,
             final String expand) {
-        return createOrUpdateJSONContentSpecFromString(dataObject.getId(), dataObject.getText(), DatabaseOperation.UPDATE, logDetails,
-                expand);
+        return createOrUpdateJSONContentSpecFromString(dataObject.getId(), dataObject.getText(), false, DatabaseOperation.UPDATE,
+                logDetails, expand);
     }
 
     /**
      * Creates a content spec from a String representation of a content specification.
      *
      * @param contentSpecString The content spec string representation.
+     * @param permissive
      * @param logDetails        The details about the changes that need to be logged.
      * @return
      */
-    protected String createTEXTContentSpecFromString(final String contentSpecString, final RESTLogDetailsV1 logDetails) {
+    protected String createTEXTContentSpecFromString(final String contentSpecString, final Boolean permissive,
+            final RESTLogDetailsV1 logDetails) {
         final ErrorLoggerManager loggerManager = new ErrorLoggerManager();
-        createOrUpdateJSONContentSpecFromString(null, contentSpecString, DatabaseOperation.CREATE, logDetails, "", RESTv1Constants.TEXT_URL,
-                loggerManager, false);
+        createOrUpdateJSONContentSpecFromString(null, contentSpecString, permissive, DatabaseOperation.CREATE, logDetails, "",
+                RESTv1Constants.TEXT_URL, loggerManager, false);
 
         return loggerManager.generateLogs();
     }
@@ -1055,13 +1057,15 @@ public class BaseRESTv1 extends BaseREST {
      *
      * @param id                The content spec id being updated.
      * @param contentSpecString The content spec string representation.
+     * @param permissive
      * @param logDetails        The details about the changes that need to be logged.
      * @return
      */
-    protected String updateTEXTContentSpecFromString(final Integer id, final String contentSpecString, final RESTLogDetailsV1 logDetails) {
+    protected String updateTEXTContentSpecFromString(final Integer id, final String contentSpecString, final Boolean permissive,
+            final RESTLogDetailsV1 logDetails) {
         final ErrorLoggerManager loggerManager = new ErrorLoggerManager();
-        createOrUpdateJSONContentSpecFromString(id, contentSpecString, DatabaseOperation.UPDATE, logDetails, "", RESTv1Constants.TEXT_URL,
-                loggerManager, true);
+        createOrUpdateJSONContentSpecFromString(id, contentSpecString, permissive, DatabaseOperation.UPDATE, logDetails, "",
+                RESTv1Constants.TEXT_URL, loggerManager, true);
 
         return loggerManager.generateLogs();
     }
@@ -1071,15 +1075,16 @@ public class BaseRESTv1 extends BaseREST {
      *
      * @param id                The content spec id being updated, or null if one is to be created.
      * @param contentSpecString The content spec string representation.
+     * @param permissive
      * @param operation         The Database Operation type (CREATE or UPDATE).
      * @param logDetails        The details about the changes that need to be logged.
      * @param expand            The Expand Object that contains details about what should be expanded.
      * @return
      */
     private RESTContentSpecV1 createOrUpdateJSONContentSpecFromString(final Integer id, final String contentSpecString,
-            final DatabaseOperation operation, final RESTLogDetailsV1 logDetails, final String expand) {
-        return createOrUpdateJSONContentSpecFromString(id, contentSpecString, operation, logDetails, expand, RESTv1Constants.JSON_URL,
-                new ErrorLoggerManager(), true);
+            final Boolean permissive, final DatabaseOperation operation, final RESTLogDetailsV1 logDetails, final String expand) {
+        return createOrUpdateJSONContentSpecFromString(id, contentSpecString, permissive, operation, logDetails, expand,
+                RESTv1Constants.JSON_URL, new ErrorLoggerManager(), true);
     }
 
     /**
@@ -1087,6 +1092,7 @@ public class BaseRESTv1 extends BaseREST {
      *
      * @param id                The content spec id being updated, or null if one is to be created.
      * @param contentSpecString The content spec string representation.
+     * @param permissive
      * @param operation         The Database Operation type (CREATE or UPDATE).
      * @param logDetails        The details about the changes that need to be logged.
      * @param expand            The Expand Object that contains details about what should be expanded.
@@ -1096,8 +1102,8 @@ public class BaseRESTv1 extends BaseREST {
      * @return
      */
     private RESTContentSpecV1 createOrUpdateJSONContentSpecFromString(final Integer id, final String contentSpecString,
-            final DatabaseOperation operation, final RESTLogDetailsV1 logDetails, final String expand, final String dataType,
-            final ErrorLoggerManager loggerManager, boolean saveWhenInvalid) {
+            final Boolean permissive, final DatabaseOperation operation, final RESTLogDetailsV1 logDetails, final String expand,
+            final String dataType, final ErrorLoggerManager loggerManager, boolean saveWhenInvalid) {
         assert contentSpecString != null;
 
         boolean success = true;
@@ -1124,6 +1130,9 @@ public class BaseRESTv1 extends BaseREST {
             final DBProviderFactory providerFactory = ProviderUtilities.getDBProviderFactory(entityManager, transactionManager,
                     enversLoggingBean);
             final ProcessingOptions processingOptions = new ProcessingOptions();
+            if (permissive != null) {
+                processingOptions.setPermissiveMode(permissive);
+            }
 
             final ContentSpecParser parser = new ContentSpecParser(providerFactory, loggerManager);
             final ContentSpecProcessor processor = new ContentSpecProcessor(providerFactory, loggerManager, processingOptions);
@@ -1169,7 +1178,7 @@ public class BaseRESTv1 extends BaseREST {
         if (exception != null) {
             throw exception;
         } else {
-            return getJSONResource(ContentSpec.class, new ContentSpecV1Factory(), csId, expand);
+            return getJSONResource(ContentSpec.class, contentSpecFactory, csId, expand);
         }
     }
 
