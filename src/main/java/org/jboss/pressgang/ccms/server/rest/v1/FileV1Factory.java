@@ -104,8 +104,6 @@ public class FileV1Factory extends RESTDataObjectFactory<RESTFileV1, File, RESTF
                 }
             }
         }
-
-        entityManager.persist(entity);
     }
 
     @Override

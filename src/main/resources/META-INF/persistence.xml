@@ -20,6 +20,7 @@
         <class>org.jboss.pressgang.ccms.model.contentspec.TranslatedContentSpec</class>
         <class>org.jboss.pressgang.ccms.model.contentspec.TranslatedCSNode</class>
         <class>org.jboss.pressgang.ccms.model.contentspec.TranslatedCSNodeString</class>
+        <class>org.jboss.pressgang.ccms.model.File</class>
         <class>org.jboss.pressgang.ccms.model.Filter</class>
         <class>org.jboss.pressgang.ccms.model.FilterCategory</class>
         <class>org.jboss.pressgang.ccms.model.FilterField</class>
@@ -28,6 +29,7 @@
         <class>org.jboss.pressgang.ccms.model.FilterTag</class>
         <class>org.jboss.pressgang.ccms.model.ImageFile</class>
         <class>org.jboss.pressgang.ccms.model.IntegerConstants</class>
+        <class>org.jboss.pressgang.ccms.model.LanguageFile</class>
         <class>org.jboss.pressgang.ccms.model.LanguageImage</class>
         <class>org.jboss.pressgang.ccms.model.Project</class>
         <class>org.jboss.pressgang.ccms.model.PropertyTag</class>
