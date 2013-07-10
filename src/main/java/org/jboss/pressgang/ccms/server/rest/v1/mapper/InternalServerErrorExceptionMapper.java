@@ -17,10 +17,11 @@ public class InternalServerErrorExceptionMapper implements ExceptionMapper<Inter
     @Override
     public Response toResponse(final InternalServerErrorException exception) {
         return Response.status(Response.Status.INTERNAL_SERVER_ERROR)
-                .entity(RESTv1Constants.ERROR_TEXT_PREFIX + " " + exception.getMessage() + "\n")
+                .entity(exception.getMessage() + "\n")
                 .header("Content-Type", MediaType.TEXT_PLAIN)
-                .header(Constants.X_PRESSGANG_VERSION_HEADER, VersionUtilities.getAPIVersion(VersionHeaderInterceptor.class))
+                .header(RESTv1Constants.X_PRESSGANG_VERSION_HEADER, VersionUtilities.getAPIVersion(VersionHeaderInterceptor.class))
                 .header(RESTv1Constants.ACCESS_CONTROL_ALLOW_ORIGIN_HEADER, Constants.CORS_ALLOW_ORIGIN_HEADER)
+                .header(RESTv1Constants.ACCESS_CONTROL_EXPOSE_HEADERS, RESTv1Constants.X_PRESSGANG_VERSION_HEADER)
                 .build();
     }
 }

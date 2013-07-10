@@ -30,7 +30,7 @@ public class VersionHeaderInterceptor implements PostProcessInterceptor, Accepte
 
     @Override
     public void postProcess(ServerResponse response) {
-        response.getMetadata().add(Constants.X_PRESSGANG_VERSION_HEADER, VersionUtilities.getAPIVersion(VersionHeaderInterceptor.class));
-        response.getMetadata().add(RESTv1Constants.ACCESS_CONTROL_EXPOSE_HEADERS, Constants.X_PRESSGANG_VERSION_HEADER);
+        response.getMetadata().add(RESTv1Constants.X_PRESSGANG_VERSION_HEADER, VersionUtilities.getAPIVersion(VersionHeaderInterceptor.class));
+        response.getMetadata().add(RESTv1Constants.ACCESS_CONTROL_EXPOSE_HEADERS, RESTv1Constants.X_PRESSGANG_VERSION_HEADER);
     }
 }

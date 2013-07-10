@@ -76,7 +76,7 @@ public abstract class BaseREST {
              * specifically allowed via Access-Control-Expose-Headers.
              * http://www.w3.org/TR/cors/#simple-response-header
              */
-            retValue.header(RESTv1Constants.ACCESS_CONTROL_EXPOSE_HEADERS, Constants.X_PRESSGANG_VERSION_HEADER);
+            retValue.header(RESTv1Constants.ACCESS_CONTROL_EXPOSE_HEADERS, RESTv1Constants.X_PRESSGANG_VERSION_HEADER);
         }
 
         return retValue.build();
