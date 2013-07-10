@@ -65,11 +65,18 @@ public abstract class BaseREST {
         final Response.ResponseBuilder retValue = Response.ok();
 
         if (Constants.CORS_ALLOW_ORIGIN_HEADER != null) {
-            if (requestHeaders != null) retValue.header(RESTv1Constants.ACCESS_CONTROL_ALLOW_HEADERS, requestHeaders + ", " + Constants.X_PRESSGANG_VERSION_HEADER);
+            if (requestHeaders != null) retValue.header(RESTv1Constants.ACCESS_CONTROL_ALLOW_HEADERS, requestHeaders);
 
             if (requestMethod != null) retValue.header(RESTv1Constants.ACCESS_CONTROL_ALLOW_METHODS, requestMethod);
 
             retValue.header(RESTv1Constants.ACCESS_CONTROL_ALLOW_ORIGIN_HEADER, Constants.CORS_ALLOW_ORIGIN_HEADER);
+
+            /**
+             * Headers that do not fall under the category of simple response headers have to be
+             * specifically allowed via Access-Control-Expose-Headers.
+             * http://www.w3.org/TR/cors/#simple-response-header
+             */
+            retValue.header("Access-Control-Expose-Headers", Constants.X_PRESSGANG_VERSION_HEADER);
         }
 
         return retValue.build();
