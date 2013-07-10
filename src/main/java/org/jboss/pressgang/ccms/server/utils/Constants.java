@@ -21,4 +21,9 @@ public class Constants {
      * The base URL from which the REST interface can be accessed
      */
     public static final String BASE_REST_PATH = "/rest";
+
+    /**
+     * A header sent back with every request.
+     */
+    public static final String X_PRESSGANG_VERSION_HEADER = "X-PressGang-Version";
 }

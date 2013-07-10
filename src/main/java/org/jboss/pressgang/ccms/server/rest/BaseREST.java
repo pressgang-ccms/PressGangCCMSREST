@@ -65,7 +65,7 @@ public abstract class BaseREST {
         final Response.ResponseBuilder retValue = Response.ok();
 
         if (Constants.CORS_ALLOW_ORIGIN_HEADER != null) {
-            if (requestHeaders != null) retValue.header(RESTv1Constants.ACCESS_CONTROL_ALLOW_HEADERS, requestHeaders);
+            if (requestHeaders != null) retValue.header(RESTv1Constants.ACCESS_CONTROL_ALLOW_HEADERS, requestHeaders + ", " + Constants.X_PRESSGANG_VERSION_HEADER);
 
             if (requestMethod != null) retValue.header(RESTv1Constants.ACCESS_CONTROL_ALLOW_METHODS, requestMethod);
 

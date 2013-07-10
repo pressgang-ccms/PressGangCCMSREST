@@ -3,7 +3,6 @@
          xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
          xsi:schemaLocation="http://java.sun.com/xml/ns/javaee http://java.sun.com/xml/ns/javaee/web-app_3_0.xsd">
 
-
     <!--<filter>
         <filter-name>OAuth2 Filter</filter-name>
         <filter-class>org.jboss.pressgang.belay.oauth2.resourceserver.filter.OAuth2RSFilter</filter-class>
@@ -26,7 +25,7 @@
     </context-param>
 
     <!-- Liquibase Parameters -->
-    <context-param>
+    <!--<context-param>
         <param-name>liquibase.changelog</param-name>
         <param-value>db/db.changelog.xml</param-value>
     </context-param>
@@ -37,12 +36,12 @@
     <context-param>
         <param-name>liquibase.onerror.fail</param-name>
         <param-value>true</param-value>
-    </context-param>
+    </context-param>-->
 
     <!-- Listeners -->
-    <listener>
+    <!--<listener>
         <listener-class>liquibase.integration.servlet.LiquibaseServletListener</listener-class>
-    </listener>
+    </listener>-->
 
     <!-- WebDAV Interop filter for Microsoft clients -->
     <filter>

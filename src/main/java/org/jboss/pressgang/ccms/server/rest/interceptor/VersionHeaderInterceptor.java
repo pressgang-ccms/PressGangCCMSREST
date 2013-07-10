@@ -29,6 +29,6 @@ public class VersionHeaderInterceptor implements PostProcessInterceptor, Accepte
 
     @Override
     public void postProcess(ServerResponse response) {
-        response.getMetadata().add("X-PressGang-Version", VersionUtilities.getAPIVersion(VersionHeaderInterceptor.class));
+        response.getMetadata().add(Constants.X_PRESSGANG_VERSION_HEADER, VersionUtilities.getAPIVersion(VersionHeaderInterceptor.class));
     }
 }
