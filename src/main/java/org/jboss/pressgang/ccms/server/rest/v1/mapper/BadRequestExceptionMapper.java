@@ -21,6 +21,7 @@ public class BadRequestExceptionMapper implements ExceptionMapper<BadRequestExce
                 .header("Content-Type", MediaType.TEXT_PLAIN)
                 .header(Constants.X_PRESSGANG_VERSION_HEADER, VersionUtilities.getAPIVersion(VersionHeaderInterceptor.class))
                 .header(RESTv1Constants.ACCESS_CONTROL_ALLOW_ORIGIN_HEADER, Constants.CORS_ALLOW_ORIGIN_HEADER)
+                .header(RESTv1Constants.ACCESS_CONTROL_EXPOSE_HEADERS, Constants.X_PRESSGANG_VERSION_HEADER)
                 .build();
     }
 }
