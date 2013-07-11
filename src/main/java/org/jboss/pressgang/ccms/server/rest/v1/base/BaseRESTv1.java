@@ -1437,7 +1437,7 @@ public class BaseRESTv1 extends BaseREST {
 
             // Construct a "readable" message outlining the validation errors
             for (ConstraintViolation invalidValue : e.getConstraintViolations())
-                stringBuilder.append(invalidValue.getPropertyPath()).append(invalidValue.getMessage()).append("\n");
+                stringBuilder.append(invalidValue.getMessage()).append("\n");
 
             return new BadRequestException(stringBuilder.toString(), cause);
         } else if (cause instanceof EntityNotFoundException) {
