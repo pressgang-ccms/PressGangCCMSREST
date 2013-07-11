@@ -27,6 +27,7 @@ import org.jboss.pressgang.ccms.rest.v1.entities.RESTFilterLocaleV1;
 import org.jboss.pressgang.ccms.rest.v1.entities.RESTFilterTagV1;
 import org.jboss.pressgang.ccms.rest.v1.entities.RESTFilterV1;
 import org.jboss.pressgang.ccms.rest.v1.entities.base.RESTBaseEntityV1;
+import org.jboss.pressgang.ccms.rest.v1.entities.enums.RESTFilterTypeV1;
 import org.jboss.pressgang.ccms.rest.v1.expansion.ExpandDataTrunk;
 import org.jboss.pressgang.ccms.server.rest.v1.base.RESTDataObjectCollectionFactory;
 import org.jboss.pressgang.ccms.server.rest.v1.base.RESTDataObjectFactory;
@@ -64,6 +65,7 @@ public class FilterV1Factory extends RESTDataObjectFactory<RESTFilterV1, Filter,
 
         retValue.setId(entity.getFilterId());
         retValue.setName(entity.getFilterName());
+        retValue.setType(RESTFilterTypeV1.getFilterType(entity.getFilterClassType()));
 
         // REVISIONS
         if (revision == null && expand != null && expand.contains(RESTBaseEntityV1.REVISIONS_NAME)) {
@@ -111,6 +113,7 @@ public class FilterV1Factory extends RESTDataObjectFactory<RESTFilterV1, Filter,
     public void syncDBEntityWithRESTEntityFirstPass(final Filter entity, final RESTFilterV1 dataObject) {
         if (dataObject.hasParameterSet(RESTFilterV1.NAME_NAME)) entity.setFilterName(dataObject.getName());
         if (dataObject.hasParameterSet(RESTFilterV1.DESCRIPTION_NAME)) entity.setFilterDescription(dataObject.getDescription());
+        if (dataObject.hasParameterSet(RESTFilterV1.TYPE_NAME)) entity.setFilterClassType(RESTFilterTypeV1.getFilterTypeId(dataObject.getType()));
 
         /* One To Many - Add will create a child entity */
         if (dataObject.hasParameterSet(
