@@ -1122,8 +1122,7 @@ public class BaseRESTv1 extends BaseREST {
             return new NotFoundException(cause);
         } else if (cause instanceof org.hibernate.exception.ConstraintViolationException) {
             return new BadRequestException(cause.getMessage());
-        } else if (cause instanceof ValidationException || cause instanceof PersistenceException || cause instanceof
-                CustomConstraintViolationException) {
+        } else if (cause instanceof ValidationException) {
             return new BadRequestException(cause);
         }
 
