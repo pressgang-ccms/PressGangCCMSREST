@@ -1122,6 +1122,9 @@ public class BaseRESTv1 extends BaseREST {
             return new NotFoundException(cause);
         } else if (cause instanceof org.hibernate.exception.ConstraintViolationException) {
             return new BadRequestException(cause.getMessage());
+        } else if (cause instanceof javax.transaction.RollbackException) {
+            return new BadRequestException("This is most likely caused by the fact that two users are trying to save the same entity at the same time.\n" +
+                    "You can try saving again, or reload the entity to see if there were any changes made in the background.", cause);
         } else if (cause instanceof ValidationException) {
             return new BadRequestException(cause);
         }
