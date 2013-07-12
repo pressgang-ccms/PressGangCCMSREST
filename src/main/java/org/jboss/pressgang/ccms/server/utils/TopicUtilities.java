@@ -242,8 +242,6 @@ public class TopicUtilities {
      * @param topic         The Topic to process the XML for.
      */
     protected static void processXML(final EntityManager entityManager, final Topic topic) {
-        if (topic.isTaggedWith(CommonConstants.CONTENT_SPEC_TAG_ID)) return;
-
         Document doc = null;
         try {
             doc = XMLUtilities.convertStringToDocument(topic.getTopicXML());
@@ -470,8 +468,6 @@ public class TopicUtilities {
      * @param blobConstantId The BlobConstants ID that is the DTD to validate against
      */
     public static void validateXML(final EntityManager entityManager, final Topic topic, final int blobConstantId) {
-        if (topic.isTaggedWith(CommonConstants.CONTENT_SPEC_TAG_ID)) return;
-
         if (entityManager == null) throw new IllegalArgumentException("entityManager cannot be null");
         if (blobConstantId < 0) throw new IllegalArgumentException("blobConstantId must be positive");
 
