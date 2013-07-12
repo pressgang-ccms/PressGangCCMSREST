@@ -2059,22 +2059,6 @@ public class RESTv1 extends BaseRESTv1 implements RESTBaseInterfaceV1, RESTInter
         return retValue;
     }
 
-    // HTML TOPIC FUNCTIONS
-
-    @Override
-    public String getHTMLTopicHTML(final Integer id) {
-        assert id != null : "The id parameter can not be null";
-
-        return getXMLResource(Topic.class, topicFactory, id, null).getHtml();
-    }
-
-    @Override
-    public String getHTMLTopicRevisionHTML(final Integer id, final Integer revision) {
-        assert id != null : "The id parameter can not be null";
-
-        return getXMLResource(Topic.class, topicFactory, id, revision, null).getHtml();
-    }
-
     // CSV TOPIC FUNCTIONS
 
     @Override
