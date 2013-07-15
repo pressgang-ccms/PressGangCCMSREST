@@ -47,7 +47,7 @@ public class BugzillaBugV1Factory extends RESTDataObjectFactory<RESTBugzillaBugV
     }
 
     @Override
-    public void syncDBEntityWithRESTEntity(final BugzillaBug entity, final RESTBugzillaBugV1 dataObject) {
+    public void syncDBEntityWithRESTEntityFirstPass(final BugzillaBug entity, final RESTBugzillaBugV1 dataObject) {
         if (dataObject.hasParameterSet(RESTBugzillaBugV1.BUG_ID)) entity.setBugzillaBugBugzillaId(dataObject.getBugId());
         if (dataObject.hasParameterSet(RESTBugzillaBugV1.BUG_ISOPEN)) entity.setBugzillaBugOpen(dataObject.getIsOpen());
         if (dataObject.hasParameterSet(RESTBugzillaBugV1.BUG_SUMMARY)) entity.setBugzillaBugSummary(dataObject.getSummary());
@@ -57,5 +57,4 @@ public class BugzillaBugV1Factory extends RESTDataObjectFactory<RESTBugzillaBugV
     protected Class<BugzillaBug> getDatabaseClass() {
         return BugzillaBug.class;
     }
-
 }

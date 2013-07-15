@@ -18,6 +18,7 @@ import org.jboss.pressgang.ccms.rest.v1.entities.base.RESTBaseEntityV1;
 import org.jboss.pressgang.ccms.rest.v1.expansion.ExpandDataTrunk;
 import org.jboss.pressgang.ccms.server.rest.v1.base.RESTDataObjectCollectionFactory;
 import org.jboss.pressgang.ccms.server.rest.v1.base.RESTDataObjectFactory;
+import org.jboss.pressgang.ccms.server.rest.v1.utils.RESTv1Utilities;
 import org.jboss.pressgang.ccms.server.utils.EnversUtilities;
 import org.jboss.resteasy.spi.BadRequestException;
 
@@ -65,10 +66,13 @@ public class ProjectV1Factory extends RESTDataObjectFactory<RESTProjectV1, Proje
     }
 
     @Override
-    public void syncDBEntityWithRESTEntity(final Project entity, final RESTProjectV1 dataObject) {
+    public void syncDBEntityWithRESTEntityFirstPass(final Project entity, final RESTProjectV1 dataObject) {
         if (dataObject.hasParameterSet(RESTProjectV1.DESCRIPTION_NAME)) entity.setProjectDescription(dataObject.getDescription());
         if (dataObject.hasParameterSet(RESTProjectV1.NAME_NAME)) entity.setProjectName(dataObject.getName());
+    }
 
+    @Override
+    public void syncDBEntityWithRESTEntitySecondPass(Project entity, RESTProjectV1 dataObject) {
         /* Many To Many - Add will create a mapping */
         if (dataObject.hasParameterSet(
                 RESTProjectV1.TAGS_NAME) && dataObject.getTags() != null && dataObject.getTags().getItems() != null) {
@@ -78,7 +82,7 @@ public class ProjectV1Factory extends RESTDataObjectFactory<RESTProjectV1, Proje
                 final RESTTagV1 restEntity = restEntityItem.getItem();
 
                 if (restEntityItem.returnIsAddItem() || restEntityItem.returnIsRemoveItem()) {
-                    final Tag dbEntity = entityManager.find(Tag.class, restEntity.getId());
+                    final Tag dbEntity = RESTv1Utilities.findEntity(entityManager, entityCache, restEntity, Tag.class);
                     if (dbEntity == null)
                         throw new BadRequestException("No Tag entity was found with the primary key " + restEntity.getId());
 

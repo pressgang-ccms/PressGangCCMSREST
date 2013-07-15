@@ -49,7 +49,7 @@ public class TopicSourceUrlV1Factory extends RESTDataObjectFactory<RESTTopicSour
     }
 
     @Override
-    public void syncDBEntityWithRESTEntity(final TopicSourceUrl entity, final RESTTopicSourceUrlV1 dataObject) {
+    public void syncDBEntityWithRESTEntityFirstPass(final TopicSourceUrl entity, final RESTTopicSourceUrlV1 dataObject) {
         if (dataObject.hasParameterSet(RESTTopicSourceUrlV1.TITLE_NAME)) entity.setTitle(dataObject.getTitle());
         if (dataObject.hasParameterSet(RESTTopicSourceUrlV1.DESCRIPTION_NAME)) entity.setDescription(dataObject.getDescription());
         if (dataObject.hasParameterSet(RESTTopicSourceUrlV1.URL_NAME)) entity.setSourceUrl(dataObject.getUrl());
@@ -59,5 +59,4 @@ public class TopicSourceUrlV1Factory extends RESTDataObjectFactory<RESTTopicSour
     protected Class<TopicSourceUrl> getDatabaseClass() {
         return TopicSourceUrl.class;
     }
-
 }

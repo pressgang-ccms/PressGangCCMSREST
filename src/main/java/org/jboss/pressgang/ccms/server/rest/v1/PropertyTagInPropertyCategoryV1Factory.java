@@ -21,7 +21,6 @@ import org.jboss.pressgang.ccms.server.utils.EnversUtilities;
 public class PropertyTagInPropertyCategoryV1Factory extends RESTDataObjectFactory<RESTPropertyTagInPropertyCategoryV1,
         PropertyTagToPropertyTagCategory, RESTPropertyTagInPropertyCategoryCollectionV1,
         RESTPropertyTagInPropertyCategoryCollectionItemV1> {
-
     @Inject
     protected PropertyCategoryInPropertyTagV1Factory propertyCategoryInPropertyTagFactory;
 
@@ -68,7 +67,7 @@ public class PropertyTagInPropertyCategoryV1Factory extends RESTDataObjectFactor
     }
 
     @Override
-    public void syncDBEntityWithRESTEntity(final PropertyTagToPropertyTagCategory entity,
+    public void syncDBEntityWithRESTEntityFirstPass(final PropertyTagToPropertyTagCategory entity,
             final RESTPropertyTagInPropertyCategoryV1 dataObject) {
         if (dataObject.hasParameterSet(RESTPropertyTagInPropertyCategoryV1.RELATIONSHIP_SORT_NAME))
             entity.setSorting(dataObject.getRelationshipSort());

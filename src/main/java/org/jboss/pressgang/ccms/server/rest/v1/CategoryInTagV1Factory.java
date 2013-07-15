@@ -66,7 +66,7 @@ public class CategoryInTagV1Factory extends RESTDataObjectFactory<RESTCategoryIn
     }
 
     @Override
-    public void syncDBEntityWithRESTEntity(final TagToCategory entity, final RESTCategoryInTagV1 dataObject) {
+    public void syncDBEntityWithRESTEntityFirstPass(final TagToCategory entity, final RESTCategoryInTagV1 dataObject) {
         if (dataObject.hasParameterSet(RESTCategoryInTagV1.RELATIONSHIP_SORT_NAME)) entity.setSorting(dataObject.getRelationshipSort());
     }
 

@@ -7,7 +7,7 @@ import java.io.Serializable;
 import org.jboss.pressgang.ccms.server.envers.LoggingRevisionEntity;
 
 /**
- * This java bean provides a mechanism to provide information to a
+ * This java bean provides a mechanism to provide information to a EnversListener
  *
  * @author lnewson
  */
@@ -35,7 +35,7 @@ public class EnversLoggingBean implements Serializable {
     }
 
     public void addLogMessage(final String message) {
-        if (this.logMessage == null || logMessage.isEmpty()) {
+        if (logMessage == null || logMessage.isEmpty()) {
             logMessage = message;
         } else {
             logMessage = logMessage.trim() + (logMessage.matches("(!|\\.|\\?)$") ? "\n" : ".\n") + message;

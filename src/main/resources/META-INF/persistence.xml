@@ -11,6 +11,15 @@
         <class>org.jboss.pressgang.ccms.model.BlobConstants</class>
         <class>org.jboss.pressgang.ccms.model.BugzillaBug</class>
         <class>org.jboss.pressgang.ccms.model.Category</class>
+        <class>org.jboss.pressgang.ccms.model.contentspec.ContentSpec</class>
+        <class>org.jboss.pressgang.ccms.model.contentspec.ContentSpecToPropertyTag</class>
+        <class>org.jboss.pressgang.ccms.model.contentspec.ContentSpecToTag</class>
+        <class>org.jboss.pressgang.ccms.model.contentspec.CSNode</class>
+        <class>org.jboss.pressgang.ccms.model.contentspec.CSNodeToCSNode</class>
+        <class>org.jboss.pressgang.ccms.model.contentspec.CSNodeToPropertyTag</class>
+        <class>org.jboss.pressgang.ccms.model.contentspec.TranslatedContentSpec</class>
+        <class>org.jboss.pressgang.ccms.model.contentspec.TranslatedCSNode</class>
+        <class>org.jboss.pressgang.ccms.model.contentspec.TranslatedCSNodeString</class>
         <class>org.jboss.pressgang.ccms.model.Filter</class>
         <class>org.jboss.pressgang.ccms.model.FilterCategory</class>
         <class>org.jboss.pressgang.ccms.model.FilterField</class>

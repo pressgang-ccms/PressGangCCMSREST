@@ -32,6 +32,10 @@ public class EntityCache {
         return entities.containsKey(restEntity);
     }
 
+    public Object get(RESTBaseEntityV1 restEntity) {
+        return entities.get(restEntity);
+    }
+
     public <U> List<U> getNewEntities(final Class<U> clazz) {
         return getEntitiesWithState(clazz, NEW_STATE);
     }

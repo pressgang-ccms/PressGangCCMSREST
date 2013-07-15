@@ -19,7 +19,8 @@ import org.jboss.pressgang.ccms.server.utils.EnversUtilities;
 public abstract class BaseAssignedPropertyTagV1Factory<T extends ToPropertyTag<T>, U extends BaseAssignedPropertyTagV1Factory<T,
         U>> extends RESTDataObjectFactory<RESTAssignedPropertyTagV1, T, RESTAssignedPropertyTagCollectionV1,
         RESTAssignedPropertyTagCollectionItemV1> {
-    @Inject PropertyCategoryInPropertyTagV1Factory propertyCategoryInPropertyTagFactory;
+    @Inject
+    protected PropertyCategoryInPropertyTagV1Factory propertyCategoryInPropertyTagFactory;
 
     @Override
     public RESTAssignedPropertyTagV1 createRESTEntityFromDBEntityInternal(final T entity, final String baseUrl, String dataType,
@@ -63,7 +64,7 @@ public abstract class BaseAssignedPropertyTagV1Factory<T extends ToPropertyTag<T
     }
 
     @Override
-    public void syncDBEntityWithRESTEntity(final T entity, final RESTAssignedPropertyTagV1 dataObject) {
+    public void syncDBEntityWithRESTEntityFirstPass(final T entity, final RESTAssignedPropertyTagV1 dataObject) {
         if (dataObject.hasParameterSet(RESTAssignedPropertyTagV1.VALUE_NAME)) entity.setValue(dataObject.getValue());
     }
 }

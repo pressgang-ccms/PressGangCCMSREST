@@ -7,7 +7,6 @@ import org.jboss.pressgang.ccms.server.rest.v1.base.BaseAssignedPropertyTagV1Fac
 
 @ApplicationScoped
 public class TopicPropertyTagV1Factory extends BaseAssignedPropertyTagV1Factory<TopicToPropertyTag, TopicPropertyTagV1Factory> {
-
     @Override
     protected Class<TopicToPropertyTag> getDatabaseClass() {
         return TopicToPropertyTag.class;

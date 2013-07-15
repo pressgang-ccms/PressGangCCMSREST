@@ -63,7 +63,7 @@ public class TranslatedTopicStringV1Factory extends RESTDataObjectFactory<RESTTr
     }
 
     @Override
-    public void syncDBEntityWithRESTEntity(final TranslatedTopicString entity, final RESTTranslatedTopicStringV1 dataObject) {
+    public void syncDBEntityWithRESTEntityFirstPass(final TranslatedTopicString entity, final RESTTranslatedTopicStringV1 dataObject) {
         if (dataObject.hasParameterSet(RESTTranslatedTopicStringV1.ORIGINALSTRING_NAME))
             entity.setOriginalString(dataObject.getOriginalString());
         if (dataObject.hasParameterSet(RESTTranslatedTopicStringV1.TRANSLATEDSTRING_NAME))

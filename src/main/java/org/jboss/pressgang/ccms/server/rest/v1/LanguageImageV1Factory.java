@@ -66,7 +66,7 @@ public class LanguageImageV1Factory extends RESTDataObjectFactory<RESTLanguageIm
     }
 
     @Override
-    public void syncDBEntityWithRESTEntity(final LanguageImage entity, final RESTLanguageImageV1 dataObject) {
+    public void syncDBEntityWithRESTEntityFirstPass(final LanguageImage entity, final RESTLanguageImageV1 dataObject) {
         if (dataObject.hasParameterSet(RESTLanguageImageV1.LOCALE_NAME)) entity.setLocale(dataObject.getLocale());
         if (dataObject.hasParameterSet(RESTLanguageImageV1.IMAGEDATA_NAME)) entity.setImageData(dataObject.getImageData());
         if (dataObject.hasParameterSet(RESTLanguageImageV1.FILENAME_NAME)) entity.setOriginalFileName(dataObject.getFilename());
@@ -76,5 +76,4 @@ public class LanguageImageV1Factory extends RESTDataObjectFactory<RESTLanguageIm
     protected Class<LanguageImage> getDatabaseClass() {
         return LanguageImage.class;
     }
-
 }
