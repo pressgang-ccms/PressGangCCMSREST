@@ -90,10 +90,7 @@ import org.jboss.pressgang.ccms.rest.v1.collections.RESTTagCollectionV1;
 import org.jboss.pressgang.ccms.rest.v1.collections.RESTTopicCollectionV1;
 import org.jboss.pressgang.ccms.rest.v1.collections.RESTTranslatedTopicCollectionV1;
 import org.jboss.pressgang.ccms.rest.v1.collections.RESTUserCollectionV1;
-import org.jboss.pressgang.ccms.rest.v1.collections.contentspec.RESTCSNodeCollectionV1;
-import org.jboss.pressgang.ccms.rest.v1.collections.contentspec.RESTContentSpecCollectionV1;
-import org.jboss.pressgang.ccms.rest.v1.collections.contentspec.RESTTranslatedCSNodeCollectionV1;
-import org.jboss.pressgang.ccms.rest.v1.collections.contentspec.RESTTranslatedContentSpecCollectionV1;
+import org.jboss.pressgang.ccms.rest.v1.collections.contentspec.*;
 import org.jboss.pressgang.ccms.rest.v1.components.ComponentTopicV1;
 import org.jboss.pressgang.ccms.rest.v1.constants.RESTv1Constants;
 import org.jboss.pressgang.ccms.rest.v1.entities.RESTBlobConstantV1;
@@ -112,10 +109,7 @@ import org.jboss.pressgang.ccms.rest.v1.entities.RESTTopicV1;
 import org.jboss.pressgang.ccms.rest.v1.entities.RESTTranslatedTopicV1;
 import org.jboss.pressgang.ccms.rest.v1.entities.RESTUserV1;
 import org.jboss.pressgang.ccms.rest.v1.entities.base.RESTLogDetailsV1;
-import org.jboss.pressgang.ccms.rest.v1.entities.contentspec.RESTCSNodeV1;
-import org.jboss.pressgang.ccms.rest.v1.entities.contentspec.RESTContentSpecV1;
-import org.jboss.pressgang.ccms.rest.v1.entities.contentspec.RESTTranslatedCSNodeV1;
-import org.jboss.pressgang.ccms.rest.v1.entities.contentspec.RESTTranslatedContentSpecV1;
+import org.jboss.pressgang.ccms.rest.v1.entities.contentspec.*;
 import org.jboss.pressgang.ccms.rest.v1.entities.enums.RESTXMLDoctype;
 import org.jboss.pressgang.ccms.rest.v1.entities.wrapper.IntegerWrapper;
 import org.jboss.pressgang.ccms.rest.v1.expansion.ExpandDataDetails;
@@ -2037,22 +2031,6 @@ public class RESTv1 extends BaseRESTv1 implements RESTBaseInterfaceV1, RESTInter
         return retValue;
     }
 
-    // HTML TOPIC FUNCTIONS
-
-    @Override
-    public String getHTMLTopicHTML(final Integer id) {
-        assert id != null : "The id parameter can not be null";
-
-        return getXMLResource(Topic.class, topicFactory, id, null).getHtml();
-    }
-
-    @Override
-    public String getHTMLTopicRevisionHTML(final Integer id, final Integer revision) {
-        assert id != null : "The id parameter can not be null";
-
-        return getXMLResource(Topic.class, topicFactory, id, revision, null).getHtml();
-    }
-
     // CSV TOPIC FUNCTIONS
 
     @Override
@@ -2442,19 +2420,13 @@ public class RESTv1 extends BaseRESTv1 implements RESTBaseInterfaceV1, RESTInter
                 RESTv1Constants.CONTENT_SPEC_EXPANSION_NAME, expand);
     }
 
-    @Override
-    public RESTContentSpecV1 updateJSONContentSpec(final String expand, final RESTContentSpecV1 dataObject, final String message,
-            final Integer flag, final String userId) {
-        if (dataObject == null) throw new BadRequestException("The dataObject parameter can not be null");
-        if (dataObject.getId() == null) throw new BadRequestException("The dataObject.getId() parameter can not be null");
+    /************************************
+        POPULATE THESE
+     *************************************/
 
-        final RESTLogDetailsV1 logDetails = generateLogDetails(message, flag, userId);
-        if (dataObject.hasParameterSet(RESTContentSpecV1.TEXT_NAME)) {
-            if (dataObject.getText() == null) throw new BadRequestException("The dataObject.getText() parameter can not be null");
-            return updateJSONContentSpecFromString(dataObject, logDetails, expand);
-        } else {
-            return updateJSONEntity(ContentSpec.class, dataObject, contentSpecFactory, expand, logDetails);
-        }
+    @Override
+    public RESTContentSpecV1 updateJSONContentSpec(@QueryParam("expand") String expand, RESTContentSpecV1 dataObject, @QueryParam("message") String message, @QueryParam("flag") Integer flag, @QueryParam("userId") String userId) {
+        return null;  //To change body of implemented methods use File | Settings | File Templates.
     }
 
     @Override
@@ -2469,17 +2441,8 @@ public class RESTv1 extends BaseRESTv1 implements RESTBaseInterfaceV1, RESTInter
     }
 
     @Override
-    public RESTContentSpecV1 createJSONContentSpec(final String expand, final RESTContentSpecV1 dataObject, final String message,
-            final Integer flag, final String userId) {
-        if (dataObject == null) throw new BadRequestException("The dataObject parameter can not be null");
-
-        final RESTLogDetailsV1 logDetails = generateLogDetails(message, flag, userId);
-        if (dataObject.hasParameterSet(RESTContentSpecV1.TEXT_NAME)) {
-            if (dataObject.getText() == null) throw new BadRequestException("The dataObject.getText() parameter can not be null");
-            return createJSONContentSpecFromString(dataObject, logDetails, expand);
-        } else {
-            return createJSONEntity(ContentSpec.class, dataObject, contentSpecFactory, expand, logDetails);
-        }
+    public RESTContentSpecV1 createJSONContentSpec(@QueryParam("expand") String expand, RESTContentSpecV1 dataObject, @QueryParam("message") String message, @QueryParam("flag") Integer flag, @QueryParam("userId") String userId) {
+        return null;  //To change body of implemented methods use File | Settings | File Templates.
     }
 
     @Override
@@ -2531,20 +2494,43 @@ public class RESTv1 extends BaseRESTv1 implements RESTBaseInterfaceV1, RESTInter
     }
 
     @Override
-    public String updateTEXTContentSpec(Integer id, String contentSpec, String message, Integer flag, String userId) {
-        if (id == null) throw new BadRequestException("The id parameter can not be null");
-        if (contentSpec == null) throw new BadRequestException("The contentSpec parameter can not be null");
-
-        final RESTLogDetailsV1 logDetails = generateLogDetails(message, flag, userId);
-        return updateTEXTContentSpecFromString(id, contentSpec, logDetails);
+    public String updateTEXTContentSpec(@PathParam("id") Integer id, String contentSpec, @QueryParam("permissive") Boolean permissive, @QueryParam("message") String message, @QueryParam("flag") Integer flag, @QueryParam("userId") String userId) {
+        return null;  //To change body of implemented methods use File | Settings | File Templates.
     }
 
     @Override
-    public String createTEXTContentSpec(String contentSpec, String message, Integer flag, String userId) {
-        if (contentSpec == null) throw new BadRequestException("The contentSpec parameter can not be null");
+    public String createTEXTContentSpec(String contentSpec, @QueryParam("permissive") Boolean permissive, @QueryParam("message") String message, @QueryParam("flag") Integer flag, @QueryParam("userId") String userId) {
+        return null;  //To change body of implemented methods use File | Settings | File Templates.
+    }
 
-        final RESTLogDetailsV1 logDetails = generateLogDetails(message, flag, userId);
-        return createTEXTContentSpecFromString(contentSpec, logDetails);
+    @Override
+    public RESTTextContentSpecV1 getJSONTextContentSpec(@PathParam("id") Integer id, @QueryParam("expand") String expand) {
+        return null;  //To change body of implemented methods use File | Settings | File Templates.
+    }
+
+    @Override
+    public RESTTextContentSpecV1 getJSONTextContentSpecRevision(@PathParam("id") Integer id, @PathParam("rev") Integer revision, @QueryParam("expand") String expand) {
+        return null;  //To change body of implemented methods use File | Settings | File Templates.
+    }
+
+    @Override
+    public RESTTextContentSpecCollectionV1 getJSONTextContentSpecs(@QueryParam("expand") String expand) {
+        return null;  //To change body of implemented methods use File | Settings | File Templates.
+    }
+
+    @Override
+    public RESTTextContentSpecCollectionV1 getJSONTextContentSpecsWithQuery(@PathParam("query") PathSegment query, @QueryParam("expand") String expand) {
+        return null;  //To change body of implemented methods use File | Settings | File Templates.
+    }
+
+    @Override
+    public RESTTextContentSpecV1 updateJSONTextContentSpec(@QueryParam("expand") String expand, RESTTextContentSpecV1 contentSpec, @QueryParam("message") String message, @QueryParam("flag") Integer flag, @QueryParam("userId") String userId) {
+        return null;  //To change body of implemented methods use File | Settings | File Templates.
+    }
+
+    @Override
+    public RESTTextContentSpecV1 createJSONTextContentSpec(@QueryParam("expand") String expand, RESTTextContentSpecV1 contentSpec, @QueryParam("message") String message, @QueryParam("flag") Integer flag, @QueryParam("userId") String userId) {
+        return null;  //To change body of implemented methods use File | Settings | File Templates.
     }
 
     @Override

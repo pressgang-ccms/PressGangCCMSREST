@@ -91,7 +91,6 @@ public class TranslatedTopicV1Factory extends RESTDataObjectFactory<RESTTranslat
 
         retValue.setXml(entity.getTranslatedXml());
         retValue.setXmlErrors(entity.getTranslatedXmlErrors());
-        retValue.setHtml(entity.getTranslatedXmlRendered());
         retValue.setLocale(entity.getTranslationLocale());
         retValue.setTranslationPercentage(entity.getTranslationPercentage());
 
@@ -206,11 +205,8 @@ public class TranslatedTopicV1Factory extends RESTDataObjectFactory<RESTTranslat
 
         entity.setTranslatedTopic(translatedTopic);
 
-        if (dataObject.hasParameterSet(RESTTranslatedTopicV1.HTML_UPDATED))
-            entity.setTranslatedXmlRenderedUpdated(dataObject.getHtmlUpdated());
         if (dataObject.hasParameterSet(RESTTranslatedTopicV1.XML_ERRORS_NAME)) entity.setTranslatedXmlErrors(dataObject.getXmlErrors());
         if (dataObject.hasParameterSet(RESTTranslatedTopicV1.XML_NAME)) entity.setTranslatedXml(dataObject.getXml());
-        if (dataObject.hasParameterSet(RESTTranslatedTopicV1.HTML_NAME)) entity.setTranslatedXmlRendered(dataObject.getHtml());
         if (dataObject.hasParameterSet(RESTTranslatedTopicV1.LOCALE_NAME)) entity.setTranslationLocale(dataObject.getLocale());
         if (dataObject.hasParameterSet(RESTTranslatedTopicV1.TRANSLATIONPERCENTAGE_NAME))
             entity.setTranslationPercentage(dataObject.getTranslationPercentage());

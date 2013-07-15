@@ -196,7 +196,7 @@ public class BaseRESTv1 extends BaseREST {
 
             if (topics.getItems() != null) {
                 for (final RESTTopicV1 topic : topics.returnItems()) {
-                    final String html = topic.getHtml();
+                    final String html = "";
 
                     final Entry entry = new Entry();
                     entry.setId(new URI(topic.getSelfLink()));
@@ -207,7 +207,7 @@ public class BaseRESTv1 extends BaseREST {
                     if (html != null) {
                         final Content content = new Content();
                         content.setType(MediaType.TEXT_HTML_TYPE);
-                        content.setText(fixHrefs(topic.getHtml()));
+                        content.setText(fixHrefs(html));
                         entry.setContent(content);
                     }
 
@@ -1008,32 +1008,7 @@ public class BaseRESTv1 extends BaseREST {
         return query;
     }
 
-    /**
-     * Creates a content spec from a String representation of a content specification.
-     *
-     * @param dataObject The REST Entity to create/update the database with.
-     * @param logDetails The details about the changes that need to be logged.
-     * @param expand     The Expand Object that contains details about what should be expanded.
-     * @return
-     */
-    protected RESTContentSpecV1 createJSONContentSpecFromString(final RESTContentSpecV1 dataObject, final RESTLogDetailsV1 logDetails,
-            final String expand) {
-        return createOrUpdateJSONContentSpecFromString(null, dataObject.getText(), DatabaseOperation.CREATE, logDetails, expand);
-    }
 
-    /**
-     * Updates a content spec from a String representation of a content specification.
-     *
-     * @param dataObject The REST Entity to create/update the database with.
-     * @param logDetails The details about the changes that need to be logged.
-     * @param expand     The Expand Object that contains details about what should be expanded.
-     * @return
-     */
-    protected RESTContentSpecV1 updateJSONContentSpecFromString(final RESTContentSpecV1 dataObject, final RESTLogDetailsV1 logDetails,
-            final String expand) {
-        return createOrUpdateJSONContentSpecFromString(dataObject.getId(), dataObject.getText(), DatabaseOperation.UPDATE, logDetails,
-                expand);
-    }
 
     /**
      * Creates a content spec from a String representation of a content specification.

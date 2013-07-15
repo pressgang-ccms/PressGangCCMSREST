@@ -59,7 +59,6 @@ public class ContentSpecV1Factory extends RESTDataObjectFactory<RESTContentSpecV
         expandOptions.add(RESTContentSpecV1.CHILDREN_NAME);
         expandOptions.add(RESTContentSpecV1.PROPERTIES_NAME);
         expandOptions.add(RESTContentSpecV1.TAGS_NAME);
-        expandOptions.add(RESTContentSpecV1.TEXT_NAME);
         if (revision == null) expandOptions.add(RESTBaseEntityV1.REVISIONS_NAME);
         retValue.setExpand(expandOptions);
 
@@ -108,12 +107,6 @@ public class ContentSpecV1Factory extends RESTDataObjectFactory<RESTContentSpecV
                             dataType, expand, baseUrl, entityManager));
         }
 
-        // TEXT
-        if (expand != null && expand.contains(RESTContentSpecV1.TEXT_NAME)) {
-            final String text = ContentSpecUtilities.getContentSpecText(entity.getId(), (Integer) revision, entityManager);
-            retValue.setText(text);
-        }
-
         retValue.setLinks(baseUrl, RESTv1Constants.CONTENT_SPEC_URL_NAME, dataType, retValue.getId());
 
         return retValue;
@@ -121,9 +114,6 @@ public class ContentSpecV1Factory extends RESTDataObjectFactory<RESTContentSpecV
 
     @Override
     public void syncDBEntityWithRESTEntityFirstPass(final ContentSpec entity, final RESTContentSpecV1 dataObject) {
-        // If the Text is being set then don't do anything else.
-        if (dataObject.hasParameterSet(RESTContentSpecV1.TEXT_NAME)) return;
-
         if (dataObject.hasParameterSet(RESTContentSpecV1.LOCALE_NAME)) entity.setLocale(dataObject.getLocale());
 
         if (dataObject.hasParameterSet(RESTContentSpecV1.CONDITION_NAME)) entity.setCondition(dataObject.getCondition());

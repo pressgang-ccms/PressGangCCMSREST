@@ -81,7 +81,6 @@ public class TopicV1Factory extends RESTDataObjectFactory<RESTTopicV1, Topic, RE
         retValue.setTitle(entity.getTopicTitle());
         retValue.setDescription(entity.getTopicText());
         retValue.setXml(entity.getTopicXML());
-        retValue.setHtml(entity.getTopicRendered());
         retValue.setLastModified(EnversUtilities.getFixedLastModifiedDate(entityManager, entity));
         retValue.setCreated(entity.getTopicTimeStamp());
         retValue.setLocale(entity.getTopicLocale());
@@ -163,7 +162,6 @@ public class TopicV1Factory extends RESTDataObjectFactory<RESTTopicV1, Topic, RE
         if (dataObject.hasParameterSet(RESTTopicV1.TITLE_NAME)) entity.setTopicTitle(dataObject.getTitle());
         if (dataObject.hasParameterSet(RESTTopicV1.DESCRIPTION_NAME)) entity.setTopicText(dataObject.getDescription());
         if (dataObject.hasParameterSet(RESTTopicV1.XML_NAME)) entity.setTopicXML(dataObject.getXml());
-        if (dataObject.hasParameterSet(RESTTopicV1.HTML_NAME)) entity.setTopicRendered(dataObject.getHtml());
         if (dataObject.hasParameterSet(RESTTopicV1.LOCALE_NAME)) entity.setTopicLocale(dataObject.getLocale());
         if (dataObject.hasParameterSet(RESTTopicV1.DOCTYPE_NAME))
             entity.setXmlDoctype(RESTXMLDoctype.getXMLDoctypeId(dataObject.getXmlDoctype()));
