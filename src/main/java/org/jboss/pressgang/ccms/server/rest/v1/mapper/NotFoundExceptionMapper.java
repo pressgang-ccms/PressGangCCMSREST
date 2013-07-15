@@ -1,21 +1,19 @@
 package org.jboss.pressgang.ccms.server.rest.v1.mapper;
 
-import javax.ws.rs.core.MediaType;
-import javax.ws.rs.core.Response;
-import javax.ws.rs.ext.ExceptionMapper;
-import javax.ws.rs.ext.Provider;
-
 import org.jboss.pressgang.ccms.rest.v1.constants.RESTv1Constants;
 import org.jboss.pressgang.ccms.server.rest.interceptor.VersionHeaderInterceptor;
 import org.jboss.pressgang.ccms.server.utils.Constants;
 import org.jboss.pressgang.ccms.utils.common.VersionUtilities;
-import org.jboss.resteasy.spi.InternalServerErrorException;
+import org.jboss.resteasy.spi.NotFoundException;
 
-@Provider
-public class InternalServerErrorExceptionMapper implements ExceptionMapper<InternalServerErrorException> {
+import javax.ws.rs.core.MediaType;
+import javax.ws.rs.core.Response;
+import javax.ws.rs.ext.ExceptionMapper;
 
+
+public class NotFoundExceptionMapper implements ExceptionMapper<NotFoundException> {
     @Override
-    public Response toResponse(final InternalServerErrorException exception) {
+    public Response toResponse(final NotFoundException exception) {
         return Response.status(Response.Status.INTERNAL_SERVER_ERROR)
                 .entity(exception.getMessage() + "\n")
                 .header("Content-Type", MediaType.TEXT_PLAIN)

@@ -70,7 +70,7 @@
             <property name="hibernate.format_sql" value="false"/>
             <property name="jboss.entity.manager.factory.jndi.name" value="java:jboss/EntityManagerFactory"/>
             <property name="hibernate.jdbc.batch_size" value="20"/>
-            <property name="hibernate.cache.use_second_level_cache" value="true"/>
+            <property name="hibernate.cache.use_second_level_cache" value="false"/>
             <property name="hibernate.cache.use_query_cache" value="false"/>
             <property name="hibernate.cache.use_minimal_puts" value="true"/>
 

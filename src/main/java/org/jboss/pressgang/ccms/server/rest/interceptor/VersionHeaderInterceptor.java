@@ -4,6 +4,7 @@ import javax.ws.rs.Path;
 import javax.ws.rs.ext.Provider;
 import java.lang.reflect.Method;
 
+import org.jboss.pressgang.ccms.rest.v1.constants.RESTv1Constants;
 import org.jboss.pressgang.ccms.server.utils.Constants;
 import org.jboss.pressgang.ccms.utils.common.VersionUtilities;
 import org.jboss.resteasy.annotations.interception.ServerInterceptor;
@@ -29,6 +30,7 @@ public class VersionHeaderInterceptor implements PostProcessInterceptor, Accepte
 
     @Override
     public void postProcess(ServerResponse response) {
-        response.getMetadata().add("X-PressGang-Version", VersionUtilities.getAPIVersion(VersionHeaderInterceptor.class));
+        response.getMetadata().add(RESTv1Constants.X_PRESSGANG_VERSION_HEADER, VersionUtilities.getAPIVersion(VersionHeaderInterceptor.class));
+        response.getMetadata().add(RESTv1Constants.ACCESS_CONTROL_EXPOSE_HEADERS, RESTv1Constants.X_PRESSGANG_VERSION_HEADER);
     }
 }

@@ -182,8 +182,10 @@ public class RESTv1 extends BaseRESTv1 implements RESTBaseInterfaceV1, RESTInter
     }
 
     @Override
-    public IntegerWrapper holdXML(String xml) {
-        if (xml == null) throw new BadRequestException("The xml parameter cannot be null");
+    public IntegerWrapper holdXML(final String xml) {
+        if (xml == null) {
+            throw new BadRequestException("The xml parameter cannot be null");
+        }
 
         // Parse the XML to make sure it's XML
         Document doc = null;
@@ -206,7 +208,7 @@ public class RESTv1 extends BaseRESTv1 implements RESTBaseInterfaceV1, RESTInter
     }
 
     @Override
-    public String echoXML(Integer id, String xml) {
+    public String echoXML(final Integer id, final String xml) {
         if (id == null && xml == null) throw new BadRequestException("The id parameter field cannot be null");
 
         if (id != null) {

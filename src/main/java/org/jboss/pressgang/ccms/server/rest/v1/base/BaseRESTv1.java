@@ -635,11 +635,9 @@ public class BaseRESTv1 extends BaseREST {
 
                     // Sync the database entity with the REST Entity
                     factory.updateDBEntityFromRESTEntity(entity, restEntity);
-                    factory.syncDBEntityWithRESTEntitySecondPass(entity, restEntity);
                 } else if (operation == DatabaseOperation.CREATE) {
                     // Create a Database Entity using the information from the REST Entity.
                     entity = factory.createDBEntityFromRESTEntity(restEntity);
-                    factory.syncDBEntityWithRESTEntitySecondPass(entity, restEntity);
 
                     // Check that the entity was successfully created
                     if (entity == null) throw new BadRequestException("The entity could not be created");
@@ -1464,7 +1462,7 @@ public class BaseRESTv1 extends BaseREST {
             return new BadRequestException(cause.getMessage());
         } else if (cause instanceof ValidationException || cause instanceof PersistenceException || cause instanceof
                 CustomConstraintViolationException) {
-            return new BadRequestException(ex);
+            return new BadRequestException(cause);
         } else if (cause instanceof ProviderException) {
             if (cause instanceof org.jboss.pressgang.ccms.provider.exception.NotFoundException) {
                 throw new NotFoundException(cause);
