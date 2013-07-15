@@ -2420,9 +2420,9 @@ public class RESTv1 extends BaseRESTv1 implements RESTBaseInterfaceV1, RESTInter
                 RESTv1Constants.CONTENT_SPEC_EXPANSION_NAME, expand);
     }
 
-    /************************************
-        POPULATE THESE
-     *************************************/
+    /************************************************************************
+        Methods below this are just stub implementations
+     *************************************************************************/
 
     @Override
     public RESTContentSpecV1 updateJSONContentSpec(@QueryParam("expand") String expand, RESTContentSpecV1 dataObject, @QueryParam("message") String message, @QueryParam("flag") Integer flag, @QueryParam("userId") String userId) {
