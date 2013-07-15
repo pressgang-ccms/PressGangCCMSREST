@@ -1093,7 +1093,7 @@ public class BaseRESTv1 extends BaseREST {
             if (cause instanceof Failure) {
                 return (Failure) cause;
             } else if (cause instanceof ValidationException || cause instanceof CustomConstraintViolationException || cause instanceof
-                    org.hibernate.exception.ConstraintViolationException) {
+                    org.hibernate.exception.ConstraintViolationException || cause instanceof javax.transaction.RollbackException) {
                 break;
             } else if (cause instanceof PersistenceException) {
                 if (cause.getCause() != null && cause.getCause() instanceof org.hibernate.exception.ConstraintViolationException) {
