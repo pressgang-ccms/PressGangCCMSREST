@@ -23,10 +23,13 @@ import java.net.URI;
 import java.sql.BatchUpdateException;
 import java.sql.SQLException;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
 import java.util.Set;
 
+import difflib.DiffUtils;
+import difflib.Patch;
 import org.codehaus.jackson.map.ObjectMapper;
 import org.hibernate.envers.AuditReader;
 import org.hibernate.envers.AuditReaderFactory;
@@ -43,6 +46,7 @@ import org.jboss.pressgang.ccms.filter.base.IFilterQueryBuilder;
 import org.jboss.pressgang.ccms.filter.base.ITagFilterQueryBuilder;
 import org.jboss.pressgang.ccms.filter.utils.FilterUtilities;
 import org.jboss.pressgang.ccms.model.Filter;
+import org.jboss.pressgang.ccms.model.Topic;
 import org.jboss.pressgang.ccms.model.TopicSourceUrl;
 import org.jboss.pressgang.ccms.model.User;
 import org.jboss.pressgang.ccms.model.base.AuditedEntity;
@@ -90,6 +94,7 @@ import org.jboss.pressgang.ccms.server.rest.v1.UserV1Factory;
 import org.jboss.pressgang.ccms.server.utils.EntityUtilities;
 import org.jboss.pressgang.ccms.server.utils.ProviderUtilities;
 import org.jboss.pressgang.ccms.server.utils.TopicSourceURLTitleThread;
+import org.jboss.pressgang.ccms.utils.common.CollectionUtilities;
 import org.jboss.resteasy.plugins.providers.atom.Content;
 import org.jboss.resteasy.plugins.providers.atom.Entry;
 import org.jboss.resteasy.plugins.providers.atom.Feed;
@@ -200,7 +205,10 @@ public class BaseRESTv1 extends BaseREST {
 
             if (topics.getItems() != null) {
                 for (final RESTTopicV1 topic : topics.returnItems()) {
-                    final String html = topic.getHtml();
+                    final RESTTopicV1 previousTopic = getJSONResource(Topic.class, topicFactory, topic.getId(), topic.getRevision() - 1,
+                            "");
+                    final String xml = topic.getXml();
+                    final String previousXml = previousTopic == null ? "" : previousTopic.getXml();
 
                     final Entry entry = new Entry();
                     entry.setId(new URI(topic.getSelfLink()));
@@ -208,10 +216,17 @@ public class BaseRESTv1 extends BaseREST {
                     entry.setUpdated(topic.getLastModified());
                     entry.setPublished(topic.getCreated());
 
-                    if (html != null) {
+                    if (xml != null) {
+                        final List<String> previousLines = Arrays.asList(previousXml.split("(\r)?\n"));
+                        final List<String> lines = Arrays.asList(xml.split("(\r)?\n"));
+
+                        final Patch<String> patch = DiffUtils.diff(previousLines, lines);
+                        final List<String> patches = DiffUtils.generateUnifiedDiff(topic.getId() + ".xml", topic.getId() + ".xml",
+                                previousLines, patch, 1);
+
                         final Content content = new Content();
-                        content.setType(MediaType.TEXT_HTML_TYPE);
-                        content.setText(fixHrefs(topic.getHtml()));
+                        content.setType(MediaType.TEXT_PLAIN_TYPE);
+                        content.setText(CollectionUtilities.toSeperatedString(patches, "\r\n"));
                         entry.setContent(content);
                     }
 
@@ -1101,7 +1116,6 @@ public class BaseRESTv1 extends BaseREST {
     /**
      * Creates or Updates a content spec from a String representation of a content specification.
      *
-     *
      * @param restEntity      The content spec string representation object.
      * @param operation       The Database Operation type (CREATE or UPDATE).
      * @param logDetails      The details about the changes that need to be logged.
@@ -1111,7 +1125,8 @@ public class BaseRESTv1 extends BaseREST {
      * @param saveWhenInvalid If the Content Specification should be saved even if the text isn't valid.
      * @return
      */
-    private RESTTextContentSpecV1 createOrUpdateJSONContentSpecFromString(final RESTTextContentSpecV1 restEntity, final DatabaseOperation operation, final RESTLogDetailsV1 logDetails, final String expand, final String dataType,
+    private RESTTextContentSpecV1 createOrUpdateJSONContentSpecFromString(final RESTTextContentSpecV1 restEntity,
+            final DatabaseOperation operation, final RESTLogDetailsV1 logDetails, final String expand, final String dataType,
             final ErrorLoggerManager loggerManager, boolean saveWhenInvalid) {
         assert restEntity != null;
 
@@ -1159,7 +1174,10 @@ public class BaseRESTv1 extends BaseREST {
 
             // If the content spec processed correctly then commit the changes, otherwise roll them back.
             if (!success) {
-                transactionManager.rollback();
+                final int status = transactionManager.getStatus();
+                if (status != Status.STATUS_ROLLING_BACK && status != Status.STATUS_ROLLEDBACK && status != Status.STATUS_NO_TRANSACTION) {
+                    transactionManager.rollback();
+                }
             } else {
                 // Get the updated or created entity
                 final ContentSpec entity = entityManager.find(ContentSpec.class, csId);

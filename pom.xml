@@ -317,6 +317,13 @@
             </exclusions>
         </dependency>
 
+        <!-- Other Libraries -->
+        <dependency>
+            <groupId>com.googlecode.java-diff-utils</groupId>
+            <artifactId>diffutils</artifactId>
+            <version>1.3.0</version>
+        </dependency>
+
         <!-- Liquibase -->
         <dependency>
             <groupId>org.liquibase</groupId>
