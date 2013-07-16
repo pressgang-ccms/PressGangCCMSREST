@@ -11,6 +11,7 @@ import javax.persistence.TypedQuery;
 import javax.persistence.criteria.CriteriaBuilder;
 import javax.persistence.criteria.CriteriaQuery;
 import javax.persistence.criteria.Root;
+import javax.transaction.RollbackException;
 import javax.transaction.Status;
 import javax.transaction.TransactionManager;
 import javax.validation.ConstraintViolation;
@@ -1424,7 +1425,7 @@ public class BaseRESTv1 extends BaseREST {
             if (cause instanceof Failure) {
                 return (Failure) cause;
             } else if (cause instanceof ValidationException || cause instanceof CustomConstraintViolationException || cause instanceof
-                    org.hibernate.exception.ConstraintViolationException) {
+                    org.hibernate.exception.ConstraintViolationException || cause instanceof RollbackException) {
                 break;
             } else if (cause instanceof PersistenceException) {
                 if (cause.getCause() != null && cause.getCause() instanceof org.hibernate.exception.ConstraintViolationException) {
@@ -1463,6 +1464,9 @@ public class BaseRESTv1 extends BaseREST {
         } else if (cause instanceof ValidationException || cause instanceof PersistenceException || cause instanceof
                 CustomConstraintViolationException) {
             return new BadRequestException(cause);
+        } else if (cause instanceof RollbackException) {
+            return new BadRequestException("This is most likely caused by the fact that two users are trying to save the same entity at the same time.\n" +
+                    "You can try saving again, or reload the entity to see if there were any changes made in the background.", cause);
         } else if (cause instanceof ProviderException) {
             if (cause instanceof org.jboss.pressgang.ccms.provider.exception.NotFoundException) {
                 throw new NotFoundException(cause);
