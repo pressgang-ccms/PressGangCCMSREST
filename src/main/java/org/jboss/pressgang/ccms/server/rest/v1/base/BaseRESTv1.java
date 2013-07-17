@@ -1188,7 +1188,7 @@ public class BaseRESTv1 extends BaseREST {
                     textContentSpecFactory.syncDBEntityWithRESTEntitySecondPass(entity, restEntity);
 
                     // Remove any errors that occurred previously
-                    entity.setErrors(null);
+                    entity.setErrors(loggerManager.generateLogs());
                     entity.setFailedContentSpec(null);
 
                     entityManager.persist(entity);

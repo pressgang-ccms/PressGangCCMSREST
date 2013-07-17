@@ -241,7 +241,7 @@ public class TopicUtilities {
      * @param entityManager An open EntityManager instance to lookup formatting constants.
      * @param topic         The Topic to process the XML for.
      */
-    protected static void processXML(final EntityManager entityManager, final Topic topic) {
+    public static void processXML(final EntityManager entityManager, final Topic topic) {
         Document doc = null;
         try {
             doc = XMLUtilities.convertStringToDocument(topic.getTopicXML());
