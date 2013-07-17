@@ -28,6 +28,7 @@ import org.jboss.pressgang.ccms.server.rest.v1.base.RESTDataObjectCollectionFact
 import org.jboss.pressgang.ccms.server.rest.v1.base.RESTDataObjectFactory;
 import org.jboss.pressgang.ccms.server.rest.v1.utils.RESTv1Utilities;
 import org.jboss.pressgang.ccms.server.utils.EnversUtilities;
+import org.jboss.pressgang.ccms.server.utils.TranslatedTopicUtilities;
 import org.jboss.pressgang.ccms.utils.common.DocBookUtilities;
 import org.jboss.resteasy.spi.BadRequestException;
 
@@ -259,6 +260,9 @@ public class TranslatedTopicV1Factory extends RESTDataObjectFactory<RESTTranslat
 
     @Override
     public void syncDBEntityWithRESTEntitySecondPass(final TranslatedTopicData entity, final RESTTranslatedTopicV1 dataObject) {
+        /* This method will set the XML errors field */
+        TranslatedTopicUtilities.processXML(entityManager, entity);
+
         // One To Many - Iterate over and do the second pass on any new items
         if (dataObject.hasParameterSet(
                 RESTTranslatedTopicV1.TRANSLATEDTOPICSTRING_NAME) && dataObject.getTranslatedTopicStrings_OTM() != null && dataObject
