@@ -1133,6 +1133,7 @@ public class BaseRESTv1 extends BaseREST {
         final String contentSpecString = restEntity.getText();
 
         boolean success = true;
+        boolean textProcessed = false;
         RuntimeException exception = null;
         Integer csId = id;
 
@@ -1155,6 +1156,7 @@ public class BaseRESTv1 extends BaseREST {
 
             // Apply the text separately
             if (restEntity.hasParameterSet(RESTTextContentSpecV1.TEXT_NAME)) {
+                textProcessed = true;
                 final DBProviderFactory providerFactory = ProviderUtilities.getDBProviderFactory(entityManager, transactionManager,
                         enversLoggingBean);
                 final ProcessingOptions processingOptions = new ProcessingOptions();
@@ -1187,8 +1189,10 @@ public class BaseRESTv1 extends BaseREST {
                     textContentSpecFactory.syncDBEntityWithRESTEntitySecondPass(entity, restEntity);
 
                     // Remove any errors that occurred previously
-                    entity.setErrors(loggerManager.generateLogs());
-                    entity.setFailedContentSpec(null);
+                    if (textProcessed) {
+                        entity.setErrors(loggerManager.generateLogs());
+                        entity.setFailedContentSpec(null);
+                    }
 
                     entityManager.persist(entity);
                 }
@@ -1207,7 +1211,7 @@ public class BaseRESTv1 extends BaseREST {
             final String log = loggerManager.generateLogs();
             if (saveWhenInvalid) {
                 if (!success) {
-                    csId = setContentSpecErrors(id, contentSpecString, log, logDetails);
+                    csId = setContentSpecErrors(restEntity, contentSpecString, log, logDetails);
                 }
             } else {
                 throw new BadRequestException(log);
@@ -1266,14 +1270,17 @@ public class BaseRESTv1 extends BaseREST {
     /**
      * Set a Content Spec to include any errors messages from processing and the failed content spec.
      *
-     * @param id                The ID of the content spec to set the errors for.
+     * @param restEntity        The rest entity the request failed for.
      * @param contentSpecString The failed Content Spec string.
      * @param errors            The error messages.
      * @param logDetails        The log details for the failed Content Spec.
      * @return The ID of the Content Spec.
      */
-    private Integer setContentSpecErrors(final Integer id, final String contentSpecString, final String errors,
+    private Integer setContentSpecErrors(final RESTTextContentSpecV1 restEntity, final String contentSpecString,
+            final String errors,
             final RESTLogDetailsV1 logDetails) {
+        final Integer id = restEntity.getId();
+
         try {
             // Start a Transaction
             transactionManager.begin();
@@ -1296,6 +1303,10 @@ public class BaseRESTv1 extends BaseREST {
 
             entity.setErrors(errors);
             entity.setFailedContentSpec(contentSpecString);
+
+            // Process any additional changes
+            textContentSpecFactory.updateDBEntityFromRESTEntity(entity, restEntity);
+            textContentSpecFactory.syncDBEntityWithRESTEntitySecondPass(entity, restEntity);
 
             // Save the error messages
             entityManager.persist(entity);

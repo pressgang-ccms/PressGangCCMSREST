@@ -75,6 +75,10 @@ public class TextContentSpecV1Factory extends RESTDataObjectFactory<RESTTextCont
         retValue.setText(text);
         final CSNode titleNode = entity.getContentSpecTitle();
         retValue.setTitle(titleNode == null ? null : titleNode.getAdditionalText());
+        final CSNode productNode = entity.getContentSpecProduct();
+        retValue.setProduct(productNode == null ? null : productNode.getAdditionalText());
+        final CSNode versionNode = entity.getContentSpecVersion();
+        retValue.setVersion(versionNode == null ? null : versionNode.getAdditionalText());
 
         // REVISIONS
         if (revision == null && expand != null && expand.contains(RESTBaseEntityV1.REVISIONS_NAME)) {
@@ -113,10 +117,6 @@ public class TextContentSpecV1Factory extends RESTDataObjectFactory<RESTTextCont
     @Override
     public void syncDBEntityWithRESTEntityFirstPass(final ContentSpec entity, final RESTTextContentSpecV1 dataObject) {
         if (dataObject.hasParameterSet(RESTTextContentSpecV1.LOCALE_NAME)) entity.setLocale(dataObject.getLocale());
-
-        // Remove any error content
-        entity.setErrors(null);
-        entity.setFailedContentSpec(null);
 
         // Many to Many
         if (dataObject.hasParameterSet(
