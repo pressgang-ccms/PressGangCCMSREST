@@ -73,6 +73,8 @@
             <property name="hibernate.cache.use_second_level_cache" value="false"/>
             <property name="hibernate.cache.use_query_cache" value="false"/>
             <property name="hibernate.cache.use_minimal_puts" value="true"/>
+            <property name="hibernate.order_inserts" value="true"/>
+            <property name="hibernate.order_updates" value="true"/>
 
             <!-- Hibernate Search Properties -->
             <property name="hibernate.search.default.directory_provider" value="filesystem"/>
