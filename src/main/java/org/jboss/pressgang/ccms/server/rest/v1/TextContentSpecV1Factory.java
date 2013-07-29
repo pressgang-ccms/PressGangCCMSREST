@@ -1,9 +1,7 @@
 package org.jboss.pressgang.ccms.server.rest.v1;
 
-import javax.annotation.Resource;
 import javax.enterprise.context.ApplicationScoped;
 import javax.inject.Inject;
-import javax.transaction.TransactionManager;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -46,8 +44,6 @@ public class TextContentSpecV1Factory extends RESTDataObjectFactory<RESTTextCont
     protected TagV1Factory tagFactory;
     @Inject
     protected EnversLoggingBean enversLoggingBean;
-    @Resource(lookup = "java:jboss/TransactionManager")
-    protected TransactionManager transactionManager;
 
     @Override
     public RESTTextContentSpecV1 createRESTEntityFromDBEntityInternal(final ContentSpec entity, final String baseUrl, final String dataType,
@@ -61,6 +57,7 @@ public class TextContentSpecV1Factory extends RESTDataObjectFactory<RESTTextCont
         expandOptions.add(RESTBaseEntityV1.LOG_DETAILS_NAME);
         expandOptions.add(RESTTextContentSpecV1.PROPERTIES_NAME);
         expandOptions.add(RESTTextContentSpecV1.TAGS_NAME);
+        expandOptions.add(RESTTextContentSpecV1.TEXT_NAME);
         if (revision == null) expandOptions.add(RESTBaseEntityV1.REVISIONS_NAME);
         retValue.setExpand(expandOptions);
 
@@ -71,8 +68,6 @@ public class TextContentSpecV1Factory extends RESTDataObjectFactory<RESTTextCont
         retValue.setLastModified(entity.getLastModified());
         retValue.setErrors(entity.getErrors());
         retValue.setFailedContentSpec(entity.getFailedContentSpec());
-        final String text = ContentSpecUtilities.getContentSpecText(entity.getId(), (Integer) revision, entityManager);
-        retValue.setText(text);
         final CSNode titleNode = entity.getContentSpecTitle();
         retValue.setTitle(titleNode == null ? null : titleNode.getAdditionalText());
         final CSNode productNode = entity.getContentSpecProduct();
@@ -85,6 +80,12 @@ public class TextContentSpecV1Factory extends RESTDataObjectFactory<RESTTextCont
             retValue.setRevisions(RESTDataObjectCollectionFactory.create(RESTTextContentSpecCollectionV1.class, this, entity,
                     EnversUtilities.getRevisions(entityManager, entity), RESTBaseEntityV1.REVISIONS_NAME, dataType, expand, baseUrl,
                     entityManager));
+        }
+
+        // TEXT
+        if (expand != null && expand.contains(RESTTextContentSpecV1.TEXT_NAME)) {
+            final String text = ContentSpecUtilities.getContentSpecText(entity.getId(), (Integer) revision, entityManager);
+            retValue.setText(text);
         }
 
         // PROPERTY TAGS
