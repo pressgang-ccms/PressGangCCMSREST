@@ -67,7 +67,7 @@ public class TextContentSpecV1Factory extends RESTDataObjectFactory<RESTTextCont
         retValue.setLastPublished(entity.getLastPublished());
         retValue.setLastModified(entity.getLastModified());
         retValue.setErrors(entity.getErrors());
-        retValue.setFailedContentSpec(entity.getFailedContentSpec());
+        retValue.setFailedContentSpec(ContentSpecUtilities.fixFailedContentSpec(entity));
         final CSNode titleNode = entity.getContentSpecTitle();
         retValue.setTitle(titleNode == null ? null : titleNode.getAdditionalText());
         final CSNode productNode = entity.getContentSpecProduct();

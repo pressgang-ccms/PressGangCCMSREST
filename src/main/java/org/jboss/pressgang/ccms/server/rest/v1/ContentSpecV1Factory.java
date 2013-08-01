@@ -30,6 +30,7 @@ import org.jboss.pressgang.ccms.rest.v1.expansion.ExpandDataTrunk;
 import org.jboss.pressgang.ccms.server.rest.v1.base.RESTDataObjectCollectionFactory;
 import org.jboss.pressgang.ccms.server.rest.v1.base.RESTDataObjectFactory;
 import org.jboss.pressgang.ccms.server.rest.v1.utils.RESTv1Utilities;
+import org.jboss.pressgang.ccms.server.utils.ContentSpecUtilities;
 import org.jboss.pressgang.ccms.server.utils.EnversUtilities;
 import org.jboss.resteasy.spi.BadRequestException;
 
@@ -57,6 +58,7 @@ public class ContentSpecV1Factory extends RESTDataObjectFactory<RESTContentSpecV
         expandOptions.add(RESTBaseEntityV1.LOG_DETAILS_NAME);
         expandOptions.add(RESTContentSpecV1.CHILDREN_NAME);
         expandOptions.add(RESTContentSpecV1.PROPERTIES_NAME);
+        expandOptions.add(RESTContentSpecV1.BOOK_TAGS_NAME);
         expandOptions.add(RESTContentSpecV1.TAGS_NAME);
         if (revision == null) expandOptions.add(RESTBaseEntityV1.REVISIONS_NAME);
         retValue.setExpand(expandOptions);
@@ -68,7 +70,7 @@ public class ContentSpecV1Factory extends RESTDataObjectFactory<RESTContentSpecV
         retValue.setLastPublished(entity.getLastPublished());
         retValue.setLastModified(entity.getLastModified());
         retValue.setErrors(entity.getErrors());
-        retValue.setFailedContentSpec(entity.getFailedContentSpec());
+        retValue.setFailedContentSpec(ContentSpecUtilities.fixFailedContentSpec(entity));
 
         // REVISIONS
         if (revision == null && expand != null && expand.contains(RESTBaseEntityV1.REVISIONS_NAME)) {
@@ -90,6 +92,12 @@ public class ContentSpecV1Factory extends RESTDataObjectFactory<RESTContentSpecV
                     RESTDataObjectCollectionFactory.create(RESTAssignedPropertyTagCollectionV1.class, contentSpecPropertyTagFactory,
                             entity.getContentSpecToPropertyTagsList(), RESTContentSpecV1.PROPERTIES_NAME, dataType, expand, baseUrl,
                             revision, entityManager));
+        }
+
+        // BOOK TAGS
+        if (expand != null && expand.contains(RESTContentSpecV1.BOOK_TAGS_NAME)) {
+            retValue.setTags(RESTDataObjectCollectionFactory.create(RESTTagCollectionV1.class, tagFactory, entity.getBookTags(),
+                    RESTContentSpecV1.BOOK_TAGS_NAME, dataType, expand, baseUrl, entityManager));
         }
 
         // TAGS
@@ -234,6 +242,37 @@ public class ContentSpecV1Factory extends RESTDataObjectFactory<RESTContentSpecV
                                     " ContentSpec " + entity.getId());
 
                     contentSpecPropertyTagFactory.syncDBEntityWithRESTEntitySecondPass(dbEntity, restEntity);
+                }
+            }
+        }
+
+        // Many to Many
+        if (dataObject.hasParameterSet(
+                RESTContentSpecV1.BOOK_TAGS_NAME) && dataObject.getBookTags() != null && dataObject.getBookTags().getItems() != null) {
+            dataObject.getBookTags().removeInvalidChangeItemRequests();
+
+            // Remove Tags first to ensure mutual exclusion is done correctly
+            for (final RESTTagCollectionItemV1 restEntityItem : dataObject.getBookTags().getItems()) {
+                final RESTTagV1 restEntity = restEntityItem.getItem();
+
+                if (restEntityItem.returnIsRemoveItem()) {
+                    final Tag dbEntity = entityManager.find(Tag.class, restEntity.getId());
+                    if (dbEntity == null)
+                        throw new BadRequestException("No Tag entity was found with the primary key " + restEntity.getId());
+
+                    entity.removeBookTag(dbEntity);
+                }
+            }
+
+            for (final RESTTagCollectionItemV1 restEntityItem : dataObject.getBookTags().getItems()) {
+                final RESTTagV1 restEntity = restEntityItem.getItem();
+
+                if (restEntityItem.returnIsAddItem()) {
+                    final Tag dbEntity = RESTv1Utilities.findEntity(entityManager, entityCache, restEntity, Tag.class);
+                    if (dbEntity == null)
+                        throw new BadRequestException("No Tag entity was found with the primary key " + restEntity.getId());
+
+                    entity.addBookTag(dbEntity);
                 }
             }
         }
