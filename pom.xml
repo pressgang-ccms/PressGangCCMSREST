@@ -38,6 +38,7 @@
         <xstream.version>1.4.2</xstream.version>
         <itext.version>2.1.7</itext.version>
         <liquibase.version>2.0.5</liquibase.version>
+        <intellij.annotations.version>12.0</intellij.annotations.version>
     </properties>
 
     <dependencyManagement>
@@ -322,6 +323,11 @@
             <groupId>com.googlecode.java-diff-utils</groupId>
             <artifactId>diffutils</artifactId>
             <version>1.3.0</version>
+        </dependency>
+        <dependency>
+            <groupId>com.intellij</groupId>
+            <artifactId>annotations</artifactId>
+            <version>${intellij.annotations.version}</version>
         </dependency>
 
         <!-- Liquibase -->
