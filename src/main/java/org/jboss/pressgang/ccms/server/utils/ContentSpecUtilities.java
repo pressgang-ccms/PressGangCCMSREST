@@ -9,6 +9,7 @@ import org.jboss.pressgang.ccms.provider.ContentSpecProvider;
 import org.jboss.pressgang.ccms.provider.DBProviderFactory;
 import org.jboss.pressgang.ccms.utils.common.HashUtilities;
 import org.jboss.pressgang.ccms.wrapper.ContentSpecWrapper;
+import org.jboss.resteasy.spi.NotFoundException;
 
 public class ContentSpecUtilities extends org.jboss.pressgang.ccms.contentspec.utils.ContentSpecUtilities {
 
@@ -22,10 +23,14 @@ public class ContentSpecUtilities extends org.jboss.pressgang.ccms.contentspec.u
     public static String getContentSpecText(final Integer id, final Integer revision, final EntityManager entityManager) {
         final DBProviderFactory providerFactory = ProviderUtilities.getDBProviderFactory(entityManager);
         final ContentSpecWrapper entity;
-        if (revision == null) {
-            entity = providerFactory.getProvider(ContentSpecProvider.class).getContentSpec(id);
-        } else {
-            entity = providerFactory.getProvider(ContentSpecProvider.class).getContentSpec(id, revision);
+        try {
+            if (revision == null) {
+                entity = providerFactory.getProvider(ContentSpecProvider.class).getContentSpec(id);
+            } else {
+                entity = providerFactory.getProvider(ContentSpecProvider.class).getContentSpec(id, revision);
+            }
+        } catch (org.jboss.pressgang.ccms.provider.exception.NotFoundException e) {
+            throw new NotFoundException(e);
         }
         final CSTransformer transformer = new CSTransformer();
 
