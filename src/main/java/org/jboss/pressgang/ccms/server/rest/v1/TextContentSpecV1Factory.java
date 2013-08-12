@@ -92,7 +92,7 @@ public class TextContentSpecV1Factory extends RESTDataObjectFactory<RESTTextCont
         if (expand != null && expand.contains(RESTContentSpecV1.PROPERTIES_NAME)) {
             retValue.setProperties(
                     RESTDataObjectCollectionFactory.create(RESTAssignedPropertyTagCollectionV1.class, contentSpecPropertyTagFactory,
-                            entity.getContentSpecToPropertyTagsList(), RESTTextContentSpecV1.PROPERTIES_NAME, dataType, expand, baseUrl,
+                            entity.getPropertyTagsList(), RESTTextContentSpecV1.PROPERTIES_NAME, dataType, expand, baseUrl,
                             revision, entityManager));
         }
 

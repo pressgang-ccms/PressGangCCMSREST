@@ -82,7 +82,7 @@ public class ContentSpecV1Factory extends RESTDataObjectFactory<RESTContentSpecV
         // CHILDREN NODES
         if (expand != null && expand.contains(RESTContentSpecV1.CHILDREN_NAME)) {
             retValue.setChildren_OTM(
-                    RESTDataObjectCollectionFactory.create(RESTCSNodeCollectionV1.class, csNodeFactory, entity.getTopCSNodes(),
+                    RESTDataObjectCollectionFactory.create(RESTCSNodeCollectionV1.class, csNodeFactory, entity.getChildrenList(),
                             RESTContentSpecV1.CHILDREN_NAME, dataType, expand, baseUrl, expandParentReferences, entityManager));
         }
 
@@ -90,7 +90,7 @@ public class ContentSpecV1Factory extends RESTDataObjectFactory<RESTContentSpecV
         if (expand != null && expand.contains(RESTContentSpecV1.PROPERTIES_NAME)) {
             retValue.setProperties(
                     RESTDataObjectCollectionFactory.create(RESTAssignedPropertyTagCollectionV1.class, contentSpecPropertyTagFactory,
-                            entity.getContentSpecToPropertyTagsList(), RESTContentSpecV1.PROPERTIES_NAME, dataType, expand, baseUrl,
+                            entity.getPropertyTagsList(), RESTContentSpecV1.PROPERTIES_NAME, dataType, expand, baseUrl,
                             revision, entityManager));
         }
 
@@ -158,7 +158,7 @@ public class ContentSpecV1Factory extends RESTDataObjectFactory<RESTContentSpecV
                     final CSNode dbEntity = entityManager.find(CSNode.class, restEntity.getId());
                     if (dbEntity == null)
                         throw new BadRequestException("No CSNode entity was found with the primary key " + restEntity.getId());
-                    if (!entity.getTopCSNodes().contains(dbEntity))
+                    if (!entity.getChildrenList().contains(dbEntity))
                         throw new BadRequestException("No CSNode entity was found with the primary key " + restEntity.getId() + " for " +
                                 "ContentSpec " + entity.getId());
 

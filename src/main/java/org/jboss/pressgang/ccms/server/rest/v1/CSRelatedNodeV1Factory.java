@@ -83,7 +83,7 @@ public class CSRelatedNodeV1Factory extends RESTDataObjectFactory<RESTCSRelatedN
             retValue.setProperties(
                     RESTDataObjectCollectionFactory.create(
                             RESTAssignedPropertyTagCollectionV1.class, csNodePropertyTagFactory,
-                            entity.getRelatedNode().getCSNodeToPropertyTagsList(), RESTCSRelatedNodeV1.PROPERTIES_NAME, dataType, expand,
+                            entity.getRelatedNode().getPropertyTagsList(), RESTCSRelatedNodeV1.PROPERTIES_NAME, dataType, expand,
                             baseUrl, revision, entityManager));
         }
 

@@ -90,7 +90,7 @@ public class CategoryV1Factory extends RESTDataObjectFactory<RESTCategoryV1, Cat
                     if (dbEntity == null)
                         throw new BadRequestException("No Tag entity was found with the primary key " + restEntity.getId());
 
-                    entity.removeTagRelationship(dbEntity);
+                    entity.removeTag(dbEntity);
                 } else if (restEntityItem.returnIsUpdateItem()) {
                     final TagToCategory dbEntity = entityManager.find(TagToCategory.class, restEntity.getRelationshipId());
                     if (dbEntity == null) throw new BadRequestException(
@@ -121,9 +121,9 @@ public class CategoryV1Factory extends RESTDataObjectFactory<RESTCategoryV1, Cat
                         throw new BadRequestException("No Tag entity was found with the primary key " + restEntity.getId());
 
                     if (restEntity.hasParameterSet(RESTCategoryInTagV1.RELATIONSHIP_SORT_NAME)) {
-                        entity.addTagRelationship(dbEntity, restEntity.getRelationshipSort());
+                        entity.addTag(dbEntity, restEntity.getRelationshipSort());
                     } else {
-                        entity.addTagRelationship(dbEntity);
+                        entity.addTag(dbEntity);
                     }
                 } else if (restEntityItem.returnIsUpdateItem()) {
                     final TagToCategory dbEntity = entityManager.find(TagToCategory.class, restEntity.getRelationshipId());

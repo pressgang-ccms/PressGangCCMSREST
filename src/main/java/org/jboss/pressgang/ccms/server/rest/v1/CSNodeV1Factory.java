@@ -124,7 +124,7 @@ public class CSNodeV1Factory extends RESTDataObjectFactory<RESTCSNodeV1, CSNode,
         if (expand != null && expand.contains(RESTCSNodeV1.PROPERTIES_NAME)) {
             retValue.setProperties(
                     RESTDataObjectCollectionFactory.create(RESTAssignedPropertyTagCollectionV1.class, csNodePropertyTagFactory,
-                            entity.getCSNodeToPropertyTagsList(), RESTCSNodeV1.PROPERTIES_NAME, dataType, expand, baseUrl, revision,
+                            entity.getPropertyTagsList(), RESTCSNodeV1.PROPERTIES_NAME, dataType, expand, baseUrl, revision,
                             entityManager));
         }
 
@@ -221,7 +221,7 @@ public class CSNodeV1Factory extends RESTDataObjectFactory<RESTCSNodeV1, CSNode,
                     if (dbEntity == null) throw new BadRequestException(
                             "No CSNodeToCSNode entity was found with the primary key " + restEntity.getRelationshipId());
 
-                    entity.removeRelatedTo(dbEntity);
+                    entity.removeRelationshipTo(dbEntity);
                 } else if (restEntityItem.returnIsUpdateItem()) {
                     final CSNodeToCSNode dbEntity = entityManager.find(CSNodeToCSNode.class, restEntity.getRelationshipId());
                     if (dbEntity == null) throw new BadRequestException(
@@ -249,7 +249,7 @@ public class CSNodeV1Factory extends RESTDataObjectFactory<RESTCSNodeV1, CSNode,
                     if (dbEntity == null) throw new BadRequestException(
                             "No CSNodeToCSNode entity was found with the primary key " + restEntity.getRelationshipId());
 
-                    entity.removeRelatedFrom(dbEntity);
+                    entity.removeRelationshipFrom(dbEntity);
                 } else if (restEntityItem.returnIsUpdateItem()) {
                     final CSNodeToCSNode dbEntity = entityManager.find(CSNodeToCSNode.class, restEntity.getRelationshipId());
                     if (dbEntity == null) throw new BadRequestException(
@@ -340,7 +340,7 @@ public class CSNodeV1Factory extends RESTDataObjectFactory<RESTCSNodeV1, CSNode,
                     if (dbEntity == null)
                         throw new BadRequestException("No CSNode entity was found with the primary key " + restEntity.getId());
 
-                    entity.addRelatedTo(dbEntity, RESTCSNodeRelationshipTypeV1.getRelationshipTypeId(restEntity.getRelationshipType()));
+                    entity.addRelationshipTo(dbEntity, RESTCSNodeRelationshipTypeV1.getRelationshipTypeId(restEntity.getRelationshipType()));
                 } else if (restEntityItem.returnIsUpdateItem()) {
                     final CSNodeToCSNode dbEntity = entityManager.find(CSNodeToCSNode.class, restEntity.getRelationshipId());
                     if (dbEntity == null) throw new BadRequestException(
@@ -368,7 +368,8 @@ public class CSNodeV1Factory extends RESTDataObjectFactory<RESTCSNodeV1, CSNode,
                     if (dbEntity == null)
                         throw new BadRequestException("No CSNode entity was found with the primary key " + restEntity.getId());
 
-                    entity.addRelatedFrom(dbEntity, RESTCSNodeRelationshipTypeV1.getRelationshipTypeId(restEntity.getRelationshipType()));
+                    entity.addRelationshipFrom(dbEntity,
+                            RESTCSNodeRelationshipTypeV1.getRelationshipTypeId(restEntity.getRelationshipType()));
                 } else if (restEntityItem.returnIsUpdateItem()) {
                     final CSNodeToCSNode dbEntity = entityManager.find(CSNodeToCSNode.class, restEntity.getRelationshipId());
                     if (dbEntity == null) throw new BadRequestException(
