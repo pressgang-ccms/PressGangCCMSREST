@@ -1282,8 +1282,7 @@ public class BaseRESTv1 extends BaseREST {
      * @param logDetails        The log details for the failed Content Spec.
      * @return The ID of the Content Spec.
      */
-    private Integer setContentSpecErrors(final RESTTextContentSpecV1 restEntity, final String contentSpecString,
-            final String errors,
+    private Integer setContentSpecErrors(final RESTTextContentSpecV1 restEntity, final String contentSpecString, final String errors,
             final RESTLogDetailsV1 logDetails) {
         final Integer id = restEntity.getId();
 
@@ -1447,8 +1446,6 @@ public class BaseRESTv1 extends BaseREST {
             } else if (cause instanceof PersistenceException) {
                 if (cause.getCause() != null && cause.getCause() instanceof org.hibernate.exception.ConstraintViolationException) {
                     cause = cause.getCause();
-                } else {
-                    break;
                 }
             } else if (cause instanceof ProviderException) {
                 if (cause != null && (cause instanceof ValidationException || cause instanceof PersistenceException || cause instanceof
@@ -1478,12 +1475,13 @@ public class BaseRESTv1 extends BaseREST {
             return new NotFoundException(cause);
         } else if (cause instanceof org.hibernate.exception.ConstraintViolationException) {
             return new BadRequestException(cause.getMessage());
-        } else if (cause instanceof ValidationException || cause instanceof PersistenceException || cause instanceof
-                CustomConstraintViolationException) {
+        } else if (cause instanceof ValidationException || cause instanceof CustomConstraintViolationException) {
             return new BadRequestException(cause);
         } else if (cause instanceof RollbackException) {
-            return new BadRequestException("This is most likely caused by the fact that two users are trying to save the same entity at the same time.\n" +
-                    "You can try saving again, or reload the entity to see if there were any changes made in the background.", cause);
+            return new BadRequestException(
+                    "This is most likely caused by the fact that two users are trying to save the same entity at the same time.\n" + "You" +
+                            " can try saving again, or reload the entity to see if there were any changes made in the background.",
+                    cause);
         } else if (cause instanceof ProviderException) {
             if (cause instanceof org.jboss.pressgang.ccms.provider.exception.NotFoundException) {
                 throw new NotFoundException(cause);
