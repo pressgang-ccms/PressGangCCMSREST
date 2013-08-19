@@ -96,7 +96,7 @@ public class ContentSpecV1Factory extends RESTDataObjectFactory<RESTContentSpecV
 
         // BOOK TAGS
         if (expand != null && expand.contains(RESTContentSpecV1.BOOK_TAGS_NAME)) {
-            retValue.setTags(RESTDataObjectCollectionFactory.create(RESTTagCollectionV1.class, tagFactory, entity.getBookTags(),
+            retValue.setBookTags(RESTDataObjectCollectionFactory.create(RESTTagCollectionV1.class, tagFactory, entity.getBookTags(),
                     RESTContentSpecV1.BOOK_TAGS_NAME, dataType, expand, baseUrl, entityManager));
         }
 
