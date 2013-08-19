@@ -2517,7 +2517,11 @@ public class RESTv1 extends BaseRESTv1 implements RESTBaseInterfaceV1, RESTInter
     public String getTEXTContentSpec(final Integer id) {
         if (id == null) throw new BadRequestException("The id parameter can not be null");
 
-        return ContentSpecUtilities.getContentSpecText(id, entityManager);
+        try {
+            return ContentSpecUtilities.getContentSpecText(id, entityManager);
+        } catch (Throwable e) {
+            throw processError(null, e);
+        }
     }
 
     @Override
@@ -2525,7 +2529,11 @@ public class RESTv1 extends BaseRESTv1 implements RESTBaseInterfaceV1, RESTInter
         if (id == null) throw new BadRequestException("The id parameter can not be null");
         if (revision == null) throw new BadRequestException("The revision parameter can not be null");
 
-        return ContentSpecUtilities.getContentSpecText(id, revision, entityManager);
+        try {
+            return ContentSpecUtilities.getContentSpecText(id, revision, entityManager);
+        } catch (Throwable e) {
+            throw processError(null, e);
+        }
     }
 
     @Override
@@ -2617,8 +2625,8 @@ public class RESTv1 extends BaseRESTv1 implements RESTBaseInterfaceV1, RESTInter
             }
 
             return ZipUtilities.createZip(files);
-        } catch (Exception e) {
-            throw new InternalServerErrorException(e);
+        } catch (Throwable e) {
+            throw processError(null, e);
         }
     }
 

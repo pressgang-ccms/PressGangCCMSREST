@@ -829,10 +829,14 @@ public class BaseRESTv1 extends BaseREST {
      * @return The Entity that matches the type and ID
      */
     protected <U> U getEntity(final Class<U> type, final Object id) {
-        final U entity = entityManager.find(type, id);
-        if (entity == null) throw new NotFoundException("No entity was found with the primary key " + id);
+        try {
+            final U entity = entityManager.find(type, id);
+            if (entity == null) throw new NotFoundException("No entity was found with the primary key " + id);
 
-        return entity;
+            return entity;
+        } catch (Throwable e) {
+            throw  processError(null, e);
+        }
     }
 
     /**
@@ -845,28 +849,32 @@ public class BaseRESTv1 extends BaseREST {
      * @return The Entity that matches the type, ID and Revision
      */
     protected <U extends AuditedEntity> U getEntity(final Class<U> type, final Object id, final Integer revision) {
-        final U entity;
+        try {
+            final U entity;
 
-        if (revision != null) {
-            // Find the closest revision that is less then the revision specified.
-            final AuditReader reader = AuditReaderFactory.get(entityManager);
-            final Number closestRevision = (Number) reader.createQuery().forRevisionsOfEntity(type, false, true).addProjection(
-                    AuditEntity.revisionNumber().max()).add(AuditEntity.id().eq(id)).add(
-                    AuditEntity.revisionNumber().le(revision)).getSingleResult();
+            if (revision != null) {
+                // Find the closest revision that is less then the revision specified.
+                final AuditReader reader = AuditReaderFactory.get(entityManager);
+                final Number closestRevision = (Number) reader.createQuery().forRevisionsOfEntity(type, false, true).addProjection(
+                        AuditEntity.revisionNumber().max()).add(AuditEntity.id().eq(id)).add(
+                        AuditEntity.revisionNumber().le(revision)).getSingleResult();
 
-            // Get the Revision Entity using an envers lookup.
-            entity = reader.find(type, id, closestRevision);
+                // Get the Revision Entity using an envers lookup.
+                entity = reader.find(type, id, closestRevision);
 
-            if (entity == null) throw new NotFoundException("No entity was found with the primary key " + id);
+                if (entity == null) throw new NotFoundException("No entity was found with the primary key " + id);
 
-            // Set the entities last modified date to the information assoicated with the revision.
-            final Date revisionLastModified = reader.getRevisionDate(closestRevision);
-            entity.setLastModifiedDate(revisionLastModified);
-        } else {
-            entity = entityManager.find(type, id);
-            if (entity == null) throw new NotFoundException("No entity was found with the primary key " + id);
+                // Set the entities last modified date to the information assoicated with the revision.
+                final Date revisionLastModified = reader.getRevisionDate(closestRevision);
+                entity.setLastModifiedDate(revisionLastModified);
+            } else {
+                entity = entityManager.find(type, id);
+                if (entity == null) throw new NotFoundException("No entity was found with the primary key " + id);
+            }
+            return entity;
+        } catch (Throwable e) {
+            throw processError(null, e);
         }
-        return entity;
     }
 
     /**
@@ -1440,6 +1448,8 @@ public class BaseRESTv1 extends BaseREST {
         while (cause != null) {
             if (cause instanceof Failure) {
                 return (Failure) cause;
+            } else if (cause instanceof EntityNotFoundException) {
+                return new NotFoundException(cause);
             } else if (cause instanceof ValidationException || cause instanceof CustomConstraintViolationException || cause instanceof
                     org.hibernate.exception.ConstraintViolationException || cause instanceof RollbackException) {
                 break;
