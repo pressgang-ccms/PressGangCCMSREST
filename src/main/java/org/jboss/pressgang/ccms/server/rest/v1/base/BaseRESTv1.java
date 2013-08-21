@@ -796,10 +796,14 @@ public class BaseRESTv1 extends BaseREST {
                         AuditEntity.revisionNumber().max()).add(AuditEntity.id().eq(id)).add(
                         AuditEntity.revisionNumber().le(revision)).getSingleResult();
 
+                if (closestRevision == null)
+                    throw new NotFoundException("No entity was found with the primary key " + id + ", revision " + revision);
+
                 // Get the Revision Entity using an envers lookup.
                 entity = reader.find(type, id, closestRevision);
 
-                if (entity == null) throw new NotFoundException("No entity was found with the primary key " + id);
+                if (entity == null)
+                    throw new NotFoundException("No entity was found with the primary key " + id + ", revision " + revision);
 
                 // Set the entities last modified date to the information associated with the revision.
                 final Date revisionLastModified = reader.getRevisionDate(closestRevision);
@@ -835,7 +839,7 @@ public class BaseRESTv1 extends BaseREST {
 
             return entity;
         } catch (Throwable e) {
-            throw  processError(null, e);
+            throw processError(null, e);
         }
     }
 
@@ -1490,8 +1494,7 @@ public class BaseRESTv1 extends BaseREST {
         } else if (cause instanceof RollbackException) {
             return new BadRequestException(
                     "This is most likely caused by the fact that two users are trying to save the same entity at the same time.\n" + "You" +
-                            " can try saving again, or reload the entity to see if there were any changes made in the background.",
-                    cause);
+                            " can try saving again, or reload the entity to see if there were any changes made in the background.", cause);
         } else if (cause instanceof ProviderException) {
             if (cause instanceof org.jboss.pressgang.ccms.provider.exception.NotFoundException) {
                 throw new NotFoundException(cause);
