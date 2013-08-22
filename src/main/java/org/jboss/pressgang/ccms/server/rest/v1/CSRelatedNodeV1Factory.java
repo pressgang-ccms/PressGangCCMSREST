@@ -49,6 +49,7 @@ public class CSRelatedNodeV1Factory extends RESTDataObjectFactory<RESTCSRelatedN
 
         retValue.setId(entity.getRelatedNode().getId());
         retValue.setRelationshipId(entity.getId());
+        retValue.setRelationshipSort(entity.getRelationshipSort());
         retValue.setTitle(entity.getRelatedNode().getCSNodeTitle());
         retValue.setAdditionalText(entity.getRelatedNode().getAdditionalText());
         retValue.setTargetId(entity.getRelatedNode().getCSNodeTargetId());
