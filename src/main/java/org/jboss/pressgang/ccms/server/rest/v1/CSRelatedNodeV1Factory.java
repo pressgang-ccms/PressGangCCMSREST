@@ -70,7 +70,7 @@ public class CSRelatedNodeV1Factory extends RESTDataObjectFactory<RESTCSRelatedN
         if (expandParentReferences && expand != null && expand.contains(
                 RESTCSRelatedNodeV1.PARENT_NAME) && entity.getRelatedNode().getParent() != null) {
             retValue.setParent(csNodeFactory.createRESTEntityFromDBEntity(entity.getRelatedNode().getParent(), baseUrl, dataType,
-                    expand.get(RESTCSNodeV1.PARENT_NAME)));
+                    expand.get(RESTCSNodeV1.PARENT_NAME), revision));
         }
 
         // CONTENT SPEC

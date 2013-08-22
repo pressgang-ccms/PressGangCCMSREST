@@ -58,7 +58,7 @@ public class UserV1Factory extends RESTDataObjectFactory<RESTUserV1, User, RESTU
         if (expand != null && expand.contains(RESTUserV1.ROLES_NAME)) {
             retValue.setRoles(
                     RESTDataObjectCollectionFactory.create(RESTRoleCollectionV1.class, roleFactory, entity.getRoles(),
-                            RESTUserV1.ROLES_NAME, dataType, expand, baseUrl, entityManager));
+                            RESTUserV1.ROLES_NAME, dataType, expand, baseUrl, revision, entityManager));
         }
 
         retValue.setLinks(baseUrl, RESTv1Constants.USER_URL_NAME, dataType, retValue.getId());

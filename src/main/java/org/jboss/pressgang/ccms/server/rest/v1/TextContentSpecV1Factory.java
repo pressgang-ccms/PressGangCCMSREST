@@ -99,7 +99,7 @@ public class TextContentSpecV1Factory extends RESTDataObjectFactory<RESTTextCont
         // TAGS
         if (expand != null && expand.contains(RESTContentSpecV1.TAGS_NAME)) {
             retValue.setTags(RESTDataObjectCollectionFactory.create(RESTTagCollectionV1.class, tagFactory, entity.getTags(),
-                    RESTTextContentSpecV1.TAGS_NAME, dataType, expand, baseUrl, entityManager));
+                    RESTTextContentSpecV1.TAGS_NAME, dataType, expand, baseUrl, revision, entityManager));
         }
 
         // TRANSLATIONS

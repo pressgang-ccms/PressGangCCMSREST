@@ -80,7 +80,7 @@ public class TranslatedCSNodeV1Factory extends RESTDataObjectFactory<RESTTransla
             retValue.setTranslatedNodeStrings_OTM(
                     RESTDataObjectCollectionFactory.create(RESTTranslatedCSNodeStringCollectionV1.class, translatedCSNodeStringFactory,
                             entity.getTranslatedCSNodeStringsArray(), RESTTranslatedCSNodeV1.TRANSLATED_STRING_NAME, dataType, expand,
-                            baseUrl, false, entityManager));
+                            baseUrl, revision, false, entityManager));
         }
 
         // TRANSLATED CONTENT SPEC

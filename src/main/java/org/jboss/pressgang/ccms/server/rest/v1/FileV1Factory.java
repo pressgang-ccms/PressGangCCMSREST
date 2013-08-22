@@ -59,7 +59,8 @@ public class FileV1Factory extends RESTDataObjectFactory<RESTFileV1, File, RESTF
         // LANGUAGE IMAGES
         if (expand != null && expand.contains(RESTFileV1.LANGUAGE_FILES_NAME)) {
             retValue.setLanguageFiles_OTM(RESTDataObjectCollectionFactory.create(RESTLanguageFileCollectionV1.class, languageFileFactory,
-                    entity.getLanguageFilesArray(), RESTFileV1.LANGUAGE_FILES_NAME, dataType, expand, baseUrl, false, entityManager));
+                    entity.getLanguageFilesArray(), RESTFileV1.LANGUAGE_FILES_NAME, dataType, expand, baseUrl, revision, false,
+                    entityManager));
         }
 
         retValue.setLinks(baseUrl, RESTv1Constants.FILE_URL_NAME, dataType, retValue.getId());

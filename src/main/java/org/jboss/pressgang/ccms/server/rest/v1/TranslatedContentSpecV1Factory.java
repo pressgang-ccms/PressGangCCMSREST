@@ -70,7 +70,7 @@ public class TranslatedContentSpecV1Factory extends RESTDataObjectFactory<RESTTr
             retValue.setTranslatedNodes_OTM(
                     RESTDataObjectCollectionFactory.create(RESTTranslatedCSNodeCollectionV1.class, translatedCSNodeFactory,
                             new ArrayList<TranslatedCSNode>(entity.getTranslatedCSNodes()),
-                            RESTTranslatedContentSpecV1.TRANSLATED_NODES_NAME, dataType, expand, baseUrl, false, entityManager));
+                            RESTTranslatedContentSpecV1.TRANSLATED_NODES_NAME, dataType, expand, baseUrl, revision, false, entityManager));
         }
 
         retValue.setLinks(baseUrl, RESTv1Constants.TRANSLATED_CONTENT_SPEC_URL_NAME, dataType, retValue.getId());

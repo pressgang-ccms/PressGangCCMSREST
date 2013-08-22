@@ -57,7 +57,7 @@ public class ImageV1Factory extends RESTDataObjectFactory<RESTImageV1, ImageFile
         if (expand != null && expand.contains(RESTImageV1.LANGUAGEIMAGES_NAME)) {
             retValue.setLanguageImages_OTM(
                     RESTDataObjectCollectionFactory.create(RESTLanguageImageCollectionV1.class, languageImageFactory,
-                            entity.getLanguageImagesArray(), RESTImageV1.LANGUAGEIMAGES_NAME, dataType, expand, baseUrl, false,
+                            entity.getLanguageImagesArray(), RESTImageV1.LANGUAGEIMAGES_NAME, dataType, expand, baseUrl, revision, false,
                             entityManager));
         }
 

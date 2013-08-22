@@ -116,49 +116,49 @@ public class TranslatedTopicV1Factory extends RESTDataObjectFactory<RESTTranslat
             retValue.setTranslatedTopicStrings_OTM(
                     RESTDataObjectCollectionFactory.create(RESTTranslatedTopicStringCollectionV1.class, translatedTopicStringFactory,
                             entity.getTranslatedTopicDataStringsArray(), RESTTranslatedTopicV1.TRANSLATEDTOPICSTRING_NAME, dataType, expand,
-                            baseUrl, false, entityManager));
+                            baseUrl, revision, false, entityManager));
         }
 
         // TAGS
         if (expand != null && expand.contains(RESTTranslatedTopicV1.TAGS_NAME)) {
             retValue.setTags(RESTDataObjectCollectionFactory.create(RESTTagCollectionV1.class, tagFactory,
                     entity.getTranslatedTopic().getEnversTopic(entityManager).getTags(), RESTv1Constants.TAGS_EXPANSION_NAME, dataType,
-                    expand, baseUrl, entityManager));
+                    expand, baseUrl, entity.getTranslatedTopic().getTopicRevision(), entityManager));
         }
 
         // OUTGOING RELATIONSHIPS
         if (expand != null && expand.contains(RESTTranslatedTopicV1.OUTGOING_NAME)) {
             retValue.setOutgoingTranslatedRelationships(RESTDataObjectCollectionFactory.create(RESTTranslatedTopicCollectionV1.class, this,
                     entity.getOutgoingRelatedTranslatedTopicData(entityManager), RESTTranslatedTopicV1.OUTGOING_NAME, dataType, expand,
-                    baseUrl, true, entityManager));
+                    baseUrl, entity.getTranslatedTopic().getTopicRevision(), true, entityManager));
         }
 
         // INCOMING RELATIONSHIPS
         if (expand != null && expand.contains(RESTTranslatedTopicV1.INCOMING_NAME)) {
             retValue.setIncomingTranslatedRelationships(RESTDataObjectCollectionFactory.create(RESTTranslatedTopicCollectionV1.class, this,
                     entity.getIncomingRelatedTranslatedTopicData(entityManager), RESTTranslatedTopicV1.INCOMING_NAME, dataType, expand,
-                    baseUrl, true, entityManager));
+                    baseUrl, entity.getTranslatedTopic().getTopicRevision(), true, entityManager));
         }
 
         // ALL OUTGOING RELATIONSHIPS (includes dummy topics)
         if (expand != null && expand.contains(RESTTranslatedTopicV1.ALL_LATEST_OUTGOING_NAME)) {
             retValue.setOutgoingRelationships(RESTDataObjectCollectionFactory.create(RESTTranslatedTopicCollectionV1.class, this,
                     entity.getOutgoingDummyFilledRelatedTranslatedTopicDatas(entityManager), RESTTranslatedTopicV1.ALL_LATEST_OUTGOING_NAME,
-                    dataType, expand, baseUrl, true, entityManager));
+                    dataType, expand, baseUrl, entity.getTranslatedTopic().getTopicRevision(), true, entityManager));
         }
 
         // ALL INCOMING RELATIONSHIPS (includes dummy topics)
         if (expand != null && expand.contains(RESTTranslatedTopicV1.ALL_LATEST_INCOMING_NAME)) {
             retValue.setIncomingRelationships(RESTDataObjectCollectionFactory.create(RESTTranslatedTopicCollectionV1.class, this,
                     entity.getIncomingDummyFilledRelatedTranslatedTopicDatas(entityManager), RESTTranslatedTopicV1.ALL_LATEST_INCOMING_NAME,
-                    dataType, expand, baseUrl, true, entityManager));
+                    dataType, expand, baseUrl, entity.getTranslatedTopic().getTopicRevision(), true, entityManager));
         }
 
         // SOURCE URLS
         if (expand != null && expand.contains(RESTTranslatedTopicV1.SOURCE_URLS_NAME)) {
             retValue.setSourceUrls_OTM(RESTDataObjectCollectionFactory.create(RESTTopicSourceUrlCollectionV1.class, topicSourceUrlFactory,
                     entity.getTranslatedTopic().getEnversTopic(entityManager).getTopicSourceUrls(), RESTTranslatedTopicV1.SOURCE_URLS_NAME,
-                    dataType, expand, baseUrl, false, entityManager));
+                    dataType, expand, baseUrl, entity.getTranslatedTopic().getTopicRevision(), false, entityManager));
         }
 
         // PROPERTY TAGS
@@ -166,7 +166,7 @@ public class TranslatedTopicV1Factory extends RESTDataObjectFactory<RESTTranslat
             retValue.setProperties(
                     RESTDataObjectCollectionFactory.create(RESTAssignedPropertyTagCollectionV1.class, topicPropertyTagFactory,
                             entity.getTranslatedTopic().getEnversTopic(entityManager).getPropertyTagsList(),
-                            RESTTranslatedTopicV1.PROPERTIES_NAME, dataType, expand, baseUrl, entityManager));
+                            RESTTranslatedTopicV1.PROPERTIES_NAME, dataType, expand, baseUrl, entity.getTranslatedTopic().getTopicRevision(), entityManager));
         }
 
         // TRANSLATED CS NODE

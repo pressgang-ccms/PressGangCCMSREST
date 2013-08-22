@@ -83,7 +83,7 @@ public class ContentSpecV1Factory extends RESTDataObjectFactory<RESTContentSpecV
         if (expand != null && expand.contains(RESTContentSpecV1.CHILDREN_NAME)) {
             retValue.setChildren_OTM(
                     RESTDataObjectCollectionFactory.create(RESTCSNodeCollectionV1.class, csNodeFactory, entity.getChildrenList(),
-                            RESTContentSpecV1.CHILDREN_NAME, dataType, expand, baseUrl, expandParentReferences, entityManager));
+                            RESTContentSpecV1.CHILDREN_NAME, dataType, expand, baseUrl, revision, expandParentReferences, entityManager));
         }
 
         // PROPERTY TAGS
@@ -97,13 +97,13 @@ public class ContentSpecV1Factory extends RESTDataObjectFactory<RESTContentSpecV
         // BOOK TAGS
         if (expand != null && expand.contains(RESTContentSpecV1.BOOK_TAGS_NAME)) {
             retValue.setBookTags(RESTDataObjectCollectionFactory.create(RESTTagCollectionV1.class, tagFactory, entity.getBookTags(),
-                    RESTContentSpecV1.BOOK_TAGS_NAME, dataType, expand, baseUrl, entityManager));
+                    RESTContentSpecV1.BOOK_TAGS_NAME, dataType, expand, baseUrl, revision, entityManager));
         }
 
         // TAGS
         if (expand != null && expand.contains(RESTContentSpecV1.TAGS_NAME)) {
             retValue.setTags(RESTDataObjectCollectionFactory.create(RESTTagCollectionV1.class, tagFactory, entity.getTags(),
-                    RESTContentSpecV1.TAGS_NAME, dataType, expand, baseUrl, entityManager));
+                    RESTContentSpecV1.TAGS_NAME, dataType, expand, baseUrl, revision, entityManager));
         }
 
         // TRANSLATIONS

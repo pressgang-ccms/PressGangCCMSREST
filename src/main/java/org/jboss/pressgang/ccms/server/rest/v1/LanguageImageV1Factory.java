@@ -52,7 +52,7 @@ public class LanguageImageV1Factory extends RESTDataObjectFactory<RESTLanguageIm
         /* Set the object references */
         if (expandParentReferences && expand != null && expand.contains(RESTLanguageImageV1.IMAGE_NAME) && entity.getImageFile() != null) {
             retValue.setImage(imageFactory.createRESTEntityFromDBEntity(entity.getImageFile(), baseUrl, dataType,
-                    expand.get(RESTLanguageImageV1.IMAGE_NAME)));
+                    expand.get(RESTLanguageImageV1.IMAGE_NAME), revision));
         }
 
         // REVISIONS
