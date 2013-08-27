@@ -596,10 +596,10 @@ public class BaseRESTv1 extends BaseREST {
      * @return
      */
     private <T extends RESTBaseEntityV1<T, V, W>, U extends AuditedEntity, V extends RESTBaseCollectionV1<T, V, W>,
-            W extends RESTBaseCollectionItemV1<T, V, W>> V createOrUpdateEntities(final Class<V> collectionClass, final Class<U> type,
-            final RESTDataObjectFactory<T, U, V, W> factory, final RESTBaseCollectionV1<T, V, W> entities,
-            final DatabaseOperation operation, final String expandName, final String dataType, final String expand,
-            final RESTLogDetailsV1 logDetails) {
+            W extends RESTBaseCollectionItemV1<T, V, W>> V createOrUpdateEntities(
+            final Class<V> collectionClass, final Class<U> type, final RESTDataObjectFactory<T, U, V, W> factory,
+            final RESTBaseCollectionV1<T, V, W> entities, final DatabaseOperation operation, final String expandName, final String dataType,
+            final String expand, final RESTLogDetailsV1 logDetails) {
         assert entities != null : "dataObject should not be null";
         assert factory != null : "factory should not be null";
 
@@ -1164,7 +1164,8 @@ public class BaseRESTv1 extends BaseREST {
                 final ContentSpecProcessor processor = new ContentSpecProcessor(providerFactory, loggerManager, processingOptions);
 
                 // Process the content spec
-                success = processContentSpecString(id, contentSpecString, parser, processor, operation, dataType);
+                success = processContentSpecString(id, contentSpecString, parser, processor, enversLoggingBean.getUsername(), operation,
+                        dataType);
 
                 csId = parser.getContentSpec().getId();
             }
@@ -1228,12 +1229,13 @@ public class BaseRESTv1 extends BaseREST {
      * @param contentSpecString The Content Spec string representation.
      * @param parser            The parser to use to parse the String representation.
      * @param processor         The processor to use, to valid and save the parsed content spec.
+     * @param username          The username of the user who sent the request.
      * @param operation         Whether the content spec should be created or updated.
      * @param dataType
      * @return True if the Content Spec was parsed and processed successfully, otherwise false.
      */
     private boolean processContentSpecString(final Integer id, final String contentSpecString, final ContentSpecParser parser,
-            final ContentSpecProcessor processor, final DatabaseOperation operation, final String dataType) {
+            final ContentSpecProcessor processor, final String username, final DatabaseOperation operation, final String dataType) {
         final ContentSpecParser.ParsingMode mode;
         if (dataType.equals(RESTv1Constants.TEXT_URL)) {
             if (operation == DatabaseOperation.CREATE) {
@@ -1263,7 +1265,7 @@ public class BaseRESTv1 extends BaseREST {
             }
 
             // Process and save the spec
-            success = processor.processContentSpec(parser.getContentSpec(), null, mode);
+            success = processor.processContentSpec(parser.getContentSpec(), username, mode);
         }
 
         return success;
