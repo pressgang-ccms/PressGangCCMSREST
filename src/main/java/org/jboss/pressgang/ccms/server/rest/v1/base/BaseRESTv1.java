@@ -1084,7 +1084,7 @@ public class BaseRESTv1 extends BaseREST {
         contentSpec.explicitSetText(contentSpecString);
 
         final RESTTextCSProcessingOptionsV1 processingOptions = new RESTTextCSProcessingOptionsV1();
-        processingOptions.setPermissive(permissive);
+        processingOptions.setStrictTitles(permissive);
         contentSpec.setProcessingOptions(processingOptions);
 
         createOrUpdateJSONContentSpecFromString(contentSpec, DatabaseOperation.UPDATE, logDetails, "", RESTv1Constants.TEXT_URL,
@@ -1156,8 +1156,8 @@ public class BaseRESTv1 extends BaseREST {
                 final DBProviderFactory providerFactory = ProviderUtilities.getDBProviderFactory(entityManager, transactionManager,
                         enversLoggingBean);
                 final ProcessingOptions processingOptions = new ProcessingOptions();
-                if (restEntity.getProcessingOptions() != null && restEntity.getProcessingOptions().getPermissive() != null) {
-                    processingOptions.setPermissiveMode(restEntity.getProcessingOptions().getPermissive());
+                if (restEntity.getProcessingOptions() != null && restEntity.getProcessingOptions().getStrictTitles() != null) {
+                    processingOptions.setStrictTitles(restEntity.getProcessingOptions().getStrictTitles());
                 }
 
                 final ContentSpecParser parser = new ContentSpecParser(providerFactory, loggerManager);
