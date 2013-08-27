@@ -70,7 +70,7 @@ public class ContentSpecV1Factory extends RESTDataObjectFactory<RESTContentSpecV
         retValue.setLastPublished(entity.getLastPublished());
         retValue.setLastModified(entity.getLastModified());
         retValue.setErrors(entity.getErrors());
-        retValue.setFailedContentSpec(ContentSpecUtilities.fixFailedContentSpec(entity));
+        retValue.setFailedContentSpec(ContentSpecUtilities.fixFailedContentSpec(entityManager, entity));
 
         // REVISIONS
         if (revision == null && expand != null && expand.contains(RESTBaseEntityV1.REVISIONS_NAME)) {
