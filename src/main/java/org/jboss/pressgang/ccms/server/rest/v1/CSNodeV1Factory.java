@@ -52,6 +52,7 @@ public class CSNodeV1Factory extends RESTDataObjectFactory<RESTCSNodeV1, CSNode,
 
         final List<String> expandOptions = new ArrayList<String>();
         expandOptions.add(RESTCSNodeV1.CHILDREN_NAME);
+        expandOptions.add(RESTCSNodeV1.INHERITED_CONDITION_NAME);
         expandOptions.add(RESTBaseEntityV1.LOG_DETAILS_NAME);
         expandOptions.add(RESTCSNodeV1.NEXT_NODE_NAME);
         expandOptions.add(RESTCSNodeV1.PARENT_NAME);
@@ -85,9 +86,15 @@ public class CSNodeV1Factory extends RESTDataObjectFactory<RESTCSNodeV1, CSNode,
         }
 
         // CONTENT SPEC
-        if (expand != null && expand.contains(RESTCSNodeV1.CONTENT_SPEC_NAME) && entity.getContentSpec() != null) retValue.setContentSpec(
-                contentSpecFactory.createRESTEntityFromDBEntity(entity.getContentSpec(), baseUrl, dataType,
-                        expand.get(RESTCSNodeV1.CONTENT_SPEC_NAME), revision, expandParentReferences));
+        if (expand != null && expand.contains(RESTCSNodeV1.CONTENT_SPEC_NAME) && entity.getContentSpec() != null) {
+            retValue.setContentSpec(contentSpecFactory.createRESTEntityFromDBEntity(entity.getContentSpec(), baseUrl, dataType,
+                    expand.get(RESTCSNodeV1.CONTENT_SPEC_NAME), revision, expandParentReferences));
+        }
+
+        // INHERITED CONDITION
+        if (expand != null && expand.contains(RESTCSNodeV1.INHERITED_CONDITION_NAME)) {
+            retValue.setInheritedCondition(entity.getInheritedCondition());
+        }
 
         // NEXT
         if (expand != null && expand.contains(RESTCSNodeV1.NEXT_NODE_NAME) && entity.getNext() != null) {
