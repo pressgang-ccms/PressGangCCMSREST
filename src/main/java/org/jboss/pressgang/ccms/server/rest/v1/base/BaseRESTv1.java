@@ -788,31 +788,11 @@ public class BaseRESTv1 extends BaseREST {
              * revision and then get that instance of the Entity.
              */
             final U entity;
-
             if (usingRevisions) {
-                // Find the closest revision that is less then the revision specified.
-                final AuditReader reader = AuditReaderFactory.get(entityManager);
-                closestRevision = (Number) reader.createQuery().forRevisionsOfEntity(type, false, true).addProjection(
-                        AuditEntity.revisionNumber().max()).add(AuditEntity.id().eq(id)).add(
-                        AuditEntity.revisionNumber().le(revision)).getSingleResult();
-
-                if (closestRevision == null)
-                    throw new NotFoundException("No entity was found with the primary key " + id + ", revision " + revision);
-
-                // Get the Revision Entity using an envers lookup.
-                entity = reader.find(type, id, closestRevision);
-
-                if (entity == null)
-                    throw new NotFoundException("No entity was found with the primary key " + id + ", revision " + revision);
-
-                // Set the entities last modified date to the information associated with the revision.
-                final Date revisionLastModified = reader.getRevisionDate(closestRevision);
-                entity.setLastModifiedDate(revisionLastModified);
+                entity = getEntity(type, id, revision);
             } else {
-                entity = entityManager.find(type, id);
+                entity = getEntity(type, id);
             }
-
-            if (entity == null) throw new NotFoundException("No entity was found with the primary key " + id);
 
             // Create the REST representation of the topic
             final T restRepresentation = dataObjectFactory.createRESTEntityFromDBEntity(entity, getBaseUrl(), dataType, expandDataTrunk,
@@ -852,7 +832,7 @@ public class BaseRESTv1 extends BaseREST {
      * @param <U>      The Entity class.
      * @return The Entity that matches the type, ID and Revision
      */
-    protected <U extends AuditedEntity> U getEntity(final Class<U> type, final Object id, final Integer revision) {
+    protected <U extends AuditedEntity> U getEntity(final Class<U> type, final Object id, final Number revision) {
         try {
             final U entity;
 
@@ -863,10 +843,14 @@ public class BaseRESTv1 extends BaseREST {
                         AuditEntity.revisionNumber().max()).add(AuditEntity.id().eq(id)).add(
                         AuditEntity.revisionNumber().le(revision)).getSingleResult();
 
+                if (closestRevision == null)
+                    throw new NotFoundException("No entity was found with the primary key " + id + ", revision " + revision);
+
                 // Get the Revision Entity using an envers lookup.
                 entity = reader.find(type, id, closestRevision);
 
-                if (entity == null) throw new NotFoundException("No entity was found with the primary key " + id);
+                if (entity == null)
+                    throw new NotFoundException("No entity was found with the primary key " + id + ", revision " + revision);
 
                 // Set the entities last modified date to the information assoicated with the revision.
                 final Date revisionLastModified = reader.getRevisionDate(closestRevision);
