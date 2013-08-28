@@ -2,11 +2,11 @@ package org.jboss.pressgang.ccms.server.utils;
 
 import javax.persistence.EntityManager;
 
-import org.jboss.pressgang.ccms.contentspec.constants.CSConstants;
 import org.jboss.pressgang.ccms.contentspec.utils.CSTransformer;
 import org.jboss.pressgang.ccms.model.contentspec.ContentSpec;
 import org.jboss.pressgang.ccms.provider.ContentSpecProvider;
 import org.jboss.pressgang.ccms.provider.DBProviderFactory;
+import org.jboss.pressgang.ccms.utils.constants.CommonConstants;
 import org.jboss.pressgang.ccms.wrapper.ContentSpecWrapper;
 import org.jboss.resteasy.spi.InternalServerErrorException;
 import org.jboss.resteasy.spi.NotFoundException;
@@ -58,7 +58,7 @@ public class ContentSpecUtilities extends org.jboss.pressgang.ccms.contentspec.u
                 final String serverContentSpec = getContentSpecText(contentSpec.getId(),
                         contentSpec.getRevision() == null ? null : contentSpec.getRevision().intValue(), entityManager);
                 final String checksum = getContentSpecChecksum(serverContentSpec);
-                return CSConstants.CHECKSUM_TITLE + "=" + checksum + "\n" + CSConstants.ID_TITLE + "=" +
+                return CommonConstants.CS_CHECKSUM_TITLE + "=" + checksum + "\n" + CommonConstants.CS_ID_TITLE + "=" +
                         contentSpec.getId() + "\n" + cleanContentSpec;
             }
         }
