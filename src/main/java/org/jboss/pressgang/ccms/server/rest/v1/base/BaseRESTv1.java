@@ -1052,15 +1052,20 @@ public class BaseRESTv1 extends BaseREST {
      * Creates a content spec from a String representation of a content specification.
      *
      * @param contentSpecString The content spec string representation.
-     * @param permissive
+     * @param strictTitles
      * @param logDetails        The details about the changes that need to be logged.
      * @return
      */
-    protected String createTEXTContentSpecFromString(final String contentSpecString, final Boolean permissive,
+    protected String createTEXTContentSpecFromString(final String contentSpecString, final Boolean strictTitles,
             final RESTLogDetailsV1 logDetails) {
         final ErrorLoggerManager loggerManager = new ErrorLoggerManager();
         final RESTTextContentSpecV1 contentSpec = new RESTTextContentSpecV1();
         contentSpec.explicitSetText(contentSpecString);
+
+        final RESTTextCSProcessingOptionsV1 processingOptions = new RESTTextCSProcessingOptionsV1();
+        processingOptions.setStrictTitles(strictTitles);
+        contentSpec.setProcessingOptions(processingOptions);
+
         createOrUpdateJSONContentSpecFromString(contentSpec, DatabaseOperation.CREATE, logDetails, "", RESTv1Constants.TEXT_URL,
                 loggerManager, false);
 
@@ -1072,11 +1077,11 @@ public class BaseRESTv1 extends BaseREST {
      *
      * @param id                The content spec id being updated.
      * @param contentSpecString The content spec string representation.
-     * @param permissive
+     * @param strictTitles
      * @param logDetails        The details about the changes that need to be logged.
      * @return
      */
-    protected String updateTEXTContentSpecFromString(final Integer id, final String contentSpecString, final Boolean permissive,
+    protected String updateTEXTContentSpecFromString(final Integer id, final String contentSpecString, final Boolean strictTitles,
             final RESTLogDetailsV1 logDetails) {
         final ErrorLoggerManager loggerManager = new ErrorLoggerManager();
         final RESTTextContentSpecV1 contentSpec = new RESTTextContentSpecV1();
@@ -1084,7 +1089,7 @@ public class BaseRESTv1 extends BaseREST {
         contentSpec.explicitSetText(contentSpecString);
 
         final RESTTextCSProcessingOptionsV1 processingOptions = new RESTTextCSProcessingOptionsV1();
-        processingOptions.setStrictTitles(permissive);
+        processingOptions.setStrictTitles(strictTitles);
         contentSpec.setProcessingOptions(processingOptions);
 
         createOrUpdateJSONContentSpecFromString(contentSpec, DatabaseOperation.UPDATE, logDetails, "", RESTv1Constants.TEXT_URL,

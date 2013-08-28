@@ -2537,22 +2537,22 @@ public class RESTv1 extends BaseRESTv1 implements RESTBaseInterfaceV1, RESTInter
     }
 
     @Override
-    public String updateTEXTContentSpec(final Integer id, final String contentSpec, final Boolean permissive, final String message,
+    public String updateTEXTContentSpec(final Integer id, final String contentSpec, final Boolean strictTitles, final String message,
             final Integer flag, final String userId) {
         if (id == null) throw new BadRequestException("The id parameter can not be null");
         if (contentSpec == null) throw new BadRequestException("The contentSpec parameter can not be null");
 
         final RESTLogDetailsV1 logDetails = generateLogDetails(message, flag, userId);
-        return updateTEXTContentSpecFromString(id, contentSpec, permissive, logDetails);
+        return updateTEXTContentSpecFromString(id, contentSpec, strictTitles, logDetails);
     }
 
     @Override
-    public String createTEXTContentSpec(final String contentSpec, final Boolean permissive, final String message, final Integer flag,
+    public String createTEXTContentSpec(final String contentSpec, final Boolean strictTitles, final String message, final Integer flag,
             final String userId) {
         if (contentSpec == null) throw new BadRequestException("The contentSpec parameter can not be null");
 
         final RESTLogDetailsV1 logDetails = generateLogDetails(message, flag, userId);
-        return createTEXTContentSpecFromString(contentSpec, permissive, logDetails);
+        return createTEXTContentSpecFromString(contentSpec, strictTitles, logDetails);
     }
 
     @Override
