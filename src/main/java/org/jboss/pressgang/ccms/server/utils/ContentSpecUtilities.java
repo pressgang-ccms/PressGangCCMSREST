@@ -21,6 +21,10 @@ public class ContentSpecUtilities extends org.jboss.pressgang.ccms.contentspec.u
     }
 
     public static String getContentSpecText(final Integer id, final Integer revision, final EntityManager entityManager) {
+        return getContentSpecText(id, revision, entityManager, true);
+    }
+
+    protected static String getContentSpecText(final Integer id, final Integer revision, final EntityManager entityManager, boolean fix) {
         final DBProviderFactory providerFactory = ProviderUtilities.getDBProviderFactory(entityManager);
         final ContentSpecWrapper entity;
         try {
@@ -34,10 +38,15 @@ public class ContentSpecUtilities extends org.jboss.pressgang.ccms.contentspec.u
         } catch (org.jboss.pressgang.ccms.provider.exception.InternalServerErrorException e) {
             throw new InternalServerErrorException(e);
         }
-        final CSTransformer transformer = new CSTransformer();
 
-        final org.jboss.pressgang.ccms.contentspec.ContentSpec contentSpec = transformer.transform(entity, providerFactory);
-        return contentSpec.toString();
+        if (fix && ((ContentSpec) entity.unwrap()).getFailedContentSpec() != null) {
+            return ((ContentSpec) entity.unwrap()).getFailedContentSpec();
+        } else {
+            final CSTransformer transformer = new CSTransformer();
+
+            final org.jboss.pressgang.ccms.contentspec.ContentSpec contentSpec = transformer.transform(entity, providerFactory);
+            return contentSpec.toString();
+        }
     }
 
     /**
@@ -56,7 +65,7 @@ public class ContentSpecUtilities extends org.jboss.pressgang.ccms.contentspec.u
             } else {
                 String cleanContentSpec = removeChecksumAndId(contentSpec.getFailedContentSpec());
                 final String serverContentSpec = getContentSpecText(contentSpec.getId(),
-                        contentSpec.getRevision() == null ? null : contentSpec.getRevision().intValue(), entityManager);
+                        contentSpec.getRevision() == null ? null : contentSpec.getRevision().intValue(), entityManager, false);
                 final String checksum = getContentSpecChecksum(serverContentSpec);
                 return CommonConstants.CS_CHECKSUM_TITLE + "=" + checksum + "\n" + CommonConstants.CS_ID_TITLE + "=" +
                         contentSpec.getId() + "\n" + cleanContentSpec;
