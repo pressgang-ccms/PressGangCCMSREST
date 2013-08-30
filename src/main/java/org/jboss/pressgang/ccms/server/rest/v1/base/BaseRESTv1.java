@@ -23,14 +23,12 @@ import java.io.IOException;
 import java.net.URI;
 import java.sql.BatchUpdateException;
 import java.sql.SQLException;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
 import java.util.Set;
 
-import difflib.DiffUtils;
-import difflib.Patch;
 import org.codehaus.jackson.map.ObjectMapper;
 import org.hibernate.envers.AuditReader;
 import org.hibernate.envers.AuditReaderFactory;
@@ -49,11 +47,11 @@ import org.jboss.pressgang.ccms.filter.utils.FilterUtilities;
 import org.jboss.pressgang.ccms.model.Filter;
 import org.jboss.pressgang.ccms.model.Topic;
 import org.jboss.pressgang.ccms.model.TopicSourceUrl;
+import org.jboss.pressgang.ccms.model.TopicToPropertyTag;
 import org.jboss.pressgang.ccms.model.User;
 import org.jboss.pressgang.ccms.model.base.AuditedEntity;
 import org.jboss.pressgang.ccms.model.contentspec.ContentSpec;
 import org.jboss.pressgang.ccms.model.exceptions.CustomConstraintViolationException;
-import org.jboss.pressgang.ccms.model.utils.EnversUtilities;
 import org.jboss.pressgang.ccms.provider.DBProviderFactory;
 import org.jboss.pressgang.ccms.provider.exception.ProviderException;
 import org.jboss.pressgang.ccms.provider.exception.UnauthorisedException;
@@ -70,6 +68,7 @@ import org.jboss.pressgang.ccms.rest.v1.entities.contentspec.RESTTextCSProcessin
 import org.jboss.pressgang.ccms.rest.v1.entities.contentspec.RESTTextContentSpecV1;
 import org.jboss.pressgang.ccms.rest.v1.expansion.ExpandDataTrunk;
 import org.jboss.pressgang.ccms.server.ejb.EnversLoggingBean;
+import org.jboss.pressgang.ccms.server.envers.LoggingRevisionEntity;
 import org.jboss.pressgang.ccms.server.rest.BaseREST;
 import org.jboss.pressgang.ccms.server.rest.DatabaseOperation;
 import org.jboss.pressgang.ccms.server.rest.v1.BlobConstantV1Factory;
@@ -92,10 +91,12 @@ import org.jboss.pressgang.ccms.server.rest.v1.TranslatedCSNodeV1Factory;
 import org.jboss.pressgang.ccms.server.rest.v1.TranslatedContentSpecV1Factory;
 import org.jboss.pressgang.ccms.server.rest.v1.TranslatedTopicV1Factory;
 import org.jboss.pressgang.ccms.server.rest.v1.UserV1Factory;
+import org.jboss.pressgang.ccms.server.utils.Constants;
 import org.jboss.pressgang.ccms.server.utils.EntityUtilities;
+import org.jboss.pressgang.ccms.server.utils.EnversUtilities;
 import org.jboss.pressgang.ccms.server.utils.ProviderUtilities;
 import org.jboss.pressgang.ccms.server.utils.TopicSourceURLTitleThread;
-import org.jboss.pressgang.ccms.utils.common.CollectionUtilities;
+import org.jboss.pressgang.ccms.utils.constants.CommonConstants;
 import org.jboss.resteasy.plugins.providers.atom.Content;
 import org.jboss.resteasy.plugins.providers.atom.Entry;
 import org.jboss.resteasy.plugins.providers.atom.Feed;
@@ -204,12 +205,14 @@ public class BaseRESTv1 extends BaseREST {
             feed.setTitle(title);
             feed.setUpdated(new Date());
 
+            final String docBuilderUrl = System.getProperty(Constants.DOCBUILDER_SYSTEM_PROPERTY);
+            final String uiUrl = System.getProperty(CommonConstants.PRESS_GANG_UI_SYSTEM_PROPERTY);
+
             if (topics.getItems() != null) {
                 for (final RESTTopicV1 topic : topics.returnItems()) {
-                    final RESTTopicV1 previousTopic = getJSONResource(Topic.class, topicFactory, topic.getId(), topic.getRevision() - 1,
-                            "");
-                    final String xml = topic.getXml();
-                    final String previousXml = previousTopic == null ? "" : previousTopic.getXml();
+                    final Topic topicEntity = getEntity(Topic.class, topic.getId(), topic.getRevision());
+                    final TopicToPropertyTag fixedUrlPropertyTag = topicEntity.getProperty(CommonConstants.FIXED_URL_PROP_TAG_ID);
+                    final List<Number> topicRevisions = EnversUtilities.getRevisions(entityManager, Topic.class, topic.getId());
 
                     final Entry entry = new Entry();
                     entry.setId(new URI(topic.getSelfLink()));
@@ -217,19 +220,58 @@ public class BaseRESTv1 extends BaseREST {
                     entry.setUpdated(topic.getLastModified());
                     entry.setPublished(topic.getCreated());
 
-                    if (xml != null) {
-                        final List<String> previousLines = Arrays.asList(previousXml.split("(\r)?\n"));
-                        final List<String> lines = Arrays.asList(xml.split("(\r)?\n"));
+                    final StringBuilder contentString = new StringBuilder("<html><head></head><body>");
 
-                        final Patch<String> patch = DiffUtils.diff(previousLines, lines);
-                        final List<String> patches = DiffUtils.generateUnifiedDiff(topic.getId() + ".xml", topic.getId() + ".xml",
-                                previousLines, patch, 1);
-
-                        final Content content = new Content();
-                        content.setType(MediaType.TEXT_PLAIN_TYPE);
-                        content.setText(CollectionUtilities.toSeperatedString(patches, "\r\n"));
-                        entry.setContent(content);
+                    // Add the rendered link
+                    if (uiUrl != null) {
+                        final String renderedUrl = uiUrl + (uiUrl.endsWith("/") ? "" : "/") + "#TopicRenderedView;" + topic.getId();
+                        contentString.append("<p>Rendered Link: <a href=\"").append(renderedUrl).append("\">").append(renderedUrl).append(
+                                "</a></p>");
                     }
+
+                    // Add the docbuilder links
+                    if (docBuilderUrl != null) {
+                        contentString.append("<p>DocBuilder Link(s):</p><ul>");
+
+                        final List<ContentSpec> contentSpecs = topicEntity.getContentSpecs(entityManager);
+                        for (final ContentSpec contentSpec : contentSpecs) {
+                            final StringBuilder url = new StringBuilder(docBuilderUrl + (docBuilderUrl.endsWith("/") ? "" : "/") +
+                                     + contentSpec.getId());
+
+                            if (fixedUrlPropertyTag != null) {
+                                url.append("#").append(fixedUrlPropertyTag.getValue());
+                            }
+
+                            contentString.append("<li><a href=\"").append(url).append("\">").append(url).append("</a></li>");
+                        }
+
+                        contentString.append("</ul>");
+                    }
+
+                    // Add the last 5 changes
+                    contentString.append("<p>Changes:</p><ul>\n");
+
+                    int count = 0;
+                    for (final Number revision : topicRevisions) {
+                        if (topicEntity.getRevision() != null && revision.intValue() > topicEntity.getRevision().intValue()) {
+                            continue;
+                        } else {
+                            count++;
+                            final LoggingRevisionEntity logEntity = EnversUtilities.getRevisionEntity(entityManager, topicEntity, revision);
+                            final Date logDate = new Date(logEntity.getTimestamp());
+                            contentString.append("<li>").append(new SimpleDateFormat(REST_DATE_FORMAT).format(logDate)).append(" - ")
+                                    .append(logEntity.getLogMessage() == null ? "" : logEntity.getLogMessage()).append("</li>");
+                        }
+
+                        if (count >= 5) break;
+                    }
+
+                    contentString.append("</ul></body></html>");
+
+                    final Content content = new Content();
+                    content.setType(MediaType.TEXT_HTML_TYPE);
+                    content.setText(contentString.toString());
+                    entry.setContent(content);
 
                     feed.getEntries().add(entry);
                 }
@@ -240,16 +282,6 @@ public class BaseRESTv1 extends BaseREST {
             log.error("There was an error creating the ATOM feed", ex);
             throw new InternalServerErrorException("There was an error creating the ATOM feed");
         }
-    }
-
-    /**
-     * Fix all the Links to a Topic in a HTML Page or general Link so that the URL's are Absolute, rather than Relative URL's.
-     *
-     * @param input The Input data to be fixed.
-     * @return The input data with all links fixed.
-     */
-    private String fixHrefs(final String input) {
-        return input.replaceAll("Topic\\.seam", uriInfo.getBaseUri().toString() + "/Topic.seam");
     }
 
     /**
