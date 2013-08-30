@@ -1290,7 +1290,9 @@ public class BaseRESTv1 extends BaseREST {
         if (success) {
             // Check that the id matches
             if (id != null && parser.getContentSpec() != null) {
-                if (!id.equals(parser.getContentSpec().getId())) {
+                if (parser.getContentSpec().getId() == null) {
+                    throw new BadRequestException("The Content Spec has no ID, but the request was to update an existing Content Spec.");
+                } else if (!id.equals(parser.getContentSpec().getId())) {
                     throw new BadRequestException("The Content Spec ID doesn't match the request ID.");
                 }
             } else if (parser.getContentSpec() != null) {
