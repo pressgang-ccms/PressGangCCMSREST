@@ -808,7 +808,6 @@ public class BaseRESTv1 extends BaseREST {
         assert dataObjectFactory != null : "The dataObjectFactory parameter can not be null";
 
         boolean usingRevisions = revision != null;
-        Number closestRevision = null;
 
         try {
             // Unmarshall the expand string into the ExpandDataTrunk object.
@@ -828,7 +827,7 @@ public class BaseRESTv1 extends BaseREST {
 
             // Create the REST representation of the topic
             final T restRepresentation = dataObjectFactory.createRESTEntityFromDBEntity(entity, getBaseUrl(), dataType, expandDataTrunk,
-                    closestRevision, true);
+                    entity.getRevision(), true);
 
             return restRepresentation;
         } catch (final Throwable e) {
@@ -887,6 +886,7 @@ public class BaseRESTv1 extends BaseREST {
                 // Set the entities last modified date to the information assoicated with the revision.
                 final Date revisionLastModified = reader.getRevisionDate(closestRevision);
                 entity.setLastModifiedDate(revisionLastModified);
+                entity.setRevision(closestRevision);
             } else {
                 entity = entityManager.find(type, id);
                 if (entity == null) throw new NotFoundException("No entity was found with the primary key " + id);
