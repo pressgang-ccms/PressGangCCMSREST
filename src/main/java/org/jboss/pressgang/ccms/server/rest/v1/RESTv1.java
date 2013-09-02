@@ -15,7 +15,6 @@ import java.util.Set;
 import org.hibernate.Session;
 import org.hibernate.search.FullTextSession;
 import org.hibernate.search.Search;
-import org.jboss.pressgang.ccms.contentspec.utils.CSTransformer;
 import org.jboss.pressgang.ccms.filter.BlobConstantFieldFilter;
 import org.jboss.pressgang.ccms.filter.CategoryFieldFilter;
 import org.jboss.pressgang.ccms.filter.ContentSpecFieldFilter;
@@ -2615,13 +2614,12 @@ public class RESTv1 extends BaseRESTv1 implements RESTBaseInterfaceV1, RESTInter
         final DBProviderFactory providerFactory = ProviderUtilities.getDBProviderFactory(entityManager);
         final CollectionWrapper<ContentSpecWrapper> contentSpecs = providerFactory.getProvider(
                 ContentSpecProvider.class).getContentSpecsWithQuery(query.toString());
-        final CSTransformer transformer = new CSTransformer();
 
         final HashMap<String, byte[]> files = new HashMap<String, byte[]>();
         try {
             for (final ContentSpecWrapper entity : contentSpecs.getItems()) {
-                final org.jboss.pressgang.ccms.contentspec.ContentSpec contentSpec = transformer.transform(entity, providerFactory);
-                files.put(contentSpec.getId() + ".contentspec", contentSpec.toString().getBytes("UTF-8"));
+                final String contentSpec = ContentSpecUtilities.getContentSpecText(entity.getId(), entity.getRevision(), entityManager);
+                files.put(entity.getId() + ".contentspec", contentSpec.getBytes("UTF-8"));
             }
 
             return ZipUtilities.createZip(files);
