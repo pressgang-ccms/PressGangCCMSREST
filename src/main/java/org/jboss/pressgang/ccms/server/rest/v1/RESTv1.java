@@ -73,8 +73,6 @@ import org.jboss.pressgang.ccms.model.contentspec.CSNode;
 import org.jboss.pressgang.ccms.model.contentspec.ContentSpec;
 import org.jboss.pressgang.ccms.model.contentspec.TranslatedCSNode;
 import org.jboss.pressgang.ccms.model.contentspec.TranslatedContentSpec;
-import org.jboss.pressgang.ccms.provider.ContentSpecProvider;
-import org.jboss.pressgang.ccms.provider.DBProviderFactory;
 import org.jboss.pressgang.ccms.rest.v1.collections.RESTBlobConstantCollectionV1;
 import org.jboss.pressgang.ccms.rest.v1.collections.RESTCategoryCollectionV1;
 import org.jboss.pressgang.ccms.rest.v1.collections.RESTFileCollectionV1;
@@ -127,15 +125,12 @@ import org.jboss.pressgang.ccms.rest.v1.jaxrsinterfaces.RESTInterfaceAdvancedV1;
 import org.jboss.pressgang.ccms.server.rest.v1.base.BaseRESTv1;
 import org.jboss.pressgang.ccms.server.utils.Constants;
 import org.jboss.pressgang.ccms.server.utils.ContentSpecUtilities;
-import org.jboss.pressgang.ccms.server.utils.ProviderUtilities;
 import org.jboss.pressgang.ccms.server.utils.TopicUtilities;
 import org.jboss.pressgang.ccms.utils.common.CollectionUtilities;
 import org.jboss.pressgang.ccms.utils.common.DocBookUtilities;
 import org.jboss.pressgang.ccms.utils.common.XMLUtilities;
 import org.jboss.pressgang.ccms.utils.common.ZipUtilities;
 import org.jboss.pressgang.ccms.utils.constants.CommonConstants;
-import org.jboss.pressgang.ccms.wrapper.ContentSpecWrapper;
-import org.jboss.pressgang.ccms.wrapper.collection.CollectionWrapper;
 import org.jboss.resteasy.plugins.providers.atom.Feed;
 import org.jboss.resteasy.specimpl.PathSegmentImpl;
 import org.jboss.resteasy.spi.BadRequestException;
@@ -2611,14 +2606,14 @@ public class RESTv1 extends BaseRESTv1 implements RESTBaseInterfaceV1, RESTInter
     public byte[] getZIPContentSpecsWithQuery(final PathSegment query) {
         response.getOutputHeaders().putSingle("Content-Disposition", "filename=ContentSpecs.zip");
 
-        final DBProviderFactory providerFactory = ProviderUtilities.getDBProviderFactory(entityManager);
-        final CollectionWrapper<ContentSpecWrapper> contentSpecs = providerFactory.getProvider(
-                ContentSpecProvider.class).getContentSpecsWithQuery(query.toString());
+        final CriteriaQuery<ContentSpec> contentSpecQuery = getEntitiesFromQuery(query.getMatrixParameters(),
+                new ContentSpecFilterQueryBuilder(entityManager), new ContentSpecFieldFilter());
+        final List<ContentSpec> contentSpecs = entityManager.createQuery(contentSpecQuery).getResultList();
 
         final HashMap<String, byte[]> files = new HashMap<String, byte[]>();
         try {
-            for (final ContentSpecWrapper entity : contentSpecs.getItems()) {
-                final String contentSpec = ContentSpecUtilities.getContentSpecText(entity.getId(), entity.getRevision(), entityManager);
+            for (final ContentSpec entity : contentSpecs) {
+                final String contentSpec = ContentSpecUtilities.getContentSpecText(entity.getId(), null, entityManager);
                 files.put(entity.getId() + ".contentspec", contentSpec.getBytes("UTF-8"));
             }
 
