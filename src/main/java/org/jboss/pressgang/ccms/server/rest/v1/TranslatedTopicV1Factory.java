@@ -218,10 +218,16 @@ public class TranslatedTopicV1Factory extends RESTDataObjectFactory<RESTTranslat
 
         if (dataObject.hasParameterSet(RESTTranslatedTopicV1.TRANSLATED_CSNODE_NAME)) {
             final RESTTranslatedCSNodeV1 restEntity = dataObject.getTranslatedCSNode();
-            final TranslatedCSNode dbEntity = entityManager.find(TranslatedCSNode.class, restEntity.getId());
-            if (dbEntity == null)
-                throw new BadRequestException("No TranslatedCSNode entity was found with the primary key " + restEntity.getId());
-            dbEntity.removeTranslatedTopicData(entity);
+            if (restEntity == null) {
+                if (entity.getTranslatedCSNode() != null) {
+                    entity.getTranslatedCSNode().removeTranslatedTopicData(entity);
+                }
+            } else {
+                final TranslatedCSNode dbEntity = entityManager.find(TranslatedCSNode.class, restEntity.getId());
+                if (dbEntity == null)
+                    throw new BadRequestException("No TranslatedCSNode entity was found with the primary key " + restEntity.getId());
+                dbEntity.addTranslatedTopicData(entity);
+            }
         }
 
         // One To Many - Add will create a child entity
