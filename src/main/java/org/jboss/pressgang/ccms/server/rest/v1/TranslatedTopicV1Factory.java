@@ -221,7 +221,7 @@ public class TranslatedTopicV1Factory extends RESTDataObjectFactory<RESTTranslat
             final TranslatedCSNode dbEntity = entityManager.find(TranslatedCSNode.class, restEntity.getId());
             if (dbEntity == null)
                 throw new BadRequestException("No TranslatedCSNode entity was found with the primary key " + restEntity.getId());
-            dbEntity.setTranslatedTopicData(entity);
+            dbEntity.removeTranslatedTopicData(entity);
         }
 
         // One To Many - Add will create a child entity
