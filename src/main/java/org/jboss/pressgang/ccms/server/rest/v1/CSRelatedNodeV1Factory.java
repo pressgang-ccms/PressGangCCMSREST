@@ -12,6 +12,7 @@ import org.jboss.pressgang.ccms.rest.v1.collections.join.RESTAssignedPropertyTag
 import org.jboss.pressgang.ccms.rest.v1.constants.RESTv1Constants;
 import org.jboss.pressgang.ccms.rest.v1.entities.base.RESTBaseEntityV1;
 import org.jboss.pressgang.ccms.rest.v1.entities.contentspec.RESTCSNodeV1;
+import org.jboss.pressgang.ccms.rest.v1.entities.contentspec.enums.RESTCSNodeRelationshipModeV1;
 import org.jboss.pressgang.ccms.rest.v1.entities.contentspec.enums.RESTCSNodeRelationshipTypeV1;
 import org.jboss.pressgang.ccms.rest.v1.entities.contentspec.enums.RESTCSNodeTypeV1;
 import org.jboss.pressgang.ccms.rest.v1.entities.contentspec.join.RESTCSRelatedNodeV1;
@@ -55,6 +56,7 @@ public class CSRelatedNodeV1Factory extends RESTDataObjectFactory<RESTCSRelatedN
         retValue.setAdditionalText(entity.getRelatedNode().getAdditionalText());
         retValue.setTargetId(entity.getRelatedNode().getCSNodeTargetId());
         retValue.setRelationshipType(RESTCSNodeRelationshipTypeV1.getRelationshipType(entity.getRelationshipType()));
+        retValue.setRelationshipMode(RESTCSNodeRelationshipModeV1.getRelationshipMode(entity.getRelationshipMode()));
         retValue.setCondition(entity.getRelatedNode().getCondition());
         retValue.setNodeType(RESTCSNodeTypeV1.getNodeType(entity.getRelatedNode().getCSNodeType()));
         retValue.setEntityId(entity.getRelatedNode().getEntityId());
@@ -106,6 +108,8 @@ public class CSRelatedNodeV1Factory extends RESTDataObjectFactory<RESTCSRelatedN
             entity.setRelationshipType(RESTCSNodeRelationshipTypeV1.getRelationshipTypeId(dataObject.getRelationshipType()));
         if (dataObject.hasParameterSet(RESTCSRelatedNodeV1.RELATIONSHIP_SORT_NAME))
             entity.setRelationshipSort(dataObject.getRelationshipSort());
+        if (dataObject.hasParameterSet(RESTCSRelatedNodeV1.RELATIONSHIP_MODE_NAME))
+            entity.setRelationshipMode(RESTCSNodeRelationshipModeV1.getRelationshipModeId(dataObject.getRelationshipMode()));
     }
 
     @Override
