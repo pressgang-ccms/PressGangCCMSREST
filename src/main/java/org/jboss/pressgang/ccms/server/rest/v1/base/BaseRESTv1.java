@@ -732,7 +732,7 @@ public class BaseRESTv1 extends BaseREST {
      */
     protected <T extends RESTBaseEntityV1<T, V, W>, U extends AuditedEntity, V extends RESTBaseCollectionV1<T, V, W>,
             W extends RESTBaseCollectionItemV1<T, V, W>> T getJSONResource(
-            final Class<U> type, final RESTDataObjectFactory<T, U, V, W> dataObjectFactory, final Object id, final String expand) {
+            final Class<U> type, final RESTDataObjectFactory<T, U, V, W> dataObjectFactory, final Integer id, final String expand) {
         return getJSONResource(type, dataObjectFactory, id, null, expand);
     }
 
@@ -749,7 +749,7 @@ public class BaseRESTv1 extends BaseREST {
      */
     protected <T extends RESTBaseEntityV1<T, V, W>, U extends AuditedEntity, V extends RESTBaseCollectionV1<T, V, W>,
             W extends RESTBaseCollectionItemV1<T, V, W>> T getJSONResource(
-            final Class<U> type, final RESTDataObjectFactory<T, U, V, W> dataObjectFactory, final Object id, final Number revision,
+            final Class<U> type, final RESTDataObjectFactory<T, U, V, W> dataObjectFactory, final Integer id, final Number revision,
             final String expand) {
         return getResource(type, dataObjectFactory, id, revision, expand, RESTv1Constants.JSON_URL);
     }
@@ -766,7 +766,7 @@ public class BaseRESTv1 extends BaseREST {
      */
     protected <T extends RESTBaseEntityV1<T, V, W>, U extends AuditedEntity, V extends RESTBaseCollectionV1<T, V, W>,
             W extends RESTBaseCollectionItemV1<T, V, W>> T getXMLResource(
-            final Class<U> type, final RESTDataObjectFactory<T, U, V, W> dataObjectFactory, final Object id, final String expand) {
+            final Class<U> type, final RESTDataObjectFactory<T, U, V, W> dataObjectFactory, final Integer id, final String expand) {
         return getXMLResource(type, dataObjectFactory, id, null, expand);
     }
 
@@ -783,7 +783,7 @@ public class BaseRESTv1 extends BaseREST {
      */
     protected <T extends RESTBaseEntityV1<T, V, W>, U extends AuditedEntity, V extends RESTBaseCollectionV1<T, V, W>,
             W extends RESTBaseCollectionItemV1<T, V, W>> T getXMLResource(
-            final Class<U> type, final RESTDataObjectFactory<T, U, V, W> dataObjectFactory, final Object id, final Number revision,
+            final Class<U> type, final RESTDataObjectFactory<T, U, V, W> dataObjectFactory, final Integer id, final Number revision,
             final String expand) {
         return getResource(type, dataObjectFactory, id, revision, expand, RESTv1Constants.XML_URL);
     }
@@ -801,7 +801,7 @@ public class BaseRESTv1 extends BaseREST {
      */
     private <T extends RESTBaseEntityV1<T, V, W>, U extends AuditedEntity, V extends RESTBaseCollectionV1<T, V, W>,
             W extends RESTBaseCollectionItemV1<T, V, W>> T getResource(
-            final Class<U> type, final RESTDataObjectFactory<T, U, V, W> dataObjectFactory, final Object id, final Number revision,
+            final Class<U> type, final RESTDataObjectFactory<T, U, V, W> dataObjectFactory, final Integer id, final Number revision,
             final String expand, final String dataType) {
         assert type != null : "The type parameter can not be null";
         assert id != null : "The id parameter can not be null";
@@ -863,16 +863,13 @@ public class BaseRESTv1 extends BaseREST {
      * @param <U>      The Entity class.
      * @return The Entity that matches the type, ID and Revision
      */
-    protected <U extends AuditedEntity> U getEntity(final Class<U> type, final Object id, final Number revision) {
+    protected <U extends AuditedEntity> U getEntity(final Class<U> type, final Integer id, final Number revision) {
         try {
             final U entity;
 
             if (revision != null) {
-                // Find the closest revision that is less then the revision specified.
                 final AuditReader reader = AuditReaderFactory.get(entityManager);
-                final Number closestRevision = (Number) reader.createQuery().forRevisionsOfEntity(type, false, true).addProjection(
-                        AuditEntity.revisionNumber().max()).add(AuditEntity.id().eq(id)).add(
-                        AuditEntity.revisionNumber().le(revision)).getSingleResult();
+                final Number closestRevision = EnversUtilities.getClosestRevision(reader, type, id, revision);
 
                 if (closestRevision == null)
                     throw new NotFoundException("No entity was found with the primary key " + id + ", revision " + revision);
