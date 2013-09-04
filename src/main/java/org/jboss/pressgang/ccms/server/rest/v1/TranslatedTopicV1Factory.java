@@ -223,6 +223,7 @@ public class TranslatedTopicV1Factory extends RESTDataObjectFactory<RESTTranslat
                     if (dbEntity == null)
                         throw new BadRequestException("No TranslatedCSNode entity was found with the primary key " + restEntity.getId());
                     dbEntity.setTranslatedTopic(translatedTopic);
+                    translatedTopic.setTranslatedCSNode(dbEntity);
                 }
             }
         }
