@@ -31,6 +31,8 @@ import org.jboss.resteasy.spi.BadRequestException;
 @ApplicationScoped
 public class TranslatedCSNodeV1Factory extends RESTDataObjectFactory<RESTTranslatedCSNodeV1, TranslatedCSNode,
         RESTTranslatedCSNodeCollectionV1, RESTTranslatedCSNodeCollectionItemV1> {
+    private static final List<TranslatedTopicData> EMPTY_LIST = new ArrayList<TranslatedTopicData>();
+
     @Inject
     protected CSNodeV1Factory csNodeFactory;
     @Inject
@@ -95,11 +97,12 @@ public class TranslatedCSNodeV1Factory extends RESTDataObjectFactory<RESTTransla
 
         // TRANSLATED TOPICS
         if (expand != null && expand.contains(RESTTranslatedCSNodeV1.TRANSLATED_TOPICS_NAME)) {
+            final List<TranslatedTopicData> translatedTopicDatas = entity.getTranslatedTopic() == null ? EMPTY_LIST : entity
+                    .getTranslatedTopic().getTranslatedTopicDataList();
             retValue.setTranslatedTopics_OTM(
                     RESTDataObjectCollectionFactory.create(RESTTranslatedTopicCollectionV1.class, translatedTopicFactory,
-                            new ArrayList<TranslatedTopicData>(entity.getTranslatedTopic().getTranslatedTopicDataList()),
-                            RESTTranslatedCSNodeV1.TRANSLATED_TOPICS_NAME, dataType, expand,
-                            baseUrl, revision, true, entityManager));
+                            new ArrayList<TranslatedTopicData>(translatedTopicDatas), RESTTranslatedCSNodeV1.TRANSLATED_TOPICS_NAME,
+                            dataType, expand, baseUrl, revision, true, entityManager));
         }
 
         retValue.setLinks(baseUrl, RESTv1Constants.CONTENT_SPEC_TRANSLATED_NODE_URL_NAME, dataType, retValue.getId());
@@ -190,8 +193,8 @@ public class TranslatedCSNodeV1Factory extends RESTDataObjectFactory<RESTTransla
                 if (restEntityItem.returnIsAddItem()) {
                     final TranslatedTopicData dbEntity = RESTv1Utilities.findEntity(entityManager, entityCache, restEntity,
                             TranslatedTopicData.class);
-                    if (dbEntity == null) throw new BadRequestException(
-                            "No TranslatedTopicData entity was found with the primary key " + restEntity.getId());
+                    if (dbEntity == null)
+                        throw new BadRequestException("No TranslatedTopicData entity was found with the primary key " + restEntity.getId());
 
                     translatedTopicFactory.syncDBEntityWithRESTEntitySecondPass(dbEntity, restEntity);
                 }
