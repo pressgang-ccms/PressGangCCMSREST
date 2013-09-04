@@ -31,8 +31,6 @@ import org.jboss.resteasy.spi.BadRequestException;
 @ApplicationScoped
 public class TranslatedCSNodeV1Factory extends RESTDataObjectFactory<RESTTranslatedCSNodeV1, TranslatedCSNode,
         RESTTranslatedCSNodeCollectionV1, RESTTranslatedCSNodeCollectionItemV1> {
-    private static final List<TranslatedTopicData> EMPTY_LIST = new ArrayList<TranslatedTopicData>();
-
     @Inject
     protected CSNodeV1Factory csNodeFactory;
     @Inject
@@ -97,11 +95,9 @@ public class TranslatedCSNodeV1Factory extends RESTDataObjectFactory<RESTTransla
 
         // TRANSLATED TOPICS
         if (expand != null && expand.contains(RESTTranslatedCSNodeV1.TRANSLATED_TOPICS_NAME)) {
-            final List<TranslatedTopicData> translatedTopicDatas = entity.getTranslatedTopic() == null ? EMPTY_LIST : entity
-                    .getTranslatedTopic().getTranslatedTopicDataList();
             retValue.setTranslatedTopics_OTM(
                     RESTDataObjectCollectionFactory.create(RESTTranslatedTopicCollectionV1.class, translatedTopicFactory,
-                            new ArrayList<TranslatedTopicData>(translatedTopicDatas), RESTTranslatedCSNodeV1.TRANSLATED_TOPICS_NAME,
+                            new ArrayList<TranslatedTopicData>(entity.getTranslatedTopicDatas()), RESTTranslatedCSNodeV1.TRANSLATED_TOPICS_NAME,
                             dataType, expand, baseUrl, revision, true, entityManager));
         }
 
