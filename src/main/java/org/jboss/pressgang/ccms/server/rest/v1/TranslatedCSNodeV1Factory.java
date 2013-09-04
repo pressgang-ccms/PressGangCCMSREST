@@ -97,7 +97,7 @@ public class TranslatedCSNodeV1Factory extends RESTDataObjectFactory<RESTTransla
         if (expand != null && expand.contains(RESTTranslatedCSNodeV1.TRANSLATED_TOPICS_NAME)) {
             retValue.setTranslatedTopics_OTM(
                     RESTDataObjectCollectionFactory.create(RESTTranslatedTopicCollectionV1.class, translatedTopicFactory,
-                            new ArrayList<TranslatedTopicData>(entity.getTranslatedTopicDatas()),
+                            new ArrayList<TranslatedTopicData>(entity.getTranslatedTopic().getTranslatedTopicDataList()),
                             RESTTranslatedCSNodeV1.TRANSLATED_TOPICS_NAME, dataType, expand,
                             baseUrl, revision, true, entityManager));
         }
@@ -142,28 +142,6 @@ public class TranslatedCSNodeV1Factory extends RESTDataObjectFactory<RESTTransla
                                     "TranslatedCSNode " + entity.getId());
 
                     translatedCSNodeStringFactory.updateDBEntityFromRESTEntity(dbEntity, restEntity);
-                }
-            }
-        }
-
-        if (dataObject.hasParameterSet(
-                RESTTranslatedCSNodeV1.TRANSLATED_TOPICS_NAME) && dataObject.getTranslatedTopics_OTM() != null && dataObject
-                .getTranslatedTopics_OTM().getItems() != null) {
-            dataObject.getTranslatedTopics_OTM().removeInvalidChangeItemRequests();
-
-            for (final RESTTranslatedTopicCollectionItemV1 restEntityItem : dataObject.getTranslatedTopics_OTM().getItems()) {
-                final RESTTranslatedTopicV1 restEntity = restEntityItem.getItem();
-
-                if (restEntityItem.returnIsRemoveItem()) {
-                    final TranslatedTopicData dbEntity = entityManager.find(TranslatedTopicData.class, restEntity.getId());
-                    if (dbEntity == null) throw new BadRequestException(
-                            "No TranslatedTopicData entity was found with the primary key " + restEntity.getId());
-
-                    entity.removeTranslatedTopicData(dbEntity);
-                    entityManager.remove(dbEntity);
-                } else if (restEntityItem.returnIsAddItem()) {
-                    final TranslatedTopicData dbEntity = translatedTopicFactory.createDBEntityFromRESTEntity(restEntity);
-                    entity.addTranslatedTopicData(dbEntity);
                 }
             }
         }

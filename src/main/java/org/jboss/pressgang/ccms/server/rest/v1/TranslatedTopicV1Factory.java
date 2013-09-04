@@ -2,7 +2,10 @@ package org.jboss.pressgang.ccms.server.rest.v1;
 
 import javax.enterprise.context.ApplicationScoped;
 import javax.inject.Inject;
-import javax.persistence.Query;
+import javax.persistence.criteria.CriteriaBuilder;
+import javax.persistence.criteria.CriteriaQuery;
+import javax.persistence.criteria.Predicate;
+import javax.persistence.criteria.Root;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -80,7 +83,7 @@ public class TranslatedTopicV1Factory extends RESTDataObjectFactory<RESTTranslat
         retValue.setTopicRevision(entity.getTranslatedTopic().getTopicRevision());
         retValue.setContainsFuzzyTranslation(entity.containsFuzzyTranslation());
         retValue.setXmlDoctype(RESTXMLDoctype.getXMLDoctype(entity.getTranslatedTopic().getEnversTopic(entityManager).getXmlDoctype()));
-        retValue.setTranslatedXMLCondition(entity.getTranslatedXMLCondition());
+        retValue.setTranslatedXMLCondition(entity.getTranslatedTopic().getTranslatedXMLCondition());
 
         // Get the title from the XML or if the XML is null then use the original topics title.
         String title = DocBookUtilities.findTitle(entity.getTranslatedXml());
@@ -170,9 +173,9 @@ public class TranslatedTopicV1Factory extends RESTDataObjectFactory<RESTTranslat
         }
 
         // TRANSLATED CS NODE
-        if (expand != null && expand.contains(RESTTranslatedTopicV1.TRANSLATED_CSNODE_NAME) && entity.getTranslatedCSNode() != null) {
+        if (expand != null && expand.contains(RESTTranslatedTopicV1.TRANSLATED_CSNODE_NAME) && entity.getTranslatedTopic().getTranslatedCSNode() != null) {
             retValue.setTranslatedCSNode(
-                    translatedCSNodeFactory.createRESTEntityFromDBEntity(entity.getTranslatedCSNode(), baseUrl, dataType,
+                    translatedCSNodeFactory.createRESTEntityFromDBEntity(entity.getTranslatedTopic().getTranslatedCSNode(), baseUrl, dataType,
                             expand.get(RESTTranslatedTopicV1.TRANSLATED_CSNODE_NAME), revision, true));
         }
 
@@ -190,10 +193,20 @@ public class TranslatedTopicV1Factory extends RESTDataObjectFactory<RESTTranslat
         TranslatedTopic translatedTopic = entity.getTranslatedTopic();
         if (translatedTopic == null) {
             try {
-                final Query query = entityManager.createQuery(
-                        TranslatedTopic.SELECT_ALL_QUERY + " WHERE translatedTopic.topicId=" + dataObject.getTopicId() + " AND " +
-                                "translatedTopic.topicRevision=" + dataObject.getTopicRevision());
-                translatedTopic = (TranslatedTopic) query.getSingleResult();
+                final CriteriaBuilder builder = entityManager.getCriteriaBuilder();
+                final CriteriaQuery<TranslatedTopic> query = builder.createQuery(TranslatedTopic.class);
+                final Root<TranslatedTopic> root = query.from(TranslatedTopic.class);
+                final Predicate topicIdMatches = builder.equal(root.get("topicId"), dataObject.getTopicId());
+                final Predicate topicRevMatches = builder.equal(root.get("topicRevision"), dataObject.getTopicRevision());
+                if (dataObject.getTranslatedCSNode() == null) {
+                    final Predicate translatedCSNodeNull = builder.isNull(root.get("translatedCSNode"));
+                    query.where(builder.and(topicIdMatches, topicRevMatches, translatedCSNodeNull));
+                } else {
+                    final Predicate translatedCSNodeMatches = builder.equal(root.get("translatedCSNode").get("translatedCSNodeId"),
+                            dataObject.getTranslatedCSNode().getId());
+                    query.where(builder.and(topicIdMatches, topicRevMatches, translatedCSNodeMatches));
+                }
+                translatedTopic = entityManager.createQuery(query).getSingleResult();
             } catch (Exception e) {
                 translatedTopic = new TranslatedTopic();
 
@@ -201,6 +214,16 @@ public class TranslatedTopicV1Factory extends RESTDataObjectFactory<RESTTranslat
                 if (dataObject.hasParameterSet(RESTTranslatedTopicV1.TOPICID_NAME)) translatedTopic.setTopicId(dataObject.getTopicId());
                 if (dataObject.hasParameterSet(RESTTranslatedTopicV1.TOPICREVISION_NAME))
                     translatedTopic.setTopicRevision(dataObject.getTopicRevision());
+                if (dataObject.hasParameterSet(RESTTranslatedTopicV1.TRANSLATED_XML_CONDITION))
+                    translatedTopic.setTranslatedXMLCondition(dataObject.getTranslatedXMLCondition());
+
+                if (dataObject.hasParameterSet(RESTTranslatedTopicV1.TRANSLATED_CSNODE_NAME)) {
+                    final RESTTranslatedCSNodeV1 restEntity = dataObject.getTranslatedCSNode();
+                    final TranslatedCSNode dbEntity = entityManager.find(TranslatedCSNode.class, restEntity.getId());
+                    if (dbEntity == null)
+                        throw new BadRequestException("No TranslatedCSNode entity was found with the primary key " + restEntity.getId());
+                    dbEntity.setTranslatedTopic(translatedTopic);
+                }
             }
         }
 
@@ -211,24 +234,8 @@ public class TranslatedTopicV1Factory extends RESTDataObjectFactory<RESTTranslat
         if (dataObject.hasParameterSet(RESTTranslatedTopicV1.LOCALE_NAME)) entity.setTranslationLocale(dataObject.getLocale());
         if (dataObject.hasParameterSet(RESTTranslatedTopicV1.TRANSLATIONPERCENTAGE_NAME))
             entity.setTranslationPercentage(dataObject.getTranslationPercentage());
-        if (dataObject.hasParameterSet(RESTTranslatedTopicV1.TRANSLATED_XML_CONDITION))
-            entity.setTranslatedXMLCondition(dataObject.getTranslatedXMLCondition());
 
         translatedTopic.getTranslatedTopicDatas().add(entity);
-
-        if (dataObject.hasParameterSet(RESTTranslatedTopicV1.TRANSLATED_CSNODE_NAME)) {
-            final RESTTranslatedCSNodeV1 restEntity = dataObject.getTranslatedCSNode();
-            if (restEntity == null) {
-                if (entity.getTranslatedCSNode() != null) {
-                    entity.getTranslatedCSNode().removeTranslatedTopicData(entity);
-                }
-            } else {
-                final TranslatedCSNode dbEntity = entityManager.find(TranslatedCSNode.class, restEntity.getId());
-                if (dbEntity == null)
-                    throw new BadRequestException("No TranslatedCSNode entity was found with the primary key " + restEntity.getId());
-                dbEntity.addTranslatedTopicData(entity);
-            }
-        }
 
         // One To Many - Add will create a child entity
         if (dataObject.hasParameterSet(
