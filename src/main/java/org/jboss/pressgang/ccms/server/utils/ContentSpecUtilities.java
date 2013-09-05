@@ -40,7 +40,7 @@ public class ContentSpecUtilities extends org.jboss.pressgang.ccms.contentspec.u
         }
 
         if (fix && ((ContentSpec) entity.unwrap()).getFailedContentSpec() != null) {
-            return ((ContentSpec) entity.unwrap()).getFailedContentSpec();
+            return fixFailedContentSpec(entityManager, (ContentSpec) entity.unwrap());
         } else {
             final CSTransformer transformer = new CSTransformer();
 
