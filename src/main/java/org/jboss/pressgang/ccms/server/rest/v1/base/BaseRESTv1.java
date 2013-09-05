@@ -1190,6 +1190,7 @@ public class BaseRESTv1 extends BaseREST {
                 final DBProviderFactory providerFactory = ProviderUtilities.getDBProviderFactory(entityManager, transactionManager,
                         enversLoggingBean);
                 final ProcessingOptions processingOptions = new ProcessingOptions();
+                processingOptions.setIgnoreChecksum(true);
                 if (restEntity.getProcessingOptions() != null && restEntity.getProcessingOptions().getStrictTitles() != null) {
                     processingOptions.setStrictTitles(restEntity.getProcessingOptions().getStrictTitles());
                 }

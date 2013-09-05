@@ -38,19 +38,16 @@ public class ContentSpecUtilities extends org.jboss.pressgang.ccms.contentspec.u
             throw new InternalServerErrorException(e);
         }
 
-        final CSTransformer transformer = new CSTransformer();
-        final org.jboss.pressgang.ccms.contentspec.ContentSpec contentSpec = transformer.transform(entity, providerFactory);
-
         if (fix && ((ContentSpec) entity.unwrap()).getFailedContentSpec() != null) {
-            return fixFailedContentSpec(entity, contentSpec.toString());
+            return fixFailedContentSpec(entity, null, false);
         } else {
-            return contentSpec.toString();
+            final CSTransformer transformer = new CSTransformer();
+            final org.jboss.pressgang.ccms.contentspec.ContentSpec contentSpec = transformer.transform(entity, providerFactory, false);
+            return contentSpec.toString(false);
         }
     }
 
-    public static final String fixFailedContentSpec(final EntityManager entityManager, final ContentSpec contentSpec) {
-        final String serverContentSpec = getContentSpecText(contentSpec.getId(),
-                contentSpec.getRevision() == null ? null : contentSpec.getRevision().intValue(), entityManager, false);
-        return fixFailedContentSpec(contentSpec.getId(), contentSpec.getFailedContentSpec(), serverContentSpec);
+    public static final String fixFailedContentSpec(final ContentSpec contentSpec) {
+        return fixFailedContentSpec(contentSpec.getId(), contentSpec.getFailedContentSpec(), null, false);
     }
 }
