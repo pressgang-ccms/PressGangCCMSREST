@@ -60,6 +60,7 @@ public class ContentSpecV1Factory extends RESTDataObjectFactory<RESTContentSpecV
         expandOptions.add(RESTContentSpecV1.PROPERTIES_NAME);
         expandOptions.add(RESTContentSpecV1.BOOK_TAGS_NAME);
         expandOptions.add(RESTContentSpecV1.TAGS_NAME);
+        expandOptions.add(RESTContentSpecV1.TRANSLATED_CONTENT_SPECS_NAME);
         if (revision == null) expandOptions.add(RESTBaseEntityV1.REVISIONS_NAME);
         retValue.setExpand(expandOptions);
 
