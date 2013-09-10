@@ -8,12 +8,13 @@
     </parent>
     <groupId>org.jboss.pressgang.ccms</groupId>
     <artifactId>pressgang-ccms-server</artifactId>
-    <version>1.1-SNAPSHOT</version>
+    <version>1.1.1-SNAPSHOT</version>
     <name>PressGang CCMS Server</name>
     <packaging>war</packaging>
 
     <properties>
         <pressgang.ccms.version>1.1-SNAPSHOT</pressgang.ccms.version>
+        <pressgang.ccms.contentspec.version>1.1.1-SNAPSHOT</pressgang.ccms.contentspec.version>
         <jboss.bom.version>1.0.2.Final</jboss.bom.version>
         <jboss.spec.verison>3.0.1.Final</jboss.spec.verison>
         <jbossasplugin.version>7.1.1.Final</jbossasplugin.version>
@@ -23,7 +24,7 @@
         <resteasy.version>2.3.2.Final</resteasy.version>
         <log4j.version>1.2.16</log4j.version>
         <slf4j.version>1.6.4</slf4j.version>
-        <csprocessor.version>0.1.0-SNAPSHOT</csprocessor.version>
+        <csprocessor.version>0.1.1-SNAPSHOT</csprocessor.version>
         <j2bugzilla.version>1.1-SNAPSHOT</j2bugzilla.version>
         <htmlcleaner.version>2.2</htmlcleaner.version>
         <arquillian.version>1.0.3.Final</arquillian.version>
@@ -236,7 +237,7 @@
         <dependency>
             <groupId>org.jboss.pressgang.ccms</groupId>
             <artifactId>pressgang-ccms-contentspec</artifactId>
-            <version>${pressgang.ccms.version}</version>
+            <version>${pressgang.ccms.contentspec.version}</version>
         </dependency>
         <dependency>
             <groupId>org.jboss.pressgang.ccms</groupId>
