@@ -82,7 +82,7 @@ public class TeiidBugLinkStrategy extends BugzillaBugLinkStrategy {
         }
     }
 
-    protected int getProductId(final String product) throws SQLException {
+    protected Integer getProductId(final String product) throws SQLException {
         final PreparedStatement statement = connection.prepareStatement(
                 "SELECT id FROM Bugzilla.products products WHERE products.name = ?");
         statement.setString(1, product);
