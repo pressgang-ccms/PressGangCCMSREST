@@ -133,28 +133,28 @@ public class TranslatedTopicV1Factory extends RESTDataObjectFactory<RESTTranslat
         if (expand != null && expand.contains(RESTTranslatedTopicV1.OUTGOING_NAME)) {
             retValue.setOutgoingTranslatedRelationships(RESTDataObjectCollectionFactory.create(RESTTranslatedTopicCollectionV1.class, this,
                     entity.getOutgoingRelatedTranslatedTopicData(entityManager), RESTTranslatedTopicV1.OUTGOING_NAME, dataType, expand,
-                    baseUrl, entity.getTranslatedTopic().getTopicRevision(), true, entityManager));
+                    baseUrl, revision, true, entityManager));
         }
 
         // INCOMING RELATIONSHIPS
         if (expand != null && expand.contains(RESTTranslatedTopicV1.INCOMING_NAME)) {
             retValue.setIncomingTranslatedRelationships(RESTDataObjectCollectionFactory.create(RESTTranslatedTopicCollectionV1.class, this,
                     entity.getIncomingRelatedTranslatedTopicData(entityManager), RESTTranslatedTopicV1.INCOMING_NAME, dataType, expand,
-                    baseUrl, entity.getTranslatedTopic().getTopicRevision(), true, entityManager));
+                    baseUrl, revision, true, entityManager));
         }
 
         // ALL OUTGOING RELATIONSHIPS (includes dummy topics)
         if (expand != null && expand.contains(RESTTranslatedTopicV1.ALL_LATEST_OUTGOING_NAME)) {
             retValue.setOutgoingRelationships(RESTDataObjectCollectionFactory.create(RESTTranslatedTopicCollectionV1.class, this,
                     entity.getOutgoingDummyFilledRelatedTranslatedTopicDatas(entityManager), RESTTranslatedTopicV1.ALL_LATEST_OUTGOING_NAME,
-                    dataType, expand, baseUrl, entity.getTranslatedTopic().getTopicRevision(), true, entityManager));
+                    dataType, expand, baseUrl, revision, true, entityManager));
         }
 
         // ALL INCOMING RELATIONSHIPS (includes dummy topics)
         if (expand != null && expand.contains(RESTTranslatedTopicV1.ALL_LATEST_INCOMING_NAME)) {
             retValue.setIncomingRelationships(RESTDataObjectCollectionFactory.create(RESTTranslatedTopicCollectionV1.class, this,
                     entity.getIncomingDummyFilledRelatedTranslatedTopicDatas(entityManager), RESTTranslatedTopicV1.ALL_LATEST_INCOMING_NAME,
-                    dataType, expand, baseUrl, entity.getTranslatedTopic().getTopicRevision(), true, entityManager));
+                    dataType, expand, baseUrl, revision, true, entityManager));
         }
 
         // SOURCE URLS
