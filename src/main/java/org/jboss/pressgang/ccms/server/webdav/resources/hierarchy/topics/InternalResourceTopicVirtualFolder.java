@@ -1,6 +1,5 @@
 package org.jboss.pressgang.ccms.server.webdav.resources.hierarchy.topics;
 
-import javax.annotation.Nullable;
 import javax.naming.NamingException;
 import javax.persistence.EntityManager;
 import javax.persistence.EntityManagerFactory;
@@ -17,6 +16,7 @@ import org.jboss.pressgang.ccms.server.webdav.managers.CompatibilityManager;
 import org.jboss.pressgang.ccms.server.webdav.resources.InternalResource;
 import org.jboss.pressgang.ccms.server.webdav.resources.MultiStatusReturnValue;
 import org.jboss.pressgang.ccms.server.webdav.utils.MathUtils;
+import org.jetbrains.annotations.Nullable;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

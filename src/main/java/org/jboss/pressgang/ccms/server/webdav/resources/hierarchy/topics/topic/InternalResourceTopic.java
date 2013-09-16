@@ -1,6 +1,5 @@
 package org.jboss.pressgang.ccms.server.webdav.resources.hierarchy.topics.topic;
 
-import javax.annotation.Nullable;
 import javax.naming.NamingException;
 import javax.persistence.EntityManager;
 import javax.persistence.EntityManagerFactory;
@@ -22,6 +21,7 @@ import org.jboss.pressgang.ccms.server.webdav.resources.InternalResource;
 import org.jboss.pressgang.ccms.server.webdav.resources.MultiStatusReturnValue;
 import org.jboss.pressgang.ccms.server.webdav.resources.hierarchy.topics.topic.fields.InternalResourceTempTopicFile;
 import org.jboss.pressgang.ccms.server.webdav.resources.hierarchy.topics.topic.fields.InternalResourceTopicContent;
+import org.jetbrains.annotations.Nullable;
 
 /**
  * Represents the available fields and temporary files associated with a topic.

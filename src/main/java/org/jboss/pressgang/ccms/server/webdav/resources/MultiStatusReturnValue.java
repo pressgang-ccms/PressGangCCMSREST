@@ -1,8 +1,7 @@
 package org.jboss.pressgang.ccms.server.webdav.resources;
 
-import javax.annotation.Nullable;
-
 import net.java.dev.webdav.jaxrs.xml.elements.MultiStatus;
+import org.jetbrains.annotations.Nullable;
 
 /**
  * A wrapper that contains the HTTP return code, and the returned MultiStatus.

@@ -1,14 +1,14 @@
 package org.jboss.pressgang.ccms.server.webdav.managers;
 
-import javax.annotation.Nullable;
 import javax.enterprise.context.ApplicationScoped;
 import javax.validation.constraints.NotNull;
-import java.util.*;
+import java.util.Arrays;
+import java.util.Calendar;
+import java.util.Date;
 import java.util.concurrent.TimeUnit;
 
 import com.google.common.cache.Cache;
 import com.google.common.cache.CacheBuilder;
-import com.google.common.cache.LoadingCache;
 import org.jboss.pressgang.ccms.server.webdav.constants.WebDavConstants;
 
 /**

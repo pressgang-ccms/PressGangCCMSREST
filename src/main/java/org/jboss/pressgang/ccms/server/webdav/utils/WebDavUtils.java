@@ -1,8 +1,9 @@
 package org.jboss.pressgang.ccms.server.webdav.utils;
 
-import javax.annotation.Nullable;
 import javax.servlet.http.HttpServletRequest;
 import javax.validation.constraints.NotNull;
+
+import org.jetbrains.annotations.Nullable;
 
 /**
  * Some util methods relating to the WebDav server.
