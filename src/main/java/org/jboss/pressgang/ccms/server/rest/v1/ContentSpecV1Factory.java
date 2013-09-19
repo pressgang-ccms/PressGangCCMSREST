@@ -11,6 +11,7 @@ import org.jboss.pressgang.ccms.model.contentspec.CSNode;
 import org.jboss.pressgang.ccms.model.contentspec.ContentSpec;
 import org.jboss.pressgang.ccms.model.contentspec.ContentSpecToPropertyTag;
 import org.jboss.pressgang.ccms.rest.v1.collections.RESTTagCollectionV1;
+import org.jboss.pressgang.ccms.rest.v1.collections.RESTTopicCollectionV1;
 import org.jboss.pressgang.ccms.rest.v1.collections.contentspec.RESTCSNodeCollectionV1;
 import org.jboss.pressgang.ccms.rest.v1.collections.contentspec.RESTContentSpecCollectionV1;
 import org.jboss.pressgang.ccms.rest.v1.collections.contentspec.RESTTranslatedContentSpecCollectionV1;
@@ -45,6 +46,8 @@ public class ContentSpecV1Factory extends RESTDataObjectFactory<RESTContentSpecV
     protected TranslatedContentSpecV1Factory translatedContentSpecFactory;
     @Inject
     protected TagV1Factory tagFactory;
+    @Inject
+    protected TopicV1Factory topicFactory;
 
     @Override
     public RESTContentSpecV1 createRESTEntityFromDBEntityInternal(final ContentSpec entity, final String baseUrl, final String dataType,
@@ -60,6 +63,7 @@ public class ContentSpecV1Factory extends RESTDataObjectFactory<RESTContentSpecV
         expandOptions.add(RESTContentSpecV1.PROPERTIES_NAME);
         expandOptions.add(RESTContentSpecV1.BOOK_TAGS_NAME);
         expandOptions.add(RESTContentSpecV1.TAGS_NAME);
+        expandOptions.add(RESTContentSpecV1.TOPICS_NAME);
         expandOptions.add(RESTContentSpecV1.TRANSLATED_CONTENT_SPECS_NAME);
         if (revision == null) expandOptions.add(RESTBaseEntityV1.REVISIONS_NAME);
         retValue.setExpand(expandOptions);
@@ -91,8 +95,8 @@ public class ContentSpecV1Factory extends RESTDataObjectFactory<RESTContentSpecV
         if (expand != null && expand.contains(RESTContentSpecV1.PROPERTIES_NAME)) {
             retValue.setProperties(
                     RESTDataObjectCollectionFactory.create(RESTAssignedPropertyTagCollectionV1.class, contentSpecPropertyTagFactory,
-                            entity.getPropertyTagsList(), RESTContentSpecV1.PROPERTIES_NAME, dataType, expand, baseUrl,
-                            revision, entityManager));
+                            entity.getPropertyTagsList(), RESTContentSpecV1.PROPERTIES_NAME, dataType, expand, baseUrl, revision,
+                            entityManager));
         }
 
         // BOOK TAGS
@@ -113,6 +117,13 @@ public class ContentSpecV1Factory extends RESTDataObjectFactory<RESTContentSpecV
                     RESTDataObjectCollectionFactory.create(RESTTranslatedContentSpecCollectionV1.class, translatedContentSpecFactory,
                             entity.getTranslatedContentSpecs(entityManager, revision), RESTContentSpecV1.TRANSLATED_CONTENT_SPECS_NAME,
                             dataType, expand, baseUrl, entityManager));
+        }
+
+        // TOPICS
+        if (expand != null && expand.contains(RESTContentSpecV1.TOPICS_NAME)) {
+            retValue.setTopics(
+                    RESTDataObjectCollectionFactory.create(RESTTopicCollectionV1.class, topicFactory, entity.getTopics(entityManager),
+                            RESTContentSpecV1.TOPICS_NAME, dataType, expand, baseUrl, entityManager));
         }
 
         retValue.setLinks(baseUrl, RESTv1Constants.CONTENT_SPEC_URL_NAME, dataType, retValue.getId());

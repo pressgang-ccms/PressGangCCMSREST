@@ -32,6 +32,7 @@ import org.jboss.pressgang.ccms.filter.TagFieldFilter;
 import org.jboss.pressgang.ccms.filter.TopicFieldFilter;
 import org.jboss.pressgang.ccms.filter.TranslatedContentSpecFieldFilter;
 import org.jboss.pressgang.ccms.filter.TranslatedContentSpecNodeFieldFilter;
+import org.jboss.pressgang.ccms.filter.TranslatedTopicFieldFilter;
 import org.jboss.pressgang.ccms.filter.UserFieldFilter;
 import org.jboss.pressgang.ccms.filter.builder.BlobConstantFilterQueryBuilder;
 import org.jboss.pressgang.ccms.filter.builder.CategoryFilterQueryBuilder;
@@ -990,7 +991,7 @@ public class RESTv1 extends BaseRESTv1 implements RESTBaseInterfaceV1, RESTInter
     @Override
     public RESTTranslatedTopicCollectionV1 getJSONTranslatedTopicsWithQuery(PathSegment query, final String expand) {
         return getJSONResourcesFromQuery(RESTTranslatedTopicCollectionV1.class, query.getMatrixParameters(),
-                TranslatedTopicDataFilterQueryBuilder.class, new TopicFieldFilter(), translatedTopicFactory,
+                TranslatedTopicDataFilterQueryBuilder.class, new TranslatedTopicFieldFilter(), translatedTopicFactory,
                 RESTv1Constants.TRANSLATEDTOPICS_EXPANSION_NAME, expand);
     }
 
