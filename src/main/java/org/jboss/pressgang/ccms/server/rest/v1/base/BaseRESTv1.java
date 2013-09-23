@@ -67,10 +67,13 @@ import org.jboss.pressgang.ccms.rest.v1.entities.base.RESTLogDetailsV1;
 import org.jboss.pressgang.ccms.rest.v1.entities.contentspec.RESTTextCSProcessingOptionsV1;
 import org.jboss.pressgang.ccms.rest.v1.entities.contentspec.RESTTextContentSpecV1;
 import org.jboss.pressgang.ccms.rest.v1.expansion.ExpandDataTrunk;
+import org.jboss.pressgang.ccms.server.config.ApplicationConfig;
+import org.jboss.pressgang.ccms.server.config.EntitiesConfig;
 import org.jboss.pressgang.ccms.server.ejb.EnversLoggingBean;
 import org.jboss.pressgang.ccms.server.envers.LoggingRevisionEntity;
 import org.jboss.pressgang.ccms.server.rest.BaseREST;
 import org.jboss.pressgang.ccms.server.rest.DatabaseOperation;
+import org.jboss.pressgang.ccms.server.rest.v1.ApplicationSettingsV1Factory;
 import org.jboss.pressgang.ccms.server.rest.v1.BlobConstantV1Factory;
 import org.jboss.pressgang.ccms.server.rest.v1.CSNodeV1Factory;
 import org.jboss.pressgang.ccms.server.rest.v1.CategoryV1Factory;
@@ -91,12 +94,10 @@ import org.jboss.pressgang.ccms.server.rest.v1.TranslatedCSNodeV1Factory;
 import org.jboss.pressgang.ccms.server.rest.v1.TranslatedContentSpecV1Factory;
 import org.jboss.pressgang.ccms.server.rest.v1.TranslatedTopicV1Factory;
 import org.jboss.pressgang.ccms.server.rest.v1.UserV1Factory;
-import org.jboss.pressgang.ccms.server.utils.Constants;
 import org.jboss.pressgang.ccms.server.utils.EntityUtilities;
 import org.jboss.pressgang.ccms.server.utils.EnversUtilities;
 import org.jboss.pressgang.ccms.server.utils.ProviderUtilities;
 import org.jboss.pressgang.ccms.server.utils.TopicSourceURLTitleThread;
-import org.jboss.pressgang.ccms.utils.constants.CommonConstants;
 import org.jboss.resteasy.plugins.providers.atom.Content;
 import org.jboss.resteasy.plugins.providers.atom.Entry;
 import org.jboss.resteasy.plugins.providers.atom.Feed;
@@ -146,6 +147,8 @@ public class BaseRESTv1 extends BaseREST {
     protected EntityCache entityCache;
     @Inject
     protected XMLEchoCache xmlEchoCache;
+    @Inject
+    protected ApplicationSettingsV1Factory applicationSettingsFactory;
 
     /* START ENTITY FACTORIES */
     @Inject
@@ -205,13 +208,14 @@ public class BaseRESTv1 extends BaseREST {
             feed.setTitle(title);
             feed.setUpdated(new Date());
 
-            final String docBuilderUrl = System.getProperty(Constants.DOCBUILDER_SYSTEM_PROPERTY);
-            final String uiUrl = System.getProperty(CommonConstants.PRESS_GANG_UI_SYSTEM_PROPERTY);
+            final String docBuilderUrl = ApplicationConfig.getInstance().getDocBuilderUrl();
+            final String uiUrl = ApplicationConfig.getInstance().getUIUrl();
 
             if (topics.getItems() != null) {
                 for (final RESTTopicV1 topic : topics.returnItems()) {
                     final Topic topicEntity = getEntity(Topic.class, topic.getId(), topic.getRevision());
-                    final TopicToPropertyTag fixedUrlPropertyTag = topicEntity.getProperty(CommonConstants.FIXED_URL_PROP_TAG_ID);
+                    final TopicToPropertyTag fixedUrlPropertyTag = topicEntity.getProperty(
+                            EntitiesConfig.getInstance().getFixedUrlPropertyTagId());
                     final List<Number> topicRevisions = EnversUtilities.getRevisions(entityManager, Topic.class, topic.getId());
 
                     final Entry entry = new Entry();
@@ -236,7 +240,7 @@ public class BaseRESTv1 extends BaseREST {
                         final List<ContentSpec> contentSpecs = topicEntity.getContentSpecs(entityManager);
                         for (final ContentSpec contentSpec : contentSpecs) {
                             final StringBuilder url = new StringBuilder(docBuilderUrl + (docBuilderUrl.endsWith("/") ? "" : "/") +
-                                     + contentSpec.getId());
+                                    +contentSpec.getId());
 
                             if (fixedUrlPropertyTag != null) {
                                 url.append("#").append(fixedUrlPropertyTag.getValue());
@@ -259,8 +263,8 @@ public class BaseRESTv1 extends BaseREST {
                             count++;
                             final LoggingRevisionEntity logEntity = EnversUtilities.getRevisionEntity(entityManager, topicEntity, revision);
                             final Date logDate = new Date(logEntity.getTimestamp());
-                            contentString.append("<li>").append(new SimpleDateFormat(REST_DATE_FORMAT).format(logDate)).append(" - ")
-                                    .append(logEntity.getLogMessage() == null ? "" : logEntity.getLogMessage()).append("</li>");
+                            contentString.append("<li>").append(new SimpleDateFormat(REST_DATE_FORMAT).format(logDate)).append(
+                                    " - ").append(logEntity.getLogMessage() == null ? "" : logEntity.getLogMessage()).append("</li>");
                         }
 
                         if (count >= 5) break;

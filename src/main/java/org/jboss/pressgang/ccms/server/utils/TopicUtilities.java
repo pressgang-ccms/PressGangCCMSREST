@@ -46,6 +46,7 @@ import org.jboss.pressgang.ccms.model.TranslatedTopicData;
 import org.jboss.pressgang.ccms.model.sort.CategoryNameComparator;
 import org.jboss.pressgang.ccms.model.sort.TagNameComparator;
 import org.jboss.pressgang.ccms.model.sort.TagToCategorySortingComparator;
+import org.jboss.pressgang.ccms.server.config.EntitiesConfig;
 import org.jboss.pressgang.ccms.utils.common.CollectionUtilities;
 import org.jboss.pressgang.ccms.utils.common.DocBookUtilities;
 import org.jboss.pressgang.ccms.utils.common.StringUtilities;
@@ -258,7 +259,7 @@ public class TopicUtilities {
 
             // Get the XML elements that require special formatting/processing
             final StringConstants xmlElementsProperties = entityManager.find(StringConstants.class,
-                    CommonConstants.XML_ELEMENTS_STRING_CONSTANT_ID);
+                    EntitiesConfig.getInstance().getXMLFormattingElementsStringConstantId());
 
             // Load the String Constants as Properties
             final Properties prop = new Properties();

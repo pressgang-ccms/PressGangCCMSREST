@@ -96,6 +96,7 @@ import org.jboss.pressgang.ccms.rest.v1.collections.contentspec.RESTTranslatedCS
 import org.jboss.pressgang.ccms.rest.v1.collections.contentspec.RESTTranslatedContentSpecCollectionV1;
 import org.jboss.pressgang.ccms.rest.v1.components.ComponentTopicV1;
 import org.jboss.pressgang.ccms.rest.v1.constants.RESTv1Constants;
+import org.jboss.pressgang.ccms.rest.v1.entities.RESTApplicationSettingsV1;
 import org.jboss.pressgang.ccms.rest.v1.entities.RESTBlobConstantV1;
 import org.jboss.pressgang.ccms.rest.v1.entities.RESTCategoryV1;
 import org.jboss.pressgang.ccms.rest.v1.entities.RESTFileV1;
@@ -227,6 +228,33 @@ public class RESTv1 extends BaseRESTv1 implements RESTBaseInterfaceV1, RESTInter
                 return xml;
             }
         }
+    }
+
+    /* APPLICATION SETTING FUNCTIONS */
+    /* JSONP FUNCTIONS */
+    @Override
+    public String getJSONPApplicationSettings(@QueryParam("callback") String callback) {
+        if (callback == null) throw new BadRequestException("The callback parameter can not be null");
+
+        try {
+            return wrapJsonInPadding(callback, convertObjectToJSON(getJSONApplicationSettings()));
+        } catch (final Exception ex) {
+            throw new InternalServerErrorException("Could not marshall return value into JSON");
+        }
+    }
+
+    /* JSON FUNCTIONS */
+    @Override
+    public RESTApplicationSettingsV1 getJSONApplicationSettings() {
+        return applicationSettingsFactory.createRESTEntity();
+    }
+
+    @Override
+    public RESTApplicationSettingsV1 updateJSONApplicationSettings(final RESTApplicationSettingsV1 dataObject) {
+        if (dataObject == null) throw new BadRequestException("The dataObject parameter can not be null");
+
+        applicationSettingsFactory.updateFromRESTEntity(dataObject);
+        return applicationSettingsFactory.createRESTEntity();
     }
 
     /* BLOBCONSTANTS FUNCTIONS */

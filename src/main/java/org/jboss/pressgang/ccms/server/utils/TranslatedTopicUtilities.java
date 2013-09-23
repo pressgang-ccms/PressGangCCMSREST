@@ -8,6 +8,7 @@ import java.util.Properties;
 
 import org.jboss.pressgang.ccms.model.StringConstants;
 import org.jboss.pressgang.ccms.model.TranslatedTopicData;
+import org.jboss.pressgang.ccms.server.config.EntitiesConfig;
 import org.jboss.pressgang.ccms.utils.common.CollectionUtilities;
 import org.jboss.pressgang.ccms.utils.common.XMLUtilities;
 import org.jboss.pressgang.ccms.utils.constants.CommonConstants;
@@ -37,7 +38,7 @@ public class TranslatedTopicUtilities {
         if (doc != null) {
             // Get the XML elements that require special formatting/processing
             final StringConstants xmlElementsProperties = entityManager.find(StringConstants.class,
-                    CommonConstants.XML_ELEMENTS_STRING_CONSTANT_ID);
+                    EntitiesConfig.getInstance().getXMLFormattingElementsStringConstantId());
 
             // Load the String Constants as Properties
             final Properties prop = new Properties();
