@@ -59,6 +59,7 @@ public class ContentSpecV1Factory extends RESTDataObjectFactory<RESTContentSpecV
 
         final List<String> expandOptions = new ArrayList<String>();
         expandOptions.add(RESTBaseEntityV1.LOG_DETAILS_NAME);
+        expandOptions.add(RESTContentSpecV1.ALL_CHILDREN_NAME);
         expandOptions.add(RESTContentSpecV1.CHILDREN_NAME);
         expandOptions.add(RESTContentSpecV1.PROPERTIES_NAME);
         expandOptions.add(RESTContentSpecV1.BOOK_TAGS_NAME);
@@ -82,6 +83,13 @@ public class ContentSpecV1Factory extends RESTDataObjectFactory<RESTContentSpecV
             retValue.setRevisions(RESTDataObjectCollectionFactory.create(RESTContentSpecCollectionV1.class, this, entity,
                     EnversUtilities.getRevisions(entityManager, entity), RESTBaseEntityV1.REVISIONS_NAME, dataType, expand, baseUrl,
                     entityManager));
+        }
+
+        // ALL CHILDREN NODES
+        if (expand != null && expand.contains(RESTContentSpecV1.ALL_CHILDREN_NAME)) {
+            retValue.setAllChildren(RESTDataObjectCollectionFactory.create(RESTCSNodeCollectionV1.class, csNodeFactory,
+                    new ArrayList<CSNode>(entity.getCSNodes()), RESTContentSpecV1.ALL_CHILDREN_NAME, dataType, expand, baseUrl, revision,
+                    expandParentReferences, entityManager));
         }
 
         // CHILDREN NODES
