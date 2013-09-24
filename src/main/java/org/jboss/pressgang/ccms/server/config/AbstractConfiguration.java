@@ -37,6 +37,10 @@ public abstract class AbstractConfiguration {
         return configuration.containsKey(key);
     }
 
+    public void removeProperty(final String key) {
+        getConfiguration().clearProperty(key);
+    }
+
     public List<String> getKeys() {
         final List<String> keys = new ArrayList<String>();
         final Iterator<String> it = configuration.getKeys();
