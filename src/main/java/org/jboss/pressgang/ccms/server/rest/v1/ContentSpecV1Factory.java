@@ -74,7 +74,7 @@ public class ContentSpecV1Factory extends RESTDataObjectFactory<RESTContentSpecV
         retValue.setCondition(entity.getCondition());
         retValue.setType(RESTContentSpecTypeV1.getContentSpecType(entity.getContentSpecType()));
         retValue.setLastPublished(entity.getLastPublished());
-        retValue.setLastModified(entity.getLastModified());
+        retValue.setLastModified(EnversUtilities.getFixedLastModifiedDate(entityManager, entity));
         retValue.setErrors(entity.getErrors());
         retValue.setFailedContentSpec(ContentSpecUtilities.fixFailedContentSpec(entity));
 
