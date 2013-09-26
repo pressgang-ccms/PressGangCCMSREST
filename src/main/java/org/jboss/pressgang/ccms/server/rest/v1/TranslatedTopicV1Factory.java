@@ -84,6 +84,7 @@ public class TranslatedTopicV1Factory extends RESTDataObjectFactory<RESTTranslat
         retValue.setContainsFuzzyTranslation(entity.containsFuzzyTranslation());
         retValue.setXmlDoctype(RESTXMLDoctype.getXMLDoctype(entity.getTranslatedTopic().getEnversTopic(entityManager).getXmlDoctype()));
         retValue.setTranslatedXMLCondition(entity.getTranslatedTopic().getTranslatedXMLCondition());
+        retValue.setTranslatedAdditionalXML(entity.getTranslatedAdditionalXml());
 
         // Get the title from the XML or if the XML is null then use the original topics title.
         String title = DocBookUtilities.findTitle(entity.getTranslatedXml());
@@ -234,6 +235,8 @@ public class TranslatedTopicV1Factory extends RESTDataObjectFactory<RESTTranslat
         if (dataObject.hasParameterSet(RESTTranslatedTopicV1.LOCALE_NAME)) entity.setTranslationLocale(dataObject.getLocale());
         if (dataObject.hasParameterSet(RESTTranslatedTopicV1.TRANSLATIONPERCENTAGE_NAME))
             entity.setTranslationPercentage(dataObject.getTranslationPercentage());
+        if (dataObject.hasParameterSet(RESTTranslatedTopicV1.TRANSLATED_ADDITIONAL_XML))
+            entity.setTranslatedAdditionalXml(dataObject.getTranslatedAdditionalXML());
 
         translatedTopic.getTranslatedTopicDatas().add(entity);
 
