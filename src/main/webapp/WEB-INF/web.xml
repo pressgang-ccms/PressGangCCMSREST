@@ -24,6 +24,16 @@
         <param-value>java:/PressGangCCMSDatasource</param-value>
     </context-param>
 
+    <context-param>
+        <param-name>javamelody.http-transform-pattern</param-name>
+        <param-value>.+</param-value>
+    </context-param>
+
+    <context-param>
+        <param-name>javamelody.sql-transform-pattern</param-name>
+        <param-value>.+</param-value>
+    </context-param>
+
     <!-- Liquibase Parameters -->
     <context-param>
         <param-name>liquibase.changelog</param-name>
