@@ -1,13 +1,8 @@
 package org.jboss.pressgang.ccms.server.rest;
 
-import javax.ws.rs.HeaderParam;
-import javax.ws.rs.OPTIONS;
-import javax.ws.rs.Path;
 import javax.ws.rs.core.Context;
-import javax.ws.rs.core.Response;
 import javax.ws.rs.core.UriInfo;
 
-import org.jboss.pressgang.ccms.rest.v1.constants.RESTv1Constants;
 import org.jboss.pressgang.ccms.server.utils.Constants;
 
 public abstract class BaseREST {
@@ -46,39 +41,5 @@ public abstract class BaseREST {
      */
     protected String getRequestUrl() {
         return uriInfo.getRequestUri().toString();
-    }
-
-    /**
-     * This method will match any preflight CORS request, and can be used as a central location to manage cross origin requests.
-     * <p/>
-     * Note: The browser restrictions on cross site requests are a very insecure way to prevent cross site access (you can just
-     * setup a proxy).
-     *
-     * @param requestMethod  The Access-Control-Request-Method header
-     * @param requestHeaders The Access-Control-Request-Headers header
-     * @return A HTTP response that indicates CORS requests are valid.
-     */
-    @OPTIONS
-    @Path("/{path:.*}")
-    public Response handleCORSRequest(@HeaderParam(RESTv1Constants.ACCESS_CONTROL_REQUEST_METHOD) final String requestMethod,
-            @HeaderParam(RESTv1Constants.ACCESS_CONTROL_REQUEST_HEADERS) final String requestHeaders) {
-        final Response.ResponseBuilder retValue = Response.ok();
-
-        if (Constants.CORS_ALLOW_ORIGIN_HEADER != null) {
-            if (requestHeaders != null) retValue.header(RESTv1Constants.ACCESS_CONTROL_ALLOW_HEADERS, requestHeaders);
-
-            if (requestMethod != null) retValue.header(RESTv1Constants.ACCESS_CONTROL_ALLOW_METHODS, requestMethod);
-
-            retValue.header(RESTv1Constants.ACCESS_CONTROL_ALLOW_ORIGIN_HEADER, Constants.CORS_ALLOW_ORIGIN_HEADER);
-
-            /**
-             * Headers that do not fall under the category of simple response headers have to be
-             * specifically allowed via Access-Control-Expose-Headers.
-             * http://www.w3.org/TR/cors/#simple-response-header
-             */
-            retValue.header(RESTv1Constants.ACCESS_CONTROL_EXPOSE_HEADERS, RESTv1Constants.X_PRESSGANG_VERSION_HEADER);
-        }
-
-        return retValue.build();
     }
 }

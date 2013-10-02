@@ -24,6 +24,5 @@ public class RESTv1VersionHeaderInterceptor implements PostProcessInterceptor, A
     @Override
     public void postProcess(ServerResponse response) {
         response.getMetadata().add(RESTv1Constants.X_PRESSGANG_VERSION_HEADER, VersionUtilities.getAPIVersion(RESTInterfaceV1.class));
-        response.getMetadata().add(RESTv1Constants.ACCESS_CONTROL_EXPOSE_HEADERS, RESTv1Constants.X_PRESSGANG_VERSION_HEADER);
     }
 }

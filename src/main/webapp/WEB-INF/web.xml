@@ -3,20 +3,7 @@
          xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
          xsi:schemaLocation="http://java.sun.com/xml/ns/javaee http://java.sun.com/xml/ns/javaee/web-app_3_0.xsd">
 
-    <!--<filter>
-        <filter-name>OAuth2 Filter</filter-name>
-        <filter-class>org.jboss.pressgang.belay.oauth2.resourceserver.filter.OAuth2RSFilter</filter-class>
-    </filter>
 
-    <filter-mapping>
-        <filter-name>OAuth2 Filter</filter-name>
-        <url-pattern>/rest/*</url-pattern>
-    </filter-mapping>
-
-    <context-param>
-        <param-name>oauth.rs.provider-class</param-name>
-        <param-value>org.jboss.pressgang.belay.oauth2.resourceserver.filter.OAuth2RSProvider</param-value>
-    </context-param>-->
 
     <!-- Java Melody Parameters -->
     <context-param>
@@ -56,5 +43,25 @@
     <filter-mapping>
         <filter-name>InteropFilter</filter-name>
         <url-pattern>/webdav/*</url-pattern>
+    </filter-mapping>
+
+    <filter>
+        <filter-name>CORS</filter-name>
+        <filter-class>com.thetransactioncompany.cors.CORSFilter</filter-class>
+
+        <init-param>
+            <param-name>cors.exposedHeaders</param-name>
+            <param-value>X-PressGang-Version</param-value>
+        </init-param>
+
+        <init-param>
+            <param-name>cors.supportedMethods</param-name>
+            <param-value>GET, POST, HEAD, PUT, DELETE</param-value>
+        </init-param>
+    </filter>
+
+    <filter-mapping>
+        <filter-name>CORS</filter-name>
+        <url-pattern>/rest/*</url-pattern>
     </filter-mapping>
 </web-app>
