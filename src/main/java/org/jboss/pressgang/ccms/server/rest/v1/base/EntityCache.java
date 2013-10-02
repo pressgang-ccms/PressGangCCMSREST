@@ -5,6 +5,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.atomic.AtomicInteger;
 
 import org.jboss.pressgang.ccms.rest.v1.entities.base.RESTBaseEntityV1;
 import org.jboss.pressgang.ccms.utils.structures.Pair;
@@ -13,10 +14,15 @@ import org.jboss.pressgang.ccms.utils.structures.Pair;
 public class EntityCache {
     private static final Integer NEW_STATE = 0;
     private static final Integer UPDATED_STATE = 1;
+    private final AtomicInteger counter = new AtomicInteger(-10000);
 
     private Map<RESTBaseEntityV1, Pair<Object, Integer>> entities = new HashMap<RESTBaseEntityV1, Pair<Object, Integer>>();
 
     public <U> void addNew(RESTBaseEntityV1 restEntity, U dbEntity) {
+        if (restEntity.getId() == null) {
+            restEntity.setId(getNextId());
+        }
+
         entities.put(restEntity, new Pair<Object, Integer>(dbEntity, NEW_STATE));
     }
 
@@ -28,12 +34,13 @@ public class EntityCache {
         entities.remove(restEntity);
     }
 
-    public <T> boolean containsRESTEntity(RESTBaseEntityV1 restEntity) {
+    public <T> boolean containsRESTEntity(final RESTBaseEntityV1 restEntity) {
         return entities.containsKey(restEntity);
     }
 
-    public Object get(RESTBaseEntityV1 restEntity) {
-        return entities.get(restEntity);
+    public Object get(final RESTBaseEntityV1 restEntity) {
+        final Pair<Object, Integer> entity = entities.get(restEntity);
+        return entity == null ? null : entity.getFirst();
     }
 
     public <U> List<U> getNewEntities(final Class<U> clazz) {
@@ -77,5 +84,15 @@ public class EntityCache {
 
     public int size() {
         return entities.size();
+    }
+
+    protected synchronized Integer getNextId() {
+        Integer count = counter.get();
+        if (count == Integer.MIN_VALUE) {
+            counter.set(-10000);
+            return -10000;
+        } else {
+            return counter.getAndDecrement();
+        }
     }
 }

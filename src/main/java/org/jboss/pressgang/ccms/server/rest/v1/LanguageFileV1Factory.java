@@ -39,6 +39,7 @@ public class LanguageFileV1Factory extends RESTDataObjectFactory<RESTLanguageFil
 
         retValue.setId(entity.getLanguageFileId());
         retValue.setLocale(entity.getLocale());
+        retValue.setFilename(entity.getOriginalFileName());
 
         // Potentially large fields need to be expanded manually
         if (expand != null && expand.contains(RESTLanguageFileV1.FILE_DATA_NAME)) retValue.setFileData(entity.getFileData());
@@ -63,6 +64,7 @@ public class LanguageFileV1Factory extends RESTDataObjectFactory<RESTLanguageFil
     public void syncDBEntityWithRESTEntityFirstPass(final LanguageFile entity, final RESTLanguageFileV1 dataObject) {
         if (dataObject.hasParameterSet(RESTLanguageFileV1.LOCALE_NAME)) entity.setLocale(dataObject.getLocale());
         if (dataObject.hasParameterSet(RESTLanguageFileV1.FILE_DATA_NAME)) entity.setFileData(dataObject.getFileData());
+        if (dataObject.hasParameterSet(RESTLanguageFileV1.FILENAME_NAME)) entity.setOriginalFileName(dataObject.getFilename());
     }
 
     @Override

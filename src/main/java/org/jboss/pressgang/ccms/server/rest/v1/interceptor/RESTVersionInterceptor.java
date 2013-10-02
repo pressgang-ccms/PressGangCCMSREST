@@ -22,6 +22,7 @@ public class RESTVersionInterceptor implements PreProcessInterceptor {
     private static final int UPGRADE_STATUS_CODE = 426;
     private static final String RESTv1_VERSION = VersionUtilities.getAPIVersion(RESTInterfaceV1.class);
     private static final boolean IS_RESTv1_SNAPSHOT = isSnapshotVersion(RESTv1_VERSION);
+    private static final int MIN_CSP_MINOR_VERSION = 33;
 
     private static final String REST_VERSION_ERROR_MSG = "The REST Client Implementation is out of date, " +
             "" + "and no longer supported. Please update the REST Client library.";
@@ -98,14 +99,15 @@ public class RESTVersionInterceptor implements PreProcessInterceptor {
     }
 
     protected boolean isValidCSPVersion(final String version) {
-        if (isUnknownVersion(version)) return true;
-        if (isSnapshotVersion(version)) return false;
+        if (isUnknownVersion(version)) return false;
 
         final Integer majorVersion = getMajorVersion(version);
         final Integer minorVersion = getMinorVersion(version);
+        final boolean isSnapshotVersion = isSnapshotVersion(version);
 
-        // Check that the version is 0.31 or higher.
-        return (majorVersion != null && majorVersion >= 0) && (minorVersion == null || minorVersion >= 31);
+        // Check that the version is 0.33 or higher (allowing for snapshots).
+        return (majorVersion != null && majorVersion >= 0) && (minorVersion == null || (minorVersion >= MIN_CSP_MINOR_VERSION &&
+                !isSnapshotVersion) || minorVersion > MIN_CSP_MINOR_VERSION);
     }
 
     protected static Integer getMajorVersion(final String version) {
@@ -120,6 +122,13 @@ public class RESTVersionInterceptor implements PreProcessInterceptor {
         final String cleanedVersion = version.replaceAll("-.*", "");
         String[] tmp = cleanedVersion.split("\\.");
         return tmp.length >= 2 ? Integer.parseInt(tmp[1]) : null;
+    }
+
+    protected static Integer getZStreamVersion(final String version) {
+        // Remove any extra information, ie -SNAPSHOT
+        final String cleanedVersion = version.replaceAll("-.*", "");
+        String[] tmp = cleanedVersion.split("\\.");
+        return tmp.length >= 3 ? Integer.parseInt(tmp[2]) : null;
     }
 
     protected static boolean isSnapshotVersion(final String version) {

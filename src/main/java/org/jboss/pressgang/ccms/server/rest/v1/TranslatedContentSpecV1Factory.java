@@ -85,8 +85,6 @@ public class TranslatedContentSpecV1Factory extends RESTDataObjectFactory<RESTTr
         if (dataObject.hasParameterSet(RESTTranslatedContentSpecV1.CONTENT_SPEC_REV_NAME))
             entity.setContentSpecRevision(dataObject.getContentSpecRevision());
 
-        entityManager.persist(entity);
-
         /* One To Many - Add will create a child entity */
         if (dataObject.hasParameterSet(
                 RESTTranslatedContentSpecV1.TRANSLATED_NODES_NAME) && dataObject.getTranslatedNodes_OTM() != null && dataObject

@@ -74,7 +74,7 @@ public class TagInCategoryV1Factory extends RESTDataObjectFactory<RESTTagInCateg
         // CATEGORIES
         if (expand != null && expand.contains(RESTTagInCategoryV1.CATEGORIES_NAME)) {
             retValue.setCategories(RESTDataObjectCollectionFactory.create(RESTCategoryInTagCollectionV1.class, categoryInTagFactory,
-                    entity.getTag().getTagToCategoriesArray(), RESTTagInCategoryV1.CATEGORIES_NAME, dataType, expand, baseUrl,
+                    entity.getTag().getTagToCategoriesList(), RESTTagInCategoryV1.CATEGORIES_NAME, dataType, expand, baseUrl,
                     entityManager));
         }
 
@@ -96,7 +96,7 @@ public class TagInCategoryV1Factory extends RESTDataObjectFactory<RESTTagInCateg
         if (expand != null && expand.contains(RESTTagInCategoryV1.PROPERTIES_NAME)) {
             retValue.setProperties(
                     RESTDataObjectCollectionFactory.create(RESTAssignedPropertyTagCollectionV1.class, tagPropertyTagFactory,
-                            entity.getTag().getTagToPropertyTagsArray(), RESTTagInCategoryV1.PROPERTIES_NAME, dataType, expand, baseUrl,
+                            entity.getTag().getPropertyTagsList(), RESTTagInCategoryV1.PROPERTIES_NAME, dataType, expand, baseUrl,
                             entityManager));
         }
 

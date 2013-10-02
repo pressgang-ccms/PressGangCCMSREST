@@ -17,7 +17,7 @@ public class ResourceProducer {
 
     @Produces
     @RequestScoped
-    EntityManager createEntityManager() {
+    public EntityManager createEntityManager() {
         final EntityManager entityManager = entityManagerFactory.createEntityManager();
         entityManager.setFlushMode(FlushModeType.AUTO);
         return entityManager;

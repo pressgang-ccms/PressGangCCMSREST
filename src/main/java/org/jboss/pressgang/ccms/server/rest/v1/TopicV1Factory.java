@@ -118,7 +118,7 @@ public class TopicV1Factory extends RESTDataObjectFactory<RESTTopicV1, Topic, RE
         if (expand != null && expand.contains(RESTTopicV1.PROPERTIES_NAME)) {
             retValue.setProperties(
                     RESTDataObjectCollectionFactory.create(RESTAssignedPropertyTagCollectionV1.class, topicPropertyTagFactory,
-                            entity.getTopicToPropertyTagsArray(), RESTTopicV1.PROPERTIES_NAME, dataType, expand, baseUrl, revision,
+                            entity.getPropertyTagsList(), RESTTopicV1.PROPERTIES_NAME, dataType, expand, baseUrl, revision,
                             entityManager));
         }
 

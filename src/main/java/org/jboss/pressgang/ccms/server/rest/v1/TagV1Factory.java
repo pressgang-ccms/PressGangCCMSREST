@@ -77,7 +77,7 @@ public class TagV1Factory extends RESTDataObjectFactory<RESTTagV1, Tag, RESTTagC
         // CATEGORIES
         if (expand != null && expand.contains(RESTTagV1.CATEGORIES_NAME)) {
             retValue.setCategories(RESTDataObjectCollectionFactory.create(RESTCategoryInTagCollectionV1.class, categoryInTagFactory,
-                    entity.getTagToCategoriesArray(), RESTTagV1.CATEGORIES_NAME, dataType, expand, baseUrl, entityManager));
+                    entity.getTagToCategoriesList(), RESTTagV1.CATEGORIES_NAME, dataType, expand, baseUrl, entityManager));
         }
 
         // PARENT TAGS
@@ -95,7 +95,7 @@ public class TagV1Factory extends RESTDataObjectFactory<RESTTagV1, Tag, RESTTagC
         // PROPERTY TAGS
         if (expand != null && expand.contains(RESTTagV1.PROPERTIES_NAME)) {
             retValue.setProperties(RESTDataObjectCollectionFactory.create(RESTAssignedPropertyTagCollectionV1.class, tagPropertyTagFactory,
-                    entity.getTagToPropertyTagsArray(), RESTTagV1.PROPERTIES_NAME, dataType, expand, baseUrl, entityManager));
+                    entity.getPropertyTagsList(), RESTTagV1.PROPERTIES_NAME, dataType, expand, baseUrl, entityManager));
         }
 
         // PROJECTS
@@ -176,12 +176,12 @@ public class TagV1Factory extends RESTDataObjectFactory<RESTTagV1, Tag, RESTTagC
 
                     if (restEntityItem.returnIsAddItem()) {
                         if (restEntity.hasParameterSet(RESTCategoryInTagV1.RELATIONSHIP_SORT_NAME)) {
-                            dbEntity.addTagRelationship(entity, restEntity.getRelationshipSort());
+                            dbEntity.addTag(entity, restEntity.getRelationshipSort());
                         } else {
-                            dbEntity.addTagRelationship(entity);
+                            dbEntity.addTag(entity);
                         }
                     } else if (restEntityItem.returnIsRemoveItem()) {
-                        dbEntity.removeTagRelationship(entity);
+                        dbEntity.removeTag(entity);
                     }
                 } else if (restEntityItem.returnIsUpdateItem()) {
                     final TagToCategory dbEntity = entityManager.find(TagToCategory.class, restEntity.getRelationshipId());

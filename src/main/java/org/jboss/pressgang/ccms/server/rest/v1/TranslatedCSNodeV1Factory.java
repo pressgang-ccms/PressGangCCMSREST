@@ -110,8 +110,6 @@ public class TranslatedCSNodeV1Factory extends RESTDataObjectFactory<RESTTransla
         if (dataObject.hasParameterSet(RESTTranslatedCSNodeV1.ORIGINALSTRING_NAME))
             entity.setOriginalString(dataObject.getOriginalString());
 
-        entityManager.persist(entity);
-
         /* One To Many - Add will create a child entity */
         if (dataObject.hasParameterSet(
                 RESTTranslatedCSNodeV1.TRANSLATED_STRING_NAME) && dataObject.getTranslatedNodeStrings_OTM() != null && dataObject

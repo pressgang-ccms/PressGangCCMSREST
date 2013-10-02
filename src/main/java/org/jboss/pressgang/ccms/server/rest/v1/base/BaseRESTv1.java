@@ -11,6 +11,7 @@ import javax.persistence.TypedQuery;
 import javax.persistence.criteria.CriteriaBuilder;
 import javax.persistence.criteria.CriteriaQuery;
 import javax.persistence.criteria.Root;
+import javax.transaction.RollbackException;
 import javax.transaction.Status;
 import javax.transaction.TransactionManager;
 import javax.validation.ConstraintViolation;
@@ -23,10 +24,13 @@ import java.net.URI;
 import java.sql.BatchUpdateException;
 import java.sql.SQLException;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
 import java.util.Set;
 
+import difflib.DiffUtils;
+import difflib.Patch;
 import org.codehaus.jackson.map.ObjectMapper;
 import org.hibernate.envers.AuditReader;
 import org.hibernate.envers.AuditReaderFactory;
@@ -43,6 +47,7 @@ import org.jboss.pressgang.ccms.filter.base.IFilterQueryBuilder;
 import org.jboss.pressgang.ccms.filter.base.ITagFilterQueryBuilder;
 import org.jboss.pressgang.ccms.filter.utils.FilterUtilities;
 import org.jboss.pressgang.ccms.model.Filter;
+import org.jboss.pressgang.ccms.model.Topic;
 import org.jboss.pressgang.ccms.model.TopicSourceUrl;
 import org.jboss.pressgang.ccms.model.User;
 import org.jboss.pressgang.ccms.model.base.AuditedEntity;
@@ -61,7 +66,8 @@ import org.jboss.pressgang.ccms.rest.v1.entities.RESTTopicV1;
 import org.jboss.pressgang.ccms.rest.v1.entities.RESTUserV1;
 import org.jboss.pressgang.ccms.rest.v1.entities.base.RESTBaseEntityV1;
 import org.jboss.pressgang.ccms.rest.v1.entities.base.RESTLogDetailsV1;
-import org.jboss.pressgang.ccms.rest.v1.entities.contentspec.RESTContentSpecV1;
+import org.jboss.pressgang.ccms.rest.v1.entities.contentspec.RESTTextCSProcessingOptionsV1;
+import org.jboss.pressgang.ccms.rest.v1.entities.contentspec.RESTTextContentSpecV1;
 import org.jboss.pressgang.ccms.rest.v1.expansion.ExpandDataTrunk;
 import org.jboss.pressgang.ccms.server.ejb.EnversLoggingBean;
 import org.jboss.pressgang.ccms.server.rest.BaseREST;
@@ -69,6 +75,7 @@ import org.jboss.pressgang.ccms.server.rest.DatabaseOperation;
 import org.jboss.pressgang.ccms.server.rest.v1.BlobConstantV1Factory;
 import org.jboss.pressgang.ccms.server.rest.v1.CSNodeV1Factory;
 import org.jboss.pressgang.ccms.server.rest.v1.CategoryV1Factory;
+import org.jboss.pressgang.ccms.server.rest.v1.ContentSpecV1Factory;
 import org.jboss.pressgang.ccms.server.rest.v1.FileV1Factory;
 import org.jboss.pressgang.ccms.server.rest.v1.FilterV1Factory;
 import org.jboss.pressgang.ccms.server.rest.v1.ImageV1Factory;
@@ -79,15 +86,16 @@ import org.jboss.pressgang.ccms.server.rest.v1.PropertyTagV1Factory;
 import org.jboss.pressgang.ccms.server.rest.v1.RoleV1Factory;
 import org.jboss.pressgang.ccms.server.rest.v1.StringConstantV1Factory;
 import org.jboss.pressgang.ccms.server.rest.v1.TagV1Factory;
+import org.jboss.pressgang.ccms.server.rest.v1.TextContentSpecV1Factory;
 import org.jboss.pressgang.ccms.server.rest.v1.TopicV1Factory;
 import org.jboss.pressgang.ccms.server.rest.v1.TranslatedCSNodeV1Factory;
 import org.jboss.pressgang.ccms.server.rest.v1.TranslatedContentSpecV1Factory;
 import org.jboss.pressgang.ccms.server.rest.v1.TranslatedTopicV1Factory;
 import org.jboss.pressgang.ccms.server.rest.v1.UserV1Factory;
-import org.jboss.pressgang.ccms.server.rest.v1.ContentSpecV1Factory;
 import org.jboss.pressgang.ccms.server.utils.EntityUtilities;
-import org.jboss.pressgang.ccms.server.utils.TopicSourceURLTitleThread;
 import org.jboss.pressgang.ccms.server.utils.ProviderUtilities;
+import org.jboss.pressgang.ccms.server.utils.TopicSourceURLTitleThread;
+import org.jboss.pressgang.ccms.utils.common.CollectionUtilities;
 import org.jboss.resteasy.plugins.providers.atom.Content;
 import org.jboss.resteasy.plugins.providers.atom.Entry;
 import org.jboss.resteasy.plugins.providers.atom.Feed;
@@ -176,6 +184,8 @@ public class BaseRESTv1 extends BaseREST {
     @Inject
     protected TranslatedCSNodeV1Factory translatedCSNodeFactory;
     @Inject
+    protected TextContentSpecV1Factory textContentSpecFactory;
+    @Inject
     protected UserV1Factory userFactory;
     /* END ENTITY FACTORIES */
 
@@ -196,7 +206,10 @@ public class BaseRESTv1 extends BaseREST {
 
             if (topics.getItems() != null) {
                 for (final RESTTopicV1 topic : topics.returnItems()) {
-                    final String html = "";
+                    final RESTTopicV1 previousTopic = getJSONResource(Topic.class, topicFactory, topic.getId(), topic.getRevision() - 1,
+                            "");
+                    final String xml = topic.getXml();
+                    final String previousXml = previousTopic == null ? "" : previousTopic.getXml();
 
                     final Entry entry = new Entry();
                     entry.setId(new URI(topic.getSelfLink()));
@@ -204,10 +217,17 @@ public class BaseRESTv1 extends BaseREST {
                     entry.setUpdated(topic.getLastModified());
                     entry.setPublished(topic.getCreated());
 
-                    if (html != null) {
+                    if (xml != null) {
+                        final List<String> previousLines = Arrays.asList(previousXml.split("(\r)?\n"));
+                        final List<String> lines = Arrays.asList(xml.split("(\r)?\n"));
+
+                        final Patch<String> patch = DiffUtils.diff(previousLines, lines);
+                        final List<String> patches = DiffUtils.generateUnifiedDiff(topic.getId() + ".xml", topic.getId() + ".xml",
+                                previousLines, patch, 1);
+
                         final Content content = new Content();
-                        content.setType(MediaType.TEXT_HTML_TYPE);
-                        content.setText(fixHrefs(html));
+                        content.setType(MediaType.TEXT_PLAIN_TYPE);
+                        content.setText(CollectionUtilities.toSeperatedString(patches, "\r\n"));
                         entry.setContent(content);
                     }
 
@@ -616,11 +636,9 @@ public class BaseRESTv1 extends BaseREST {
 
                     // Sync the database entity with the REST Entity
                     factory.updateDBEntityFromRESTEntity(entity, restEntity);
-                    factory.syncDBEntityWithRESTEntitySecondPass(entity, restEntity);
                 } else if (operation == DatabaseOperation.CREATE) {
                     // Create a Database Entity using the information from the REST Entity.
                     entity = factory.createDBEntityFromRESTEntity(restEntity);
-                    factory.syncDBEntityWithRESTEntitySecondPass(entity, restEntity);
 
                     // Check that the entity was successfully created
                     if (entity == null) throw new BadRequestException("The entity could not be created");
@@ -1008,18 +1026,46 @@ public class BaseRESTv1 extends BaseREST {
         return query;
     }
 
+    /**
+     * Creates a content spec from a String representation of a content specification.
+     *
+     * @param dataObject The REST Entity to create/update the database with.
+     * @param logDetails The details about the changes that need to be logged.
+     * @param expand     The Expand Object that contains details about what should be expanded.
+     * @return
+     */
+    protected RESTTextContentSpecV1 createJSONContentSpecFromString(final RESTTextContentSpecV1 dataObject,
+            final RESTLogDetailsV1 logDetails, final String expand) {
+        return createOrUpdateJSONContentSpecFromString(dataObject, DatabaseOperation.CREATE, logDetails, expand);
+    }
 
+    /**
+     * Updates a content spec from a String representation of a content specification.
+     *
+     * @param dataObject The REST Entity to create/update the database with.
+     * @param logDetails The details about the changes that need to be logged.
+     * @param expand     The Expand Object that contains details about what should be expanded.
+     * @return
+     */
+    protected RESTTextContentSpecV1 updateJSONContentSpecFromString(final RESTTextContentSpecV1 dataObject,
+            final RESTLogDetailsV1 logDetails, final String expand) {
+        return createOrUpdateJSONContentSpecFromString(dataObject, DatabaseOperation.UPDATE, logDetails, expand);
+    }
 
     /**
      * Creates a content spec from a String representation of a content specification.
      *
      * @param contentSpecString The content spec string representation.
+     * @param permissive
      * @param logDetails        The details about the changes that need to be logged.
      * @return
      */
-    protected String createTEXTContentSpecFromString(final String contentSpecString, final RESTLogDetailsV1 logDetails) {
+    protected String createTEXTContentSpecFromString(final String contentSpecString, final Boolean permissive,
+            final RESTLogDetailsV1 logDetails) {
         final ErrorLoggerManager loggerManager = new ErrorLoggerManager();
-        createOrUpdateJSONContentSpecFromString(null, contentSpecString, DatabaseOperation.CREATE, logDetails, "", RESTv1Constants.TEXT_URL,
+        final RESTTextContentSpecV1 contentSpec = new RESTTextContentSpecV1();
+        contentSpec.explicitSetText(contentSpecString);
+        createOrUpdateJSONContentSpecFromString(contentSpec, DatabaseOperation.CREATE, logDetails, "", RESTv1Constants.TEXT_URL,
                 loggerManager, false);
 
         return loggerManager.generateLogs();
@@ -1030,12 +1076,22 @@ public class BaseRESTv1 extends BaseREST {
      *
      * @param id                The content spec id being updated.
      * @param contentSpecString The content spec string representation.
+     * @param permissive
      * @param logDetails        The details about the changes that need to be logged.
      * @return
      */
-    protected String updateTEXTContentSpecFromString(final Integer id, final String contentSpecString, final RESTLogDetailsV1 logDetails) {
+    protected String updateTEXTContentSpecFromString(final Integer id, final String contentSpecString, final Boolean permissive,
+            final RESTLogDetailsV1 logDetails) {
         final ErrorLoggerManager loggerManager = new ErrorLoggerManager();
-        createOrUpdateJSONContentSpecFromString(id, contentSpecString, DatabaseOperation.UPDATE, logDetails, "", RESTv1Constants.TEXT_URL,
+        final RESTTextContentSpecV1 contentSpec = new RESTTextContentSpecV1();
+        contentSpec.setId(id);
+        contentSpec.explicitSetText(contentSpecString);
+
+        final RESTTextCSProcessingOptionsV1 processingOptions = new RESTTextCSProcessingOptionsV1();
+        processingOptions.setPermissive(permissive);
+        contentSpec.setProcessingOptions(processingOptions);
+
+        createOrUpdateJSONContentSpecFromString(contentSpec, DatabaseOperation.UPDATE, logDetails, "", RESTv1Constants.TEXT_URL,
                 loggerManager, true);
 
         return loggerManager.generateLogs();
@@ -1044,38 +1100,40 @@ public class BaseRESTv1 extends BaseREST {
     /**
      * Creates or Updates a content spec from a String representation of a content specification.
      *
-     * @param id                The content spec id being updated, or null if one is to be created.
-     * @param contentSpecString The content spec string representation.
-     * @param operation         The Database Operation type (CREATE or UPDATE).
-     * @param logDetails        The details about the changes that need to be logged.
-     * @param expand            The Expand Object that contains details about what should be expanded.
+     * @param restEntity The content spec string representation object.
+     * @param operation  The Database Operation type (CREATE or UPDATE).
+     * @param logDetails The details about the changes that need to be logged.
+     * @param expand     The Expand Object that contains details about what should be expanded.
      * @return
      */
-    private RESTContentSpecV1 createOrUpdateJSONContentSpecFromString(final Integer id, final String contentSpecString,
+    private RESTTextContentSpecV1 createOrUpdateJSONContentSpecFromString(final RESTTextContentSpecV1 restEntity,
             final DatabaseOperation operation, final RESTLogDetailsV1 logDetails, final String expand) {
-        return createOrUpdateJSONContentSpecFromString(id, contentSpecString, operation, logDetails, expand, RESTv1Constants.JSON_URL,
+        return createOrUpdateJSONContentSpecFromString(restEntity, operation, logDetails, expand, RESTv1Constants.JSON_URL,
                 new ErrorLoggerManager(), true);
     }
 
     /**
      * Creates or Updates a content spec from a String representation of a content specification.
      *
-     * @param id                The content spec id being updated, or null if one is to be created.
-     * @param contentSpecString The content spec string representation.
-     * @param operation         The Database Operation type (CREATE or UPDATE).
-     * @param logDetails        The details about the changes that need to be logged.
-     * @param expand            The Expand Object that contains details about what should be expanded.
+     * @param restEntity      The content spec string representation object.
+     * @param operation       The Database Operation type (CREATE or UPDATE).
+     * @param logDetails      The details about the changes that need to be logged.
+     * @param expand          The Expand Object that contains details about what should be expanded.
      * @param dataType
-     * @param loggerManager     The Content Spec Logging manager to capture logs messages.
-     * @param saveWhenInvalid   If the Content Specification should be saved even if the text isn't valid.
+     * @param loggerManager   The Content Spec Logging manager to capture logs messages.
+     * @param saveWhenInvalid If the Content Specification should be saved even if the text isn't valid.
      * @return
      */
-    private RESTContentSpecV1 createOrUpdateJSONContentSpecFromString(final Integer id, final String contentSpecString,
+    private RESTTextContentSpecV1 createOrUpdateJSONContentSpecFromString(final RESTTextContentSpecV1 restEntity,
             final DatabaseOperation operation, final RESTLogDetailsV1 logDetails, final String expand, final String dataType,
             final ErrorLoggerManager loggerManager, boolean saveWhenInvalid) {
-        assert contentSpecString != null;
+        assert restEntity != null;
+
+        final Integer id = restEntity.getId();
+        final String contentSpecString = restEntity.getText();
 
         boolean success = true;
+        boolean textProcessed = false;
         RuntimeException exception = null;
         Integer csId = id;
 
@@ -1096,28 +1154,47 @@ public class BaseRESTv1 extends BaseREST {
             // Store the log details into the Logging Java Bean
             setLogDetails(entityManager, logDetails);
 
-            final DBProviderFactory providerFactory = ProviderUtilities.getDBProviderFactory(entityManager, transactionManager,
-                    enversLoggingBean);
-            final ProcessingOptions processingOptions = new ProcessingOptions();
+            // Apply the text separately
+            if (restEntity.hasParameterSet(RESTTextContentSpecV1.TEXT_NAME)) {
+                textProcessed = true;
+                final DBProviderFactory providerFactory = ProviderUtilities.getDBProviderFactory(entityManager, transactionManager,
+                        enversLoggingBean);
+                final ProcessingOptions processingOptions = new ProcessingOptions();
+                if (restEntity.getProcessingOptions() != null && restEntity.getProcessingOptions().getPermissive() != null) {
+                    processingOptions.setPermissiveMode(restEntity.getProcessingOptions().getPermissive());
+                }
 
-            final ContentSpecParser parser = new ContentSpecParser(providerFactory, loggerManager);
-            final ContentSpecProcessor processor = new ContentSpecProcessor(providerFactory, loggerManager, processingOptions);
+                final ContentSpecParser parser = new ContentSpecParser(providerFactory, loggerManager);
+                final ContentSpecProcessor processor = new ContentSpecProcessor(providerFactory, loggerManager, processingOptions);
 
-            // Process the content spec
-            success = processContentSpecString(id, contentSpecString, parser, processor, operation, dataType);
+                // Process the content spec
+                success = processContentSpecString(id, contentSpecString, parser, processor, operation, dataType);
+
+                csId = parser.getContentSpec().getId();
+            }
 
             // If the content spec processed correctly then commit the changes, otherwise roll them back.
             if (!success) {
-                transactionManager.rollback();
+                final int status = transactionManager.getStatus();
+                if (status != Status.STATUS_ROLLING_BACK && status != Status.STATUS_ROLLEDBACK && status != Status.STATUS_NO_TRANSACTION) {
+                    transactionManager.rollback();
+                }
             } else {
                 // Get the updated or created entity
-                csId = parser.getContentSpec().getId();
                 final ContentSpec entity = entityManager.find(ContentSpec.class, csId);
 
                 if (entity != null) {
+                    // Process any additional changes
+                    textContentSpecFactory.updateDBEntityFromRESTEntity(entity, restEntity);
+                    textContentSpecFactory.syncDBEntityWithRESTEntitySecondPass(entity, restEntity);
+
                     // Remove any errors that occurred previously
-                    entity.setErrors(null);
-                    entity.setFailedContentSpec(null);
+                    if (textProcessed) {
+                        entity.setErrors(loggerManager.generateLogs());
+                        entity.setFailedContentSpec(null);
+                    }
+
+                    entityManager.persist(entity);
                 }
                 transactionManager.commit();
 
@@ -1134,7 +1211,7 @@ public class BaseRESTv1 extends BaseREST {
             final String log = loggerManager.generateLogs();
             if (saveWhenInvalid) {
                 if (!success) {
-                    csId = setContentSpecErrors(id, contentSpecString, log, logDetails);
+                    csId = setContentSpecErrors(restEntity, contentSpecString, log, logDetails);
                 }
             } else {
                 throw new BadRequestException(log);
@@ -1144,7 +1221,7 @@ public class BaseRESTv1 extends BaseREST {
         if (exception != null) {
             throw exception;
         } else {
-            return getJSONResource(ContentSpec.class, new ContentSpecV1Factory(), csId, expand);
+            return getJSONResource(ContentSpec.class, textContentSpecFactory, csId, expand);
         }
     }
 
@@ -1178,8 +1255,14 @@ public class BaseRESTv1 extends BaseREST {
         if (success) {
             // Check that the id matches
             if (id != null && parser.getContentSpec() != null) {
-                if (!id.equals(parser.getContentSpec().getId())) {
+                if (parser.getContentSpec().getId() == null) {
+                    throw new BadRequestException("The Content Spec has no ID, but the request was to update an existing Content Spec.");
+                } else if (!id.equals(parser.getContentSpec().getId())) {
                     throw new BadRequestException("The Content Spec ID doesn't match the request ID.");
+                }
+            } else if (parser.getContentSpec() != null) {
+                if (parser.getContentSpec().getId() != null) {
+                    throw new BadRequestException("The Content Spec has an ID, but the request was to create a new Content Spec.");
                 }
             }
 
@@ -1193,14 +1276,17 @@ public class BaseRESTv1 extends BaseREST {
     /**
      * Set a Content Spec to include any errors messages from processing and the failed content spec.
      *
-     * @param id                The ID of the content spec to set the errors for.
+     * @param restEntity        The rest entity the request failed for.
      * @param contentSpecString The failed Content Spec string.
      * @param errors            The error messages.
      * @param logDetails        The log details for the failed Content Spec.
      * @return The ID of the Content Spec.
      */
-    private Integer setContentSpecErrors(final Integer id, final String contentSpecString, final String errors,
+    private Integer setContentSpecErrors(final RESTTextContentSpecV1 restEntity, final String contentSpecString,
+            final String errors,
             final RESTLogDetailsV1 logDetails) {
+        final Integer id = restEntity.getId();
+
         try {
             // Start a Transaction
             transactionManager.begin();
@@ -1223,6 +1309,10 @@ public class BaseRESTv1 extends BaseREST {
 
             entity.setErrors(errors);
             entity.setFailedContentSpec(contentSpecString);
+
+            // Process any additional changes
+            textContentSpecFactory.updateDBEntityFromRESTEntity(entity, restEntity);
+            textContentSpecFactory.syncDBEntityWithRESTEntitySecondPass(entity, restEntity);
 
             // Save the error messages
             entityManager.persist(entity);
@@ -1352,7 +1442,7 @@ public class BaseRESTv1 extends BaseREST {
             if (cause instanceof Failure) {
                 return (Failure) cause;
             } else if (cause instanceof ValidationException || cause instanceof CustomConstraintViolationException || cause instanceof
-                    org.hibernate.exception.ConstraintViolationException || cause instanceof javax.transaction.RollbackException) {
+                    org.hibernate.exception.ConstraintViolationException || cause instanceof RollbackException) {
                 break;
             } else if (cause instanceof PersistenceException) {
                 if (cause.getCause() != null && cause.getCause() instanceof org.hibernate.exception.ConstraintViolationException) {
@@ -1381,21 +1471,19 @@ public class BaseRESTv1 extends BaseREST {
 
             // Construct a "readable" message outlining the validation errors
             for (ConstraintViolation invalidValue : e.getConstraintViolations())
-                stringBuilder.append(invalidValue.getPropertyPath()).append(invalidValue.getMessage()).append("\n");
+                stringBuilder.append(invalidValue.getMessage()).append("\n");
 
             return new BadRequestException(stringBuilder.toString(), cause);
         } else if (cause instanceof EntityNotFoundException) {
             return new NotFoundException(cause);
         } else if (cause instanceof org.hibernate.exception.ConstraintViolationException) {
             return new BadRequestException(cause.getMessage());
-        } else if (cause instanceof javax.transaction.RollbackException) {
-            return new BadRequestException("This is most likely caused by the fact that two users are trying to save the same entity at the same time.\n" +
-                    "You can try saving again, or reload the entity to see if there were any changes made in the background.", cause);
-        } else if (cause instanceof ValidationException) {
-            return new BadRequestException(cause);
         } else if (cause instanceof ValidationException || cause instanceof PersistenceException || cause instanceof
                 CustomConstraintViolationException) {
-            return new BadRequestException(ex);
+            return new BadRequestException(cause);
+        } else if (cause instanceof RollbackException) {
+            return new BadRequestException("This is most likely caused by the fact that two users are trying to save the same entity at the same time.\n" +
+                    "You can try saving again, or reload the entity to see if there were any changes made in the background.", cause);
         } else if (cause instanceof ProviderException) {
             if (cause instanceof org.jboss.pressgang.ccms.provider.exception.NotFoundException) {
                 throw new NotFoundException(cause);
