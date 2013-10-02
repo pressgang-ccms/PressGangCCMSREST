@@ -56,6 +56,7 @@
         <class>org.jboss.pressgang.ccms.model.TopicToTopicSourceUrl</class>
         <class>org.jboss.pressgang.ccms.model.TranslatedTopic</class>
         <class>org.jboss.pressgang.ccms.model.TranslatedTopicData</class>
+        <class>org.jboss.pressgang.ccms.model.TranslatedTopicSecondOrderData</class>
         <class>org.jboss.pressgang.ccms.model.TranslatedTopicString</class>
         <class>org.jboss.pressgang.ccms.model.User</class>
         <class>org.jboss.pressgang.ccms.model.UserRole</class>

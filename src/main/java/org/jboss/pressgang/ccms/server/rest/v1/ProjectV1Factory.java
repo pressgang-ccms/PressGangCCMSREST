@@ -57,7 +57,7 @@ public class ProjectV1Factory extends RESTDataObjectFactory<RESTProjectV1, Proje
         if (expand != null && expand.contains(RESTProjectV1.TAGS_NAME)) {
             retValue.setTags(
                     RESTDataObjectCollectionFactory.create(RESTTagCollectionV1.class, tagFactory, entity.getTags(), RESTProjectV1.TAGS_NAME,
-                            dataType, expand, baseUrl, entityManager));
+                            dataType, expand, baseUrl, revision, entityManager));
         }
 
         retValue.setLinks(baseUrl, RESTv1Constants.PROJECT_URL_NAME, dataType, retValue.getId());

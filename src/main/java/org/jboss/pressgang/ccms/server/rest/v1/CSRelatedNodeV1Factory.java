@@ -12,6 +12,7 @@ import org.jboss.pressgang.ccms.rest.v1.collections.join.RESTAssignedPropertyTag
 import org.jboss.pressgang.ccms.rest.v1.constants.RESTv1Constants;
 import org.jboss.pressgang.ccms.rest.v1.entities.base.RESTBaseEntityV1;
 import org.jboss.pressgang.ccms.rest.v1.entities.contentspec.RESTCSNodeV1;
+import org.jboss.pressgang.ccms.rest.v1.entities.contentspec.enums.RESTCSNodeRelationshipModeV1;
 import org.jboss.pressgang.ccms.rest.v1.entities.contentspec.enums.RESTCSNodeRelationshipTypeV1;
 import org.jboss.pressgang.ccms.rest.v1.entities.contentspec.enums.RESTCSNodeTypeV1;
 import org.jboss.pressgang.ccms.rest.v1.entities.contentspec.join.RESTCSRelatedNodeV1;
@@ -39,6 +40,7 @@ public class CSRelatedNodeV1Factory extends RESTDataObjectFactory<RESTCSRelatedN
         final RESTCSRelatedNodeV1 retValue = new RESTCSRelatedNodeV1();
 
         final List<String> expandOptions = new ArrayList<String>();
+        expandOptions.add(RESTCSRelatedNodeV1.INHERITED_CONDITION_NAME);
         expandOptions.add(RESTBaseEntityV1.LOG_DETAILS_NAME);
         expandOptions.add(RESTCSRelatedNodeV1.PARENT_NAME);
         expandOptions.add(RESTCSRelatedNodeV1.PROPERTIES_NAME);
@@ -49,10 +51,12 @@ public class CSRelatedNodeV1Factory extends RESTDataObjectFactory<RESTCSRelatedN
 
         retValue.setId(entity.getRelatedNode().getId());
         retValue.setRelationshipId(entity.getId());
+        retValue.setRelationshipSort(entity.getRelationshipSort());
         retValue.setTitle(entity.getRelatedNode().getCSNodeTitle());
         retValue.setAdditionalText(entity.getRelatedNode().getAdditionalText());
         retValue.setTargetId(entity.getRelatedNode().getCSNodeTargetId());
         retValue.setRelationshipType(RESTCSNodeRelationshipTypeV1.getRelationshipType(entity.getRelationshipType()));
+        retValue.setRelationshipMode(RESTCSNodeRelationshipModeV1.getRelationshipMode(entity.getRelationshipMode()));
         retValue.setCondition(entity.getRelatedNode().getCondition());
         retValue.setNodeType(RESTCSNodeTypeV1.getNodeType(entity.getRelatedNode().getCSNodeType()));
         retValue.setEntityId(entity.getRelatedNode().getEntityId());
@@ -69,14 +73,20 @@ public class CSRelatedNodeV1Factory extends RESTDataObjectFactory<RESTCSRelatedN
         if (expandParentReferences && expand != null && expand.contains(
                 RESTCSRelatedNodeV1.PARENT_NAME) && entity.getRelatedNode().getParent() != null) {
             retValue.setParent(csNodeFactory.createRESTEntityFromDBEntity(entity.getRelatedNode().getParent(), baseUrl, dataType,
-                    expand.get(RESTCSNodeV1.PARENT_NAME)));
+                    expand.get(RESTCSNodeV1.PARENT_NAME), revision));
         }
 
         // CONTENT SPEC
-        if (expand != null && expand.contains(RESTCSRelatedNodeV1.CONTENT_SPEC_NAME) && entity.getRelatedNode().getContentSpec() != null)
+        if (expand != null && expand.contains(RESTCSRelatedNodeV1.CONTENT_SPEC_NAME) && entity.getRelatedNode().getContentSpec() != null) {
             retValue.setContentSpec(
                     contentSpecFactory.createRESTEntityFromDBEntity(entity.getRelatedNode().getContentSpec(), baseUrl, dataType,
                             expand.get(RESTCSRelatedNodeV1.CONTENT_SPEC_NAME), revision, expandParentReferences));
+        }
+
+        // INHERITED CONDITION
+        if (expand != null && expand.contains(RESTCSNodeV1.INHERITED_CONDITION_NAME)) {
+            retValue.setInheritedCondition(entity.getRelatedNode().getInheritedCondition());
+        }
 
         // PROPERTY TAGS
         if (expand != null && expand.contains(RESTCSRelatedNodeV1.PROPERTIES_NAME)) {
@@ -98,6 +108,8 @@ public class CSRelatedNodeV1Factory extends RESTDataObjectFactory<RESTCSRelatedN
             entity.setRelationshipType(RESTCSNodeRelationshipTypeV1.getRelationshipTypeId(dataObject.getRelationshipType()));
         if (dataObject.hasParameterSet(RESTCSRelatedNodeV1.RELATIONSHIP_SORT_NAME))
             entity.setRelationshipSort(dataObject.getRelationshipSort());
+        if (dataObject.hasParameterSet(RESTCSRelatedNodeV1.RELATIONSHIP_MODE_NAME))
+            entity.setRelationshipMode(RESTCSNodeRelationshipModeV1.getRelationshipModeId(dataObject.getRelationshipMode()));
     }
 
     @Override

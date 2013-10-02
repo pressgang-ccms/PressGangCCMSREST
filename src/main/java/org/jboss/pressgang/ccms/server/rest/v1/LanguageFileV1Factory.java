@@ -47,7 +47,7 @@ public class LanguageFileV1Factory extends RESTDataObjectFactory<RESTLanguageFil
         // Set the object references
         if (expandParentReferences && expand != null && expand.contains(RESTLanguageFileV1.FILE_NAME) && entity.getFile() != null) {
             retValue.setFile(fileFactory.createRESTEntityFromDBEntity(entity.getFile(), baseUrl, dataType,
-                    expand.get(RESTLanguageFileV1.FILE_NAME)));
+                    expand.get(RESTLanguageFileV1.FILE_NAME), revision));
         }
 
         // REVISIONS

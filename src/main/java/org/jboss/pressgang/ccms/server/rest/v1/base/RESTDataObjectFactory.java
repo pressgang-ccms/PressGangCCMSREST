@@ -4,12 +4,12 @@ import javax.inject.Inject;
 import javax.persistence.EntityManager;
 
 import org.jboss.pressgang.ccms.model.base.AuditedEntity;
-import org.jboss.pressgang.ccms.model.utils.EnversUtilities;
 import org.jboss.pressgang.ccms.rest.v1.collections.base.RESTBaseCollectionItemV1;
 import org.jboss.pressgang.ccms.rest.v1.collections.base.RESTBaseCollectionV1;
 import org.jboss.pressgang.ccms.rest.v1.entities.base.RESTBaseEntityV1;
 import org.jboss.pressgang.ccms.rest.v1.expansion.ExpandDataTrunk;
 import org.jboss.pressgang.ccms.server.rest.v1.LogDetailsV1Factory;
+import org.jboss.pressgang.ccms.server.utils.EnversUtilities;
 import org.jboss.resteasy.spi.BadRequestException;
 import org.jboss.resteasy.spi.InternalServerErrorException;
 
@@ -93,7 +93,8 @@ public abstract class RESTDataObjectFactory<T extends RESTBaseEntityV1<T, V, W>,
         final T retValue = createRESTEntityFromDBEntityInternal(entity, baseUrl, dataType, expand, revision, expandParentReferences);
 
         // Set the entities revision
-        final Number fixedRevision = revision == null ? EnversUtilities.getLatestRevision(entityManager, entity) : revision;
+        final Number fixedRevision = revision == null ? EnversUtilities.getLatestRevision(entityManager,
+                entity) : EnversUtilities.getClosestRevision(entityManager, entity, revision);
         retValue.setRevision(fixedRevision.intValue());
 
         // Add the log details
@@ -140,8 +141,8 @@ public abstract class RESTDataObjectFactory<T extends RESTBaseEntityV1<T, V, W>,
      * 3. Do the Second Pass on any Update items.<br />
      * 4. Set the singular entities, so new entities can be found.<br />
      *
-     * @param entity         The database entity to be synced from the REST Entity.
-     * @param dataObject     The REST entity object.
+     * @param entity     The database entity to be synced from the REST Entity.
+     * @param dataObject The REST entity object.
      */
     public void syncDBEntityWithRESTEntitySecondPass(final U entity, final T dataObject) {
 

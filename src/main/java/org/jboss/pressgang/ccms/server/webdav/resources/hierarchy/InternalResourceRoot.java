@@ -1,6 +1,5 @@
 package org.jboss.pressgang.ccms.server.webdav.resources.hierarchy;
 
-import javax.annotation.Nullable;
 import javax.validation.constraints.NotNull;
 import javax.ws.rs.core.UriInfo;
 import java.util.ArrayList;
@@ -12,6 +11,7 @@ import org.jboss.pressgang.ccms.server.webdav.managers.CompatibilityManager;
 import org.jboss.pressgang.ccms.server.webdav.resources.InternalResource;
 import org.jboss.pressgang.ccms.server.webdav.resources.MultiStatusReturnValue;
 import org.jboss.pressgang.ccms.server.webdav.resources.hierarchy.topics.InternalResourceTopicVirtualFolder;
+import org.jetbrains.annotations.Nullable;
 
 /**
  * The root folder of the WebDAV hierarchy.

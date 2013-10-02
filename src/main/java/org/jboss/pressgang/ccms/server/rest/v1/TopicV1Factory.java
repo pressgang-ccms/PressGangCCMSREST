@@ -97,7 +97,7 @@ public class TopicV1Factory extends RESTDataObjectFactory<RESTTopicV1, Topic, RE
         // TAGS
         if (expand != null && expand.contains(RESTTopicV1.TAGS_NAME)) {
             retValue.setTags(RESTDataObjectCollectionFactory.create(RESTTagCollectionV1.class, tagFactory, entity.getTags(),
-                    RESTv1Constants.TAGS_EXPANSION_NAME, dataType, expand, baseUrl, entityManager));
+                    RESTv1Constants.TAGS_EXPANSION_NAME, dataType, expand, baseUrl, revision, entityManager));
         }
 
         // OUTGOING RELATIONSHIPS
@@ -140,13 +140,13 @@ public class TopicV1Factory extends RESTDataObjectFactory<RESTTopicV1, Topic, RE
             retValue.setTranslatedTopics_OTM(
                     RESTDataObjectCollectionFactory.create(RESTTranslatedTopicCollectionV1.class, translatedTopicFactory,
                             entity.getTranslatedTopics(entityManager, revision), RESTTopicV1.TRANSLATEDTOPICS_NAME, dataType, expand,
-                            baseUrl, revision, false, entityManager));
+                            baseUrl, false, entityManager));
         }
 
         // CONTENT SPECS
         if (expand != null && expand.contains(RESTTopicV1.CONTENTSPECS_NAME)) {
             retValue.setContentSpecs_OTM(RESTDataObjectCollectionFactory.create(RESTContentSpecCollectionV1.class, contentSpecFactory,
-                    entity.getContentSpecs(entityManager), RESTTopicV1.CONTENTSPECS_NAME, dataType, expand, baseUrl, revision, false,
+                    entity.getContentSpecs(entityManager), RESTTopicV1.CONTENTSPECS_NAME, dataType, expand, baseUrl, false,
                     entityManager));
         }
 

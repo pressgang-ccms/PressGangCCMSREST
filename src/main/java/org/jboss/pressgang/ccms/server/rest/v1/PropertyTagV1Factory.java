@@ -1,9 +1,12 @@
 package org.jboss.pressgang.ccms.server.rest.v1;
 
+import static com.google.common.base.Strings.isNullOrEmpty;
+
 import javax.enterprise.context.ApplicationScoped;
 import javax.inject.Inject;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.regex.Pattern;
 
 import org.jboss.pressgang.ccms.model.PropertyTag;
 import org.jboss.pressgang.ccms.model.PropertyTagCategory;
@@ -75,7 +78,17 @@ public class PropertyTagV1Factory extends RESTDataObjectFactory<RESTPropertyTagV
         if (dataObject.hasParameterSet(RESTPropertyTagV1.DESCRIPTION_NAME)) entity.setPropertyTagDescription(dataObject.getDescription());
         if (dataObject.hasParameterSet(RESTPropertyTagV1.CANBENULL_NAME)) entity.setPropertyTagCanBeNull(dataObject.getCanBeNull());
         if (dataObject.hasParameterSet(RESTPropertyTagV1.NAME_NAME)) entity.setPropertyTagName(dataObject.getName());
-        if (dataObject.hasParameterSet(RESTPropertyTagV1.REGEX_NAME)) entity.setPropertyTagRegex(dataObject.getRegex());
+        if (dataObject.hasParameterSet(RESTPropertyTagV1.REGEX_NAME)) {
+            if (!isNullOrEmpty(dataObject.getRegex())) {
+                // Validate that the condition is valid
+                try {
+                    Pattern.compile(dataObject.getRegex());
+                } catch (Exception e) {
+                    throw new BadRequestException(e);
+                }
+            }
+            entity.setPropertyTagRegex(dataObject.getRegex());
+        }
         if (dataObject.hasParameterSet(RESTPropertyTagV1.ISUNIQUE_NAME)) entity.setPropertyTagIsUnique(dataObject.getIsUnique());
 
         if (dataObject.hasParameterSet(

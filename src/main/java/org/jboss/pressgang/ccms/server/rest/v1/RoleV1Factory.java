@@ -66,21 +66,21 @@ public class RoleV1Factory extends RESTDataObjectFactory<RESTRoleV1, Role, RESTR
         // USERS
         if (expand != null && expand.contains(RESTRoleV1.USERS_NAME)) {
             retValue.setUsers(RESTDataObjectCollectionFactory.create(RESTUserCollectionV1.class, userFactory, entity.getUsers(),
-                    RESTRoleV1.USERS_NAME, dataType, expand, baseUrl, entityManager));
+                    RESTRoleV1.USERS_NAME, dataType, expand, baseUrl, revision, entityManager));
         }
 
         // PARENT ROLES
         if (expand != null && expand.contains(RESTRoleV1.PARENTROLES_NAME)) {
             retValue.setParentRoles(
                     RESTDataObjectCollectionFactory.create(RESTRoleCollectionV1.class, this, entity.getParentRoles(),
-                            RESTRoleV1.PARENTROLES_NAME, dataType, expand, baseUrl, entityManager));
+                            RESTRoleV1.PARENTROLES_NAME, dataType, expand, baseUrl, revision, entityManager));
         }
 
         // CHILD ROLES
         if (expand != null && expand.contains(RESTRoleV1.CHILDROLES_NAME)) {
             retValue.setChildRoles(
                     RESTDataObjectCollectionFactory.create(RESTRoleCollectionV1.class, this, entity.getChildRoles(),
-                            RESTRoleV1.CHILDROLES_NAME, dataType, expand, baseUrl, entityManager));
+                            RESTRoleV1.CHILDROLES_NAME, dataType, expand, baseUrl, revision, entityManager));
         }
 
         retValue.setLinks(baseUrl, RESTv1Constants.ROLE_URL_NAME, dataType, retValue.getId());

@@ -77,31 +77,31 @@ public class TagV1Factory extends RESTDataObjectFactory<RESTTagV1, Tag, RESTTagC
         // CATEGORIES
         if (expand != null && expand.contains(RESTTagV1.CATEGORIES_NAME)) {
             retValue.setCategories(RESTDataObjectCollectionFactory.create(RESTCategoryInTagCollectionV1.class, categoryInTagFactory,
-                    entity.getTagToCategoriesList(), RESTTagV1.CATEGORIES_NAME, dataType, expand, baseUrl, entityManager));
+                    entity.getTagToCategoriesList(), RESTTagV1.CATEGORIES_NAME, dataType, expand, baseUrl, revision, entityManager));
         }
 
         // PARENT TAGS
         if (expand != null && expand.contains(RESTTagV1.PARENT_TAGS_NAME)) {
             retValue.setParentTags(RESTDataObjectCollectionFactory.create(RESTTagCollectionV1.class, this, entity.getParentTags(),
-                    RESTTagV1.PARENT_TAGS_NAME, dataType, expand, baseUrl, entityManager));
+                    RESTTagV1.PARENT_TAGS_NAME, dataType, expand, baseUrl, revision, entityManager));
         }
 
         // CHILD TAGS
         if (expand != null && expand.contains(RESTTagV1.CHILD_TAGS_NAME)) {
             retValue.setChildTags(RESTDataObjectCollectionFactory.create(RESTTagCollectionV1.class, this, entity.getChildTags(),
-                    RESTTagV1.CHILD_TAGS_NAME, dataType, expand, baseUrl, entityManager));
+                    RESTTagV1.CHILD_TAGS_NAME, dataType, expand, baseUrl, revision, entityManager));
         }
 
         // PROPERTY TAGS
         if (expand != null && expand.contains(RESTTagV1.PROPERTIES_NAME)) {
             retValue.setProperties(RESTDataObjectCollectionFactory.create(RESTAssignedPropertyTagCollectionV1.class, tagPropertyTagFactory,
-                    entity.getPropertyTagsList(), RESTTagV1.PROPERTIES_NAME, dataType, expand, baseUrl, entityManager));
+                    entity.getPropertyTagsList(), RESTTagV1.PROPERTIES_NAME, dataType, expand, baseUrl, revision, entityManager));
         }
 
         // PROJECTS
         if (expand != null && expand.contains(RESTTagV1.PROJECTS_NAME)) {
             retValue.setProjects(RESTDataObjectCollectionFactory.create(RESTProjectCollectionV1.class, projectFactory, entity.getProjects(),
-                    RESTTagV1.PROJECTS_NAME, dataType, expand, baseUrl, entityManager));
+                    RESTTagV1.PROJECTS_NAME, dataType, expand, baseUrl, revision, entityManager));
         }
 
         retValue.setLinks(baseUrl, RESTv1Constants.TAG_URL_NAME, dataType, retValue.getId());

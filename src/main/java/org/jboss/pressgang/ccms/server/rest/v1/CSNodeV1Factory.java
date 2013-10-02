@@ -52,6 +52,7 @@ public class CSNodeV1Factory extends RESTDataObjectFactory<RESTCSNodeV1, CSNode,
 
         final List<String> expandOptions = new ArrayList<String>();
         expandOptions.add(RESTCSNodeV1.CHILDREN_NAME);
+        expandOptions.add(RESTCSNodeV1.INHERITED_CONDITION_NAME);
         expandOptions.add(RESTBaseEntityV1.LOG_DETAILS_NAME);
         expandOptions.add(RESTCSNodeV1.NEXT_NODE_NAME);
         expandOptions.add(RESTCSNodeV1.PARENT_NAME);
@@ -80,36 +81,43 @@ public class CSNodeV1Factory extends RESTDataObjectFactory<RESTCSNodeV1, CSNode,
 
         // PARENT
         if (expandParentReferences && expand != null && expand.contains(RESTCSNodeV1.PARENT_NAME) && entity.getParent() != null) {
-            retValue.setParent(createRESTEntityFromDBEntity(entity.getParent(), baseUrl, dataType, expand.get(RESTCSNodeV1.PARENT_NAME)));
+            retValue.setParent(
+                    createRESTEntityFromDBEntity(entity.getParent(), baseUrl, dataType, expand.get(RESTCSNodeV1.PARENT_NAME), revision));
         }
 
         // CONTENT SPEC
-        if (expand != null && expand.contains(RESTCSNodeV1.CONTENT_SPEC_NAME) && entity.getContentSpec() != null) retValue.setContentSpec(
-                contentSpecFactory.createRESTEntityFromDBEntity(entity.getContentSpec(), baseUrl, dataType,
-                        expand.get(RESTCSNodeV1.CONTENT_SPEC_NAME), revision, expandParentReferences));
+        if (expand != null && expand.contains(RESTCSNodeV1.CONTENT_SPEC_NAME) && entity.getContentSpec() != null) {
+            retValue.setContentSpec(contentSpecFactory.createRESTEntityFromDBEntity(entity.getContentSpec(), baseUrl, dataType,
+                    expand.get(RESTCSNodeV1.CONTENT_SPEC_NAME), revision, expandParentReferences));
+        }
+
+        // INHERITED CONDITION
+        if (expand != null && expand.contains(RESTCSNodeV1.INHERITED_CONDITION_NAME)) {
+            retValue.setInheritedCondition(entity.getInheritedCondition());
+        }
 
         // NEXT
         if (expand != null && expand.contains(RESTCSNodeV1.NEXT_NODE_NAME) && entity.getNext() != null) {
             retValue.setNextNode(
-                    createRESTEntityFromDBEntity(entity.getNext(), baseUrl, dataType, expand.get(RESTCSNodeV1.NEXT_NODE_NAME)));
+                    createRESTEntityFromDBEntity(entity.getNext(), baseUrl, dataType, expand.get(RESTCSNodeV1.NEXT_NODE_NAME), revision));
         }
 
         // CHILDREN NODES
         if (expand != null && expand.contains(RESTContentSpecV1.CHILDREN_NAME)) {
             retValue.setChildren_OTM(RESTDataObjectCollectionFactory.create(RESTCSNodeCollectionV1.class, this, entity.getChildrenList(),
-                    RESTCSNodeV1.CHILDREN_NAME, dataType, expand, baseUrl, expandParentReferences, entityManager));
+                    RESTCSNodeV1.CHILDREN_NAME, dataType, expand, baseUrl, revision, expandParentReferences, entityManager));
         }
 
         // RELATED FROM
         if (expand != null && expand.contains(RESTCSNodeV1.RELATED_FROM_NAME)) {
             retValue.setRelatedFromNodes(RESTDataObjectCollectionFactory.create(RESTCSRelatedNodeCollectionV1.class, csRelatedNodeFactory,
-                    entity.getRelatedFromNodesList(), RESTCSNodeV1.RELATED_FROM_NAME, dataType, expand, baseUrl, entityManager));
+                    entity.getRelatedFromNodesList(), RESTCSNodeV1.RELATED_FROM_NAME, dataType, expand, baseUrl, revision, entityManager));
         }
 
         // RELATED TO
         if (expand != null && expand.contains(RESTCSNodeV1.RELATED_TO_NAME)) {
             retValue.setRelatedToNodes(RESTDataObjectCollectionFactory.create(RESTCSRelatedNodeCollectionV1.class, csRelatedNodeFactory,
-                    entity.getRelatedToNodesList(), RESTCSNodeV1.RELATED_TO_NAME, dataType, expand, baseUrl, entityManager));
+                    entity.getRelatedToNodesList(), RESTCSNodeV1.RELATED_TO_NAME, dataType, expand, baseUrl, revision, entityManager));
         }
 
         // TRANSLATED STRINGS
@@ -340,7 +348,8 @@ public class CSNodeV1Factory extends RESTDataObjectFactory<RESTCSNodeV1, CSNode,
                     if (dbEntity == null)
                         throw new BadRequestException("No CSNode entity was found with the primary key " + restEntity.getId());
 
-                    entity.addRelationshipTo(dbEntity, RESTCSNodeRelationshipTypeV1.getRelationshipTypeId(restEntity.getRelationshipType()));
+                    entity.addRelationshipTo(dbEntity,
+                            RESTCSNodeRelationshipTypeV1.getRelationshipTypeId(restEntity.getRelationshipType()));
                 } else if (restEntityItem.returnIsUpdateItem()) {
                     final CSNodeToCSNode dbEntity = entityManager.find(CSNodeToCSNode.class, restEntity.getRelationshipId());
                     if (dbEntity == null) throw new BadRequestException(

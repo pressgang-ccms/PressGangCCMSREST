@@ -58,6 +58,7 @@ public class TextContentSpecV1Factory extends RESTDataObjectFactory<RESTTextCont
         expandOptions.add(RESTTextContentSpecV1.PROPERTIES_NAME);
         expandOptions.add(RESTTextContentSpecV1.TAGS_NAME);
         expandOptions.add(RESTTextContentSpecV1.TEXT_NAME);
+        expandOptions.add(RESTTextContentSpecV1.TRANSLATED_CONTENT_SPECS_NAME);
         if (revision == null) expandOptions.add(RESTBaseEntityV1.REVISIONS_NAME);
         retValue.setExpand(expandOptions);
 
@@ -65,7 +66,7 @@ public class TextContentSpecV1Factory extends RESTDataObjectFactory<RESTTextCont
         retValue.setLocale(entity.getLocale());
         retValue.setType(RESTContentSpecTypeV1.getContentSpecType(entity.getContentSpecType()));
         retValue.setLastPublished(entity.getLastPublished());
-        retValue.setLastModified(entity.getLastModified());
+        retValue.setLastModified(EnversUtilities.getFixedLastModifiedDate(entityManager, entity));
         retValue.setErrors(entity.getErrors());
         retValue.setFailedContentSpec(ContentSpecUtilities.fixFailedContentSpec(entity));
         final CSNode titleNode = entity.getContentSpecTitle();
@@ -99,7 +100,7 @@ public class TextContentSpecV1Factory extends RESTDataObjectFactory<RESTTextCont
         // TAGS
         if (expand != null && expand.contains(RESTContentSpecV1.TAGS_NAME)) {
             retValue.setTags(RESTDataObjectCollectionFactory.create(RESTTagCollectionV1.class, tagFactory, entity.getTags(),
-                    RESTTextContentSpecV1.TAGS_NAME, dataType, expand, baseUrl, entityManager));
+                    RESTTextContentSpecV1.TAGS_NAME, dataType, expand, baseUrl, revision, entityManager));
         }
 
         // TRANSLATIONS

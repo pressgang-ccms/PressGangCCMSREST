@@ -57,7 +57,7 @@ public class CategoryInTagV1Factory extends RESTDataObjectFactory<RESTCategoryIn
         if (expand != null && expand.contains(RESTCategoryInTagV1.TAGS_NAME)) {
             retValue.setTags(RESTDataObjectCollectionFactory.create(RESTTagInCategoryCollectionV1.class, tagInCategoryFactory,
                     entity.getCategory().getTagToCategoriesArray(), RESTCategoryInTagV1.TAGS_NAME, dataType, expand, baseUrl,
-                    entityManager));
+                    revision, entityManager));
         }
 
         retValue.setLinks(baseUrl, RESTv1Constants.CATEGORY_URL_NAME, dataType, retValue.getId());

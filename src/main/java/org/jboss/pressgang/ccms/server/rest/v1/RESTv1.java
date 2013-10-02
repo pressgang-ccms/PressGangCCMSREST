@@ -15,7 +15,6 @@ import java.util.Set;
 import org.hibernate.Session;
 import org.hibernate.search.FullTextSession;
 import org.hibernate.search.Search;
-import org.jboss.pressgang.ccms.contentspec.utils.CSTransformer;
 import org.jboss.pressgang.ccms.filter.BlobConstantFieldFilter;
 import org.jboss.pressgang.ccms.filter.CategoryFieldFilter;
 import org.jboss.pressgang.ccms.filter.ContentSpecFieldFilter;
@@ -33,6 +32,7 @@ import org.jboss.pressgang.ccms.filter.TagFieldFilter;
 import org.jboss.pressgang.ccms.filter.TopicFieldFilter;
 import org.jboss.pressgang.ccms.filter.TranslatedContentSpecFieldFilter;
 import org.jboss.pressgang.ccms.filter.TranslatedContentSpecNodeFieldFilter;
+import org.jboss.pressgang.ccms.filter.TranslatedTopicFieldFilter;
 import org.jboss.pressgang.ccms.filter.UserFieldFilter;
 import org.jboss.pressgang.ccms.filter.builder.BlobConstantFilterQueryBuilder;
 import org.jboss.pressgang.ccms.filter.builder.CategoryFilterQueryBuilder;
@@ -74,8 +74,6 @@ import org.jboss.pressgang.ccms.model.contentspec.CSNode;
 import org.jboss.pressgang.ccms.model.contentspec.ContentSpec;
 import org.jboss.pressgang.ccms.model.contentspec.TranslatedCSNode;
 import org.jboss.pressgang.ccms.model.contentspec.TranslatedContentSpec;
-import org.jboss.pressgang.ccms.provider.ContentSpecProvider;
-import org.jboss.pressgang.ccms.provider.DBProviderFactory;
 import org.jboss.pressgang.ccms.rest.v1.collections.RESTBlobConstantCollectionV1;
 import org.jboss.pressgang.ccms.rest.v1.collections.RESTCategoryCollectionV1;
 import org.jboss.pressgang.ccms.rest.v1.collections.RESTFileCollectionV1;
@@ -128,15 +126,12 @@ import org.jboss.pressgang.ccms.rest.v1.jaxrsinterfaces.RESTInterfaceAdvancedV1;
 import org.jboss.pressgang.ccms.server.rest.v1.base.BaseRESTv1;
 import org.jboss.pressgang.ccms.server.utils.Constants;
 import org.jboss.pressgang.ccms.server.utils.ContentSpecUtilities;
-import org.jboss.pressgang.ccms.server.utils.ProviderUtilities;
 import org.jboss.pressgang.ccms.server.utils.TopicUtilities;
 import org.jboss.pressgang.ccms.utils.common.CollectionUtilities;
 import org.jboss.pressgang.ccms.utils.common.DocBookUtilities;
 import org.jboss.pressgang.ccms.utils.common.XMLUtilities;
 import org.jboss.pressgang.ccms.utils.common.ZipUtilities;
 import org.jboss.pressgang.ccms.utils.constants.CommonConstants;
-import org.jboss.pressgang.ccms.wrapper.ContentSpecWrapper;
-import org.jboss.pressgang.ccms.wrapper.collection.CollectionWrapper;
 import org.jboss.resteasy.plugins.providers.atom.Feed;
 import org.jboss.resteasy.specimpl.PathSegmentImpl;
 import org.jboss.resteasy.spi.BadRequestException;
@@ -996,7 +991,7 @@ public class RESTv1 extends BaseRESTv1 implements RESTBaseInterfaceV1, RESTInter
     @Override
     public RESTTranslatedTopicCollectionV1 getJSONTranslatedTopicsWithQuery(PathSegment query, final String expand) {
         return getJSONResourcesFromQuery(RESTTranslatedTopicCollectionV1.class, query.getMatrixParameters(),
-                TranslatedTopicDataFilterQueryBuilder.class, new TopicFieldFilter(), translatedTopicFactory,
+                TranslatedTopicDataFilterQueryBuilder.class, new TranslatedTopicFieldFilter(), translatedTopicFactory,
                 RESTv1Constants.TRANSLATEDTOPICS_EXPANSION_NAME, expand);
     }
 
@@ -2517,7 +2512,11 @@ public class RESTv1 extends BaseRESTv1 implements RESTBaseInterfaceV1, RESTInter
     public String getTEXTContentSpec(final Integer id) {
         if (id == null) throw new BadRequestException("The id parameter can not be null");
 
-        return ContentSpecUtilities.getContentSpecText(id, entityManager);
+        try {
+            return ContentSpecUtilities.getContentSpecText(id, entityManager);
+        } catch (Throwable e) {
+            throw processError(null, e);
+        }
     }
 
     @Override
@@ -2525,26 +2524,30 @@ public class RESTv1 extends BaseRESTv1 implements RESTBaseInterfaceV1, RESTInter
         if (id == null) throw new BadRequestException("The id parameter can not be null");
         if (revision == null) throw new BadRequestException("The revision parameter can not be null");
 
-        return ContentSpecUtilities.getContentSpecText(id, revision, entityManager);
+        try {
+            return ContentSpecUtilities.getContentSpecText(id, revision, entityManager);
+        } catch (Throwable e) {
+            throw processError(null, e);
+        }
     }
 
     @Override
-    public String updateTEXTContentSpec(final Integer id, final String contentSpec, final Boolean permissive, final String message,
+    public String updateTEXTContentSpec(final Integer id, final String contentSpec, final Boolean strictTitles, final String message,
             final Integer flag, final String userId) {
         if (id == null) throw new BadRequestException("The id parameter can not be null");
         if (contentSpec == null) throw new BadRequestException("The contentSpec parameter can not be null");
 
         final RESTLogDetailsV1 logDetails = generateLogDetails(message, flag, userId);
-        return updateTEXTContentSpecFromString(id, contentSpec, permissive, logDetails);
+        return updateTEXTContentSpecFromString(id, contentSpec, strictTitles, logDetails);
     }
 
     @Override
-    public String createTEXTContentSpec(final String contentSpec, final Boolean permissive, final String message, final Integer flag,
+    public String createTEXTContentSpec(final String contentSpec, final Boolean strictTitles, final String message, final Integer flag,
             final String userId) {
         if (contentSpec == null) throw new BadRequestException("The contentSpec parameter can not be null");
 
         final RESTLogDetailsV1 logDetails = generateLogDetails(message, flag, userId);
-        return createTEXTContentSpecFromString(contentSpec, permissive, logDetails);
+        return createTEXTContentSpecFromString(contentSpec, strictTitles, logDetails);
     }
 
     @Override
@@ -2604,21 +2607,20 @@ public class RESTv1 extends BaseRESTv1 implements RESTBaseInterfaceV1, RESTInter
     public byte[] getZIPContentSpecsWithQuery(final PathSegment query) {
         response.getOutputHeaders().putSingle("Content-Disposition", "filename=ContentSpecs.zip");
 
-        final DBProviderFactory providerFactory = ProviderUtilities.getDBProviderFactory(entityManager);
-        final CollectionWrapper<ContentSpecWrapper> contentSpecs = providerFactory.getProvider(
-                ContentSpecProvider.class).getContentSpecsWithQuery(query.toString());
-        final CSTransformer transformer = new CSTransformer();
+        final CriteriaQuery<ContentSpec> contentSpecQuery = getEntitiesFromQuery(query.getMatrixParameters(),
+                new ContentSpecFilterQueryBuilder(entityManager), new ContentSpecFieldFilter());
+        final List<ContentSpec> contentSpecs = entityManager.createQuery(contentSpecQuery).getResultList();
 
         final HashMap<String, byte[]> files = new HashMap<String, byte[]>();
         try {
-            for (final ContentSpecWrapper entity : contentSpecs.getItems()) {
-                final org.jboss.pressgang.ccms.contentspec.ContentSpec contentSpec = transformer.transform(entity, providerFactory);
-                files.put(contentSpec.getId() + ".contentspec", contentSpec.toString().getBytes("UTF-8"));
+            for (final ContentSpec entity : contentSpecs) {
+                final String contentSpec = ContentSpecUtilities.getContentSpecText(entity.getId(), null, entityManager);
+                files.put(entity.getId() + ".contentspec", contentSpec.getBytes("UTF-8"));
             }
 
             return ZipUtilities.createZip(files);
-        } catch (Exception e) {
-            throw new InternalServerErrorException(e);
+        } catch (Throwable e) {
+            throw processError(null, e);
         }
     }
 

@@ -3,7 +3,6 @@ package org.jboss.pressgang.ccms.server.webdav.resources;
 import static javax.ws.rs.core.Response.Status.OK;
 import static net.java.dev.webdav.jaxrs.xml.properties.ResourceType.COLLECTION;
 
-import javax.annotation.Nullable;
 import javax.validation.constraints.NotNull;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
@@ -26,6 +25,7 @@ import org.jboss.pressgang.ccms.server.webdav.resources.hierarchy.topics.Interna
 import org.jboss.pressgang.ccms.server.webdav.resources.hierarchy.topics.topic.InternalResourceTopic;
 import org.jboss.pressgang.ccms.server.webdav.resources.hierarchy.topics.topic.fields.InternalResourceTempTopicFile;
 import org.jboss.pressgang.ccms.server.webdav.resources.hierarchy.topics.topic.fields.InternalResourceTopicContent;
+import org.jetbrains.annotations.Nullable;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
