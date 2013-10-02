@@ -26,18 +26,17 @@
     </context-param>
 
     <!--
-        https://groups.google.com/forum/#!searchin/javamelody/http_transform_pattern/javamelody/v-IN8cXoALM/6kTUPooL1xYJ
-
+        http://stackoverflow.com/questions/19147762/javamelody-crashing-the-server-with-thousands-of-rrd-files/19147763#19147763
         Aggregate all requests into single files to prevent thousands of rrd files being created.
     -->
     <context-param>
         <param-name>javamelody.http-transform-pattern</param-name>
-        <param-value>/rest/.*</param-value>
+        <param-value>(?&lt;=/rest/).*</param-value>
     </context-param>
 
     <context-param>
         <param-name>javamelody.sql-transform-pattern</param-name>
-        <param-value>/rest/.*</param-value>
+        <param-value>.*</param-value>
     </context-param>
 
 
