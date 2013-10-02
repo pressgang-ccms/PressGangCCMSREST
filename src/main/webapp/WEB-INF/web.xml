@@ -25,6 +25,22 @@
         <param-value>java:/PressGangCCMSDatasource</param-value>
     </context-param>
 
+    <!--
+        https://groups.google.com/forum/#!searchin/javamelody/http_transform_pattern/javamelody/v-IN8cXoALM/6kTUPooL1xYJ
+
+        Aggregate all requests into single files to prevent thousands of rrd files being created.
+    -->
+    <context-param>
+        <param-name>javamelody.http-transform-pattern</param-name>
+        <param-value>.+</param-value>
+    </context-param>
+
+    <context-param>
+        <param-name>javamelody.sql-transform-pattern</param-name>
+        <param-value>.+</param-value>
+    </context-param>
+
+
     <!-- Liquibase Parameters -->
     <context-param>
         <param-name>liquibase.changelog</param-name>
