@@ -4,12 +4,12 @@ import javax.inject.Inject;
 import javax.persistence.EntityManager;
 
 import org.jboss.pressgang.ccms.model.base.AuditedEntity;
-import org.jboss.pressgang.ccms.model.utils.EnversUtilities;
 import org.jboss.pressgang.ccms.rest.v1.collections.base.RESTBaseCollectionItemV1;
 import org.jboss.pressgang.ccms.rest.v1.collections.base.RESTBaseCollectionV1;
 import org.jboss.pressgang.ccms.rest.v1.entities.base.RESTBaseEntityV1;
 import org.jboss.pressgang.ccms.rest.v1.expansion.ExpandDataTrunk;
 import org.jboss.pressgang.ccms.server.rest.v1.LogDetailsV1Factory;
+import org.jboss.pressgang.ccms.server.utils.EnversUtilities;
 import org.jboss.resteasy.spi.BadRequestException;
 import org.jboss.resteasy.spi.InternalServerErrorException;
 
@@ -93,7 +93,8 @@ public abstract class RESTDataObjectFactory<T extends RESTBaseEntityV1<T, V, W>,
         final T retValue = createRESTEntityFromDBEntityInternal(entity, baseUrl, dataType, expand, revision, expandParentReferences);
 
         // Set the entities revision
-        final Number fixedRevision = revision == null ? EnversUtilities.getLatestRevision(entityManager, entity) : revision;
+        final Number fixedRevision = revision == null ? EnversUtilities.getLatestRevision(entityManager,
+                entity) : EnversUtilities.getClosestRevision(entityManager, entity, revision);
         retValue.setRevision(fixedRevision.intValue());
 
         // Add the log details
@@ -118,12 +119,34 @@ public abstract class RESTDataObjectFactory<T extends RESTBaseEntityV1<T, V, W>,
             final ExpandDataTrunk expand, final Number revision, final boolean expandParentReferences);
 
     /**
-     * Populates the values of a database entity from a REST entity
+     * Populates the values of a database entity from a REST entity. This step should iterate over "One to Many" or "Many to Many"
+     * collections and do the following:<br />
+     * <br />
+     * 1. Process any Remove items.<br />
+     * 2. Create any "One to Many" Add items and do the First Pass on the new entities.<br />
+     * 3. Do the First Pass on any Update items.<br />
      *
      * @param entity     The database entity to be synced from the REST Entity.
      * @param dataObject The REST entity object.
      */
-    protected abstract void syncDBEntityWithRESTEntity(final U entity, final T dataObject);
+    protected abstract void syncDBEntityWithRESTEntityFirstPass(final U entity, final T dataObject);
+
+    /**
+     * Populates the entities for new entities, that were created in the first pass. This step should iterate over "One to Many" or "Many
+     * to Many"
+     * collections and do the following:<br />
+     * <br />
+     * 1. Do the Second Pass "One to Many" Add items.<br />
+     * 2. Add the "Many to Many" Add items.<br />
+     * 3. Do the Second Pass on any Update items.<br />
+     * 4. Set the singular entities, so new entities can be found.<br />
+     *
+     * @param entity     The database entity to be synced from the REST Entity.
+     * @param dataObject The REST entity object.
+     */
+    public void syncDBEntityWithRESTEntitySecondPass(final U entity, final T dataObject) {
+
+    }
 
     /**
      * Creates, populates and returns a new database entity from a REST entity
@@ -134,7 +157,7 @@ public abstract class RESTDataObjectFactory<T extends RESTBaseEntityV1<T, V, W>,
     public U createDBEntityFromRESTEntity(final T dataObject) {
         try {
             final U entity = getDatabaseClass().newInstance();
-            syncDBEntityWithRESTEntity(entity, dataObject);
+            syncDBEntityWithRESTEntityFirstPass(entity, dataObject);
             entityCache.addNew(dataObject, entity);
             return entity;
         } catch (InstantiationException e) {
@@ -151,7 +174,7 @@ public abstract class RESTDataObjectFactory<T extends RESTBaseEntityV1<T, V, W>,
      * @param dataObject The REST entity used to populate the database entity's values
      */
     public void updateDBEntityFromRESTEntity(final U entity, final T dataObject) {
-        syncDBEntityWithRESTEntity(entity, dataObject);
+        syncDBEntityWithRESTEntityFirstPass(entity, dataObject);
         entityCache.addUpdated(dataObject, entity);
     }
 

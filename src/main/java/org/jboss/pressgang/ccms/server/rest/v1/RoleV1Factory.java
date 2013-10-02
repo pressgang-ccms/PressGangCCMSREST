@@ -66,21 +66,21 @@ public class RoleV1Factory extends RESTDataObjectFactory<RESTRoleV1, Role, RESTR
         // USERS
         if (expand != null && expand.contains(RESTRoleV1.USERS_NAME)) {
             retValue.setUsers(RESTDataObjectCollectionFactory.create(RESTUserCollectionV1.class, userFactory, entity.getUsers(),
-                    RESTRoleV1.USERS_NAME, dataType, expand, baseUrl, entityManager));
+                    RESTRoleV1.USERS_NAME, dataType, expand, baseUrl, revision, entityManager));
         }
 
         // PARENT ROLES
         if (expand != null && expand.contains(RESTRoleV1.PARENTROLES_NAME)) {
             retValue.setParentRoles(
                     RESTDataObjectCollectionFactory.create(RESTRoleCollectionV1.class, this, entity.getParentRoles(),
-                            RESTRoleV1.PARENTROLES_NAME, dataType, expand, baseUrl, entityManager));
+                            RESTRoleV1.PARENTROLES_NAME, dataType, expand, baseUrl, revision, entityManager));
         }
 
         // CHILD ROLES
         if (expand != null && expand.contains(RESTRoleV1.CHILDROLES_NAME)) {
             retValue.setChildRoles(
                     RESTDataObjectCollectionFactory.create(RESTRoleCollectionV1.class, this, entity.getChildRoles(),
-                            RESTRoleV1.CHILDROLES_NAME, dataType, expand, baseUrl, entityManager));
+                            RESTRoleV1.CHILDROLES_NAME, dataType, expand, baseUrl, revision, entityManager));
         }
 
         retValue.setLinks(baseUrl, RESTv1Constants.ROLE_URL_NAME, dataType, retValue.getId());
@@ -89,10 +89,14 @@ public class RoleV1Factory extends RESTDataObjectFactory<RESTRoleV1, Role, RESTR
     }
 
     @Override
-    public void syncDBEntityWithRESTEntity(final Role entity, final RESTRoleV1 dataObject) {
+    public void syncDBEntityWithRESTEntityFirstPass(final Role entity, final RESTRoleV1 dataObject) {
         if (dataObject.hasParameterSet(RESTUserV1.DESCRIPTION_NAME)) entity.setDescription(dataObject.getDescription());
         if (dataObject.hasParameterSet(RESTUserV1.NAME_NAME)) entity.setRoleName(dataObject.getName());
 
+    }
+
+    @Override
+    public void syncDBEntityWithRESTEntitySecondPass(Role entity, RESTRoleV1 dataObject) {
         /* Many To Many - Add will create a mapping */
         if (dataObject.hasParameterSet(
                 RESTRoleV1.USERS_NAME) && dataObject.getUsers() != null && dataObject.getUsers().getItems() != null) {
@@ -102,7 +106,8 @@ public class RoleV1Factory extends RESTDataObjectFactory<RESTRoleV1, Role, RESTR
                 final RESTUserV1 restEntity = restEntityItem.getItem();
 
                 final User dbEntity = entityManager.find(User.class, restEntity.getId());
-                if (dbEntity == null) throw new BadRequestException("No User entity was found with the primary key " + restEntity.getId());
+                if (dbEntity == null)
+                    throw new BadRequestException("No User entity was found with the primary key " + restEntity.getId());
 
                 if (restEntityItem.returnIsAddItem()) {
                     entity.addUser(dbEntity);
@@ -123,7 +128,8 @@ public class RoleV1Factory extends RESTDataObjectFactory<RESTRoleV1, Role, RESTR
                 final Role dbEntity = entityManager.find(Role.class, restEntity.getId());
                 final RoleToRoleRelationship dbRelationshipEntity = entityManager.find(RoleToRoleRelationship.class, ROLE_TO_ROLE_ID);
 
-                if (dbEntity == null) throw new BadRequestException("No Role entity was found with the primary key " + restEntity.getId());
+                if (dbEntity == null)
+                    throw new BadRequestException("No Role entity was found with the primary key " + restEntity.getId());
                 else if (dbRelationshipEntity == null)
                     throw new BadRequestException("No RoleToRoleRelationship entity was found with the primary key " + ROLE_TO_ROLE_ID);
 
@@ -146,9 +152,11 @@ public class RoleV1Factory extends RESTDataObjectFactory<RESTRoleV1, Role, RESTR
                 final Role dbEntity = entityManager.find(Role.class, restEntity.getId());
                 final RoleToRoleRelationship dbRelationshipEntity = entityManager.find(RoleToRoleRelationship.class, ROLE_TO_ROLE_ID);
 
-                if (dbEntity == null) throw new BadRequestException("No Role entity was found with the primary key " + restEntity.getId());
+                if (dbEntity == null)
+                    throw new BadRequestException("No Role entity was found with the primary key " + restEntity.getId());
                 else if (dbRelationshipEntity == null)
-                    throw new BadRequestException("No RoleToRoleRelationship entity was found with the primary key " + ROLE_TO_ROLE_ID);
+                    throw new BadRequestException("No RoleToRoleRelationship entity was found with the primary key "
+                            + ROLE_TO_ROLE_ID);
 
                 if (restEntityItem.returnIsAddItem()) {
                     entity.addChildRole(dbEntity, dbRelationshipEntity);

@@ -52,7 +52,7 @@ public class BlobConstantV1Factory extends RESTDataObjectFactory<RESTBlobConstan
     }
 
     @Override
-    public void syncDBEntityWithRESTEntity(final BlobConstants entity, final RESTBlobConstantV1 dataObject) {
+    public void syncDBEntityWithRESTEntityFirstPass(final BlobConstants entity, final RESTBlobConstantV1 dataObject) {
         if (dataObject.hasParameterSet(RESTBlobConstantV1.NAME_NAME)) entity.setConstantName(dataObject.getName());
         if (dataObject.hasParameterSet(RESTBlobConstantV1.VALUE_NAME)) entity.setConstantValue(dataObject.getValue());
     }

@@ -55,7 +55,7 @@ public class FilterLocaleV1Factory extends RESTDataObjectFactory<RESTFilterLocal
     }
 
     @Override
-    public void syncDBEntityWithRESTEntity(final FilterLocale entity, final RESTFilterLocaleV1 dataObject) {
+    public void syncDBEntityWithRESTEntityFirstPass(final FilterLocale entity, final RESTFilterLocaleV1 dataObject) {
         if (dataObject.hasParameterSet(RESTFilterLocaleV1.LOCALE_NAME)) entity.setLocaleName(dataObject.getLocale());
         if (dataObject.hasParameterSet(RESTFilterLocaleV1.STATE_NAME)) entity.setLocaleState(dataObject.getState());
     }

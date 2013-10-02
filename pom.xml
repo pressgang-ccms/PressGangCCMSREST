@@ -8,12 +8,13 @@
     </parent>
     <groupId>org.jboss.pressgang.ccms</groupId>
     <artifactId>pressgang-ccms-server</artifactId>
-    <version>1.0-SNAPSHOT</version>
+    <version>1.1.1-SNAPSHOT</version>
     <name>PressGang CCMS Server</name>
     <packaging>war</packaging>
 
     <properties>
-        <pressgang.ccms.version>1.0-SNAPSHOT</pressgang.ccms.version>
+        <pressgang.ccms.version>1.1-SNAPSHOT</pressgang.ccms.version>
+        <pressgang.ccms.contentspec.version>1.1.1-SNAPSHOT</pressgang.ccms.contentspec.version>
         <jboss.bom.version>1.0.2.Final</jboss.bom.version>
         <jboss.spec.verison>3.0.1.Final</jboss.spec.verison>
         <jbossasplugin.version>7.1.1.Final</jbossasplugin.version>
@@ -23,8 +24,9 @@
         <resteasy.version>2.3.2.Final</resteasy.version>
         <log4j.version>1.2.16</log4j.version>
         <slf4j.version>1.6.4</slf4j.version>
-        <csprocessor.version>0.0.7-SNAPSHOT</csprocessor.version>
+        <csprocessor.version>0.1.1-SNAPSHOT</csprocessor.version>
         <j2bugzilla.version>1.1-SNAPSHOT</j2bugzilla.version>
+        <htmlcleaner.version>2.2</htmlcleaner.version>
         <arquillian.version>1.0.3.Final</arquillian.version>
         <jbossarquillian.version>7.1.1.Final</jbossarquillian.version>
         <arquillianbom.version>1.0.0.Final</arquillianbom.version>
@@ -36,7 +38,9 @@
         <javamelody.version>1.44.0</javamelody.version>
         <xstream.version>1.4.2</xstream.version>
         <itext.version>2.1.7</itext.version>
-        <liquibase.version>2.0.5</liquibase.version>
+        <liquibase.version>2.0.1</liquibase.version>
+        <intellij.annotations.version>12.0</intellij.annotations.version>
+        <version.org.hibernate>4.0.1.Final</version.org.hibernate>
     </properties>
 
     <dependencyManagement>
@@ -188,16 +192,19 @@
         <dependency>
             <groupId>org.hibernate</groupId>
             <artifactId>hibernate-envers</artifactId>
+            <version>${version.org.hibernate}</version>
             <scope>provided</scope>
         </dependency>
         <dependency>
             <groupId>org.hibernate</groupId>
             <artifactId>hibernate-entitymanager</artifactId>
+            <version>${version.org.hibernate}</version>
             <scope>provided</scope>
         </dependency>
         <dependency>
             <groupId>org.hibernate</groupId>
             <artifactId>hibernate-core</artifactId>
+            <version>${version.org.hibernate}</version>
             <scope>provided</scope>
         </dependency>
         <dependency>
@@ -230,7 +237,7 @@
         <dependency>
             <groupId>org.jboss.pressgang.ccms</groupId>
             <artifactId>pressgang-ccms-contentspec</artifactId>
-            <version>${pressgang.ccms.version}</version>
+            <version>${pressgang.ccms.contentspec.version}</version>
         </dependency>
         <dependency>
             <groupId>org.jboss.pressgang.ccms</groupId>
@@ -250,7 +257,12 @@
         <dependency>
             <groupId>org.jboss.pressgang.ccms.contentspec</groupId>
             <artifactId>processor</artifactId>
-            <version>0.0.7-SNAPSHOT</version>
+            <version>${csprocessor.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.jboss.pressgang.ccms</groupId>
+            <artifactId>database-provider</artifactId>
+            <version>${pressgang.ccms.version}</version>
         </dependency>
         <dependency>
             <groupId>org.jboss.pressgang.ccms</groupId>
@@ -270,6 +282,13 @@
             <groupId>commons-io</groupId>
             <artifactId>commons-io</artifactId>
             <version>2.4</version>
+        </dependency>
+
+        <!-- HTML Cleaner -->
+        <dependency>
+            <groupId>net.sourceforge.htmlcleaner</groupId>
+            <artifactId>htmlcleaner</artifactId>
+            <version>${htmlcleaner.version}</version>
         </dependency>
 
         <!-- Java Melody -->
@@ -302,6 +321,13 @@
                     <groupId>bouncycastle</groupId>
                 </exclusion>
             </exclusions>
+        </dependency>
+
+        <!-- Other Libraries -->
+        <dependency>
+            <groupId>com.intellij</groupId>
+            <artifactId>annotations</artifactId>
+            <version>${intellij.annotations.version}</version>
         </dependency>
 
         <!-- Liquibase -->

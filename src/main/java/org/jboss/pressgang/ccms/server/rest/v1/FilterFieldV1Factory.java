@@ -58,7 +58,7 @@ public class FilterFieldV1Factory extends RESTDataObjectFactory<RESTFilterFieldV
     }
 
     @Override
-    public void syncDBEntityWithRESTEntity(final FilterField entity, final RESTFilterFieldV1 dataObject) {
+    public void syncDBEntityWithRESTEntityFirstPass(final FilterField entity, final RESTFilterFieldV1 dataObject) {
         if (dataObject.hasParameterSet(RESTFilterFieldV1.DESCRIPTION_NAME)) entity.setDescription(dataObject.getDescription());
         if (dataObject.hasParameterSet(RESTFilterFieldV1.NAME_NAME)) entity.setField(dataObject.getName());
         if (dataObject.hasParameterSet(RESTFilterFieldV1.VALUE_NAME)) entity.setValue(dataObject.getValue());

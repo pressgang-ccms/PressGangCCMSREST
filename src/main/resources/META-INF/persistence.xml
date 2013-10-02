@@ -11,6 +11,16 @@
         <class>org.jboss.pressgang.ccms.model.BlobConstants</class>
         <class>org.jboss.pressgang.ccms.model.BugzillaBug</class>
         <class>org.jboss.pressgang.ccms.model.Category</class>
+        <class>org.jboss.pressgang.ccms.model.contentspec.ContentSpec</class>
+        <class>org.jboss.pressgang.ccms.model.contentspec.ContentSpecToPropertyTag</class>
+        <class>org.jboss.pressgang.ccms.model.contentspec.ContentSpecToTag</class>
+        <class>org.jboss.pressgang.ccms.model.contentspec.CSNode</class>
+        <class>org.jboss.pressgang.ccms.model.contentspec.CSNodeToCSNode</class>
+        <class>org.jboss.pressgang.ccms.model.contentspec.CSNodeToPropertyTag</class>
+        <class>org.jboss.pressgang.ccms.model.contentspec.TranslatedContentSpec</class>
+        <class>org.jboss.pressgang.ccms.model.contentspec.TranslatedCSNode</class>
+        <class>org.jboss.pressgang.ccms.model.contentspec.TranslatedCSNodeString</class>
+        <class>org.jboss.pressgang.ccms.model.File</class>
         <class>org.jboss.pressgang.ccms.model.Filter</class>
         <class>org.jboss.pressgang.ccms.model.FilterCategory</class>
         <class>org.jboss.pressgang.ccms.model.FilterField</class>
@@ -19,6 +29,7 @@
         <class>org.jboss.pressgang.ccms.model.FilterTag</class>
         <class>org.jboss.pressgang.ccms.model.ImageFile</class>
         <class>org.jboss.pressgang.ccms.model.IntegerConstants</class>
+        <class>org.jboss.pressgang.ccms.model.LanguageFile</class>
         <class>org.jboss.pressgang.ccms.model.LanguageImage</class>
         <class>org.jboss.pressgang.ccms.model.Project</class>
         <class>org.jboss.pressgang.ccms.model.PropertyTag</class>
@@ -59,9 +70,15 @@
             <property name="hibernate.format_sql" value="false"/>
             <property name="jboss.entity.manager.factory.jndi.name" value="java:jboss/EntityManagerFactory"/>
             <property name="hibernate.jdbc.batch_size" value="20"/>
-            <property name="hibernate.cache.use_second_level_cache" value="true"/>
+            <property name="hibernate.cache.use_second_level_cache" value="false"/>
             <property name="hibernate.cache.use_query_cache" value="false"/>
             <property name="hibernate.cache.use_minimal_puts" value="true"/>
+            <property name="hibernate.order_inserts" value="true"/>
+            <property name="hibernate.order_updates" value="true"/>
+
+            <!-- Make sure the connection uses UTF-8 -->
+            <property name="hibernate.connection.useUnicode" value="true" />
+            <property name="hibernate.connection.characterEncoding" value="UTF-8"/>
 
             <!-- Hibernate Search Properties -->
             <property name="hibernate.search.default.directory_provider" value="filesystem"/>

@@ -56,8 +56,7 @@ public class PropertyCategoryInPropertyTagV1Factory extends RESTDataObjectFactor
         // PROPERTY TAGS
         if (expand != null && expand.contains(RESTPropertyCategoryInPropertyTagV1.PROPERTY_TAGS_NAME)) {
             retValue.setPropertyTags(RESTDataObjectCollectionFactory.create(RESTPropertyTagInPropertyCategoryCollectionV1.class,
-                    propertyTagInPropertyCategoryFactory,
-                    entity.getPropertyTagCategory().getPropertyTagToPropertyTagCategoriesList(),
+                    propertyTagInPropertyCategoryFactory, entity.getPropertyTagCategory().getPropertyTagToPropertyTagCategoriesList(),
                     RESTPropertyCategoryInPropertyTagV1.PROPERTY_TAGS_NAME, dataType, expand, baseUrl, revision, false, entityManager));
         }
 
@@ -67,7 +66,7 @@ public class PropertyCategoryInPropertyTagV1Factory extends RESTDataObjectFactor
     }
 
     @Override
-    public void syncDBEntityWithRESTEntity(final PropertyTagToPropertyTagCategory entity,
+    public void syncDBEntityWithRESTEntityFirstPass(final PropertyTagToPropertyTagCategory entity,
             final RESTPropertyCategoryInPropertyTagV1 dataObject) {
         if (dataObject.hasParameterSet(RESTPropertyCategoryInPropertyTagV1.RELATIONSHIP_SORT_NAME))
             entity.setSorting(dataObject.getRelationshipSort());

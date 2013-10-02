@@ -19,6 +19,7 @@ import org.jboss.pressgang.ccms.rest.v1.entities.join.RESTPropertyTagInPropertyC
 import org.jboss.pressgang.ccms.rest.v1.expansion.ExpandDataTrunk;
 import org.jboss.pressgang.ccms.server.rest.v1.base.RESTDataObjectCollectionFactory;
 import org.jboss.pressgang.ccms.server.rest.v1.base.RESTDataObjectFactory;
+import org.jboss.pressgang.ccms.server.rest.v1.utils.RESTv1Utilities;
 import org.jboss.pressgang.ccms.server.utils.EnversUtilities;
 import org.jboss.resteasy.spi.BadRequestException;
 
@@ -48,10 +49,9 @@ public class PropertyCategoryV1Factory extends RESTDataObjectFactory<RESTPropert
 
         // REVISIONS
         if (revision == null && expand != null && expand.contains(RESTBaseEntityV1.REVISIONS_NAME)) {
-            retValue.setRevisions(
-                    RESTDataObjectCollectionFactory.create(RESTPropertyCategoryCollectionV1.class, this, entity,
-                            EnversUtilities.getRevisions(entityManager, entity), RESTBaseEntityV1.REVISIONS_NAME, dataType, expand, baseUrl,
-                            entityManager));
+            retValue.setRevisions(RESTDataObjectCollectionFactory.create(RESTPropertyCategoryCollectionV1.class, this, entity,
+                    EnversUtilities.getRevisions(entityManager, entity), RESTBaseEntityV1.REVISIONS_NAME, dataType, expand, baseUrl,
+                    entityManager));
         }
 
         // PROPERTY TAGS
@@ -67,11 +67,12 @@ public class PropertyCategoryV1Factory extends RESTDataObjectFactory<RESTPropert
     }
 
     @Override
-    public void syncDBEntityWithRESTEntity(final PropertyTagCategory entity, final RESTPropertyCategoryV1 dataObject) {
+    public void syncDBEntityWithRESTEntityFirstPass(final PropertyTagCategory entity, final RESTPropertyCategoryV1 dataObject) {
         if (dataObject.hasParameterSet(RESTPropertyCategoryV1.DESCRIPTION_NAME))
             entity.setPropertyTagCategoryDescription(dataObject.getDescription());
         if (dataObject.hasParameterSet(RESTPropertyCategoryV1.NAME_NAME)) entity.setPropertyTagCategoryName(dataObject.getName());
 
+        // Many to Many
         if (dataObject.hasParameterSet(
                 RESTPropertyCategoryV1.PROPERTY_TAGS_NAME) && dataObject.getPropertyTags() != null && dataObject.getPropertyTags()
                 .getItems() != null) {
@@ -80,16 +81,12 @@ public class PropertyCategoryV1Factory extends RESTDataObjectFactory<RESTPropert
             for (final RESTPropertyTagInPropertyCategoryCollectionItemV1 restEntityItem : dataObject.getPropertyTags().getItems()) {
                 final RESTPropertyTagInPropertyCategoryV1 restEntity = restEntityItem.getItem();
 
-                if (restEntityItem.returnIsAddItem() || restEntityItem.returnIsRemoveItem()) {
+                if (restEntityItem.returnIsRemoveItem()) {
                     final PropertyTag dbEntity = entityManager.find(PropertyTag.class, restEntity.getId());
                     if (dbEntity == null)
                         throw new BadRequestException("No PropertyTag entity was found with the primary key " + restEntity.getId());
 
-                    if (restEntityItem.returnIsAddItem()) {
-                        entity.addPropertyTag(dbEntity);
-                    } else if (restEntityItem.returnIsRemoveItem()) {
-                        entity.removePropertyTag(dbEntity);
-                    }
+                    entity.removePropertyTag(dbEntity);
                 } else if (restEntityItem.returnIsUpdateItem()) {
                     final PropertyTagToPropertyTagCategory dbEntity = entityManager.find(PropertyTagToPropertyTagCategory.class,
                             restEntity.getRelationshipId());
@@ -100,6 +97,38 @@ public class PropertyCategoryV1Factory extends RESTDataObjectFactory<RESTPropert
                                     + " for PropertyCategory " + entity.getId());
 
                     propertyTagInPropertyCategoryFactory.updateDBEntityFromRESTEntity(dbEntity, restEntity);
+                }
+            }
+        }
+    }
+
+    @Override
+    public void syncDBEntityWithRESTEntitySecondPass(PropertyTagCategory entity, RESTPropertyCategoryV1 dataObject) {
+        // Many to Many
+        if (dataObject.hasParameterSet(
+                RESTPropertyCategoryV1.PROPERTY_TAGS_NAME) && dataObject.getPropertyTags() != null && dataObject.getPropertyTags()
+                .getItems() != null) {
+            dataObject.getPropertyTags().removeInvalidChangeItemRequests();
+
+            for (final RESTPropertyTagInPropertyCategoryCollectionItemV1 restEntityItem : dataObject.getPropertyTags().getItems()) {
+                final RESTPropertyTagInPropertyCategoryV1 restEntity = restEntityItem.getItem();
+
+                if (restEntityItem.returnIsAddItem()) {
+                    final PropertyTag dbEntity = RESTv1Utilities.findEntity(entityManager, entityCache, restEntity, PropertyTag.class);
+                    if (dbEntity == null)
+                        throw new BadRequestException("No PropertyTag entity was found with the primary key " + restEntity.getId());
+
+                    entity.addPropertyTag(dbEntity);
+                } else if (restEntityItem.returnIsUpdateItem()) {
+                    final PropertyTagToPropertyTagCategory dbEntity = entityManager.find(PropertyTagToPropertyTagCategory.class,
+                            restEntity.getRelationshipId());
+                    if (dbEntity == null) throw new BadRequestException(
+                            "No PropertyTagToPropertyTagCategory entity was found with the primary key " + restEntity.getRelationshipId());
+                    if (!entity.getPropertyTagToPropertyTagCategories().contains(dbEntity)) throw new BadRequestException(
+                            "No PropertyTagToPropertyTagCategory entity was found with the primary key " + restEntity.getRelationshipId()
+                                    + " for PropertyCategory " + entity.getId());
+
+                    propertyTagInPropertyCategoryFactory.syncDBEntityWithRESTEntitySecondPass(dbEntity, restEntity);
                 }
             }
         }

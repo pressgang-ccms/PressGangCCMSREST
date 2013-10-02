@@ -3,9 +3,12 @@ package org.jboss.pressgang.ccms.server.rest.v1;
 import javax.persistence.criteria.CriteriaQuery;
 import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
+import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.Context;
 import javax.ws.rs.core.PathSegment;
 import javax.ws.rs.core.Response;
+import java.io.IOException;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Set;
 
@@ -14,6 +17,9 @@ import org.hibernate.search.FullTextSession;
 import org.hibernate.search.Search;
 import org.jboss.pressgang.ccms.filter.BlobConstantFieldFilter;
 import org.jboss.pressgang.ccms.filter.CategoryFieldFilter;
+import org.jboss.pressgang.ccms.filter.ContentSpecFieldFilter;
+import org.jboss.pressgang.ccms.filter.ContentSpecNodeFieldFilter;
+import org.jboss.pressgang.ccms.filter.FileFieldFilter;
 import org.jboss.pressgang.ccms.filter.FilterFieldFilter;
 import org.jboss.pressgang.ccms.filter.ImageFieldFilter;
 import org.jboss.pressgang.ccms.filter.IntegerConstantFieldFilter;
@@ -24,9 +30,14 @@ import org.jboss.pressgang.ccms.filter.RoleFieldFilter;
 import org.jboss.pressgang.ccms.filter.StringConstantFieldFilter;
 import org.jboss.pressgang.ccms.filter.TagFieldFilter;
 import org.jboss.pressgang.ccms.filter.TopicFieldFilter;
+import org.jboss.pressgang.ccms.filter.TranslatedContentSpecFieldFilter;
+import org.jboss.pressgang.ccms.filter.TranslatedContentSpecNodeFieldFilter;
 import org.jboss.pressgang.ccms.filter.UserFieldFilter;
 import org.jboss.pressgang.ccms.filter.builder.BlobConstantFilterQueryBuilder;
 import org.jboss.pressgang.ccms.filter.builder.CategoryFilterQueryBuilder;
+import org.jboss.pressgang.ccms.filter.builder.ContentSpecFilterQueryBuilder;
+import org.jboss.pressgang.ccms.filter.builder.ContentSpecNodeFilterQueryBuilder;
+import org.jboss.pressgang.ccms.filter.builder.FileFilterQueryBuilder;
 import org.jboss.pressgang.ccms.filter.builder.FilterFilterQueryBuilder;
 import org.jboss.pressgang.ccms.filter.builder.ImageFilterQueryBuilder;
 import org.jboss.pressgang.ccms.filter.builder.IntegerConstantFilterQueryBuilder;
@@ -37,13 +48,17 @@ import org.jboss.pressgang.ccms.filter.builder.RoleFilterQueryBuilder;
 import org.jboss.pressgang.ccms.filter.builder.StringConstantFilterQueryBuilder;
 import org.jboss.pressgang.ccms.filter.builder.TagFilterQueryBuilder;
 import org.jboss.pressgang.ccms.filter.builder.TopicFilterQueryBuilder;
+import org.jboss.pressgang.ccms.filter.builder.TranslatedContentSpecFilterQueryBuilder;
+import org.jboss.pressgang.ccms.filter.builder.TranslatedContentSpecNodeFilterQueryBuilder;
 import org.jboss.pressgang.ccms.filter.builder.TranslatedTopicDataFilterQueryBuilder;
 import org.jboss.pressgang.ccms.filter.builder.UserFilterQueryBuilder;
 import org.jboss.pressgang.ccms.model.BlobConstants;
 import org.jboss.pressgang.ccms.model.Category;
+import org.jboss.pressgang.ccms.model.File;
 import org.jboss.pressgang.ccms.model.Filter;
 import org.jboss.pressgang.ccms.model.ImageFile;
 import org.jboss.pressgang.ccms.model.IntegerConstants;
+import org.jboss.pressgang.ccms.model.LanguageFile;
 import org.jboss.pressgang.ccms.model.LanguageImage;
 import org.jboss.pressgang.ccms.model.Project;
 import org.jboss.pressgang.ccms.model.PropertyTag;
@@ -54,8 +69,13 @@ import org.jboss.pressgang.ccms.model.Tag;
 import org.jboss.pressgang.ccms.model.Topic;
 import org.jboss.pressgang.ccms.model.TranslatedTopicData;
 import org.jboss.pressgang.ccms.model.User;
+import org.jboss.pressgang.ccms.model.contentspec.CSNode;
+import org.jboss.pressgang.ccms.model.contentspec.ContentSpec;
+import org.jboss.pressgang.ccms.model.contentspec.TranslatedCSNode;
+import org.jboss.pressgang.ccms.model.contentspec.TranslatedContentSpec;
 import org.jboss.pressgang.ccms.rest.v1.collections.RESTBlobConstantCollectionV1;
 import org.jboss.pressgang.ccms.rest.v1.collections.RESTCategoryCollectionV1;
+import org.jboss.pressgang.ccms.rest.v1.collections.RESTFileCollectionV1;
 import org.jboss.pressgang.ccms.rest.v1.collections.RESTFilterCollectionV1;
 import org.jboss.pressgang.ccms.rest.v1.collections.RESTImageCollectionV1;
 import org.jboss.pressgang.ccms.rest.v1.collections.RESTIntegerConstantCollectionV1;
@@ -68,10 +88,16 @@ import org.jboss.pressgang.ccms.rest.v1.collections.RESTTagCollectionV1;
 import org.jboss.pressgang.ccms.rest.v1.collections.RESTTopicCollectionV1;
 import org.jboss.pressgang.ccms.rest.v1.collections.RESTTranslatedTopicCollectionV1;
 import org.jboss.pressgang.ccms.rest.v1.collections.RESTUserCollectionV1;
+import org.jboss.pressgang.ccms.rest.v1.collections.contentspec.RESTCSNodeCollectionV1;
+import org.jboss.pressgang.ccms.rest.v1.collections.contentspec.RESTContentSpecCollectionV1;
+import org.jboss.pressgang.ccms.rest.v1.collections.contentspec.RESTTextContentSpecCollectionV1;
+import org.jboss.pressgang.ccms.rest.v1.collections.contentspec.RESTTranslatedCSNodeCollectionV1;
+import org.jboss.pressgang.ccms.rest.v1.collections.contentspec.RESTTranslatedContentSpecCollectionV1;
 import org.jboss.pressgang.ccms.rest.v1.components.ComponentTopicV1;
 import org.jboss.pressgang.ccms.rest.v1.constants.RESTv1Constants;
 import org.jboss.pressgang.ccms.rest.v1.entities.RESTBlobConstantV1;
 import org.jboss.pressgang.ccms.rest.v1.entities.RESTCategoryV1;
+import org.jboss.pressgang.ccms.rest.v1.entities.RESTFileV1;
 import org.jboss.pressgang.ccms.rest.v1.entities.RESTFilterV1;
 import org.jboss.pressgang.ccms.rest.v1.entities.RESTImageV1;
 import org.jboss.pressgang.ccms.rest.v1.entities.RESTIntegerConstantV1;
@@ -85,6 +111,11 @@ import org.jboss.pressgang.ccms.rest.v1.entities.RESTTopicV1;
 import org.jboss.pressgang.ccms.rest.v1.entities.RESTTranslatedTopicV1;
 import org.jboss.pressgang.ccms.rest.v1.entities.RESTUserV1;
 import org.jboss.pressgang.ccms.rest.v1.entities.base.RESTLogDetailsV1;
+import org.jboss.pressgang.ccms.rest.v1.entities.contentspec.RESTCSNodeV1;
+import org.jboss.pressgang.ccms.rest.v1.entities.contentspec.RESTContentSpecV1;
+import org.jboss.pressgang.ccms.rest.v1.entities.contentspec.RESTTextContentSpecV1;
+import org.jboss.pressgang.ccms.rest.v1.entities.contentspec.RESTTranslatedCSNodeV1;
+import org.jboss.pressgang.ccms.rest.v1.entities.contentspec.RESTTranslatedContentSpecV1;
 import org.jboss.pressgang.ccms.rest.v1.entities.enums.RESTXMLDoctype;
 import org.jboss.pressgang.ccms.rest.v1.entities.wrapper.IntegerWrapper;
 import org.jboss.pressgang.ccms.rest.v1.expansion.ExpandDataDetails;
@@ -93,16 +124,20 @@ import org.jboss.pressgang.ccms.rest.v1.jaxrsinterfaces.RESTBaseInterfaceV1;
 import org.jboss.pressgang.ccms.rest.v1.jaxrsinterfaces.RESTInterfaceAdvancedV1;
 import org.jboss.pressgang.ccms.server.rest.v1.base.BaseRESTv1;
 import org.jboss.pressgang.ccms.server.utils.Constants;
+import org.jboss.pressgang.ccms.server.utils.ContentSpecUtilities;
 import org.jboss.pressgang.ccms.server.utils.TopicUtilities;
 import org.jboss.pressgang.ccms.utils.common.CollectionUtilities;
 import org.jboss.pressgang.ccms.utils.common.DocBookUtilities;
 import org.jboss.pressgang.ccms.utils.common.XMLUtilities;
+import org.jboss.pressgang.ccms.utils.common.ZipUtilities;
 import org.jboss.pressgang.ccms.utils.constants.CommonConstants;
 import org.jboss.resteasy.plugins.providers.atom.Feed;
+import org.jboss.resteasy.specimpl.PathSegmentImpl;
 import org.jboss.resteasy.spi.BadRequestException;
 import org.jboss.resteasy.spi.HttpResponse;
 import org.jboss.resteasy.spi.InternalServerErrorException;
 import org.jboss.resteasy.spi.NotFoundException;
+import org.jboss.resteasy.util.Base64;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.w3c.dom.Document;
@@ -1756,21 +1791,41 @@ public class RESTv1 extends BaseRESTv1 implements RESTBaseInterfaceV1, RESTInter
         final ImageFile entity = getEntity(ImageFile.class, id);
         final String fixedLocale = locale == null ? CommonConstants.DEFAULT_LOCALE : locale;
 
-        /* Try and find the locale specified first */
-        for (final LanguageImage languageImage : entity.getLanguageImages()) {
-            if (fixedLocale.equalsIgnoreCase(languageImage.getLocale())) {
-                return Response.ok(languageImage.getThumbnailData(), languageImage.getMimeType()).build();
-            }
-        }
+        try {
+            LanguageImage foundLanguageImage = null;
 
-        /* If the specified locale can't be found then use the default */
-        for (final LanguageImage languageImage : entity.getLanguageImages()) {
-            if (CommonConstants.DEFAULT_LOCALE.equalsIgnoreCase(languageImage.getLocale())) {
-                return Response.ok(languageImage.getThumbnailData(), languageImage.getMimeType()).build();
+            // Try and find the locale specified first
+            for (final LanguageImage languageImage : entity.getLanguageImages()) {
+                if (fixedLocale.equalsIgnoreCase(languageImage.getLocale())) {
+                    foundLanguageImage = languageImage;
+                    break;
+                }
             }
-        }
 
-        throw new BadRequestException("No image exists for the " + fixedLocale + " locale.");
+            if (foundLanguageImage == null) {
+                // If the specified locale can't be found then use the default */
+                for (final LanguageImage languageImage : entity.getLanguageImages()) {
+                    if (CommonConstants.DEFAULT_LOCALE.equalsIgnoreCase(languageImage.getLocale())) {
+                        foundLanguageImage = languageImage;
+                        break;
+                    }
+                }
+            }
+
+            if (foundLanguageImage != null) {
+                byte[] base64Thumbnail = foundLanguageImage.getThumbnailData();
+                final String mimeType = foundLanguageImage.getMimeType();
+                if (mimeType.equals("image/svg+xml")) {
+                    return Response.ok(Base64.decode(base64Thumbnail), "image/jpg").build();
+                } else {
+                    return Response.ok(Base64.decode(base64Thumbnail), mimeType).build();
+                }
+            } else {
+                throw new BadRequestException("No image exists for the " + fixedLocale + " locale.");
+            }
+        } catch (IOException e) {
+            throw new InternalServerErrorException(e);
+        }
     }
 
     /* TOPIC FUNCTIONS */
@@ -2000,22 +2055,6 @@ public class RESTv1 extends BaseRESTv1 implements RESTBaseInterfaceV1, RESTInter
         return retValue;
     }
 
-    // HTML TOPIC FUNCTIONS
-
-    @Override
-    public String getHTMLTopicHTML(final Integer id) {
-        assert id != null : "The id parameter can not be null";
-
-        return getXMLResource(Topic.class, topicFactory, id, null).getHtml();
-    }
-
-    @Override
-    public String getHTMLTopicRevisionHTML(final Integer id, final Integer revision) {
-        assert id != null : "The id parameter can not be null";
-
-        return getXMLResource(Topic.class, topicFactory, id, revision, null).getHtml();
-    }
-
     // CSV TOPIC FUNCTIONS
 
     @Override
@@ -2190,8 +2229,8 @@ public class RESTv1 extends BaseRESTv1 implements RESTBaseInterfaceV1, RESTInter
 
         final Set<String> dbEntityIds = ids.getMatrixParameters().keySet();
         final RESTLogDetailsV1 logDetails = generateLogDetails(message, flag, userId);
-        return deleteJSONEntities(RESTFilterCollectionV1.class, Filter.class, filterFactory, dbEntityIds, RESTv1Constants.FILTERS_EXPANSION_NAME,
-                expand, logDetails);
+        return deleteJSONEntities(RESTFilterCollectionV1.class, Filter.class, filterFactory, dbEntityIds,
+                RESTv1Constants.FILTERS_EXPANSION_NAME, expand, logDetails);
     }
 
     /* INTEGERCONSTANT FUNCTIONS */
@@ -2328,5 +2367,854 @@ public class RESTv1 extends BaseRESTv1 implements RESTBaseInterfaceV1, RESTInter
         final RESTLogDetailsV1 logDetails = generateLogDetails(message, flag, userId);
         return deleteJSONEntities(RESTIntegerConstantCollectionV1.class, IntegerConstants.class, integerConstantFactory, dbEntityIds,
                 RESTv1Constants.INTEGERCONSTANTS_EXPANSION_NAME, expand, logDetails);
+    }
+
+    /* CONTENT SPEC FUNCTIONS */
+    /* JSONP FUNCTIONS */
+    @Override
+    public String getJSONPContentSpec(final Integer id, final String expand, final String callback) {
+        if (callback == null) throw new BadRequestException("The callback parameter can not be null");
+
+        try {
+            return wrapJsonInPadding(callback, convertObjectToJSON(getJSONContentSpec(id, expand)));
+        } catch (final Exception ex) {
+            throw new InternalServerErrorException("Could not marshall return value into JSON");
+        }
+    }
+
+    @Override
+    public String getJSONPContentSpecRevision(final Integer id, final Integer revision, final String expand, final String callback) {
+        if (callback == null) throw new BadRequestException("The callback parameter can not be null");
+
+        try {
+            return wrapJsonInPadding(callback, convertObjectToJSON(getJSONContentSpecRevision(id, revision, expand)));
+        } catch (final Exception ex) {
+            throw new InternalServerErrorException("Could not marshall return value into JSON");
+        }
+    }
+
+    @Override
+    public String getJSONPContentSpecs(final String expand, final String callback) {
+        if (callback == null) throw new BadRequestException("The callback parameter can not be null");
+
+        try {
+            return wrapJsonInPadding(callback, convertObjectToJSON(getJSONContentSpecs(expand)));
+        } catch (final Exception ex) {
+            throw new InternalServerErrorException("Could not marshall return value into JSON");
+        }
+    }
+
+    @Override
+    public String getJSONPContentSpecsWithQuery(final PathSegment query, final String expand, final String callback) {
+        if (callback == null) throw new BadRequestException("The callback parameter can not be null");
+
+        try {
+            return wrapJsonInPadding(callback, convertObjectToJSON(getJSONContentSpecsWithQuery(query, expand)));
+        } catch (final Exception ex) {
+            throw new InternalServerErrorException("Could not marshall return value into JSON");
+        }
+    }
+
+    /* JSON FUNCTIONS */
+    @Override
+    public RESTContentSpecV1 getJSONContentSpec(final Integer id, final String expand) {
+        if (id == null) throw new BadRequestException("The id parameter can not be null");
+
+        return getJSONResource(ContentSpec.class, contentSpecFactory, id, expand);
+    }
+
+    @Override
+    public RESTContentSpecV1 getJSONContentSpecRevision(final Integer id, final Integer revision, final String expand) {
+        if (id == null) throw new BadRequestException("The id parameter can not be null");
+        if (revision == null) throw new BadRequestException("The revision parameter can not be null");
+
+        return getJSONResource(ContentSpec.class, contentSpecFactory, id, revision, expand);
+    }
+
+    @Override
+    public RESTContentSpecCollectionV1 getJSONContentSpecs(final String expand) {
+        return getJSONResources(RESTContentSpecCollectionV1.class, ContentSpec.class, contentSpecFactory,
+                RESTv1Constants.CONTENT_SPEC_EXPANSION_NAME, expand);
+    }
+
+    @Override
+    public RESTContentSpecCollectionV1 getJSONContentSpecsWithQuery(final PathSegment query, final String expand) {
+        return getJSONResourcesFromQuery(RESTContentSpecCollectionV1.class, query.getMatrixParameters(),
+                ContentSpecFilterQueryBuilder.class, new ContentSpecFieldFilter(), contentSpecFactory,
+                RESTv1Constants.CONTENT_SPEC_EXPANSION_NAME, expand);
+    }
+
+    @Override
+    public RESTContentSpecV1 updateJSONContentSpec(final String expand, final RESTContentSpecV1 dataObject, final String message,
+            final Integer flag, final String userId) {
+        if (dataObject == null) throw new BadRequestException("The dataObject parameter can not be null");
+        if (dataObject.getId() == null) throw new BadRequestException("The dataObject.getId() parameter can not be null");
+
+        final RESTLogDetailsV1 logDetails = generateLogDetails(message, flag, userId);
+        return updateJSONEntity(ContentSpec.class, dataObject, contentSpecFactory, expand, logDetails);
+    }
+
+    @Override
+    public RESTContentSpecCollectionV1 updateJSONContentSpecs(final String expand, final RESTContentSpecCollectionV1 dataObjects,
+            final String message, final Integer flag, final String userId) {
+        if (dataObjects == null) throw new BadRequestException("The dataObjects parameter can not be null");
+        if (dataObjects.getItems() == null) throw new BadRequestException("The dataObjects.getItems() parameter can not be null");
+
+        final RESTLogDetailsV1 logDetails = generateLogDetails(message, flag, userId);
+        return updateJSONEntities(RESTContentSpecCollectionV1.class, ContentSpec.class, dataObjects, contentSpecFactory,
+                RESTv1Constants.CONTENT_SPEC_EXPANSION_NAME, expand, logDetails);
+    }
+
+    @Override
+    public RESTContentSpecV1 createJSONContentSpec(final String expand, final RESTContentSpecV1 dataObject, final String message,
+            final Integer flag, final String userId) {
+        if (dataObject == null) throw new BadRequestException("The dataObject parameter can not be null");
+
+        final RESTLogDetailsV1 logDetails = generateLogDetails(message, flag, userId);
+        return createJSONEntity(ContentSpec.class, dataObject, contentSpecFactory, expand, logDetails);
+    }
+
+    @Override
+    public RESTContentSpecCollectionV1 createJSONContentSpecs(final String expand, final RESTContentSpecCollectionV1 dataObjects,
+            final String message, final Integer flag, final String userId) {
+        if (dataObjects == null) throw new BadRequestException("The dataObjects parameter can not be null");
+        if (dataObjects.getItems() == null) throw new BadRequestException("The dataObjects.getItems() parameter can not be null");
+
+        final RESTLogDetailsV1 logDetails = generateLogDetails(message, flag, userId);
+        return createJSONEntities(RESTContentSpecCollectionV1.class, ContentSpec.class, dataObjects, contentSpecFactory,
+                RESTv1Constants.CONTENT_SPEC_EXPANSION_NAME, expand, logDetails);
+    }
+
+    @Override
+    public RESTContentSpecV1 deleteJSONContentSpec(final Integer id, final String message, final Integer flag, final String userId,
+            final String expand) {
+        if (id == null) throw new BadRequestException("The dataObject parameter can not be null");
+
+        final RESTLogDetailsV1 logDetails = generateLogDetails(message, flag, userId);
+        return deleteJSONEntity(ContentSpec.class, contentSpecFactory, id, expand, logDetails);
+    }
+
+    @Override
+    public RESTContentSpecCollectionV1 deleteJSONContentSpecs(final PathSegment ids, final String message, final Integer flag,
+            final String userId, final String expand) {
+        if (ids == null) throw new BadRequestException("The dataObjects parameter can not be null");
+
+        final Set<String> dbEntityIds = ids.getMatrixParameters().keySet();
+        final RESTLogDetailsV1 logDetails = generateLogDetails(message, flag, userId);
+        return deleteJSONEntities(RESTContentSpecCollectionV1.class, ContentSpec.class, contentSpecFactory, dbEntityIds,
+                RESTv1Constants.CONTENT_SPEC_EXPANSION_NAME, expand, logDetails);
+    }
+
+    /* ADDITIONAL CONTENT SPEC FUNCTIONS */
+
+    @Override
+    public String getTEXTContentSpec(final Integer id) {
+        if (id == null) throw new BadRequestException("The id parameter can not be null");
+
+        try {
+            return ContentSpecUtilities.getContentSpecText(id, entityManager);
+        } catch (Throwable e) {
+            throw processError(null, e);
+        }
+    }
+
+    @Override
+    public String getTEXTContentSpecRevision(final Integer id, final Integer revision) {
+        if (id == null) throw new BadRequestException("The id parameter can not be null");
+        if (revision == null) throw new BadRequestException("The revision parameter can not be null");
+
+        try {
+            return ContentSpecUtilities.getContentSpecText(id, revision, entityManager);
+        } catch (Throwable e) {
+            throw processError(null, e);
+        }
+    }
+
+    @Override
+    public String updateTEXTContentSpec(final Integer id, final String contentSpec, final Boolean strictTitles, final String message,
+            final Integer flag, final String userId) {
+        if (id == null) throw new BadRequestException("The id parameter can not be null");
+        if (contentSpec == null) throw new BadRequestException("The contentSpec parameter can not be null");
+
+        final RESTLogDetailsV1 logDetails = generateLogDetails(message, flag, userId);
+        return updateTEXTContentSpecFromString(id, contentSpec, strictTitles, logDetails);
+    }
+
+    @Override
+    public String createTEXTContentSpec(final String contentSpec, final Boolean strictTitles, final String message, final Integer flag,
+            final String userId) {
+        if (contentSpec == null) throw new BadRequestException("The contentSpec parameter can not be null");
+
+        final RESTLogDetailsV1 logDetails = generateLogDetails(message, flag, userId);
+        return createTEXTContentSpecFromString(contentSpec, strictTitles, logDetails);
+    }
+
+    @Override
+    public RESTTextContentSpecV1 getJSONTextContentSpec(final Integer id, final String expand) {
+        if (id == null) throw new BadRequestException("The id parameter can not be null");
+
+        return getJSONResource(ContentSpec.class, textContentSpecFactory, id, expand);
+    }
+
+    @Override
+    public RESTTextContentSpecV1 getJSONTextContentSpecRevision(final Integer id, final Integer revision, final String expand) {
+        if (id == null) throw new BadRequestException("The id parameter can not be null");
+        if (revision == null) throw new BadRequestException("The revision parameter can not be null");
+
+        return getJSONResource(ContentSpec.class, textContentSpecFactory, id, revision, expand);
+    }
+
+    @Override
+    public RESTTextContentSpecCollectionV1 getJSONTextContentSpecs(final String expand) {
+        return getJSONResources(RESTTextContentSpecCollectionV1.class, ContentSpec.class, textContentSpecFactory,
+                RESTv1Constants.CONTENT_SPEC_EXPANSION_NAME, expand);
+    }
+
+    @Override
+    public RESTTextContentSpecCollectionV1 getJSONTextContentSpecsWithQuery(final PathSegment query, final String expand) {
+        return getJSONResourcesFromQuery(RESTTextContentSpecCollectionV1.class, query.getMatrixParameters(),
+                ContentSpecFilterQueryBuilder.class, new ContentSpecFieldFilter(), textContentSpecFactory,
+                RESTv1Constants.CONTENT_SPEC_EXPANSION_NAME, expand);
+    }
+
+    @Override
+    public RESTTextContentSpecV1 updateJSONTextContentSpec(final String expand, final RESTTextContentSpecV1 dataObject,
+            final String message, final Integer flag, final String userId) {
+        if (dataObject == null) throw new BadRequestException("The dataObject parameter can not be null");
+        if (dataObject.getId() == null) throw new BadRequestException("The dataObject.getId() parameter can not be null");
+
+        final RESTLogDetailsV1 logDetails = generateLogDetails(message, flag, userId);
+        return updateJSONContentSpecFromString(dataObject, logDetails, expand);
+    }
+
+    @Override
+    public RESTTextContentSpecV1 createJSONTextContentSpec(final String expand, final RESTTextContentSpecV1 dataObject,
+            final String message, final Integer flag, final String userId) {
+        if (dataObject == null) throw new BadRequestException("The dataObject parameter can not be null");
+
+        final RESTLogDetailsV1 logDetails = generateLogDetails(message, flag, userId);
+        return createJSONContentSpecFromString(dataObject, logDetails, expand);
+    }
+
+    @Override
+    public byte[] getZIPContentSpecs() {
+        final PathSegment pathSegment = new PathSegmentImpl("query;", false);
+        return getZIPContentSpecsWithQuery(pathSegment);
+    }
+
+    @Override
+    public byte[] getZIPContentSpecsWithQuery(final PathSegment query) {
+        response.getOutputHeaders().putSingle("Content-Disposition", "filename=ContentSpecs.zip");
+
+        final CriteriaQuery<ContentSpec> contentSpecQuery = getEntitiesFromQuery(query.getMatrixParameters(),
+                new ContentSpecFilterQueryBuilder(entityManager), new ContentSpecFieldFilter());
+        final List<ContentSpec> contentSpecs = entityManager.createQuery(contentSpecQuery).getResultList();
+
+        final HashMap<String, byte[]> files = new HashMap<String, byte[]>();
+        try {
+            for (final ContentSpec entity : contentSpecs) {
+                final String contentSpec = ContentSpecUtilities.getContentSpecText(entity.getId(), null, entityManager);
+                files.put(entity.getId() + ".contentspec", contentSpec.getBytes("UTF-8"));
+            }
+
+            return ZipUtilities.createZip(files);
+        } catch (Throwable e) {
+            throw processError(null, e);
+        }
+    }
+
+    /* CONTENT SPEC NODE FUNCTIONS */
+    /* JSONP FUNCTIONS */
+    @Override
+    public String getJSONPContentSpecNode(final Integer id, final String expand, final String callback) {
+        if (callback == null) throw new BadRequestException("The callback parameter can not be null");
+
+        try {
+            return wrapJsonInPadding(callback, convertObjectToJSON(getJSONContentSpecNode(id, expand)));
+        } catch (final Exception ex) {
+            throw new InternalServerErrorException("Could not marshall return value into JSON");
+        }
+    }
+
+    @Override
+    public String getJSONPContentSpecNodeRevision(final Integer id, final Integer revision, final String expand, final String callback) {
+        if (callback == null) throw new BadRequestException("The callback parameter can not be null");
+
+        try {
+            return wrapJsonInPadding(callback, convertObjectToJSON(getJSONContentSpecNodeRevision(id, revision, expand)));
+        } catch (final Exception ex) {
+            throw new InternalServerErrorException("Could not marshall return value into JSON");
+        }
+    }
+
+    @Override
+    public String getJSONPContentSpecNodes(final String expand, final String callback) {
+        if (callback == null) throw new BadRequestException("The callback parameter can not be null");
+
+        try {
+            return wrapJsonInPadding(callback, convertObjectToJSON(getJSONContentSpecNodes(expand)));
+        } catch (final Exception ex) {
+            throw new InternalServerErrorException("Could not marshall return value into JSON");
+        }
+    }
+
+    @Override
+    public String getJSONPContentSpecNodesWithQuery(final PathSegment query, final String expand, final String callback) {
+        if (callback == null) throw new BadRequestException("The callback parameter can not be null");
+
+        try {
+            return wrapJsonInPadding(callback, convertObjectToJSON(getJSONContentSpecNodesWithQuery(query, expand)));
+        } catch (final Exception ex) {
+            throw new InternalServerErrorException("Could not marshall return value into JSON");
+        }
+    }
+
+    /* JSON FUNCTIONS */
+    @Override
+    public RESTCSNodeV1 getJSONContentSpecNode(final Integer id, final String expand) {
+        if (id == null) throw new BadRequestException("The id parameter can not be null");
+
+        return getJSONResource(CSNode.class, csNodeFactory, id, expand);
+    }
+
+    @Override
+    public RESTCSNodeV1 getJSONContentSpecNodeRevision(final Integer id, final Integer revision, final String expand) {
+        if (id == null) throw new BadRequestException("The id parameter can not be null");
+        if (revision == null) throw new BadRequestException("The revision parameter can not be null");
+
+        return getJSONResource(CSNode.class, csNodeFactory, id, revision, expand);
+    }
+
+    @Override
+    public RESTCSNodeCollectionV1 getJSONContentSpecNodes(final String expand) {
+        return getJSONResources(RESTCSNodeCollectionV1.class, CSNode.class, csNodeFactory, RESTv1Constants.CONTENT_SPEC_NODE_EXPANSION_NAME,
+                expand);
+    }
+
+    @Override
+    public RESTCSNodeCollectionV1 getJSONContentSpecNodesWithQuery(final PathSegment query, final String expand) {
+        return getJSONResourcesFromQuery(RESTCSNodeCollectionV1.class, query.getMatrixParameters(), ContentSpecNodeFilterQueryBuilder.class,
+                new ContentSpecNodeFieldFilter(), csNodeFactory, RESTv1Constants.CONTENT_SPEC_NODE_EXPANSION_NAME, expand);
+    }
+
+//    @Override
+//    public RESTCSNodeV1 updateJSONContentSpecNode(final String expand, final RESTCSNodeV1 dataObject, final String message,
+//            final Integer flag, final String userId) {
+//        if (dataObject == null) throw new BadRequestException("The dataObject parameter can not be null");
+//        if (dataObject.getId() == null) throw new BadRequestException("The dataObject.getId() parameter can not be null");
+//
+//        final RESTLogDetailsV1 logDetails = generateLogDetails(message, flag, userId);
+//        return updateJSONEntity(CSNode.class, dataObject, csNodeFactory, expand, logDetails);
+//    }
+//
+//    @Override
+//    public RESTCSNodeCollectionV1 updateJSONContentSpecNodes(final String expand, final RESTCSNodeCollectionV1 dataObjects,
+//            final String message, final Integer flag, final String userId) {
+//        if (dataObjects == null) throw new BadRequestException("The dataObjects parameter can not be null");
+//        if (dataObjects.getItems() == null) throw new BadRequestException("The dataObjects.getItems() parameter can not be null");
+//
+//        final RESTLogDetailsV1 logDetails = generateLogDetails(message, flag, userId);
+//        return updateJSONEntities(RESTCSNodeCollectionV1.class, CSNode.class, dataObjects, csNodeFactory,
+//                RESTv1Constants.CONTENT_SPEC_NODE_EXPANSION_NAME, expand, logDetails);
+//    }
+//
+//    @Override
+//    public RESTCSNodeV1 createJSONContentSpecNode(final String expand, final RESTCSNodeV1 dataObject, final String message,
+//            final Integer flag, final String userId) {
+//        if (dataObject == null) throw new BadRequestException("The dataObject parameter can not be null");
+//
+//        final RESTLogDetailsV1 logDetails = generateLogDetails(message, flag, userId);
+//        return createJSONEntity(CSNode.class, dataObject, csNodeFactory, expand, logDetails);
+//    }
+//
+//    @Override
+//    public RESTCSNodeCollectionV1 createJSONContentSpecNodes(final String expand, final RESTCSNodeCollectionV1 dataObjects,
+//            final String message, final Integer flag, final String userId) {
+//        if (dataObjects == null) throw new BadRequestException("The dataObjects parameter can not be null");
+//        if (dataObjects.getItems() == null) throw new BadRequestException("The dataObjects.getItems() parameter can not be null");
+//
+//        final RESTLogDetailsV1 logDetails = generateLogDetails(message, flag, userId);
+//        return createJSONEntities(RESTCSNodeCollectionV1.class, CSNode.class, dataObjects, csNodeFactory,
+//                RESTv1Constants.CONTENT_SPEC_NODE_EXPANSION_NAME, expand, logDetails);
+//    }
+//
+//    @Override
+//    public RESTCSNodeV1 deleteJSONContentSpecNode(final Integer id, final String message, final Integer flag, final String userId,
+//            final String expand) {
+//        if (id == null) throw new BadRequestException("The dataObject parameter can not be null");
+//
+//        final RESTLogDetailsV1 logDetails = generateLogDetails(message, flag, userId);
+//        return deleteJSONEntity(CSNode.class, csNodeFactory, id, expand, logDetails);
+//    }
+//
+//    @Override
+//    public RESTCSNodeCollectionV1 deleteJSONContentSpecNodes(final PathSegment ids, final String message, final Integer flag,
+//            final String userId, final String expand) {
+//        if (ids == null) throw new BadRequestException("The dataObjects parameter can not be null");
+//
+//        final Set<String> dbEntityIds = ids.getMatrixParameters().keySet();
+//        final RESTLogDetailsV1 logDetails = generateLogDetails(message, flag, userId);
+//        return deleteJSONEntities(RESTCSNodeCollectionV1.class, CSNode.class, csNodeFactory, dbEntityIds,
+//                RESTv1Constants.CONTENT_SPEC_NODE_EXPANSION_NAME, expand, logDetails);
+//    }
+
+    /* TRANSLATED CONTENT SPEC FUNCTIONS */
+    /* JSONP FUNCTIONS */
+    @Override
+    public String getJSONPTranslatedContentSpec(final Integer id, final String expand, final String callback) {
+        if (callback == null) throw new BadRequestException("The callback parameter can not be null");
+
+        try {
+            return wrapJsonInPadding(callback, convertObjectToJSON(getJSONTranslatedContentSpec(id, expand)));
+        } catch (final Exception ex) {
+            throw new InternalServerErrorException("Could not marshall return value into JSON");
+        }
+    }
+
+    @Override
+    public String getJSONPTranslatedContentSpecRevision(final Integer id, final Integer revision, final String expand,
+            final String callback) {
+        if (callback == null) throw new BadRequestException("The callback parameter can not be null");
+
+        try {
+            return wrapJsonInPadding(callback, convertObjectToJSON(getJSONTranslatedContentSpecRevision(id, revision, expand)));
+        } catch (final Exception ex) {
+            throw new InternalServerErrorException("Could not marshall return value into JSON");
+        }
+    }
+
+    @Override
+    public String getJSONPTranslatedContentSpecs(final String expand, final String callback) {
+        if (callback == null) throw new BadRequestException("The callback parameter can not be null");
+
+        try {
+            return wrapJsonInPadding(callback, convertObjectToJSON(getJSONTranslatedContentSpecs(expand)));
+        } catch (final Exception ex) {
+            throw new InternalServerErrorException("Could not marshall return value into JSON");
+        }
+    }
+
+    @Override
+    public String getJSONPTranslatedContentSpecsWithQuery(final PathSegment query, final String expand, final String callback) {
+        if (callback == null) throw new BadRequestException("The callback parameter can not be null");
+
+        try {
+            return wrapJsonInPadding(callback, convertObjectToJSON(getJSONTranslatedContentSpecsWithQuery(query, expand)));
+        } catch (final Exception ex) {
+            throw new InternalServerErrorException("Could not marshall return value into JSON");
+        }
+    }
+
+    /* JSON FUNCTIONS */
+    @Override
+    public RESTTranslatedContentSpecV1 getJSONTranslatedContentSpec(final Integer id, final String expand) {
+        if (id == null) throw new BadRequestException("The id parameter can not be null");
+
+        return getJSONResource(TranslatedContentSpec.class, translatedContentSpecFactory, id, expand);
+    }
+
+    @Override
+    public RESTTranslatedContentSpecV1 getJSONTranslatedContentSpecRevision(final Integer id, final Integer revision, final String expand) {
+        if (id == null) throw new BadRequestException("The id parameter can not be null");
+        if (revision == null) throw new BadRequestException("The revision parameter can not be null");
+
+        return getJSONResource(TranslatedContentSpec.class, translatedContentSpecFactory, id, revision, expand);
+    }
+
+    @Override
+    public RESTTranslatedContentSpecCollectionV1 getJSONTranslatedContentSpecs(final String expand) {
+        return getJSONResources(RESTTranslatedContentSpecCollectionV1.class, TranslatedContentSpec.class, translatedContentSpecFactory,
+                RESTv1Constants.TRANSLATED_CONTENT_SPEC_EXPANSION_NAME, expand);
+    }
+
+    @Override
+    public RESTTranslatedContentSpecCollectionV1 getJSONTranslatedContentSpecsWithQuery(final PathSegment query, final String expand) {
+        return getJSONResourcesFromQuery(RESTTranslatedContentSpecCollectionV1.class, query.getMatrixParameters(),
+                TranslatedContentSpecFilterQueryBuilder.class, new TranslatedContentSpecFieldFilter(), translatedContentSpecFactory,
+                RESTv1Constants.TRANSLATED_CONTENT_SPEC_EXPANSION_NAME, expand);
+    }
+
+    @Override
+    public RESTTranslatedContentSpecV1 updateJSONTranslatedContentSpec(final String expand, final RESTTranslatedContentSpecV1 dataObject,
+            final String message, final Integer flag, final String userId) {
+        if (dataObject == null) throw new BadRequestException("The dataObject parameter can not be null");
+        if (dataObject.getId() == null) throw new BadRequestException("The dataObject.getId() parameter can not be null");
+
+        final RESTLogDetailsV1 logDetails = generateLogDetails(message, flag, userId);
+        return updateJSONEntity(TranslatedContentSpec.class, dataObject, translatedContentSpecFactory, expand, logDetails);
+    }
+
+    @Override
+    public RESTTranslatedContentSpecCollectionV1 updateJSONTranslatedContentSpecs(final String expand,
+            final RESTTranslatedContentSpecCollectionV1 dataObjects, final String message, final Integer flag, final String userId) {
+        if (dataObjects == null) throw new BadRequestException("The dataObjects parameter can not be null");
+        if (dataObjects.getItems() == null) throw new BadRequestException("The dataObjects.getItems() parameter can not be null");
+
+        final RESTLogDetailsV1 logDetails = generateLogDetails(message, flag, userId);
+        return updateJSONEntities(RESTTranslatedContentSpecCollectionV1.class, TranslatedContentSpec.class, dataObjects,
+                translatedContentSpecFactory, RESTv1Constants.TRANSLATED_CONTENT_SPEC_EXPANSION_NAME, expand, logDetails);
+    }
+
+    @Override
+    public RESTTranslatedContentSpecV1 createJSONTranslatedContentSpec(final String expand, final RESTTranslatedContentSpecV1 dataObject,
+            final String message, final Integer flag, final String userId) {
+        if (dataObject == null) throw new BadRequestException("The dataObject parameter can not be null");
+
+        final RESTLogDetailsV1 logDetails = generateLogDetails(message, flag, userId);
+        return createJSONEntity(TranslatedContentSpec.class, dataObject, translatedContentSpecFactory, expand, logDetails);
+    }
+
+    @Override
+    public RESTTranslatedContentSpecCollectionV1 createJSONTranslatedContentSpecs(final String expand,
+            final RESTTranslatedContentSpecCollectionV1 dataObjects, final String message, final Integer flag, final String userId) {
+        if (dataObjects == null) throw new BadRequestException("The dataObjects parameter can not be null");
+        if (dataObjects.getItems() == null) throw new BadRequestException("The dataObjects.getItems() parameter can not be null");
+
+        final RESTLogDetailsV1 logDetails = generateLogDetails(message, flag, userId);
+        return createJSONEntities(RESTTranslatedContentSpecCollectionV1.class, TranslatedContentSpec.class, dataObjects,
+                translatedContentSpecFactory, RESTv1Constants.TRANSLATED_CONTENT_SPEC_EXPANSION_NAME, expand, logDetails);
+    }
+
+    @Override
+    public RESTTranslatedContentSpecV1 deleteJSONTranslatedContentSpec(final Integer id, final String message, final Integer flag,
+            final String userId, final String expand) {
+        if (id == null) throw new BadRequestException("The dataObject parameter can not be null");
+
+        final RESTLogDetailsV1 logDetails = generateLogDetails(message, flag, userId);
+        return deleteJSONEntity(TranslatedContentSpec.class, translatedContentSpecFactory, id, expand, logDetails);
+    }
+
+    @Override
+    public RESTTranslatedContentSpecCollectionV1 deleteJSONTranslatedContentSpecs(final PathSegment ids, final String message,
+            final Integer flag, final String userId, final String expand) {
+        if (ids == null) throw new BadRequestException("The dataObjects parameter can not be null");
+
+        final Set<String> dbEntityIds = ids.getMatrixParameters().keySet();
+        final RESTLogDetailsV1 logDetails = generateLogDetails(message, flag, userId);
+        return deleteJSONEntities(RESTTranslatedContentSpecCollectionV1.class, TranslatedContentSpec.class, translatedContentSpecFactory,
+                dbEntityIds, RESTv1Constants.TRANSLATED_CONTENT_SPEC_EXPANSION_NAME, expand, logDetails);
+    }
+
+    /* TRANSLATED CONTENT SPEC NODE FUNCTIONS */
+    /* JSONP FUNCTIONS */
+    @Override
+    public String getJSONPTranslatedContentSpecNode(final Integer id, final String expand, final String callback) {
+        if (callback == null) throw new BadRequestException("The callback parameter can not be null");
+
+        try {
+            return wrapJsonInPadding(callback, convertObjectToJSON(getJSONTranslatedContentSpecNode(id, expand)));
+        } catch (final Exception ex) {
+            throw new InternalServerErrorException("Could not marshall return value into JSON");
+        }
+    }
+
+    @Override
+    public String getJSONPTranslatedContentSpecNodeRevision(final Integer id, final Integer revision, final String expand,
+            final String callback) {
+        if (callback == null) throw new BadRequestException("The callback parameter can not be null");
+
+        try {
+            return wrapJsonInPadding(callback, convertObjectToJSON(getJSONTranslatedContentSpecNodeRevision(id, revision, expand)));
+        } catch (final Exception ex) {
+            throw new InternalServerErrorException("Could not marshall return value into JSON");
+        }
+    }
+
+    @Override
+    public String getJSONPTranslatedContentSpecNodes(final String expand, final String callback) {
+        if (callback == null) throw new BadRequestException("The callback parameter can not be null");
+
+        try {
+            return wrapJsonInPadding(callback, convertObjectToJSON(getJSONTranslatedContentSpecNodes(expand)));
+        } catch (final Exception ex) {
+            throw new InternalServerErrorException("Could not marshall return value into JSON");
+        }
+    }
+
+    @Override
+    public String getJSONPTranslatedContentSpecNodesWithQuery(final PathSegment query, final String expand, final String callback) {
+        if (callback == null) throw new BadRequestException("The callback parameter can not be null");
+
+        try {
+            return wrapJsonInPadding(callback, convertObjectToJSON(getJSONTranslatedContentSpecNodesWithQuery(query, expand)));
+        } catch (final Exception ex) {
+            throw new InternalServerErrorException("Could not marshall return value into JSON");
+        }
+    }
+
+    /* JSON FUNCTIONS */
+    @Override
+    public RESTTranslatedCSNodeV1 getJSONTranslatedContentSpecNode(final Integer id, final String expand) {
+        if (id == null) throw new BadRequestException("The id parameter can not be null");
+
+        return getJSONResource(TranslatedCSNode.class, translatedCSNodeFactory, id, expand);
+    }
+
+    @Override
+    public RESTTranslatedCSNodeV1 getJSONTranslatedContentSpecNodeRevision(final Integer id, final Integer revision, final String expand) {
+        if (id == null) throw new BadRequestException("The id parameter can not be null");
+        if (revision == null) throw new BadRequestException("The revision parameter can not be null");
+
+        return getJSONResource(TranslatedCSNode.class, translatedCSNodeFactory, id, revision, expand);
+    }
+
+    @Override
+    public RESTTranslatedCSNodeCollectionV1 getJSONTranslatedContentSpecNodes(final String expand) {
+        return getJSONResources(RESTTranslatedCSNodeCollectionV1.class, TranslatedCSNode.class, translatedCSNodeFactory,
+                RESTv1Constants.CONTENT_SPEC_TRANSLATED_NODE_EXPANSION_NAME, expand);
+    }
+
+    @Override
+    public RESTTranslatedCSNodeCollectionV1 getJSONTranslatedContentSpecNodesWithQuery(final PathSegment query, final String expand) {
+        return getJSONResourcesFromQuery(RESTTranslatedCSNodeCollectionV1.class, query.getMatrixParameters(),
+                TranslatedContentSpecNodeFilterQueryBuilder.class, new TranslatedContentSpecNodeFieldFilter(), translatedCSNodeFactory,
+                RESTv1Constants.CONTENT_SPEC_TRANSLATED_NODE_EXPANSION_NAME, expand);
+    }
+
+    @Override
+    public RESTTranslatedCSNodeV1 updateJSONTranslatedContentSpecNode(final String expand, final RESTTranslatedCSNodeV1 dataObject,
+            final String message, final Integer flag, final String userId) {
+        if (dataObject == null) throw new BadRequestException("The dataObject parameter can not be null");
+        if (dataObject.getId() == null) throw new BadRequestException("The dataObject.getId() parameter can not be null");
+
+        final RESTLogDetailsV1 logDetails = generateLogDetails(message, flag, userId);
+        return updateJSONEntity(TranslatedCSNode.class, dataObject, translatedCSNodeFactory, expand, logDetails);
+    }
+
+    @Override
+    public RESTTranslatedCSNodeCollectionV1 updateJSONTranslatedContentSpecNodes(final String expand,
+            final RESTTranslatedCSNodeCollectionV1 dataObjects, final String message, final Integer flag, final String userId) {
+        if (dataObjects == null) throw new BadRequestException("The dataObjects parameter can not be null");
+        if (dataObjects.getItems() == null) throw new BadRequestException("The dataObjects.getItems() parameter can not be null");
+
+        final RESTLogDetailsV1 logDetails = generateLogDetails(message, flag, userId);
+        return updateJSONEntities(RESTTranslatedCSNodeCollectionV1.class, TranslatedCSNode.class, dataObjects, translatedCSNodeFactory,
+                RESTv1Constants.CONTENT_SPEC_TRANSLATED_NODE_EXPANSION_NAME, expand, logDetails);
+    }
+
+    @Override
+    public RESTTranslatedCSNodeV1 createJSONTranslatedContentSpecNode(final String expand, final RESTTranslatedCSNodeV1 dataObject,
+            final String message, final Integer flag, final String userId) {
+        if (dataObject == null) throw new BadRequestException("The dataObject parameter can not be null");
+
+        final RESTLogDetailsV1 logDetails = generateLogDetails(message, flag, userId);
+        return createJSONEntity(TranslatedCSNode.class, dataObject, translatedCSNodeFactory, expand, logDetails);
+    }
+
+    @Override
+    public RESTTranslatedCSNodeCollectionV1 createJSONTranslatedContentSpecNodes(final String expand,
+            final RESTTranslatedCSNodeCollectionV1 dataObjects, final String message, final Integer flag, final String userId) {
+        if (dataObjects == null) throw new BadRequestException("The dataObjects parameter can not be null");
+        if (dataObjects.getItems() == null) throw new BadRequestException("The dataObjects.getItems() parameter can not be null");
+
+        final RESTLogDetailsV1 logDetails = generateLogDetails(message, flag, userId);
+        return createJSONEntities(RESTTranslatedCSNodeCollectionV1.class, TranslatedCSNode.class, dataObjects, translatedCSNodeFactory,
+                RESTv1Constants.CONTENT_SPEC_TRANSLATED_NODE_EXPANSION_NAME, expand, logDetails);
+    }
+
+    @Override
+    public RESTTranslatedCSNodeV1 deleteJSONTranslatedContentSpecNode(final Integer id, final String message, final Integer flag,
+            final String userId, final String expand) {
+        if (id == null) throw new BadRequestException("The dataObject parameter can not be null");
+
+        final RESTLogDetailsV1 logDetails = generateLogDetails(message, flag, userId);
+        return deleteJSONEntity(TranslatedCSNode.class, translatedCSNodeFactory, id, expand, logDetails);
+    }
+
+    @Override
+    public RESTTranslatedCSNodeCollectionV1 deleteJSONTranslatedContentSpecNodes(final PathSegment ids, final String message,
+            final Integer flag, final String userId, final String expand) {
+        if (ids == null) throw new BadRequestException("The dataObjects parameter can not be null");
+
+        final Set<String> dbEntityIds = ids.getMatrixParameters().keySet();
+        final RESTLogDetailsV1 logDetails = generateLogDetails(message, flag, userId);
+        return deleteJSONEntities(RESTTranslatedCSNodeCollectionV1.class, TranslatedCSNode.class, translatedCSNodeFactory, dbEntityIds,
+                RESTv1Constants.CONTENT_SPEC_TRANSLATED_NODE_EXPANSION_NAME, expand, logDetails);
+    }
+
+    /* FILE FUNCTIONS */
+    /* JSONP FUNCTIONS */
+    @Override
+    public String getJSONPFile(final Integer id, final String expand, final String callback) {
+        if (callback == null) throw new BadRequestException("The callback parameter can not be null");
+
+        try {
+            return wrapJsonInPadding(callback, convertObjectToJSON(getJSONFile(id, expand)));
+        } catch (final Exception ex) {
+            throw new InternalServerErrorException("Could not marshall return value into JSON");
+        }
+    }
+
+    @Override
+    public String getJSONPFileRevision(final Integer id, final Integer revision, final String expand, final String callback) {
+        if (callback == null) throw new BadRequestException("The callback parameter can not be null");
+
+        try {
+            return wrapJsonInPadding(callback, convertObjectToJSON(getJSONFileRevision(id, revision, expand)));
+        } catch (final Exception ex) {
+            throw new InternalServerErrorException("Could not marshall return value into JSON");
+        }
+    }
+
+    @Override
+    public String getJSONPFiles(final String expand, final String callback) {
+        if (callback == null) throw new BadRequestException("The callback parameter can not be null");
+
+        try {
+            return wrapJsonInPadding(callback, convertObjectToJSON(getJSONFiles(expand)));
+        } catch (final Exception ex) {
+            throw new InternalServerErrorException("Could not marshall return value into JSON");
+        }
+    }
+
+    @Override
+    public String getJSONPFilesWithQuery(final PathSegment query, final String expand, final String callback) {
+        if (callback == null) throw new BadRequestException("The callback parameter can not be null");
+
+        try {
+            return wrapJsonInPadding(callback, convertObjectToJSON(getJSONFilesWithQuery(query, expand)));
+        } catch (final Exception ex) {
+            throw new InternalServerErrorException("Could not marshall return value into JSON");
+        }
+    }
+
+    /* JSON FUNCTIONS */
+    @Override
+    public RESTFileV1 getJSONFile(final Integer id, final String expand) {
+        if (id == null) throw new BadRequestException("The id parameter can not be null");
+
+        return getJSONResource(File.class, fileFactory, id, expand);
+    }
+
+    @Override
+    public RESTFileV1 getJSONFileRevision(final Integer id, Integer revision, final String expand) {
+        if (id == null) throw new BadRequestException("The id parameter can not be null");
+        if (revision == null) throw new BadRequestException("The revision parameter can not be null");
+
+        return getJSONResource(File.class, fileFactory, id, revision, expand);
+    }
+
+    @Override
+    public RESTFileCollectionV1 getJSONFiles(final String expand) {
+        return getJSONResources(RESTFileCollectionV1.class, File.class, fileFactory, RESTv1Constants.FILES_EXPANSION_NAME, expand);
+    }
+
+    @Override
+    public RESTFileCollectionV1 getJSONFilesWithQuery(final PathSegment query, final String expand) {
+        return this.getJSONResourcesFromQuery(RESTFileCollectionV1.class, query.getMatrixParameters(), FileFilterQueryBuilder.class,
+                new FileFieldFilter(), fileFactory, RESTv1Constants.FILES_EXPANSION_NAME, expand);
+    }
+
+    @Override
+    public RESTFileV1 updateJSONFile(final String expand, final RESTFileV1 dataObject, final String message, final Integer flag,
+            final String userId) {
+        if (dataObject == null) throw new BadRequestException("The dataObject parameter can not be null");
+        if (dataObject.getId() == null) throw new BadRequestException("The dataObject.getId() parameter can not be null");
+
+        final RESTLogDetailsV1 logDetails = generateLogDetails(message, flag, userId);
+        return updateJSONEntity(File.class, dataObject, fileFactory, expand, logDetails);
+    }
+
+    @Override
+    public RESTFileCollectionV1 updateJSONFiles(final String expand, final RESTFileCollectionV1 dataObjects, final String message,
+            final Integer flag, final String userId) {
+        if (dataObjects == null) throw new BadRequestException("The dataObjects parameter can not be null");
+        if (dataObjects.getItems() == null) throw new BadRequestException("The dataObjects.getItems() parameter can not be null");
+
+        final RESTLogDetailsV1 logDetails = generateLogDetails(message, flag, userId);
+        return updateJSONEntities(RESTFileCollectionV1.class, File.class, dataObjects, fileFactory, RESTv1Constants.FILES_EXPANSION_NAME,
+                expand, logDetails);
+    }
+
+    @Override
+    public RESTFileV1 createJSONFile(final String expand, final RESTFileV1 dataObject, final String message, final Integer flag,
+            final String userId) {
+        if (dataObject == null) throw new BadRequestException("The dataObject parameter can not be null");
+
+        final RESTLogDetailsV1 logDetails = generateLogDetails(message, flag, userId);
+        return createJSONEntity(File.class, dataObject, fileFactory, expand, logDetails);
+    }
+
+    @Override
+    public RESTFileCollectionV1 createJSONFiles(final String expand, final RESTFileCollectionV1 dataObjects, final String message,
+            final Integer flag, final String userId) {
+        if (dataObjects == null) throw new BadRequestException("The dataObjects parameter can not be null");
+        if (dataObjects.getItems() == null) throw new BadRequestException("The dataObjects.getItems() parameter can not be null");
+
+        final RESTLogDetailsV1 logDetails = generateLogDetails(message, flag, userId);
+        return createJSONEntities(RESTFileCollectionV1.class, File.class, dataObjects, fileFactory, RESTv1Constants.FILES_EXPANSION_NAME,
+                expand, logDetails);
+    }
+
+    @Override
+    public RESTFileV1 deleteJSONFile(final Integer id, final String message, final Integer flag, final String userId, final String expand) {
+        if (id == null) throw new BadRequestException("The id parameter can not be null");
+
+        final RESTLogDetailsV1 logDetails = generateLogDetails(message, flag, userId);
+        return deleteJSONEntity(File.class, fileFactory, id, expand, logDetails);
+    }
+
+    @Override
+    public RESTFileCollectionV1 deleteJSONFiles(final PathSegment ids, final String message, final Integer flag, final String userId,
+            final String expand) {
+        if (ids == null) throw new BadRequestException("The ids parameter can not be null");
+
+        final Set<String> dbEntityIds = ids.getMatrixParameters().keySet();
+        final RESTLogDetailsV1 logDetails = generateLogDetails(message, flag, userId);
+        return deleteJSONEntities(RESTFileCollectionV1.class, File.class, fileFactory, dbEntityIds, RESTv1Constants.FILES_EXPANSION_NAME,
+                expand, logDetails);
+    }
+
+    @Override
+    public byte[] getRAWFile(@PathParam("id") Integer id, @QueryParam("lang") String locale) {
+        if (id == null) throw new BadRequestException("The id parameter can not be null");
+
+        final File entity = getEntity(File.class, id);
+        final String fixedLocale = locale == null ? CommonConstants.DEFAULT_LOCALE : locale;
+
+        /* Try and find the locale specified first */
+        for (final LanguageFile languageFile : entity.getLanguageFiles()) {
+            if (fixedLocale.equalsIgnoreCase(languageFile.getLocale())) {
+                response.getOutputHeaders().putSingle("Content-Disposition", "filename=" + entity.getFileName());
+                return languageFile.getFileData();
+            }
+        }
+
+        /* If the specified locale can't be found then use the default */
+        for (final LanguageFile languageFile : entity.getLanguageFiles()) {
+            if (CommonConstants.DEFAULT_LOCALE.equalsIgnoreCase(languageFile.getLocale())) {
+                response.getOutputHeaders().putSingle("Content-Disposition", "filename=" + entity.getFileName());
+                return languageFile.getFileData();
+            }
+        }
+
+        throw new BadRequestException("No file exists for the " + fixedLocale + " locale.");
+    }
+
+    @Override
+    public byte[] getRAWFileRevision(@PathParam("id") Integer id, @PathParam("rev") Integer revision, @QueryParam("lang") String locale) {
+        if (id == null) throw new BadRequestException("The id parameter can not be null");
+        if (revision == null) throw new BadRequestException("The revision parameter can not be null");
+
+        final File entity = getEntity(File.class, id, revision);
+        final String fixedLocale = locale == null ? CommonConstants.DEFAULT_LOCALE : locale;
+
+        /* Try and find the locale specified first */
+        for (final LanguageFile languageFile : entity.getLanguageFiles()) {
+            if (fixedLocale.equalsIgnoreCase(languageFile.getLocale())) {
+                response.getOutputHeaders().putSingle("Content-Disposition", "filename=" + entity.getFileName());
+                return languageFile.getFileData();
+            }
+        }
+
+        /* If the specified locale can't be found then use the default */
+        for (final LanguageFile languageFile : entity.getLanguageFiles()) {
+            if (CommonConstants.DEFAULT_LOCALE.equalsIgnoreCase(languageFile.getLocale())) {
+                response.getOutputHeaders().putSingle("Content-Disposition", "filename=" + entity.getFileName());
+                return languageFile.getFileData();
+            }
+        }
+
+        throw new BadRequestException("No file exists for the " + fixedLocale + " locale.");
     }
 }

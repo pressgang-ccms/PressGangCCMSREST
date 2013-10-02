@@ -74,7 +74,7 @@ public class TagInCategoryV1Factory extends RESTDataObjectFactory<RESTTagInCateg
         // CATEGORIES
         if (expand != null && expand.contains(RESTTagInCategoryV1.CATEGORIES_NAME)) {
             retValue.setCategories(RESTDataObjectCollectionFactory.create(RESTCategoryInTagCollectionV1.class, categoryInTagFactory,
-                    entity.getTag().getTagToCategoriesArray(), RESTTagInCategoryV1.CATEGORIES_NAME, dataType, expand, baseUrl,
+                    entity.getTag().getTagToCategoriesList(), RESTTagInCategoryV1.CATEGORIES_NAME, dataType, expand, baseUrl, revision,
                     entityManager));
         }
 
@@ -82,28 +82,28 @@ public class TagInCategoryV1Factory extends RESTDataObjectFactory<RESTTagInCateg
         if (expand != null && expand.contains(RESTTagInCategoryV1.PARENT_TAGS_NAME)) {
             retValue.setParentTags(
                     RESTDataObjectCollectionFactory.create(RESTTagCollectionV1.class, tagFactory, entity.getTag().getParentTags(),
-                            RESTTagInCategoryV1.PARENT_TAGS_NAME, dataType, expand, baseUrl, entityManager));
+                            RESTTagInCategoryV1.PARENT_TAGS_NAME, dataType, expand, baseUrl, revision, entityManager));
         }
 
         // CHILD TAGS
         if (expand != null && expand.contains(RESTTagInCategoryV1.CHILD_TAGS_NAME)) {
             retValue.setChildTags(
                     RESTDataObjectCollectionFactory.create(RESTTagCollectionV1.class, tagFactory, entity.getTag().getChildTags(),
-                            RESTTagInCategoryV1.CHILD_TAGS_NAME, dataType, expand, baseUrl, entityManager));
+                            RESTTagInCategoryV1.CHILD_TAGS_NAME, dataType, expand, baseUrl, revision, entityManager));
         }
 
         // PROPERTIES
         if (expand != null && expand.contains(RESTTagInCategoryV1.PROPERTIES_NAME)) {
             retValue.setProperties(
                     RESTDataObjectCollectionFactory.create(RESTAssignedPropertyTagCollectionV1.class, tagPropertyTagFactory,
-                            entity.getTag().getTagToPropertyTagsArray(), RESTTagInCategoryV1.PROPERTIES_NAME, dataType, expand, baseUrl,
-                            entityManager));
+                            entity.getTag().getPropertyTagsList(), RESTTagInCategoryV1.PROPERTIES_NAME, dataType, expand, baseUrl,
+                            revision, entityManager));
         }
 
         // PROJECTS
         if (expand != null && expand.contains(RESTTagInCategoryV1.PROJECTS_NAME)) {
             retValue.setProjects(RESTDataObjectCollectionFactory.create(RESTProjectCollectionV1.class, projectFactory,
-                    entity.getTag().getProjects(), RESTTagInCategoryV1.PROJECTS_NAME, dataType, expand, baseUrl, entityManager));
+                    entity.getTag().getProjects(), RESTTagInCategoryV1.PROJECTS_NAME, dataType, expand, baseUrl, revision, entityManager));
         }
 
         retValue.setLinks(baseUrl, RESTv1Constants.TAG_URL_NAME, dataType, retValue.getId());
@@ -112,7 +112,7 @@ public class TagInCategoryV1Factory extends RESTDataObjectFactory<RESTTagInCateg
     }
 
     @Override
-    public void syncDBEntityWithRESTEntity(final TagToCategory entity, final RESTTagInCategoryV1 dataObject) {
+    public void syncDBEntityWithRESTEntityFirstPass(final TagToCategory entity, final RESTTagInCategoryV1 dataObject) {
         if (dataObject.hasParameterSet(RESTTagInCategoryV1.RELATIONSHIP_SORT_NAME)) entity.setSorting(dataObject.getRelationshipSort());
     }
 

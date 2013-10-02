@@ -7,6 +7,8 @@ public class Constants {
     public static final String CORS_ALLOW_ORIGIN_SYSTEM_PROPERTY = "topicIndex.CORS.allowOrigin";
     public static final String CORS_ALLOW_ORIGIN_HEADER = System.getProperty(Constants.CORS_ALLOW_ORIGIN_SYSTEM_PROPERTY, null);
 
+    public static final String DOCBUILDER_SYSTEM_PROPERTY = "topicIndex.docbuilder";
+
     /**
      * A Topic ID that no topic should ever match
      */
@@ -21,4 +23,5 @@ public class Constants {
      * The base URL from which the REST interface can be accessed
      */
     public static final String BASE_REST_PATH = "/rest";
+
 }

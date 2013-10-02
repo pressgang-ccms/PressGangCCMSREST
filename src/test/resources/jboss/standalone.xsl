@@ -171,11 +171,11 @@
     </xsl:template>
 
     <!--<xsl:template match="*[@name='INFO']">-->
-        <!--<xsl:copy>-->
-            <!--<xsl:attribute name="name">-->
-                <!--<xsl:value-of select="'DEBUG'"/>-->
-            <!--</xsl:attribute>-->
-        <!--</xsl:copy>-->
+    <!--<xsl:copy>-->
+    <!--<xsl:attribute name="name">-->
+    <!--<xsl:value-of select="'DEBUG'"/>-->
+    <!--</xsl:attribute>-->
+    <!--</xsl:copy>-->
     <!--</xsl:template>-->
 
 </xsl:stylesheet>
