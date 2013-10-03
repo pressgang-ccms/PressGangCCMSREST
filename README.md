@@ -112,3 +112,12 @@ Installing to the Application Server
 2. In the first terminal run the following command:
 
     	mvn clean package jboss-as:deploy
+
+
+Increasing the file limit
+-------------------------
+
+The default open file limit on RHEL is 1024, which is not enough if you have a few users. Edit /etc/security/limits.conf and add the following lines
+
+* soft nofile 4096
+* hard nofile 4096
