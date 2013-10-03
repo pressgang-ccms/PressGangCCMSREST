@@ -24,6 +24,21 @@
         <param-value>java:/PressGangCCMSDatasource</param-value>
     </context-param>
 
+    <!--
+        http://stackoverflow.com/questions/19147762/javamelody-crashing-the-server-with-thousands-of-rrd-files/19147763#19147763
+        Aggregate all requests into single files to prevent thousands of rrd files being created.
+    -->
+    <context-param>
+        <param-name>javamelody.http-transform-pattern</param-name>
+        <param-value>(?&lt;=/rest/).*</param-value>
+    </context-param>
+
+    <context-param>
+        <param-name>javamelody.sql-transform-pattern</param-name>
+        <param-value>.*</param-value>
+    </context-param>
+
+
     <!-- Liquibase Parameters -->
     <context-param>
         <param-name>liquibase.changelog</param-name>
