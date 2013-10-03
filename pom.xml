@@ -236,11 +236,6 @@
         </dependency>
         <dependency>
             <groupId>org.jboss.pressgang.ccms</groupId>
-            <artifactId>pressgang-ccms-utils</artifactId>
-            <version>${pressgang.ccms.version}</version>
-        </dependency>
-        <dependency>
-            <groupId>org.jboss.pressgang.ccms</groupId>
             <artifactId>pressgang-ccms-contentspec</artifactId>
             <version>${pressgang.ccms.contentspec.version}</version>
         </dependency>
