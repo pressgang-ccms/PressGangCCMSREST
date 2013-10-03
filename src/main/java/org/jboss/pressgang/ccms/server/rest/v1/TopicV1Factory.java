@@ -37,13 +37,9 @@ import org.jboss.pressgang.ccms.server.rest.v1.base.RESTDataObjectFactory;
 import org.jboss.pressgang.ccms.server.rest.v1.utils.RESTv1Utilities;
 import org.jboss.pressgang.ccms.server.utils.EnversUtilities;
 import org.jboss.pressgang.ccms.server.utils.TopicUtilities;
-import org.jboss.pressgang.ccms.utils.common.XMLUtilities;
+import org.jboss.pressgang.ccms.utils.common.DocBookUtilities;
 import org.jboss.pressgang.ccms.utils.constants.CommonConstants;
 import org.jboss.resteasy.spi.BadRequestException;
-import org.w3c.dom.Document;
-import org.w3c.dom.Element;
-import org.w3c.dom.Node;
-import org.xml.sax.SAXException;
 
 @ApplicationScoped
 public class TopicV1Factory extends RESTDataObjectFactory<RESTTopicV1, Topic, RESTTopicCollectionV1, RESTTopicCollectionItemV1> {
@@ -183,27 +179,9 @@ public class TopicV1Factory extends RESTDataObjectFactory<RESTTopicV1, Topic, RE
             entity.setTopicXML(dataObject.getXml());
             // the title was not manually set, so extract it from the XML and update the topic
             if (!titlePropertySpecificallySet) {
-                try {
-                    final Document dom = XMLUtilities.convertStringToDocument(dataObject.getXml());
-                    if (dom != null) {
-                        final Element section = dom.getDocumentElement();
-
-                        if (section != null && "section".equals(section.getNodeName())) {
-
-                            // loop over the text nodes to the first ELEMENT_NODE
-                            Node title = section.getFirstChild();
-                            while (title != null && title.getNodeType() != Node.ELEMENT_NODE) {
-                                title = title.getNextSibling();
-                            }
-
-                            if (title != null && "title".equals(title.getNodeName())) {
-                                entity.setTopicTitle(title.getTextContent());
-                            }
-                        }
-                    }
-
-                } catch (final SAXException e) {
-                    // The XML is invalid, so we can not extract the title
+                final String title = DocBookUtilities.findTitle(dataObject.getXml());
+                if (title != null) {
+                    entity.setTopicTitle(title);
                 }
             }
         }
