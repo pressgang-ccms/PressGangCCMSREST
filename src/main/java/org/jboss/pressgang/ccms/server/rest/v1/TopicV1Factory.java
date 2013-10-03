@@ -37,8 +37,13 @@ import org.jboss.pressgang.ccms.server.rest.v1.base.RESTDataObjectFactory;
 import org.jboss.pressgang.ccms.server.rest.v1.utils.RESTv1Utilities;
 import org.jboss.pressgang.ccms.server.utils.EnversUtilities;
 import org.jboss.pressgang.ccms.server.utils.TopicUtilities;
+import org.jboss.pressgang.ccms.utils.common.XMLUtilities;
 import org.jboss.pressgang.ccms.utils.constants.CommonConstants;
 import org.jboss.resteasy.spi.BadRequestException;
+import org.w3c.dom.Document;
+import org.w3c.dom.Element;
+import org.w3c.dom.Node;
+import org.xml.sax.SAXException;
 
 @ApplicationScoped
 public class TopicV1Factory extends RESTDataObjectFactory<RESTTopicV1, Topic, RESTTopicCollectionV1, RESTTopicCollectionItemV1> {
@@ -158,10 +163,50 @@ public class TopicV1Factory extends RESTDataObjectFactory<RESTTopicV1, Topic, RE
     @Override
     public void syncDBEntityWithRESTEntityFirstPass(final Topic entity, final RESTTopicV1 dataObject) {
 
+        /*
+            The topic title can either be set specifically from the title property, or it can be inferred from
+            the XML itself.
+
+            If the property is set, that takes precedence. Otherwise the XML is extracted and the title there is
+            set as the title property.
+        */
+        boolean titlePropertySpecificallySet = false;
+
         /* sync the basic properties */
-        if (dataObject.hasParameterSet(RESTTopicV1.TITLE_NAME)) entity.setTopicTitle(dataObject.getTitle());
+        if (dataObject.hasParameterSet(RESTTopicV1.TITLE_NAME))  {
+            entity.setTopicTitle(dataObject.getTitle());
+            // the title was manually set, so use that
+            titlePropertySpecificallySet = true;
+        }
         if (dataObject.hasParameterSet(RESTTopicV1.DESCRIPTION_NAME)) entity.setTopicText(dataObject.getDescription());
-        if (dataObject.hasParameterSet(RESTTopicV1.XML_NAME)) entity.setTopicXML(dataObject.getXml());
+        if (dataObject.hasParameterSet(RESTTopicV1.XML_NAME)) {
+            entity.setTopicXML(dataObject.getXml());
+            // the title was not manually set, so extract it from the XML and update the topic
+            if (!titlePropertySpecificallySet) {
+                try {
+                    final Document dom = XMLUtilities.convertStringToDocument(dataObject.getXml());
+                    if (dom != null) {
+                        final Element section = dom.getDocumentElement();
+
+                        if (section != null && "section".equals(section.getNodeName())) {
+
+                            // loop over the text nodes to the first ELEMENT_NODE
+                            Node title = section.getFirstChild();
+                            while (title != null && title.getNodeType() != Node.ELEMENT_NODE) {
+                                title = title.getNextSibling();
+                            }
+
+                            if (title != null && "title".equals(title.getNodeName())) {
+                                entity.setTopicTitle(title.getTextContent());
+                            }
+                        }
+                    }
+
+                } catch (final SAXException e) {
+                    // The XML is invalid, so we can not extract the title
+                }
+            }
+        }
         if (dataObject.hasParameterSet(RESTTopicV1.LOCALE_NAME)) entity.setTopicLocale(dataObject.getLocale());
         if (dataObject.hasParameterSet(RESTTopicV1.DOCTYPE_NAME))
             entity.setXmlDoctype(RESTXMLDoctype.getXMLDoctypeId(dataObject.getXmlDoctype()));
