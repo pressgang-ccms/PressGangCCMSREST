@@ -235,8 +235,35 @@ public class TranslatedTopicV1Factory extends RESTDataObjectFactory<RESTTranslat
         if (dataObject.hasParameterSet(RESTTranslatedTopicV1.LOCALE_NAME)) entity.setTranslationLocale(dataObject.getLocale());
         if (dataObject.hasParameterSet(RESTTranslatedTopicV1.TRANSLATIONPERCENTAGE_NAME))
             entity.setTranslationPercentage(dataObject.getTranslationPercentage());
-        if (dataObject.hasParameterSet(RESTTranslatedTopicV1.TRANSLATED_ADDITIONAL_XML))
+
+        boolean additionalXMLSet = false;
+        if (dataObject.hasParameterSet(RESTTranslatedTopicV1.TRANSLATED_ADDITIONAL_XML)) {
             entity.setTranslatedAdditionalXml(dataObject.getTranslatedAdditionalXML());
+            additionalXMLSet = true;
+        }
+
+        /*
+         * If the additional XML wasn't set and this is a new entity then try and get the previous topics additional XML. We need to do
+         * this otherwise every time one little change is made the additional xml will be lost and have to be re-added.
+         */
+        if (!additionalXMLSet && entity.getId() == null && entity.getTranslationLocale() != null) {
+            final CriteriaBuilder builder = entityManager.getCriteriaBuilder();
+            final CriteriaQuery<TranslatedTopicData> query = builder.createQuery(TranslatedTopicData.class);
+            final Root<TranslatedTopicData> root = query.from(TranslatedTopicData.class);
+
+            final Predicate localeMatches = builder.equal(root.get("translationLocale"), entity.getTranslationLocale());
+            final Predicate topicIdMatches = builder.equal(root.get("translatedTopic").get("topicId"),
+                    entity.getTranslatedTopic().getTopicId());
+            query.where(builder.and(localeMatches, topicIdMatches));
+
+            // Order by topic revision in descending order
+            query.orderBy(builder.desc(root.get("translatedTopic").get("topicRevision")));
+
+            final TranslatedTopicData previousTranslatedTopic = entityManager.createQuery(query).setMaxResults(1).getSingleResult();
+            if (previousTranslatedTopic != null) {
+                entity.setTranslatedAdditionalXml(previousTranslatedTopic.getTranslatedAdditionalXml());
+            }
+        }
 
         translatedTopic.getTranslatedTopicDatas().add(entity);
 
