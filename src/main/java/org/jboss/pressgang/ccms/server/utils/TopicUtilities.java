@@ -492,7 +492,7 @@ public class TopicUtilities {
                 if (topic.isTaggedWith(CSConstants.REVISION_HISTORY_TAG_ID)) {
                     // Make sure the revision history is an appendix
                     if (!doc.getDocumentElement().getNodeName().equals("appendix")) {
-                        xmlErrors.append("Root element must be <appendix> for Revision History Topics.");
+                        xmlErrors.append("Root element must be <appendix> for Revision History Topics.\n");
                     }
 
                     // Check to make sure that a revhistory entry exists
@@ -503,13 +503,18 @@ public class TopicUtilities {
                 } else if (topic.isTaggedWith(CSConstants.LEGAL_NOTICE_TAG_ID)) {
                     // Make sure the Legal Notice is a legalnotice
                     if (!doc.getDocumentElement().getNodeName().equals("legalnotice")) {
-                        xmlErrors.append("Root element must be <legalnotice> for Legal Notice Topics.");
+                        xmlErrors.append("Root element must be <legalnotice> for Legal Notice Topics.\n");
+                    }
+                } else if (topic.isTaggedWith(CSConstants.AUTHOR_GROUP_TAG_ID)) {
+                    // Make sure the Author Group is a authorgroup
+                    if (!doc.getDocumentElement().getNodeName().equals("authorgroup")) {
+                        xmlErrors.append("Root element must be <authorgroup> for Author Group Topics.\n");
                     }
                 }
             } else {
                 // Make sure the topic is a section
                 if (!doc.getDocumentElement().getNodeName().equals(DocBookUtilities.TOPIC_ROOT_NODE_NAME)) {
-                    xmlErrors.append("Root element must be <" + DocBookUtilities.TOPIC_ROOT_NODE_NAME + "> for Topics.");
+                    xmlErrors.append("Root element must be <" + DocBookUtilities.TOPIC_ROOT_NODE_NAME + "> for Topics.\n");
                 }
 
                 // Check the tables are valid
@@ -537,7 +542,8 @@ public class TopicUtilities {
      * @return True if the topic is a normal topic, otherwise false.
      */
     public static boolean isTopicNormalTopic(final Topic topic) {
-        return !(topic.isTaggedWith(CSConstants.REVISION_HISTORY_TAG_ID) || topic.isTaggedWith(CSConstants.LEGAL_NOTICE_TAG_ID));
+        return !(topic.isTaggedWith(CSConstants.REVISION_HISTORY_TAG_ID) || topic.isTaggedWith(
+                CSConstants.LEGAL_NOTICE_TAG_ID) || topic.isTaggedWith(CSConstants.AUTHOR_GROUP_TAG_ID));
     }
 
     /**
