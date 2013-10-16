@@ -53,7 +53,6 @@ public class JaxRsActivator extends Application {
         classes.add(ReaderExceptionMapper.class);
         classes.add(UnauthorizedExceptionMapper.class);
         classes.add(WriterExceptionMapper.class);
-        classes.add(ConstraintViolationExceptionMapper.class);
     }
 
     @Override
