@@ -24,6 +24,7 @@ public abstract class BaseExceptionMapper<T extends Throwable> implements Except
                 .header("Content-Type", MediaType.TEXT_PLAIN)
                 .header(RESTv1Constants.X_PRESSGANG_VERSION_HEADER, VersionUtilities.getAPIVersion(RESTInterfaceV1.class))
                 .header(RESTv1Constants.ACCESS_CONTROL_EXPOSE_HEADERS, RESTv1Constants.X_PRESSGANG_VERSION_HEADER)
+                .header(RESTv1Constants.ACCESS_CONTROL_ALLOW_ORIGIN_HEADER, "*")
                 .build();
     }
 
