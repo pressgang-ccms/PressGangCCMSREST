@@ -25,8 +25,8 @@ public class RESTv1VersionInterceptor implements PreProcessInterceptor, Accepted
     private static final int UPGRADE_STATUS_CODE = 426;
     private static final String RESTv1_VERSION = VersionUtilities.getAPIVersion(RESTInterfaceV1.class);
     private static final boolean IS_RESTv1_SNAPSHOT = isSnapshotVersion(RESTv1_VERSION);
-    private static final int MIN_CSP_MAJOR_VERSION = 0;
-    private static final int MIN_CSP_MINOR_VERSION = 99;
+    private static final int MIN_CSP_MAJOR_VERSION = 1;
+    private static final int MIN_CSP_MINOR_VERSION = 1;
 
     private static final String REST_VERSION_ERROR_MSG = "The REST Client Implementation is out of date, " +
             "" + "and no longer supported. Please update the REST Client library.";
