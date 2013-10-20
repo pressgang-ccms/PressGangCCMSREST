@@ -259,7 +259,8 @@ public class TranslatedTopicV1Factory extends RESTDataObjectFactory<RESTTranslat
             // Order by topic revision in descending order
             query.orderBy(builder.desc(root.get("translatedTopic").get("topicRevision")));
 
-            final TranslatedTopicData previousTranslatedTopic = entityManager.createQuery(query).setMaxResults(1).getSingleResult();
+            final List<TranslatedTopicData> previousTranslatedTopicList = entityManager.createQuery(query).setMaxResults(1).getResultList();
+            final TranslatedTopicData previousTranslatedTopic = previousTranslatedTopicList.size() > 0 ? previousTranslatedTopicList.get(0) : null;
             if (previousTranslatedTopic != null) {
                 entity.setTranslatedAdditionalXml(previousTranslatedTopic.getTranslatedAdditionalXml());
             }
