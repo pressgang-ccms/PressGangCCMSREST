@@ -5,7 +5,9 @@ import javax.inject.Inject;
 import java.io.IOException;
 import java.io.StringReader;
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -152,6 +154,18 @@ public class TopicV1Factory extends RESTDataObjectFactory<RESTTopicV1, Topic, RE
                 }  else {
                     mlt.setMaxDocFreqPct(ServiceConstants.KEYWORD_MAXIMUM_DOCUMENT_FREQUENCY_PERCENT_DEFAULT);
                 }
+
+                final StringConstants stopWords = entityManager.find(StringConstants.class, ServiceConstants.KEYWORDS_STOPWORDS_STRING_CONSTANT_ID);
+                if (stopWords != null && stopWords.getConstantValue() != null)  {
+                    final String [] stopWordsSplit = stopWords.getConstantValue().split("\n");
+                    final Set<String> stopWordsSet = new HashSet<String>();
+                    for (final String stopWord : stopWordsSplit) {
+                        stopWordsSet.add(stopWord);
+                    }
+                    mlt.setStopWords(stopWordsSet);
+                }
+
+
 
                 mlt.setFieldNames(new String[]{Topic.TOPIC_SEARCH_TEXT_FIELD_NAME});
 

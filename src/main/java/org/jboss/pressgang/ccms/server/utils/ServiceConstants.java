@@ -44,4 +44,8 @@ public class ServiceConstants {
      * The Integer Constant ID that defines the maximum number of documents that a keyword can appear in.
      */
     public static final int KEYWORD_MAXIMUM_DOCUMENT_FREQUENCY_PERCENT_INT_CONSTANT_ID = 6;
+    /**
+     * The string constant that defines the addition stop words.
+     */
+    public static final int KEYWORDS_STOPWORDS_STRING_CONSTANT_ID = 73;
 }
