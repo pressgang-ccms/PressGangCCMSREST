@@ -165,8 +165,6 @@ public class TopicV1Factory extends RESTDataObjectFactory<RESTTopicV1, Topic, RE
                     mlt.setStopWords(stopWordsSet);
                 }
 
-
-
                 mlt.setFieldNames(new String[]{Topic.TOPIC_SEARCH_TEXT_FIELD_NAME});
 
                 final ArrayList<String> keywords = new ArrayList<String>();
