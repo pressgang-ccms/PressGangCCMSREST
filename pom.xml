@@ -216,6 +216,11 @@
             <artifactId>hibernate-validator</artifactId>
             <scope>provided</scope>
         </dependency>
+        <dependency>
+            <groupId>org.apache.lucene</groupId>
+            <artifactId>lucene-queries</artifactId>
+            <version>3.5.0</version>
+        </dependency>
 
         <!-- PressGangCCMS Libraries -->
         <dependency>

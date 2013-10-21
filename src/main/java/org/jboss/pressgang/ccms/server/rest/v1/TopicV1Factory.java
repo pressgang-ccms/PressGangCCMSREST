@@ -2,9 +2,21 @@ package org.jboss.pressgang.ccms.server.rest.v1;
 
 import javax.enterprise.context.ApplicationScoped;
 import javax.inject.Inject;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
+import org.apache.lucene.index.IndexReader;
+
+import org.apache.lucene.search.similar.MoreLikeThis;
+import org.hibernate.Session;
+import org.hibernate.search.FullTextSession;
+import org.hibernate.search.Search;
+import org.hibernate.search.SearchFactory;
+import org.hibernate.search.indexes.spi.ReaderProvider;
+import org.hibernate.search.store.DirectoryProvider;
 import org.jboss.pressgang.ccms.model.BugzillaBug;
 import org.jboss.pressgang.ccms.model.PropertyTag;
 import org.jboss.pressgang.ccms.model.Tag;
@@ -37,6 +49,7 @@ import org.jboss.pressgang.ccms.server.rest.v1.base.RESTDataObjectFactory;
 import org.jboss.pressgang.ccms.server.rest.v1.utils.RESTv1Utilities;
 import org.jboss.pressgang.ccms.server.utils.EnversUtilities;
 import org.jboss.pressgang.ccms.server.utils.TopicUtilities;
+import org.jboss.pressgang.ccms.utils.common.CollectionUtilities;
 import org.jboss.pressgang.ccms.utils.common.DocBookUtilities;
 import org.jboss.pressgang.ccms.utils.constants.CommonConstants;
 import org.jboss.resteasy.spi.BadRequestException;
@@ -56,6 +69,8 @@ public class TopicV1Factory extends RESTDataObjectFactory<RESTTopicV1, Topic, RE
     @Inject
     protected ContentSpecV1Factory contentSpecFactory;
 
+    private static final Logger LOGGER = Logger.getLogger(TopicV1Factory.class.getName());
+
     @Override
     public RESTTopicV1 createRESTEntityFromDBEntityInternal(final Topic entity, final String baseUrl, final String dataType,
             final ExpandDataTrunk expand, final Number revision, final boolean expandParentReferences) {
@@ -73,6 +88,7 @@ public class TopicV1Factory extends RESTDataObjectFactory<RESTTopicV1, Topic, RE
         expandOptions.add(RESTTopicV1.PROPERTIES_NAME);
         expandOptions.add(RESTTopicV1.LOG_DETAILS_NAME);
         expandOptions.add(RESTTopicV1.CONTENTSPECS_NAME);
+        expandOptions.add(RESTTopicV1.KEYWORDS_NAME);
         if (revision == null) expandOptions.add(RESTBaseEntityV1.REVISIONS_NAME);
 
         retValue.setExpand(expandOptions);
@@ -87,6 +103,29 @@ public class TopicV1Factory extends RESTDataObjectFactory<RESTTopicV1, Topic, RE
         retValue.setLocale(entity.getTopicLocale());
         retValue.setXmlErrors(entity.getTopicXMLErrors());
         retValue.setXmlDoctype(RESTXMLDoctype.getXMLDoctype(entity.getXmlDoctype()));
+
+        // KEYWORDS
+        if (revision == null && expand != null && expand.contains(RESTTopicV1.KEYWORDS_NAME)) {
+            /*
+                Keywords are extracted from the lucene index managed by Hibernate search.
+                http://docs.jboss.org/hibernate/search/4.5/reference/en-US/html_single/#IndexReaders
+              */
+            final Session session = (Session) entityManager.getDelegate();
+            final FullTextSession fullTextSession = Search.getFullTextSession(session);
+            final SearchFactory searchFactory = fullTextSession.getSearchFactory();
+            final IndexReader reader = searchFactory.getIndexReaderAccessor().open(Topic.class);
+
+            try {
+                final MoreLikeThis mlt = new MoreLikeThis(reader);
+                final ArrayList<String> keywords = new ArrayList<String>();
+                CollectionUtilities.addAll(mlt.retrieveInterestingTerms(entity.getTopicId()), keywords);
+                retValue.setKeywords(keywords);
+            } catch (final IOException ex) {
+                LOGGER.log(Level.SEVERE, ex.toString());
+            } finally {
+                searchFactory.getIndexReaderAccessor().close(reader);
+            }
+        }
 
         // REVISIONS
         if (revision == null && expand != null && expand.contains(RESTTopicV1.REVISIONS_NAME)) {
