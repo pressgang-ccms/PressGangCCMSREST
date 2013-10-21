@@ -3,11 +3,13 @@ package org.jboss.pressgang.ccms.server.rest.v1;
 import javax.enterprise.context.ApplicationScoped;
 import javax.inject.Inject;
 import java.io.IOException;
+import java.io.StringReader;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
+import org.apache.lucene.analysis.Analyzer;
 import org.apache.lucene.index.IndexReader;
 
 import org.apache.lucene.search.similar.MoreLikeThis;
@@ -114,11 +116,18 @@ public class TopicV1Factory extends RESTDataObjectFactory<RESTTopicV1, Topic, RE
             final FullTextSession fullTextSession = Search.getFullTextSession(session);
             final SearchFactory searchFactory = fullTextSession.getSearchFactory();
             final IndexReader reader = searchFactory.getIndexReaderAccessor().open(Topic.class);
+            final Analyzer analyser =  fullTextSession.getSearchFactory().getAnalyzer(Topic.class);
 
             try {
                 final MoreLikeThis mlt = new MoreLikeThis(reader);
+                mlt.setAnalyzer(analyser);
+                mlt.setMinWordLen(3);
+                mlt.setMinDocFreq(5);
+                mlt.setFieldNames(new String[]{Topic.TOPIC_SEARCH_TEXT_FIELD_NAME});
+
                 final ArrayList<String> keywords = new ArrayList<String>();
-                CollectionUtilities.addAll(mlt.retrieveInterestingTerms(entity.getTopicId()), keywords);
+                final String[] keywordsArray = mlt.retrieveInterestingTerms(new StringReader(entity.getTopicSearchText()), Topic.TOPIC_SEARCH_TEXT_FIELD_NAME);
+                CollectionUtilities.addAll(keywordsArray, keywords);
                 retValue.setKeywords(keywords);
             } catch (final IOException ex) {
                 LOGGER.log(Level.SEVERE, ex.toString());

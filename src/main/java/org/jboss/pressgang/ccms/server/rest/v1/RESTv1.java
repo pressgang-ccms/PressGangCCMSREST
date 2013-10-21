@@ -158,7 +158,7 @@ public class RESTv1 extends BaseRESTv1 implements RESTBaseInterfaceV1, RESTInter
         try {
             final Session session = (Session) entityManager.getDelegate();
             final FullTextSession fullTextSession = Search.getFullTextSession(session);
-            fullTextSession.createIndexer(Topic.class).start();
+            fullTextSession.createIndexer().start();
         } catch (final Exception ex) {
             log.error("An error reindexing the Lucene database", ex);
         }
