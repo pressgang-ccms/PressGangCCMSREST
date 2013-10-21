@@ -134,9 +134,23 @@ public class TopicV1Factory extends RESTDataObjectFactory<RESTTopicV1, Topic, RE
 
                 final IntegerConstants maxQueryTerms = entityManager.find(IntegerConstants.class, ServiceConstants.KEYWORD_MAX_QUERY_TERMS_INT_CONSTANT_ID);
                 if (maxQueryTerms != null && maxQueryTerms.getConstantValue() != null)  {
-                    mlt.setMaxQueryTerms(minDocFreq.getConstantValue());
+                    mlt.setMaxQueryTerms(maxQueryTerms.getConstantValue());
                 }  else {
                     mlt.setMaxQueryTerms(ServiceConstants.KEYWORD_MAX_QUERY_TERMS_INT_DEFAULT);
+                }
+
+                final IntegerConstants minTermFreq = entityManager.find(IntegerConstants.class, ServiceConstants.KEYWORD_MINIMUM_TERM_FREQUENCY_INT_CONSTANT_ID);
+                if (minTermFreq != null && minTermFreq.getConstantValue() != null)  {
+                    mlt.setMinTermFreq(minTermFreq.getConstantValue());
+                }  else {
+                    mlt.setMinTermFreq(ServiceConstants.KEYWORD_MINIMUM_TERM_FREQUENCY_DEFAULT);
+                }
+
+                final IntegerConstants maxDocFreqPct = entityManager.find(IntegerConstants.class, ServiceConstants.KEYWORD_MAXIMUM_DOCUMENT_FREQUENCY_PERCENT_INT_CONSTANT_ID);
+                if (maxDocFreqPct != null && maxDocFreqPct.getConstantValue() != null)  {
+                    mlt.setMaxDocFreqPct(maxDocFreqPct.getConstantValue());
+                }  else {
+                    mlt.setMaxDocFreqPct(ServiceConstants.KEYWORD_MAXIMUM_DOCUMENT_FREQUENCY_PERCENT_DEFAULT);
                 }
 
                 mlt.setFieldNames(new String[]{Topic.TOPIC_SEARCH_TEXT_FIELD_NAME});
