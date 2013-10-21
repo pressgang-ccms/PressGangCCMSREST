@@ -38,9 +38,9 @@
     </context-param>
 
     <!-- Listeners -->
-    <!--<listener>
+    <listener>
         <listener-class>liquibase.integration.servlet.LiquibaseServletListener</listener-class>
-    </listener>-->
+    </listener>
 
     <!-- WebDAV Interop filter for Microsoft clients -->
     <filter>
