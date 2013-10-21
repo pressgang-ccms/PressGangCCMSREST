@@ -19,12 +19,7 @@ import org.hibernate.search.Search;
 import org.hibernate.search.SearchFactory;
 import org.hibernate.search.indexes.spi.ReaderProvider;
 import org.hibernate.search.store.DirectoryProvider;
-import org.jboss.pressgang.ccms.model.BugzillaBug;
-import org.jboss.pressgang.ccms.model.PropertyTag;
-import org.jboss.pressgang.ccms.model.Tag;
-import org.jboss.pressgang.ccms.model.Topic;
-import org.jboss.pressgang.ccms.model.TopicSourceUrl;
-import org.jboss.pressgang.ccms.model.TopicToPropertyTag;
+import org.jboss.pressgang.ccms.model.*;
 import org.jboss.pressgang.ccms.rest.v1.collections.RESTBugzillaBugCollectionV1;
 import org.jboss.pressgang.ccms.rest.v1.collections.RESTTagCollectionV1;
 import org.jboss.pressgang.ccms.rest.v1.collections.RESTTopicCollectionV1;
@@ -50,6 +45,7 @@ import org.jboss.pressgang.ccms.server.rest.v1.base.RESTDataObjectCollectionFact
 import org.jboss.pressgang.ccms.server.rest.v1.base.RESTDataObjectFactory;
 import org.jboss.pressgang.ccms.server.rest.v1.utils.RESTv1Utilities;
 import org.jboss.pressgang.ccms.server.utils.EnversUtilities;
+import org.jboss.pressgang.ccms.server.utils.ServiceConstants;
 import org.jboss.pressgang.ccms.server.utils.TopicUtilities;
 import org.jboss.pressgang.ccms.utils.common.CollectionUtilities;
 import org.jboss.pressgang.ccms.utils.common.DocBookUtilities;
@@ -121,9 +117,28 @@ public class TopicV1Factory extends RESTDataObjectFactory<RESTTopicV1, Topic, RE
             try {
                 final MoreLikeThis mlt = new MoreLikeThis(reader);
                 mlt.setAnalyzer(analyser);
-                mlt.setMinWordLen(3);
-                mlt.setMinDocFreq(5);
-                mlt.setMaxQueryTerms(5);
+
+                final IntegerConstants minWordLen = entityManager.find(IntegerConstants.class, ServiceConstants.KEYWORD_MINIMUM_WORD_LENGTH_INT_CONSTANT_ID);
+                if (minWordLen != null && minWordLen.getConstantValue() != null)  {
+                    mlt.setMinWordLen(minWordLen.getConstantValue());
+                } else {
+                    mlt.setMinWordLen(ServiceConstants.KEYWORD_MINIMUM_WORD_LENGTH_DEFAULT);
+                }
+
+                final IntegerConstants minDocFreq = entityManager.find(IntegerConstants.class, ServiceConstants.KEYWORD_MINIMUM_DOCUMENT_FREQUENCY_INT_CONSTANT_ID);
+                if (minDocFreq != null && minDocFreq.getConstantValue() != null)  {
+                    mlt.setMinDocFreq(minDocFreq.getConstantValue());
+                }  else {
+                    mlt.setMinDocFreq(ServiceConstants.KEYWORD_MINIMUM_DOCUMENT_FREQUENCY_DEFAULT);
+                }
+
+                final IntegerConstants maxQueryTerms = entityManager.find(IntegerConstants.class, ServiceConstants.KEYWORD_MAX_QUERY_TERMS_INT_CONSTANT_ID);
+                if (maxQueryTerms != null && maxQueryTerms.getConstantValue() != null)  {
+                    mlt.setMaxQueryTerms(minDocFreq.getConstantValue());
+                }  else {
+                    mlt.setMaxQueryTerms(ServiceConstants.KEYWORD_MAX_QUERY_TERMS_INT_DEFAULT);
+                }
+
                 mlt.setFieldNames(new String[]{Topic.TOPIC_SEARCH_TEXT_FIELD_NAME});
 
                 final ArrayList<String> keywords = new ArrayList<String>();
