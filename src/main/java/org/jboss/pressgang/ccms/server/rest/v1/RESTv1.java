@@ -1919,10 +1919,13 @@ public class RESTv1 extends BaseRESTv1 implements RESTBaseInterfaceV1, RESTInter
             final Map<Integer, String> tagNames = new HashMap<Integer, String>();
             final Map<Integer, AtomicInteger> tagCounts = new HashMap<Integer, AtomicInteger>();
 
-           for (final String option : chartingOptions.keySet()) {
+            String chartTitle = "PressGang CCMS Chart";
+
+            for (final String option : chartingOptions.keySet()) {
+                final List<String> values = chartingOptions.get(option);
 
                 if (RESTv1Constants.CHART_TAG_GROUP.equals(option)) {
-                    final List<String> values = chartingOptions.get(option);
+
                     for (final String value : values) {
                         try {
                             final Integer tagId = Integer.parseInt(value);
@@ -1932,6 +1935,10 @@ public class RESTv1 extends BaseRESTv1 implements RESTBaseInterfaceV1, RESTInter
                         } catch (final NumberFormatException ex) {
                             log.error(value + " is not a valid tag id");
                         }
+                    }
+                } else if (RESTv1Constants.CHART_TITLE.equals(option)) {
+                    if (values.size() != 0) {
+                        chartTitle = values.get(0);
                     }
                 } else {
                     log.error(option + " is not a valid chart option");
@@ -1960,7 +1967,7 @@ public class RESTv1 extends BaseRESTv1 implements RESTBaseInterfaceV1, RESTInter
             }
 
             /* This method returns a JFreeChart object back to us */
-            final JFreeChart myPieChart = ChartFactory.createPieChart("JFreeChart - SVG Pie Chart Example", mySvgPieChartData, true, true, false);
+            final JFreeChart myPieChart = ChartFactory.createPieChart(chartTitle, mySvgPieChartData, true, true, false);
 
             /* Our logical Pie chart is ready at this step. We can now write the chart as SVG using Batik */
             /* Get DOM Implementation */
