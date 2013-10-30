@@ -5,13 +5,20 @@ import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
 import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.Context;
+import javax.ws.rs.core.MultivaluedMap;
 import javax.ws.rs.core.PathSegment;
 import javax.ws.rs.core.Response;
+import java.awt.geom.Rectangle2D;
 import java.io.IOException;
+import java.io.StringWriter;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
+import java.util.concurrent.atomic.AtomicInteger;
 
+import org.apache.batik.dom.GenericDOMImplementation;
+import org.apache.batik.svggen.SVGGraphics2D;
 import org.hibernate.Session;
 import org.hibernate.search.FullTextSession;
 import org.hibernate.search.Search;
@@ -94,6 +101,8 @@ import org.jboss.pressgang.ccms.rest.v1.collections.contentspec.RESTContentSpecC
 import org.jboss.pressgang.ccms.rest.v1.collections.contentspec.RESTTextContentSpecCollectionV1;
 import org.jboss.pressgang.ccms.rest.v1.collections.contentspec.RESTTranslatedCSNodeCollectionV1;
 import org.jboss.pressgang.ccms.rest.v1.collections.contentspec.RESTTranslatedContentSpecCollectionV1;
+import org.jboss.pressgang.ccms.rest.v1.collections.items.RESTTagCollectionItemV1;
+import org.jboss.pressgang.ccms.rest.v1.collections.items.RESTTopicCollectionItemV1;
 import org.jboss.pressgang.ccms.rest.v1.components.ComponentTopicV1;
 import org.jboss.pressgang.ccms.rest.v1.constants.RESTv1Constants;
 import org.jboss.pressgang.ccms.rest.v1.entities.RESTBlobConstantV1;
@@ -139,8 +148,12 @@ import org.jboss.resteasy.spi.HttpResponse;
 import org.jboss.resteasy.spi.InternalServerErrorException;
 import org.jboss.resteasy.spi.NotFoundException;
 import org.jboss.resteasy.util.Base64;
+import org.jfree.chart.ChartFactory;
+import org.jfree.chart.JFreeChart;
+import org.jfree.data.general.DefaultPieDataset;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.w3c.dom.DOMImplementation;
 import org.w3c.dom.Document;
 
 /**
@@ -1882,9 +1895,102 @@ public class RESTv1 extends BaseRESTv1 implements RESTBaseInterfaceV1, RESTInter
     }
 
     @Override
-    public RESTTopicCollectionV1 getJSONTopicsWithQuery(PathSegment query, final String expand) {
+    public RESTTopicCollectionV1 getJSONTopicsWithQuery(final PathSegment query, final String expand) {
         return getJSONResourcesFromQuery(RESTTopicCollectionV1.class, query.getMatrixParameters(), TopicFilterQueryBuilder.class,
                 new TopicFieldFilter(), topicFactory, RESTv1Constants.TOPICS_EXPANSION_NAME, expand);
+    }
+
+    @Override
+    public String getSVGTopicsWithQuery(final PathSegment query, final PathSegment chart) {
+        /* The stream to hold the output */
+        final StringWriter output = new StringWriter();
+
+        try {
+            final String expand = "{\"branches\":[" +
+                    "{\"trunk\":{\"name\": \"" + RESTv1Constants.TOPICS_EXPANSION_NAME + "\"}, \"branches\": [" +
+                        "{\"trunk\":{\"name\": \"" + RESTTopicV1.TAGS_NAME + "\"}}" +
+                    "]}" +
+                "]}";
+
+            final RESTTopicCollectionV1 topics = getJSONResourcesFromQuery(RESTTopicCollectionV1.class, query.getMatrixParameters(), TopicFilterQueryBuilder.class,
+                    new TopicFieldFilter(), topicFactory, RESTv1Constants.TOPICS_EXPANSION_NAME, expand);
+
+            final MultivaluedMap<String, String> chartingOptions = chart.getMatrixParameters();
+            final Map<Integer, String> tagNames = new HashMap<Integer, String>();
+            final Map<Integer, AtomicInteger> tagCounts = new HashMap<Integer, AtomicInteger>();
+
+           for (final String option : chartingOptions.keySet()) {
+
+                if (RESTv1Constants.CHART_TAG_GROUP.equals(option)) {
+                    final List<String> values = chartingOptions.get(option);
+                    for (final String value : values) {
+                        try {
+                            final Integer tagId = Integer.parseInt(value);
+                            if (!tagCounts.containsKey(tagId)) {
+                                tagCounts.put(tagId, new AtomicInteger(0));
+                            }
+                        } catch (final NumberFormatException ex) {
+                            log.error(value + " is not a valid tag id");
+                        }
+                    }
+                } else {
+                    log.error(option + " is not a valid chart option");
+                }
+            }
+
+            for (final Integer tagId : tagCounts.keySet()) {
+                for (final RESTTopicCollectionItemV1 topic : topics.getItems()) {
+                    for (final RESTTagCollectionItemV1 tag : topic.getItem().getTags().getItems()) {
+                        if (tagId.equals(tag.getItem().getId())) {
+                            if (!tagNames.containsKey(tagId)) {
+                                tagNames.put(tagId, tag.getItem().getName());
+                            }
+
+                            tagCounts.get(tagId).incrementAndGet();
+                        }
+                    }
+                }
+            }
+
+            /* Define the data range for SVG Pie Chart */
+            final DefaultPieDataset mySvgPieChartData = new DefaultPieDataset();
+
+            for (final Integer tagId : tagNames.keySet()) {
+                mySvgPieChartData.setValue(tagNames.get(tagId), tagCounts.get(tagId).get());
+            }
+
+            /* This method returns a JFreeChart object back to us */
+            final JFreeChart myPieChart = ChartFactory.createPieChart("JFreeChart - SVG Pie Chart Example", mySvgPieChartData, true, true, false);
+
+            /* Our logical Pie chart is ready at this step. We can now write the chart as SVG using Batik */
+            /* Get DOM Implementation */
+            final DOMImplementation mySVGDOM = GenericDOMImplementation.getDOMImplementation();
+
+            /* create Document object */
+            final String svgNS = "http://www.w3.org/2000/svg";
+            final Document document = mySVGDOM.createDocument(svgNS, "svg", null);
+
+            /* Create SVG Generator */
+            final SVGGraphics2D my_svg_generator = new SVGGraphics2D(document);
+
+            /* Render chart as SVG 2D Graphics object */
+            myPieChart.draw(my_svg_generator, new Rectangle2D.Double(0, 0, 640, 480), null);
+
+            /* Write output to file */
+            my_svg_generator.stream(output);
+
+            return output.toString();
+
+        } catch (final Exception ex) {
+            throw new InternalServerErrorException(ex);
+        } finally {
+            try {
+                // not required, but good practice
+                output.close();
+            } catch (IOException e) {
+               //
+            }
+        }
     }
 
     @Override
