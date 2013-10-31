@@ -1904,6 +1904,12 @@ public class RESTv1 extends BaseRESTv1 implements RESTBaseInterfaceV1, RESTInter
                 new TopicFieldFilter(), topicFactory, RESTv1Constants.TOPICS_EXPANSION_NAME, expand);
     }
 
+    /**
+     * http://localhost:8080/pressgang-ccms/rest/1/topics/get/svg/query;topicIncludedInSpec=13968/chart;chartTagGroup=4;chartTagGroup=5;chartTagGroup=6;chartTitle=Topic%20Types
+     * @param query The query settings. Same ones as getJSONTopicsWithQuery accespts
+     * @param chart The charting settings.
+     * @return A SVG chart image
+     */
     @Override
     public String getSVGTopicsWithQuery(final PathSegment query, final PathSegment chart) {
         /* The stream to hold the output */
