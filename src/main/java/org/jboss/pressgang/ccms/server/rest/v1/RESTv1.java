@@ -206,20 +206,8 @@ public class RESTv1 extends BaseRESTv1 implements RESTBaseInterfaceV1, RESTInter
                 entityManager.joinTransaction();
 
                 for (int j = i; j < topics.size() && j < i + batchSize; ++j) {
-
-
                     final Topic topic = topics.get(j);
-
-                    topic.getMinHashes().clear();
-
-                    final List<Integer> minHashes = TopicUtilities.getMinHashes(topic.getTopicXML(), minHashXORs);
-
-                    for (int k = 0; k < minHashes.size(); ++k) {
-                        final MinHash minHash = new MinHash();
-                        minHash.setMinHashFuncID(k);
-                        minHash.setMinHash(minHashes.get(k));
-                        topic.getMinHashes().add(minHash);
-                    }
+                    TopicUtilities.recalculateMinHash(topic, minHashXORs);
 
                     // Handle topics that have invalid titles.
                     if (topic.getTopicTitle() == null || topic.getTopicTitle().trim().isEmpty()) {
@@ -227,7 +215,6 @@ public class RESTv1 extends BaseRESTv1 implements RESTBaseInterfaceV1, RESTInter
                     }
 
                     entityManager.persist(topic);
-
                 }
 
                 transactionManager.commit();

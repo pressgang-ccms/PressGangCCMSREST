@@ -52,6 +52,19 @@ import org.xml.sax.SAXException;
 public class TopicUtilities {
     private static final Logger log = LoggerFactory.getLogger(TopicUtilities.class);
 
+    public static void recalculateMinHash(final Topic topic, final List<MinHashXOR> minHashXORs) {
+        topic.getMinHashes().clear();
+
+        final List<Integer> minHashes = TopicUtilities.getMinHashes(topic.getTopicXML(), minHashXORs);
+
+        for (int k = 0; k < minHashes.size(); ++k) {
+            final MinHash minHash = new MinHash();
+            minHash.setMinHashFuncID(k);
+            minHash.setMinHash(minHashes.get(k));
+            topic.getMinHashes().add(minHash);
+        }
+    }
+
     /**
      * Generate the min hashes
      * @param xml
