@@ -8,6 +8,7 @@ import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MultivaluedMap;
 import javax.ws.rs.core.PathSegment;
 import javax.ws.rs.core.Response;
+import java.awt.*;
 import java.awt.geom.Rectangle2D;
 import java.io.IOException;
 import java.io.StringWriter;
@@ -150,6 +151,9 @@ import org.jboss.resteasy.spi.NotFoundException;
 import org.jboss.resteasy.util.Base64;
 import org.jfree.chart.ChartFactory;
 import org.jfree.chart.JFreeChart;
+import org.jfree.chart.plot.PiePlot3D;
+import org.jfree.chart.plot.PlotOrientation;
+import org.jfree.data.category.DefaultCategoryDataset;
 import org.jfree.data.general.DefaultPieDataset;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -1920,7 +1924,13 @@ public class RESTv1 extends BaseRESTv1 implements RESTBaseInterfaceV1, RESTInter
             final Map<Integer, AtomicInteger> tagCounts = new HashMap<Integer, AtomicInteger>();
 
             String chartTitle = "PressGang CCMS Chart";
+            String chartType = RESTv1Constants.CHART_PIE_TYPE;
+            boolean showTitle = true;
+            boolean showLegend = true;
 
+            /*
+                Loop through the options and use them to set the chart options
+             */
             for (final String option : chartingOptions.keySet()) {
                 final List<String> values = chartingOptions.get(option);
 
@@ -1939,6 +1949,20 @@ public class RESTv1 extends BaseRESTv1 implements RESTBaseInterfaceV1, RESTInter
                 } else if (RESTv1Constants.CHART_TITLE.equals(option)) {
                     if (values.size() != 0) {
                         chartTitle = values.get(0);
+                    }
+                } else if (RESTv1Constants.CHART_TYPE.equals(option)) {
+                    if (values.size() != 0) {
+                        if (RESTv1Constants.CHART_PIE_TYPE.equals(values.get(0))) {
+                            chartType =  RESTv1Constants.CHART_PIE_TYPE;
+                        } else if (RESTv1Constants.CHART_BAR_TYPE.equals(values.get(0))) {
+                            chartType = RESTv1Constants.CHART_BAR_TYPE;
+                        }  else if (RESTv1Constants.CHART_PIE3D_TYPE.equals(values.get(0))) {
+                            chartType = RESTv1Constants.CHART_PIE3D_TYPE;
+                        }
+                    }
+                } else if (RESTv1Constants.CHART_SHOW_LEGEND.equals(option)) {
+                    if (values.size() != 0) {
+                        showLegend = Boolean.parseBoolean(values.get(0));
                     }
                 } else {
                     log.error(option + " is not a valid chart option");
@@ -1959,32 +1983,60 @@ public class RESTv1 extends BaseRESTv1 implements RESTBaseInterfaceV1, RESTInter
                 }
             }
 
-            /* Define the data range for SVG Pie Chart */
-            final DefaultPieDataset mySvgPieChartData = new DefaultPieDataset();
+            JFreeChart jFreeChart = null;
 
-            for (final Integer tagId : tagNames.keySet()) {
-                mySvgPieChartData.setValue(tagNames.get(tagId), tagCounts.get(tagId).get());
+            if (RESTv1Constants.CHART_PIE_TYPE.equals(chartType)) {
+                /* Define the data range for SVG Pie Chart */
+                final DefaultPieDataset mySvgPieChartData = new DefaultPieDataset();
+
+                for (final Integer tagId : tagNames.keySet()) {
+                    mySvgPieChartData.setValue(tagNames.get(tagId), tagCounts.get(tagId).get());
+                }
+
+                /* This method returns a JFreeChart object back to us */
+                jFreeChart = ChartFactory.createPieChart(chartTitle, mySvgPieChartData, showLegend, false, false);
+            } else if (RESTv1Constants.CHART_PIE3D_TYPE.equals(chartType)) {
+                /* Define the data range for SVG Pie Chart */
+                final DefaultPieDataset mySvgPieChartData = new DefaultPieDataset();
+
+                for (final Integer tagId : tagNames.keySet()) {
+                    mySvgPieChartData.setValue(tagNames.get(tagId), tagCounts.get(tagId).get());
+                }
+
+                /* This method returns a JFreeChart object back to us */
+                jFreeChart = ChartFactory.createPieChart3D(chartTitle, mySvgPieChartData, showLegend, false, false);
+                ((PiePlot3D)jFreeChart.getPlot()).setForegroundAlpha(0.6f);
+            } else if (RESTv1Constants.CHART_BAR_TYPE.equals(chartType)) {
+                /* Define the data range for SVG Pie Chart */
+                final DefaultCategoryDataset categoryDataset = new DefaultCategoryDataset();
+
+                for (final Integer tagId : tagNames.keySet()) {
+                    categoryDataset.addValue(tagCounts.get(tagId).get(), tagNames.get(tagId), "");
+                }
+
+                /* This method returns a JFreeChart object back to us */
+                jFreeChart = ChartFactory.createBarChart(chartTitle, "Tags", "Topics", categoryDataset, PlotOrientation.VERTICAL, showLegend, false, false);
             }
 
-            /* This method returns a JFreeChart object back to us */
-            final JFreeChart myPieChart = ChartFactory.createPieChart(chartTitle, mySvgPieChartData, true, true, false);
+            if (jFreeChart != null) {
+                /* Our logical Pie chart is ready at this step. We can now write the chart as SVG using Batik */
+                /* Get DOM Implementation */
+                final DOMImplementation mySVGDOM = GenericDOMImplementation.getDOMImplementation();
 
-            /* Our logical Pie chart is ready at this step. We can now write the chart as SVG using Batik */
-            /* Get DOM Implementation */
-            final DOMImplementation mySVGDOM = GenericDOMImplementation.getDOMImplementation();
+                /* create Document object */
+                final String svgNS = "http://www.w3.org/2000/svg";
+                final Document document = mySVGDOM.createDocument(svgNS, "svg", null);
 
-            /* create Document object */
-            final String svgNS = "http://www.w3.org/2000/svg";
-            final Document document = mySVGDOM.createDocument(svgNS, "svg", null);
+                /* Create SVG Generator */
+                final SVGGraphics2D my_svg_generator = new SVGGraphics2D(document);
 
-            /* Create SVG Generator */
-            final SVGGraphics2D my_svg_generator = new SVGGraphics2D(document);
+                /* Render chart as SVG 2D Graphics object */
+                jFreeChart.draw(my_svg_generator, new Rectangle2D.Double(0, 0, 640, 480), null);
 
-            /* Render chart as SVG 2D Graphics object */
-            myPieChart.draw(my_svg_generator, new Rectangle2D.Double(0, 0, 640, 480), null);
+                /* Write output to file */
+                my_svg_generator.stream(output);
+            }
 
-            /* Write output to file */
-            my_svg_generator.stream(output);
 
             return output.toString();
 
