@@ -30,19 +30,7 @@ import com.j2bugzilla.rpc.BugSearch;
 import com.j2bugzilla.rpc.GetBug;
 import com.j2bugzilla.rpc.LogIn;
 import org.jboss.pressgang.ccms.contentspec.constants.CSConstants;
-import org.jboss.pressgang.ccms.model.BlobConstants;
-import org.jboss.pressgang.ccms.model.BugzillaBug;
-import org.jboss.pressgang.ccms.model.Category;
-import org.jboss.pressgang.ccms.model.StringConstants;
-import org.jboss.pressgang.ccms.model.Tag;
-import org.jboss.pressgang.ccms.model.TagToCategory;
-import org.jboss.pressgang.ccms.model.Topic;
-import org.jboss.pressgang.ccms.model.TopicToBugzillaBug;
-import org.jboss.pressgang.ccms.model.TopicToTag;
-import org.jboss.pressgang.ccms.model.TopicToTopic;
-import org.jboss.pressgang.ccms.model.TopicToTopicSourceUrl;
-import org.jboss.pressgang.ccms.model.TranslatedTopic;
-import org.jboss.pressgang.ccms.model.TranslatedTopicData;
+import org.jboss.pressgang.ccms.model.*;
 import org.jboss.pressgang.ccms.model.sort.CategoryNameComparator;
 import org.jboss.pressgang.ccms.model.sort.TagNameComparator;
 import org.jboss.pressgang.ccms.model.sort.TagToCategorySortingComparator;
@@ -63,6 +51,102 @@ import org.xml.sax.SAXException;
 
 public class TopicUtilities {
     private static final Logger log = LoggerFactory.getLogger(TopicUtilities.class);
+
+    /**
+     * Generate the min hashes
+     * @param xml
+     * @param minHashXORs
+     * @return
+     */
+    public static List<Integer> getMinHashes(final String xml, final List<MinHashXOR> minHashXORs) {
+
+        final List<Integer> retValue = new ArrayList<Integer>();
+
+        // the first minhash uses the builtin hashcode only
+        retValue.add(getMinHash(xml, null));
+
+        for (final MinHashXOR minHashXOR : minHashXORs) {
+            retValue.add(getMinHash(xml, minHashXOR.getMinHashXOR()));
+        }
+
+        return retValue;
+    }
+
+    /**
+     * Returns the minimum hash of the sentences in an XML file.
+     * @param xml The xml to analyse
+     * @param xor the number to xor the hash against
+     * @return The minimum hash
+     */
+    public static Integer getMinHash(final String xml, final Integer xor) {
+        if (xml == null) {
+            return null;
+        }
+
+        final int SHINGLE_WORD_COUNT = 5;
+
+        try {
+            final Document doc = XMLUtilities.convertStringToDocument(xml);
+            if (doc != null) {
+                final String text = doc.getTextContent();
+                final String[] words = text.split("\\s+");
+                final List<String> shingles = new ArrayList<String>();
+
+                if (words.length < SHINGLE_WORD_COUNT) {
+                    final StringBuilder shingle = new StringBuilder();
+                    for (int i = 0; i < words.length; ++i) {
+                        if (shingle.length() != 0) {
+                            shingle.append(" ");
+                        }
+                        shingle.append(words[i]);
+                    }
+                    final int hash =  shingle.toString().hashCode();
+                    if (xor != null) {
+                        return hash ^ xor;
+                    } else {
+                        return hash;
+                    }
+                } else {
+                    for (int i = 0; i < words.length - SHINGLE_WORD_COUNT + 1; ++i) {
+                        final StringBuilder shingle = new StringBuilder();
+                        for (int j = i; j < words.length && j < i + SHINGLE_WORD_COUNT; ++j) {
+                            if (shingle.length() != 0) {
+                                shingle.append(" ");
+                            }
+                            shingle.append(words[j]);
+                        }
+                        shingles.add(shingle.toString());
+                    }
+
+                    Integer minHash = null;
+                    for (final String string : shingles) {
+                        final int hash = string.hashCode();
+                        final int finalHash = xor != null ? hash ^ xor : hash;
+                        if (minHash == null || finalHash < minHash) {
+                            minHash = finalHash;
+                        }
+                    }
+                    return minHash;
+                }
+
+            }
+        }
+        catch (final Exception ex) {
+
+        }
+
+        // if we get to here the topic does not have valid xml or has no translatable strings.
+        final String[] sentences = xml.split("\\.");
+        Integer minHash = null;
+        for (final String string : sentences) {
+            final int hash = string.hashCode();
+            final int finalHash = xor != null ? hash ^ xor : hash;
+            if (minHash == null || finalHash < minHash) {
+                minHash = finalHash;
+            }
+        }
+        return minHash;
+    }
 
     /**
      * Creates a CSV string representation of all the topics in the provided list.

@@ -12,10 +12,8 @@ import java.awt.*;
 import java.awt.geom.Rectangle2D;
 import java.io.IOException;
 import java.io.StringWriter;
-import java.util.HashMap;
+import java.util.*;
 import java.util.List;
-import java.util.Map;
-import java.util.Set;
 import java.util.concurrent.atomic.AtomicInteger;
 
 import com.sun.jdi.IntegerValue;
@@ -62,23 +60,7 @@ import org.jboss.pressgang.ccms.filter.builder.TranslatedContentSpecFilterQueryB
 import org.jboss.pressgang.ccms.filter.builder.TranslatedContentSpecNodeFilterQueryBuilder;
 import org.jboss.pressgang.ccms.filter.builder.TranslatedTopicDataFilterQueryBuilder;
 import org.jboss.pressgang.ccms.filter.builder.UserFilterQueryBuilder;
-import org.jboss.pressgang.ccms.model.BlobConstants;
-import org.jboss.pressgang.ccms.model.Category;
-import org.jboss.pressgang.ccms.model.File;
-import org.jboss.pressgang.ccms.model.Filter;
-import org.jboss.pressgang.ccms.model.ImageFile;
-import org.jboss.pressgang.ccms.model.IntegerConstants;
-import org.jboss.pressgang.ccms.model.LanguageFile;
-import org.jboss.pressgang.ccms.model.LanguageImage;
-import org.jboss.pressgang.ccms.model.Project;
-import org.jboss.pressgang.ccms.model.PropertyTag;
-import org.jboss.pressgang.ccms.model.PropertyTagCategory;
-import org.jboss.pressgang.ccms.model.Role;
-import org.jboss.pressgang.ccms.model.StringConstants;
-import org.jboss.pressgang.ccms.model.Tag;
-import org.jboss.pressgang.ccms.model.Topic;
-import org.jboss.pressgang.ccms.model.TranslatedTopicData;
-import org.jboss.pressgang.ccms.model.User;
+import org.jboss.pressgang.ccms.model.*;
 import org.jboss.pressgang.ccms.model.contentspec.CSNode;
 import org.jboss.pressgang.ccms.model.contentspec.ContentSpec;
 import org.jboss.pressgang.ccms.model.contentspec.TranslatedCSNode;
@@ -172,14 +154,13 @@ public class RESTv1 extends BaseRESTv1 implements RESTBaseInterfaceV1, RESTInter
 
     /* UTILITY FUNCTIONS */
     @Override
-    public IntegerWrapper getMinHash(final String xml) {
-        final IntegerWrapper retValue = new IntegerWrapper();
-        retValue.value = org.jboss.pressgang.ccms.model.utils.TopicUtilities.getMinHash(xml);
-        return retValue;
+    public List<Integer> getMinHashes(final String xml) {
+        final List<MinHashXOR> minHashXORs = entityManager.createQuery(MinHashXOR.SELECT_ALL_QUERY).getResultList();
+        return TopicUtilities.getMinHashes(xml, minHashXORs);
     }
 
     @Override
-    public void recalculateMinHash() {
+    public void recalculateMinHashXORs() {
         try {
             // Start a Transaction
             transactionManager.begin();
@@ -187,20 +168,70 @@ public class RESTv1 extends BaseRESTv1 implements RESTBaseInterfaceV1, RESTInter
             // Join the transaction we just started
             entityManager.joinTransaction();
 
-            final List<Topic> topics = entityManager.createQuery(Topic.SELECT_ALL_QUERY).getResultList();
-            for (final Topic topic : topics) {
-                // Change the min hash so the entity manager will attempt to save the topic.
-                // The actual value will be set in @PreUpdate on the Topic class
-                topic.setMinHash(topic.getMinHash() == null ? 0 : topic.getMinHash() == 0 ? 1 : 0);
-                // Handle topics that have invalid titles.
-                if (topic.getTopicTitle() == null || topic.getTopicTitle().trim().isEmpty()) {
-                    topic.setTopicTitle("Placeholder");
+            final Random randomGenerator = new Random();
+
+            // The first min hash is not XORed.
+            for (int i = 1; i < Constants.NUM_MIN_HASHES; ++i) {
+                final int random =  randomGenerator.nextInt();
+                MinHashXOR minHashXOR = entityManager.find(MinHashXOR.class, i);
+                if (minHashXOR == null)  {
+                    minHashXOR = new MinHashXOR();
+                    minHashXOR.setMinHashXORId(i);
                 }
-                entityManager.persist(topic);
+
+                minHashXOR.setMinHashXOR(random);
+
+                entityManager.persist(minHashXOR);
             }
 
-            entityManager.flush();
             transactionManager.commit();
+        } catch (final Exception ex) {
+            throw new InternalServerErrorException(ex);
+        }
+    }
+
+    @Override
+    public void recalculateMinHash() {
+        final int batchSize = 100;
+
+        try {
+            final List<MinHashXOR> minHashXORs = entityManager.createQuery(MinHashXOR.SELECT_ALL_QUERY).getResultList();
+            final List<Topic> topics = entityManager.createQuery(Topic.SELECT_ALL_QUERY).getResultList();
+
+            for (int i = 0; i < topics.size(); i += batchSize) {
+                // Start a Transaction
+                transactionManager.begin();
+
+                // Join the transaction we just started
+                entityManager.joinTransaction();
+
+                for (int j = i; j < topics.size() && j < i + batchSize; ++j) {
+
+
+                    final Topic topic = topics.get(j);
+
+                    topic.getMinHashes().clear();
+
+                    final List<Integer> minHashes = TopicUtilities.getMinHashes(topic.getTopicXML(), minHashXORs);
+
+                    for (int k = 0; k < minHashes.size(); ++k) {
+                        final MinHash minHash = new MinHash();
+                        minHash.setMinHashFuncID(k);
+                        minHash.setMinHash(minHashes.get(k));
+                        topic.getMinHashes().add(minHash);
+                    }
+
+                    // Handle topics that have invalid titles.
+                    if (topic.getTopicTitle() == null || topic.getTopicTitle().trim().isEmpty()) {
+                        topic.setTopicTitle("Placeholder");
+                    }
+
+                    entityManager.persist(topic);
+
+                }
+
+                transactionManager.commit();
+            }
         } catch (final Exception ex) {
             throw new InternalServerErrorException(ex);
         }

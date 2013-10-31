@@ -68,6 +68,8 @@ public class TopicV1Factory extends RESTDataObjectFactory<RESTTopicV1, Topic, RE
     protected TranslatedTopicV1Factory translatedTopicFactory;
     @Inject
     protected ContentSpecV1Factory contentSpecFactory;
+    @Inject
+    protected MinHashV1Factory minHashFactory;
 
     private static final Logger LOGGER = Logger.getLogger(TopicV1Factory.class.getName());
 
@@ -89,6 +91,7 @@ public class TopicV1Factory extends RESTDataObjectFactory<RESTTopicV1, Topic, RE
         expandOptions.add(RESTTopicV1.LOG_DETAILS_NAME);
         expandOptions.add(RESTTopicV1.CONTENTSPECS_NAME);
         expandOptions.add(RESTTopicV1.KEYWORDS_NAME);
+        expandOptions.add(RESTTopicV1.MINHASHES_NAME);
         if (revision == null) expandOptions.add(RESTBaseEntityV1.REVISIONS_NAME);
 
         retValue.setExpand(expandOptions);
@@ -103,7 +106,6 @@ public class TopicV1Factory extends RESTDataObjectFactory<RESTTopicV1, Topic, RE
         retValue.setLocale(entity.getTopicLocale());
         retValue.setXmlErrors(entity.getTopicXMLErrors());
         retValue.setXmlDoctype(RESTXMLDoctype.getXMLDoctype(entity.getXmlDoctype()));
-        retValue.setMinHash(entity.getMinHash());
 
         // KEYWORDS
         if (revision == null && expand != null && expand.contains(RESTTopicV1.KEYWORDS_NAME)) {
@@ -239,6 +241,13 @@ public class TopicV1Factory extends RESTDataObjectFactory<RESTTopicV1, Topic, RE
         if (expand != null && expand.contains(RESTTopicV1.CONTENTSPECS_NAME)) {
             retValue.setContentSpecs_OTM(RESTDataObjectCollectionFactory.create(RESTContentSpecCollectionV1.class, contentSpecFactory,
                     entity.getContentSpecs(entityManager), RESTTopicV1.CONTENTSPECS_NAME, dataType, expand, baseUrl, false,
+                    entityManager));
+        }
+
+        // MINHASHES
+        if (expand != null && expand.contains(RESTTopicV1.MINHASHES_NAME)) {
+            retValue.setMinHashes(RESTDataObjectCollectionFactory.create(RESTMinHashCollectionV1.class, minHashFactory,
+                    entity.getMinHashes(), RESTTopicV1.MINHASHES_NAME, dataType, expand, baseUrl, false,
                     entityManager));
         }
 
