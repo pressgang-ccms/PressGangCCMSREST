@@ -18,6 +18,7 @@ import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.atomic.AtomicInteger;
 
+import com.sun.jdi.IntegerValue;
 import org.apache.batik.dom.GenericDOMImplementation;
 import org.apache.batik.svggen.SVGGraphics2D;
 import org.hibernate.Session;
@@ -81,7 +82,7 @@ import org.jboss.pressgang.ccms.model.User;
 import org.jboss.pressgang.ccms.model.contentspec.CSNode;
 import org.jboss.pressgang.ccms.model.contentspec.ContentSpec;
 import org.jboss.pressgang.ccms.model.contentspec.TranslatedCSNode;
-import org.jboss.pressgang.ccms.model.contentspec.TranslatedContentSpec;
+import org.jboss.pressgang.ccms.model.contentspec.TranslatedContentSpec;;
 import org.jboss.pressgang.ccms.rest.v1.collections.RESTBlobConstantCollectionV1;
 import org.jboss.pressgang.ccms.rest.v1.collections.RESTCategoryCollectionV1;
 import org.jboss.pressgang.ccms.rest.v1.collections.RESTFileCollectionV1;
@@ -168,6 +169,22 @@ public class RESTv1 extends BaseRESTv1 implements RESTBaseInterfaceV1, RESTInter
     private static final Logger log = LoggerFactory.getLogger(RESTv1.class);
 
     @Context HttpResponse response;
+
+    /* UTILITY FUNCTIONS */
+    @Override
+    public IntegerWrapper getMinHash(final String xml) {
+        final IntegerWrapper retValue = new IntegerWrapper();
+        retValue.value = org.jboss.pressgang.ccms.model.utils.TopicUtilities.getMinHash(xml);
+        return retValue;
+    }
+
+    @Override
+    public void recalculateMinHash() {
+        final List<Topic> topics = entityManager.createQuery(Topic.SELECT_ALL_QUERY).getResultList();
+        for (final Topic topic : topics) {
+            entityManager.persist(topic);
+        }
+    }
 
     /* SYSTEM FUNCTIONS */
     @Override
