@@ -12,9 +12,11 @@ import org.jboss.pressgang.ccms.server.rest.v1.base.RESTDataObjectCollectionFact
 import org.jboss.pressgang.ccms.server.rest.v1.base.RESTDataObjectFactory;
 import org.jboss.pressgang.ccms.server.utils.EnversUtilities;
 
+import javax.enterprise.context.ApplicationScoped;
 import java.util.ArrayList;
 import java.util.List;
 
+@ApplicationScoped
 public class MinHashV1Factory extends RESTDataObjectFactory<RESTMinHashV1, MinHash, RESTMinHashCollectionV1, RESTMinHashCollectionItemV1> {
     @Override
     public RESTMinHashV1 createRESTEntityFromDBEntityInternal(final MinHash entity, final String baseUrl, final String dataType,
