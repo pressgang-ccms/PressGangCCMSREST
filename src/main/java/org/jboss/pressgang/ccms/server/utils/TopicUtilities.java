@@ -52,6 +52,12 @@ import org.xml.sax.SAXException;
 public class TopicUtilities {
     private static final Logger log = LoggerFactory.getLogger(TopicUtilities.class);
 
+
+    /**
+     * Recalculate the min hash signature for a topic.
+     * @param topic The topic to generate a signature for
+     * @param minHashXORs The list of XOR values to apply to the hash code
+     */
     public static void recalculateMinHash(final Topic topic, final List<MinHashXOR> minHashXORs) {
         topic.getMinHashes().clear();
 
@@ -67,8 +73,8 @@ public class TopicUtilities {
 
     /**
      * Generate the min hashes
-     * @param xml
-     * @param minHashXORs
+     * @param xml The content to apply the signature to
+     * @param minHashXORs The list of XOR values to apply to the hash code
      * @return
      */
     public static List<Integer> getMinHashes(final String xml, final List<MinHashXOR> minHashXORs) {
@@ -88,7 +94,7 @@ public class TopicUtilities {
     /**
      * Returns the minimum hash of the sentences in an XML file.
      * @param xml The xml to analyse
-     * @param xor the number to xor the hash against
+     * @param xor the number to xor the hash against. Null if the standard hashCode() method should be used alone.
      * @return The minimum hash
      */
     public static Integer getMinHash(final String xml, final Integer xor) {
