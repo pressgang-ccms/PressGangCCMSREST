@@ -104,14 +104,24 @@ public class TopicUtilities {
      * @return
      */
     public static List<Integer> getMinHashes(final String xml, final List<MinHashXOR> minHashXORs) {
-
         final List<Integer> retValue = new ArrayList<Integer>();
 
+        // If the xml is null then all min hashes are also going to be null, so just return an empty list.
+        if (xml == null) {
+            return retValue;
+        }
+
         // the first minhash uses the builtin hashcode only
-        retValue.add(getMinHash(xml, null));
+        final Integer baseMinHash = getMinHash(xml, null);
+        if (baseMinHash != null) {
+            retValue.add(baseMinHash);
+        }
 
         for (final MinHashXOR minHashXOR : minHashXORs) {
-            retValue.add(getMinHash(xml, minHashXOR.getMinHashXOR()));
+            final Integer minHash = getMinHash(xml, minHashXOR.getMinHashXOR());
+            if (minHash != null) {
+                retValue.add(minHash);
+            }
         }
 
         return retValue;
