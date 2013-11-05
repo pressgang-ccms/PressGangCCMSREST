@@ -23,7 +23,6 @@
         <resteasy.version>2.3.5.Final</resteasy.version>
         <log4j.version>1.2.16</log4j.version>
         <slf4j.version>1.6.4</slf4j.version>
-        <csprocessor.version>1.2-SNAPSHOT</csprocessor.version>
         <j2bugzilla.version>1.1-SNAPSHOT</j2bugzilla.version>
         <cors.filter.version>1.7.1</cors.filter.version>
         <htmlcleaner.version>2.2</htmlcleaner.version>
@@ -261,7 +260,7 @@
         <dependency>
             <groupId>org.jboss.pressgang.ccms.contentspec</groupId>
             <artifactId>processor</artifactId>
-            <version>${csprocessor.version}</version>
+            <version>${pressgang.ccms.version}</version>
         </dependency>
         <dependency>
             <groupId>org.jboss.pressgang.ccms</groupId>
