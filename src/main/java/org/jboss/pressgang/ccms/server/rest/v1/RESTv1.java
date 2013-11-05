@@ -212,7 +212,7 @@ public class RESTv1 extends BaseRESTv1 implements RESTBaseInterfaceV1, RESTInter
             entityManager.flush();
             transactionManager.commit();
         } catch (final Throwable ex) {
-            processError(transactionManager, ex);
+            throw processError(transactionManager, ex);
         }
     }
 
@@ -249,7 +249,7 @@ public class RESTv1 extends BaseRESTv1 implements RESTBaseInterfaceV1, RESTInter
             entityManager.flush();
             transactionManager.commit();
         } catch (final Throwable ex) {
-            processError(transactionManager, ex);
+            throw processError(transactionManager, ex);
         }
     }
 
