@@ -1,20 +1,19 @@
 package org.jboss.pressgang.ccms.server.rest.v1;
 
 
+import javax.enterprise.context.ApplicationScoped;
+import java.util.ArrayList;
+import java.util.List;
+
 import org.jboss.pressgang.ccms.model.MinHash;
 import org.jboss.pressgang.ccms.rest.v1.collections.RESTMinHashCollectionV1;
 import org.jboss.pressgang.ccms.rest.v1.collections.items.RESTMinHashCollectionItemV1;
-import org.jboss.pressgang.ccms.rest.v1.constants.RESTv1Constants;
 import org.jboss.pressgang.ccms.rest.v1.entities.RESTMinHashV1;
 import org.jboss.pressgang.ccms.rest.v1.entities.base.RESTBaseEntityV1;
 import org.jboss.pressgang.ccms.rest.v1.expansion.ExpandDataTrunk;
 import org.jboss.pressgang.ccms.server.rest.v1.base.RESTDataObjectCollectionFactory;
 import org.jboss.pressgang.ccms.server.rest.v1.base.RESTDataObjectFactory;
 import org.jboss.pressgang.ccms.server.utils.EnversUtilities;
-
-import javax.enterprise.context.ApplicationScoped;
-import java.util.ArrayList;
-import java.util.List;
 
 @ApplicationScoped
 public class MinHashV1Factory extends RESTDataObjectFactory<RESTMinHashV1, MinHash, RESTMinHashCollectionV1, RESTMinHashCollectionItemV1> {
@@ -41,8 +40,6 @@ public class MinHashV1Factory extends RESTDataObjectFactory<RESTMinHashV1, MinHa
                     EnversUtilities.getRevisions(entityManager, entity), RESTBaseEntityV1.REVISIONS_NAME, dataType, expand, baseUrl,
                     entityManager));
         }
-
-        retValue.setLinks(baseUrl, RESTv1Constants.MINHASH_URL_NAME, dataType, retValue.getId());
 
         return retValue;
     }
