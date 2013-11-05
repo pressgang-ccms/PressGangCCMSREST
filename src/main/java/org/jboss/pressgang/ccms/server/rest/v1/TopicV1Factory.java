@@ -6,12 +6,14 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.jboss.pressgang.ccms.model.BugzillaBug;
+import org.jboss.pressgang.ccms.model.MinHashXOR;
 import org.jboss.pressgang.ccms.model.PropertyTag;
 import org.jboss.pressgang.ccms.model.Tag;
 import org.jboss.pressgang.ccms.model.Topic;
 import org.jboss.pressgang.ccms.model.TopicSourceUrl;
 import org.jboss.pressgang.ccms.model.TopicToPropertyTag;
 import org.jboss.pressgang.ccms.rest.v1.collections.RESTBugzillaBugCollectionV1;
+import org.jboss.pressgang.ccms.rest.v1.collections.RESTMinHashCollectionV1;
 import org.jboss.pressgang.ccms.rest.v1.collections.RESTTagCollectionV1;
 import org.jboss.pressgang.ccms.rest.v1.collections.RESTTopicCollectionV1;
 import org.jboss.pressgang.ccms.rest.v1.collections.RESTTopicSourceUrlCollectionV1;
@@ -55,6 +57,8 @@ public class TopicV1Factory extends RESTDataObjectFactory<RESTTopicV1, Topic, RE
     protected TranslatedTopicV1Factory translatedTopicFactory;
     @Inject
     protected ContentSpecV1Factory contentSpecFactory;
+    @Inject
+    protected MinHashV1Factory minHashFactory;
 
     @Override
     public RESTTopicV1 createRESTEntityFromDBEntityInternal(final Topic entity, final String baseUrl, final String dataType,
@@ -74,6 +78,7 @@ public class TopicV1Factory extends RESTDataObjectFactory<RESTTopicV1, Topic, RE
         expandOptions.add(RESTTopicV1.LOG_DETAILS_NAME);
         expandOptions.add(RESTTopicV1.CONTENTSPECS_NAME);
         expandOptions.add(RESTTopicV1.KEYWORDS_NAME);
+        expandOptions.add(RESTTopicV1.MINHASHES_NAME);
         if (revision == null) expandOptions.add(RESTBaseEntityV1.REVISIONS_NAME);
 
         retValue.setExpand(expandOptions);
@@ -155,6 +160,21 @@ public class TopicV1Factory extends RESTDataObjectFactory<RESTTopicV1, Topic, RE
             retValue.setContentSpecs_OTM(RESTDataObjectCollectionFactory.create(RESTContentSpecCollectionV1.class, contentSpecFactory,
                     entity.getContentSpecs(entityManager), RESTTopicV1.CONTENTSPECS_NAME, dataType, expand, baseUrl, false,
                     entityManager));
+        }
+
+        // MINHASHES
+        if (expand != null && expand.contains(RESTTopicV1.MINHASHES_NAME)) {
+            retValue.setMinHashes(RESTDataObjectCollectionFactory.create(
+                    RESTMinHashCollectionV1.class,
+                    minHashFactory,
+                    entity.getMinHashesList(),
+                    RESTTopicV1.MINHASHES_NAME,
+                    dataType,
+                    expand,
+                    baseUrl,
+                    false,
+                    entityManager));
+
         }
 
         retValue.setLinks(baseUrl, RESTv1Constants.TOPIC_URL_NAME, dataType, retValue.getId());
@@ -344,6 +364,10 @@ public class TopicV1Factory extends RESTDataObjectFactory<RESTTopicV1, Topic, RE
         /* This method will set the XML errors field */
         TopicUtilities.syncXML(entityManager, entity);
         TopicUtilities.validateXML(entityManager, entity, CommonConstants.ROCBOOK_DTD_BLOB_ID);
+
+        /* Update the minhash signature */
+        final List<MinHashXOR> minHashXORs = entityManager.createQuery(MinHashXOR.SELECT_ALL_QUERY).getResultList();
+        TopicUtilities.recalculateMinHash(entity, minHashXORs);
 
         if (dataObject.hasParameterSet(
                 RESTTopicV1.OUTGOING_NAME) && dataObject.getOutgoingRelationships() != null && dataObject.getOutgoingRelationships()

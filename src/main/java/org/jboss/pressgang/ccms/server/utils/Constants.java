@@ -1,6 +1,11 @@
 package org.jboss.pressgang.ccms.server.utils;
 
 public class Constants {
+    /**
+     * The number of min hashes to generate a topic signature with.
+     */
+    public static final int NUM_MIN_HASHES = 200;
+
     public static final String DOCBUILDER_SYSTEM_PROPERTY = "topicIndex.docbuilder";
 
     /**
