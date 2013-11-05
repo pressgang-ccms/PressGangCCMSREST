@@ -2,26 +2,15 @@ package org.jboss.pressgang.ccms.server.rest.v1;
 
 import javax.enterprise.context.ApplicationScoped;
 import javax.inject.Inject;
-import java.io.IOException;
-import java.io.StringReader;
 import java.util.ArrayList;
-import java.util.HashSet;
 import java.util.List;
-import java.util.Set;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 
-import org.apache.lucene.analysis.Analyzer;
-import org.apache.lucene.index.IndexReader;
-
-import org.apache.lucene.search.similar.MoreLikeThis;
-import org.hibernate.Session;
-import org.hibernate.search.FullTextSession;
-import org.hibernate.search.Search;
-import org.hibernate.search.SearchFactory;
-import org.hibernate.search.indexes.spi.ReaderProvider;
-import org.hibernate.search.store.DirectoryProvider;
-import org.jboss.pressgang.ccms.model.*;
+import org.jboss.pressgang.ccms.model.BugzillaBug;
+import org.jboss.pressgang.ccms.model.PropertyTag;
+import org.jboss.pressgang.ccms.model.Tag;
+import org.jboss.pressgang.ccms.model.Topic;
+import org.jboss.pressgang.ccms.model.TopicSourceUrl;
+import org.jboss.pressgang.ccms.model.TopicToPropertyTag;
 import org.jboss.pressgang.ccms.rest.v1.collections.RESTBugzillaBugCollectionV1;
 import org.jboss.pressgang.ccms.rest.v1.collections.RESTTagCollectionV1;
 import org.jboss.pressgang.ccms.rest.v1.collections.RESTTopicCollectionV1;
@@ -47,9 +36,7 @@ import org.jboss.pressgang.ccms.server.rest.v1.base.RESTDataObjectCollectionFact
 import org.jboss.pressgang.ccms.server.rest.v1.base.RESTDataObjectFactory;
 import org.jboss.pressgang.ccms.server.rest.v1.utils.RESTv1Utilities;
 import org.jboss.pressgang.ccms.server.utils.EnversUtilities;
-import org.jboss.pressgang.ccms.server.utils.ServiceConstants;
 import org.jboss.pressgang.ccms.server.utils.TopicUtilities;
-import org.jboss.pressgang.ccms.utils.common.CollectionUtilities;
 import org.jboss.pressgang.ccms.utils.common.DocBookUtilities;
 import org.jboss.pressgang.ccms.utils.constants.CommonConstants;
 import org.jboss.resteasy.spi.BadRequestException;
@@ -68,8 +55,6 @@ public class TopicV1Factory extends RESTDataObjectFactory<RESTTopicV1, Topic, RE
     protected TranslatedTopicV1Factory translatedTopicFactory;
     @Inject
     protected ContentSpecV1Factory contentSpecFactory;
-
-    private static final Logger LOGGER = Logger.getLogger(TopicV1Factory.class.getName());
 
     @Override
     public RESTTopicV1 createRESTEntityFromDBEntityInternal(final Topic entity, final String baseUrl, final String dataType,
@@ -106,76 +91,7 @@ public class TopicV1Factory extends RESTDataObjectFactory<RESTTopicV1, Topic, RE
 
         // KEYWORDS
         if (revision == null && expand != null && expand.contains(RESTTopicV1.KEYWORDS_NAME)) {
-            /*
-                Keywords are extracted from the lucene index managed by Hibernate search.
-                http://docs.jboss.org/hibernate/search/4.5/reference/en-US/html_single/#IndexReaders
-              */
-            final Session session = (Session) entityManager.getDelegate();
-            final FullTextSession fullTextSession = Search.getFullTextSession(session);
-            final SearchFactory searchFactory = fullTextSession.getSearchFactory();
-            final IndexReader reader = searchFactory.getIndexReaderAccessor().open(Topic.class);
-            final Analyzer analyser =  fullTextSession.getSearchFactory().getAnalyzer(Topic.class);
-
-            try {
-                final MoreLikeThis mlt = new MoreLikeThis(reader);
-                mlt.setAnalyzer(analyser);
-
-                final IntegerConstants minWordLen = entityManager.find(IntegerConstants.class, ServiceConstants.KEYWORD_MINIMUM_WORD_LENGTH_INT_CONSTANT_ID);
-                if (minWordLen != null && minWordLen.getConstantValue() != null)  {
-                    mlt.setMinWordLen(minWordLen.getConstantValue());
-                } else {
-                    mlt.setMinWordLen(ServiceConstants.KEYWORD_MINIMUM_WORD_LENGTH_DEFAULT);
-                }
-
-                final IntegerConstants minDocFreq = entityManager.find(IntegerConstants.class, ServiceConstants.KEYWORD_MINIMUM_DOCUMENT_FREQUENCY_INT_CONSTANT_ID);
-                if (minDocFreq != null && minDocFreq.getConstantValue() != null)  {
-                    mlt.setMinDocFreq(minDocFreq.getConstantValue());
-                }  else {
-                    mlt.setMinDocFreq(ServiceConstants.KEYWORD_MINIMUM_DOCUMENT_FREQUENCY_DEFAULT);
-                }
-
-                final IntegerConstants maxQueryTerms = entityManager.find(IntegerConstants.class, ServiceConstants.KEYWORD_MAX_QUERY_TERMS_INT_CONSTANT_ID);
-                if (maxQueryTerms != null && maxQueryTerms.getConstantValue() != null)  {
-                    mlt.setMaxQueryTerms(maxQueryTerms.getConstantValue());
-                }  else {
-                    mlt.setMaxQueryTerms(ServiceConstants.KEYWORD_MAX_QUERY_TERMS_INT_DEFAULT);
-                }
-
-                final IntegerConstants minTermFreq = entityManager.find(IntegerConstants.class, ServiceConstants.KEYWORD_MINIMUM_TERM_FREQUENCY_INT_CONSTANT_ID);
-                if (minTermFreq != null && minTermFreq.getConstantValue() != null)  {
-                    mlt.setMinTermFreq(minTermFreq.getConstantValue());
-                }  else {
-                    mlt.setMinTermFreq(ServiceConstants.KEYWORD_MINIMUM_TERM_FREQUENCY_DEFAULT);
-                }
-
-                final IntegerConstants maxDocFreqPct = entityManager.find(IntegerConstants.class, ServiceConstants.KEYWORD_MAXIMUM_DOCUMENT_FREQUENCY_PERCENT_INT_CONSTANT_ID);
-                if (maxDocFreqPct != null && maxDocFreqPct.getConstantValue() != null)  {
-                    mlt.setMaxDocFreqPct(maxDocFreqPct.getConstantValue());
-                }  else {
-                    mlt.setMaxDocFreqPct(ServiceConstants.KEYWORD_MAXIMUM_DOCUMENT_FREQUENCY_PERCENT_DEFAULT);
-                }
-
-                final StringConstants stopWords = entityManager.find(StringConstants.class, ServiceConstants.KEYWORDS_STOPWORDS_STRING_CONSTANT_ID);
-                if (stopWords != null && stopWords.getConstantValue() != null)  {
-                    final String [] stopWordsSplit = stopWords.getConstantValue().split("\n");
-                    final Set<String> stopWordsSet = new HashSet<String>();
-                    for (final String stopWord : stopWordsSplit) {
-                        stopWordsSet.add(stopWord);
-                    }
-                    mlt.setStopWords(stopWordsSet);
-                }
-
-                mlt.setFieldNames(new String[]{Topic.TOPIC_SEARCH_TEXT_FIELD_NAME});
-
-                final ArrayList<String> keywords = new ArrayList<String>();
-                final String[] keywordsArray = mlt.retrieveInterestingTerms(new StringReader(entity.getTopicSearchText()), Topic.TOPIC_SEARCH_TEXT_FIELD_NAME);
-                CollectionUtilities.addAll(keywordsArray, keywords);
-                retValue.setKeywords(keywords);
-            } catch (final IOException ex) {
-                LOGGER.log(Level.SEVERE, ex.toString());
-            } finally {
-                searchFactory.getIndexReaderAccessor().close(reader);
-            }
+            retValue.setKeywords(TopicUtilities.getTopicKeywords(entity, entityManager));
         }
 
         // REVISIONS

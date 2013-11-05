@@ -19,6 +19,7 @@ import java.io.UnsupportedEncodingException;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Properties;
 import java.util.Set;
@@ -29,10 +30,18 @@ import com.j2bugzilla.base.ECSBug;
 import com.j2bugzilla.rpc.BugSearch;
 import com.j2bugzilla.rpc.GetBug;
 import com.j2bugzilla.rpc.LogIn;
+import org.apache.lucene.analysis.Analyzer;
+import org.apache.lucene.index.IndexReader;
+import org.apache.lucene.search.similar.MoreLikeThis;
+import org.hibernate.Session;
+import org.hibernate.search.FullTextSession;
+import org.hibernate.search.Search;
+import org.hibernate.search.SearchFactory;
 import org.jboss.pressgang.ccms.contentspec.constants.CSConstants;
 import org.jboss.pressgang.ccms.model.BlobConstants;
 import org.jboss.pressgang.ccms.model.BugzillaBug;
 import org.jboss.pressgang.ccms.model.Category;
+import org.jboss.pressgang.ccms.model.IntegerConstants;
 import org.jboss.pressgang.ccms.model.StringConstants;
 import org.jboss.pressgang.ccms.model.Tag;
 import org.jboss.pressgang.ccms.model.TagToCategory;
@@ -687,5 +696,80 @@ public class TopicUtilities {
         }
 
         return "Unknown";
+    }
+
+    public static List<String> getTopicKeywords(final Topic entity, final EntityManager entityManager) {
+        /*
+         * Keywords are extracted from the lucene index managed by Hibernate search.
+         * http://docs.jboss.org/hibernate/search/4.5/reference/en-US/html_single/#IndexReaders
+         */
+        final Session session = (Session) entityManager.getDelegate();
+        final FullTextSession fullTextSession = Search.getFullTextSession(session);
+        final SearchFactory searchFactory = fullTextSession.getSearchFactory();
+        final IndexReader reader = searchFactory.getIndexReaderAccessor().open(Topic.class);
+        final Analyzer analyser =  fullTextSession.getSearchFactory().getAnalyzer(Topic.class);
+
+        try {
+            final MoreLikeThis mlt = new MoreLikeThis(reader);
+            mlt.setAnalyzer(analyser);
+
+            final IntegerConstants minWordLen = entityManager.find(IntegerConstants.class, ServiceConstants.KEYWORD_MINIMUM_WORD_LENGTH_INT_CONSTANT_ID);
+            if (minWordLen != null && minWordLen.getConstantValue() != null)  {
+                mlt.setMinWordLen(minWordLen.getConstantValue());
+            } else {
+                mlt.setMinWordLen(ServiceConstants.KEYWORD_MINIMUM_WORD_LENGTH_DEFAULT);
+            }
+
+            final IntegerConstants minDocFreq = entityManager.find(IntegerConstants.class, ServiceConstants.KEYWORD_MINIMUM_DOCUMENT_FREQUENCY_INT_CONSTANT_ID);
+            if (minDocFreq != null && minDocFreq.getConstantValue() != null)  {
+                mlt.setMinDocFreq(minDocFreq.getConstantValue());
+            }  else {
+                mlt.setMinDocFreq(ServiceConstants.KEYWORD_MINIMUM_DOCUMENT_FREQUENCY_DEFAULT);
+            }
+
+            final IntegerConstants maxQueryTerms = entityManager.find(IntegerConstants.class, ServiceConstants.KEYWORD_MAX_QUERY_TERMS_INT_CONSTANT_ID);
+            if (maxQueryTerms != null && maxQueryTerms.getConstantValue() != null)  {
+                mlt.setMaxQueryTerms(maxQueryTerms.getConstantValue());
+            }  else {
+                mlt.setMaxQueryTerms(ServiceConstants.KEYWORD_MAX_QUERY_TERMS_INT_DEFAULT);
+            }
+
+            final IntegerConstants minTermFreq = entityManager.find(IntegerConstants.class, ServiceConstants.KEYWORD_MINIMUM_TERM_FREQUENCY_INT_CONSTANT_ID);
+            if (minTermFreq != null && minTermFreq.getConstantValue() != null)  {
+                mlt.setMinTermFreq(minTermFreq.getConstantValue());
+            }  else {
+                mlt.setMinTermFreq(ServiceConstants.KEYWORD_MINIMUM_TERM_FREQUENCY_DEFAULT);
+            }
+
+            final IntegerConstants maxDocFreqPct = entityManager.find(IntegerConstants.class, ServiceConstants.KEYWORD_MAXIMUM_DOCUMENT_FREQUENCY_PERCENT_INT_CONSTANT_ID);
+            if (maxDocFreqPct != null && maxDocFreqPct.getConstantValue() != null)  {
+                mlt.setMaxDocFreqPct(maxDocFreqPct.getConstantValue());
+            }  else {
+                mlt.setMaxDocFreqPct(ServiceConstants.KEYWORD_MAXIMUM_DOCUMENT_FREQUENCY_PERCENT_DEFAULT);
+            }
+
+            final StringConstants stopWords = entityManager.find(StringConstants.class, ServiceConstants.KEYWORDS_STOPWORDS_STRING_CONSTANT_ID);
+            if (stopWords != null && stopWords.getConstantValue() != null)  {
+                final String [] stopWordsSplit = stopWords.getConstantValue().split("\n");
+                final Set<String> stopWordsSet = new HashSet<String>();
+                for (final String stopWord : stopWordsSplit) {
+                    stopWordsSet.add(stopWord);
+                }
+                mlt.setStopWords(stopWordsSet);
+            }
+
+            mlt.setFieldNames(new String[]{Topic.TOPIC_SEARCH_TEXT_FIELD_NAME});
+
+            final ArrayList<String> keywords = new ArrayList<String>();
+            final String[] keywordsArray = mlt.retrieveInterestingTerms(new StringReader(entity.getTopicSearchText()), Topic.TOPIC_SEARCH_TEXT_FIELD_NAME);
+            CollectionUtilities.addAll(keywordsArray, keywords);
+            return keywords;
+        } catch (final IOException ex) {
+            log.error(ex.toString());
+        } finally {
+            searchFactory.getIndexReaderAccessor().close(reader);
+        }
+
+        return null;
     }
 }
