@@ -8,15 +8,16 @@ import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MultivaluedMap;
 import javax.ws.rs.core.PathSegment;
 import javax.ws.rs.core.Response;
-import java.awt.*;
 import java.awt.geom.Rectangle2D;
 import java.io.IOException;
 import java.io.StringWriter;
-import java.util.*;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
+import java.util.Random;
+import java.util.Set;
 import java.util.concurrent.atomic.AtomicInteger;
 
-import com.sun.jdi.IntegerValue;
 import org.apache.batik.dom.GenericDOMImplementation;
 import org.apache.batik.svggen.SVGGraphics2D;
 import org.hibernate.Session;
@@ -60,7 +61,24 @@ import org.jboss.pressgang.ccms.filter.builder.TranslatedContentSpecFilterQueryB
 import org.jboss.pressgang.ccms.filter.builder.TranslatedContentSpecNodeFilterQueryBuilder;
 import org.jboss.pressgang.ccms.filter.builder.TranslatedTopicDataFilterQueryBuilder;
 import org.jboss.pressgang.ccms.filter.builder.UserFilterQueryBuilder;
-import org.jboss.pressgang.ccms.model.*;
+import org.jboss.pressgang.ccms.model.BlobConstants;
+import org.jboss.pressgang.ccms.model.Category;
+import org.jboss.pressgang.ccms.model.File;
+import org.jboss.pressgang.ccms.model.Filter;
+import org.jboss.pressgang.ccms.model.ImageFile;
+import org.jboss.pressgang.ccms.model.IntegerConstants;
+import org.jboss.pressgang.ccms.model.LanguageFile;
+import org.jboss.pressgang.ccms.model.LanguageImage;
+import org.jboss.pressgang.ccms.model.MinHashXOR;
+import org.jboss.pressgang.ccms.model.Project;
+import org.jboss.pressgang.ccms.model.PropertyTag;
+import org.jboss.pressgang.ccms.model.PropertyTagCategory;
+import org.jboss.pressgang.ccms.model.Role;
+import org.jboss.pressgang.ccms.model.StringConstants;
+import org.jboss.pressgang.ccms.model.Tag;
+import org.jboss.pressgang.ccms.model.Topic;
+import org.jboss.pressgang.ccms.model.TranslatedTopicData;
+import org.jboss.pressgang.ccms.model.User;
 import org.jboss.pressgang.ccms.model.contentspec.CSNode;
 import org.jboss.pressgang.ccms.model.contentspec.ContentSpec;
 import org.jboss.pressgang.ccms.model.contentspec.TranslatedCSNode;
@@ -182,11 +200,18 @@ public class RESTv1 extends BaseRESTv1 implements RESTBaseInterfaceV1, RESTInter
                 minHashXOR.setMinHashXOR(random);
 
                 entityManager.persist(minHashXOR);
+
+                // Do batch updating by flushing the changes every 100 updates.
+                if (i % 100 == 0) {
+                    entityManager.flush();
+                }
             }
 
+            // Flush the changes to the database and commit the transaction
+            entityManager.flush();
             transactionManager.commit();
-        } catch (final Exception ex) {
-            throw new InternalServerErrorException(ex);
+        } catch (final Throwable ex) {
+            processError(transactionManager, ex);
         }
     }
 
@@ -198,12 +223,13 @@ public class RESTv1 extends BaseRESTv1 implements RESTBaseInterfaceV1, RESTInter
             final List<MinHashXOR> minHashXORs = entityManager.createQuery(MinHashXOR.SELECT_ALL_QUERY).getResultList();
             final List<Topic> topics = entityManager.createQuery(Topic.SELECT_ALL_QUERY).getResultList();
 
-            for (int i = 0; i < topics.size(); i += batchSize) {
-                // Start a Transaction
-                transactionManager.begin();
+            // Start a Transaction
+            transactionManager.begin();
 
-                // Join the transaction we just started
-                entityManager.joinTransaction();
+            // Join the transaction we just started
+            entityManager.joinTransaction();
+
+            for (int i = 0; i < topics.size(); i += batchSize) {
 
                 for (int j = i; j < topics.size() && j < i + batchSize; ++j) {
                     final Topic topic = topics.get(j);
@@ -216,11 +242,13 @@ public class RESTv1 extends BaseRESTv1 implements RESTBaseInterfaceV1, RESTInter
 
                     entityManager.persist(topic);
                 }
-
-                transactionManager.commit();
             }
+
+            // Flush the changes to the database and commit the transaction
+            entityManager.flush();
+            transactionManager.commit();
         } catch (final Exception ex) {
-            throw new InternalServerErrorException(ex);
+            processError(transactionManager, ex);
         }
     }
 
