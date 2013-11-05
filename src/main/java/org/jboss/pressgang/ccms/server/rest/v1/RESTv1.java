@@ -218,36 +218,43 @@ public class RESTv1 extends BaseRESTv1 implements RESTBaseInterfaceV1, RESTInter
 
     @Override
     public void recalculateMinHash() {
+        final int maxTransactSize = BATCH_SIZE * 10;
+
         try {
             final List<MinHashXOR> minHashXORs = entityManager.createQuery(MinHashXOR.SELECT_ALL_QUERY).getResultList();
             final List<Topic> topics = entityManager.createQuery(Topic.SELECT_ALL_QUERY).getResultList();
 
-            // Start a Transaction
-            transactionManager.begin();
+            // Since there are a lot of topics to process there is a high chance it'll hit the timeout,
+            // so break the transactions into smaller chunks
+            for (int i = 0; i < topics.size(); i += maxTransactSize) {
+                // Start a Transaction
+                transactionManager.begin();
 
-            // Join the transaction we just started
-            entityManager.joinTransaction();
+                // Join the transaction we just started
+                entityManager.joinTransaction();
 
-            for (int i = 0; i < topics.size(); i++) {
-                final Topic topic = topics.get(i);
-                TopicUtilities.recalculateMinHash(topic, minHashXORs);
+                for (int j = i; j < topics.size() && j < i + maxTransactSize; ++j) {
 
-                // Handle topics that have invalid titles.
-                if (topic.getTopicTitle() == null || topic.getTopicTitle().trim().isEmpty()) {
-                    topic.setTopicTitle("Placeholder");
+                    final Topic topic = topics.get(j);
+                    TopicUtilities.recalculateMinHash(topic, minHashXORs);
+
+                    // Handle topics that have invalid titles.
+                    if (topic.getTopicTitle() == null || topic.getTopicTitle().trim().isEmpty()) {
+                        topic.setTopicTitle("Placeholder");
+                    }
+
+                    entityManager.persist(topic);
+
+                    // Do batch updating by flushing the changes every 100 updates.
+                    if (j % BATCH_SIZE == 0) {
+                        entityManager.flush();
+                    }
                 }
 
-                entityManager.persist(topic);
-
-                // Do batch updating by flushing the changes every 100 updates.
-                if (i % BATCH_SIZE == 0) {
-                    entityManager.flush();
-                }
+                // Flush the changes to the database and commit the transaction
+                entityManager.flush();
+                transactionManager.commit();
             }
-
-            // Flush the changes to the database and commit the transaction
-            entityManager.flush();
-            transactionManager.commit();
         } catch (final Throwable ex) {
             throw processError(transactionManager, ex);
         }
