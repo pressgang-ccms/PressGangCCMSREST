@@ -167,6 +167,7 @@ import org.w3c.dom.Document;
 @Path(Constants.BASE_REST_PATH + "/1")
 public class RESTv1 extends BaseRESTv1 implements RESTBaseInterfaceV1, RESTInterfaceAdvancedV1 {
     private static final Logger log = LoggerFactory.getLogger(RESTv1.class);
+    private static final int BATCH_SIZE = 100;
 
     @Context HttpResponse response;
 
@@ -202,7 +203,7 @@ public class RESTv1 extends BaseRESTv1 implements RESTBaseInterfaceV1, RESTInter
                 entityManager.persist(minHashXOR);
 
                 // Do batch updating by flushing the changes every 100 updates.
-                if (i % 100 == 0) {
+                if (i % BATCH_SIZE == 0) {
                     entityManager.flush();
                 }
             }
@@ -217,8 +218,6 @@ public class RESTv1 extends BaseRESTv1 implements RESTBaseInterfaceV1, RESTInter
 
     @Override
     public void recalculateMinHash() {
-        final int batchSize = 100;
-
         try {
             final List<MinHashXOR> minHashXORs = entityManager.createQuery(MinHashXOR.SELECT_ALL_QUERY).getResultList();
             final List<Topic> topics = entityManager.createQuery(Topic.SELECT_ALL_QUERY).getResultList();
@@ -229,25 +228,27 @@ public class RESTv1 extends BaseRESTv1 implements RESTBaseInterfaceV1, RESTInter
             // Join the transaction we just started
             entityManager.joinTransaction();
 
-            for (int i = 0; i < topics.size(); i += batchSize) {
+            for (int i = 0; i < topics.size(); i++) {
+                final Topic topic = topics.get(i);
+                TopicUtilities.recalculateMinHash(topic, minHashXORs);
 
-                for (int j = i; j < topics.size() && j < i + batchSize; ++j) {
-                    final Topic topic = topics.get(j);
-                    TopicUtilities.recalculateMinHash(topic, minHashXORs);
+                // Handle topics that have invalid titles.
+                if (topic.getTopicTitle() == null || topic.getTopicTitle().trim().isEmpty()) {
+                    topic.setTopicTitle("Placeholder");
+                }
 
-                    // Handle topics that have invalid titles.
-                    if (topic.getTopicTitle() == null || topic.getTopicTitle().trim().isEmpty()) {
-                        topic.setTopicTitle("Placeholder");
-                    }
+                entityManager.persist(topic);
 
-                    entityManager.persist(topic);
+                // Do batch updating by flushing the changes every 100 updates.
+                if (i % BATCH_SIZE == 0) {
+                    entityManager.flush();
                 }
             }
 
             // Flush the changes to the database and commit the transaction
             entityManager.flush();
             transactionManager.commit();
-        } catch (final Exception ex) {
+        } catch (final Throwable ex) {
             processError(transactionManager, ex);
         }
     }

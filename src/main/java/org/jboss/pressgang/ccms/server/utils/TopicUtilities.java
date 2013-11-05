@@ -82,7 +82,10 @@ public class TopicUtilities {
      * @param minHashXORs The list of XOR values to apply to the hash code
      */
     public static void recalculateMinHash(final Topic topic, final List<MinHashXOR> minHashXORs) {
-        topic.getMinHashes().clear();
+        final List<MinHash> existingMinHashes = new ArrayList<MinHash>(topic.getMinHashes());
+        for (final MinHash minHash : existingMinHashes) {
+            topic.removeMinHash(minHash);
+        }
 
         final List<Integer> minHashes = getMinHashes(topic.getTopicXML(), minHashXORs);
 
@@ -90,7 +93,7 @@ public class TopicUtilities {
             final MinHash minHash = new MinHash();
             minHash.setMinHashFuncID(k);
             minHash.setMinHash(minHashes.get(k));
-            topic.getMinHashes().add(minHash);
+            topic.addMinHash(minHash);
         }
     }
 
