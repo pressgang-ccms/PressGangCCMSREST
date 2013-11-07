@@ -41,6 +41,7 @@
         <xstream.version>1.4.2</xstream.version>
         <itext.version>2.1.7</itext.version>
         <liquibase.version>2.0.1</liquibase.version>
+        <liquibase.log.version>1.2.1</liquibase.log.version>
         <intellij.annotations.version>12.0</intellij.annotations.version>
     </properties>
 
@@ -344,6 +345,11 @@
             <groupId>org.liquibase</groupId>
             <artifactId>liquibase-core</artifactId>
             <version>${liquibase.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>com.mattbertolini</groupId>
+            <artifactId>liquibase-slf4j</artifactId>
+            <version>${liquibase.log.version}</version>
         </dependency>
 
         <!-- Logging Libraries -->
