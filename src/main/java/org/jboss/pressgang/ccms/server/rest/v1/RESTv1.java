@@ -181,26 +181,31 @@ public class RESTv1 extends BaseRESTv1 implements RESTBaseInterfaceV1, RESTInter
     @Override
     public void recalculateMinHash() {
         try {
-            // Start a Transaction
-            transactionManager.begin();
-
-            // Join the transaction we just started
-            entityManager.joinTransaction();
-
             final List<Topic> topics = entityManager.createQuery(Topic.SELECT_ALL_QUERY).getResultList();
-            for (final Topic topic : topics) {
-                // Change the min hash so the entity manager will attempt to save the topic.
-                // The actual value will be set in @PreUpdate on the Topic class
-                topic.setMinHash(topic.getMinHash() == null ? 0 : topic.getMinHash() == 0 ? 1 : 0);
-                // Handle topics that have invalid titles.
-                if (topic.getTopicTitle() == null || topic.getTopicTitle().trim().isEmpty()) {
-                    topic.setTopicTitle("Placeholder");
-                }
-                entityManager.persist(topic);
-            }
 
-            entityManager.flush();
-            transactionManager.commit();
+            // break up the transactions so we don't time out
+            for (int i = 0; i < topics.size(); i += 100) {
+                // Start a Transaction
+                transactionManager.begin();
+
+                // Join the transaction we just started
+                entityManager.joinTransaction();
+
+                for (int j = i; j < topics.size() && j < i + 100; ++j) {
+                    final Topic topic = topics.get(j);
+                    // Change the min hash so the entity manager will attempt to save the topic.
+                    // The actual value will be set in @PreUpdate on the Topic class
+                    topic.setMinHash(topic.getMinHash() == null ? 0 : topic.getMinHash() == 0 ? 1 : 0);
+                    // Handle topics that have invalid titles.
+                    if (topic.getTopicTitle() == null || topic.getTopicTitle().trim().isEmpty()) {
+                        topic.setTopicTitle("Placeholder");
+                    }
+                    entityManager.persist(topic);
+                }
+
+                entityManager.flush();
+                transactionManager.commit();
+            }
         } catch (final Exception ex) {
             throw new InternalServerErrorException(ex);
         }
