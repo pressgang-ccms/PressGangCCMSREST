@@ -84,37 +84,41 @@ public class TeiidBugLinkStrategy extends BugzillaBugLinkStrategy {
 
     protected Integer getProductId(final String product) throws SQLException {
         final PreparedStatement statement = connection.prepareStatement(
-                "SELECT id FROM Bugzilla.products products WHERE products.name = ?");
+                "SELECT id, products.name FROM Bugzilla.products products WHERE products.name = ?");
         statement.setString(1, product);
 
         final ResultSet resultSet = statement.executeQuery();
         Integer projectId = null;
+        String name = null;
         if (resultSet.next()) {
             projectId = resultSet.getInt("id");
+            name = resultSet.getString("name");
         }
         resultSet.close();
         statement.close();
 
-        return projectId;
+        return product.equals(name) ? projectId : null;
     }
 
     protected void checkComponentExists(final String component, final Integer productId) throws SQLException, ValidationException {
         final PreparedStatement statement = connection.prepareStatement(
-                "SELECT id, isactive FROM Bugzilla.components components WHERE components.name = ? AND product_id = ?");
+                "SELECT id, isactive, components.name FROM Bugzilla.components components WHERE components.name = ? AND product_id = ?");
         statement.setString(1, component);
         statement.setInt(2, productId);
 
         final ResultSet resultSet = statement.executeQuery();
         Integer componentId = null;
         Boolean isActive = null;
+        String name = null;
         if (resultSet.next()) {
             componentId = resultSet.getInt("id");
             isActive = resultSet.getBoolean("isactive");
+            name = resultSet.getString("name");
         }
         resultSet.close();
         statement.close();
 
-        if (componentId == null) {
+        if (componentId == null || !component.equals(name)) {
             throw new ValidationException("No Bugzilla Component exists for component \"" + component + "\".");
         } else if (isActive == null || !isActive) {
             throw new ValidationException("The Bugzilla Component \"" + component + "\" is not active.");
@@ -123,21 +127,23 @@ public class TeiidBugLinkStrategy extends BugzillaBugLinkStrategy {
 
     protected void checkVersionExists(final String version, final Integer productId) throws SQLException, ValidationException {
         final PreparedStatement statement = connection.prepareStatement(
-                "SELECT id, isactive FROM Bugzilla.versions versions WHERE versions.value = ? AND versions.product_id = ?");
+                "SELECT id, isactive, versions.value FROM Bugzilla.versions versions WHERE versions.value = ? AND versions.product_id = ?");
         statement.setString(1, version);
         statement.setInt(2, productId);
 
         final ResultSet resultSet = statement.executeQuery();
         Integer versionId = null;
         Boolean isActive = null;
+        String value = null;
         if (resultSet.next()) {
             versionId = resultSet.getInt("id");
             isActive = resultSet.getBoolean("isactive");
+            value = resultSet.getString("value");
         }
         resultSet.close();
         statement.close();
 
-        if (versionId == null) {
+        if (versionId == null || !version.equals(value)) {
             throw new ValidationException("No Bugzilla Version exists for version \"" + version + "\".");
         } else if (isActive == null || !isActive) {
             throw new ValidationException("The Bugzilla Version \"" + version + "\" is not active.");
@@ -146,7 +152,7 @@ public class TeiidBugLinkStrategy extends BugzillaBugLinkStrategy {
 
     protected void checkKeywordsExist(final String[] keywords) throws SQLException, ValidationException {
         final PreparedStatement statement = connection.prepareStatement(
-                "SELECT id FROM Bugzilla.keyworddefs keywords WHERE keywords.name = ?");
+                "SELECT id, keywords.name FROM Bugzilla.keyworddefs keywords WHERE keywords.name = ?");
         for (final String keyword : keywords) {
             if (!doesKeywordExist(statement, keyword)) {
                 throw new ValidationException("No Bugzilla Keyword exists for keyword \"" + keyword + "\".");
@@ -159,7 +165,12 @@ public class TeiidBugLinkStrategy extends BugzillaBugLinkStrategy {
         statement.setString(1, keyword);
 
         final ResultSet resultSet = statement.executeQuery();
-        boolean exists = resultSet.next();
+        boolean exists = false;
+
+        if (resultSet.next()) {
+            final String name = resultSet.getString("name");
+            exists = keyword.equals(name);
+        }
         resultSet.close();
 
         return exists;
