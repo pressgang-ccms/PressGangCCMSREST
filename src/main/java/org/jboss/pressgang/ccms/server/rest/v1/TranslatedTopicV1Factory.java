@@ -243,7 +243,7 @@ public class TranslatedTopicV1Factory extends RESTDataObjectFactory<RESTTranslat
         }
 
         /*
-         * If the additional XML wasn't set and this is a new entity then try and get the previous topics additional XML. We need to do
+         * If the additional XML wasn't set and this is a new entity then try and get the previous topic's additional XML. We need to do
          * this otherwise every time one little change is made the additional xml will be lost and have to be re-added.
          */
         if (!additionalXMLSet && entity.getId() == null && entity.getTranslationLocale() != null) {

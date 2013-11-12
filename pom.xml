@@ -14,6 +14,8 @@
 
     <properties>
         <pressgang.ccms.version>1.3-SNAPSHOT</pressgang.ccms.version>
+        <csprocessor.version>1.3-SNAPSHOT</csprocessor.version>
+
         <jboss.bom.version>1.0.2.Final</jboss.bom.version>
         <jboss.spec.verison>3.0.1.Final</jboss.spec.verison>
         <jbossasplugin.version>7.1.1.Final</jbossasplugin.version>
@@ -23,10 +25,10 @@
         <resteasy.version>2.3.5.Final</resteasy.version>
         <log4j.version>1.2.16</log4j.version>
         <slf4j.version>1.6.4</slf4j.version>
-        <csprocessor.version>1.2-SNAPSHOT</csprocessor.version>
         <j2bugzilla.version>1.1-SNAPSHOT</j2bugzilla.version>
         <cors.filter.version>1.7.1</cors.filter.version>
         <htmlcleaner.version>2.2</htmlcleaner.version>
+        <lucene.version>3.5.0</lucene.version>
         <arquillian.version>1.0.3.Final</arquillian.version>
         <jbossarquillian.version>7.1.1.Final</jbossarquillian.version>
         <arquillianbom.version>1.0.0.Final</arquillianbom.version>
@@ -39,8 +41,8 @@
         <xstream.version>1.4.2</xstream.version>
         <itext.version>2.1.7</itext.version>
         <liquibase.version>2.0.1</liquibase.version>
+        <liquibase.log.version>1.2.1</liquibase.log.version>
         <intellij.annotations.version>12.0</intellij.annotations.version>
-        <version.org.hibernate>4.0.1.Final</version.org.hibernate>
     </properties>
 
     <dependencyManagement>
@@ -192,19 +194,16 @@
         <dependency>
             <groupId>org.hibernate</groupId>
             <artifactId>hibernate-envers</artifactId>
-            <version>${version.org.hibernate}</version>
             <scope>provided</scope>
         </dependency>
         <dependency>
             <groupId>org.hibernate</groupId>
             <artifactId>hibernate-entitymanager</artifactId>
-            <version>${version.org.hibernate}</version>
             <scope>provided</scope>
         </dependency>
         <dependency>
             <groupId>org.hibernate</groupId>
             <artifactId>hibernate-core</artifactId>
-            <version>${version.org.hibernate}</version>
             <scope>provided</scope>
         </dependency>
         <dependency>
@@ -219,7 +218,7 @@
         <dependency>
             <groupId>org.apache.lucene</groupId>
             <artifactId>lucene-queries</artifactId>
-            <version>3.5.0</version>
+            <version>${lucene.version}</version>
         </dependency>
 
         <!-- PressGangCCMS Libraries -->
@@ -261,7 +260,7 @@
         <dependency>
             <groupId>org.jboss.pressgang.ccms.contentspec</groupId>
             <artifactId>processor</artifactId>
-            <version>${csprocessor.version}</version>
+            <version>${pressgang.ccms.version}</version>
         </dependency>
         <dependency>
             <groupId>org.jboss.pressgang.ccms</groupId>
@@ -346,6 +345,11 @@
             <groupId>org.liquibase</groupId>
             <artifactId>liquibase-core</artifactId>
             <version>${liquibase.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>com.mattbertolini</groupId>
+            <artifactId>liquibase-slf4j</artifactId>
+            <version>${liquibase.log.version}</version>
         </dependency>
 
         <!-- Logging Libraries -->
@@ -465,6 +469,14 @@
     </dependencies>
 
     <profiles>
+        <profile>
+            <id>jboss-eap-6.1</id>
+            <properties>
+                <jboss.bom.version>1.0.4.Final</jboss.bom.version>
+                <jboss.spec.verison>3.0.2.Final</jboss.spec.verison>
+                <resteasy.version>2.3.6.Final</resteasy.version>
+            </properties>
+        </profile>
         <profile>
             <id>belay</id>
             <dependencies>

@@ -19,6 +19,7 @@ import java.io.UnsupportedEncodingException;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Properties;
 import java.util.Set;
@@ -29,10 +30,20 @@ import com.j2bugzilla.base.ECSBug;
 import com.j2bugzilla.rpc.BugSearch;
 import com.j2bugzilla.rpc.GetBug;
 import com.j2bugzilla.rpc.LogIn;
+import org.apache.lucene.analysis.Analyzer;
+import org.apache.lucene.index.IndexReader;
+import org.apache.lucene.search.similar.MoreLikeThis;
+import org.hibernate.Session;
+import org.hibernate.search.FullTextSession;
+import org.hibernate.search.Search;
+import org.hibernate.search.SearchFactory;
 import org.jboss.pressgang.ccms.contentspec.constants.CSConstants;
 import org.jboss.pressgang.ccms.model.BlobConstants;
 import org.jboss.pressgang.ccms.model.BugzillaBug;
 import org.jboss.pressgang.ccms.model.Category;
+import org.jboss.pressgang.ccms.model.IntegerConstants;
+import org.jboss.pressgang.ccms.model.MinHash;
+import org.jboss.pressgang.ccms.model.MinHashXOR;
 import org.jboss.pressgang.ccms.model.StringConstants;
 import org.jboss.pressgang.ccms.model.Tag;
 import org.jboss.pressgang.ccms.model.TagToCategory;
@@ -63,6 +74,134 @@ import org.xml.sax.SAXException;
 
 public class TopicUtilities {
     private static final Logger log = LoggerFactory.getLogger(TopicUtilities.class);
+
+
+    /**
+     * Recalculate the min hash signature for a topic.
+     * @param topic The topic to generate a signature for
+     * @param minHashXORs The list of XOR values to apply to the hash code
+     */
+    public static void recalculateMinHash(final Topic topic, final List<MinHashXOR> minHashXORs) {
+        final List<MinHash> existingMinHashes = new ArrayList<MinHash>(topic.getMinHashes());
+        for (final MinHash minHash : existingMinHashes) {
+            topic.removeMinHash(minHash);
+        }
+
+        final List<Integer> minHashes = getMinHashes(topic.getTopicXML(), minHashXORs);
+
+        for (int k = 0; k < minHashes.size(); ++k) {
+            final MinHash minHash = new MinHash();
+            minHash.setMinHashFuncID(k);
+            minHash.setMinHash(minHashes.get(k));
+            topic.addMinHash(minHash);
+        }
+    }
+
+    /**
+     * Generate the min hashes
+     * @param xml The content to apply the signature to
+     * @param minHashXORs The list of XOR values to apply to the hash code
+     * @return
+     */
+    public static List<Integer> getMinHashes(final String xml, final List<MinHashXOR> minHashXORs) {
+        final List<Integer> retValue = new ArrayList<Integer>();
+
+        // If the xml is null then all min hashes are also going to be null, so just return an empty list.
+        if (xml == null) {
+            return retValue;
+        }
+
+        // the first minhash uses the builtin hashcode only
+        final Integer baseMinHash = getMinHash(xml, null);
+        if (baseMinHash != null) {
+            retValue.add(baseMinHash);
+        }
+
+        for (final MinHashXOR minHashXOR : minHashXORs) {
+            final Integer minHash = getMinHash(xml, minHashXOR.getMinHashXOR());
+            if (minHash != null) {
+                retValue.add(minHash);
+            }
+        }
+
+        return retValue;
+    }
+
+    /**
+     * Returns the minimum hash of the sentences in an XML file.
+     * @param xml The xml to analyse
+     * @param xor the number to xor the hash against. Null if the standard hashCode() method should be used alone.
+     * @return The minimum hash
+     */
+    public static Integer getMinHash(final String xml, final Integer xor) {
+        if (xml == null) {
+            return null;
+        }
+
+        final int SHINGLE_WORD_COUNT = 5;
+
+        try {
+            final Document doc = XMLUtilities.convertStringToDocument(xml);
+            if (doc != null) {
+                final String text = doc.getTextContent();
+                final String[] words = text.split("\\s+");
+                final List<String> shingles = new ArrayList<String>();
+
+                if (words.length < SHINGLE_WORD_COUNT) {
+                    final StringBuilder shingle = new StringBuilder();
+                    for (int i = 0; i < words.length; ++i) {
+                        if (shingle.length() != 0) {
+                            shingle.append(" ");
+                        }
+                        shingle.append(words[i]);
+                    }
+                    final int hash =  shingle.toString().hashCode();
+                    if (xor != null) {
+                        return hash ^ xor;
+                    } else {
+                        return hash;
+                    }
+                } else {
+                    for (int i = 0; i < words.length - SHINGLE_WORD_COUNT + 1; ++i) {
+                        final StringBuilder shingle = new StringBuilder();
+                        for (int j = i; j < words.length && j < i + SHINGLE_WORD_COUNT; ++j) {
+                            if (shingle.length() != 0) {
+                                shingle.append(" ");
+                            }
+                            shingle.append(words[j]);
+                        }
+                        shingles.add(shingle.toString());
+                    }
+
+                    Integer minHash = null;
+                    for (final String string : shingles) {
+                        final int hash = string.hashCode();
+                        final int finalHash = xor != null ? hash ^ xor : hash;
+                        if (minHash == null || finalHash < minHash) {
+                            minHash = finalHash;
+                        }
+                    }
+                    return minHash;
+                }
+
+            }
+        }
+        catch (final Exception ex) {
+
+        }
+
+        // if we get to here the topic does not have valid xml or has no translatable strings.
+        final String[] sentences = xml.split("\\.");
+        Integer minHash = null;
+        for (final String string : sentences) {
+            final int hash = string.hashCode();
+            final int finalHash = xor != null ? hash ^ xor : hash;
+            if (minHash == null || finalHash < minHash) {
+                minHash = finalHash;
+            }
+        }
+        return minHash;
+    }
 
     /**
      * Creates a CSV string representation of all the topics in the provided list.
@@ -687,5 +826,80 @@ public class TopicUtilities {
         }
 
         return "Unknown";
+    }
+
+    public static List<String> getTopicKeywords(final Topic entity, final EntityManager entityManager) {
+        /*
+         * Keywords are extracted from the lucene index managed by Hibernate search.
+         * http://docs.jboss.org/hibernate/search/4.5/reference/en-US/html_single/#IndexReaders
+         */
+        final Session session = (Session) entityManager.getDelegate();
+        final FullTextSession fullTextSession = Search.getFullTextSession(session);
+        final SearchFactory searchFactory = fullTextSession.getSearchFactory();
+        final IndexReader reader = searchFactory.getIndexReaderAccessor().open(Topic.class);
+        final Analyzer analyser =  fullTextSession.getSearchFactory().getAnalyzer(Topic.class);
+
+        try {
+            final MoreLikeThis mlt = new MoreLikeThis(reader);
+            mlt.setAnalyzer(analyser);
+
+            final IntegerConstants minWordLen = entityManager.find(IntegerConstants.class, ServiceConstants.KEYWORD_MINIMUM_WORD_LENGTH_INT_CONSTANT_ID);
+            if (minWordLen != null && minWordLen.getConstantValue() != null)  {
+                mlt.setMinWordLen(minWordLen.getConstantValue());
+            } else {
+                mlt.setMinWordLen(ServiceConstants.KEYWORD_MINIMUM_WORD_LENGTH_DEFAULT);
+            }
+
+            final IntegerConstants minDocFreq = entityManager.find(IntegerConstants.class, ServiceConstants.KEYWORD_MINIMUM_DOCUMENT_FREQUENCY_INT_CONSTANT_ID);
+            if (minDocFreq != null && minDocFreq.getConstantValue() != null)  {
+                mlt.setMinDocFreq(minDocFreq.getConstantValue());
+            }  else {
+                mlt.setMinDocFreq(ServiceConstants.KEYWORD_MINIMUM_DOCUMENT_FREQUENCY_DEFAULT);
+            }
+
+            final IntegerConstants maxQueryTerms = entityManager.find(IntegerConstants.class, ServiceConstants.KEYWORD_MAX_QUERY_TERMS_INT_CONSTANT_ID);
+            if (maxQueryTerms != null && maxQueryTerms.getConstantValue() != null)  {
+                mlt.setMaxQueryTerms(maxQueryTerms.getConstantValue());
+            }  else {
+                mlt.setMaxQueryTerms(ServiceConstants.KEYWORD_MAX_QUERY_TERMS_INT_DEFAULT);
+            }
+
+            final IntegerConstants minTermFreq = entityManager.find(IntegerConstants.class, ServiceConstants.KEYWORD_MINIMUM_TERM_FREQUENCY_INT_CONSTANT_ID);
+            if (minTermFreq != null && minTermFreq.getConstantValue() != null)  {
+                mlt.setMinTermFreq(minTermFreq.getConstantValue());
+            }  else {
+                mlt.setMinTermFreq(ServiceConstants.KEYWORD_MINIMUM_TERM_FREQUENCY_DEFAULT);
+            }
+
+            final IntegerConstants maxDocFreqPct = entityManager.find(IntegerConstants.class, ServiceConstants.KEYWORD_MAXIMUM_DOCUMENT_FREQUENCY_PERCENT_INT_CONSTANT_ID);
+            if (maxDocFreqPct != null && maxDocFreqPct.getConstantValue() != null)  {
+                mlt.setMaxDocFreqPct(maxDocFreqPct.getConstantValue());
+            }  else {
+                mlt.setMaxDocFreqPct(ServiceConstants.KEYWORD_MAXIMUM_DOCUMENT_FREQUENCY_PERCENT_DEFAULT);
+            }
+
+            final StringConstants stopWords = entityManager.find(StringConstants.class, ServiceConstants.KEYWORDS_STOPWORDS_STRING_CONSTANT_ID);
+            if (stopWords != null && stopWords.getConstantValue() != null)  {
+                final String [] stopWordsSplit = stopWords.getConstantValue().split("\n");
+                final Set<String> stopWordsSet = new HashSet<String>();
+                for (final String stopWord : stopWordsSplit) {
+                    stopWordsSet.add(stopWord);
+                }
+                mlt.setStopWords(stopWordsSet);
+            }
+
+            mlt.setFieldNames(new String[]{Topic.TOPIC_SEARCH_TEXT_FIELD_NAME});
+
+            final ArrayList<String> keywords = new ArrayList<String>();
+            final String[] keywordsArray = mlt.retrieveInterestingTerms(new StringReader(entity.getTopicSearchText()), Topic.TOPIC_SEARCH_TEXT_FIELD_NAME);
+            CollectionUtilities.addAll(keywordsArray, keywords);
+            return keywords;
+        } catch (final IOException ex) {
+            log.error(ex.toString());
+        } finally {
+            searchFactory.getIndexReaderAccessor().close(reader);
+        }
+
+        return null;
     }
 }

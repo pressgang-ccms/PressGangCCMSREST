@@ -15,6 +15,7 @@ import java.io.StringWriter;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Random;
 import java.util.Set;
 import java.util.concurrent.atomic.AtomicInteger;
 
@@ -70,6 +71,7 @@ import org.jboss.pressgang.ccms.model.ImageFile;
 import org.jboss.pressgang.ccms.model.IntegerConstants;
 import org.jboss.pressgang.ccms.model.LanguageFile;
 import org.jboss.pressgang.ccms.model.LanguageImage;
+import org.jboss.pressgang.ccms.model.MinHashXOR;
 import org.jboss.pressgang.ccms.model.Project;
 import org.jboss.pressgang.ccms.model.PropertyTag;
 import org.jboss.pressgang.ccms.model.PropertyTagCategory;
@@ -167,47 +169,96 @@ import org.w3c.dom.Document;
 @Path(Constants.BASE_REST_PATH + "/1")
 public class RESTv1 extends BaseRESTv1 implements RESTBaseInterfaceV1, RESTInterfaceAdvancedV1 {
     private static final Logger log = LoggerFactory.getLogger(RESTv1.class);
+    private static final int BATCH_SIZE = 100;
 
     @Context HttpResponse response;
 
     /* UTILITY FUNCTIONS */
     @Override
-    public IntegerWrapper getMinHash(final String xml) {
-        final IntegerWrapper retValue = new IntegerWrapper();
-        retValue.value = org.jboss.pressgang.ccms.model.utils.TopicUtilities.getMinHash(xml);
-        return retValue;
+    public List<Integer> getMinHashes(final String xml) {
+        final List<MinHashXOR> minHashXORs = entityManager.createQuery(MinHashXOR.SELECT_ALL_QUERY).getResultList();
+        return TopicUtilities.getMinHashes(xml, minHashXORs);
+    }
+
+    @Override
+    public void recalculateMinHashXORs() {
+        try {
+            // Start a Transaction
+            transactionManager.begin();
+
+            // Join the transaction we just started
+            entityManager.joinTransaction();
+
+            final Random randomGenerator = new Random();
+
+            // The first min hash is not XORed.
+            for (int i = 1; i < Constants.NUM_MIN_HASHES; ++i) {
+                final int random =  randomGenerator.nextInt();
+                MinHashXOR minHashXOR = entityManager.find(MinHashXOR.class, i);
+                if (minHashXOR == null)  {
+                    minHashXOR = new MinHashXOR();
+                    minHashXOR.setMinHashXORId(i);
+                }
+
+                minHashXOR.setMinHashXOR(random);
+
+                entityManager.persist(minHashXOR);
+
+                // Do batch updating by flushing the changes every 100 updates.
+                if (i % BATCH_SIZE == 0) {
+                    entityManager.flush();
+                }
+            }
+
+            // Flush the changes to the database and commit the transaction
+            entityManager.flush();
+            transactionManager.commit();
+        } catch (final Throwable ex) {
+            throw processError(transactionManager, ex);
+        }
     }
 
     @Override
     public void recalculateMinHash() {
+        final int maxTransactSize = BATCH_SIZE * 10;
+
         try {
+            final List<MinHashXOR> minHashXORs = entityManager.createQuery(MinHashXOR.SELECT_ALL_QUERY).getResultList();
             final List<Topic> topics = entityManager.createQuery(Topic.SELECT_ALL_QUERY).getResultList();
 
-            // break up the transactions so we don't time out
-            for (int i = 0; i < topics.size(); i += 100) {
+            // Since there are a lot of topics to process there is a high chance it'll hit the timeout,
+            // so break the transactions into smaller chunks
+            for (int i = 0; i < topics.size(); i += maxTransactSize) {
                 // Start a Transaction
                 transactionManager.begin();
 
                 // Join the transaction we just started
                 entityManager.joinTransaction();
 
-                for (int j = i; j < topics.size() && j < i + 100; ++j) {
+                for (int j = i; j < topics.size() && j < i + maxTransactSize; ++j) {
+
                     final Topic topic = topics.get(j);
-                    // Change the min hash so the entity manager will attempt to save the topic.
-                    // The actual value will be set in @PreUpdate on the Topic class
-                    topic.setMinHash(topic.getMinHash() == null ? 0 : topic.getMinHash() == 0 ? 1 : 0);
+                    TopicUtilities.recalculateMinHash(topic, minHashXORs);
+
                     // Handle topics that have invalid titles.
                     if (topic.getTopicTitle() == null || topic.getTopicTitle().trim().isEmpty()) {
                         topic.setTopicTitle("Placeholder");
                     }
+
                     entityManager.persist(topic);
+
+                    // Do batch updating by flushing the changes every 100 updates.
+                    if (j % BATCH_SIZE == 0) {
+                        entityManager.flush();
+                    }
                 }
 
+                // Flush the changes to the database and commit the transaction
                 entityManager.flush();
                 transactionManager.commit();
             }
-        } catch (final Exception ex) {
-            throw new InternalServerErrorException(ex);
+        } catch (final Throwable ex) {
+            throw processError(transactionManager, ex);
         }
     }
 

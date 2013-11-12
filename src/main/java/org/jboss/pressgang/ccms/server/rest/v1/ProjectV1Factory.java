@@ -72,7 +72,7 @@ public class ProjectV1Factory extends RESTDataObjectFactory<RESTProjectV1, Proje
     }
 
     @Override
-    public void syncDBEntityWithRESTEntitySecondPass(Project entity, RESTProjectV1 dataObject) {
+    public void syncDBEntityWithRESTEntitySecondPass(final Project entity, final RESTProjectV1 dataObject) {
         /* Many To Many - Add will create a mapping */
         if (dataObject.hasParameterSet(
                 RESTProjectV1.TAGS_NAME) && dataObject.getTags() != null && dataObject.getTags().getItems() != null) {
