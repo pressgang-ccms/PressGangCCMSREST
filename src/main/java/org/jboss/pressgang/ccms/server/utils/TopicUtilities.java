@@ -78,7 +78,8 @@ public class TopicUtilities {
 
     /**
      * Recalculate the min hash signature for a topic.
-     * @param topic The topic to generate a signature for
+     *
+     * @param topic       The topic to generate a signature for
      * @param minHashXORs The list of XOR values to apply to the hash code
      */
     public static void recalculateMinHash(final Topic topic, final List<MinHashXOR> minHashXORs) {
@@ -99,7 +100,8 @@ public class TopicUtilities {
 
     /**
      * Generate the min hashes
-     * @param xml The content to apply the signature to
+     *
+     * @param xml         The content to apply the signature to
      * @param minHashXORs The list of XOR values to apply to the hash code
      * @return
      */
@@ -129,6 +131,7 @@ public class TopicUtilities {
 
     /**
      * Returns the minimum hash of the sentences in an XML file.
+     *
      * @param xml The xml to analyse
      * @param xor the number to xor the hash against. Null if the standard hashCode() method should be used alone.
      * @return The minimum hash
@@ -155,7 +158,7 @@ public class TopicUtilities {
                         }
                         shingle.append(words[i]);
                     }
-                    final int hash =  shingle.toString().hashCode();
+                    final int hash = shingle.toString().hashCode();
                     if (xor != null) {
                         return hash ^ xor;
                     } else {
@@ -185,8 +188,7 @@ public class TopicUtilities {
                 }
 
             }
-        }
-        catch (final Exception ex) {
+        } catch (final Exception ex) {
 
         }
 
@@ -645,9 +647,14 @@ public class TopicUtilities {
                         xmlErrors.append("Root element must be <legalnotice> for Legal Notice Topics.\n");
                     }
                 } else if (topic.isTaggedWith(CSConstants.AUTHOR_GROUP_TAG_ID)) {
-                    // Make sure the Author Group is a authorgroup
+                    // Make sure the Author Group is an authorgroup
                     if (!doc.getDocumentElement().getNodeName().equals("authorgroup")) {
                         xmlErrors.append("Root element must be <authorgroup> for Author Group Topics.\n");
+                    }
+                } else if (topic.isTaggedWith(CSConstants.ABSTRACT_TAG_ID)) {
+                    // Make sure the Abstract is an abstract
+                    if (!doc.getDocumentElement().getNodeName().equals("abstract")) {
+                        xmlErrors.append("Root element must be <abstract> for Abstract Topics.\n");
                     }
                 }
             } else {
@@ -682,7 +689,8 @@ public class TopicUtilities {
      */
     public static boolean isTopicNormalTopic(final Topic topic) {
         return !(topic.isTaggedWith(CSConstants.REVISION_HISTORY_TAG_ID) || topic.isTaggedWith(
-                CSConstants.LEGAL_NOTICE_TAG_ID) || topic.isTaggedWith(CSConstants.AUTHOR_GROUP_TAG_ID));
+                CSConstants.LEGAL_NOTICE_TAG_ID) || topic.isTaggedWith(CSConstants.AUTHOR_GROUP_TAG_ID) || topic.isTaggedWith(
+                CSConstants.ABSTRACT_TAG_ID));
     }
 
     /**
@@ -837,50 +845,56 @@ public class TopicUtilities {
         final FullTextSession fullTextSession = Search.getFullTextSession(session);
         final SearchFactory searchFactory = fullTextSession.getSearchFactory();
         final IndexReader reader = searchFactory.getIndexReaderAccessor().open(Topic.class);
-        final Analyzer analyser =  fullTextSession.getSearchFactory().getAnalyzer(Topic.class);
+        final Analyzer analyser = fullTextSession.getSearchFactory().getAnalyzer(Topic.class);
 
         try {
             final MoreLikeThis mlt = new MoreLikeThis(reader);
             mlt.setAnalyzer(analyser);
 
-            final IntegerConstants minWordLen = entityManager.find(IntegerConstants.class, ServiceConstants.KEYWORD_MINIMUM_WORD_LENGTH_INT_CONSTANT_ID);
-            if (minWordLen != null && minWordLen.getConstantValue() != null)  {
+            final IntegerConstants minWordLen = entityManager.find(IntegerConstants.class,
+                    ServiceConstants.KEYWORD_MINIMUM_WORD_LENGTH_INT_CONSTANT_ID);
+            if (minWordLen != null && minWordLen.getConstantValue() != null) {
                 mlt.setMinWordLen(minWordLen.getConstantValue());
             } else {
                 mlt.setMinWordLen(ServiceConstants.KEYWORD_MINIMUM_WORD_LENGTH_DEFAULT);
             }
 
-            final IntegerConstants minDocFreq = entityManager.find(IntegerConstants.class, ServiceConstants.KEYWORD_MINIMUM_DOCUMENT_FREQUENCY_INT_CONSTANT_ID);
-            if (minDocFreq != null && minDocFreq.getConstantValue() != null)  {
+            final IntegerConstants minDocFreq = entityManager.find(IntegerConstants.class,
+                    ServiceConstants.KEYWORD_MINIMUM_DOCUMENT_FREQUENCY_INT_CONSTANT_ID);
+            if (minDocFreq != null && minDocFreq.getConstantValue() != null) {
                 mlt.setMinDocFreq(minDocFreq.getConstantValue());
-            }  else {
+            } else {
                 mlt.setMinDocFreq(ServiceConstants.KEYWORD_MINIMUM_DOCUMENT_FREQUENCY_DEFAULT);
             }
 
-            final IntegerConstants maxQueryTerms = entityManager.find(IntegerConstants.class, ServiceConstants.KEYWORD_MAX_QUERY_TERMS_INT_CONSTANT_ID);
-            if (maxQueryTerms != null && maxQueryTerms.getConstantValue() != null)  {
+            final IntegerConstants maxQueryTerms = entityManager.find(IntegerConstants.class,
+                    ServiceConstants.KEYWORD_MAX_QUERY_TERMS_INT_CONSTANT_ID);
+            if (maxQueryTerms != null && maxQueryTerms.getConstantValue() != null) {
                 mlt.setMaxQueryTerms(maxQueryTerms.getConstantValue());
-            }  else {
+            } else {
                 mlt.setMaxQueryTerms(ServiceConstants.KEYWORD_MAX_QUERY_TERMS_INT_DEFAULT);
             }
 
-            final IntegerConstants minTermFreq = entityManager.find(IntegerConstants.class, ServiceConstants.KEYWORD_MINIMUM_TERM_FREQUENCY_INT_CONSTANT_ID);
-            if (minTermFreq != null && minTermFreq.getConstantValue() != null)  {
+            final IntegerConstants minTermFreq = entityManager.find(IntegerConstants.class,
+                    ServiceConstants.KEYWORD_MINIMUM_TERM_FREQUENCY_INT_CONSTANT_ID);
+            if (minTermFreq != null && minTermFreq.getConstantValue() != null) {
                 mlt.setMinTermFreq(minTermFreq.getConstantValue());
-            }  else {
+            } else {
                 mlt.setMinTermFreq(ServiceConstants.KEYWORD_MINIMUM_TERM_FREQUENCY_DEFAULT);
             }
 
-            final IntegerConstants maxDocFreqPct = entityManager.find(IntegerConstants.class, ServiceConstants.KEYWORD_MAXIMUM_DOCUMENT_FREQUENCY_PERCENT_INT_CONSTANT_ID);
-            if (maxDocFreqPct != null && maxDocFreqPct.getConstantValue() != null)  {
+            final IntegerConstants maxDocFreqPct = entityManager.find(IntegerConstants.class,
+                    ServiceConstants.KEYWORD_MAXIMUM_DOCUMENT_FREQUENCY_PERCENT_INT_CONSTANT_ID);
+            if (maxDocFreqPct != null && maxDocFreqPct.getConstantValue() != null) {
                 mlt.setMaxDocFreqPct(maxDocFreqPct.getConstantValue());
-            }  else {
+            } else {
                 mlt.setMaxDocFreqPct(ServiceConstants.KEYWORD_MAXIMUM_DOCUMENT_FREQUENCY_PERCENT_DEFAULT);
             }
 
-            final StringConstants stopWords = entityManager.find(StringConstants.class, ServiceConstants.KEYWORDS_STOPWORDS_STRING_CONSTANT_ID);
-            if (stopWords != null && stopWords.getConstantValue() != null)  {
-                final String [] stopWordsSplit = stopWords.getConstantValue().split("\n");
+            final StringConstants stopWords = entityManager.find(StringConstants.class,
+                    ServiceConstants.KEYWORDS_STOPWORDS_STRING_CONSTANT_ID);
+            if (stopWords != null && stopWords.getConstantValue() != null) {
+                final String[] stopWordsSplit = stopWords.getConstantValue().split("\n");
                 final Set<String> stopWordsSet = new HashSet<String>();
                 for (final String stopWord : stopWordsSplit) {
                     stopWordsSet.add(stopWord);
@@ -891,7 +905,8 @@ public class TopicUtilities {
             mlt.setFieldNames(new String[]{Topic.TOPIC_SEARCH_TEXT_FIELD_NAME});
 
             final ArrayList<String> keywords = new ArrayList<String>();
-            final String[] keywordsArray = mlt.retrieveInterestingTerms(new StringReader(entity.getTopicSearchText()), Topic.TOPIC_SEARCH_TEXT_FIELD_NAME);
+            final String[] keywordsArray = mlt.retrieveInterestingTerms(new StringReader(entity.getTopicSearchText()),
+                    Topic.TOPIC_SEARCH_TEXT_FIELD_NAME);
             CollectionUtilities.addAll(keywordsArray, keywords);
             return keywords;
         } catch (final IOException ex) {
