@@ -1473,7 +1473,10 @@ public class BaseRESTv1 extends BaseREST {
         // We need to do some unwrapping of exception first
         Throwable cause = ex;
         while (cause != null) {
-            if (cause instanceof Failure) {
+            if (cause == cause.getCause()) {
+                // sometimes this can be an circular reference
+                break;
+            } else if (cause instanceof Failure) {
                 return (Failure) cause;
             } else if (cause instanceof EntityNotFoundException) {
                 return new NotFoundException(cause);
@@ -1483,6 +1486,8 @@ public class BaseRESTv1 extends BaseREST {
             } else if (cause instanceof PersistenceException) {
                 if (cause.getCause() != null && cause.getCause() instanceof org.hibernate.exception.ConstraintViolationException) {
                     cause = cause.getCause();
+                } else {
+                    break;
                 }
             } else if (cause instanceof ProviderException) {
                 if (cause != null && (cause instanceof ValidationException || cause instanceof PersistenceException || cause instanceof

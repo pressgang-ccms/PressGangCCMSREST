@@ -54,6 +54,7 @@ import org.jboss.pressgang.ccms.model.TopicToTopic;
 import org.jboss.pressgang.ccms.model.TopicToTopicSourceUrl;
 import org.jboss.pressgang.ccms.model.TranslatedTopic;
 import org.jboss.pressgang.ccms.model.TranslatedTopicData;
+import org.jboss.pressgang.ccms.model.constants.*;
 import org.jboss.pressgang.ccms.model.sort.CategoryNameComparator;
 import org.jboss.pressgang.ccms.model.sort.TagNameComparator;
 import org.jboss.pressgang.ccms.model.sort.TagToCategorySortingComparator;
@@ -117,10 +118,21 @@ public class TopicUtilities {
             retValue.add(baseMinHash);
         }
 
-        for (final MinHashXOR minHashXOR : minHashXORs) {
-            final Integer minHash = getMinHash(xml, minHashXOR.getMinHashXOR());
-            if (minHash != null) {
-                retValue.add(minHash);
+
+        for (int funcId = 1; funcId < org.jboss.pressgang.ccms.model.constants.Constants.NUM_MIN_HASHES; ++funcId) {
+            boolean foundMinHash = false;
+            for (final MinHashXOR minHashXOR : minHashXORs) {
+                if (minHashXOR.getMinHashXORFuncId() == funcId) {
+                    final Integer minHash = getMinHash(xml, minHashXOR.getMinHashXOR());
+                    if (minHash != null) {
+                        retValue.add(minHash);
+                    }
+                    foundMinHash = true;
+                    break;
+                }
+            }
+            if (!foundMinHash) {
+                throw new IllegalStateException("Did not find a minhash xor int for function " + funcId);
             }
         }
 
@@ -140,67 +152,63 @@ public class TopicUtilities {
 
         final int SHINGLE_WORD_COUNT = 5;
 
+        String text = null;
+
         try {
             final Document doc = XMLUtilities.convertStringToDocument(xml);
             if (doc != null) {
-                final String text = doc.getTextContent();
-                final String[] words = text.split("\\s+");
-                final List<String> shingles = new ArrayList<String>();
-
-                if (words.length < SHINGLE_WORD_COUNT) {
-                    final StringBuilder shingle = new StringBuilder();
-                    for (int i = 0; i < words.length; ++i) {
-                        if (shingle.length() != 0) {
-                            shingle.append(" ");
-                        }
-                        shingle.append(words[i]);
-                    }
-                    final int hash =  shingle.toString().hashCode();
-                    if (xor != null) {
-                        return hash ^ xor;
-                    } else {
-                        return hash;
-                    }
-                } else {
-                    for (int i = 0; i < words.length - SHINGLE_WORD_COUNT + 1; ++i) {
-                        final StringBuilder shingle = new StringBuilder();
-                        for (int j = i; j < words.length && j < i + SHINGLE_WORD_COUNT; ++j) {
-                            if (shingle.length() != 0) {
-                                shingle.append(" ");
-                            }
-                            shingle.append(words[j]);
-                        }
-                        shingles.add(shingle.toString());
-                    }
-
-                    Integer minHash = null;
-                    for (final String string : shingles) {
-                        final int hash = string.hashCode();
-                        final int finalHash = xor != null ? hash ^ xor : hash;
-                        if (minHash == null || finalHash < minHash) {
-                            minHash = finalHash;
-                        }
-                    }
-                    return minHash;
-                }
-
+                text = doc.getTextContent();
             }
         }
         catch (final Exception ex) {
 
         }
 
-        // if we get to here the topic does not have valid xml or has no translatable strings.
-        final String[] sentences = xml.split("\\.");
-        Integer minHash = null;
-        for (final String string : sentences) {
-            final int hash = string.hashCode();
-            final int finalHash = xor != null ? hash ^ xor : hash;
-            if (minHash == null || finalHash < minHash) {
-                minHash = finalHash;
-            }
+        // the xml was invalid, so just strip out xml elements manually
+        if (text == null) {
+            text = xml.replaceAll("<//?.*?//?>", " ");
         }
-        return minHash;
+
+        // now generate the minhashes
+        final String[] words = text.replaceAll("[^A-Za-z0-9]", " ").split("\\s+");
+        final List<String> shingles = new ArrayList<String>();
+
+        if (words.length < SHINGLE_WORD_COUNT) {
+            final StringBuilder shingle = new StringBuilder();
+            for (int i = 0; i < words.length; ++i) {
+                if (shingle.length() != 0) {
+                    shingle.append(" ");
+                }
+                shingle.append(words[i]);
+            }
+            final int hash =  shingle.toString().hashCode();
+            if (xor != null) {
+                return hash ^ xor;
+            } else {
+                return hash;
+            }
+        } else {
+            for (int i = 0; i < words.length - SHINGLE_WORD_COUNT + 1; ++i) {
+                final StringBuilder shingle = new StringBuilder();
+                for (int j = i; j < words.length && j < i + SHINGLE_WORD_COUNT; ++j) {
+                    if (shingle.length() != 0) {
+                        shingle.append(" ");
+                    }
+                    shingle.append(words[j]);
+                }
+                shingles.add(shingle.toString());
+            }
+
+            Integer minHash = null;
+            for (final String string : shingles) {
+                final int hash = string.hashCode();
+                final int finalHash = xor != null ? hash ^ xor : hash;
+                if (minHash == null || finalHash < minHash) {
+                    minHash = finalHash;
+                }
+            }
+            return minHash;
+        }
     }
 
     /**

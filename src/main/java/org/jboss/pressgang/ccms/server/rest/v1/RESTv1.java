@@ -181,7 +181,7 @@ public class RESTv1 extends BaseRESTv1 implements RESTBaseInterfaceV1, RESTInter
     }
 
     @Override
-    public void recalculateMinHashXORs() {
+    public void recalculateMinHashXORs(final String confirmation) {
         try {
             // Start a Transaction
             transactionManager.begin();
@@ -189,25 +189,39 @@ public class RESTv1 extends BaseRESTv1 implements RESTBaseInterfaceV1, RESTInter
             // Join the transaction we just started
             entityManager.joinTransaction();
 
-            final Random randomGenerator = new Random();
+            /*
+                Confirmation needs to equal the current minhash with func id 1.
+                This is because any topics saved after the minhashes are regenerated can not
+                be compared to any that were saved before. This check ensures that you *really*
+                wanted to regenerate the minhash xor values.
+            */
+            final MinHashXOR firstMinHash = entityManager.find(MinHashXOR.class, 1);
+            final String firstMinHashAsString = firstMinHash == null ? "" : firstMinHash.getMinHashXOR().toString();
+            final String confirmationString = confirmation == null ? "" : confirmation;
+            if (firstMinHashAsString.equals(confirmationString)) {
 
-            // The first min hash is not XORed.
-            for (int i = 1; i < Constants.NUM_MIN_HASHES; ++i) {
-                final int random =  randomGenerator.nextInt();
-                MinHashXOR minHashXOR = entityManager.find(MinHashXOR.class, i);
-                if (minHashXOR == null)  {
-                    minHashXOR = new MinHashXOR();
-                    minHashXOR.setMinHashXORId(i);
+                final Random randomGenerator = new Random();
+
+                // The first min hash is not XORed.
+                for (int i = 1; i < org.jboss.pressgang.ccms.model.constants.Constants.NUM_MIN_HASHES; ++i) {
+                    final int random =  randomGenerator.nextInt();
+                    MinHashXOR minHashXOR = entityManager.find(MinHashXOR.class, i);
+                    if (minHashXOR == null)  {
+                        minHashXOR = new MinHashXOR();
+                        minHashXOR.setMinHashXORFuncId(i);
+                    }
+
+                    minHashXOR.setMinHashXOR(random);
+
+                    entityManager.persist(minHashXOR);
+
+                    // Do batch updating by flushing the changes every 100 updates.
+                    if (i % BATCH_SIZE == 0) {
+                        entityManager.flush();
+                    }
                 }
-
-                minHashXOR.setMinHashXOR(random);
-
-                entityManager.persist(minHashXOR);
-
-                // Do batch updating by flushing the changes every 100 updates.
-                if (i % BATCH_SIZE == 0) {
-                    entityManager.flush();
-                }
+            } else {
+                throw new BadRequestException("The request body needs to equal the existing MinHashXOR with id 1, or be empty if there is no existing MinHashXOR with id 1.");
             }
 
             // Flush the changes to the database and commit the transaction
@@ -220,22 +234,20 @@ public class RESTv1 extends BaseRESTv1 implements RESTBaseInterfaceV1, RESTInter
 
     @Override
     public void recalculateMinHash() {
-        final int maxTransactSize = BATCH_SIZE * 10;
-
         try {
             final List<MinHashXOR> minHashXORs = entityManager.createQuery(MinHashXOR.SELECT_ALL_QUERY).getResultList();
             final List<Topic> topics = entityManager.createQuery(Topic.SELECT_ALL_QUERY).getResultList();
 
             // Since there are a lot of topics to process there is a high chance it'll hit the timeout,
             // so break the transactions into smaller chunks
-            for (int i = 0; i < topics.size(); i += maxTransactSize) {
+            for (int i = 0; i < topics.size(); i += BATCH_SIZE) {
                 // Start a Transaction
                 transactionManager.begin();
 
                 // Join the transaction we just started
                 entityManager.joinTransaction();
 
-                for (int j = i; j < topics.size() && j < i + maxTransactSize; ++j) {
+                for (int j = i; j < topics.size() && j < i + BATCH_SIZE; ++j) {
 
                     final Topic topic = topics.get(j);
                     TopicUtilities.recalculateMinHash(topic, minHashXORs);
