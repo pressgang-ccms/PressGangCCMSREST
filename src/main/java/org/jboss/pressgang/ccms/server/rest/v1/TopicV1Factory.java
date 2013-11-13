@@ -6,12 +6,14 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.jboss.pressgang.ccms.model.BugzillaBug;
+import org.jboss.pressgang.ccms.model.MinHashXOR;
 import org.jboss.pressgang.ccms.model.PropertyTag;
 import org.jboss.pressgang.ccms.model.Tag;
 import org.jboss.pressgang.ccms.model.Topic;
 import org.jboss.pressgang.ccms.model.TopicSourceUrl;
 import org.jboss.pressgang.ccms.model.TopicToPropertyTag;
 import org.jboss.pressgang.ccms.rest.v1.collections.RESTBugzillaBugCollectionV1;
+import org.jboss.pressgang.ccms.rest.v1.collections.RESTMinHashCollectionV1;
 import org.jboss.pressgang.ccms.rest.v1.collections.RESTTagCollectionV1;
 import org.jboss.pressgang.ccms.rest.v1.collections.RESTTopicCollectionV1;
 import org.jboss.pressgang.ccms.rest.v1.collections.RESTTopicSourceUrlCollectionV1;
@@ -38,6 +40,7 @@ import org.jboss.pressgang.ccms.server.rest.v1.base.RESTDataObjectFactory;
 import org.jboss.pressgang.ccms.server.rest.v1.utils.RESTv1Utilities;
 import org.jboss.pressgang.ccms.server.utils.EnversUtilities;
 import org.jboss.pressgang.ccms.server.utils.TopicUtilities;
+import org.jboss.pressgang.ccms.utils.common.DocBookUtilities;
 import org.jboss.resteasy.spi.BadRequestException;
 
 @ApplicationScoped
@@ -54,6 +57,8 @@ public class TopicV1Factory extends RESTDataObjectFactory<RESTTopicV1, Topic, RE
     protected TranslatedTopicV1Factory translatedTopicFactory;
     @Inject
     protected ContentSpecV1Factory contentSpecFactory;
+    @Inject
+    protected MinHashV1Factory minHashFactory;
 
     @Override
     public RESTTopicV1 createRESTEntityFromDBEntityInternal(final Topic entity, final String baseUrl, final String dataType,
@@ -72,6 +77,8 @@ public class TopicV1Factory extends RESTDataObjectFactory<RESTTopicV1, Topic, RE
         expandOptions.add(RESTTopicV1.PROPERTIES_NAME);
         expandOptions.add(RESTTopicV1.LOG_DETAILS_NAME);
         expandOptions.add(RESTTopicV1.CONTENTSPECS_NAME);
+        expandOptions.add(RESTTopicV1.KEYWORDS_NAME);
+        expandOptions.add(RESTTopicV1.MINHASHES_NAME);
         if (revision == null) expandOptions.add(RESTBaseEntityV1.REVISIONS_NAME);
 
         retValue.setExpand(expandOptions);
@@ -86,6 +93,11 @@ public class TopicV1Factory extends RESTDataObjectFactory<RESTTopicV1, Topic, RE
         retValue.setLocale(entity.getTopicLocale());
         retValue.setXmlErrors(entity.getTopicXMLErrors());
         retValue.setXmlDoctype(RESTXMLDoctype.getXMLDoctype(entity.getXmlDoctype()));
+
+        // KEYWORDS
+        if (revision == null && expand != null && expand.contains(RESTTopicV1.KEYWORDS_NAME)) {
+            retValue.setKeywords(TopicUtilities.getTopicKeywords(entity, entityManager));
+        }
 
         // REVISIONS
         if (revision == null && expand != null && expand.contains(RESTTopicV1.REVISIONS_NAME)) {
@@ -150,6 +162,21 @@ public class TopicV1Factory extends RESTDataObjectFactory<RESTTopicV1, Topic, RE
                     entityManager));
         }
 
+        // MINHASHES
+        if (expand != null && expand.contains(RESTTopicV1.MINHASHES_NAME)) {
+            retValue.setMinHashes(RESTDataObjectCollectionFactory.create(
+                    RESTMinHashCollectionV1.class,
+                    minHashFactory,
+                    entity.getMinHashesList(),
+                    RESTTopicV1.MINHASHES_NAME,
+                    dataType,
+                    expand,
+                    baseUrl,
+                    false,
+                    entityManager));
+
+        }
+
         retValue.setLinks(baseUrl, RESTv1Constants.TOPIC_URL_NAME, dataType, retValue.getId());
 
         return retValue;
@@ -158,10 +185,32 @@ public class TopicV1Factory extends RESTDataObjectFactory<RESTTopicV1, Topic, RE
     @Override
     public void syncDBEntityWithRESTEntityFirstPass(final Topic entity, final RESTTopicV1 dataObject) {
 
+        /*
+            The topic title can either be set specifically from the title property, or it can be inferred from
+            the XML itself.
+
+            If the property is set, that takes precedence. Otherwise the XML is extracted and the title there is
+            set as the title property.
+        */
+        boolean titlePropertySpecificallySet = false;
+
         /* sync the basic properties */
-        if (dataObject.hasParameterSet(RESTTopicV1.TITLE_NAME)) entity.setTopicTitle(dataObject.getTitle());
+        if (dataObject.hasParameterSet(RESTTopicV1.TITLE_NAME))  {
+            entity.setTopicTitle(dataObject.getTitle());
+            // the title was manually set, so use that
+            titlePropertySpecificallySet = true;
+        }
         if (dataObject.hasParameterSet(RESTTopicV1.DESCRIPTION_NAME)) entity.setTopicText(dataObject.getDescription());
-        if (dataObject.hasParameterSet(RESTTopicV1.XML_NAME)) entity.setTopicXML(dataObject.getXml());
+        if (dataObject.hasParameterSet(RESTTopicV1.XML_NAME)) {
+            entity.setTopicXML(dataObject.getXml());
+            // the title was not manually set, so extract it from the XML and update the topic
+            if (!titlePropertySpecificallySet && TopicUtilities.isTopicNormalTopic(entity)) {
+                final String title = DocBookUtilities.findTitle(dataObject.getXml());
+                if (title != null) {
+                    entity.setTopicTitle(title);
+                }
+            }
+        }
         if (dataObject.hasParameterSet(RESTTopicV1.LOCALE_NAME)) entity.setTopicLocale(dataObject.getLocale());
         if (dataObject.hasParameterSet(RESTTopicV1.DOCTYPE_NAME))
             entity.setXmlDoctype(RESTXMLDoctype.getXMLDoctypeId(dataObject.getXmlDoctype()));
@@ -315,6 +364,10 @@ public class TopicV1Factory extends RESTDataObjectFactory<RESTTopicV1, Topic, RE
         /* This method will set the XML errors field */
         TopicUtilities.syncXML(entityManager, entity);
         TopicUtilities.validateXML(entityManager, entity, EntitiesConfig.getInstance().getRocBookDTDBlobConstantId());
+
+        /* Update the minhash signature */
+        final List<MinHashXOR> minHashXORs = entityManager.createQuery(MinHashXOR.SELECT_ALL_QUERY).getResultList();
+        TopicUtilities.recalculateMinHash(entity, minHashXORs);
 
         if (dataObject.hasParameterSet(
                 RESTTopicV1.OUTGOING_NAME) && dataObject.getOutgoingRelationships() != null && dataObject.getOutgoingRelationships()

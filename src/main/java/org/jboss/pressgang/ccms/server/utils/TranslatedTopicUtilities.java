@@ -1,5 +1,7 @@
 package org.jboss.pressgang.ccms.server.utils;
 
+import static com.google.common.base.Strings.isNullOrEmpty;
+
 import javax.persistence.EntityManager;
 import java.io.IOException;
 import java.io.StringReader;
@@ -27,47 +29,66 @@ public class TranslatedTopicUtilities {
      * @param translatedTopicData The TranslatedTopic to process the XML for.
      */
     public static void processXML(final EntityManager entityManager, final TranslatedTopicData translatedTopicData) {
-        Document doc = null;
+        // Get the XML elements that require special formatting/processing
+        final StringConstants xmlElementsProperties = entityManager.find(StringConstants.class,
+                EntitiesConfig.getInstance().getXMLFormattingElementsStringConstantId());
+
+        // Load the String Constants as Properties
+        final Properties prop = new Properties();
         try {
-            doc = XMLUtilities.convertStringToDocument(translatedTopicData.getTranslatedXml());
-        } catch (SAXException ex) {
-            // Do nothing with this as it's handled later by the validator
-        } catch (Exception ex) {
-            log.warn("An Error occurred transforming a XML String to a DOM Document", ex);
+            prop.load(new StringReader(xmlElementsProperties.getConstantValue()));
+        } catch (IOException ex) {
+            log.error("The XML Elements Properties file couldn't be loaded as a property file", ex);
         }
-        if (doc != null) {
-            // Get the XML elements that require special formatting/processing
-            final StringConstants xmlElementsProperties = entityManager.find(StringConstants.class,
-                    EntitiesConfig.getInstance().getXMLFormattingElementsStringConstantId());
+        // Find the XML elements that need formatting for different display rules.
+        final String verbatimElementsString = prop.getProperty(CommonConstants.VERBATIM_XML_ELEMENTS_PROPERTY_KEY);
+        final String inlineElementsString = prop.getProperty(CommonConstants.INLINE_XML_ELEMENTS_PROPERTY_KEY);
+        final String contentsInlineElementsString = prop.getProperty(CommonConstants.CONTENTS_INLINE_XML_ELEMENTS_PROPERTY_KEY);
 
-            // Load the String Constants as Properties
-            final Properties prop = new Properties();
+        final ArrayList<String> verbatimElements = verbatimElementsString == null ? new ArrayList<String>() : CollectionUtilities
+                .toArrayList(
+                        verbatimElementsString.split("[\\s]*,[\\s]*"));
+
+        final ArrayList<String> inlineElements = inlineElementsString == null ? new ArrayList<String>() : CollectionUtilities
+                .toArrayList(
+                        inlineElementsString.split("[\\s]*,[\\s]*"));
+
+        final ArrayList<String> contentsInlineElements = contentsInlineElementsString == null ? new ArrayList<String>() :
+                CollectionUtilities.toArrayList(
+                        contentsInlineElementsString.split("[\\s]*,[\\s]*"));
+
+        // Check we have something to process
+        if (!isNullOrEmpty(translatedTopicData.getTranslatedXml())) {
+            Document doc = null;
             try {
-                prop.load(new StringReader(xmlElementsProperties.getConstantValue()));
-            } catch (IOException ex) {
-                log.error("The XML Elements Properties file couldn't be loaded as a property file", ex);
+                doc = XMLUtilities.convertStringToDocument(translatedTopicData.getTranslatedXml());
+            } catch (SAXException ex) {
+                // Do nothing with this as it's handled later by the validator
+            } catch (Exception ex) {
+                log.warn("An Error occurred transforming a XML String to a DOM Document", ex);
             }
+            if (doc != null) {
+                // Convert the document to a String applying the XML Formatting property rules
+                translatedTopicData.setTranslatedXml(
+                        XMLUtilities.convertNodeToString(doc, verbatimElements, inlineElements, contentsInlineElements, true));
+            }
+        }
 
-            // Find the XML elements that need formatting for different display rules.
-            final String verbatimElementsString = prop.getProperty(CommonConstants.VERBATIM_XML_ELEMENTS_PROPERTY_KEY);
-            final String inlineElementsString = prop.getProperty(CommonConstants.INLINE_XML_ELEMENTS_PROPERTY_KEY);
-            final String contentsInlineElementsString = prop.getProperty(CommonConstants.CONTENTS_INLINE_XML_ELEMENTS_PROPERTY_KEY);
-
-            final ArrayList<String> verbatimElements = verbatimElementsString == null ? new ArrayList<String>() : CollectionUtilities
-                    .toArrayList(
-                    verbatimElementsString.split("[\\s]*,[\\s]*"));
-
-            final ArrayList<String> inlineElements = inlineElementsString == null ? new ArrayList<String>() : CollectionUtilities
-                    .toArrayList(
-                    inlineElementsString.split("[\\s]*,[\\s]*"));
-
-            final ArrayList<String> contentsInlineElements = contentsInlineElementsString == null ? new ArrayList<String>() :
-                    CollectionUtilities.toArrayList(
-                    contentsInlineElementsString.split("[\\s]*,[\\s]*"));
-
-            // Convert the document to a String applying the XML Formatting property rules
-            translatedTopicData.setTranslatedXml(
-                    XMLUtilities.convertNodeToString(doc, verbatimElements, inlineElements, contentsInlineElements, true));
+        // Check we have some additional xml to process
+        if (!isNullOrEmpty(translatedTopicData.getTranslatedAdditionalXml())) {
+            Document doc = null;
+            try {
+                doc = XMLUtilities.convertStringToDocument(translatedTopicData.getTranslatedAdditionalXml());
+            } catch (SAXException ex) {
+                // Do nothing with this as it's handled later by the validator
+            } catch (Exception ex) {
+                log.warn("An Error occurred transforming a XML String to a DOM Document", ex);
+            }
+            if (doc != null) {
+                // Convert the document to a String applying the XML Formatting property rules
+                translatedTopicData.setTranslatedAdditionalXml(
+                        XMLUtilities.convertNodeToString(doc, verbatimElements, inlineElements, contentsInlineElements, true));
+            }
         }
     }
 }

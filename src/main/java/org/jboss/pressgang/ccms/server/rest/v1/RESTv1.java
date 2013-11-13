@@ -5,13 +5,21 @@ import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
 import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.Context;
+import javax.ws.rs.core.MultivaluedMap;
 import javax.ws.rs.core.PathSegment;
 import javax.ws.rs.core.Response;
+import java.awt.geom.Rectangle2D;
 import java.io.IOException;
+import java.io.StringWriter;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
+import java.util.Random;
 import java.util.Set;
+import java.util.concurrent.atomic.AtomicInteger;
 
+import org.apache.batik.dom.GenericDOMImplementation;
+import org.apache.batik.svggen.SVGGraphics2D;
 import org.hibernate.Session;
 import org.hibernate.search.FullTextSession;
 import org.hibernate.search.Search;
@@ -61,6 +69,7 @@ import org.jboss.pressgang.ccms.model.ImageFile;
 import org.jboss.pressgang.ccms.model.IntegerConstants;
 import org.jboss.pressgang.ccms.model.LanguageFile;
 import org.jboss.pressgang.ccms.model.LanguageImage;
+import org.jboss.pressgang.ccms.model.MinHashXOR;
 import org.jboss.pressgang.ccms.model.Project;
 import org.jboss.pressgang.ccms.model.PropertyTag;
 import org.jboss.pressgang.ccms.model.PropertyTagCategory;
@@ -94,6 +103,8 @@ import org.jboss.pressgang.ccms.rest.v1.collections.contentspec.RESTContentSpecC
 import org.jboss.pressgang.ccms.rest.v1.collections.contentspec.RESTTextContentSpecCollectionV1;
 import org.jboss.pressgang.ccms.rest.v1.collections.contentspec.RESTTranslatedCSNodeCollectionV1;
 import org.jboss.pressgang.ccms.rest.v1.collections.contentspec.RESTTranslatedContentSpecCollectionV1;
+import org.jboss.pressgang.ccms.rest.v1.collections.items.RESTTagCollectionItemV1;
+import org.jboss.pressgang.ccms.rest.v1.collections.items.RESTTopicCollectionItemV1;
 import org.jboss.pressgang.ccms.rest.v1.components.ComponentTopicV1;
 import org.jboss.pressgang.ccms.rest.v1.constants.RESTv1Constants;
 import org.jboss.pressgang.ccms.rest.v1.entities.RESTApplicationSettingsV1;
@@ -140,8 +151,15 @@ import org.jboss.resteasy.spi.HttpResponse;
 import org.jboss.resteasy.spi.InternalServerErrorException;
 import org.jboss.resteasy.spi.NotFoundException;
 import org.jboss.resteasy.util.Base64;
+import org.jfree.chart.ChartFactory;
+import org.jfree.chart.JFreeChart;
+import org.jfree.chart.plot.PiePlot3D;
+import org.jfree.chart.plot.PlotOrientation;
+import org.jfree.data.category.DefaultCategoryDataset;
+import org.jfree.data.general.DefaultPieDataset;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.w3c.dom.DOMImplementation;
 import org.w3c.dom.Document;
 
 /**
@@ -150,8 +168,98 @@ import org.w3c.dom.Document;
 @Path(Constants.BASE_REST_PATH + "/1")
 public class RESTv1 extends BaseRESTv1 implements RESTBaseInterfaceV1, RESTInterfaceAdvancedV1 {
     private static final Logger log = LoggerFactory.getLogger(RESTv1.class);
+    private static final int BATCH_SIZE = 100;
 
     @Context HttpResponse response;
+
+    /* UTILITY FUNCTIONS */
+    @Override
+    public List<Integer> getMinHashes(final String xml) {
+        final List<MinHashXOR> minHashXORs = entityManager.createQuery(MinHashXOR.SELECT_ALL_QUERY).getResultList();
+        return TopicUtilities.getMinHashes(xml, minHashXORs);
+    }
+
+    @Override
+    public void recalculateMinHashXORs() {
+        try {
+            // Start a Transaction
+            transactionManager.begin();
+
+            // Join the transaction we just started
+            entityManager.joinTransaction();
+
+            final Random randomGenerator = new Random();
+
+            // The first min hash is not XORed.
+            for (int i = 1; i < Constants.NUM_MIN_HASHES; ++i) {
+                final int random =  randomGenerator.nextInt();
+                MinHashXOR minHashXOR = entityManager.find(MinHashXOR.class, i);
+                if (minHashXOR == null)  {
+                    minHashXOR = new MinHashXOR();
+                    minHashXOR.setMinHashXORId(i);
+                }
+
+                minHashXOR.setMinHashXOR(random);
+
+                entityManager.persist(minHashXOR);
+
+                // Do batch updating by flushing the changes every 100 updates.
+                if (i % BATCH_SIZE == 0) {
+                    entityManager.flush();
+                }
+            }
+
+            // Flush the changes to the database and commit the transaction
+            entityManager.flush();
+            transactionManager.commit();
+        } catch (final Throwable ex) {
+            throw processError(transactionManager, ex);
+        }
+    }
+
+    @Override
+    public void recalculateMinHash() {
+        final int maxTransactSize = BATCH_SIZE * 10;
+
+        try {
+            final List<MinHashXOR> minHashXORs = entityManager.createQuery(MinHashXOR.SELECT_ALL_QUERY).getResultList();
+            final List<Topic> topics = entityManager.createQuery(Topic.SELECT_ALL_QUERY).getResultList();
+
+            // Since there are a lot of topics to process there is a high chance it'll hit the timeout,
+            // so break the transactions into smaller chunks
+            for (int i = 0; i < topics.size(); i += maxTransactSize) {
+                // Start a Transaction
+                transactionManager.begin();
+
+                // Join the transaction we just started
+                entityManager.joinTransaction();
+
+                for (int j = i; j < topics.size() && j < i + maxTransactSize; ++j) {
+
+                    final Topic topic = topics.get(j);
+                    TopicUtilities.recalculateMinHash(topic, minHashXORs);
+
+                    // Handle topics that have invalid titles.
+                    if (topic.getTopicTitle() == null || topic.getTopicTitle().trim().isEmpty()) {
+                        topic.setTopicTitle("Placeholder");
+                    }
+
+                    entityManager.persist(topic);
+
+                    // Do batch updating by flushing the changes every 100 updates.
+                    if (j % BATCH_SIZE == 0) {
+                        entityManager.flush();
+                    }
+                }
+
+                // Flush the changes to the database and commit the transaction
+                entityManager.flush();
+                transactionManager.commit();
+            }
+        } catch (final Throwable ex) {
+            throw processError(transactionManager, ex);
+        }
+    }
 
     /* SYSTEM FUNCTIONS */
     @Override
@@ -159,7 +267,7 @@ public class RESTv1 extends BaseRESTv1 implements RESTBaseInterfaceV1, RESTInter
         try {
             final Session session = (Session) entityManager.getDelegate();
             final FullTextSession fullTextSession = Search.getFullTextSession(session);
-            fullTextSession.createIndexer(Topic.class).start();
+            fullTextSession.createIndexer().start();
         } catch (final Exception ex) {
             log.error("An error reindexing the Lucene database", ex);
         }
@@ -1910,9 +2018,163 @@ public class RESTv1 extends BaseRESTv1 implements RESTBaseInterfaceV1, RESTInter
     }
 
     @Override
-    public RESTTopicCollectionV1 getJSONTopicsWithQuery(PathSegment query, final String expand) {
+    public RESTTopicCollectionV1 getJSONTopicsWithQuery(final PathSegment query, final String expand) {
         return getJSONResourcesFromQuery(RESTTopicCollectionV1.class, query.getMatrixParameters(), TopicFilterQueryBuilder.class,
                 new TopicFieldFilter(), topicFactory, RESTv1Constants.TOPICS_EXPANSION_NAME, expand);
+    }
+
+    /**
+     * http://localhost:8080/pressgang-ccms/rest/1/topics/get/svg/query;topicIncludedInSpec=13968/chart;chartTagGroup=4;chartTagGroup=5;chartTagGroup=6;chartTitle=Topic%20Types
+     * @param query The query settings. Same ones as getJSONTopicsWithQuery accespts
+     * @param chart The charting settings.
+     * @return A SVG chart image
+     */
+    @Override
+    public String getSVGTopicsWithQuery(final PathSegment query, final PathSegment chart) {
+        /* The stream to hold the output */
+        final StringWriter output = new StringWriter();
+
+        try {
+            final String expand = "{\"branches\":[" +
+                    "{\"trunk\":{\"name\": \"" + RESTv1Constants.TOPICS_EXPANSION_NAME + "\"}, \"branches\": [" +
+                        "{\"trunk\":{\"name\": \"" + RESTTopicV1.TAGS_NAME + "\"}}" +
+                    "]}" +
+                "]}";
+
+            final RESTTopicCollectionV1 topics = getJSONResourcesFromQuery(RESTTopicCollectionV1.class, query.getMatrixParameters(), TopicFilterQueryBuilder.class,
+                    new TopicFieldFilter(), topicFactory, RESTv1Constants.TOPICS_EXPANSION_NAME, expand);
+
+            final MultivaluedMap<String, String> chartingOptions = chart.getMatrixParameters();
+            final Map<Integer, String> tagNames = new HashMap<Integer, String>();
+            final Map<Integer, AtomicInteger> tagCounts = new HashMap<Integer, AtomicInteger>();
+
+            String chartTitle = "PressGang CCMS Chart";
+            String chartType = RESTv1Constants.CHART_PIE_TYPE;
+            boolean showTitle = true;
+            boolean showLegend = true;
+
+            /*
+                Loop through the options and use them to set the chart options
+             */
+            for (final String option : chartingOptions.keySet()) {
+                final List<String> values = chartingOptions.get(option);
+
+                if (RESTv1Constants.CHART_TAG_GROUP.equals(option)) {
+
+                    for (final String value : values) {
+                        try {
+                            final Integer tagId = Integer.parseInt(value);
+                            if (!tagCounts.containsKey(tagId)) {
+                                tagCounts.put(tagId, new AtomicInteger(0));
+                            }
+                        } catch (final NumberFormatException ex) {
+                            log.error(value + " is not a valid tag id");
+                        }
+                    }
+                } else if (RESTv1Constants.CHART_TITLE.equals(option)) {
+                    if (values.size() != 0) {
+                        chartTitle = values.get(0);
+                    }
+                } else if (RESTv1Constants.CHART_TYPE.equals(option)) {
+                    if (values.size() != 0) {
+                        if (RESTv1Constants.CHART_PIE_TYPE.equals(values.get(0))) {
+                            chartType =  RESTv1Constants.CHART_PIE_TYPE;
+                        } else if (RESTv1Constants.CHART_BAR_TYPE.equals(values.get(0))) {
+                            chartType = RESTv1Constants.CHART_BAR_TYPE;
+                        }  else if (RESTv1Constants.CHART_PIE3D_TYPE.equals(values.get(0))) {
+                            chartType = RESTv1Constants.CHART_PIE3D_TYPE;
+                        }
+                    }
+                } else if (RESTv1Constants.CHART_SHOW_LEGEND.equals(option)) {
+                    if (values.size() != 0) {
+                        showLegend = Boolean.parseBoolean(values.get(0));
+                    }
+                } else {
+                    log.error(option + " is not a valid chart option");
+                }
+            }
+
+            for (final Integer tagId : tagCounts.keySet()) {
+                for (final RESTTopicCollectionItemV1 topic : topics.getItems()) {
+                    for (final RESTTagCollectionItemV1 tag : topic.getItem().getTags().getItems()) {
+                        if (tagId.equals(tag.getItem().getId())) {
+                            if (!tagNames.containsKey(tagId)) {
+                                tagNames.put(tagId, tag.getItem().getName());
+                            }
+
+                            tagCounts.get(tagId).incrementAndGet();
+                        }
+                    }
+                }
+            }
+
+            JFreeChart jFreeChart = null;
+
+            if (RESTv1Constants.CHART_PIE_TYPE.equals(chartType)) {
+                /* Define the data range for SVG Pie Chart */
+                final DefaultPieDataset mySvgPieChartData = new DefaultPieDataset();
+
+                for (final Integer tagId : tagNames.keySet()) {
+                    mySvgPieChartData.setValue(tagNames.get(tagId), tagCounts.get(tagId).get());
+                }
+
+                /* This method returns a JFreeChart object back to us */
+                jFreeChart = ChartFactory.createPieChart(chartTitle, mySvgPieChartData, showLegend, false, false);
+            } else if (RESTv1Constants.CHART_PIE3D_TYPE.equals(chartType)) {
+                /* Define the data range for SVG Pie Chart */
+                final DefaultPieDataset mySvgPieChartData = new DefaultPieDataset();
+
+                for (final Integer tagId : tagNames.keySet()) {
+                    mySvgPieChartData.setValue(tagNames.get(tagId), tagCounts.get(tagId).get());
+                }
+
+                /* This method returns a JFreeChart object back to us */
+                jFreeChart = ChartFactory.createPieChart3D(chartTitle, mySvgPieChartData, showLegend, false, false);
+                ((PiePlot3D)jFreeChart.getPlot()).setForegroundAlpha(0.6f);
+            } else if (RESTv1Constants.CHART_BAR_TYPE.equals(chartType)) {
+                /* Define the data range for SVG Pie Chart */
+                final DefaultCategoryDataset categoryDataset = new DefaultCategoryDataset();
+
+                for (final Integer tagId : tagNames.keySet()) {
+                    categoryDataset.addValue(tagCounts.get(tagId).get(), tagNames.get(tagId), "");
+                }
+
+                /* This method returns a JFreeChart object back to us */
+                jFreeChart = ChartFactory.createBarChart(chartTitle, "Tags", "Topics", categoryDataset, PlotOrientation.VERTICAL, showLegend, false, false);
+            }
+
+            if (jFreeChart != null) {
+                /* Our logical Pie chart is ready at this step. We can now write the chart as SVG using Batik */
+                /* Get DOM Implementation */
+                final DOMImplementation mySVGDOM = GenericDOMImplementation.getDOMImplementation();
+
+                /* create Document object */
+                final String svgNS = "http://www.w3.org/2000/svg";
+                final Document document = mySVGDOM.createDocument(svgNS, "svg", null);
+
+                /* Create SVG Generator */
+                final SVGGraphics2D my_svg_generator = new SVGGraphics2D(document);
+
+                /* Render chart as SVG 2D Graphics object */
+                jFreeChart.draw(my_svg_generator, new Rectangle2D.Double(0, 0, 640, 480), null);
+
+                /* Write output to file */
+                my_svg_generator.stream(output);
+            }
+
+
+            return output.toString();
+
+        } catch (final Exception ex) {
+            throw new InternalServerErrorException(ex);
+        } finally {
+            try {
+                // not required, but good practice
+                output.close();
+            } catch (IOException e) {
+               //
+            }
+        }
     }
 
     @Override

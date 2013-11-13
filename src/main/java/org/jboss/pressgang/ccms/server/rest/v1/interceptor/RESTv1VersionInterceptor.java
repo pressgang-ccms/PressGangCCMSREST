@@ -3,10 +3,12 @@ package org.jboss.pressgang.ccms.server.rest.v1.interceptor;
 import javax.ws.rs.WebApplicationException;
 import javax.ws.rs.core.HttpHeaders;
 import javax.ws.rs.ext.Provider;
+import java.lang.reflect.Method;
 import java.util.List;
 
 import org.jboss.pressgang.ccms.rest.v1.constants.RESTv1Constants;
 import org.jboss.pressgang.ccms.rest.v1.jaxrsinterfaces.RESTInterfaceV1;
+import org.jboss.pressgang.ccms.server.rest.v1.RESTv1;
 import org.jboss.pressgang.ccms.utils.common.VersionUtilities;
 import org.jboss.resteasy.annotations.interception.ServerInterceptor;
 import org.jboss.resteasy.core.Headers;
@@ -14,16 +16,17 @@ import org.jboss.resteasy.core.ResourceMethod;
 import org.jboss.resteasy.core.ServerResponse;
 import org.jboss.resteasy.spi.Failure;
 import org.jboss.resteasy.spi.HttpRequest;
+import org.jboss.resteasy.spi.interception.AcceptedByMethod;
 import org.jboss.resteasy.spi.interception.PreProcessInterceptor;
 
 @Provider
 @ServerInterceptor
-public class RESTVersionInterceptor implements PreProcessInterceptor {
+public class RESTv1VersionInterceptor implements PreProcessInterceptor, AcceptedByMethod {
     private static final int UPGRADE_STATUS_CODE = 426;
     private static final String RESTv1_VERSION = VersionUtilities.getAPIVersion(RESTInterfaceV1.class);
     private static final boolean IS_RESTv1_SNAPSHOT = isSnapshotVersion(RESTv1_VERSION);
-    private static final int MIN_CSP_MAJOR_VERSION = 0;
-    private static final int MIN_CSP_MINOR_VERSION = 99;
+    private static final int MIN_CSP_MAJOR_VERSION = 1;
+    private static final int MIN_CSP_MINOR_VERSION = 1;
 
     private static final String REST_VERSION_ERROR_MSG = "The REST Client Implementation is out of date, " +
             "" + "and no longer supported. Please update the REST Client library.";
@@ -138,5 +141,11 @@ public class RESTVersionInterceptor implements PreProcessInterceptor {
 
     protected static boolean isUnknownVersion(final String version) {
         return version.toLowerCase().equals("unknown");
+    }
+
+    @Override
+    public boolean accept(Class declaring, Method method) {
+        // Only use this interceptor for v1 endpoints.
+        return RESTv1.class.equals(declaring);
     }
 }
