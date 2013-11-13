@@ -1,4 +1,4 @@
-package org.jboss.pressgang.ccms.server.utils;
+package org.jboss.pressgang.ccms.server.constants;
 
 /**
  * Constants that relate to values in the database.

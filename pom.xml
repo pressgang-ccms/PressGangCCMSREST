@@ -27,7 +27,6 @@
         <slf4j.version>1.6.4</slf4j.version>
         <j2bugzilla.version>1.1-SNAPSHOT</j2bugzilla.version>
         <cors.filter.version>1.7.1</cors.filter.version>
-        <commons-configuration.version>1.9</commons-configuration.version>
         <htmlcleaner.version>2.2</htmlcleaner.version>
         <lucene.version>3.5.0</lucene.version>
         <arquillian.version>1.0.3.Final</arquillian.version>
@@ -293,11 +292,6 @@
             <groupId>commons-io</groupId>
             <artifactId>commons-io</artifactId>
             <version>2.4</version>
-        </dependency>
-        <dependency>
-            <groupId>commons-configuration</groupId>
-            <artifactId>commons-configuration</artifactId>
-            <version>${commons-configuration.version}</version>
         </dependency>
 
         <!-- HTML Cleaner -->

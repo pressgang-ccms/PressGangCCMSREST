@@ -8,8 +8,8 @@ import org.apache.commons.configuration.ConfigurationException;
 import org.jboss.pressgang.ccms.provider.exception.BadRequestException;
 import org.jboss.pressgang.ccms.rest.v1.entities.RESTApplicationEntitiesV1;
 import org.jboss.pressgang.ccms.rest.v1.entities.RESTApplicationSettingsV1;
-import org.jboss.pressgang.ccms.server.config.ApplicationConfig;
-import org.jboss.pressgang.ccms.server.config.EntitiesConfig;
+import org.jboss.pressgang.ccms.model.config.ApplicationConfig;
+import org.jboss.pressgang.ccms.model.config.EntitiesConfig;
 import org.jboss.pressgang.ccms.utils.constants.CommonConstants;
 import org.jboss.resteasy.spi.InternalServerErrorException;
 
@@ -39,8 +39,17 @@ public class ApplicationSettingsV1Factory {
 
         // Entities
         // Tags
+        retValue.getEntities().setAbstractTagId(entitiesConfig.getAbstractTagId());
+        retValue.getEntities().setAuthorGroupTagId(entitiesConfig.getAuthorGroupTagId());
         retValue.getEntities().setContentSpecTagId(entitiesConfig.getContentSpecTagId());
+        retValue.getEntities().setLegalNoticeTagId(entitiesConfig.getLegalNoticeTagId());
         retValue.getEntities().setReviewTagId(entitiesConfig.getReviewTagId());
+        retValue.getEntities().setRevisionHistoryTagId(entitiesConfig.getRevisionHistoryTagId());
+
+        // Property Tags
+        retValue.getEntities().setFixedUrlPropertyTagId(entitiesConfig.getFixedUrlPropertyTagId());
+        retValue.getEntities().setOriginalFileNamePropertyTagId(entitiesConfig.getOriginalFileNamePropertyTagId());
+        retValue.getEntities().setTagStylePropertyTagId(entitiesConfig.getTagStylePropertyTagId());
 
         // Categories
         retValue.getEntities().setTypeCategoryId(entitiesConfig.getTypeCategoryId());

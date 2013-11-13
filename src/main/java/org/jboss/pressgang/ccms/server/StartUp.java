@@ -8,8 +8,8 @@ import java.io.File;
 
 import org.jboss.pressgang.ccms.contentspec.buglinks.BugLinkStrategyFactory;
 import org.jboss.pressgang.ccms.contentspec.enums.BugLinkType;
-import org.jboss.pressgang.ccms.server.config.ApplicationConfig;
-import org.jboss.pressgang.ccms.server.config.EntitiesConfig;
+import org.jboss.pressgang.ccms.model.config.ApplicationConfig;
+import org.jboss.pressgang.ccms.model.config.EntitiesConfig;
 import org.jboss.pressgang.ccms.server.contentspec.TeiidBugLinkStrategy;
 import org.jboss.pressgang.ccms.utils.constants.CommonConstants;
 

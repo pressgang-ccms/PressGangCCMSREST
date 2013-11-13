@@ -3,7 +3,7 @@ package org.jboss.pressgang.ccms.server.rest;
 import javax.ws.rs.core.Context;
 import javax.ws.rs.core.UriInfo;
 
-import org.jboss.pressgang.ccms.server.utils.Constants;
+import org.jboss.pressgang.ccms.server.constants.Constants;
 
 public abstract class BaseREST {
     /**

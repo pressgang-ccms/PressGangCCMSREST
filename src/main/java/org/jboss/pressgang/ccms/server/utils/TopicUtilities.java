@@ -37,7 +37,6 @@ import org.hibernate.Session;
 import org.hibernate.search.FullTextSession;
 import org.hibernate.search.Search;
 import org.hibernate.search.SearchFactory;
-import org.jboss.pressgang.ccms.contentspec.constants.CSConstants;
 import org.jboss.pressgang.ccms.model.BlobConstants;
 import org.jboss.pressgang.ccms.model.BugzillaBug;
 import org.jboss.pressgang.ccms.model.Category;
@@ -57,7 +56,8 @@ import org.jboss.pressgang.ccms.model.TranslatedTopicData;
 import org.jboss.pressgang.ccms.model.sort.CategoryNameComparator;
 import org.jboss.pressgang.ccms.model.sort.TagNameComparator;
 import org.jboss.pressgang.ccms.model.sort.TagToCategorySortingComparator;
-import org.jboss.pressgang.ccms.server.config.EntitiesConfig;
+import org.jboss.pressgang.ccms.model.config.EntitiesConfig;
+import org.jboss.pressgang.ccms.server.constants.ServiceConstants;
 import org.jboss.pressgang.ccms.utils.common.CollectionUtilities;
 import org.jboss.pressgang.ccms.utils.common.DocBookUtilities;
 import org.jboss.pressgang.ccms.utils.common.StringUtilities;
@@ -460,7 +460,7 @@ public class TopicUtilities {
             final Set<TagToCategory> tagToCategories = tag.getTagToCategories();
 
             if (tagToCategories.size() == 0) {
-                final NameIDSortMap categoryDetails = new NameIDSortMap("Uncatagorised", -1, 0);
+                final NameIDSortMap categoryDetails = new NameIDSortMap("Uncategorised", -1, 0);
 
                 if (!tags.containsKey(categoryDetails)) tags.put(categoryDetails, new ArrayList<Tag>());
 
@@ -631,7 +631,7 @@ public class TopicUtilities {
             }
 
             if (!isTopicNormalTopic(topic)) {
-                if (topic.isTaggedWith(CSConstants.REVISION_HISTORY_TAG_ID)) {
+                if (topic.isTaggedWith(EntitiesConfig.getInstance().getRevisionHistoryTagId())) {
                     // Make sure the revision history is an appendix
                     if (!doc.getDocumentElement().getNodeName().equals("appendix")) {
                         xmlErrors.append("Root element must be <appendix> for Revision History Topics.\n");
@@ -642,17 +642,17 @@ public class TopicUtilities {
                     if (revHistoryList.getLength() == 0) {
                         xmlErrors.append("No <revhistory> element found. A <revhistory> must exist for Revision Histories.\n");
                     }
-                } else if (topic.isTaggedWith(CSConstants.LEGAL_NOTICE_TAG_ID)) {
+                } else if (topic.isTaggedWith(EntitiesConfig.getInstance().getLegalNoticeTagId())) {
                     // Make sure the Legal Notice is a legalnotice
                     if (!doc.getDocumentElement().getNodeName().equals("legalnotice")) {
                         xmlErrors.append("Root element must be <legalnotice> for Legal Notice Topics.\n");
                     }
-                } else if (topic.isTaggedWith(CSConstants.AUTHOR_GROUP_TAG_ID)) {
+                } else if (topic.isTaggedWith(EntitiesConfig.getInstance().getAuthorGroupTagId())) {
                     // Make sure the Author Group is an authorgroup
                     if (!doc.getDocumentElement().getNodeName().equals("authorgroup")) {
                         xmlErrors.append("Root element must be <authorgroup> for Author Group Topics.\n");
                     }
-                } else if (topic.isTaggedWith(CSConstants.ABSTRACT_TAG_ID)) {
+                } else if (topic.isTaggedWith(EntitiesConfig.getInstance().getAbstractTagId())) {
                     // Make sure the Abstract is an abstract
                     if (!doc.getDocumentElement().getNodeName().equals("abstract")) {
                         xmlErrors.append("Root element must be <abstract> for Abstract Topics.\n");
@@ -689,9 +689,10 @@ public class TopicUtilities {
      * @return True if the topic is a normal topic, otherwise false.
      */
     public static boolean isTopicNormalTopic(final Topic topic) {
-        return !(topic.isTaggedWith(CSConstants.REVISION_HISTORY_TAG_ID) || topic.isTaggedWith(
-                CSConstants.LEGAL_NOTICE_TAG_ID) || topic.isTaggedWith(CSConstants.AUTHOR_GROUP_TAG_ID) || topic.isTaggedWith(
-                CSConstants.ABSTRACT_TAG_ID));
+        return !(topic.isTaggedWith(EntitiesConfig.getInstance().getRevisionHistoryTagId())
+                || topic.isTaggedWith(EntitiesConfig.getInstance().getLegalNoticeTagId())
+                || topic.isTaggedWith(EntitiesConfig.getInstance().getAuthorGroupTagId())
+                || topic.isTaggedWith(EntitiesConfig.getInstance().getAbstractTagId()));
     }
 
     /**

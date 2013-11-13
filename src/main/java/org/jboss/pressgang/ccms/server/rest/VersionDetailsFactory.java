@@ -5,7 +5,7 @@ import javax.ws.rs.Path;
 import org.jboss.pressgang.ccms.rest.collections.RESTVersionDetailsCollection;
 import org.jboss.pressgang.ccms.rest.entities.RESTVersionDetails;
 import org.jboss.pressgang.ccms.rest.v1.jaxrsinterfaces.RESTBaseInterfaceV1;
-import org.jboss.pressgang.ccms.server.utils.Constants;
+import org.jboss.pressgang.ccms.server.constants.Constants;
 import org.jboss.pressgang.ccms.utils.common.VersionUtilities;
 
 public class VersionDetailsFactory {
