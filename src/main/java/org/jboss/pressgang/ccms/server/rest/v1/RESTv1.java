@@ -190,8 +190,7 @@ public class RESTv1 extends BaseRESTv1 implements RESTBaseInterfaceV1, RESTInter
         final PathSegment filter = new PathSegmentImpl(Constants.QUERY_PATHSEGMENT_PREFIX, false);
         filter.getMatrixParameters().add(CommonFilterConstants.TOPIC_IDS_FILTER_VAR, topicIds);
 
-        getJSONTopicsWithQuery(filter, expand);
-        return null;
+        return getJSONTopicsWithQuery(filter, expand);
     }
 
     @Override
