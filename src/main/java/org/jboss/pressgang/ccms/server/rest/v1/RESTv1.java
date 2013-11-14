@@ -168,7 +168,7 @@ import org.w3c.dom.Document;
 @Path(Constants.BASE_REST_PATH + "/1")
 public class RESTv1 extends BaseRESTv1 implements RESTBaseInterfaceV1, RESTInterfaceAdvancedV1 {
     private static final Logger log = LoggerFactory.getLogger(RESTv1.class);
-    private static final int BATCH_SIZE = 100;
+    private static final int BATCH_SIZE = 20;
 
     @Context HttpResponse response;
 
@@ -277,11 +277,6 @@ public class RESTv1 extends BaseRESTv1 implements RESTBaseInterfaceV1, RESTInter
                         }
 
                         entityManager.persist(topic);
-
-                        // Do batch updating by flushing the changes every 100 updates.
-                        if (j % BATCH_SIZE == 0) {
-                            entityManager.flush();
-                        }
                     }
 
                     // Flush the changes to the database and commit the transaction
@@ -452,7 +447,7 @@ public class RESTv1 extends BaseRESTv1 implements RESTBaseInterfaceV1, RESTInter
 
     @Override
     public RESTBlobConstantV1 updateJSONBlobConstant(final String expand, final RESTBlobConstantV1 dataObject, final String message,
-            final Integer flag, final String userId) {
+                                                     final Integer flag, final String userId) {
         if (dataObject == null) throw new BadRequestException("The dataObject parameter can not be null");
         if (dataObject.getId() == null) throw new BadRequestException("The dataObject.getId() parameter can not be null");
 
@@ -462,7 +457,7 @@ public class RESTv1 extends BaseRESTv1 implements RESTBaseInterfaceV1, RESTInter
 
     @Override
     public RESTBlobConstantCollectionV1 updateJSONBlobConstants(final String expand, final RESTBlobConstantCollectionV1 dataObjects,
-            final String message, final Integer flag, final String userId) {
+                                                                final String message, final Integer flag, final String userId) {
         if (dataObjects == null) throw new BadRequestException("The dataObjects parameter can not be null");
         if (dataObjects.getItems() == null) throw new BadRequestException("The dataObjects.getItems() parameter can not be null");
 
@@ -473,7 +468,7 @@ public class RESTv1 extends BaseRESTv1 implements RESTBaseInterfaceV1, RESTInter
 
     @Override
     public RESTBlobConstantV1 createJSONBlobConstant(final String expand, final RESTBlobConstantV1 dataObject, final String message,
-            final Integer flag, final String userId) {
+                                                     final Integer flag, final String userId) {
         if (dataObject == null) throw new BadRequestException("The dataObject parameter can not be null");
 
         final RESTLogDetailsV1 logDetails = generateLogDetails(message, flag, userId);
@@ -482,7 +477,7 @@ public class RESTv1 extends BaseRESTv1 implements RESTBaseInterfaceV1, RESTInter
 
     @Override
     public RESTBlobConstantCollectionV1 createJSONBlobConstants(final String expand, final RESTBlobConstantCollectionV1 dataObjects,
-            final String message, final Integer flag, final String userId) {
+                                                                final String message, final Integer flag, final String userId) {
         if (dataObjects == null) throw new BadRequestException("The dataObjects parameter can not be null");
         if (dataObjects.getItems() == null) throw new BadRequestException("The dataObjects.getItems() parameter can not be null");
 
@@ -493,7 +488,7 @@ public class RESTv1 extends BaseRESTv1 implements RESTBaseInterfaceV1, RESTInter
 
     @Override
     public RESTBlobConstantV1 deleteJSONBlobConstant(final Integer id, final String message, final Integer flag, final String userId,
-            final String expand) {
+                                                     final String expand) {
         if (id == null) throw new BadRequestException("The dataObject parameter can not be null");
 
         final RESTLogDetailsV1 logDetails = generateLogDetails(message, flag, userId);
@@ -502,7 +497,7 @@ public class RESTv1 extends BaseRESTv1 implements RESTBaseInterfaceV1, RESTInter
 
     @Override
     public RESTBlobConstantCollectionV1 deleteJSONBlobConstants(final PathSegment ids, final String message, final Integer flag,
-            final String userId, final String expand) {
+                                                                final String userId, final String expand) {
         if (ids == null) throw new BadRequestException("The dataObjects parameter can not be null");
 
         final Set<String> dbEntityIds = ids.getMatrixParameters().keySet();
@@ -609,7 +604,7 @@ public class RESTv1 extends BaseRESTv1 implements RESTBaseInterfaceV1, RESTInter
 
     @Override
     public RESTProjectV1 updateJSONProject(final String expand, final RESTProjectV1 dataObject, final String message, final Integer flag,
-            final String userId) {
+                                           final String userId) {
         if (dataObject == null) throw new BadRequestException("The dataObject parameter can not be null");
         if (dataObject.getId() == null) throw new BadRequestException("The dataObject.getId() parameter can not be null");
 
@@ -619,7 +614,7 @@ public class RESTv1 extends BaseRESTv1 implements RESTBaseInterfaceV1, RESTInter
 
     @Override
     public RESTProjectCollectionV1 updateJSONProjects(final String expand, final RESTProjectCollectionV1 dataObjects, final String message,
-            final Integer flag, final String userId) {
+                                                      final Integer flag, final String userId) {
         if (dataObjects == null) throw new BadRequestException("The dataObjects parameter can not be null");
         if (dataObjects.getItems() == null) throw new BadRequestException("The dataObjects.getItems() parameter can not be null");
 
@@ -630,7 +625,7 @@ public class RESTv1 extends BaseRESTv1 implements RESTBaseInterfaceV1, RESTInter
 
     @Override
     public RESTProjectV1 createJSONProject(final String expand, final RESTProjectV1 dataObject, final String message, final Integer flag,
-            final String userId) {
+                                           final String userId) {
         if (dataObject == null) throw new BadRequestException("The dataObject parameter can not be null");
 
         final RESTLogDetailsV1 logDetails = generateLogDetails(message, flag, userId);
@@ -639,7 +634,7 @@ public class RESTv1 extends BaseRESTv1 implements RESTBaseInterfaceV1, RESTInter
 
     @Override
     public RESTProjectCollectionV1 createJSONProjects(final String expand, final RESTProjectCollectionV1 dataObjects, final String message,
-            final Integer flag, final String userId) {
+                                                      final Integer flag, final String userId) {
         if (dataObjects == null) throw new BadRequestException("The dataObjects parameter can not be null");
         if (dataObjects.getItems() == null) throw new BadRequestException("The dataObjects.getItems() parameter can not be null");
 
@@ -650,7 +645,7 @@ public class RESTv1 extends BaseRESTv1 implements RESTBaseInterfaceV1, RESTInter
 
     @Override
     public RESTProjectV1 deleteJSONProject(final Integer id, final String message, final Integer flag, final String userId,
-            final String expand) {
+                                           final String expand) {
         if (id == null) throw new BadRequestException("The dataObject parameter can not be null");
 
         final RESTLogDetailsV1 logDetails = generateLogDetails(message, flag, userId);
@@ -659,7 +654,7 @@ public class RESTv1 extends BaseRESTv1 implements RESTBaseInterfaceV1, RESTInter
 
     @Override
     public RESTProjectCollectionV1 deleteJSONProjects(final PathSegment ids, final String message, final Integer flag, final String userId,
-            final String expand) {
+                                                      final String expand) {
         if (ids == null) throw new BadRequestException("The dataObjects parameter can not be null");
 
         final Set<String> dbEntityIds = ids.getMatrixParameters().keySet();
@@ -745,7 +740,7 @@ public class RESTv1 extends BaseRESTv1 implements RESTBaseInterfaceV1, RESTInter
 
     @Override
     public RESTPropertyTagV1 updateJSONPropertyTag(final String expand, final RESTPropertyTagV1 dataObject, final String message,
-            final Integer flag, final String userId) {
+                                                   final Integer flag, final String userId) {
         if (dataObject == null) throw new BadRequestException("The dataObject parameter can not be null");
         if (dataObject.getId() == null) throw new BadRequestException("The dataObject.getId() parameter can not be null");
 
@@ -755,7 +750,7 @@ public class RESTv1 extends BaseRESTv1 implements RESTBaseInterfaceV1, RESTInter
 
     @Override
     public RESTPropertyTagCollectionV1 updateJSONPropertyTags(final String expand, final RESTPropertyTagCollectionV1 dataObjects,
-            final String message, final Integer flag, final String userId) {
+                                                              final String message, final Integer flag, final String userId) {
         if (dataObjects == null) throw new BadRequestException("The dataObjects parameter can not be null");
         if (dataObjects.getItems() == null) throw new BadRequestException("The dataObjects.getItems() parameter can not be null");
 
@@ -766,7 +761,7 @@ public class RESTv1 extends BaseRESTv1 implements RESTBaseInterfaceV1, RESTInter
 
     @Override
     public RESTPropertyTagV1 createJSONPropertyTag(final String expand, final RESTPropertyTagV1 dataObject, final String message,
-            final Integer flag, final String userId) {
+                                                   final Integer flag, final String userId) {
         if (dataObject == null) throw new BadRequestException("The dataObject parameter can not be null");
 
         final RESTLogDetailsV1 logDetails = generateLogDetails(message, flag, userId);
@@ -775,7 +770,7 @@ public class RESTv1 extends BaseRESTv1 implements RESTBaseInterfaceV1, RESTInter
 
     @Override
     public RESTPropertyTagCollectionV1 createJSONPropertyTags(final String expand, final RESTPropertyTagCollectionV1 dataObjects,
-            final String message, final Integer flag, final String userId) {
+                                                              final String message, final Integer flag, final String userId) {
         if (dataObjects == null) throw new BadRequestException("The dataObjects parameter can not be null");
         if (dataObjects.getItems() == null) throw new BadRequestException("The dataObjects.getItems() parameter can not be null");
 
@@ -786,7 +781,7 @@ public class RESTv1 extends BaseRESTv1 implements RESTBaseInterfaceV1, RESTInter
 
     @Override
     public RESTPropertyTagV1 deleteJSONPropertyTag(final Integer id, final String message, final Integer flag, final String userId,
-            final String expand) {
+                                                   final String expand) {
         if (id == null) throw new BadRequestException("The dataObject parameter can not be null");
 
         final RESTLogDetailsV1 logDetails = generateLogDetails(message, flag, userId);
@@ -795,7 +790,7 @@ public class RESTv1 extends BaseRESTv1 implements RESTBaseInterfaceV1, RESTInter
 
     @Override
     public RESTPropertyTagCollectionV1 deleteJSONPropertyTags(final PathSegment ids, final String message, final Integer flag,
-            final String userId, final String expand) {
+                                                              final String userId, final String expand) {
         if (ids == null) throw new BadRequestException("The dataObjects parameter can not be null");
 
         final Set<String> dbEntityIds = ids.getMatrixParameters().keySet();
@@ -881,7 +876,7 @@ public class RESTv1 extends BaseRESTv1 implements RESTBaseInterfaceV1, RESTInter
 
     @Override
     public RESTPropertyCategoryV1 updateJSONPropertyCategory(final String expand, final RESTPropertyCategoryV1 dataObject,
-            final String message, final Integer flag, final String userId) {
+                                                             final String message, final Integer flag, final String userId) {
         if (dataObject == null) throw new BadRequestException("The dataObject parameter can not be null");
         if (dataObject.getId() == null) throw new BadRequestException("The dataObject.getId() parameter can not be null");
 
@@ -891,7 +886,7 @@ public class RESTv1 extends BaseRESTv1 implements RESTBaseInterfaceV1, RESTInter
 
     @Override
     public RESTPropertyCategoryCollectionV1 updateJSONPropertyCategories(final String expand,
-            final RESTPropertyCategoryCollectionV1 dataObjects, final String message, final Integer flag, final String userId) {
+                                                                         final RESTPropertyCategoryCollectionV1 dataObjects, final String message, final Integer flag, final String userId) {
         if (dataObjects == null) throw new BadRequestException("The dataObjects parameter can not be null");
         if (dataObjects.getItems() == null) throw new BadRequestException("The dataObjects.getItems() parameter can not be null");
 
@@ -902,7 +897,7 @@ public class RESTv1 extends BaseRESTv1 implements RESTBaseInterfaceV1, RESTInter
 
     @Override
     public RESTPropertyCategoryV1 createJSONPropertyCategory(final String expand, final RESTPropertyCategoryV1 dataObject,
-            final String message, final Integer flag, final String userId) {
+                                                             final String message, final Integer flag, final String userId) {
         if (dataObject == null) throw new BadRequestException("The dataObject parameter can not be null");
 
         final RESTLogDetailsV1 logDetails = generateLogDetails(message, flag, userId);
@@ -911,7 +906,7 @@ public class RESTv1 extends BaseRESTv1 implements RESTBaseInterfaceV1, RESTInter
 
     @Override
     public RESTPropertyCategoryCollectionV1 createJSONPropertyCategories(final String expand,
-            final RESTPropertyCategoryCollectionV1 dataObjects, final String message, final Integer flag, final String userId) {
+                                                                         final RESTPropertyCategoryCollectionV1 dataObjects, final String message, final Integer flag, final String userId) {
         if (dataObjects == null) throw new BadRequestException("The dataObjects parameter can not be null");
         if (dataObjects.getItems() == null) throw new BadRequestException("The dataObjects.getItems() parameter can not be null");
 
@@ -922,7 +917,7 @@ public class RESTv1 extends BaseRESTv1 implements RESTBaseInterfaceV1, RESTInter
 
     @Override
     public RESTPropertyCategoryV1 deleteJSONPropertyCategory(final Integer id, final String message, final Integer flag,
-            final String userId, final String expand) {
+                                                             final String userId, final String expand) {
         if (id == null) throw new BadRequestException("The dataObject parameter can not be null");
 
         final RESTLogDetailsV1 logDetails = generateLogDetails(message, flag, userId);
@@ -931,7 +926,7 @@ public class RESTv1 extends BaseRESTv1 implements RESTBaseInterfaceV1, RESTInter
 
     @Override
     public RESTPropertyCategoryCollectionV1 deleteJSONPropertyCategories(final PathSegment ids, final String message, final Integer flag,
-            final String userId, final String expand) {
+                                                                         final String userId, final String expand) {
         if (ids == null) throw new BadRequestException("The dataObjects parameter can not be null");
 
         final Set<String> dbEntityIds = ids.getMatrixParameters().keySet();
@@ -1015,7 +1010,7 @@ public class RESTv1 extends BaseRESTv1 implements RESTBaseInterfaceV1, RESTInter
 
     @Override
     public RESTRoleV1 updateJSONRole(final String expand, final RESTRoleV1 dataObject, final String message, final Integer flag,
-            final String userId) {
+                                     final String userId) {
         if (dataObject == null) throw new BadRequestException("The dataObject parameter can not be null");
         if (dataObject.getId() == null) throw new BadRequestException("The dataObject.getId() parameter can not be null");
 
@@ -1025,7 +1020,7 @@ public class RESTv1 extends BaseRESTv1 implements RESTBaseInterfaceV1, RESTInter
 
     @Override
     public RESTRoleCollectionV1 updateJSONRoles(final String expand, final RESTRoleCollectionV1 dataObjects, final String message,
-            final Integer flag, final String userId) {
+                                                final Integer flag, final String userId) {
         if (dataObjects == null) throw new BadRequestException("The dataObjects parameter can not be null");
         if (dataObjects.getItems() == null) throw new BadRequestException("The dataObjects.getItems() parameter can not be null");
 
@@ -1036,7 +1031,7 @@ public class RESTv1 extends BaseRESTv1 implements RESTBaseInterfaceV1, RESTInter
 
     @Override
     public RESTRoleV1 createJSONRole(final String expand, final RESTRoleV1 dataObject, final String message, final Integer flag,
-            final String userId) {
+                                     final String userId) {
         if (dataObject == null) throw new BadRequestException("The dataObject parameter can not be null");
 
         final RESTLogDetailsV1 logDetails = generateLogDetails(message, flag, userId);
@@ -1045,7 +1040,7 @@ public class RESTv1 extends BaseRESTv1 implements RESTBaseInterfaceV1, RESTInter
 
     @Override
     public RESTRoleCollectionV1 createJSONRoles(final String expand, final RESTRoleCollectionV1 dataObjects, final String message,
-            final Integer flag, final String userId) {
+                                                final Integer flag, final String userId) {
         if (dataObjects == null) throw new BadRequestException("The dataObjects parameter can not be null");
         if (dataObjects.getItems() == null) throw new BadRequestException("The dataObjects.getItems() parameter can not be null");
 
@@ -1064,7 +1059,7 @@ public class RESTv1 extends BaseRESTv1 implements RESTBaseInterfaceV1, RESTInter
 
     @Override
     public RESTRoleCollectionV1 deleteJSONRoles(final PathSegment ids, final String message, final Integer flag, final String userId,
-            final String expand) {
+                                                final String expand) {
         if (ids == null) throw new BadRequestException("The dataObjects parameter can not be null");
 
         final Set<String> dbEntityIds = ids.getMatrixParameters().keySet();
@@ -1150,7 +1145,7 @@ public class RESTv1 extends BaseRESTv1 implements RESTBaseInterfaceV1, RESTInter
 
     @Override
     public RESTTranslatedTopicV1 updateJSONTranslatedTopic(final String expand, final RESTTranslatedTopicV1 dataObject,
-            final String message, final Integer flag, final String userId) {
+                                                           final String message, final Integer flag, final String userId) {
         if (dataObject == null) throw new BadRequestException("The dataObject parameter can not be null");
         if (dataObject.getId() == null) throw new BadRequestException("The dataObject.getId() parameter can not be null");
 
@@ -1160,7 +1155,7 @@ public class RESTv1 extends BaseRESTv1 implements RESTBaseInterfaceV1, RESTInter
 
     @Override
     public RESTTranslatedTopicCollectionV1 updateJSONTranslatedTopics(final String expand,
-            final RESTTranslatedTopicCollectionV1 dataObjects, final String message, final Integer flag, final String userId) {
+                                                                      final RESTTranslatedTopicCollectionV1 dataObjects, final String message, final Integer flag, final String userId) {
         if (dataObjects == null) throw new BadRequestException("The dataObjects parameter can not be null");
         if (dataObjects.getItems() == null) throw new BadRequestException("The dataObjects.getItems() parameter can not be null");
 
@@ -1171,7 +1166,7 @@ public class RESTv1 extends BaseRESTv1 implements RESTBaseInterfaceV1, RESTInter
 
     @Override
     public RESTTranslatedTopicV1 createJSONTranslatedTopic(final String expand, final RESTTranslatedTopicV1 dataObject,
-            final String message, final Integer flag, final String userId) {
+                                                           final String message, final Integer flag, final String userId) {
         if (dataObject == null) throw new BadRequestException("The dataObject parameter can not be null");
 
         final RESTLogDetailsV1 logDetails = generateLogDetails(message, flag, userId);
@@ -1180,7 +1175,7 @@ public class RESTv1 extends BaseRESTv1 implements RESTBaseInterfaceV1, RESTInter
 
     @Override
     public RESTTranslatedTopicCollectionV1 createJSONTranslatedTopics(final String expand,
-            final RESTTranslatedTopicCollectionV1 dataObjects, final String message, final Integer flag, final String userId) {
+                                                                      final RESTTranslatedTopicCollectionV1 dataObjects, final String message, final Integer flag, final String userId) {
         if (dataObjects == null) throw new BadRequestException("The dataObjects parameter can not be null");
 
         if (dataObjects.getItems() == null) throw new BadRequestException("The dataObjects.getItems() parameter can not be null");
@@ -1192,7 +1187,7 @@ public class RESTv1 extends BaseRESTv1 implements RESTBaseInterfaceV1, RESTInter
 
     @Override
     public RESTTranslatedTopicV1 deleteJSONTranslatedTopic(final Integer id, final String message, final Integer flag, final String userId,
-            final String expand) {
+                                                           final String expand) {
         if (id == null) throw new BadRequestException("The dataObject parameter can not be null");
 
         final RESTLogDetailsV1 logDetails = generateLogDetails(message, flag, userId);
@@ -1201,7 +1196,7 @@ public class RESTv1 extends BaseRESTv1 implements RESTBaseInterfaceV1, RESTInter
 
     @Override
     public RESTTranslatedTopicCollectionV1 deleteJSONTranslatedTopics(final PathSegment ids, final String message, final Integer flag,
-            final String userId, final String expand) {
+                                                                      final String userId, final String expand) {
         if (ids == null) throw new BadRequestException("The dataObjects parameter can not be null");
 
         final Set<String> dbEntityIds = ids.getMatrixParameters().keySet();
@@ -1287,7 +1282,7 @@ public class RESTv1 extends BaseRESTv1 implements RESTBaseInterfaceV1, RESTInter
 
     @Override
     public RESTStringConstantV1 updateJSONStringConstant(final String expand, final RESTStringConstantV1 dataObject, final String message,
-            final Integer flag, final String userId) {
+                                                         final Integer flag, final String userId) {
         if (dataObject == null) throw new BadRequestException("The dataObject parameter can not be null");
         if (dataObject.getId() == null) throw new BadRequestException("The dataObject.getId() parameter can not be null");
 
@@ -1297,7 +1292,7 @@ public class RESTv1 extends BaseRESTv1 implements RESTBaseInterfaceV1, RESTInter
 
     @Override
     public RESTStringConstantCollectionV1 updateJSONStringConstants(final String expand, final RESTStringConstantCollectionV1 dataObjects,
-            final String message, final Integer flag, final String userId) {
+                                                                    final String message, final Integer flag, final String userId) {
         if (dataObjects == null) throw new BadRequestException("The dataObjects parameter can not be null");
         if (dataObjects.getItems() == null) throw new BadRequestException("The dataObjects.getItems() parameter can not be null");
 
@@ -1308,7 +1303,7 @@ public class RESTv1 extends BaseRESTv1 implements RESTBaseInterfaceV1, RESTInter
 
     @Override
     public RESTStringConstantV1 createJSONStringConstant(final String expand, final RESTStringConstantV1 dataObject, final String message,
-            final Integer flag, final String userId) {
+                                                         final Integer flag, final String userId) {
         if (dataObject == null) throw new BadRequestException("The dataObject parameter can not be null");
 
         final RESTLogDetailsV1 logDetails = generateLogDetails(message, flag, userId);
@@ -1317,7 +1312,7 @@ public class RESTv1 extends BaseRESTv1 implements RESTBaseInterfaceV1, RESTInter
 
     @Override
     public RESTStringConstantCollectionV1 createJSONStringConstants(final String expand, final RESTStringConstantCollectionV1 dataObjects,
-            final String message, final Integer flag, final String userId) {
+                                                                    final String message, final Integer flag, final String userId) {
         if (dataObjects == null) throw new BadRequestException("The dataObjects parameter can not be null");
         if (dataObjects.getItems() == null) throw new BadRequestException("The dataObjects.getItems() parameter can not be null");
 
@@ -1328,7 +1323,7 @@ public class RESTv1 extends BaseRESTv1 implements RESTBaseInterfaceV1, RESTInter
 
     @Override
     public RESTStringConstantV1 deleteJSONStringConstant(final Integer id, final String message, final Integer flag, final String userId,
-            final String expand) {
+                                                         final String expand) {
         if (id == null) throw new BadRequestException("The id parameter can not be null");
 
         final RESTLogDetailsV1 logDetails = generateLogDetails(message, flag, userId);
@@ -1337,7 +1332,7 @@ public class RESTv1 extends BaseRESTv1 implements RESTBaseInterfaceV1, RESTInter
 
     @Override
     public RESTStringConstantCollectionV1 deleteJSONStringConstants(final PathSegment ids, final String message, final Integer flag,
-            final String userId, final String expand) {
+                                                                    final String userId, final String expand) {
         if (ids == null) throw new BadRequestException("The ids parameter can not be null");
 
         final Set<String> dbEntityIds = ids.getMatrixParameters().keySet();
@@ -1421,7 +1416,7 @@ public class RESTv1 extends BaseRESTv1 implements RESTBaseInterfaceV1, RESTInter
 
     @Override
     public RESTUserV1 updateJSONUser(final String expand, final RESTUserV1 dataObject, final String message, final Integer flag,
-            final String userId) {
+                                     final String userId) {
         if (dataObject == null) throw new BadRequestException("The dataObject parameter can not be null");
         if (dataObject.getId() == null) throw new BadRequestException("The dataObject.getId() parameter can not be null");
 
@@ -1431,7 +1426,7 @@ public class RESTv1 extends BaseRESTv1 implements RESTBaseInterfaceV1, RESTInter
 
     @Override
     public RESTUserCollectionV1 updateJSONUsers(final String expand, final RESTUserCollectionV1 dataObjects, final String message,
-            final Integer flag, final String userId) {
+                                                final Integer flag, final String userId) {
         if (dataObjects == null) throw new BadRequestException("The dataObjects parameter can not be null");
         if (dataObjects.getItems() == null) throw new BadRequestException("The dataObjects.getItems() parameter can not be null");
 
@@ -1442,7 +1437,7 @@ public class RESTv1 extends BaseRESTv1 implements RESTBaseInterfaceV1, RESTInter
 
     @Override
     public RESTUserV1 createJSONUser(final String expand, final RESTUserV1 dataObject, final String message, final Integer flag,
-            final String userId) {
+                                     final String userId) {
         if (dataObject == null) throw new BadRequestException("The dataObject parameter can not be null");
 
         final RESTLogDetailsV1 logDetails = generateLogDetails(message, flag, userId);
@@ -1451,7 +1446,7 @@ public class RESTv1 extends BaseRESTv1 implements RESTBaseInterfaceV1, RESTInter
 
     @Override
     public RESTUserCollectionV1 createJSONUsers(final String expand, final RESTUserCollectionV1 dataObjects, final String message,
-            final Integer flag, final String userId) {
+                                                final Integer flag, final String userId) {
         if (dataObjects == null) throw new BadRequestException("The dataObjects parameter can not be null");
 
         if (dataObjects.getItems() == null) throw new BadRequestException("The dataObjects.getItems() parameter can not be null");
@@ -1471,7 +1466,7 @@ public class RESTv1 extends BaseRESTv1 implements RESTBaseInterfaceV1, RESTInter
 
     @Override
     public RESTUserCollectionV1 deleteJSONUsers(final PathSegment ids, final String message, final Integer flag, final String userId,
-            final String expand) {
+                                                final String expand) {
         if (ids == null) throw new BadRequestException("The ids parameter can not be null");
         final Set<String> dbEntityIds = ids.getMatrixParameters().keySet();
 
@@ -1555,7 +1550,7 @@ public class RESTv1 extends BaseRESTv1 implements RESTBaseInterfaceV1, RESTInter
 
     @Override
     public RESTTagV1 updateJSONTag(final String expand, final RESTTagV1 dataObject, final String message, final Integer flag,
-            final String userId) {
+                                   final String userId) {
         if (dataObject == null) throw new BadRequestException("The dataObject parameter can not be null");
         if (dataObject.getId() == null) throw new BadRequestException("The dataObject.getId() parameter can not be null");
 
@@ -1565,7 +1560,7 @@ public class RESTv1 extends BaseRESTv1 implements RESTBaseInterfaceV1, RESTInter
 
     @Override
     public RESTTagCollectionV1 updateJSONTags(final String expand, final RESTTagCollectionV1 dataObjects, final String message,
-            final Integer flag, final String userId) {
+                                              final Integer flag, final String userId) {
         if (dataObjects == null) throw new BadRequestException("The dataObjects parameter can not be null");
         if (dataObjects.getItems() == null) throw new BadRequestException("The dataObjects.getItems() parameter can not be null");
 
@@ -1576,7 +1571,7 @@ public class RESTv1 extends BaseRESTv1 implements RESTBaseInterfaceV1, RESTInter
 
     @Override
     public RESTTagV1 createJSONTag(final String expand, final RESTTagV1 dataObject, final String message, final Integer flag,
-            final String userId) {
+                                   final String userId) {
         if (dataObject == null) throw new BadRequestException("The dataObject parameter can not be null");
 
         final RESTLogDetailsV1 logDetails = generateLogDetails(message, flag, userId);
@@ -1585,7 +1580,7 @@ public class RESTv1 extends BaseRESTv1 implements RESTBaseInterfaceV1, RESTInter
 
     @Override
     public RESTTagCollectionV1 createJSONTags(final String expand, final RESTTagCollectionV1 dataObjects, final String message,
-            final Integer flag, final String userId) {
+                                              final Integer flag, final String userId) {
         if (dataObjects == null) throw new BadRequestException("The dataObjects parameter can not be null");
         if (dataObjects.getItems() == null) throw new BadRequestException("The dataObjects.getItems() parameter can not be null");
 
@@ -1604,7 +1599,7 @@ public class RESTv1 extends BaseRESTv1 implements RESTBaseInterfaceV1, RESTInter
 
     @Override
     public RESTTagCollectionV1 deleteJSONTags(final PathSegment ids, final String message, final Integer flag, final String userId,
-            final String expand) {
+                                              final String expand) {
         if (ids == null) throw new BadRequestException("The ids parameter can not be null");
 
         final Set<String> dbEntityIds = ids.getMatrixParameters().keySet();
@@ -1689,7 +1684,7 @@ public class RESTv1 extends BaseRESTv1 implements RESTBaseInterfaceV1, RESTInter
 
     @Override
     public RESTCategoryV1 updateJSONCategory(final String expand, final RESTCategoryV1 dataObject, final String message, final Integer flag,
-            final String userId) {
+                                             final String userId) {
         if (dataObject == null) throw new BadRequestException("The dataObject parameter can not be null");
         if (dataObject.getId() == null) throw new BadRequestException("The dataObject.getId() parameter can not be null");
 
@@ -1699,7 +1694,7 @@ public class RESTv1 extends BaseRESTv1 implements RESTBaseInterfaceV1, RESTInter
 
     @Override
     public RESTCategoryCollectionV1 updateJSONCategories(final String expand, final RESTCategoryCollectionV1 dataObjects,
-            final String message, final Integer flag, final String userId) {
+                                                         final String message, final Integer flag, final String userId) {
         if (dataObjects == null) throw new BadRequestException("The dataObjects parameter can not be null");
         if (dataObjects.getItems() == null) throw new BadRequestException("The dataObjects.getItems() parameter can not be null");
 
@@ -1710,7 +1705,7 @@ public class RESTv1 extends BaseRESTv1 implements RESTBaseInterfaceV1, RESTInter
 
     @Override
     public RESTCategoryV1 createJSONCategory(final String expand, final RESTCategoryV1 dataObject, final String message, final Integer flag,
-            final String userId) {
+                                             final String userId) {
         if (dataObject == null) throw new BadRequestException("The dataObject parameter can not be null");
 
         final RESTLogDetailsV1 logDetails = generateLogDetails(message, flag, userId);
@@ -1719,7 +1714,7 @@ public class RESTv1 extends BaseRESTv1 implements RESTBaseInterfaceV1, RESTInter
 
     @Override
     public RESTCategoryCollectionV1 createJSONCategories(final String expand, final RESTCategoryCollectionV1 dataObjects,
-            final String message, final Integer flag, final String userId) {
+                                                         final String message, final Integer flag, final String userId) {
         if (dataObjects == null) throw new BadRequestException("The dataObjects parameter can not be null");
         if (dataObjects.getItems() == null) throw new BadRequestException("The dataObjects.getItems() parameter can not be null");
 
@@ -1730,7 +1725,7 @@ public class RESTv1 extends BaseRESTv1 implements RESTBaseInterfaceV1, RESTInter
 
     @Override
     public RESTCategoryV1 deleteJSONCategory(final Integer id, final String message, final Integer flag, final String userId,
-            final String expand) {
+                                             final String expand) {
         if (id == null) throw new BadRequestException("The id parameter can not be null");
 
         final RESTLogDetailsV1 logDetails = generateLogDetails(message, flag, userId);
@@ -1739,7 +1734,7 @@ public class RESTv1 extends BaseRESTv1 implements RESTBaseInterfaceV1, RESTInter
 
     @Override
     public RESTCategoryCollectionV1 deleteJSONCategories(final PathSegment ids, final String message, final Integer flag,
-            final String userId, final String expand) {
+                                                         final String userId, final String expand) {
         if (ids == null) throw new BadRequestException("The ids parameter can not be null");
 
         final Set<String> dbEntityIds = ids.getMatrixParameters().keySet();
@@ -1823,7 +1818,7 @@ public class RESTv1 extends BaseRESTv1 implements RESTBaseInterfaceV1, RESTInter
 
     @Override
     public RESTImageV1 updateJSONImage(final String expand, final RESTImageV1 dataObject, final String message, final Integer flag,
-            final String userId) {
+                                       final String userId) {
         if (dataObject == null) throw new BadRequestException("The dataObject parameter can not be null");
         if (dataObject.getId() == null) throw new BadRequestException("The dataObject.getId() parameter can not be null");
 
@@ -1833,7 +1828,7 @@ public class RESTv1 extends BaseRESTv1 implements RESTBaseInterfaceV1, RESTInter
 
     @Override
     public RESTImageCollectionV1 updateJSONImages(final String expand, final RESTImageCollectionV1 dataObjects, final String message,
-            final Integer flag, final String userId) {
+                                                  final Integer flag, final String userId) {
         if (dataObjects == null) throw new BadRequestException("The dataObjects parameter can not be null");
         if (dataObjects.getItems() == null) throw new BadRequestException("The dataObjects.getItems() parameter can not be null");
 
@@ -1844,7 +1839,7 @@ public class RESTv1 extends BaseRESTv1 implements RESTBaseInterfaceV1, RESTInter
 
     @Override
     public RESTImageV1 createJSONImage(final String expand, final RESTImageV1 dataObject, final String message, final Integer flag,
-            final String userId) {
+                                       final String userId) {
         if (dataObject == null) throw new BadRequestException("The dataObject parameter can not be null");
 
         final RESTLogDetailsV1 logDetails = generateLogDetails(message, flag, userId);
@@ -1853,7 +1848,7 @@ public class RESTv1 extends BaseRESTv1 implements RESTBaseInterfaceV1, RESTInter
 
     @Override
     public RESTImageCollectionV1 createJSONImages(final String expand, final RESTImageCollectionV1 dataObjects, final String message,
-            final Integer flag, final String userId) {
+                                                  final Integer flag, final String userId) {
         if (dataObjects == null) throw new BadRequestException("The dataObjects parameter can not be null");
         if (dataObjects.getItems() == null) throw new BadRequestException("The dataObjects.getItems() parameter can not be null");
 
@@ -1864,7 +1859,7 @@ public class RESTv1 extends BaseRESTv1 implements RESTBaseInterfaceV1, RESTInter
 
     @Override
     public RESTImageV1 deleteJSONImage(final Integer id, final String message, final Integer flag, final String userId,
-            final String expand) {
+                                       final String expand) {
         if (id == null) throw new BadRequestException("The id parameter can not be null");
 
         final RESTLogDetailsV1 logDetails = generateLogDetails(message, flag, userId);
@@ -1873,7 +1868,7 @@ public class RESTv1 extends BaseRESTv1 implements RESTBaseInterfaceV1, RESTInter
 
     @Override
     public RESTImageCollectionV1 deleteJSONImages(final PathSegment ids, final String message, final Integer flag, final String userId,
-            final String expand) {
+                                                  final String expand) {
         if (ids == null) throw new BadRequestException("The ids parameter can not be null");
 
         final Set<String> dbEntityIds = ids.getMatrixParameters().keySet();
@@ -2048,9 +2043,9 @@ public class RESTv1 extends BaseRESTv1 implements RESTBaseInterfaceV1, RESTInter
         try {
             final String expand = "{\"branches\":[" +
                     "{\"trunk\":{\"name\": \"" + RESTv1Constants.TOPICS_EXPANSION_NAME + "\"}, \"branches\": [" +
-                        "{\"trunk\":{\"name\": \"" + RESTTopicV1.TAGS_NAME + "\"}}" +
+                    "{\"trunk\":{\"name\": \"" + RESTTopicV1.TAGS_NAME + "\"}}" +
                     "]}" +
-                "]}";
+                    "]}";
 
             final RESTTopicCollectionV1 topics = getJSONResourcesFromQuery(RESTTopicCollectionV1.class, query.getMatrixParameters(), TopicFilterQueryBuilder.class,
                     new TopicFieldFilter(), topicFactory, RESTv1Constants.TOPICS_EXPANSION_NAME, expand);
@@ -2183,7 +2178,7 @@ public class RESTv1 extends BaseRESTv1 implements RESTBaseInterfaceV1, RESTInter
                 // not required, but good practice
                 output.close();
             } catch (IOException e) {
-               //
+                //
             }
         }
     }
@@ -2211,7 +2206,7 @@ public class RESTv1 extends BaseRESTv1 implements RESTBaseInterfaceV1, RESTInter
 
     @Override
     public RESTTopicV1 updateJSONTopic(final String expand, final RESTTopicV1 dataObject, final String message, final Integer flag,
-            final String userId) {
+                                       final String userId) {
         if (dataObject == null) throw new BadRequestException("The dataObject parameter can not be null");
         if (dataObject.getId() == null) throw new BadRequestException("The dataObject.getId() parameter can not be null");
 
@@ -2221,7 +2216,7 @@ public class RESTv1 extends BaseRESTv1 implements RESTBaseInterfaceV1, RESTInter
 
     @Override
     public RESTTopicCollectionV1 updateJSONTopics(final String expand, final RESTTopicCollectionV1 dataObjects, final String message,
-            final Integer flag, final String userId) {
+                                                  final Integer flag, final String userId) {
         if (dataObjects == null) throw new BadRequestException("The dataObjects parameter can not be null");
         if (dataObjects.getItems() == null) throw new BadRequestException("The dataObjects.getItems() parameter can not be null");
 
@@ -2232,7 +2227,7 @@ public class RESTv1 extends BaseRESTv1 implements RESTBaseInterfaceV1, RESTInter
 
     @Override
     public RESTTopicV1 createJSONTopic(final String expand, final RESTTopicV1 dataObject, final String message, final Integer flag,
-            final String userId) {
+                                       final String userId) {
         if (dataObject == null) throw new BadRequestException("The dataObject parameter can not be null");
 
         final RESTLogDetailsV1 logDetails = generateLogDetails(message, flag, userId);
@@ -2241,7 +2236,7 @@ public class RESTv1 extends BaseRESTv1 implements RESTBaseInterfaceV1, RESTInter
 
     @Override
     public RESTTopicCollectionV1 createJSONTopics(final String expand, final RESTTopicCollectionV1 dataObjects, final String message,
-            final Integer flag, final String userId) {
+                                                  final Integer flag, final String userId) {
         if (dataObjects == null) throw new BadRequestException("The dataObjects parameter can not be null");
         if (dataObjects.getItems() == null) throw new BadRequestException("The dataObjects.getItems() parameter can not be null");
 
@@ -2252,7 +2247,7 @@ public class RESTv1 extends BaseRESTv1 implements RESTBaseInterfaceV1, RESTInter
 
     @Override
     public RESTTopicV1 deleteJSONTopic(final Integer id, final String message, final Integer flag, final String userId,
-            final String expand) {
+                                       final String expand) {
         if (id == null) throw new BadRequestException("The id parameter can not be null");
 
         final RESTLogDetailsV1 logDetails = generateLogDetails(message, flag, userId);
@@ -2261,7 +2256,7 @@ public class RESTv1 extends BaseRESTv1 implements RESTBaseInterfaceV1, RESTInter
 
     @Override
     public RESTTopicCollectionV1 deleteJSONTopics(final PathSegment ids, final String message, final Integer flag, final String userId,
-            final String expand) {
+                                                  final String expand) {
         if (ids == null) throw new BadRequestException("The ids parameter can not be null");
 
         final Set<String> dbEntityIds = ids.getMatrixParameters().keySet();
@@ -2476,7 +2471,7 @@ public class RESTv1 extends BaseRESTv1 implements RESTBaseInterfaceV1, RESTInter
 
     @Override
     public RESTFilterV1 updateJSONFilter(final String expand, final RESTFilterV1 dataObject, final String message, final Integer flag,
-            final String userId) {
+                                         final String userId) {
         if (dataObject == null) throw new BadRequestException("The dataObject parameter can not be null");
         if (dataObject.getId() == null) throw new BadRequestException("The dataObject.getId() parameter can not be null");
 
@@ -2486,7 +2481,7 @@ public class RESTv1 extends BaseRESTv1 implements RESTBaseInterfaceV1, RESTInter
 
     @Override
     public RESTFilterCollectionV1 updateJSONFilters(final String expand, final RESTFilterCollectionV1 dataObjects, final String message,
-            final Integer flag, final String userId) {
+                                                    final Integer flag, final String userId) {
         if (dataObjects == null) throw new BadRequestException("The dataObjects parameter can not be null");
         if (dataObjects.getItems() == null) throw new BadRequestException("The dataObjects.getItems() parameter can not be null");
 
@@ -2497,7 +2492,7 @@ public class RESTv1 extends BaseRESTv1 implements RESTBaseInterfaceV1, RESTInter
 
     @Override
     public RESTFilterV1 createJSONFilter(final String expand, final RESTFilterV1 dataObject, final String message, final Integer flag,
-            final String userId) {
+                                         final String userId) {
         if (dataObject == null) throw new BadRequestException("The dataObject parameter can not be null");
 
         final RESTLogDetailsV1 logDetails = generateLogDetails(message, flag, userId);
@@ -2506,7 +2501,7 @@ public class RESTv1 extends BaseRESTv1 implements RESTBaseInterfaceV1, RESTInter
 
     @Override
     public RESTFilterCollectionV1 createJSONFilters(final String expand, final RESTFilterCollectionV1 dataObjects, final String message,
-            final Integer flag, final String userId) {
+                                                    final Integer flag, final String userId) {
         if (dataObjects == null) throw new BadRequestException("The dataObjects parameter can not be null");
         if (dataObjects.getItems() == null) throw new BadRequestException("The dataObjects.getItems() parameter can not be null");
 
@@ -2517,7 +2512,7 @@ public class RESTv1 extends BaseRESTv1 implements RESTBaseInterfaceV1, RESTInter
 
     @Override
     public RESTFilterV1 deleteJSONFilter(final Integer id, final String message, final Integer flag, final String userId,
-            final String expand) {
+                                         final String expand) {
         if (id == null) throw new BadRequestException("The id parameter can not be null");
 
         final RESTLogDetailsV1 logDetails = generateLogDetails(message, flag, userId);
@@ -2526,7 +2521,7 @@ public class RESTv1 extends BaseRESTv1 implements RESTBaseInterfaceV1, RESTInter
 
     @Override
     public RESTFilterCollectionV1 deleteJSONFilters(final PathSegment ids, final String message, final Integer flag, final String userId,
-            final String expand) {
+                                                    final String expand) {
         if (ids == null) throw new BadRequestException("The ids parameter can not be null");
 
         final Set<String> dbEntityIds = ids.getMatrixParameters().keySet();
@@ -2612,7 +2607,7 @@ public class RESTv1 extends BaseRESTv1 implements RESTBaseInterfaceV1, RESTInter
 
     @Override
     public RESTIntegerConstantV1 updateJSONIntegerConstant(final String expand, final RESTIntegerConstantV1 dataObject,
-            final String message, final Integer flag, final String userId) {
+                                                           final String message, final Integer flag, final String userId) {
         if (dataObject == null) throw new BadRequestException("The dataObject parameter can not be null");
         if (dataObject.getId() == null) throw new BadRequestException("The dataObject.getId() parameter can not be null");
 
@@ -2622,7 +2617,7 @@ public class RESTv1 extends BaseRESTv1 implements RESTBaseInterfaceV1, RESTInter
 
     @Override
     public RESTIntegerConstantCollectionV1 updateJSONIntegerConstants(final String expand,
-            final RESTIntegerConstantCollectionV1 dataObjects, final String message, final Integer flag, final String userId) {
+                                                                      final RESTIntegerConstantCollectionV1 dataObjects, final String message, final Integer flag, final String userId) {
         if (dataObjects == null) throw new BadRequestException("The dataObjects parameter can not be null");
         if (dataObjects.getItems() == null) throw new BadRequestException("The dataObjects.getItems() parameter can not be null");
 
@@ -2633,7 +2628,7 @@ public class RESTv1 extends BaseRESTv1 implements RESTBaseInterfaceV1, RESTInter
 
     @Override
     public RESTIntegerConstantV1 createJSONIntegerConstant(final String expand, final RESTIntegerConstantV1 dataObject,
-            final String message, final Integer flag, final String userId) {
+                                                           final String message, final Integer flag, final String userId) {
         if (dataObject == null) throw new BadRequestException("The dataObject parameter can not be null");
 
         final RESTLogDetailsV1 logDetails = generateLogDetails(message, flag, userId);
@@ -2642,7 +2637,7 @@ public class RESTv1 extends BaseRESTv1 implements RESTBaseInterfaceV1, RESTInter
 
     @Override
     public RESTIntegerConstantCollectionV1 createJSONIntegerConstants(final String expand,
-            final RESTIntegerConstantCollectionV1 dataObjects, final String message, final Integer flag, final String userId) {
+                                                                      final RESTIntegerConstantCollectionV1 dataObjects, final String message, final Integer flag, final String userId) {
         if (dataObjects == null) throw new BadRequestException("The dataObjects parameter can not be null");
         if (dataObjects.getItems() == null) throw new BadRequestException("The dataObjects.getItems() parameter can not be null");
 
@@ -2653,7 +2648,7 @@ public class RESTv1 extends BaseRESTv1 implements RESTBaseInterfaceV1, RESTInter
 
     @Override
     public RESTIntegerConstantV1 deleteJSONIntegerConstant(final Integer id, final String message, final Integer flag, final String userId,
-            final String expand) {
+                                                           final String expand) {
         if (id == null) throw new BadRequestException("The id parameter can not be null");
 
         final RESTLogDetailsV1 logDetails = generateLogDetails(message, flag, userId);
@@ -2662,7 +2657,7 @@ public class RESTv1 extends BaseRESTv1 implements RESTBaseInterfaceV1, RESTInter
 
     @Override
     public RESTIntegerConstantCollectionV1 deleteJSONIntegerConstants(final PathSegment ids, final String message, final Integer flag,
-            final String userId, final String expand) {
+                                                                      final String userId, final String expand) {
         if (ids == null) throw new BadRequestException("The ids parameter can not be null");
 
         final Set<String> dbEntityIds = ids.getMatrixParameters().keySet();
@@ -2748,7 +2743,7 @@ public class RESTv1 extends BaseRESTv1 implements RESTBaseInterfaceV1, RESTInter
 
     @Override
     public RESTContentSpecV1 updateJSONContentSpec(final String expand, final RESTContentSpecV1 dataObject, final String message,
-            final Integer flag, final String userId) {
+                                                   final Integer flag, final String userId) {
         if (dataObject == null) throw new BadRequestException("The dataObject parameter can not be null");
         if (dataObject.getId() == null) throw new BadRequestException("The dataObject.getId() parameter can not be null");
 
@@ -2758,7 +2753,7 @@ public class RESTv1 extends BaseRESTv1 implements RESTBaseInterfaceV1, RESTInter
 
     @Override
     public RESTContentSpecCollectionV1 updateJSONContentSpecs(final String expand, final RESTContentSpecCollectionV1 dataObjects,
-            final String message, final Integer flag, final String userId) {
+                                                              final String message, final Integer flag, final String userId) {
         if (dataObjects == null) throw new BadRequestException("The dataObjects parameter can not be null");
         if (dataObjects.getItems() == null) throw new BadRequestException("The dataObjects.getItems() parameter can not be null");
 
@@ -2769,7 +2764,7 @@ public class RESTv1 extends BaseRESTv1 implements RESTBaseInterfaceV1, RESTInter
 
     @Override
     public RESTContentSpecV1 createJSONContentSpec(final String expand, final RESTContentSpecV1 dataObject, final String message,
-            final Integer flag, final String userId) {
+                                                   final Integer flag, final String userId) {
         if (dataObject == null) throw new BadRequestException("The dataObject parameter can not be null");
 
         final RESTLogDetailsV1 logDetails = generateLogDetails(message, flag, userId);
@@ -2778,7 +2773,7 @@ public class RESTv1 extends BaseRESTv1 implements RESTBaseInterfaceV1, RESTInter
 
     @Override
     public RESTContentSpecCollectionV1 createJSONContentSpecs(final String expand, final RESTContentSpecCollectionV1 dataObjects,
-            final String message, final Integer flag, final String userId) {
+                                                              final String message, final Integer flag, final String userId) {
         if (dataObjects == null) throw new BadRequestException("The dataObjects parameter can not be null");
         if (dataObjects.getItems() == null) throw new BadRequestException("The dataObjects.getItems() parameter can not be null");
 
@@ -2789,7 +2784,7 @@ public class RESTv1 extends BaseRESTv1 implements RESTBaseInterfaceV1, RESTInter
 
     @Override
     public RESTContentSpecV1 deleteJSONContentSpec(final Integer id, final String message, final Integer flag, final String userId,
-            final String expand) {
+                                                   final String expand) {
         if (id == null) throw new BadRequestException("The dataObject parameter can not be null");
 
         final RESTLogDetailsV1 logDetails = generateLogDetails(message, flag, userId);
@@ -2798,7 +2793,7 @@ public class RESTv1 extends BaseRESTv1 implements RESTBaseInterfaceV1, RESTInter
 
     @Override
     public RESTContentSpecCollectionV1 deleteJSONContentSpecs(final PathSegment ids, final String message, final Integer flag,
-            final String userId, final String expand) {
+                                                              final String userId, final String expand) {
         if (ids == null) throw new BadRequestException("The dataObjects parameter can not be null");
 
         final Set<String> dbEntityIds = ids.getMatrixParameters().keySet();
@@ -2834,7 +2829,7 @@ public class RESTv1 extends BaseRESTv1 implements RESTBaseInterfaceV1, RESTInter
 
     @Override
     public String updateTEXTContentSpec(final Integer id, final String contentSpec, final Boolean strictTitles, final String message,
-            final Integer flag, final String userId) {
+                                        final Integer flag, final String userId) {
         if (id == null) throw new BadRequestException("The id parameter can not be null");
         if (contentSpec == null) throw new BadRequestException("The contentSpec parameter can not be null");
 
@@ -2844,7 +2839,7 @@ public class RESTv1 extends BaseRESTv1 implements RESTBaseInterfaceV1, RESTInter
 
     @Override
     public String createTEXTContentSpec(final String contentSpec, final Boolean strictTitles, final String message, final Integer flag,
-            final String userId) {
+                                        final String userId) {
         if (contentSpec == null) throw new BadRequestException("The contentSpec parameter can not be null");
 
         final RESTLogDetailsV1 logDetails = generateLogDetails(message, flag, userId);
@@ -2881,7 +2876,7 @@ public class RESTv1 extends BaseRESTv1 implements RESTBaseInterfaceV1, RESTInter
 
     @Override
     public RESTTextContentSpecV1 updateJSONTextContentSpec(final String expand, final RESTTextContentSpecV1 dataObject,
-            final String message, final Integer flag, final String userId) {
+                                                           final String message, final Integer flag, final String userId) {
         if (dataObject == null) throw new BadRequestException("The dataObject parameter can not be null");
         if (dataObject.getId() == null) throw new BadRequestException("The dataObject.getId() parameter can not be null");
 
@@ -2891,7 +2886,7 @@ public class RESTv1 extends BaseRESTv1 implements RESTBaseInterfaceV1, RESTInter
 
     @Override
     public RESTTextContentSpecV1 createJSONTextContentSpec(final String expand, final RESTTextContentSpecV1 dataObject,
-            final String message, final Integer flag, final String userId) {
+                                                           final String message, final Integer flag, final String userId) {
         if (dataObject == null) throw new BadRequestException("The dataObject parameter can not be null");
 
         final RESTLogDetailsV1 logDetails = generateLogDetails(message, flag, userId);
@@ -3075,7 +3070,7 @@ public class RESTv1 extends BaseRESTv1 implements RESTBaseInterfaceV1, RESTInter
 
     @Override
     public String getJSONPTranslatedContentSpecRevision(final Integer id, final Integer revision, final String expand,
-            final String callback) {
+                                                        final String callback) {
         if (callback == null) throw new BadRequestException("The callback parameter can not be null");
 
         try {
@@ -3138,7 +3133,7 @@ public class RESTv1 extends BaseRESTv1 implements RESTBaseInterfaceV1, RESTInter
 
     @Override
     public RESTTranslatedContentSpecV1 updateJSONTranslatedContentSpec(final String expand, final RESTTranslatedContentSpecV1 dataObject,
-            final String message, final Integer flag, final String userId) {
+                                                                       final String message, final Integer flag, final String userId) {
         if (dataObject == null) throw new BadRequestException("The dataObject parameter can not be null");
         if (dataObject.getId() == null) throw new BadRequestException("The dataObject.getId() parameter can not be null");
 
@@ -3148,7 +3143,7 @@ public class RESTv1 extends BaseRESTv1 implements RESTBaseInterfaceV1, RESTInter
 
     @Override
     public RESTTranslatedContentSpecCollectionV1 updateJSONTranslatedContentSpecs(final String expand,
-            final RESTTranslatedContentSpecCollectionV1 dataObjects, final String message, final Integer flag, final String userId) {
+                                                                                  final RESTTranslatedContentSpecCollectionV1 dataObjects, final String message, final Integer flag, final String userId) {
         if (dataObjects == null) throw new BadRequestException("The dataObjects parameter can not be null");
         if (dataObjects.getItems() == null) throw new BadRequestException("The dataObjects.getItems() parameter can not be null");
 
@@ -3159,7 +3154,7 @@ public class RESTv1 extends BaseRESTv1 implements RESTBaseInterfaceV1, RESTInter
 
     @Override
     public RESTTranslatedContentSpecV1 createJSONTranslatedContentSpec(final String expand, final RESTTranslatedContentSpecV1 dataObject,
-            final String message, final Integer flag, final String userId) {
+                                                                       final String message, final Integer flag, final String userId) {
         if (dataObject == null) throw new BadRequestException("The dataObject parameter can not be null");
 
         final RESTLogDetailsV1 logDetails = generateLogDetails(message, flag, userId);
@@ -3168,7 +3163,7 @@ public class RESTv1 extends BaseRESTv1 implements RESTBaseInterfaceV1, RESTInter
 
     @Override
     public RESTTranslatedContentSpecCollectionV1 createJSONTranslatedContentSpecs(final String expand,
-            final RESTTranslatedContentSpecCollectionV1 dataObjects, final String message, final Integer flag, final String userId) {
+                                                                                  final RESTTranslatedContentSpecCollectionV1 dataObjects, final String message, final Integer flag, final String userId) {
         if (dataObjects == null) throw new BadRequestException("The dataObjects parameter can not be null");
         if (dataObjects.getItems() == null) throw new BadRequestException("The dataObjects.getItems() parameter can not be null");
 
@@ -3179,7 +3174,7 @@ public class RESTv1 extends BaseRESTv1 implements RESTBaseInterfaceV1, RESTInter
 
     @Override
     public RESTTranslatedContentSpecV1 deleteJSONTranslatedContentSpec(final Integer id, final String message, final Integer flag,
-            final String userId, final String expand) {
+                                                                       final String userId, final String expand) {
         if (id == null) throw new BadRequestException("The dataObject parameter can not be null");
 
         final RESTLogDetailsV1 logDetails = generateLogDetails(message, flag, userId);
@@ -3188,7 +3183,7 @@ public class RESTv1 extends BaseRESTv1 implements RESTBaseInterfaceV1, RESTInter
 
     @Override
     public RESTTranslatedContentSpecCollectionV1 deleteJSONTranslatedContentSpecs(final PathSegment ids, final String message,
-            final Integer flag, final String userId, final String expand) {
+                                                                                  final Integer flag, final String userId, final String expand) {
         if (ids == null) throw new BadRequestException("The dataObjects parameter can not be null");
 
         final Set<String> dbEntityIds = ids.getMatrixParameters().keySet();
@@ -3212,7 +3207,7 @@ public class RESTv1 extends BaseRESTv1 implements RESTBaseInterfaceV1, RESTInter
 
     @Override
     public String getJSONPTranslatedContentSpecNodeRevision(final Integer id, final Integer revision, final String expand,
-            final String callback) {
+                                                            final String callback) {
         if (callback == null) throw new BadRequestException("The callback parameter can not be null");
 
         try {
@@ -3275,7 +3270,7 @@ public class RESTv1 extends BaseRESTv1 implements RESTBaseInterfaceV1, RESTInter
 
     @Override
     public RESTTranslatedCSNodeV1 updateJSONTranslatedContentSpecNode(final String expand, final RESTTranslatedCSNodeV1 dataObject,
-            final String message, final Integer flag, final String userId) {
+                                                                      final String message, final Integer flag, final String userId) {
         if (dataObject == null) throw new BadRequestException("The dataObject parameter can not be null");
         if (dataObject.getId() == null) throw new BadRequestException("The dataObject.getId() parameter can not be null");
 
@@ -3285,7 +3280,7 @@ public class RESTv1 extends BaseRESTv1 implements RESTBaseInterfaceV1, RESTInter
 
     @Override
     public RESTTranslatedCSNodeCollectionV1 updateJSONTranslatedContentSpecNodes(final String expand,
-            final RESTTranslatedCSNodeCollectionV1 dataObjects, final String message, final Integer flag, final String userId) {
+                                                                                 final RESTTranslatedCSNodeCollectionV1 dataObjects, final String message, final Integer flag, final String userId) {
         if (dataObjects == null) throw new BadRequestException("The dataObjects parameter can not be null");
         if (dataObjects.getItems() == null) throw new BadRequestException("The dataObjects.getItems() parameter can not be null");
 
@@ -3296,7 +3291,7 @@ public class RESTv1 extends BaseRESTv1 implements RESTBaseInterfaceV1, RESTInter
 
     @Override
     public RESTTranslatedCSNodeV1 createJSONTranslatedContentSpecNode(final String expand, final RESTTranslatedCSNodeV1 dataObject,
-            final String message, final Integer flag, final String userId) {
+                                                                      final String message, final Integer flag, final String userId) {
         if (dataObject == null) throw new BadRequestException("The dataObject parameter can not be null");
 
         final RESTLogDetailsV1 logDetails = generateLogDetails(message, flag, userId);
@@ -3305,7 +3300,7 @@ public class RESTv1 extends BaseRESTv1 implements RESTBaseInterfaceV1, RESTInter
 
     @Override
     public RESTTranslatedCSNodeCollectionV1 createJSONTranslatedContentSpecNodes(final String expand,
-            final RESTTranslatedCSNodeCollectionV1 dataObjects, final String message, final Integer flag, final String userId) {
+                                                                                 final RESTTranslatedCSNodeCollectionV1 dataObjects, final String message, final Integer flag, final String userId) {
         if (dataObjects == null) throw new BadRequestException("The dataObjects parameter can not be null");
         if (dataObjects.getItems() == null) throw new BadRequestException("The dataObjects.getItems() parameter can not be null");
 
@@ -3316,7 +3311,7 @@ public class RESTv1 extends BaseRESTv1 implements RESTBaseInterfaceV1, RESTInter
 
     @Override
     public RESTTranslatedCSNodeV1 deleteJSONTranslatedContentSpecNode(final Integer id, final String message, final Integer flag,
-            final String userId, final String expand) {
+                                                                      final String userId, final String expand) {
         if (id == null) throw new BadRequestException("The dataObject parameter can not be null");
 
         final RESTLogDetailsV1 logDetails = generateLogDetails(message, flag, userId);
@@ -3325,7 +3320,7 @@ public class RESTv1 extends BaseRESTv1 implements RESTBaseInterfaceV1, RESTInter
 
     @Override
     public RESTTranslatedCSNodeCollectionV1 deleteJSONTranslatedContentSpecNodes(final PathSegment ids, final String message,
-            final Integer flag, final String userId, final String expand) {
+                                                                                 final Integer flag, final String userId, final String expand) {
         if (ids == null) throw new BadRequestException("The dataObjects parameter can not be null");
 
         final Set<String> dbEntityIds = ids.getMatrixParameters().keySet();
@@ -3409,7 +3404,7 @@ public class RESTv1 extends BaseRESTv1 implements RESTBaseInterfaceV1, RESTInter
 
     @Override
     public RESTFileV1 updateJSONFile(final String expand, final RESTFileV1 dataObject, final String message, final Integer flag,
-            final String userId) {
+                                     final String userId) {
         if (dataObject == null) throw new BadRequestException("The dataObject parameter can not be null");
         if (dataObject.getId() == null) throw new BadRequestException("The dataObject.getId() parameter can not be null");
 
@@ -3419,7 +3414,7 @@ public class RESTv1 extends BaseRESTv1 implements RESTBaseInterfaceV1, RESTInter
 
     @Override
     public RESTFileCollectionV1 updateJSONFiles(final String expand, final RESTFileCollectionV1 dataObjects, final String message,
-            final Integer flag, final String userId) {
+                                                final Integer flag, final String userId) {
         if (dataObjects == null) throw new BadRequestException("The dataObjects parameter can not be null");
         if (dataObjects.getItems() == null) throw new BadRequestException("The dataObjects.getItems() parameter can not be null");
 
@@ -3430,7 +3425,7 @@ public class RESTv1 extends BaseRESTv1 implements RESTBaseInterfaceV1, RESTInter
 
     @Override
     public RESTFileV1 createJSONFile(final String expand, final RESTFileV1 dataObject, final String message, final Integer flag,
-            final String userId) {
+                                     final String userId) {
         if (dataObject == null) throw new BadRequestException("The dataObject parameter can not be null");
 
         final RESTLogDetailsV1 logDetails = generateLogDetails(message, flag, userId);
@@ -3439,7 +3434,7 @@ public class RESTv1 extends BaseRESTv1 implements RESTBaseInterfaceV1, RESTInter
 
     @Override
     public RESTFileCollectionV1 createJSONFiles(final String expand, final RESTFileCollectionV1 dataObjects, final String message,
-            final Integer flag, final String userId) {
+                                                final Integer flag, final String userId) {
         if (dataObjects == null) throw new BadRequestException("The dataObjects parameter can not be null");
         if (dataObjects.getItems() == null) throw new BadRequestException("The dataObjects.getItems() parameter can not be null");
 
@@ -3458,7 +3453,7 @@ public class RESTv1 extends BaseRESTv1 implements RESTBaseInterfaceV1, RESTInter
 
     @Override
     public RESTFileCollectionV1 deleteJSONFiles(final PathSegment ids, final String message, final Integer flag, final String userId,
-            final String expand) {
+                                                final String expand) {
         if (ids == null) throw new BadRequestException("The ids parameter can not be null");
 
         final Set<String> dbEntityIds = ids.getMatrixParameters().keySet();

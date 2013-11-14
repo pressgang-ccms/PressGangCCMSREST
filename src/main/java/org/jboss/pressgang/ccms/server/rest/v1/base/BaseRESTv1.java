@@ -4,16 +4,14 @@ import javax.annotation.Resource;
 import javax.enterprise.context.RequestScoped;
 import javax.inject.Inject;
 import javax.naming.NamingException;
-import javax.persistence.EntityManager;
-import javax.persistence.EntityNotFoundException;
-import javax.persistence.PersistenceException;
-import javax.persistence.TypedQuery;
+import javax.persistence.*;
 import javax.persistence.criteria.CriteriaBuilder;
 import javax.persistence.criteria.CriteriaQuery;
 import javax.persistence.criteria.Root;
 import javax.transaction.RollbackException;
 import javax.transaction.Status;
 import javax.transaction.TransactionManager;
+import javax.transaction.UserTransaction;
 import javax.validation.ConstraintViolation;
 import javax.validation.ConstraintViolationException;
 import javax.validation.ValidationException;
@@ -115,6 +113,10 @@ import org.slf4j.LoggerFactory;
 @RequestScoped
 public class BaseRESTv1 extends BaseREST {
     private static final Logger log = LoggerFactory.getLogger(BaseRESTv1.class);
+
+    public static final String TRANSACTION_MANAGER_NAME = "java:jboss/TransactionManager";
+    public static final String PERSISTENCE_UNIT_NAME = "PressGangCCMS";
+
     /**
      * The format for dates passed and returned by the REST Interface
      */
@@ -132,8 +134,12 @@ public class BaseRESTv1 extends BaseREST {
     /**
      * The JBoss Transaction Manager
      */
-    @Resource(lookup = "java:jboss/TransactionManager")
+    @Resource(lookup = TRANSACTION_MANAGER_NAME)
     protected TransactionManager transactionManager;
+    /*@PersistenceUnit(unitName = PERSISTENCE_UNIT_NAME)
+    protected EntityManagerFactory entityManagerFactory;
+    @Resource
+    protected UserTransaction userTransaction;*/
     /**
      * The EntityManager to use for this request
      */
