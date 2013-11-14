@@ -144,6 +144,7 @@ import org.jboss.pressgang.ccms.utils.common.DocBookUtilities;
 import org.jboss.pressgang.ccms.utils.common.XMLUtilities;
 import org.jboss.pressgang.ccms.utils.common.ZipUtilities;
 import org.jboss.pressgang.ccms.utils.constants.CommonConstants;
+import org.jboss.pressgang.ccms.utils.constants.CommonFilterConstants;
 import org.jboss.resteasy.plugins.providers.atom.Feed;
 import org.jboss.resteasy.specimpl.PathSegmentImpl;
 import org.jboss.resteasy.spi.BadRequestException;
@@ -174,14 +175,22 @@ public class RESTv1 extends BaseRESTv1 implements RESTBaseInterfaceV1, RESTInter
 
     /* UTILITY FUNCTIONS */
     @Override
-    public List<Integer> getMinHashes(final String xml) {
+    public Map<Integer, Integer> getMinHashes(final String xml) {
         final List<MinHashXOR> minHashXORs = entityManager.createQuery(MinHashXOR.SELECT_ALL_QUERY).getResultList();
-        return TopicUtilities.getMinHashes(xml, minHashXORs);
+        return org.jboss.pressgang.ccms.model.utils.TopicUtilities.getMinHashes(xml, minHashXORs);
     }
 
     @Override
-    public RESTTopicCollectionV1 getSimilarTopics(final String xml, final String expand) {
-        //final List<Integer> topics = org.jboss.pressgang.ccms.model.utils.TopicUtilities.getMatchingMinHash();
+    public RESTTopicCollectionV1 getSimilarTopics(final String xml, final String expand, final Float threshold) {
+        final Map<Integer, Integer> minHashes = getMinHashes(xml);
+
+        final List<Integer> topics = org.jboss.pressgang.ccms.model.utils.TopicUtilities.getMatchingMinHash(entityManager, minHashes, threshold);
+        final String topicIds = CollectionUtilities.toSeperatedString(topics, ",");
+
+        final PathSegment filter = new PathSegmentImpl("query", false);
+        filter.getMatrixParameters().add(CommonFilterConstants.TOPIC_IDS_FILTER_VAR, topicIds);
+
+        getJSONTopicsWithQuery(filter, expand);
         return null;
     }
 
