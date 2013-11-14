@@ -84,17 +84,26 @@ public class TopicUtilities {
      */
     public static void recalculateMinHash(final Topic topic, final List<MinHashXOR> minHashXORs) {
         final List<MinHash> existingMinHashes = new ArrayList<MinHash>(topic.getMinHashes());
-        for (final MinHash minHash : existingMinHashes) {
-            topic.removeMinHash(minHash);
-        }
 
         final List<Integer> minHashes = getMinHashes(topic.getTopicXML(), minHashXORs);
 
         for (int k = 0; k < minHashes.size(); ++k) {
-            final MinHash minHash = new MinHash();
-            minHash.setMinHashFuncID(k);
-            minHash.setMinHash(minHashes.get(k));
-            topic.addMinHash(minHash);
+
+            boolean found = false;
+            for (final MinHash minHash : existingMinHashes) {
+                if (minHash.getMinHashFuncID() == k) {
+                    minHash.setMinHash(minHashes.get(k));
+                    found = true;
+                    break;
+                }
+            }
+
+            if (!found) {
+                final MinHash minHash = new MinHash();
+                minHash.setMinHashFuncID(k);
+                minHash.setMinHash(minHashes.get(k));
+                topic.addMinHash(minHash);
+            }
         }
     }
 

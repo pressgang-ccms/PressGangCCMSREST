@@ -1,6 +1,7 @@
 package org.jboss.pressgang.ccms.server.rest.v1;
 
 import javax.persistence.criteria.CriteriaQuery;
+import javax.transaction.Status;
 import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
 import javax.ws.rs.QueryParam;
@@ -179,6 +180,12 @@ public class RESTv1 extends BaseRESTv1 implements RESTBaseInterfaceV1, RESTInter
     }
 
     @Override
+    public RESTTopicCollectionV1 getSimilarTopics(final String xml, final String expand) {
+        //final List<Integer> topics = org.jboss.pressgang.ccms.model.utils.TopicUtilities.getMatchingMinHash();
+        return null;
+    }
+
+    @Override
     public void recalculateMinHashXORs(final String confirmation) {
         try {
             // Start a Transaction
@@ -232,40 +239,60 @@ public class RESTv1 extends BaseRESTv1 implements RESTBaseInterfaceV1, RESTInter
 
     @Override
     public void recalculateMinHash() {
+        recalculateMinHashes(false);
+    }
+
+    @Override
+    public void recalculateMissingMinHash() {
+        recalculateMinHashes(true);
+    }
+
+    private void recalculateMinHashes(final boolean missingOnly) {
         try {
+            final String topicQuery = Topic.SELECT_ALL_QUERY + " WHERE topic.topicXML != '' AND NOT topic.topicXML IS NULL" +
+                    (missingOnly ? " AND SIZE(topic.minHashes) != " + org.jboss.pressgang.ccms.model.constants.Constants.NUM_MIN_HASHES : "");
+
             final List<MinHashXOR> minHashXORs = entityManager.createQuery(MinHashXOR.SELECT_ALL_QUERY).getResultList();
-            final List<Topic> topics = entityManager.createQuery(Topic.SELECT_ALL_QUERY).getResultList();
+            final List<Topic> topics = entityManager.createQuery(topicQuery).getResultList();
 
             // Since there are a lot of topics to process there is a high chance it'll hit the timeout,
             // so break the transactions into smaller chunks
             for (int i = 0; i < topics.size(); i += BATCH_SIZE) {
-                // Start a Transaction
-                transactionManager.begin();
+                // allow a batch to fail while the remaining ones keep calculating
+                try {
+                    // Start a Transaction
+                    transactionManager.begin();
 
-                // Join the transaction we just started
-                entityManager.joinTransaction();
+                    // Join the transaction we just started
+                    entityManager.joinTransaction();
 
-                for (int j = i; j < topics.size() && j < i + BATCH_SIZE; ++j) {
+                    for (int j = i; j < topics.size() && j < i + BATCH_SIZE; ++j) {
 
-                    final Topic topic = topics.get(j);
-                    TopicUtilities.recalculateMinHash(topic, minHashXORs);
+                        final Topic topic = topics.get(j);
+                        TopicUtilities.recalculateMinHash(topic, minHashXORs);
 
-                    // Handle topics that have invalid titles.
-                    if (topic.getTopicTitle() == null || topic.getTopicTitle().trim().isEmpty()) {
-                        topic.setTopicTitle("Placeholder");
+                        // Handle topics that have invalid titles.
+                        if (topic.getTopicTitle() == null || topic.getTopicTitle().trim().isEmpty()) {
+                            topic.setTopicTitle("Placeholder");
+                        }
+
+                        entityManager.persist(topic);
+
+                        // Do batch updating by flushing the changes every 100 updates.
+                        if (j % BATCH_SIZE == 0) {
+                            entityManager.flush();
+                        }
                     }
 
-                    entityManager.persist(topic);
-
-                    // Do batch updating by flushing the changes every 100 updates.
-                    if (j % BATCH_SIZE == 0) {
-                        entityManager.flush();
+                    // Flush the changes to the database and commit the transaction
+                    entityManager.flush();
+                    transactionManager.commit();
+                } catch (final Exception ex) {
+                    final int status = transactionManager.getStatus();
+                    if (status != Status.STATUS_ROLLING_BACK && status != Status.STATUS_ROLLEDBACK && status != Status.STATUS_NO_TRANSACTION) {
+                        transactionManager.rollback();
                     }
                 }
-
-                // Flush the changes to the database and commit the transaction
-                entityManager.flush();
-                transactionManager.commit();
             }
         } catch (final Throwable ex) {
             throw processError(transactionManager, ex);
