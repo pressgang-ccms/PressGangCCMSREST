@@ -18,5 +18,9 @@ public class Constants {
      * The base URL from which the REST interface can be accessed
      */
     public static final String BASE_REST_PATH = "/rest";
+    /**
+     * Query strings passed in as path segments always use this as the prefix
+     */
+    public static final String QUERY_PATHSEGMENT_PREFIX = "query";
 
 }

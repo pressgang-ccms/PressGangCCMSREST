@@ -187,7 +187,7 @@ public class RESTv1 extends BaseRESTv1 implements RESTBaseInterfaceV1, RESTInter
         final List<Integer> topics = org.jboss.pressgang.ccms.model.utils.TopicUtilities.getMatchingMinHash(entityManager, minHashes, threshold);
         final String topicIds = CollectionUtilities.toSeperatedString(topics, ",");
 
-        final PathSegment filter = new PathSegmentImpl("query", false);
+        final PathSegment filter = new PathSegmentImpl(Constants.QUERY_PATHSEGMENT_PREFIX, false);
         filter.getMatrixParameters().add(CommonFilterConstants.TOPIC_IDS_FILTER_VAR, topicIds);
 
         getJSONTopicsWithQuery(filter, expand);
@@ -278,7 +278,7 @@ public class RESTv1 extends BaseRESTv1 implements RESTBaseInterfaceV1, RESTInter
                     for (int j = i; j < topics.size() && j < i + BATCH_SIZE; ++j) {
 
                         final Topic topic = topics.get(j);
-                        TopicUtilities.recalculateMinHash(topic, minHashXORs);
+                        org.jboss.pressgang.ccms.model.utils.TopicUtilities.recalculateMinHash(topic, minHashXORs);
 
                         // Handle topics that have invalid titles.
                         if (topic.getTopicTitle() == null || topic.getTopicTitle().trim().isEmpty()) {
