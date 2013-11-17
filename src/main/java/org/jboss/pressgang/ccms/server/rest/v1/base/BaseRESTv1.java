@@ -115,6 +115,7 @@ public class BaseRESTv1 extends BaseREST {
     private static final Logger log = LoggerFactory.getLogger(BaseRESTv1.class);
 
     public static final String TRANSACTION_MANAGER_NAME = "java:jboss/TransactionManager";
+    public static final String USER_TRANSACTION_NAME = "java:jboss/UserTransaction";
     public static final String PERSISTENCE_UNIT_NAME = "PressGangCCMS";
 
     /**
@@ -136,10 +137,8 @@ public class BaseRESTv1 extends BaseREST {
      */
     @Resource(lookup = TRANSACTION_MANAGER_NAME)
     protected TransactionManager transactionManager;
-    /*@PersistenceUnit(unitName = PERSISTENCE_UNIT_NAME)
+    @PersistenceUnit(unitName = PERSISTENCE_UNIT_NAME)
     protected EntityManagerFactory entityManagerFactory;
-    @Resource
-    protected UserTransaction userTransaction;*/
     /**
      * The EntityManager to use for this request
      */

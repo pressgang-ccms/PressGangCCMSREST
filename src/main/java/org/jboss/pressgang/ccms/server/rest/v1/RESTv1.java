@@ -1,7 +1,11 @@
 package org.jboss.pressgang.ccms.server.rest.v1;
 
+import javax.naming.InitialContext;
+import javax.persistence.EntityManager;
 import javax.persistence.criteria.CriteriaQuery;
 import javax.transaction.Status;
+import javax.transaction.SystemException;
+import javax.transaction.UserTransaction;
 import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
 import javax.ws.rs.QueryParam;
@@ -21,6 +25,8 @@ import java.util.concurrent.atomic.AtomicInteger;
 
 import org.apache.batik.dom.GenericDOMImplementation;
 import org.apache.batik.svggen.SVGGraphics2D;
+import org.apache.commons.threadpool.DefaultThreadPool;
+import org.apache.commons.threadpool.ThreadPool;
 import org.hibernate.Session;
 import org.hibernate.search.FullTextSession;
 import org.hibernate.search.Search;
@@ -170,6 +176,8 @@ import org.w3c.dom.Document;
 public class RESTv1 extends BaseRESTv1 implements RESTBaseInterfaceV1, RESTInterfaceAdvancedV1 {
     private static final Logger log = LoggerFactory.getLogger(RESTv1.class);
     private static final int BATCH_SIZE = 20;
+    private static final int THREAD_POOL_SIZE = 5;
+    private static final ThreadPool THREAD_POOL = new DefaultThreadPool(THREAD_POOL_SIZE);
 
     @Context HttpResponse response;
 
@@ -185,12 +193,20 @@ public class RESTv1 extends BaseRESTv1 implements RESTBaseInterfaceV1, RESTInter
         final Map<Integer, Integer> minHashes = getMinHashes(xml);
 
         final List<Integer> topics = org.jboss.pressgang.ccms.model.utils.TopicUtilities.getMatchingMinHash(entityManager, minHashes, threshold);
-        final String topicIds = CollectionUtilities.toSeperatedString(topics, ",");
 
-        final PathSegment filter = new PathSegmentImpl(Constants.QUERY_PATHSEGMENT_PREFIX, false);
-        filter.getMatrixParameters().add(CommonFilterConstants.TOPIC_IDS_FILTER_VAR, topicIds);
+        if (topics != null) {
 
-        return getJSONTopicsWithQuery(filter, expand);
+
+
+            final String topicIds = CollectionUtilities.toSeperatedString(topics, ",");
+
+            final PathSegment filter = new PathSegmentImpl(Constants.QUERY_PATHSEGMENT_PREFIX, false);
+            filter.getMatrixParameters().add(CommonFilterConstants.TOPIC_IDS_FILTER_VAR, topicIds);
+
+            return getJSONTopicsWithQuery(filter, expand);
+        } else {
+            return new RESTTopicCollectionV1();
+        }
     }
 
     @Override
@@ -257,39 +273,71 @@ public class RESTv1 extends BaseRESTv1 implements RESTBaseInterfaceV1, RESTInter
 
     private void recalculateMinHashes(final boolean missingOnly) {
         try {
-            final String topicQuery = Topic.SELECT_ALL_QUERY + " WHERE topic.topicXML != '' AND NOT topic.topicXML IS NULL" +
+            final String topicQuery = "SELECT topic.topicId FROM Topic as Topic WHERE topic.topicXML != '' AND NOT topic.topicXML IS NULL" +
                     (missingOnly ? " AND SIZE(topic.minHashes) != " + org.jboss.pressgang.ccms.model.constants.Constants.NUM_MIN_HASHES : "");
 
             final List<MinHashXOR> minHashXORs = entityManager.createQuery(MinHashXOR.SELECT_ALL_QUERY).getResultList();
-            final List<Topic> topics = entityManager.createQuery(topicQuery).getResultList();
+            final List<Integer> topics = entityManager.createQuery(topicQuery).getResultList();
 
             // Since there are a lot of topics to process there is a high chance it'll hit the timeout,
             // so break the transactions into smaller chunks
             for (int i = 0; i < topics.size(); i += BATCH_SIZE) {
+
+                final int startTopic = i;
+
                 // allow a batch to fail while the remaining ones keep calculating
                 try {
-                    // Start a Transaction
-                    transactionManager.begin();
+                    // lets just wrap up some code in a Runnable
+                    THREAD_POOL.invokeLater(
+                            new Runnable() {
+                                public void run() {
 
-                    // Join the transaction we just started
-                    entityManager.joinTransaction();
+                                    InitialContext ic = null;
+                                    UserTransaction utx = null;
+                                    EntityManager em = null;
 
-                    for (int j = i; j < topics.size() && j < i + BATCH_SIZE; ++j) {
+                                    try {
+                                        ic = new InitialContext();
+                                        utx = (UserTransaction)ic.lookup(USER_TRANSACTION_NAME);
+                                        em = entityManagerFactory.createEntityManager();
 
-                        final Topic topic = topics.get(j);
-                        org.jboss.pressgang.ccms.model.utils.TopicUtilities.recalculateMinHash(topic, minHashXORs);
+                                        // Start a Transaction
+                                        utx.begin();
 
-                        // Handle topics that have invalid titles.
-                        if (topic.getTopicTitle() == null || topic.getTopicTitle().trim().isEmpty()) {
-                            topic.setTopicTitle("Placeholder");
-                        }
+                                        // Join the transaction we just started
+                                        em.joinTransaction();
 
-                        entityManager.persist(topic);
-                    }
+                                        for (int j = startTopic; j < topics.size() && j < startTopic + BATCH_SIZE; ++j) {
 
-                    // Flush the changes to the database and commit the transaction
-                    entityManager.flush();
-                    transactionManager.commit();
+                                            final Topic topic = em.find(Topic.class, topics.get(j));
+                                            org.jboss.pressgang.ccms.model.utils.TopicUtilities.recalculateMinHash(topic, minHashXORs);
+
+                                            // Handle topics that have invalid titles.
+                                            if (topic.getTopicTitle() == null || topic.getTopicTitle().trim().isEmpty()) {
+                                                topic.setTopicTitle("Placeholder");
+                                            }
+
+                                            em.persist(topic);
+                                        }
+
+                                        utx.commit();
+                                    } catch (final Exception ex) {
+                                        try {
+                                            if (utx != null) {
+                                                utx.rollback();
+                                            }
+                                        } catch (final SystemException ex2) {
+                                            // nothing to do here
+                                        }
+                                    } finally {
+                                        if (em != null) {
+                                            em.close();
+                                        }
+                                    }
+                                }
+                            }
+                    );
+
                 } catch (final Exception ex) {
                     final int status = transactionManager.getStatus();
                     if (status != Status.STATUS_ROLLING_BACK && status != Status.STATUS_ROLLEDBACK && status != Status.STATUS_NO_TRANSACTION) {
