@@ -36,7 +36,6 @@ import org.jboss.pressgang.ccms.model.User;
 import org.jboss.pressgang.ccms.rest.v1.constants.CommonFilterConstants;
 import org.jboss.pressgang.ccms.server.constants.Constants;
 import org.jboss.pressgang.ccms.utils.common.CollectionUtilities;
-import org.jboss.pressgang.ccms.utils.constants.CommonConstants;
 import org.joda.time.DateTime;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -538,19 +537,6 @@ public class EntityUtilities extends org.jboss.pressgang.ccms.filter.utils.Entit
         if (topics.size() == 0) return Constants.NULL_TOPIC_ID_STRING;
 
         return CollectionUtilities.toSeperatedString(topics);
-    }
-
-    public static List<String> getLocales(final EntityManager entityManager) {
-        final String localeConstant = loadStringConstant(entityManager, CommonConstants.LOCALES_STRING_CONSTANT_ID);
-
-        if (localeConstant != null) {
-            final List<String> locales = CollectionUtilities.replaceStrings(
-                    CollectionUtilities.sortAndReturn(CollectionUtilities.toArrayList(localeConstant.split("[\\s\r\n]*,[\\s\r\n]*"))), "_",
-                    "-");
-            return locales;
-        } else {
-            return new ArrayList<String>();
-        }
     }
 
     @SuppressWarnings("unchecked")

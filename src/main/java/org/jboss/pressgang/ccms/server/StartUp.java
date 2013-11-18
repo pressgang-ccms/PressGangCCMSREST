@@ -11,7 +11,6 @@ import org.jboss.pressgang.ccms.contentspec.enums.BugLinkType;
 import org.jboss.pressgang.ccms.model.config.ApplicationConfig;
 import org.jboss.pressgang.ccms.model.config.EntitiesConfig;
 import org.jboss.pressgang.ccms.server.contentspec.TeiidBugLinkStrategy;
-import org.jboss.pressgang.ccms.utils.constants.CommonConstants;
 
 @Singleton
 @Startup
@@ -24,8 +23,6 @@ public class StartUp {
         // Load the application config
         final ApplicationConfig appConfig = ApplicationConfig.getInstance();
         appConfig.load(new File(pressGangConfigurationDir + ApplicationConfig.FILENAME));
-        // Set the default locale system property
-        System.setProperty(CommonConstants.DEFAULT_LOCALE_PROPERTY, appConfig.getDefaultLocale());
 
         // Load the entities config
         final EntitiesConfig entitiesConfig = EntitiesConfig.getInstance();
@@ -47,7 +44,12 @@ public class StartUp {
         if (pressGangConfigurationDir == null) {
             // If the pressgang config directory isn't set then try and load from the jboss config directory
             final String jbossConfigurationDir = System.getProperties().getProperty("jboss.server.config.dir");
-            configurationDir = jbossConfigurationDir + File.separator + "pressgang";
+            if (jbossConfigurationDir == null) {
+                // We aren't running on a jboss install, so just use the current working directory
+                configurationDir = System.getProperty("user.dir");
+            } else {
+                configurationDir = jbossConfigurationDir + File.separator + "pressgang";
+            }
         } else {
             configurationDir = pressGangConfigurationDir;
         }

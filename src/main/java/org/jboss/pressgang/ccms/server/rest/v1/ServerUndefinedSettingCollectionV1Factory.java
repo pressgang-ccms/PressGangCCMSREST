@@ -40,7 +40,7 @@ public class ServerUndefinedSettingCollectionV1Factory {
                 applicationConfig.removeProperty(restEntity.getKey());
             } else if (restEntityItem.returnIsAddItem() || restEntityItem.returnIsUpdateItem()) {
                 if (restEntity.hasParameterSet(RESTServerUndefinedSettingV1.VALUE_NAME)) {
-                    applicationConfig.addUndefinedProperty(restEntity.getKey(), restEntity.getValue());
+                    applicationConfig.addUndefinedSetting(restEntity.getKey(), restEntity.getValue());
                 }
             }
         }

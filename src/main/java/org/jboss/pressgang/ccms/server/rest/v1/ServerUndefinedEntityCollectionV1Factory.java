@@ -39,7 +39,7 @@ public class ServerUndefinedEntityCollectionV1Factory {
                 entityConfig.removeProperty(restEntity.getKey());
             } else if (restEntityItem.returnIsAddItem() || restEntityItem.returnIsUpdateItem()) {
                 if (restEntity.hasParameterSet(RESTServerUndefinedEntityV1.VALUE_NAME)) {
-                    entityConfig.addUndefinedProperty(restEntity.getKey(), restEntity.getValue());
+                    entityConfig.addUndefinedEntity(restEntity.getKey(), restEntity.getValue());
                 }
             }
         }

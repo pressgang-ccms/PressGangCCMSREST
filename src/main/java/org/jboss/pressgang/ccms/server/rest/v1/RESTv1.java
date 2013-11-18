@@ -86,6 +86,7 @@ import org.jboss.pressgang.ccms.model.Tag;
 import org.jboss.pressgang.ccms.model.Topic;
 import org.jboss.pressgang.ccms.model.TranslatedTopicData;
 import org.jboss.pressgang.ccms.model.User;
+import org.jboss.pressgang.ccms.model.config.ApplicationConfig;
 import org.jboss.pressgang.ccms.model.contentspec.CSNode;
 import org.jboss.pressgang.ccms.model.contentspec.ContentSpec;
 import org.jboss.pressgang.ccms.model.contentspec.TranslatedCSNode;
@@ -1967,18 +1968,18 @@ public class RESTv1 extends BaseRESTv1 implements RESTBaseInterfaceV1, RESTInter
         if (id == null) throw new BadRequestException("The id parameter can not be null");
 
         final ImageFile entity = getEntity(ImageFile.class, id);
-        final String fixedLocale = locale == null ? CommonConstants.DEFAULT_LOCALE : locale;
+        final String fixedLocale = locale == null ? ApplicationConfig.getInstance().getDefaultLocale() : locale;
 
-        /* Try and find the locale specified first */
+        // Try and find the locale specified first
         for (final LanguageImage languageImage : entity.getLanguageImages()) {
             if (fixedLocale.equalsIgnoreCase(languageImage.getLocale())) {
                 return Response.ok(languageImage.getImageData(), languageImage.getMimeType()).build();
             }
         }
 
-        /* If the specified locale can't be found then use the default */
+        // If the specified locale can't be found then use the default
         for (final LanguageImage languageImage : entity.getLanguageImages()) {
-            if (CommonConstants.DEFAULT_LOCALE.equalsIgnoreCase(languageImage.getLocale())) {
+            if (ApplicationConfig.getInstance().getDefaultLocale().equalsIgnoreCase(languageImage.getLocale())) {
                 return Response.ok(languageImage.getImageData(), languageImage.getMimeType()).build();
             }
         }
@@ -1992,18 +1993,18 @@ public class RESTv1 extends BaseRESTv1 implements RESTBaseInterfaceV1, RESTInter
         if (revision == null) throw new BadRequestException("The revision parameter can not be null");
 
         final ImageFile entity = getEntity(ImageFile.class, id, revision);
-        final String fixedLocale = locale == null ? CommonConstants.DEFAULT_LOCALE : locale;
+        final String fixedLocale = locale == null ? ApplicationConfig.getInstance().getDefaultLocale() : locale;
 
-        /* Try and find the locale specified first */
+        // Try and find the locale specified first
         for (final LanguageImage languageImage : entity.getLanguageImages()) {
             if (fixedLocale.equalsIgnoreCase(languageImage.getLocale())) {
                 return Response.ok(languageImage.getImageData(), languageImage.getMimeType()).build();
             }
         }
 
-        /* If the specified locale can't be found then use the default */
+        // If the specified locale can't be found then use the default
         for (final LanguageImage languageImage : entity.getLanguageImages()) {
-            if (CommonConstants.DEFAULT_LOCALE.equalsIgnoreCase(languageImage.getLocale())) {
+            if (ApplicationConfig.getInstance().getDefaultLocale().equalsIgnoreCase(languageImage.getLocale())) {
                 return Response.ok(languageImage.getImageData(), languageImage.getMimeType()).build();
             }
         }
@@ -2016,7 +2017,7 @@ public class RESTv1 extends BaseRESTv1 implements RESTBaseInterfaceV1, RESTInter
         if (id == null) throw new BadRequestException("The id parameter can not be null");
 
         final ImageFile entity = getEntity(ImageFile.class, id);
-        final String fixedLocale = locale == null ? CommonConstants.DEFAULT_LOCALE : locale;
+        final String fixedLocale = locale == null ? ApplicationConfig.getInstance().getDefaultLocale() : locale;
 
         try {
             LanguageImage foundLanguageImage = null;
@@ -2032,7 +2033,7 @@ public class RESTv1 extends BaseRESTv1 implements RESTBaseInterfaceV1, RESTInter
             if (foundLanguageImage == null) {
                 // If the specified locale can't be found then use the default */
                 for (final LanguageImage languageImage : entity.getLanguageImages()) {
-                    if (CommonConstants.DEFAULT_LOCALE.equalsIgnoreCase(languageImage.getLocale())) {
+                    if (ApplicationConfig.getInstance().getDefaultLocale().equalsIgnoreCase(languageImage.getLocale())) {
                         foundLanguageImage = languageImage;
                         break;
                     }
@@ -3551,9 +3552,9 @@ public class RESTv1 extends BaseRESTv1 implements RESTBaseInterfaceV1, RESTInter
         if (id == null) throw new BadRequestException("The id parameter can not be null");
 
         final File entity = getEntity(File.class, id);
-        final String fixedLocale = locale == null ? CommonConstants.DEFAULT_LOCALE : locale;
+        final String fixedLocale = locale == null ? ApplicationConfig.getInstance().getDefaultLocale() : locale;
 
-        /* Try and find the locale specified first */
+        // Try and find the locale specified first
         for (final LanguageFile languageFile : entity.getLanguageFiles()) {
             if (fixedLocale.equalsIgnoreCase(languageFile.getLocale())) {
                 response.getOutputHeaders().putSingle("Content-Disposition", "filename=" + entity.getFileName());
@@ -3561,9 +3562,9 @@ public class RESTv1 extends BaseRESTv1 implements RESTBaseInterfaceV1, RESTInter
             }
         }
 
-        /* If the specified locale can't be found then use the default */
+        // If the specified locale can't be found then use the default
         for (final LanguageFile languageFile : entity.getLanguageFiles()) {
-            if (CommonConstants.DEFAULT_LOCALE.equalsIgnoreCase(languageFile.getLocale())) {
+            if (ApplicationConfig.getInstance().getDefaultLocale().equalsIgnoreCase(languageFile.getLocale())) {
                 response.getOutputHeaders().putSingle("Content-Disposition", "filename=" + entity.getFileName());
                 return languageFile.getFileData();
             }
@@ -3578,9 +3579,9 @@ public class RESTv1 extends BaseRESTv1 implements RESTBaseInterfaceV1, RESTInter
         if (revision == null) throw new BadRequestException("The revision parameter can not be null");
 
         final File entity = getEntity(File.class, id, revision);
-        final String fixedLocale = locale == null ? CommonConstants.DEFAULT_LOCALE : locale;
+        final String fixedLocale = locale == null ? ApplicationConfig.getInstance().getDefaultLocale() : locale;
 
-        /* Try and find the locale specified first */
+        // Try and find the locale specified first
         for (final LanguageFile languageFile : entity.getLanguageFiles()) {
             if (fixedLocale.equalsIgnoreCase(languageFile.getLocale())) {
                 response.getOutputHeaders().putSingle("Content-Disposition", "filename=" + entity.getFileName());
@@ -3588,9 +3589,9 @@ public class RESTv1 extends BaseRESTv1 implements RESTBaseInterfaceV1, RESTInter
             }
         }
 
-        /* If the specified locale can't be found then use the default */
+        // If the specified locale can't be found then use the default
         for (final LanguageFile languageFile : entity.getLanguageFiles()) {
-            if (CommonConstants.DEFAULT_LOCALE.equalsIgnoreCase(languageFile.getLocale())) {
+            if (ApplicationConfig.getInstance().getDefaultLocale().equalsIgnoreCase(languageFile.getLocale())) {
                 response.getOutputHeaders().putSingle("Content-Disposition", "filename=" + entity.getFileName());
                 return languageFile.getFileData();
             }
