@@ -4,10 +4,7 @@ import javax.annotation.Resource;
 import javax.enterprise.context.RequestScoped;
 import javax.inject.Inject;
 import javax.naming.NamingException;
-import javax.persistence.EntityManager;
-import javax.persistence.EntityNotFoundException;
-import javax.persistence.PersistenceException;
-import javax.persistence.TypedQuery;
+import javax.persistence.*;
 import javax.persistence.criteria.CriteriaBuilder;
 import javax.persistence.criteria.CriteriaQuery;
 import javax.persistence.criteria.Root;
@@ -73,7 +70,7 @@ import org.jboss.pressgang.ccms.server.ejb.EnversLoggingBean;
 import org.jboss.pressgang.ccms.server.envers.LoggingRevisionEntity;
 import org.jboss.pressgang.ccms.server.rest.BaseREST;
 import org.jboss.pressgang.ccms.server.rest.DatabaseOperation;
-import org.jboss.pressgang.ccms.server.rest.v1.ApplicationSettingsV1Factory;
+import org.jboss.pressgang.ccms.server.rest.v1.ServerSettingsV1Factory;
 import org.jboss.pressgang.ccms.server.rest.v1.BlobConstantV1Factory;
 import org.jboss.pressgang.ccms.server.rest.v1.CSNodeV1Factory;
 import org.jboss.pressgang.ccms.server.rest.v1.CategoryV1Factory;
@@ -116,6 +113,11 @@ import org.slf4j.LoggerFactory;
 @RequestScoped
 public class BaseRESTv1 extends BaseREST {
     private static final Logger log = LoggerFactory.getLogger(BaseRESTv1.class);
+
+    public static final String TRANSACTION_MANAGER_NAME = "java:jboss/TransactionManager";
+    public static final String USER_TRANSACTION_NAME = "java:jboss/UserTransaction";
+    public static final String PERSISTENCE_UNIT_NAME = "PressGangCCMS";
+
     /**
      * The format for dates passed and returned by the REST Interface
      */
@@ -133,8 +135,10 @@ public class BaseRESTv1 extends BaseREST {
     /**
      * The JBoss Transaction Manager
      */
-    @Resource(lookup = "java:jboss/TransactionManager")
+    @Resource(lookup = TRANSACTION_MANAGER_NAME)
     protected TransactionManager transactionManager;
+    @PersistenceUnit(unitName = PERSISTENCE_UNIT_NAME)
+    protected EntityManagerFactory entityManagerFactory;
     /**
      * The EntityManager to use for this request
      */
@@ -148,7 +152,7 @@ public class BaseRESTv1 extends BaseREST {
     @Inject
     protected XMLEchoCache xmlEchoCache;
     @Inject
-    protected ApplicationSettingsV1Factory applicationSettingsFactory;
+    protected ServerSettingsV1Factory applicationSettingsFactory;
 
     /* START ENTITY FACTORIES */
     @Inject
@@ -1477,7 +1481,10 @@ public class BaseRESTv1 extends BaseREST {
         // We need to do some unwrapping of exception first
         Throwable cause = ex;
         while (cause != null) {
-            if (cause instanceof Failure) {
+            if (cause == cause.getCause()) {
+                // sometimes this can be an circular reference
+                break;
+            } else if (cause instanceof Failure) {
                 return (Failure) cause;
             } else if (cause instanceof EntityNotFoundException) {
                 return new NotFoundException(cause);
@@ -1487,6 +1494,8 @@ public class BaseRESTv1 extends BaseREST {
             } else if (cause instanceof PersistenceException) {
                 if (cause.getCause() != null && cause.getCause() instanceof org.hibernate.exception.ConstraintViolationException) {
                     cause = cause.getCause();
+                } else {
+                    break;
                 }
             } else if (cause instanceof ProviderException) {
                 if (cause != null && (cause instanceof ValidationException || cause instanceof PersistenceException || cause instanceof

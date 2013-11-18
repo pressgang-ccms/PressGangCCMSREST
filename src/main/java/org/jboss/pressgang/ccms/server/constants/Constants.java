@@ -1,10 +1,6 @@
 package org.jboss.pressgang.ccms.server.constants;
 
 public class Constants {
-    /**
-     * The number of min hashes to generate a topic signature with.
-     */
-    public static final int NUM_MIN_HASHES = 200;
 
     /**
      * A Topic ID that no topic should ever match
@@ -20,5 +16,9 @@ public class Constants {
      * The base URL from which the REST interface can be accessed
      */
     public static final String BASE_REST_PATH = "/rest";
+    /**
+     * Query strings passed in as path segments always use this as the prefix
+     */
+    public static final String QUERY_PATHSEGMENT_PREFIX = "query";
 
 }
