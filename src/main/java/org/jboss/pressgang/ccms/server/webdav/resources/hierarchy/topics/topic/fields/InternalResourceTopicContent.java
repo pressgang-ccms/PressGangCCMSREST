@@ -33,6 +33,7 @@ import org.jboss.pressgang.ccms.server.webdav.managers.ResourceTypes;
 import org.jboss.pressgang.ccms.server.webdav.resources.ByteArrayReturnValue;
 import org.jboss.pressgang.ccms.server.webdav.resources.InternalResource;
 import org.jboss.pressgang.ccms.server.webdav.resources.MultiStatusReturnValue;
+import org.jboss.pressgang.ccms.utils.common.DocBookUtilities;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -77,6 +78,14 @@ public class InternalResourceTopicContent extends InternalResource {
             final Topic topic = entityManager.find(Topic.class, getIntId());
 
             if (topic != null) {
+                // Sync the title from the xml
+                if (TopicUtilities.isTopicNormalTopic(topic)) {
+                    final String title = DocBookUtilities.findTitle(stringContents);
+                    if (title != null) {
+                        topic.setTopicTitle(title);
+                    }
+                }
+
                 // Set the updated xml contents
                 topic.setTopicXML(stringContents);
 
