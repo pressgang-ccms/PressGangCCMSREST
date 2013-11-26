@@ -9,6 +9,12 @@
         <param-value>java:/PressGangCCMSDatasource</param-value>
     </context-param>
 
+    <!-- RESTEasy -->
+    <context-param>
+        <param-name>resteasy.providers</param-name>
+        <param-value>net.java.dev.webdav.jaxrs.xml.WebDavContextResolver</param-value>
+    </context-param>
+
     <!--
         http://stackoverflow.com/questions/19147762/javamelody-crashing-the-server-with-thousands-of-rrd-files/19147763#19147763
         Aggregate all requests into single files to prevent thousands of rrd files being created.

@@ -5,6 +5,7 @@ import javax.ws.rs.core.Application;
 import java.util.HashSet;
 import java.util.Set;
 
+import net.java.dev.webdav.jaxrs.xml.properties.ResourceType;
 import org.jboss.pressgang.ccms.server.rest.v1.RESTv1;
 import org.jboss.pressgang.ccms.server.rest.v1.interceptor.RESTv1VersionHeaderInterceptor;
 import org.jboss.pressgang.ccms.server.rest.v1.interceptor.RESTv1VersionInterceptor;
