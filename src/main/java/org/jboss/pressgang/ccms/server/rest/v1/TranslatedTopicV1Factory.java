@@ -85,6 +85,7 @@ public class TranslatedTopicV1Factory extends RESTDataObjectFactory<RESTTranslat
         retValue.setXmlDoctype(RESTXMLDoctype.getXMLDoctype(entity.getTranslatedTopic().getEnversTopic(entityManager).getXmlDoctype()));
         retValue.setTranslatedXMLCondition(entity.getTranslatedTopic().getTranslatedXMLCondition());
         retValue.setTranslatedAdditionalXML(entity.getTranslatedAdditionalXml());
+        retValue.setCustomEntities(entity.getTranslatedTopic().getCustomEntities());
 
         // Get the title from the XML or if the XML is null then use the original topics title.
         String title = DocBookUtilities.findTitle(entity.getTranslatedXml());
@@ -215,8 +216,10 @@ public class TranslatedTopicV1Factory extends RESTDataObjectFactory<RESTTranslat
                 if (dataObject.hasParameterSet(RESTTranslatedTopicV1.TOPICID_NAME)) translatedTopic.setTopicId(dataObject.getTopicId());
                 if (dataObject.hasParameterSet(RESTTranslatedTopicV1.TOPICREVISION_NAME))
                     translatedTopic.setTopicRevision(dataObject.getTopicRevision());
-                if (dataObject.hasParameterSet(RESTTranslatedTopicV1.TRANSLATED_XML_CONDITION))
+                if (dataObject.hasParameterSet(RESTTranslatedTopicV1.TRANSLATED_XML_CONDITION_NAME))
                     translatedTopic.setTranslatedXMLCondition(dataObject.getTranslatedXMLCondition());
+                if (dataObject.hasParameterSet(RESTTranslatedTopicV1.CUSTOM_ENTITIES_NAME))
+                    translatedTopic.setCustomEntities(dataObject.getCustomEntities());
 
                 if (dataObject.hasParameterSet(RESTTranslatedTopicV1.TRANSLATED_CSNODE_NAME)) {
                     final RESTTranslatedCSNodeV1 restEntity = dataObject.getTranslatedCSNode();
@@ -237,7 +240,7 @@ public class TranslatedTopicV1Factory extends RESTDataObjectFactory<RESTTranslat
             entity.setTranslationPercentage(dataObject.getTranslationPercentage());
 
         boolean additionalXMLSet = false;
-        if (dataObject.hasParameterSet(RESTTranslatedTopicV1.TRANSLATED_ADDITIONAL_XML)) {
+        if (dataObject.hasParameterSet(RESTTranslatedTopicV1.TRANSLATED_ADDITIONAL_XML_NAME)) {
             entity.setTranslatedAdditionalXml(dataObject.getTranslatedAdditionalXML());
             additionalXMLSet = true;
         }

@@ -10,6 +10,7 @@ import java.util.Properties;
 
 import org.jboss.pressgang.ccms.model.StringConstants;
 import org.jboss.pressgang.ccms.model.TranslatedTopicData;
+import org.jboss.pressgang.ccms.model.config.EntitiesConfig;
 import org.jboss.pressgang.ccms.utils.common.CollectionUtilities;
 import org.jboss.pressgang.ccms.utils.common.XMLUtilities;
 import org.jboss.pressgang.ccms.utils.constants.CommonConstants;
@@ -30,7 +31,7 @@ public class TranslatedTopicUtilities {
     public static void processXML(final EntityManager entityManager, final TranslatedTopicData translatedTopicData) {
         // Get the XML elements that require special formatting/processing
         final StringConstants xmlElementsProperties = entityManager.find(StringConstants.class,
-                CommonConstants.XML_ELEMENTS_STRING_CONSTANT_ID);
+                EntitiesConfig.getInstance().getXMLFormattingElementsStringConstantId());
 
         // Load the String Constants as Properties
         final Properties prop = new Properties();
@@ -39,7 +40,6 @@ public class TranslatedTopicUtilities {
         } catch (IOException ex) {
             log.error("The XML Elements Properties file couldn't be loaded as a property file", ex);
         }
-
         // Find the XML elements that need formatting for different display rules.
         final String verbatimElementsString = prop.getProperty(CommonConstants.VERBATIM_XML_ELEMENTS_PROPERTY_KEY);
         final String inlineElementsString = prop.getProperty(CommonConstants.INLINE_XML_ELEMENTS_PROPERTY_KEY);

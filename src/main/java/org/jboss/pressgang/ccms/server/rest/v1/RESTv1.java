@@ -86,6 +86,7 @@ import org.jboss.pressgang.ccms.model.Tag;
 import org.jboss.pressgang.ccms.model.Topic;
 import org.jboss.pressgang.ccms.model.TranslatedTopicData;
 import org.jboss.pressgang.ccms.model.User;
+import org.jboss.pressgang.ccms.model.config.ApplicationConfig;
 import org.jboss.pressgang.ccms.model.contentspec.CSNode;
 import org.jboss.pressgang.ccms.model.contentspec.ContentSpec;
 import org.jboss.pressgang.ccms.model.contentspec.TranslatedCSNode;
@@ -114,6 +115,7 @@ import org.jboss.pressgang.ccms.rest.v1.collections.items.RESTTagCollectionItemV
 import org.jboss.pressgang.ccms.rest.v1.collections.items.RESTTopicCollectionItemV1;
 import org.jboss.pressgang.ccms.rest.v1.components.ComponentTopicV1;
 import org.jboss.pressgang.ccms.rest.v1.constants.RESTv1Constants;
+import org.jboss.pressgang.ccms.rest.v1.entities.RESTServerSettingsV1;
 import org.jboss.pressgang.ccms.rest.v1.entities.RESTBlobConstantV1;
 import org.jboss.pressgang.ccms.rest.v1.entities.RESTCategoryV1;
 import org.jboss.pressgang.ccms.rest.v1.entities.RESTFileV1;
@@ -142,7 +144,7 @@ import org.jboss.pressgang.ccms.rest.v1.expansion.ExpandDataTrunk;
 import org.jboss.pressgang.ccms.rest.v1.jaxrsinterfaces.RESTBaseInterfaceV1;
 import org.jboss.pressgang.ccms.rest.v1.jaxrsinterfaces.RESTInterfaceAdvancedV1;
 import org.jboss.pressgang.ccms.server.rest.v1.base.BaseRESTv1;
-import org.jboss.pressgang.ccms.server.utils.Constants;
+import org.jboss.pressgang.ccms.server.constants.Constants;
 import org.jboss.pressgang.ccms.server.utils.ContentSpecUtilities;
 import org.jboss.pressgang.ccms.server.utils.TopicUtilities;
 import org.jboss.pressgang.ccms.utils.common.CollectionUtilities;
@@ -432,6 +434,33 @@ public class RESTv1 extends BaseRESTv1 implements RESTBaseInterfaceV1, RESTInter
                 return xml;
             }
         }
+    }
+
+    /* APPLICATION SETTING FUNCTIONS */
+    /* JSONP FUNCTIONS */
+    @Override
+    public String getJSONPApplicationSettings(@QueryParam("callback") String callback) {
+        if (callback == null) throw new BadRequestException("The callback parameter can not be null");
+
+        try {
+            return wrapJsonInPadding(callback, convertObjectToJSON(getJSONServerSettings()));
+        } catch (final Exception ex) {
+            throw new InternalServerErrorException("Could not marshall return value into JSON");
+        }
+    }
+
+    /* JSON FUNCTIONS */
+    @Override
+    public RESTServerSettingsV1 getJSONServerSettings() {
+        return applicationSettingsFactory.createRESTEntity();
+    }
+
+    @Override
+    public RESTServerSettingsV1 updateJSONServerSettings(final RESTServerSettingsV1 dataObject) {
+        if (dataObject == null) throw new BadRequestException("The dataObject parameter can not be null");
+
+        applicationSettingsFactory.updateFromRESTEntity(dataObject);
+        return applicationSettingsFactory.createRESTEntity();
     }
 
     /* BLOBCONSTANTS FUNCTIONS */
@@ -1946,18 +1975,18 @@ public class RESTv1 extends BaseRESTv1 implements RESTBaseInterfaceV1, RESTInter
         if (id == null) throw new BadRequestException("The id parameter can not be null");
 
         final ImageFile entity = getEntity(ImageFile.class, id);
-        final String fixedLocale = locale == null ? CommonConstants.DEFAULT_LOCALE : locale;
+        final String fixedLocale = locale == null ? ApplicationConfig.getInstance().getDefaultLocale() : locale;
 
-        /* Try and find the locale specified first */
+        // Try and find the locale specified first
         for (final LanguageImage languageImage : entity.getLanguageImages()) {
             if (fixedLocale.equalsIgnoreCase(languageImage.getLocale())) {
                 return Response.ok(languageImage.getImageData(), languageImage.getMimeType()).build();
             }
         }
 
-        /* If the specified locale can't be found then use the default */
+        // If the specified locale can't be found then use the default
         for (final LanguageImage languageImage : entity.getLanguageImages()) {
-            if (CommonConstants.DEFAULT_LOCALE.equalsIgnoreCase(languageImage.getLocale())) {
+            if (ApplicationConfig.getInstance().getDefaultLocale().equalsIgnoreCase(languageImage.getLocale())) {
                 return Response.ok(languageImage.getImageData(), languageImage.getMimeType()).build();
             }
         }
@@ -1971,18 +2000,18 @@ public class RESTv1 extends BaseRESTv1 implements RESTBaseInterfaceV1, RESTInter
         if (revision == null) throw new BadRequestException("The revision parameter can not be null");
 
         final ImageFile entity = getEntity(ImageFile.class, id, revision);
-        final String fixedLocale = locale == null ? CommonConstants.DEFAULT_LOCALE : locale;
+        final String fixedLocale = locale == null ? ApplicationConfig.getInstance().getDefaultLocale() : locale;
 
-        /* Try and find the locale specified first */
+        // Try and find the locale specified first
         for (final LanguageImage languageImage : entity.getLanguageImages()) {
             if (fixedLocale.equalsIgnoreCase(languageImage.getLocale())) {
                 return Response.ok(languageImage.getImageData(), languageImage.getMimeType()).build();
             }
         }
 
-        /* If the specified locale can't be found then use the default */
+        // If the specified locale can't be found then use the default
         for (final LanguageImage languageImage : entity.getLanguageImages()) {
-            if (CommonConstants.DEFAULT_LOCALE.equalsIgnoreCase(languageImage.getLocale())) {
+            if (ApplicationConfig.getInstance().getDefaultLocale().equalsIgnoreCase(languageImage.getLocale())) {
                 return Response.ok(languageImage.getImageData(), languageImage.getMimeType()).build();
             }
         }
@@ -1995,7 +2024,7 @@ public class RESTv1 extends BaseRESTv1 implements RESTBaseInterfaceV1, RESTInter
         if (id == null) throw new BadRequestException("The id parameter can not be null");
 
         final ImageFile entity = getEntity(ImageFile.class, id);
-        final String fixedLocale = locale == null ? CommonConstants.DEFAULT_LOCALE : locale;
+        final String fixedLocale = locale == null ? ApplicationConfig.getInstance().getDefaultLocale() : locale;
 
         try {
             LanguageImage foundLanguageImage = null;
@@ -2011,7 +2040,7 @@ public class RESTv1 extends BaseRESTv1 implements RESTBaseInterfaceV1, RESTInter
             if (foundLanguageImage == null) {
                 // If the specified locale can't be found then use the default */
                 for (final LanguageImage languageImage : entity.getLanguageImages()) {
-                    if (CommonConstants.DEFAULT_LOCALE.equalsIgnoreCase(languageImage.getLocale())) {
+                    if (ApplicationConfig.getInstance().getDefaultLocale().equalsIgnoreCase(languageImage.getLocale())) {
                         foundLanguageImage = languageImage;
                         break;
                     }
@@ -3530,9 +3559,9 @@ public class RESTv1 extends BaseRESTv1 implements RESTBaseInterfaceV1, RESTInter
         if (id == null) throw new BadRequestException("The id parameter can not be null");
 
         final File entity = getEntity(File.class, id);
-        final String fixedLocale = locale == null ? CommonConstants.DEFAULT_LOCALE : locale;
+        final String fixedLocale = locale == null ? ApplicationConfig.getInstance().getDefaultLocale() : locale;
 
-        /* Try and find the locale specified first */
+        // Try and find the locale specified first
         for (final LanguageFile languageFile : entity.getLanguageFiles()) {
             if (fixedLocale.equalsIgnoreCase(languageFile.getLocale())) {
                 response.getOutputHeaders().putSingle("Content-Disposition", "filename=" + entity.getFileName());
@@ -3540,9 +3569,9 @@ public class RESTv1 extends BaseRESTv1 implements RESTBaseInterfaceV1, RESTInter
             }
         }
 
-        /* If the specified locale can't be found then use the default */
+        // If the specified locale can't be found then use the default
         for (final LanguageFile languageFile : entity.getLanguageFiles()) {
-            if (CommonConstants.DEFAULT_LOCALE.equalsIgnoreCase(languageFile.getLocale())) {
+            if (ApplicationConfig.getInstance().getDefaultLocale().equalsIgnoreCase(languageFile.getLocale())) {
                 response.getOutputHeaders().putSingle("Content-Disposition", "filename=" + entity.getFileName());
                 return languageFile.getFileData();
             }
@@ -3557,9 +3586,9 @@ public class RESTv1 extends BaseRESTv1 implements RESTBaseInterfaceV1, RESTInter
         if (revision == null) throw new BadRequestException("The revision parameter can not be null");
 
         final File entity = getEntity(File.class, id, revision);
-        final String fixedLocale = locale == null ? CommonConstants.DEFAULT_LOCALE : locale;
+        final String fixedLocale = locale == null ? ApplicationConfig.getInstance().getDefaultLocale() : locale;
 
-        /* Try and find the locale specified first */
+        // Try and find the locale specified first
         for (final LanguageFile languageFile : entity.getLanguageFiles()) {
             if (fixedLocale.equalsIgnoreCase(languageFile.getLocale())) {
                 response.getOutputHeaders().putSingle("Content-Disposition", "filename=" + entity.getFileName());
@@ -3567,9 +3596,9 @@ public class RESTv1 extends BaseRESTv1 implements RESTBaseInterfaceV1, RESTInter
             }
         }
 
-        /* If the specified locale can't be found then use the default */
+        // If the specified locale can't be found then use the default
         for (final LanguageFile languageFile : entity.getLanguageFiles()) {
-            if (CommonConstants.DEFAULT_LOCALE.equalsIgnoreCase(languageFile.getLocale())) {
+            if (ApplicationConfig.getInstance().getDefaultLocale().equalsIgnoreCase(languageFile.getLocale())) {
                 response.getOutputHeaders().putSingle("Content-Disposition", "filename=" + entity.getFileName());
                 return languageFile.getFileData();
             }

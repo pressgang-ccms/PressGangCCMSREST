@@ -11,7 +11,6 @@ import javax.persistence.criteria.Root;
 import javax.transaction.RollbackException;
 import javax.transaction.Status;
 import javax.transaction.TransactionManager;
-import javax.transaction.UserTransaction;
 import javax.validation.ConstraintViolation;
 import javax.validation.ConstraintViolationException;
 import javax.validation.ValidationException;
@@ -54,8 +53,8 @@ import org.jboss.pressgang.ccms.provider.DBProviderFactory;
 import org.jboss.pressgang.ccms.provider.exception.ProviderException;
 import org.jboss.pressgang.ccms.provider.exception.UnauthorisedException;
 import org.jboss.pressgang.ccms.rest.v1.collections.RESTTopicCollectionV1;
-import org.jboss.pressgang.ccms.rest.v1.collections.base.RESTBaseCollectionItemV1;
-import org.jboss.pressgang.ccms.rest.v1.collections.base.RESTBaseCollectionV1;
+import org.jboss.pressgang.ccms.rest.v1.collections.base.RESTBaseEntityCollectionItemV1;
+import org.jboss.pressgang.ccms.rest.v1.collections.base.RESTBaseEntityCollectionV1;
 import org.jboss.pressgang.ccms.rest.v1.constants.CommonFilterConstants;
 import org.jboss.pressgang.ccms.rest.v1.constants.RESTv1Constants;
 import org.jboss.pressgang.ccms.rest.v1.entities.RESTTopicV1;
@@ -65,10 +64,13 @@ import org.jboss.pressgang.ccms.rest.v1.entities.base.RESTLogDetailsV1;
 import org.jboss.pressgang.ccms.rest.v1.entities.contentspec.RESTTextCSProcessingOptionsV1;
 import org.jboss.pressgang.ccms.rest.v1.entities.contentspec.RESTTextContentSpecV1;
 import org.jboss.pressgang.ccms.rest.v1.expansion.ExpandDataTrunk;
+import org.jboss.pressgang.ccms.model.config.ApplicationConfig;
+import org.jboss.pressgang.ccms.model.config.EntitiesConfig;
 import org.jboss.pressgang.ccms.server.ejb.EnversLoggingBean;
 import org.jboss.pressgang.ccms.server.envers.LoggingRevisionEntity;
 import org.jboss.pressgang.ccms.server.rest.BaseREST;
 import org.jboss.pressgang.ccms.server.rest.DatabaseOperation;
+import org.jboss.pressgang.ccms.server.rest.v1.ServerSettingsV1Factory;
 import org.jboss.pressgang.ccms.server.rest.v1.BlobConstantV1Factory;
 import org.jboss.pressgang.ccms.server.rest.v1.CSNodeV1Factory;
 import org.jboss.pressgang.ccms.server.rest.v1.CategoryV1Factory;
@@ -89,12 +91,10 @@ import org.jboss.pressgang.ccms.server.rest.v1.TranslatedCSNodeV1Factory;
 import org.jboss.pressgang.ccms.server.rest.v1.TranslatedContentSpecV1Factory;
 import org.jboss.pressgang.ccms.server.rest.v1.TranslatedTopicV1Factory;
 import org.jboss.pressgang.ccms.server.rest.v1.UserV1Factory;
-import org.jboss.pressgang.ccms.server.utils.Constants;
 import org.jboss.pressgang.ccms.server.utils.EntityUtilities;
 import org.jboss.pressgang.ccms.server.utils.EnversUtilities;
 import org.jboss.pressgang.ccms.server.utils.ProviderUtilities;
 import org.jboss.pressgang.ccms.server.utils.TopicSourceURLTitleThread;
-import org.jboss.pressgang.ccms.utils.constants.CommonConstants;
 import org.jboss.resteasy.plugins.providers.atom.Content;
 import org.jboss.resteasy.plugins.providers.atom.Entry;
 import org.jboss.resteasy.plugins.providers.atom.Feed;
@@ -151,6 +151,8 @@ public class BaseRESTv1 extends BaseREST {
     protected EntityCache entityCache;
     @Inject
     protected XMLEchoCache xmlEchoCache;
+    @Inject
+    protected ServerSettingsV1Factory applicationSettingsFactory;
 
     /* START ENTITY FACTORIES */
     @Inject
@@ -210,13 +212,14 @@ public class BaseRESTv1 extends BaseREST {
             feed.setTitle(title);
             feed.setUpdated(new Date());
 
-            final String docBuilderUrl = System.getProperty(Constants.DOCBUILDER_SYSTEM_PROPERTY);
-            final String uiUrl = System.getProperty(CommonConstants.PRESS_GANG_UI_SYSTEM_PROPERTY);
+            final String docBuilderUrl = ApplicationConfig.getInstance().getDocBuilderUrl();
+            final String uiUrl = ApplicationConfig.getInstance().getUIUrl();
 
             if (topics.getItems() != null) {
                 for (final RESTTopicV1 topic : topics.returnItems()) {
                     final Topic topicEntity = getEntity(Topic.class, topic.getId(), topic.getRevision());
-                    final TopicToPropertyTag fixedUrlPropertyTag = topicEntity.getProperty(CommonConstants.FIXED_URL_PROP_TAG_ID);
+                    final TopicToPropertyTag fixedUrlPropertyTag = topicEntity.getProperty(
+                            EntitiesConfig.getInstance().getFixedUrlPropertyTagId());
                     final List<Number> topicRevisions = EnversUtilities.getRevisions(entityManager, Topic.class, topic.getId());
 
                     final Entry entry = new Entry();
@@ -241,7 +244,7 @@ public class BaseRESTv1 extends BaseREST {
                         final List<ContentSpec> contentSpecs = topicEntity.getContentSpecs(entityManager);
                         for (final ContentSpec contentSpec : contentSpecs) {
                             final StringBuilder url = new StringBuilder(docBuilderUrl + (docBuilderUrl.endsWith("/") ? "" : "/") +
-                                     + contentSpec.getId());
+                                    +contentSpec.getId());
 
                             if (fixedUrlPropertyTag != null) {
                                 url.append("#").append(fixedUrlPropertyTag.getValue());
@@ -264,8 +267,8 @@ public class BaseRESTv1 extends BaseREST {
                             count++;
                             final LoggingRevisionEntity logEntity = EnversUtilities.getRevisionEntity(entityManager, topicEntity, revision);
                             final Date logDate = new Date(logEntity.getTimestamp());
-                            contentString.append("<li>").append(new SimpleDateFormat(REST_DATE_FORMAT).format(logDate)).append(" - ")
-                                    .append(logEntity.getLogMessage() == null ? "" : logEntity.getLogMessage()).append("</li>");
+                            contentString.append("<li>").append(new SimpleDateFormat(REST_DATE_FORMAT).format(logDate)).append(
+                                    " - ").append(logEntity.getLogMessage() == null ? "" : logEntity.getLogMessage()).append("</li>");
                         }
 
                         if (count >= 5) break;
@@ -299,8 +302,8 @@ public class BaseRESTv1 extends BaseREST {
      * @param date
      * @return
      */
-    protected <T extends RESTBaseEntityV1<T, V, W>, U extends AuditedEntity, V extends RESTBaseCollectionV1<T, V, W>,
-            W extends RESTBaseCollectionItemV1<T, V, W>> V getJSONEntitiesUpdatedSince(
+    protected <T extends RESTBaseEntityV1<T, V, W>, U extends AuditedEntity, V extends RESTBaseEntityCollectionV1<T, V, W>,
+            W extends RESTBaseEntityCollectionItemV1<T, V, W>> V getJSONEntitiesUpdatedSince(
             final Class<V> collectionClass, final Class<U> type, final String idProperty,
             final RESTDataObjectFactory<T, U, V, W> dataObjectFactory, final String expandName, final String expand, final Date date) {
         return getEntitiesUpdatedSince(collectionClass, type, idProperty, dataObjectFactory, expandName, expand, RESTv1Constants.JSON_URL,
@@ -318,8 +321,8 @@ public class BaseRESTv1 extends BaseREST {
      * @param date
      * @return
      */
-    protected <T extends RESTBaseEntityV1<T, V, W>, U extends AuditedEntity, V extends RESTBaseCollectionV1<T, V, W>,
-            W extends RESTBaseCollectionItemV1<T, V, W>> V getEntitiesUpdatedSince(
+    protected <T extends RESTBaseEntityV1<T, V, W>, U extends AuditedEntity, V extends RESTBaseEntityCollectionV1<T, V, W>,
+            W extends RESTBaseEntityCollectionItemV1<T, V, W>> V getEntitiesUpdatedSince(
             final Class<V> collectionClass, final Class<U> type, final String idProperty,
             final RESTDataObjectFactory<T, U, V, W> dataObjectFactory, final String expandName, final String expand, final String dataType,
             final Date date) {
@@ -360,8 +363,8 @@ public class BaseRESTv1 extends BaseREST {
         }
     }
 
-    protected <T extends RESTBaseEntityV1<T, V, W>, U extends AuditedEntity, V extends RESTBaseCollectionV1<T, V, W>,
-            W extends RESTBaseCollectionItemV1<T, V, W>> T deleteJSONEntity(
+    protected <T extends RESTBaseEntityV1<T, V, W>, U extends AuditedEntity, V extends RESTBaseEntityCollectionV1<T, V, W>,
+            W extends RESTBaseEntityCollectionItemV1<T, V, W>> T deleteJSONEntity(
             final Class<U> type, final RESTDataObjectFactory<T, U, V, W> factory, final Integer id, final String expand,
             final RESTLogDetailsV1 logDetails) {
         return deleteEntity(type, factory, id, RESTv1Constants.JSON_URL, expand, logDetails);
@@ -378,8 +381,8 @@ public class BaseRESTv1 extends BaseREST {
      * @param logDetails The details about the changes that need to be logged.
      * @return
      */
-    protected <T extends RESTBaseEntityV1<T, V, W>, U extends AuditedEntity, V extends RESTBaseCollectionV1<T, V, W>,
-            W extends RESTBaseCollectionItemV1<T, V, W>> T deleteEntity(
+    protected <T extends RESTBaseEntityV1<T, V, W>, U extends AuditedEntity, V extends RESTBaseEntityCollectionV1<T, V, W>,
+            W extends RESTBaseEntityCollectionItemV1<T, V, W>> T deleteEntity(
             final Class<U> type, final RESTDataObjectFactory<T, U, V, W> factory, final Integer id, final String dataType,
             final String expand, final RESTLogDetailsV1 logDetails) {
         assert id != null : "id should not be null";
@@ -414,29 +417,29 @@ public class BaseRESTv1 extends BaseREST {
         }
     }
 
-    protected <T extends RESTBaseEntityV1<T, V, W>, U extends AuditedEntity, V extends RESTBaseCollectionV1<T, V, W>,
-            W extends RESTBaseCollectionItemV1<T, V, W>> T createJSONEntity(
+    protected <T extends RESTBaseEntityV1<T, V, W>, U extends AuditedEntity, V extends RESTBaseEntityCollectionV1<T, V, W>,
+            W extends RESTBaseEntityCollectionItemV1<T, V, W>> T createJSONEntity(
             final Class<U> type, final T restEntity, final RESTDataObjectFactory<T, U, V, W> factory, final String expand,
             final RESTLogDetailsV1 logDetails) {
         return createEntity(type, restEntity, factory, RESTv1Constants.JSON_URL, expand, logDetails);
     }
 
-    protected <T extends RESTBaseEntityV1<T, V, W>, U extends AuditedEntity, V extends RESTBaseCollectionV1<T, V, W>,
-            W extends RESTBaseCollectionItemV1<T, V, W>> T updateJSONEntity(
+    protected <T extends RESTBaseEntityV1<T, V, W>, U extends AuditedEntity, V extends RESTBaseEntityCollectionV1<T, V, W>,
+            W extends RESTBaseEntityCollectionItemV1<T, V, W>> T updateJSONEntity(
             final Class<U> type, final T restEntity, final RESTDataObjectFactory<T, U, V, W> factory, final String expand,
             final RESTLogDetailsV1 logDetails) {
         return updateEntity(type, restEntity, factory, RESTv1Constants.JSON_URL, expand, logDetails);
     }
 
-    protected <T extends RESTBaseEntityV1<T, V, W>, U extends AuditedEntity, V extends RESTBaseCollectionV1<T, V, W>,
-            W extends RESTBaseCollectionItemV1<T, V, W>> T createEntity(
+    protected <T extends RESTBaseEntityV1<T, V, W>, U extends AuditedEntity, V extends RESTBaseEntityCollectionV1<T, V, W>,
+            W extends RESTBaseEntityCollectionItemV1<T, V, W>> T createEntity(
             final Class<U> type, final T restEntity, final RESTDataObjectFactory<T, U, V, W> factory, final String dataType,
             final String expand, final RESTLogDetailsV1 logDetails) {
         return createOrUpdateEntity(type, restEntity, factory, DatabaseOperation.CREATE, dataType, expand, logDetails);
     }
 
-    protected <T extends RESTBaseEntityV1<T, V, W>, U extends AuditedEntity, V extends RESTBaseCollectionV1<T, V, W>,
-            W extends RESTBaseCollectionItemV1<T, V, W>> T updateEntity(
+    protected <T extends RESTBaseEntityV1<T, V, W>, U extends AuditedEntity, V extends RESTBaseEntityCollectionV1<T, V, W>,
+            W extends RESTBaseEntityCollectionItemV1<T, V, W>> T updateEntity(
             final Class<U> type, final T restEntity, final RESTDataObjectFactory<T, U, V, W> factory, final String dataType,
             final String expand, final RESTLogDetailsV1 logDetails) {
         return createOrUpdateEntity(type, restEntity, factory, DatabaseOperation.UPDATE, dataType, expand, logDetails);
@@ -454,8 +457,8 @@ public class BaseRESTv1 extends BaseREST {
      * @param logDetails The details about the changes that need to be logged.
      * @return The updated/created REST Entity representation of the database entity.
      */
-    private <T extends RESTBaseEntityV1<T, V, W>, U extends AuditedEntity, V extends RESTBaseCollectionV1<T, V, W>,
-            W extends RESTBaseCollectionItemV1<T, V, W>> T createOrUpdateEntity(
+    private <T extends RESTBaseEntityV1<T, V, W>, U extends AuditedEntity, V extends RESTBaseEntityCollectionV1<T, V, W>,
+            W extends RESTBaseEntityCollectionItemV1<T, V, W>> T createOrUpdateEntity(
             final Class<U> type, final T restEntity, final RESTDataObjectFactory<T, U, V, W> factory, final DatabaseOperation operation,
             final String dataType, final String expand, final RESTLogDetailsV1 logDetails) {
         assert restEntity != null : "restEntity should not be null";
@@ -522,49 +525,49 @@ public class BaseRESTv1 extends BaseREST {
         return retValue;
     }
 
-    protected <T extends RESTBaseEntityV1<T, V, W>, U extends AuditedEntity, V extends RESTBaseCollectionV1<T, V, W>,
-            W extends RESTBaseCollectionItemV1<T, V, W>> V createJSONEntities(
-            final Class<V> collectionClass, final Class<U> type, final RESTBaseCollectionV1<T, V, W> entities,
+    protected <T extends RESTBaseEntityV1<T, V, W>, U extends AuditedEntity, V extends RESTBaseEntityCollectionV1<T, V, W>,
+            W extends RESTBaseEntityCollectionItemV1<T, V, W>> V createJSONEntities(
+            final Class<V> collectionClass, final Class<U> type, final RESTBaseEntityCollectionV1<T, V, W> entities,
             final RESTDataObjectFactory<T, U, V, W> factory, final String expandName, final String expand,
             final RESTLogDetailsV1 logDetails) {
         return createEntities(collectionClass, type, entities, factory, expandName, RESTv1Constants.JSON_URL, expand, logDetails);
     }
 
-    protected <T extends RESTBaseEntityV1<T, V, W>, U extends AuditedEntity, V extends RESTBaseCollectionV1<T, V, W>,
-            W extends RESTBaseCollectionItemV1<T, V, W>> V updateJSONEntities(
-            final Class<V> collectionClass, final Class<U> type, final RESTBaseCollectionV1<T, V, W> entities,
+    protected <T extends RESTBaseEntityV1<T, V, W>, U extends AuditedEntity, V extends RESTBaseEntityCollectionV1<T, V, W>,
+            W extends RESTBaseEntityCollectionItemV1<T, V, W>> V updateJSONEntities(
+            final Class<V> collectionClass, final Class<U> type, final RESTBaseEntityCollectionV1<T, V, W> entities,
             final RESTDataObjectFactory<T, U, V, W> factory, final String expandName, final String expand,
             final RESTLogDetailsV1 logDetails) {
         return updateEntities(collectionClass, type, entities, factory, expandName, RESTv1Constants.JSON_URL, expand, logDetails);
     }
 
-    protected <T extends RESTBaseEntityV1<T, V, W>, U extends AuditedEntity, V extends RESTBaseCollectionV1<T, V, W>,
-            W extends RESTBaseCollectionItemV1<T, V, W>> V createEntities(
-            final Class<V> collectionClass, final Class<U> type, final RESTBaseCollectionV1<T, V, W> entities,
+    protected <T extends RESTBaseEntityV1<T, V, W>, U extends AuditedEntity, V extends RESTBaseEntityCollectionV1<T, V, W>,
+            W extends RESTBaseEntityCollectionItemV1<T, V, W>> V createEntities(
+            final Class<V> collectionClass, final Class<U> type, final RESTBaseEntityCollectionV1<T, V, W> entities,
             final RESTDataObjectFactory<T, U, V, W> factory, final String expandName, final String dataType, final String expand,
             final RESTLogDetailsV1 logDetails) {
         return createOrUpdateEntities(collectionClass, type, factory, entities, DatabaseOperation.CREATE, expandName, dataType, expand,
                 logDetails);
     }
 
-    protected <T extends RESTBaseEntityV1<T, V, W>, U extends AuditedEntity, V extends RESTBaseCollectionV1<T, V, W>,
-            W extends RESTBaseCollectionItemV1<T, V, W>> V updateEntities(
-            final Class<V> collectionClass, final Class<U> type, final RESTBaseCollectionV1<T, V, W> entities,
+    protected <T extends RESTBaseEntityV1<T, V, W>, U extends AuditedEntity, V extends RESTBaseEntityCollectionV1<T, V, W>,
+            W extends RESTBaseEntityCollectionItemV1<T, V, W>> V updateEntities(
+            final Class<V> collectionClass, final Class<U> type, final RESTBaseEntityCollectionV1<T, V, W> entities,
             final RESTDataObjectFactory<T, U, V, W> factory, final String expandName, final String dataType, final String expand,
             final RESTLogDetailsV1 logDetails) {
         return createOrUpdateEntities(collectionClass, type, factory, entities, DatabaseOperation.UPDATE, expandName, dataType, expand,
                 logDetails);
     }
 
-    protected <T extends RESTBaseEntityV1<T, V, W>, U extends AuditedEntity, V extends RESTBaseCollectionV1<T, V, W>,
-            W extends RESTBaseCollectionItemV1<T, V, W>> V deleteJSONEntities(
+    protected <T extends RESTBaseEntityV1<T, V, W>, U extends AuditedEntity, V extends RESTBaseEntityCollectionV1<T, V, W>,
+            W extends RESTBaseEntityCollectionItemV1<T, V, W>> V deleteJSONEntities(
             final Class<V> collectionClass, final Class<U> type, final RESTDataObjectFactory<T, U, V, W> factory, final Set<String> ids,
             final String expandName, final String expand, final RESTLogDetailsV1 logDetails) {
         return deleteEntities(collectionClass, type, factory, ids, expandName, RESTv1Constants.JSON_URL, expand, logDetails);
     }
 
-    protected <T extends RESTBaseEntityV1<T, V, W>, U extends AuditedEntity, V extends RESTBaseCollectionV1<T, V, W>,
-            W extends RESTBaseCollectionItemV1<T, V, W>> V deleteEntities(
+    protected <T extends RESTBaseEntityV1<T, V, W>, U extends AuditedEntity, V extends RESTBaseEntityCollectionV1<T, V, W>,
+            W extends RESTBaseEntityCollectionItemV1<T, V, W>> V deleteEntities(
             final Class<V> collectionClass, final Class<U> type, final RESTDataObjectFactory<T, U, V, W> factory, final Set<String> ids,
             final String expandName, final String dataType, final String expand, final RESTLogDetailsV1 logDetails) {
         assert type != null : "type should not be null";
@@ -632,10 +635,10 @@ public class BaseRESTv1 extends BaseREST {
      * @param logDetails      The details about the changes that need to be logged.
      * @return
      */
-    private <T extends RESTBaseEntityV1<T, V, W>, U extends AuditedEntity, V extends RESTBaseCollectionV1<T, V, W>,
-            W extends RESTBaseCollectionItemV1<T, V, W>> V createOrUpdateEntities(
+    private <T extends RESTBaseEntityV1<T, V, W>, U extends AuditedEntity, V extends RESTBaseEntityCollectionV1<T, V, W>,
+            W extends RESTBaseEntityCollectionItemV1<T, V, W>> V createOrUpdateEntities(
             final Class<V> collectionClass, final Class<U> type, final RESTDataObjectFactory<T, U, V, W> factory,
-            final RESTBaseCollectionV1<T, V, W> entities, final DatabaseOperation operation, final String expandName, final String dataType,
+            final RESTBaseEntityCollectionV1<T, V, W> entities, final DatabaseOperation operation, final String expandName, final String dataType,
             final String expand, final RESTLogDetailsV1 logDetails) {
         assert entities != null : "dataObject should not be null";
         assert factory != null : "factory should not be null";
@@ -737,8 +740,8 @@ public class BaseRESTv1 extends BaseREST {
      * @param expand            The expand parameters to determine what fields should be expanded.
      * @return The REST Entity containing the information from the database entity.
      */
-    protected <T extends RESTBaseEntityV1<T, V, W>, U extends AuditedEntity, V extends RESTBaseCollectionV1<T, V, W>,
-            W extends RESTBaseCollectionItemV1<T, V, W>> T getJSONResource(
+    protected <T extends RESTBaseEntityV1<T, V, W>, U extends AuditedEntity, V extends RESTBaseEntityCollectionV1<T, V, W>,
+            W extends RESTBaseEntityCollectionItemV1<T, V, W>> T getJSONResource(
             final Class<U> type, final RESTDataObjectFactory<T, U, V, W> dataObjectFactory, final Integer id, final String expand) {
         return getJSONResource(type, dataObjectFactory, id, null, expand);
     }
@@ -754,8 +757,8 @@ public class BaseRESTv1 extends BaseREST {
      * @param expand            The expand parameters to determine what fields should be expanded.
      * @return The REST Entity containing the information from the database entity.
      */
-    protected <T extends RESTBaseEntityV1<T, V, W>, U extends AuditedEntity, V extends RESTBaseCollectionV1<T, V, W>,
-            W extends RESTBaseCollectionItemV1<T, V, W>> T getJSONResource(
+    protected <T extends RESTBaseEntityV1<T, V, W>, U extends AuditedEntity, V extends RESTBaseEntityCollectionV1<T, V, W>,
+            W extends RESTBaseEntityCollectionItemV1<T, V, W>> T getJSONResource(
             final Class<U> type, final RESTDataObjectFactory<T, U, V, W> dataObjectFactory, final Integer id, final Number revision,
             final String expand) {
         return getResource(type, dataObjectFactory, id, revision, expand, RESTv1Constants.JSON_URL);
@@ -771,8 +774,8 @@ public class BaseRESTv1 extends BaseREST {
      * @param expand            The expand parameters to determine what fields should be expanded.
      * @return The REST Entity containing the information from the database entity.
      */
-    protected <T extends RESTBaseEntityV1<T, V, W>, U extends AuditedEntity, V extends RESTBaseCollectionV1<T, V, W>,
-            W extends RESTBaseCollectionItemV1<T, V, W>> T getXMLResource(
+    protected <T extends RESTBaseEntityV1<T, V, W>, U extends AuditedEntity, V extends RESTBaseEntityCollectionV1<T, V, W>,
+            W extends RESTBaseEntityCollectionItemV1<T, V, W>> T getXMLResource(
             final Class<U> type, final RESTDataObjectFactory<T, U, V, W> dataObjectFactory, final Integer id, final String expand) {
         return getXMLResource(type, dataObjectFactory, id, null, expand);
     }
@@ -788,8 +791,8 @@ public class BaseRESTv1 extends BaseREST {
      * @param expand            The expand parameters to determine what fields should be expanded.
      * @return The REST Entity containing the information from the database entity.
      */
-    protected <T extends RESTBaseEntityV1<T, V, W>, U extends AuditedEntity, V extends RESTBaseCollectionV1<T, V, W>,
-            W extends RESTBaseCollectionItemV1<T, V, W>> T getXMLResource(
+    protected <T extends RESTBaseEntityV1<T, V, W>, U extends AuditedEntity, V extends RESTBaseEntityCollectionV1<T, V, W>,
+            W extends RESTBaseEntityCollectionItemV1<T, V, W>> T getXMLResource(
             final Class<U> type, final RESTDataObjectFactory<T, U, V, W> dataObjectFactory, final Integer id, final Number revision,
             final String expand) {
         return getResource(type, dataObjectFactory, id, revision, expand, RESTv1Constants.XML_URL);
@@ -806,8 +809,8 @@ public class BaseRESTv1 extends BaseREST {
      * @param dataType          The output data type. eg JSON or XML.
      * @return The REST Entity containing the information from the database entity.
      */
-    private <T extends RESTBaseEntityV1<T, V, W>, U extends AuditedEntity, V extends RESTBaseCollectionV1<T, V, W>,
-            W extends RESTBaseCollectionItemV1<T, V, W>> T getResource(
+    private <T extends RESTBaseEntityV1<T, V, W>, U extends AuditedEntity, V extends RESTBaseEntityCollectionV1<T, V, W>,
+            W extends RESTBaseEntityCollectionItemV1<T, V, W>> T getResource(
             final Class<U> type, final RESTDataObjectFactory<T, U, V, W> dataObjectFactory, final Integer id, final Number revision,
             final String expand, final String dataType) {
         assert type != null : "The type parameter can not be null";
@@ -933,22 +936,22 @@ public class BaseRESTv1 extends BaseREST {
         return query.getResultList();
     }
 
-    protected <T extends RESTBaseEntityV1<T, V, W>, U extends AuditedEntity, V extends RESTBaseCollectionV1<T, V, W>,
-            W extends RESTBaseCollectionItemV1<T, V, W>> V getXMLResources(
+    protected <T extends RESTBaseEntityV1<T, V, W>, U extends AuditedEntity, V extends RESTBaseEntityCollectionV1<T, V, W>,
+            W extends RESTBaseEntityCollectionItemV1<T, V, W>> V getXMLResources(
             final Class<V> collectionClass, final Class<U> type, final RESTDataObjectFactory<T, U, V, W> dataObjectFactory,
             final String expandName, final String expand) {
         return getResources(collectionClass, type, dataObjectFactory, expandName, expand, RESTv1Constants.XML_URL);
     }
 
-    protected <T extends RESTBaseEntityV1<T, V, W>, U extends AuditedEntity, V extends RESTBaseCollectionV1<T, V, W>,
-            W extends RESTBaseCollectionItemV1<T, V, W>> V getJSONResources(
+    protected <T extends RESTBaseEntityV1<T, V, W>, U extends AuditedEntity, V extends RESTBaseEntityCollectionV1<T, V, W>,
+            W extends RESTBaseEntityCollectionItemV1<T, V, W>> V getJSONResources(
             final Class<V> collectionClass, final Class<U> type, final RESTDataObjectFactory<T, U, V, W> dataObjectFactory,
             final String expandName, final String expand) {
         return getResources(collectionClass, type, dataObjectFactory, expandName, expand, RESTv1Constants.JSON_URL);
     }
 
-    protected <T extends RESTBaseEntityV1<T, V, W>, U extends AuditedEntity, V extends RESTBaseCollectionV1<T, V, W>,
-            W extends RESTBaseCollectionItemV1<T, V, W>> V getResources(
+    protected <T extends RESTBaseEntityV1<T, V, W>, U extends AuditedEntity, V extends RESTBaseEntityCollectionV1<T, V, W>,
+            W extends RESTBaseEntityCollectionItemV1<T, V, W>> V getResources(
             final Class<V> collectionClass, final Class<U> type, final RESTDataObjectFactory<T, U, V, W> dataObjectFactory,
             final String expandName, final String expand, final String dataType) {
         assert type != null : "The type parameter can not be null";
@@ -983,8 +986,8 @@ public class BaseRESTv1 extends BaseREST {
      * @param expand                  The Expand Object that contains details about what should be expanded.
      * @return A Collection of Entities represented as the passed collectionClass.
      */
-    protected <T extends RESTBaseEntityV1<T, V, W>, U extends AuditedEntity, V extends RESTBaseCollectionV1<T, V, W>,
-            W extends RESTBaseCollectionItemV1<T, V, W>> V getJSONResourcesFromQuery(
+    protected <T extends RESTBaseEntityV1<T, V, W>, U extends AuditedEntity, V extends RESTBaseEntityCollectionV1<T, V, W>,
+            W extends RESTBaseEntityCollectionItemV1<T, V, W>> V getJSONResourcesFromQuery(
             final Class<V> collectionClass, final MultivaluedMap<String, String> queryParams,
             final Class<? extends IFilterQueryBuilder<U>> filterQueryBuilderClass, final IFieldFilter entityFieldFilter,
             final RESTDataObjectFactory<T, U, V, W> dataObjectFactory, final String expandName, final String expand) {
@@ -1005,8 +1008,8 @@ public class BaseRESTv1 extends BaseREST {
      * @param dataType                The MIME data type that should be returned and used for entity URL links.
      * @return A Collection of Entities represented as the passed collectionClass.
      */
-    protected <T extends RESTBaseEntityV1<T, V, W>, U extends AuditedEntity, V extends RESTBaseCollectionV1<T, V, W>,
-            W extends RESTBaseCollectionItemV1<T, V, W>> V getResourcesFromQuery(
+    protected <T extends RESTBaseEntityV1<T, V, W>, U extends AuditedEntity, V extends RESTBaseEntityCollectionV1<T, V, W>,
+            W extends RESTBaseEntityCollectionItemV1<T, V, W>> V getResourcesFromQuery(
             final Class<V> collectionClass, final MultivaluedMap<String, String> queryParams,
             final Class<? extends IFilterQueryBuilder<U>> filterQueryBuilderClass, final IFieldFilter entityFieldFilter,
             final RESTDataObjectFactory<T, U, V, W> dataObjectFactory, final String expandName, final String expand,

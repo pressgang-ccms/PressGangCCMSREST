@@ -4,7 +4,7 @@ import javax.ws.rs.Path;
 
 import org.jboss.pressgang.ccms.rest.collections.RESTVersionDetailsCollection;
 import org.jboss.pressgang.ccms.rest.jaxrsinterfaces.RESTInterface;
-import org.jboss.pressgang.ccms.server.utils.Constants;
+import org.jboss.pressgang.ccms.server.constants.Constants;
 
 @Path(Constants.BASE_REST_PATH)
 public class REST extends BaseREST implements RESTInterface {

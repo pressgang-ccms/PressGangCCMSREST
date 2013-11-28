@@ -1,8 +1,6 @@
-package org.jboss.pressgang.ccms.server.utils;
+package org.jboss.pressgang.ccms.server.constants;
 
 public class Constants {
-
-    public static final String DOCBUILDER_SYSTEM_PROPERTY = "topicIndex.docbuilder";
 
     /**
      * A Topic ID that no topic should ever match

@@ -5,6 +5,7 @@ import javax.ws.rs.core.Application;
 import java.util.HashSet;
 import java.util.Set;
 
+import net.java.dev.webdav.jaxrs.xml.WebDavContextResolver;
 import org.jboss.pressgang.ccms.server.rest.v1.RESTv1;
 import org.jboss.pressgang.ccms.server.rest.v1.interceptor.RESTv1VersionHeaderInterceptor;
 import org.jboss.pressgang.ccms.server.rest.v1.interceptor.RESTv1VersionInterceptor;
@@ -37,6 +38,7 @@ public class JaxRsActivator extends Application {
 
         // Providers
         classes.add(CustomJacksonJsonProvider.class);
+        classes.add(WebDavContextResolver.class);
 
         // Interceptors
         classes.add(RESTv1VersionHeaderInterceptor.class);

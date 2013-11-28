@@ -16,7 +16,7 @@ import java.util.Set;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.regex.Pattern;
 
-import org.jboss.pressgang.ccms.server.utils.Constants;
+import org.jboss.pressgang.ccms.server.constants.Constants;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
