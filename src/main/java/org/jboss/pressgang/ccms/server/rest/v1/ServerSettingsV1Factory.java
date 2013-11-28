@@ -103,7 +103,7 @@ public class ServerSettingsV1Factory {
         if (dataObject.hasParameterSet(RESTServerSettingsV1.DEFAULT_LOCALE_NAME))
             applicationConfig.setDefaultLocale(dataObject.getDefaultLocale());
         if (dataObject.hasParameterSet(RESTServerSettingsV1.LOCALES_NAME)) applicationConfig.setLocales(dataObject.getLocales());
-        if (dataObject.hasParameterSet(RESTServerSettingsV1.DOCBOOK_ELEMENTS_NAME))
+        if (dataObject.hasParameterSet(RESTServerSettingsV1.DOCBOOK_TEMPLATES_NAME))
             applicationConfig.setDocBookTemplateStringConstantIds(dataObject.getDocBookTemplateIds());
         if (dataObject.hasParameterSet(RESTServerSettingsV1.SEO_CATEGORIES_NAME))
             applicationConfig.setSEOCategoryIds(dataObject.getSeoCategoryIds());
