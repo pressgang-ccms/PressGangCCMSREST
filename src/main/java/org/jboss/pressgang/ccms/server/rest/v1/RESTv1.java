@@ -192,14 +192,21 @@ public class RESTv1 extends BaseRESTv1 implements RESTBaseInterfaceV1, RESTInter
 
     @Override
     public RESTTopicCollectionV1 getSimilarTopics(final String xml, final String expand, final Float threshold) {
+
+        if (threshold == null) {
+            throw new IllegalArgumentException("threshold must be between " + org.jboss.pressgang.ccms.model.constants.Constants.MIN_DOCUMENT_SIMILARITY + " and " + org.jboss.pressgang.ccms.model.constants.Constants.MAX_DOCUMENT_SIMILARITY);
+        }
+
+        if (threshold < org.jboss.pressgang.ccms.model.constants.Constants.MIN_DOCUMENT_SIMILARITY ||
+                threshold > org.jboss.pressgang.ccms.model.constants.Constants.MAX_DOCUMENT_SIMILARITY) {
+            throw new IllegalArgumentException("threshold must be between " + org.jboss.pressgang.ccms.model.constants.Constants.MIN_DOCUMENT_SIMILARITY + " and " + org.jboss.pressgang.ccms.model.constants.Constants.MAX_DOCUMENT_SIMILARITY);
+        }
+
         final Map<Integer, Integer> minHashes = getMinHashes(xml);
 
         final List<Integer> topics = org.jboss.pressgang.ccms.model.utils.TopicUtilities.getMatchingMinHash(entityManager, minHashes, threshold);
 
         if (topics != null) {
-
-
-
             final String topicIds = CollectionUtilities.toSeperatedString(topics, ",");
 
             final PathSegment filter = new PathSegmentImpl(Constants.QUERY_PATHSEGMENT_PREFIX, false);
