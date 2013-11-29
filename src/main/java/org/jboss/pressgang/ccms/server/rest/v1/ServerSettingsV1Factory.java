@@ -43,8 +43,10 @@ public class ServerSettingsV1Factory {
         entities.setAbstractTagId(entitiesConfig.getAbstractTagId());
         entities.setAuthorGroupTagId(entitiesConfig.getAuthorGroupTagId());
         entities.setContentSpecTagId(entitiesConfig.getContentSpecTagId());
+        entities.setFrozenTagId(entitiesConfig.getFrozenTagId());
         entities.setInternalOnlyTagId(entitiesConfig.getInternalOnlyTagId());
         entities.setLegalNoticeTagId(entitiesConfig.getLegalNoticeTagId());
+        entities.setObsoleteTagId(entitiesConfig.getObsoleteTagId());
         entities.setReviewTagId(entitiesConfig.getReviewTagId());
         entities.setRevisionHistoryTagId(entitiesConfig.getRevisionHistoryTagId());
         entities.setTaskTagId(entitiesConfig.getTaskTagId());
