@@ -367,7 +367,7 @@ public class TopicV1Factory extends RESTDataObjectFactory<RESTTopicV1, Topic, RE
 
         /* Update the minhash signature (or skip if the min hash xors have not been created. */
         final List<MinHashXOR> minHashXORs = entityManager.createQuery(MinHashXOR.SELECT_ALL_QUERY).getResultList();
-        if (minHashXORs.size() == org.jboss.pressgang.ccms.model.constants.Constants.NUM_MIN_HASHES) {
+        if (minHashXORs.size() == org.jboss.pressgang.ccms.model.constants.Constants.NUM_MIN_HASHES - 1) {
             org.jboss.pressgang.ccms.model.utils.TopicUtilities.recalculateMinHash(entity, minHashXORs);
         }
 
