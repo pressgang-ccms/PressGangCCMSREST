@@ -288,6 +288,38 @@ public class RESTv1 extends BaseRESTv1 implements RESTBaseInterfaceV1, RESTInter
             final List<MinHashXOR> minHashXORs = entityManager.createQuery(MinHashXOR.SELECT_ALL_QUERY).getResultList();
             final List<Integer> topics = entityManager.createQuery(topicQuery).getResultList();
 
+            for (int i = 0; i < topics.size(); i += BATCH_SIZE) {
+                try {
+                    // Start a Transaction
+                    transactionManager.begin();
+
+                    // Join the transaction we just started
+                    entityManager.joinTransaction();
+
+                    for (int j = i; j < topics.size() && j < i + BATCH_SIZE; ++j) {
+                        final Topic topic = entityManager.find(Topic.class, topics.get(j));
+                        org.jboss.pressgang.ccms.model.utils.TopicUtilities.recalculateMinHash(topic, minHashXORs);
+
+                        // Handle topics that have invalid titles.
+                        if (topic.getTopicTitle() == null || topic.getTopicTitle().trim().isEmpty()) {
+                            topic.setTopicTitle("Placeholder");
+                        }
+
+                        entityManager.persist(topic);
+                    }
+
+                    // Flush the changes to the database and commit the transaction
+                    entityManager.flush();
+                    transactionManager.commit();
+                } catch (final Throwable ex) {
+                    final int status = transactionManager.getStatus();
+                    if (status != Status.STATUS_ROLLING_BACK && status != Status.STATUS_ROLLEDBACK && status != Status.STATUS_NO_TRANSACTION) {
+                        transactionManager.rollback();
+                    }
+                }
+            }
+
+            /*
             // Since there are a lot of topics to process there is a high chance it'll hit the timeout,
             // so break the transactions into smaller chunks
             for (int i = 0; i < topics.size(); i += BATCH_SIZE) {
@@ -353,7 +385,7 @@ public class RESTv1 extends BaseRESTv1 implements RESTBaseInterfaceV1, RESTInter
                         transactionManager.rollback();
                     }
                 }
-            }
+            }    */
         } catch (final Throwable ex) {
             throw processError(transactionManager, ex);
         }
