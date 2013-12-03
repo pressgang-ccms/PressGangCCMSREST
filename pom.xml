@@ -4,7 +4,7 @@
     <parent>
         <groupId>org.jboss.pressgang</groupId>
         <artifactId>pressgang-parent</artifactId>
-        <version>1.5</version>
+        <version>1.6-SNAPSHOT</version>
     </parent>
     <groupId>org.jboss.pressgang.ccms</groupId>
     <artifactId>pressgang-ccms-server</artifactId>
