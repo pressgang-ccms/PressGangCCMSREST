@@ -15,12 +15,13 @@
     <properties>
         <pressgang.ccms.version>1.4-SNAPSHOT</pressgang.ccms.version>
 
-        <jboss.bom.version>1.0.2.Final</jboss.bom.version>
+        <jboss.bom.version>1.0.3.Final</jboss.bom.version>
         <jboss.spec.verison>3.0.1.Final</jboss.spec.verison>
         <jbossasplugin.version>7.1.1.Final</jbossasplugin.version>
         <jackson.version>1.9.9</jackson.version>
         <xalan.version>2.7.1</xalan.version>
         <xerces.version>2.11.0</xerces.version>
+        <weld.version>1.1.Final</weld.version>
         <resteasy.version>2.3.5.Final</resteasy.version>
         <log4j.version>1.2.16</log4j.version>
         <slf4j.version>1.6.4</slf4j.version>
@@ -56,6 +57,13 @@
             <dependency>
                 <groupId>org.jboss.bom</groupId>
                 <artifactId>jboss-javaee-6.0-with-hibernate</artifactId>
+                <version>${jboss.bom.version}</version>
+                <type>pom</type>
+                <scope>import</scope>
+            </dependency>
+            <dependency>
+                <groupId>org.jboss.bom</groupId>
+                <artifactId>jboss-javaee-6.0-with-deltaspike</artifactId>
                 <version>${jboss.bom.version}</version>
                 <type>pom</type>
                 <scope>import</scope>
@@ -150,6 +158,12 @@
             <groupId>xerces</groupId>
             <artifactId>xercesImpl</artifactId>
             <version>${xerces.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.jboss.weld</groupId>
+            <artifactId>weld-api</artifactId>
+            <version>${weld.version}</version>
+            <scope>provided</scope>
         </dependency>
 
         <!-- RestEASY Dependencies -->
@@ -337,6 +351,21 @@
             <groupId>com.intellij</groupId>
             <artifactId>annotations</artifactId>
             <version>${intellij.annotations.version}</version>
+        </dependency>
+
+        <!-- Deltaspike API. we use compile scope as we need its API -->
+        <dependency>
+            <groupId>org.apache.deltaspike.core</groupId>
+            <artifactId>deltaspike-core-api</artifactId>
+            <scope>compile</scope>
+        </dependency>
+
+        <!-- Deltaspike Impl. we use runtime scope as we its implementation
+            dependencies only on runtime -->
+        <dependency>
+            <groupId>org.apache.deltaspike.core</groupId>
+            <artifactId>deltaspike-core-impl</artifactId>
+            <scope>runtime</scope>
         </dependency>
 
         <!-- Liquibase -->

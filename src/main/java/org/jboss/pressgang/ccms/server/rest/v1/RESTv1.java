@@ -5,6 +5,7 @@ import javax.persistence.EntityManager;
 import javax.persistence.criteria.CriteriaQuery;
 import javax.transaction.Status;
 import javax.transaction.SystemException;
+import javax.transaction.TransactionManager;
 import javax.transaction.UserTransaction;
 import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
@@ -115,7 +116,6 @@ import org.jboss.pressgang.ccms.rest.v1.collections.items.RESTTagCollectionItemV
 import org.jboss.pressgang.ccms.rest.v1.collections.items.RESTTopicCollectionItemV1;
 import org.jboss.pressgang.ccms.rest.v1.components.ComponentTopicV1;
 import org.jboss.pressgang.ccms.rest.v1.constants.RESTv1Constants;
-import org.jboss.pressgang.ccms.rest.v1.entities.RESTServerSettingsV1;
 import org.jboss.pressgang.ccms.rest.v1.entities.RESTBlobConstantV1;
 import org.jboss.pressgang.ccms.rest.v1.entities.RESTCategoryV1;
 import org.jboss.pressgang.ccms.rest.v1.entities.RESTFileV1;
@@ -126,6 +126,7 @@ import org.jboss.pressgang.ccms.rest.v1.entities.RESTProjectV1;
 import org.jboss.pressgang.ccms.rest.v1.entities.RESTPropertyCategoryV1;
 import org.jboss.pressgang.ccms.rest.v1.entities.RESTPropertyTagV1;
 import org.jboss.pressgang.ccms.rest.v1.entities.RESTRoleV1;
+import org.jboss.pressgang.ccms.rest.v1.entities.RESTServerSettingsV1;
 import org.jboss.pressgang.ccms.rest.v1.entities.RESTStringConstantV1;
 import org.jboss.pressgang.ccms.rest.v1.entities.RESTTagV1;
 import org.jboss.pressgang.ccms.rest.v1.entities.RESTTopicV1;
@@ -143,15 +144,16 @@ import org.jboss.pressgang.ccms.rest.v1.expansion.ExpandDataDetails;
 import org.jboss.pressgang.ccms.rest.v1.expansion.ExpandDataTrunk;
 import org.jboss.pressgang.ccms.rest.v1.jaxrsinterfaces.RESTBaseInterfaceV1;
 import org.jboss.pressgang.ccms.rest.v1.jaxrsinterfaces.RESTInterfaceAdvancedV1;
-import org.jboss.pressgang.ccms.server.rest.v1.base.BaseRESTv1;
 import org.jboss.pressgang.ccms.server.constants.Constants;
+import org.jboss.pressgang.ccms.server.rest.v1.base.BaseRESTv1;
+import org.jboss.pressgang.ccms.server.utils.BeanUtilities;
 import org.jboss.pressgang.ccms.server.utils.ContentSpecUtilities;
+import org.jboss.pressgang.ccms.server.utils.JNDIUtilities;
 import org.jboss.pressgang.ccms.server.utils.TopicUtilities;
 import org.jboss.pressgang.ccms.utils.common.CollectionUtilities;
 import org.jboss.pressgang.ccms.utils.common.DocBookUtilities;
 import org.jboss.pressgang.ccms.utils.common.XMLUtilities;
 import org.jboss.pressgang.ccms.utils.common.ZipUtilities;
-import org.jboss.pressgang.ccms.utils.constants.CommonConstants;
 import org.jboss.pressgang.ccms.utils.constants.CommonFilterConstants;
 import org.jboss.resteasy.plugins.providers.atom.Feed;
 import org.jboss.resteasy.specimpl.PathSegmentImpl;
@@ -160,6 +162,7 @@ import org.jboss.resteasy.spi.HttpResponse;
 import org.jboss.resteasy.spi.InternalServerErrorException;
 import org.jboss.resteasy.spi.NotFoundException;
 import org.jboss.resteasy.util.Base64;
+import org.jboss.weld.context.bound.BoundRequestContext;
 import org.jfree.chart.ChartFactory;
 import org.jfree.chart.JFreeChart;
 import org.jfree.chart.plot.PiePlot3D;
@@ -288,38 +291,6 @@ public class RESTv1 extends BaseRESTv1 implements RESTBaseInterfaceV1, RESTInter
             final List<MinHashXOR> minHashXORs = entityManager.createQuery(MinHashXOR.SELECT_ALL_QUERY).getResultList();
             final List<Integer> topics = entityManager.createQuery(topicQuery).getResultList();
 
-            for (int i = 0; i < topics.size(); i += BATCH_SIZE) {
-                try {
-                    // Start a Transaction
-                    transactionManager.begin();
-
-                    // Join the transaction we just started
-                    entityManager.joinTransaction();
-
-                    for (int j = i; j < topics.size() && j < i + BATCH_SIZE; ++j) {
-                        final Topic topic = entityManager.find(Topic.class, topics.get(j));
-                        org.jboss.pressgang.ccms.model.utils.TopicUtilities.recalculateMinHash(topic, minHashXORs);
-
-                        // Handle topics that have invalid titles.
-                        if (topic.getTopicTitle() == null || topic.getTopicTitle().trim().isEmpty()) {
-                            topic.setTopicTitle("Placeholder");
-                        }
-
-                        entityManager.persist(topic);
-                    }
-
-                    // Flush the changes to the database and commit the transaction
-                    entityManager.flush();
-                    transactionManager.commit();
-                } catch (final Throwable ex) {
-                    final int status = transactionManager.getStatus();
-                    if (status != Status.STATUS_ROLLING_BACK && status != Status.STATUS_ROLLEDBACK && status != Status.STATUS_NO_TRANSACTION) {
-                        transactionManager.rollback();
-                    }
-                }
-            }
-
-            /*
             // Since there are a lot of topics to process there is a high chance it'll hit the timeout,
             // so break the transactions into smaller chunks
             for (int i = 0; i < topics.size(); i += BATCH_SIZE) {
@@ -332,18 +303,24 @@ public class RESTv1 extends BaseRESTv1 implements RESTBaseInterfaceV1, RESTInter
                     THREAD_POOL.invokeLater(
                             new Runnable() {
                                 public void run() {
+                                    /*
+                                     * Since the envers logging we use relies on being associated with a managed context we need to
+                                     * simulate this in the runnable. This can be achieved by associating the thread with a
+                                     * RequestContext, see: http://docs.jboss.org/weld/reference/latest/en-US/html/contexts.html
+                                     */
+                                    Map<String, Object> dataStore = new HashMap<String, Object>();
 
-                                    InitialContext ic = null;
-                                    UserTransaction utx = null;
+                                    TransactionManager transactionManager = null;
                                     EntityManager em = null;
 
                                     try {
-                                        ic = new InitialContext();
-                                        utx = (UserTransaction)ic.lookup(USER_TRANSACTION_NAME);
-                                        em = entityManagerFactory.createEntityManager();
+                                        beginRequest(dataStore);
+
+                                        transactionManager = JNDIUtilities.lookupJBossTransactionManager();
+                                        em = JNDIUtilities.lookupJBossEntityManagerFactory().createEntityManager();
 
                                         // Start a Transaction
-                                        utx.begin();
+                                        transactionManager.begin();
 
                                         // Join the transaction we just started
                                         em.joinTransaction();
@@ -361,11 +338,11 @@ public class RESTv1 extends BaseRESTv1 implements RESTBaseInterfaceV1, RESTInter
                                             em.persist(topic);
                                         }
 
-                                        utx.commit();
+                                        transactionManager.commit();
                                     } catch (final Exception ex) {
                                         try {
-                                            if (utx != null) {
-                                                utx.rollback();
+                                            if (transactionManager != null) {
+                                                transactionManager.rollback();
                                             }
                                         } catch (final SystemException ex2) {
                                             // nothing to do here
@@ -374,18 +351,39 @@ public class RESTv1 extends BaseRESTv1 implements RESTBaseInterfaceV1, RESTInter
                                         if (em != null) {
                                             em.close();
                                         }
+                                        endRequest(dataStore);
+                                        dataStore = null;
                                     }
+                                }
+
+                                private void beginRequest(final Map<String, Object> dataStore) {
+                                    final BoundRequestContext requestContext = getRequestContext();
+                                    requestContext.associate(dataStore);
+                                    requestContext.activate();
+                                }
+
+                                private void endRequest(final Map<String, Object> dataStore) {
+                                    final BoundRequestContext requestContext = getRequestContext();
+                                    try {
+                                        requestContext.invalidate();
+                                        requestContext.deactivate();
+                                    } finally {
+                                        requestContext.dissociate(dataStore);
+                                    }
+                                }
+
+                                private BoundRequestContext getRequestContext() {
+                                    return BeanUtilities.lookupBean(BoundRequestContext.class);
                                 }
                             }
                     );
-
                 } catch (final Exception ex) {
                     final int status = transactionManager.getStatus();
                     if (status != Status.STATUS_ROLLING_BACK && status != Status.STATUS_ROLLEDBACK && status != Status.STATUS_NO_TRANSACTION) {
                         transactionManager.rollback();
                     }
                 }
-            }    */
+            }
         } catch (final Throwable ex) {
             throw processError(transactionManager, ex);
         }
