@@ -29,6 +29,7 @@
         <cors.filter.version>1.7.1</cors.filter.version>
         <htmlcleaner.version>2.2</htmlcleaner.version>
         <lucene.version>3.5.0</lucene.version>
+        <jppf.version>3.3.7</jppf.version>
         <arquillian.version>1.0.3.Final</arquillian.version>
         <jbossarquillian.version>7.1.1.Final</jbossarquillian.version>
         <arquillianbom.version>1.0.0.Final</arquillianbom.version>
@@ -314,6 +315,13 @@
             <groupId>commons-threadpool</groupId>
             <artifactId>commons-threadpool</artifactId>
             <version>${commons.threadpool.version}</version>
+        </dependency>
+
+        <!-- JPPF -->
+        <dependency>
+            <groupId>org.jppf</groupId>
+            <artifactId>jppf-client</artifactId>
+            <version>${jppf.version}</version>
         </dependency>
 
         <!-- HTML Cleaner -->
