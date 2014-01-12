@@ -16,6 +16,9 @@ import org.jboss.pressgang.ccms.server.contentspec.TeiidBugzillaBugLinkStrategy;
 @Startup
 public class StartUp {
 
+    //@Inject
+    //private ProcessManager processManager;
+
     @PostConstruct
     public void init() throws Exception {
         final String pressGangConfigurationDir = getPressGangConfigurationDirectory();
@@ -23,12 +26,18 @@ public class StartUp {
         // Load the application config
         final ApplicationConfig appConfig = ApplicationConfig.getInstance();
         appConfig.load(new File(pressGangConfigurationDir + ApplicationConfig.FILENAME));
+        if (!appConfig.validate()) {
+            throw new ConfigurationException(
+                    "The application config file at " + pressGangConfigurationDir + ApplicationConfig.FILENAME + " " +
+                            "failed to validate.");
+        }
 
         // Load the entities config
         final EntitiesConfig entitiesConfig = EntitiesConfig.getInstance();
         entitiesConfig.load(new File(pressGangConfigurationDir + EntitiesConfig.FILENAME));
         if (!entitiesConfig.validate()) {
-            throw new ConfigurationException("The entities config file at " + pressGangConfigurationDir + EntitiesConfig.FILENAME + " failed to validate.");
+            throw new ConfigurationException(
+                    "The entities config file at " + pressGangConfigurationDir + EntitiesConfig.FILENAME + " failed to validate.");
         }
 
         if (appConfig.getBugzillaTeiid()) {
@@ -36,6 +45,9 @@ public class StartUp {
             BugLinkStrategyFactory.getInstance().registerStrategy(BugLinkType.BUGZILLA, 1, TeiidBugzillaBugLinkStrategy.class,
                     appConfig.getBugzillaUrl());
         }
+
+        // Make a call to process manager so it's post construct will be called
+        //processManager.toString();
     }
 
     protected String getPressGangConfigurationDirectory() {

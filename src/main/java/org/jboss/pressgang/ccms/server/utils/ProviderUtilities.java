@@ -4,6 +4,7 @@ import static com.google.common.base.Strings.isNullOrEmpty;
 
 import javax.persistence.EntityManager;
 import javax.transaction.TransactionManager;
+import javax.transaction.UserTransaction;
 
 import org.jboss.pressgang.ccms.model.User;
 import org.jboss.pressgang.ccms.provider.DBProviderFactory;
@@ -13,11 +14,11 @@ import org.jboss.pressgang.ccms.wrapper.LogMessageWrapper;
 
 public class ProviderUtilities {
 
-    public static DBProviderFactory getDBProviderFactory(final EntityManager entityManager, final TransactionManager transactionManager) {
+    public static DBProviderFactory getDBProviderFactory(final EntityManager entityManager, final UserTransaction transactionManager) {
         return getDBProviderFactory(entityManager, transactionManager, null);
     }
 
-    public static DBProviderFactory getDBProviderFactory(final EntityManager entityManager, final TransactionManager transactionManager,
+    public static DBProviderFactory getDBProviderFactory(final EntityManager entityManager, final UserTransaction transactionManager,
             final EnversLoggingBean loggingBean) {
         final DBProviderFactory providerFactory = DBProviderFactory.create(entityManager, transactionManager);
         if (loggingBean != null) {

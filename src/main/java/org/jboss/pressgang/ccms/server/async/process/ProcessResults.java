@@ -6,10 +6,10 @@ import java.util.Collections;
 
 import org.jboss.pressgang.ccms.server.async.process.task.ProcessTask;
 import org.jppf.client.JobResults;
-import org.jppf.server.protocol.JPPFTask;
+import org.jppf.node.protocol.Task;
 
 /*
- * A Wrapper class to make return custom classes from the normal results.
+ * A Wrapper class to return custom classes from the normal results.
  */
 public class ProcessResults {
     private final JobResults results;
@@ -44,7 +44,7 @@ public class ProcessResults {
      * @return a <code>ProcessTask</code> instance, or null if no result was received for a task at this position.
      */
     public ProcessTask getResult(final int position) {
-        return (ProcessTask) results.getResult(position);
+        return (ProcessTask) results.getResultTask(position);
     }
 
     /**
@@ -54,8 +54,8 @@ public class ProcessResults {
      */
     public synchronized Collection<ProcessTask> getAll() {
         final Collection<ProcessTask> tasks = new ArrayList<ProcessTask>();
-        final Collection<JPPFTask> jppfTasks = results.getAll();
-        for (final JPPFTask task : jppfTasks) {
+        final Collection<Task<?>> jppfTasks = results.getAllResults();
+        for (final Task<?> task : jppfTasks) {
             tasks.add((ProcessTask) task);
         }
         return Collections.unmodifiableCollection(tasks);

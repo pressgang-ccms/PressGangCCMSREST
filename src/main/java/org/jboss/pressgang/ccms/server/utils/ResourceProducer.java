@@ -9,11 +9,10 @@ import javax.persistence.FlushModeType;
 import javax.persistence.PersistenceUnit;
 
 public class ResourceProducer {
+    public static final String PERSISTENCE_UNIT_NAME = "PressGangCCMS";
 
-    @PersistenceUnit
+    @PersistenceUnit(unitName = PERSISTENCE_UNIT_NAME)
     protected EntityManagerFactory entityManagerFactory;
-
-    protected EntityManager em;
 
     @Produces
     @RequestScoped

@@ -12,6 +12,7 @@
         <class>org.jboss.pressgang.ccms.model.BugzillaBug</class>
         <class>org.jboss.pressgang.ccms.model.Category</class>
         <class>org.jboss.pressgang.ccms.model.contentspec.ContentSpec</class>
+        <class>org.jboss.pressgang.ccms.model.contentspec.ContentSpecToProcess</class>
         <class>org.jboss.pressgang.ccms.model.contentspec.ContentSpecToPropertyTag</class>
         <class>org.jboss.pressgang.ccms.model.contentspec.ContentSpecToTag</class>
         <class>org.jboss.pressgang.ccms.model.contentspec.CSNode</class>
@@ -33,6 +34,7 @@
         <class>org.jboss.pressgang.ccms.model.LanguageImage</class>
         <class>org.jboss.pressgang.ccms.model.MinHash</class>
         <class>org.jboss.pressgang.ccms.model.MinHashXOR</class>
+        <class>org.jboss.pressgang.ccms.model.Process</class>
         <class>org.jboss.pressgang.ccms.model.Project</class>
         <class>org.jboss.pressgang.ccms.model.PropertyTag</class>
         <class>org.jboss.pressgang.ccms.model.PropertyTagCategory</class>

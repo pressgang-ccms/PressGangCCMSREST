@@ -5,28 +5,18 @@ import javax.enterprise.context.RequestScoped;
 import javax.inject.Inject;
 import javax.naming.NamingException;
 import javax.persistence.EntityManager;
-import javax.persistence.EntityManagerFactory;
-import javax.persistence.EntityNotFoundException;
-import javax.persistence.PersistenceException;
-import javax.persistence.PersistenceUnit;
 import javax.persistence.TypedQuery;
 import javax.persistence.criteria.CriteriaBuilder;
 import javax.persistence.criteria.CriteriaQuery;
 import javax.persistence.criteria.Root;
-import javax.transaction.RollbackException;
 import javax.transaction.Status;
-import javax.transaction.TransactionManager;
-import javax.validation.ConstraintViolation;
-import javax.validation.ConstraintViolationException;
-import javax.validation.ValidationException;
+import javax.transaction.UserTransaction;
 import javax.ws.rs.core.Context;
 import javax.ws.rs.core.HttpHeaders;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.MultivaluedMap;
 import java.io.IOException;
 import java.net.URI;
-import java.sql.BatchUpdateException;
-import java.sql.SQLException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
@@ -59,10 +49,7 @@ import org.jboss.pressgang.ccms.model.base.AuditedEntity;
 import org.jboss.pressgang.ccms.model.config.ApplicationConfig;
 import org.jboss.pressgang.ccms.model.config.EntitiesConfig;
 import org.jboss.pressgang.ccms.model.contentspec.ContentSpec;
-import org.jboss.pressgang.ccms.model.exceptions.CustomConstraintViolationException;
 import org.jboss.pressgang.ccms.provider.DBProviderFactory;
-import org.jboss.pressgang.ccms.provider.exception.ProviderException;
-import org.jboss.pressgang.ccms.provider.exception.UnauthorisedException;
 import org.jboss.pressgang.ccms.rest.v1.collections.RESTTopicCollectionV1;
 import org.jboss.pressgang.ccms.rest.v1.collections.base.RESTBaseEntityCollectionItemV1;
 import org.jboss.pressgang.ccms.rest.v1.collections.base.RESTBaseEntityCollectionV1;
@@ -80,27 +67,33 @@ import org.jboss.pressgang.ccms.server.ejb.EnversLoggingBean;
 import org.jboss.pressgang.ccms.server.envers.LoggingRevisionEntity;
 import org.jboss.pressgang.ccms.server.rest.BaseREST;
 import org.jboss.pressgang.ccms.server.rest.DatabaseOperation;
-import org.jboss.pressgang.ccms.server.rest.v1.BlobConstantV1Factory;
-import org.jboss.pressgang.ccms.server.rest.v1.CSNodeV1Factory;
-import org.jboss.pressgang.ccms.server.rest.v1.CategoryV1Factory;
-import org.jboss.pressgang.ccms.server.rest.v1.ContentSpecV1Factory;
-import org.jboss.pressgang.ccms.server.rest.v1.FileV1Factory;
-import org.jboss.pressgang.ccms.server.rest.v1.FilterV1Factory;
-import org.jboss.pressgang.ccms.server.rest.v1.ImageV1Factory;
-import org.jboss.pressgang.ccms.server.rest.v1.IntegerConstantV1Factory;
-import org.jboss.pressgang.ccms.server.rest.v1.ProjectV1Factory;
-import org.jboss.pressgang.ccms.server.rest.v1.PropertyCategoryV1Factory;
-import org.jboss.pressgang.ccms.server.rest.v1.PropertyTagV1Factory;
-import org.jboss.pressgang.ccms.server.rest.v1.RoleV1Factory;
-import org.jboss.pressgang.ccms.server.rest.v1.ServerSettingsV1Factory;
-import org.jboss.pressgang.ccms.server.rest.v1.StringConstantV1Factory;
-import org.jboss.pressgang.ccms.server.rest.v1.TagV1Factory;
-import org.jboss.pressgang.ccms.server.rest.v1.TextContentSpecV1Factory;
-import org.jboss.pressgang.ccms.server.rest.v1.TopicV1Factory;
-import org.jboss.pressgang.ccms.server.rest.v1.TranslatedCSNodeV1Factory;
-import org.jboss.pressgang.ccms.server.rest.v1.TranslatedContentSpecV1Factory;
-import org.jboss.pressgang.ccms.server.rest.v1.TranslatedTopicV1Factory;
-import org.jboss.pressgang.ccms.server.rest.v1.UserV1Factory;
+import org.jboss.pressgang.ccms.server.rest.v1.EntityCache;
+import org.jboss.pressgang.ccms.server.rest.v1.XMLEchoCache;
+import org.jboss.pressgang.ccms.server.rest.v1.factory.BlobConstantV1Factory;
+import org.jboss.pressgang.ccms.server.rest.v1.factory.CSNodeV1Factory;
+import org.jboss.pressgang.ccms.server.rest.v1.factory.CategoryV1Factory;
+import org.jboss.pressgang.ccms.server.rest.v1.factory.ContentSpecV1Factory;
+import org.jboss.pressgang.ccms.server.rest.v1.factory.FileV1Factory;
+import org.jboss.pressgang.ccms.server.rest.v1.factory.FilterV1Factory;
+import org.jboss.pressgang.ccms.server.rest.v1.factory.ImageV1Factory;
+import org.jboss.pressgang.ccms.server.rest.v1.factory.IntegerConstantV1Factory;
+import org.jboss.pressgang.ccms.server.rest.v1.factory.ProcessInformationV1Factory;
+import org.jboss.pressgang.ccms.server.rest.v1.factory.ProjectV1Factory;
+import org.jboss.pressgang.ccms.server.rest.v1.factory.PropertyCategoryV1Factory;
+import org.jboss.pressgang.ccms.server.rest.v1.factory.PropertyTagV1Factory;
+import org.jboss.pressgang.ccms.server.rest.v1.factory.RoleV1Factory;
+import org.jboss.pressgang.ccms.server.rest.v1.factory.ServerSettingsV1Factory;
+import org.jboss.pressgang.ccms.server.rest.v1.factory.StringConstantV1Factory;
+import org.jboss.pressgang.ccms.server.rest.v1.factory.TagV1Factory;
+import org.jboss.pressgang.ccms.server.rest.v1.factory.TextContentSpecV1Factory;
+import org.jboss.pressgang.ccms.server.rest.v1.factory.TopicV1Factory;
+import org.jboss.pressgang.ccms.server.rest.v1.factory.TranslatedCSNodeV1Factory;
+import org.jboss.pressgang.ccms.server.rest.v1.factory.TranslatedContentSpecV1Factory;
+import org.jboss.pressgang.ccms.server.rest.v1.factory.TranslatedTopicV1Factory;
+import org.jboss.pressgang.ccms.server.rest.v1.factory.UserV1Factory;
+import org.jboss.pressgang.ccms.server.rest.v1.factory.base.RESTEntityCollectionFactory;
+import org.jboss.pressgang.ccms.server.rest.v1.factory.base.RESTEntityFactory;
+import org.jboss.pressgang.ccms.server.rest.v1.utils.RESTv1Utilities;
 import org.jboss.pressgang.ccms.server.utils.EntityUtilities;
 import org.jboss.pressgang.ccms.server.utils.EnversUtilities;
 import org.jboss.pressgang.ccms.server.utils.ProviderUtilities;
@@ -109,11 +102,9 @@ import org.jboss.resteasy.plugins.providers.atom.Content;
 import org.jboss.resteasy.plugins.providers.atom.Entry;
 import org.jboss.resteasy.plugins.providers.atom.Feed;
 import org.jboss.resteasy.spi.BadRequestException;
-import org.jboss.resteasy.spi.Failure;
 import org.jboss.resteasy.spi.HttpResponse;
 import org.jboss.resteasy.spi.InternalServerErrorException;
 import org.jboss.resteasy.spi.NotFoundException;
-import org.jboss.resteasy.spi.UnauthorizedException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -126,13 +117,14 @@ public class BaseRESTv1 extends BaseREST {
     private static final Logger log = LoggerFactory.getLogger(BaseRESTv1.class);
 
     public static final String TRANSACTION_MANAGER_NAME = "java:jboss/TransactionManager";
-    public static final String USER_TRANSACTION_NAME = "java:jboss/UserTransaction";
-    public static final String PERSISTENCE_UNIT_NAME = "PressGangCCMS";
 
     /**
      * The format for dates passed and returned by the REST Interface
      */
     protected static final String REST_DATE_FORMAT = "dd-MMM-yyyy";
+
+    protected static ApplicationConfig applicationConfig = ApplicationConfig.getInstance();
+    protected static EntitiesConfig entitiesConfig = EntitiesConfig.getInstance();
 
     /**
      * An mapper to map Objects to JSON or vice-versa
@@ -143,13 +135,8 @@ public class BaseRESTv1 extends BaseREST {
      */
     @Inject
     private EnversLoggingBean enversLoggingBean;
-    /**
-     * The JBoss Transaction Manager
-     */
-    @Resource(lookup = TRANSACTION_MANAGER_NAME)
-    protected TransactionManager transactionManager;
-    @PersistenceUnit(unitName = PERSISTENCE_UNIT_NAME)
-    protected EntityManagerFactory entityManagerFactory;
+    @Resource
+    protected UserTransaction transaction;
     @Context
     protected HttpResponse response;
     /**
@@ -165,7 +152,9 @@ public class BaseRESTv1 extends BaseREST {
     @Inject
     protected XMLEchoCache xmlEchoCache;
     @Inject
-    protected ServerSettingsV1Factory applicationSettingsFactory;
+    protected ServerSettingsV1Factory serverSettingsFactory;
+    @Inject
+    protected ProcessInformationV1Factory processInformationFactory;
 
     /* START ENTITY FACTORIES */
     @Inject
@@ -318,7 +307,7 @@ public class BaseRESTv1 extends BaseREST {
     protected <T extends RESTBaseEntityV1<T, V, W>, U extends AuditedEntity, V extends RESTBaseEntityCollectionV1<T, V, W>,
             W extends RESTBaseEntityCollectionItemV1<T, V, W>> V getJSONEntitiesUpdatedSince(
             final Class<V> collectionClass, final Class<U> type, final String idProperty,
-            final RESTDataObjectFactory<T, U, V, W> dataObjectFactory, final String expandName, final String expand, final Date date) {
+            final RESTEntityFactory<T, U, V, W> dataObjectFactory, final String expandName, final String expand, final Date date) {
         return getEntitiesUpdatedSince(collectionClass, type, idProperty, dataObjectFactory, expandName, expand, RESTv1Constants.JSON_URL,
                 date);
     }
@@ -337,7 +326,7 @@ public class BaseRESTv1 extends BaseREST {
     protected <T extends RESTBaseEntityV1<T, V, W>, U extends AuditedEntity, V extends RESTBaseEntityCollectionV1<T, V, W>,
             W extends RESTBaseEntityCollectionItemV1<T, V, W>> V getEntitiesUpdatedSince(
             final Class<V> collectionClass, final Class<U> type, final String idProperty,
-            final RESTDataObjectFactory<T, U, V, W> dataObjectFactory, final String expandName, final String expand, final String dataType,
+            final RESTEntityFactory<T, U, V, W> dataObjectFactory, final String expandName, final String expand, final String dataType,
             final Date date) {
         assert date != null : "The date parameter can not be null";
 
@@ -366,7 +355,7 @@ public class BaseRESTv1 extends BaseREST {
             final List<U> entities = jpaQuery.getResultList();
 
             // Create and initialise the Collection using the specified REST Object Factory
-            final V retValue = RESTDataObjectCollectionFactory.create(collectionClass, dataObjectFactory, entities, expandName, dataType,
+            final V retValue = RESTEntityCollectionFactory.create(collectionClass, dataObjectFactory, entities, expandName, dataType,
                     expandDataTrunk, getBaseUrl(), entityManager);
 
             return retValue;
@@ -378,7 +367,7 @@ public class BaseRESTv1 extends BaseREST {
 
     protected <T extends RESTBaseEntityV1<T, V, W>, U extends AuditedEntity, V extends RESTBaseEntityCollectionV1<T, V, W>,
             W extends RESTBaseEntityCollectionItemV1<T, V, W>> T deleteJSONEntity(
-            final Class<U> type, final RESTDataObjectFactory<T, U, V, W> factory, final Integer id, final String expand,
+            final Class<U> type, final RESTEntityFactory<T, U, V, W> factory, final Integer id, final String expand,
             final RESTLogDetailsV1 logDetails) {
         return deleteEntity(type, factory, id, RESTv1Constants.JSON_URL, expand, logDetails);
     }
@@ -396,7 +385,7 @@ public class BaseRESTv1 extends BaseREST {
      */
     protected <T extends RESTBaseEntityV1<T, V, W>, U extends AuditedEntity, V extends RESTBaseEntityCollectionV1<T, V, W>,
             W extends RESTBaseEntityCollectionItemV1<T, V, W>> T deleteEntity(
-            final Class<U> type, final RESTDataObjectFactory<T, U, V, W> factory, final Integer id, final String dataType,
+            final Class<U> type, final RESTEntityFactory<T, U, V, W> factory, final Integer id, final String dataType,
             final String expand, final RESTLogDetailsV1 logDetails) {
         assert id != null : "id should not be null";
 
@@ -405,7 +394,7 @@ public class BaseRESTv1 extends BaseREST {
             final ExpandDataTrunk expandDataTrunk = unmarshallExpand(expand);
 
             // Start a Transaction
-            transactionManager.begin();
+            transaction.begin();
 
             // Join the transaction we just started
             entityManager.joinTransaction();
@@ -422,31 +411,31 @@ public class BaseRESTv1 extends BaseREST {
 
             // Flush and commit the changes to the database
             entityManager.flush();
-            transactionManager.commit();
+            transaction.commit();
 
             return factory.createRESTEntityFromDBEntity(entity, getBaseUrl(), dataType, expandDataTrunk);
         } catch (final Throwable e) {
-            throw processError(transactionManager, e);
+            throw RESTv1Utilities.processError(transaction, e);
         }
     }
 
     protected <T extends RESTBasePrimaryEntityV1<T, V, W>, U extends AuditedEntity, V extends RESTBaseEntityCollectionV1<T, V, W>,
             W extends RESTBaseEntityCollectionItemV1<T, V, W>> T createJSONEntity(
-            final Class<U> type, final T restEntity, final RESTDataObjectFactory<T, U, V, W> factory, final String expand,
+            final Class<U> type, final T restEntity, final RESTEntityFactory<T, U, V, W> factory, final String expand,
             final RESTLogDetailsV1 logDetails) {
         return createEntity(type, restEntity, factory, RESTv1Constants.JSON_URL, expand, logDetails);
     }
 
     protected <T extends RESTBaseEntityV1<T, V, W>, U extends AuditedEntity, V extends RESTBaseEntityCollectionV1<T, V, W>,
             W extends RESTBaseEntityCollectionItemV1<T, V, W>> T updateJSONEntity(
-            final Class<U> type, final T restEntity, final RESTDataObjectFactory<T, U, V, W> factory, final String expand,
+            final Class<U> type, final T restEntity, final RESTEntityFactory<T, U, V, W> factory, final String expand,
             final RESTLogDetailsV1 logDetails) {
         return updateEntity(type, restEntity, factory, RESTv1Constants.JSON_URL, expand, logDetails);
     }
 
     protected <T extends RESTBasePrimaryEntityV1<T, V, W>, U extends AuditedEntity, V extends RESTBaseEntityCollectionV1<T, V, W>,
             W extends RESTBaseEntityCollectionItemV1<T, V, W>> T createEntity(
-            final Class<U> type, final T restEntity, final RESTDataObjectFactory<T, U, V, W> factory, final String dataType,
+            final Class<U> type, final T restEntity, final RESTEntityFactory<T, U, V, W> factory, final String dataType,
             final String expand, final RESTLogDetailsV1 logDetails) {
         final T newEntity = createOrUpdateEntity(type, restEntity, factory, DatabaseOperation.CREATE, dataType, expand, logDetails);
 
@@ -459,7 +448,7 @@ public class BaseRESTv1 extends BaseREST {
 
     protected <T extends RESTBaseEntityV1<T, V, W>, U extends AuditedEntity, V extends RESTBaseEntityCollectionV1<T, V, W>,
             W extends RESTBaseEntityCollectionItemV1<T, V, W>> T updateEntity(
-            final Class<U> type, final T restEntity, final RESTDataObjectFactory<T, U, V, W> factory, final String dataType,
+            final Class<U> type, final T restEntity, final RESTEntityFactory<T, U, V, W> factory, final String dataType,
             final String expand, final RESTLogDetailsV1 logDetails) {
         return createOrUpdateEntity(type, restEntity, factory, DatabaseOperation.UPDATE, dataType, expand, logDetails);
     }
@@ -478,7 +467,7 @@ public class BaseRESTv1 extends BaseREST {
      */
     private <T extends RESTBaseEntityV1<T, V, W>, U extends AuditedEntity, V extends RESTBaseEntityCollectionV1<T, V, W>,
             W extends RESTBaseEntityCollectionItemV1<T, V, W>> T createOrUpdateEntity(
-            final Class<U> type, final T restEntity, final RESTDataObjectFactory<T, U, V, W> factory, final DatabaseOperation operation,
+            final Class<U> type, final T restEntity, final RESTEntityFactory<T, U, V, W> factory, final DatabaseOperation operation,
             final String dataType, final String expand, final RESTLogDetailsV1 logDetails) {
         assert restEntity != null : "restEntity should not be null";
         assert factory != null : "factory should not be null";
@@ -490,7 +479,7 @@ public class BaseRESTv1 extends BaseREST {
             final ExpandDataTrunk expandDataTrunk = unmarshallExpand(expand);
 
             // Start a Transaction
-            transactionManager.begin();
+            transaction.begin();
 
             // Join the transaction we just started
             entityManager.joinTransaction();
@@ -531,11 +520,11 @@ public class BaseRESTv1 extends BaseREST {
 
             // Flush the changes to the database and commit the transaction
             entityManager.flush();
-            transactionManager.commit();
+            transaction.commit();
 
             retValue = factory.createRESTEntityFromDBEntity(entity, getBaseUrl(), dataType, expandDataTrunk, null, true);
         } catch (final Throwable e) {
-            throw processError(transactionManager, e);
+            throw RESTv1Utilities.processError(transaction, e);
         }
 
         // Do Post create or update actions
@@ -547,7 +536,7 @@ public class BaseRESTv1 extends BaseREST {
     protected <T extends RESTBaseEntityV1<T, V, W>, U extends AuditedEntity, V extends RESTBaseEntityCollectionV1<T, V, W>,
             W extends RESTBaseEntityCollectionItemV1<T, V, W>> V createJSONEntities(
             final Class<V> collectionClass, final Class<U> type, final RESTBaseEntityCollectionV1<T, V, W> entities,
-            final RESTDataObjectFactory<T, U, V, W> factory, final String expandName, final String expand,
+            final RESTEntityFactory<T, U, V, W> factory, final String expandName, final String expand,
             final RESTLogDetailsV1 logDetails) {
         return createEntities(collectionClass, type, entities, factory, expandName, RESTv1Constants.JSON_URL, expand, logDetails);
     }
@@ -555,7 +544,7 @@ public class BaseRESTv1 extends BaseREST {
     protected <T extends RESTBaseEntityV1<T, V, W>, U extends AuditedEntity, V extends RESTBaseEntityCollectionV1<T, V, W>,
             W extends RESTBaseEntityCollectionItemV1<T, V, W>> V updateJSONEntities(
             final Class<V> collectionClass, final Class<U> type, final RESTBaseEntityCollectionV1<T, V, W> entities,
-            final RESTDataObjectFactory<T, U, V, W> factory, final String expandName, final String expand,
+            final RESTEntityFactory<T, U, V, W> factory, final String expandName, final String expand,
             final RESTLogDetailsV1 logDetails) {
         return updateEntities(collectionClass, type, entities, factory, expandName, RESTv1Constants.JSON_URL, expand, logDetails);
     }
@@ -563,7 +552,7 @@ public class BaseRESTv1 extends BaseREST {
     protected <T extends RESTBaseEntityV1<T, V, W>, U extends AuditedEntity, V extends RESTBaseEntityCollectionV1<T, V, W>,
             W extends RESTBaseEntityCollectionItemV1<T, V, W>> V createEntities(
             final Class<V> collectionClass, final Class<U> type, final RESTBaseEntityCollectionV1<T, V, W> entities,
-            final RESTDataObjectFactory<T, U, V, W> factory, final String expandName, final String dataType, final String expand,
+            final RESTEntityFactory<T, U, V, W> factory, final String expandName, final String dataType, final String expand,
             final RESTLogDetailsV1 logDetails) {
         final V collection = createOrUpdateEntities(collectionClass, type, factory, entities, DatabaseOperation.CREATE, expandName,
                 dataType, expand, logDetails);
@@ -577,7 +566,7 @@ public class BaseRESTv1 extends BaseREST {
     protected <T extends RESTBaseEntityV1<T, V, W>, U extends AuditedEntity, V extends RESTBaseEntityCollectionV1<T, V, W>,
             W extends RESTBaseEntityCollectionItemV1<T, V, W>> V updateEntities(
             final Class<V> collectionClass, final Class<U> type, final RESTBaseEntityCollectionV1<T, V, W> entities,
-            final RESTDataObjectFactory<T, U, V, W> factory, final String expandName, final String dataType, final String expand,
+            final RESTEntityFactory<T, U, V, W> factory, final String expandName, final String dataType, final String expand,
             final RESTLogDetailsV1 logDetails) {
         return createOrUpdateEntities(collectionClass, type, factory, entities, DatabaseOperation.UPDATE, expandName, dataType, expand,
                 logDetails);
@@ -585,14 +574,14 @@ public class BaseRESTv1 extends BaseREST {
 
     protected <T extends RESTBaseEntityV1<T, V, W>, U extends AuditedEntity, V extends RESTBaseEntityCollectionV1<T, V, W>,
             W extends RESTBaseEntityCollectionItemV1<T, V, W>> V deleteJSONEntities(
-            final Class<V> collectionClass, final Class<U> type, final RESTDataObjectFactory<T, U, V, W> factory, final Set<String> ids,
+            final Class<V> collectionClass, final Class<U> type, final RESTEntityFactory<T, U, V, W> factory, final Set<String> ids,
             final String expandName, final String expand, final RESTLogDetailsV1 logDetails) {
         return deleteEntities(collectionClass, type, factory, ids, expandName, RESTv1Constants.JSON_URL, expand, logDetails);
     }
 
     protected <T extends RESTBaseEntityV1<T, V, W>, U extends AuditedEntity, V extends RESTBaseEntityCollectionV1<T, V, W>,
             W extends RESTBaseEntityCollectionItemV1<T, V, W>> V deleteEntities(
-            final Class<V> collectionClass, final Class<U> type, final RESTDataObjectFactory<T, U, V, W> factory, final Set<String> ids,
+            final Class<V> collectionClass, final Class<U> type, final RESTEntityFactory<T, U, V, W> factory, final Set<String> ids,
             final String expandName, final String dataType, final String expand, final RESTLogDetailsV1 logDetails) {
         assert type != null : "type should not be null";
         assert ids != null : "ids should not be null";
@@ -603,7 +592,7 @@ public class BaseRESTv1 extends BaseREST {
             final ExpandDataTrunk expandDataTrunk = unmarshallExpand(expand);
 
             // Start a Transaction
-            transactionManager.begin();
+            transaction.begin();
 
             // Join the transaction we just started
             entityManager.joinTransaction();
@@ -635,12 +624,12 @@ public class BaseRESTv1 extends BaseREST {
 
             // Flush the changes and commit the changes
             entityManager.flush();
-            transactionManager.commit();
+            transaction.commit();
 
-            return RESTDataObjectCollectionFactory.create(collectionClass, factory, retValue, expandName, dataType, expandDataTrunk,
+            return RESTEntityCollectionFactory.create(collectionClass, factory, retValue, expandName, dataType, expandDataTrunk,
                     getBaseUrl(), true, entityManager);
         } catch (final Throwable e) {
-            throw processError(transactionManager, e);
+            throw RESTv1Utilities.processError(transaction, e);
         }
     }
 
@@ -661,7 +650,7 @@ public class BaseRESTv1 extends BaseREST {
      */
     private <T extends RESTBaseEntityV1<T, V, W>, U extends AuditedEntity, V extends RESTBaseEntityCollectionV1<T, V, W>,
             W extends RESTBaseEntityCollectionItemV1<T, V, W>> V createOrUpdateEntities(
-            final Class<V> collectionClass, final Class<U> type, final RESTDataObjectFactory<T, U, V, W> factory,
+            final Class<V> collectionClass, final Class<U> type, final RESTEntityFactory<T, U, V, W> factory,
             final RESTBaseEntityCollectionV1<T, V, W> entities, final DatabaseOperation operation, final String expandName, final String dataType,
             final String expand, final RESTLogDetailsV1 logDetails) {
         assert entities != null : "dataObject should not be null";
@@ -674,7 +663,7 @@ public class BaseRESTv1 extends BaseREST {
             final ExpandDataTrunk expandDataTrunk = unmarshallExpand(expand);
 
             // Start a Transaction
-            transactionManager.begin();
+            transaction.begin();
 
             // Join the transaction we just started
             entityManager.joinTransaction();
@@ -718,12 +707,12 @@ public class BaseRESTv1 extends BaseREST {
 
             // Flush and commit the changes to the database.
             entityManager.flush();
-            transactionManager.commit();
+            transaction.commit();
 
-            retValue = RESTDataObjectCollectionFactory.create(collectionClass, factory, returnEntities, expandName, dataType,
-                    expandDataTrunk, getBaseUrl(), true, entityManager);
+            retValue = RESTEntityCollectionFactory.create(collectionClass, factory, returnEntities, expandName, dataType, expandDataTrunk,
+                    getBaseUrl(), true, entityManager);
         } catch (final Throwable e) {
-            throw processError(transactionManager, e);
+            throw RESTv1Utilities.processError(transaction, e);
         }
 
         // Do Post create or update actions
@@ -755,7 +744,7 @@ public class BaseRESTv1 extends BaseREST {
     }
 
     /**
-     * This method is just a wrapper for the {@link #getResource(Class, RESTDataObjectFactory, Integer, Number, String, String)
+     * This method is just a wrapper for the {@link #getResource(Class, RESTEntityFactory, Integer, Number, String, String)
      * getResource()} method that will specify that the response dataType will be JSON.
      *
      * @param type              The matching Database Entity type for the REST Entity.
@@ -766,12 +755,12 @@ public class BaseRESTv1 extends BaseREST {
      */
     protected <T extends RESTBaseEntityV1<T, V, W>, U extends AuditedEntity, V extends RESTBaseEntityCollectionV1<T, V, W>,
             W extends RESTBaseEntityCollectionItemV1<T, V, W>> T getJSONResource(
-            final Class<U> type, final RESTDataObjectFactory<T, U, V, W> dataObjectFactory, final Integer id, final String expand) {
+            final Class<U> type, final RESTEntityFactory<T, U, V, W> dataObjectFactory, final Integer id, final String expand) {
         return getJSONResource(type, dataObjectFactory, id, null, expand);
     }
 
     /**
-     * This method is just a wrapper for the {@link #getResource(Class, RESTDataObjectFactory, Integer, Number, String, String)
+     * This method is just a wrapper for the {@link #getResource(Class, RESTEntityFactory, Integer, Number, String, String)
      * getResource()} method that will specify that the response dataType will be JSON.
      *
      * @param type              The matching Database Entity type for the REST Entity.
@@ -783,13 +772,13 @@ public class BaseRESTv1 extends BaseREST {
      */
     protected <T extends RESTBaseEntityV1<T, V, W>, U extends AuditedEntity, V extends RESTBaseEntityCollectionV1<T, V, W>,
             W extends RESTBaseEntityCollectionItemV1<T, V, W>> T getJSONResource(
-            final Class<U> type, final RESTDataObjectFactory<T, U, V, W> dataObjectFactory, final Integer id, final Number revision,
+            final Class<U> type, final RESTEntityFactory<T, U, V, W> dataObjectFactory, final Integer id, final Number revision,
             final String expand) {
         return getResource(type, dataObjectFactory, id, revision, expand, RESTv1Constants.JSON_URL);
     }
 
     /**
-     * This method is just a wrapper for the {@link #getResource(Class, RESTDataObjectFactory, Integer, Number, String, String)
+     * This method is just a wrapper for the {@link #getResource(Class, RESTEntityFactory, Integer, Number, String, String)
      * getResource()} method that will specify that the response dataType will be XML.
      *
      * @param type              The matching Database Entity type for the REST Entity.
@@ -800,12 +789,12 @@ public class BaseRESTv1 extends BaseREST {
      */
     protected <T extends RESTBaseEntityV1<T, V, W>, U extends AuditedEntity, V extends RESTBaseEntityCollectionV1<T, V, W>,
             W extends RESTBaseEntityCollectionItemV1<T, V, W>> T getXMLResource(
-            final Class<U> type, final RESTDataObjectFactory<T, U, V, W> dataObjectFactory, final Integer id, final String expand) {
+            final Class<U> type, final RESTEntityFactory<T, U, V, W> dataObjectFactory, final Integer id, final String expand) {
         return getXMLResource(type, dataObjectFactory, id, null, expand);
     }
 
     /**
-     * This method is just a wrapper for the {@link #getResource(Class, RESTDataObjectFactory, Integer, Number, String, String)
+     * This method is just a wrapper for the {@link #getResource(Class, RESTEntityFactory, Integer, Number, String, String)
      * getResource()} method that will specify that the response dataType will be XML.
      *
      * @param type              The matching Database Entity type for the REST Entity.
@@ -817,7 +806,7 @@ public class BaseRESTv1 extends BaseREST {
      */
     protected <T extends RESTBaseEntityV1<T, V, W>, U extends AuditedEntity, V extends RESTBaseEntityCollectionV1<T, V, W>,
             W extends RESTBaseEntityCollectionItemV1<T, V, W>> T getXMLResource(
-            final Class<U> type, final RESTDataObjectFactory<T, U, V, W> dataObjectFactory, final Integer id, final Number revision,
+            final Class<U> type, final RESTEntityFactory<T, U, V, W> dataObjectFactory, final Integer id, final Number revision,
             final String expand) {
         return getResource(type, dataObjectFactory, id, revision, expand, RESTv1Constants.XML_URL);
     }
@@ -835,7 +824,7 @@ public class BaseRESTv1 extends BaseREST {
      */
     private <T extends RESTBaseEntityV1<T, V, W>, U extends AuditedEntity, V extends RESTBaseEntityCollectionV1<T, V, W>,
             W extends RESTBaseEntityCollectionItemV1<T, V, W>> T getResource(
-            final Class<U> type, final RESTDataObjectFactory<T, U, V, W> dataObjectFactory, final Integer id, final Number revision,
+            final Class<U> type, final RESTEntityFactory<T, U, V, W> dataObjectFactory, final Integer id, final Number revision,
             final String expand, final String dataType) {
         assert type != null : "The type parameter can not be null";
         assert id != null : "The id parameter can not be null";
@@ -865,7 +854,7 @@ public class BaseRESTv1 extends BaseREST {
 
             return restRepresentation;
         } catch (final Throwable e) {
-            throw processError(null, e);
+            throw RESTv1Utilities.processError(e);
         }
     }
 
@@ -884,7 +873,7 @@ public class BaseRESTv1 extends BaseREST {
 
             return entity;
         } catch (Throwable e) {
-            throw processError(null, e);
+            throw RESTv1Utilities.processError(e);
         }
     }
 
@@ -924,7 +913,7 @@ public class BaseRESTv1 extends BaseREST {
             }
             return entity;
         } catch (Throwable e) {
-            throw processError(null, e);
+            throw RESTv1Utilities.processError(null, e);
         }
     }
 
@@ -962,21 +951,21 @@ public class BaseRESTv1 extends BaseREST {
 
     protected <T extends RESTBaseEntityV1<T, V, W>, U extends AuditedEntity, V extends RESTBaseEntityCollectionV1<T, V, W>,
             W extends RESTBaseEntityCollectionItemV1<T, V, W>> V getXMLResources(
-            final Class<V> collectionClass, final Class<U> type, final RESTDataObjectFactory<T, U, V, W> dataObjectFactory,
+            final Class<V> collectionClass, final Class<U> type, final RESTEntityFactory<T, U, V, W> dataObjectFactory,
             final String expandName, final String expand) {
         return getResources(collectionClass, type, dataObjectFactory, expandName, expand, RESTv1Constants.XML_URL);
     }
 
     protected <T extends RESTBaseEntityV1<T, V, W>, U extends AuditedEntity, V extends RESTBaseEntityCollectionV1<T, V, W>,
             W extends RESTBaseEntityCollectionItemV1<T, V, W>> V getJSONResources(
-            final Class<V> collectionClass, final Class<U> type, final RESTDataObjectFactory<T, U, V, W> dataObjectFactory,
+            final Class<V> collectionClass, final Class<U> type, final RESTEntityFactory<T, U, V, W> dataObjectFactory,
             final String expandName, final String expand) {
         return getResources(collectionClass, type, dataObjectFactory, expandName, expand, RESTv1Constants.JSON_URL);
     }
 
     protected <T extends RESTBaseEntityV1<T, V, W>, U extends AuditedEntity, V extends RESTBaseEntityCollectionV1<T, V, W>,
             W extends RESTBaseEntityCollectionItemV1<T, V, W>> V getResources(
-            final Class<V> collectionClass, final Class<U> type, final RESTDataObjectFactory<T, U, V, W> dataObjectFactory,
+            final Class<V> collectionClass, final Class<U> type, final RESTEntityFactory<T, U, V, W> dataObjectFactory,
             final String expandName, final String expand, final String dataType) {
         assert type != null : "The type parameter can not be null";
         assert dataObjectFactory != null : "The dataObjectFactory parameter can not be null";
@@ -989,12 +978,12 @@ public class BaseRESTv1 extends BaseREST {
             final CriteriaQuery<U> query = getAllEntitiesQuery(type);
 
             // Create and initialise the Collection using the specified REST Object Factory
-            final V retValue = RESTDataObjectCollectionFactory.create(collectionClass, dataObjectFactory, query, expandName, dataType,
+            final V retValue = RESTEntityCollectionFactory.create(collectionClass, dataObjectFactory, query, expandName, dataType,
                     expandDataTrunk, getBaseUrl(), true, entityManager);
 
             return retValue;
         } catch (Throwable e) {
-            throw processError(null, e);
+            throw RESTv1Utilities.processError(null, e);
         }
     }
 
@@ -1014,7 +1003,7 @@ public class BaseRESTv1 extends BaseREST {
             W extends RESTBaseEntityCollectionItemV1<T, V, W>> V getJSONResourcesFromQuery(
             final Class<V> collectionClass, final MultivaluedMap<String, String> queryParams,
             final Class<? extends IFilterQueryBuilder<U>> filterQueryBuilderClass, final IFieldFilter entityFieldFilter,
-            final RESTDataObjectFactory<T, U, V, W> dataObjectFactory, final String expandName, final String expand) {
+            final RESTEntityFactory<T, U, V, W> dataObjectFactory, final String expandName, final String expand) {
         return getResourcesFromQuery(collectionClass, queryParams, filterQueryBuilderClass, entityFieldFilter, dataObjectFactory,
                 expandName, expand, RESTv1Constants.JSON_URL);
     }
@@ -1036,7 +1025,7 @@ public class BaseRESTv1 extends BaseREST {
             W extends RESTBaseEntityCollectionItemV1<T, V, W>> V getResourcesFromQuery(
             final Class<V> collectionClass, final MultivaluedMap<String, String> queryParams,
             final Class<? extends IFilterQueryBuilder<U>> filterQueryBuilderClass, final IFieldFilter entityFieldFilter,
-            final RESTDataObjectFactory<T, U, V, W> dataObjectFactory, final String expandName, final String expand,
+            final RESTEntityFactory<T, U, V, W> dataObjectFactory, final String expandName, final String expand,
             final String dataType) {
         assert dataObjectFactory != null : "The dataObjectFactory parameter can not be null";
         assert uriInfo != null : "uriInfo can not be null";
@@ -1051,12 +1040,12 @@ public class BaseRESTv1 extends BaseREST {
             final CriteriaQuery<U> query = getEntitiesFromQuery(queryParams, filterQueryBuilder, entityFieldFilter);
 
             // Create the Collection Class and populate it with data using the query result data
-            final V retValue = RESTDataObjectCollectionFactory.create(collectionClass, dataObjectFactory, query, expandName, dataType,
+            final V retValue = RESTEntityCollectionFactory.create(collectionClass, dataObjectFactory, query, expandName, dataType,
                     expandDataTrunk, getBaseUrl(), true, entityManager);
 
             return retValue;
         } catch (Throwable e) {
-            throw processError(null, e);
+            throw RESTv1Utilities.processError(null, e);
         }
     }
 
@@ -1068,7 +1057,7 @@ public class BaseRESTv1 extends BaseREST {
      * @param entityFieldFilter  The entity field filter, to filter out incorrect fields.
      * @return A list of entities for the filter query.
      */
-    protected <U extends AuditedEntity> CriteriaQuery<U> getEntitiesFromQuery(final MultivaluedMap<String, String> queryParams,
+    protected <U> CriteriaQuery<U> getEntitiesFromQuery(final MultivaluedMap<String, String> queryParams,
             final IFilterQueryBuilder<U> filterQueryBuilder, final IFieldFilter entityFieldFilter) {
         // build up a Filter object from the URL variables
         final Filter filter;
@@ -1203,7 +1192,7 @@ public class BaseRESTv1 extends BaseREST {
 
         try {
             // Start a Transaction
-            transactionManager.begin();
+            transaction.begin();
 
             // Join the transaction we just started
             entityManager.joinTransaction();
@@ -1221,7 +1210,7 @@ public class BaseRESTv1 extends BaseREST {
             // Apply the text separately
             if (restEntity.hasParameterSet(RESTTextContentSpecV1.TEXT_NAME)) {
                 textProcessed = true;
-                final DBProviderFactory providerFactory = ProviderUtilities.getDBProviderFactory(entityManager, transactionManager,
+                final DBProviderFactory providerFactory = ProviderUtilities.getDBProviderFactory(entityManager, transaction,
                         enversLoggingBean);
                 final ProcessingOptions processingOptions = new ProcessingOptions();
                 processingOptions.setIgnoreChecksum(true);
@@ -1244,9 +1233,9 @@ public class BaseRESTv1 extends BaseREST {
 
             // If the content spec processed correctly then commit the changes, otherwise roll them back.
             if (!success) {
-                final int status = transactionManager.getStatus();
+                final int status = transaction.getStatus();
                 if (status != Status.STATUS_ROLLING_BACK && status != Status.STATUS_ROLLEDBACK && status != Status.STATUS_NO_TRANSACTION) {
-                    transactionManager.rollback();
+                    transaction.rollback();
                 }
             } else {
                 // Get the updated or created entity
@@ -1265,7 +1254,7 @@ public class BaseRESTv1 extends BaseREST {
 
                     entityManager.persist(entity);
                 }
-                transactionManager.commit();
+                transaction.commit();
 
                 // Get the revision and log a message
                 final Integer revision = (Integer) EnversUtilities.getLatestRevision(entityManager, ContentSpec.class, csId);
@@ -1274,7 +1263,7 @@ public class BaseRESTv1 extends BaseREST {
                 logger.info(String.format(ProcessorConstants.SUCCESSFUL_PUSH_REV_MSG, revision));
             }
         } catch (final Throwable e) {
-            exception = processError(transactionManager, e);
+            exception = RESTv1Utilities.processError(transaction, e);
         } finally {
             // Check if the processing succeeded, if not set the error fields and throw an error
             final String log = loggerManager.generateLogs();
@@ -1359,7 +1348,7 @@ public class BaseRESTv1 extends BaseREST {
 
         try {
             // Start a Transaction
-            transactionManager.begin();
+            transaction.begin();
 
             // Join the transaction we just started
             entityManager.joinTransaction();
@@ -1386,11 +1375,11 @@ public class BaseRESTv1 extends BaseREST {
 
             // Save the error messages
             entityManager.persist(entity);
-            transactionManager.commit();
+            transaction.commit();
 
             return entity.getId();
         } catch (final Throwable e) {
-            throw processError(transactionManager, e);
+            throw RESTv1Utilities.processError(transaction, e);
         }
     }
 
@@ -1454,7 +1443,7 @@ public class BaseRESTv1 extends BaseREST {
                     user.setId(userEntity.getId());
                     logDetails.explicitSetUser(user);
                 } catch (Throwable e) {
-                    throw processError(null, e);
+                    throw RESTv1Utilities.processError(null, e);
                 }
             }
         }
@@ -1482,121 +1471,6 @@ public class BaseRESTv1 extends BaseREST {
         } catch (final IOException ex) {
             throw new BadRequestException("Could not convert expand data from JSON to an instance of ExpandDataTrunk");
         }
-    }
-
-    /**
-     * Process an Error/Exception and generate a RESTEasy Exception based on the error/exception produced.
-     *
-     * @param transactionManager The transaction manager to handle rolling back changes.
-     * @param ex                 The Error/Exception to be processed.
-     * @return A RESTEasy Exception containing the details of the Error.
-     */
-    public Failure processError(final TransactionManager transactionManager, final Throwable ex) {
-        log.error("Failed to process REST request", ex);
-
-        // Rollback if a transaction is active
-        try {
-            if (transactionManager != null) {
-                /*
-                    Rolling back only active transactions leads to "Error checking for a transaction" and
-                    "Transaction is not active" errors.
-
-                    From http://techblogs.agiledigital.com.au/2013/01/03/jboss-as-7-1-transaction-reaping/
-
-                        Transaction information is stored in the thread context. Each connector can potentially share the
-                        same transaction – even across requests. The transaction is removed from the thread context when it
-                        is committed or rolled back.
-
-                        When the transaction is reaped, it is marked as rollback only. This changes the status of the
-                        transaction to STATUS_ROLLING_BACK – and then shortly thereafter STATUS_ROLLED_BACK. However, the
-                        transaction is not actually rolled back or removed from the context of the thread. It will not be
-                        removed until utx.commit() or utx.rollback() is called.
-
-                        The base servlet would never attempt to commit or rollback the transaction because:
-
-                        (utx.getStatus() == Status.STATUS_ACTIVE)
-
-                        will always be false after the transaction reaper has caused the status to change to ROLLED_BACK.
-                        Consequently, the transaction was never removed from the thread context and an attempt would be made
-                        by TxConnectionManagerImpl (seen in the stack trace above) to re-use it. Since it had been marked
-                        ROLLED_BACK it could not be re-used and an exception was thrown.
-                 */
-                final int status = transactionManager.getStatus();
-                if (status != Status.STATUS_NO_TRANSACTION) {
-                    transactionManager.rollback();
-                }
-            }
-        } catch (Throwable e) {
-            return new InternalServerErrorException(e);
-        }
-
-        // We need to do some unwrapping of exception first
-        Throwable cause = ex;
-        while (cause != null) {
-            if (cause == cause.getCause()) {
-                // sometimes this can be an circular reference
-                break;
-            } else if (cause instanceof Failure) {
-                return (Failure) cause;
-            } else if (cause instanceof EntityNotFoundException) {
-                return new NotFoundException(cause);
-            } else if (cause instanceof ValidationException || cause instanceof CustomConstraintViolationException || cause instanceof
-                    org.hibernate.exception.ConstraintViolationException || cause instanceof RollbackException) {
-                break;
-            } else if (cause instanceof PersistenceException) {
-                if (cause.getCause() != null && cause.getCause() instanceof org.hibernate.exception.ConstraintViolationException) {
-                    cause = cause.getCause();
-                } else {
-                    break;
-                }
-            } else if (cause instanceof ProviderException) {
-                if (cause != null && (cause instanceof ValidationException || cause instanceof PersistenceException || cause instanceof
-                        CustomConstraintViolationException)) {
-                    cause = cause.getCause();
-                } else {
-                    break;
-                }
-            } else if (cause instanceof BatchUpdateException) {
-                cause = ((SQLException) cause).getNextException();
-            } else {
-                cause = cause.getCause();
-            }
-        }
-
-        // This is a Persistence exception with information
-        if (cause instanceof ConstraintViolationException) {
-            final ConstraintViolationException e = (ConstraintViolationException) cause;
-            final StringBuilder stringBuilder = new StringBuilder();
-
-            // Construct a "readable" message outlining the validation errors
-            for (ConstraintViolation invalidValue : e.getConstraintViolations())
-                stringBuilder.append(invalidValue.getMessage()).append("\n");
-
-            return new BadRequestException(stringBuilder.toString(), cause);
-        } else if (cause instanceof EntityNotFoundException) {
-            return new NotFoundException(cause);
-        } else if (cause instanceof org.hibernate.exception.ConstraintViolationException) {
-            return new BadRequestException(cause.getMessage());
-        } else if (cause instanceof ValidationException || cause instanceof CustomConstraintViolationException) {
-            return new BadRequestException(cause);
-        } else if (cause instanceof RollbackException) {
-            return new BadRequestException(
-                    "This is most likely caused by the fact that two users are trying to save the same entity at the same time.\n" + "You" +
-                            " can try saving again, or reload the entity to see if there were any changes made in the background.", cause);
-        } else if (cause instanceof ProviderException) {
-            if (cause instanceof org.jboss.pressgang.ccms.provider.exception.NotFoundException) {
-                throw new NotFoundException(cause);
-            } else if (cause instanceof org.jboss.pressgang.ccms.provider.exception.InternalServerErrorException) {
-                throw new InternalServerErrorException(cause);
-            } else if (cause instanceof org.jboss.pressgang.ccms.provider.exception.BadRequestException) {
-                throw new BadRequestException(cause);
-            } else if (cause instanceof UnauthorisedException) {
-                throw new UnauthorizedException(cause);
-            }
-        }
-
-        // If it's not some validation error then it must be an internal error.
-        return new InternalServerErrorException(ex);
     }
 
     /**

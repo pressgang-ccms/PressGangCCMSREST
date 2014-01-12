@@ -1,0 +1,122 @@
+package org.jboss.pressgang.ccms.server.async.process.task;
+
+import java.io.File;
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collection;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
+
+import org.jboss.pressgang.ccms.provider.DataProviderFactory;
+import org.jboss.pressgang.ccms.provider.RESTProviderFactory;
+import org.jboss.pressgang.ccms.provider.ServerSettingsProvider;
+import org.jboss.pressgang.ccms.services.zanatasync.ZanataSyncService;
+import org.jboss.pressgang.ccms.utils.common.CollectionUtilities;
+import org.jboss.pressgang.ccms.wrapper.ServerSettingsWrapper;
+import org.jboss.pressgang.ccms.zanata.ETagCache;
+import org.jboss.pressgang.ccms.zanata.ETagInterceptor;
+import org.jboss.pressgang.ccms.zanata.ZanataDetails;
+import org.jboss.pressgang.ccms.zanata.ZanataInterface;
+import org.jboss.resteasy.spi.UnauthorizedException;
+import org.zanata.common.LocaleId;
+import org.zanata.rest.client.ISourceDocResource;
+
+public class ZanataSyncTask extends ProcessRESTTask<Boolean> {
+    private static final List<Class<?>> IGNORED_RESOURCES = new ArrayList<Class<?>>() {
+        {
+            add(ISourceDocResource.class);
+        }
+    };
+    private final String ZANATA_CACHE_LOCATION = System.getProperty("java.io.tmpdir") + File.separator + ".zanata-cache";
+
+    private final String restServerUrl;
+    private final ZanataDetails zanataDetails;
+    private final Set<String> ids = new HashSet<String>();
+    private final List<LocaleId> locales = new ArrayList<LocaleId>();
+    private final boolean useETagCache = false;
+
+    public ZanataSyncTask(final String restServerUrl, final Integer contentSpecId, final ZanataDetails zanataDetails) {
+        this(restServerUrl, contentSpecId, null, zanataDetails);
+    }
+
+    public ZanataSyncTask(final String restServerUrl, final Integer contentSpecId, final Collection<LocaleId> locales,
+            final ZanataDetails zanataDetails) {
+        this(restServerUrl, Arrays.asList(contentSpecId.toString()), locales, zanataDetails);
+    }
+
+    public ZanataSyncTask(final String restServerUrl, final Collection<String> contentSpecIds, final ZanataDetails zanataDetails) {
+        this(restServerUrl, contentSpecIds, null, zanataDetails);
+    }
+
+    public ZanataSyncTask(final String restServerUrl, final Collection<String> contentSpecIds, final Collection<LocaleId> locales,
+            final ZanataDetails zanataDetails) {
+        this.restServerUrl = restServerUrl;
+        this.zanataDetails = zanataDetails;
+        ids.addAll(contentSpecIds);
+        if (locales != null) {
+            this.locales.addAll(locales);
+        }
+    }
+
+    @Override
+    public void execute() {
+        final DataProviderFactory providerFactory = RESTProviderFactory.create(restServerUrl);
+        final ServerSettingsProvider settingsProvider = providerFactory.getProvider(ServerSettingsProvider.class);
+        final ServerSettingsWrapper settings = settingsProvider.getServerSettings();
+        final ETagCache eTagCache = new ETagCache();
+        ZanataInterface zanataInterface;
+        try {
+            zanataInterface = new ZanataInterface(0.2, zanataDetails);
+        } catch (UnauthorizedException e) {
+            getLogger().error(e.getMessage());
+            setSuccessful(false);
+            return;
+        }
+
+        // Log some basic details about the sync
+        logDetails();
+
+        // Load the etag cache
+        if (useETagCache) {
+            try {
+                eTagCache.load(new File(ZANATA_CACHE_LOCATION));
+            } catch (IOException e) {
+                getLogger().error("Failed to load the Zanata Cache from {}", ZANATA_CACHE_LOCATION);
+            }
+            final ETagInterceptor interceptor = new ETagInterceptor(eTagCache, IGNORED_RESOURCES);
+            zanataInterface.getProxyFactory().registerPrefixInterceptor(interceptor);
+        }
+
+        // Load the available locales into the zanata interface
+        final List<LocaleId> localeIds = new ArrayList<LocaleId>();
+        for (final String locale : settings.getLocales()) {
+            // Covert the language into a LocaleId
+            localeIds.add(LocaleId.fromJavaName(locale));
+        }
+        zanataInterface.getLocaleManager().setLocales(localeIds);
+
+        // Create the sync service and perform the sync
+        final ZanataSyncService syncService = new ZanataSyncService(providerFactory, zanataInterface, settings);
+        syncService.sync(ids, null, locales.isEmpty() ? null : locales);
+
+        // Save the etag cache
+        if (useETagCache) {
+            try {
+                eTagCache.save(new File(ZANATA_CACHE_LOCATION));
+            } catch (IOException e) {
+                getLogger().error("Failed to save the Zanata Cache to {}", ZANATA_CACHE_LOCATION);
+            }
+        }
+
+        // Set the result as true since the sync completed successfully
+        setResult(true);
+    }
+
+    protected void logDetails() {
+        getLogger().info("Connecting to " + zanataDetails.getServer() + " using project \"" + zanataDetails.getProject() + "\", " +
+                "version \"" + zanataDetails.getVersion() + "\"");
+        getLogger().info("Syncing the following locales: " + CollectionUtilities.toSeperatedString(locales, ", "));
+    }
+}

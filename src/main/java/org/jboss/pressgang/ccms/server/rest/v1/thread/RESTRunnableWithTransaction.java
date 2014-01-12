@@ -2,7 +2,7 @@ package org.jboss.pressgang.ccms.server.rest.v1.thread;
 
 import javax.persistence.EntityManager;
 import javax.transaction.SystemException;
-import javax.transaction.TransactionManager;
+import javax.transaction.UserTransaction;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -19,28 +19,28 @@ public abstract class RESTRunnableWithTransaction implements Runnable {
          */
         Map<String, Object> dataStore = new HashMap<String, Object>();
 
-        TransactionManager transactionManager = null;
+        UserTransaction transaction = null;
         EntityManager em = null;
 
         try {
             beginRequest(dataStore);
 
-            transactionManager = JNDIUtilities.lookupJBossTransactionManager();
+            transaction = JNDIUtilities.lookupUserTransaction();
             em = JNDIUtilities.lookupJBossEntityManagerFactory().createEntityManager();
 
             // Start a Transaction
-            transactionManager.begin();
+            transaction.begin();
 
             // Join the transaction we just started
             em.joinTransaction();
 
-            doWork(em, transactionManager);
+            doWork(em, transaction);
 
-            transactionManager.commit();
+            transaction.commit();
         } catch (final Exception ex) {
             try {
-                if (transactionManager != null) {
-                    transactionManager.rollback();
+                if (transaction != null) {
+                    transaction.rollback();
                 }
             } catch (final SystemException ex2) {
                 // nothing to do here
@@ -54,7 +54,7 @@ public abstract class RESTRunnableWithTransaction implements Runnable {
         }
     }
 
-    public abstract void doWork(EntityManager em, TransactionManager transactionManager);
+    public abstract void doWork(EntityManager em, UserTransaction transaction);
 
     private void beginRequest(final Map<String, Object> dataStore) {
         final BoundRequestContext requestContext = getRequestContext();

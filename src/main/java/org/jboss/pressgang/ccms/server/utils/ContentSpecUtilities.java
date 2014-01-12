@@ -15,6 +15,32 @@ public class ContentSpecUtilities extends org.jboss.pressgang.ccms.contentspec.u
     private ContentSpecUtilities() {
     }
 
+    public static ContentSpecWrapper getContentSpecEntity(final Integer id, final Integer revision, final DBProviderFactory providerFactory) {
+        try {
+            if (revision == null) {
+                return providerFactory.getProvider(ContentSpecProvider.class).getContentSpec(id);
+            } else {
+                return providerFactory.getProvider(ContentSpecProvider.class).getContentSpec(id, revision);
+            }
+        } catch (org.jboss.pressgang.ccms.provider.exception.NotFoundException e) {
+            throw new NotFoundException(e);
+        } catch (org.jboss.pressgang.ccms.provider.exception.InternalServerErrorException e) {
+            throw new InternalServerErrorException(e);
+        }
+    }
+
+    public static org.jboss.pressgang.ccms.contentspec.ContentSpec getContentSpec(final Integer id, final Integer revision,
+            final EntityManager entityManager) {
+        final DBProviderFactory providerFactory = ProviderUtilities.getDBProviderFactory(entityManager);
+        return getContentSpec(id, revision, providerFactory);
+    }
+
+    public static org.jboss.pressgang.ccms.contentspec.ContentSpec getContentSpec(final Integer id, final Integer revision,
+            final DBProviderFactory providerFactory) {
+        final ContentSpecWrapper entity = getContentSpecEntity(id, revision, providerFactory);
+        return CSTransformer.transform(entity, providerFactory, false);
+    }
+
     public static String getContentSpecText(final Integer id, final EntityManager entityManager) {
         return getContentSpecText(id, null, entityManager);
     }
@@ -25,24 +51,12 @@ public class ContentSpecUtilities extends org.jboss.pressgang.ccms.contentspec.u
 
     protected static String getContentSpecText(final Integer id, final Integer revision, final EntityManager entityManager, boolean fix) {
         final DBProviderFactory providerFactory = ProviderUtilities.getDBProviderFactory(entityManager);
-        final ContentSpecWrapper entity;
-        try {
-            if (revision == null) {
-                entity = providerFactory.getProvider(ContentSpecProvider.class).getContentSpec(id);
-            } else {
-                entity = providerFactory.getProvider(ContentSpecProvider.class).getContentSpec(id, revision);
-            }
-        } catch (org.jboss.pressgang.ccms.provider.exception.NotFoundException e) {
-            throw new NotFoundException(e);
-        } catch (org.jboss.pressgang.ccms.provider.exception.InternalServerErrorException e) {
-            throw new InternalServerErrorException(e);
-        }
+        final ContentSpecWrapper entity = getContentSpecEntity(id, revision, providerFactory);
 
         if (fix && ((ContentSpec) entity.unwrap()).getFailedContentSpec() != null) {
             return fixFailedContentSpec(entity, null, false);
         } else {
-            final CSTransformer transformer = new CSTransformer();
-            final org.jboss.pressgang.ccms.contentspec.ContentSpec contentSpec = transformer.transform(entity, providerFactory, false);
+            final org.jboss.pressgang.ccms.contentspec.ContentSpec contentSpec = CSTransformer.transform(entity, providerFactory, false);
             return contentSpec.toString(false);
         }
     }

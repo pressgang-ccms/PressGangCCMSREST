@@ -56,6 +56,7 @@ public class JaxRsActivator extends Application {
         classes.add(UnauthorizedExceptionMapper.class);
         classes.add(WriterExceptionMapper.class);
         classes.add(IllegalArgumentExceptionMapper.class);
+        classes.add(IllegalStateExceptionMapper.class);
     }
 
     @Override

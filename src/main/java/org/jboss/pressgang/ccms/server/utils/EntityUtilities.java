@@ -3,11 +3,15 @@ package org.jboss.pressgang.ccms.server.utils;
 import javax.faces.context.FacesContext;
 import javax.persistence.EntityManager;
 import javax.persistence.Query;
+import javax.persistence.criteria.CriteriaBuilder;
 import javax.persistence.criteria.CriteriaQuery;
+import javax.persistence.criteria.Predicate;
+import javax.persistence.criteria.Root;
 import javax.ws.rs.core.MultivaluedMap;
 import java.io.UnsupportedEncodingException;
 import java.net.URLDecoder;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -24,6 +28,8 @@ import org.jboss.pressgang.ccms.model.FilterLocale;
 import org.jboss.pressgang.ccms.model.FilterTag;
 import org.jboss.pressgang.ccms.model.IntegerConstants;
 import org.jboss.pressgang.ccms.model.LanguageImage;
+import org.jboss.pressgang.ccms.model.ProcessStatus;
+import org.jboss.pressgang.ccms.model.ProcessType;
 import org.jboss.pressgang.ccms.model.Project;
 import org.jboss.pressgang.ccms.model.StringConstants;
 import org.jboss.pressgang.ccms.model.Tag;
@@ -33,6 +39,7 @@ import org.jboss.pressgang.ccms.model.TopicToBugzillaBug;
 import org.jboss.pressgang.ccms.model.TopicToPropertyTag;
 import org.jboss.pressgang.ccms.model.TranslatedTopicData;
 import org.jboss.pressgang.ccms.model.User;
+import org.jboss.pressgang.ccms.model.contentspec.ContentSpecToProcess;
 import org.jboss.pressgang.ccms.rest.v1.constants.CommonFilterConstants;
 import org.jboss.pressgang.ccms.server.constants.Constants;
 import org.jboss.pressgang.ccms.utils.common.CollectionUtilities;
@@ -42,6 +49,8 @@ import org.slf4j.LoggerFactory;
 
 public class EntityUtilities extends org.jboss.pressgang.ccms.filter.utils.EntityUtilities {
     private static final Logger log = LoggerFactory.getLogger(EntityUtilities.class);
+    private static final List<ProcessStatus> EXECUTING_STATUSES = Arrays.asList(ProcessStatus.PENDING, ProcessStatus.QUEUED,
+            ProcessStatus.EXECUTING);
 
     public static byte[] loadBlobConstant(final EntityManager entityManager, final Integer id) {
         if (id == null) return null;
@@ -553,5 +562,36 @@ public class EntityUtilities extends org.jboss.pressgang.ccms.filter.utils.Entit
         }
 
         return retValue;
+    }
+
+    public static Long getNumberOfRunningContentSpecProcessesForType(final EntityManager entityManager,
+            final Integer contentSpecId, final ProcessType type) {
+        final CriteriaBuilder criteriaBuilder = entityManager.getCriteriaBuilder();
+        final CriteriaQuery<Long> query = criteriaBuilder.createQuery(Long.class);
+        final Root<ContentSpecToProcess> root = query.from(ContentSpecToProcess.class);
+        query.select(criteriaBuilder.count(root));
+
+        final Predicate contentSpecIdMatches = criteriaBuilder.equal(root.get("contentSpec").get("contentSpecId"), contentSpecId);
+        final Predicate processStatus = root.get("process").get("status").in(EXECUTING_STATUSES);
+        final Predicate processType = criteriaBuilder.equal(root.get("process").get("type").as(ProcessType.class),
+                type);
+        query.where(criteriaBuilder.and(contentSpecIdMatches, processStatus, processType));
+
+        return entityManager.createQuery(query).getSingleResult();
+    }
+
+    public static List<ContentSpecToProcess> getRunningContentSpecProcessesForType(final EntityManager entityManager,
+            final Integer contentSpecId, final ProcessType type) {
+        final CriteriaBuilder criteriaBuilder = entityManager.getCriteriaBuilder();
+        final CriteriaQuery<ContentSpecToProcess> query = criteriaBuilder.createQuery(ContentSpecToProcess.class);
+        final Root<ContentSpecToProcess> root = query.from(ContentSpecToProcess.class);
+
+        final Predicate contentSpecIdMatches = criteriaBuilder.equal(root.get("contentSpec").get("contentSpecId"), contentSpecId);
+        final Predicate processStatus = root.get("process").get("status").in(EXECUTING_STATUSES);
+        final Predicate processType = criteriaBuilder.equal(root.get("process").get("type").as(ProcessType.class),
+                type);
+        query.where(criteriaBuilder.and(contentSpecIdMatches, processStatus, processType));
+
+        return entityManager.createQuery(query).getResultList();
     }
 }

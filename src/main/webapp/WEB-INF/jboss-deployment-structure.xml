@@ -3,6 +3,7 @@
     <deployment>
         <exclusions>
             <module name="org.jboss.resteasy.resteasy-jackson-provider"/>
+            <module name="org.jboss.resteasy.resteasy-yaml-provider" />
         </exclusions>
     </deployment>
 </jboss-deployment-structure>

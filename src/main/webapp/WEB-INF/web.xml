@@ -24,23 +24,23 @@
     </context-param>
 
     <!-- Liquibase Parameters -->
-    <context-param>
-        <param-name>liquibase.changelog</param-name>
-        <param-value>db/db.changelog.xml</param-value>
-    </context-param>
-    <context-param>
-        <param-name>liquibase.datasource</param-name>
-        <param-value>java:/PressGangCCMSDatasource</param-value>
-    </context-param>
-    <context-param>
-        <param-name>liquibase.onerror.fail</param-name>
-        <param-value>true</param-value>
-    </context-param>
+    <!--<context-param>-->
+        <!--<param-name>liquibase.changelog</param-name>-->
+        <!--<param-value>db/db.changelog.xml</param-value>-->
+    <!--</context-param>-->
+    <!--<context-param>-->
+        <!--<param-name>liquibase.datasource</param-name>-->
+        <!--<param-value>java:/PressGangCCMSDatasource</param-value>-->
+    <!--</context-param>-->
+    <!--<context-param>-->
+        <!--<param-name>liquibase.onerror.fail</param-name>-->
+        <!--<param-value>true</param-value>-->
+    <!--</context-param>-->
 
     <!-- Listeners -->
-    <listener>
-        <listener-class>liquibase.integration.servlet.LiquibaseServletListener</listener-class>
-    </listener>
+    <!--<listener>-->
+        <!--<listener-class>liquibase.integration.servlet.LiquibaseServletListener</listener-class>-->
+    <!--</listener>-->
 
     <!-- WebDAV Interop filter for Microsoft clients -->
     <filter>

@@ -29,7 +29,7 @@
         <cors.filter.version>1.7.1</cors.filter.version>
         <htmlcleaner.version>2.2</htmlcleaner.version>
         <lucene.version>3.5.0</lucene.version>
-        <jppf.version>3.3.7</jppf.version>
+        <jppf.version>4.0.0</jppf.version>
         <arquillian.version>1.0.3.Final</arquillian.version>
         <jbossarquillian.version>7.1.1.Final</jbossarquillian.version>
         <arquillianbom.version>1.0.0.Final</arquillianbom.version>
@@ -41,7 +41,7 @@
         <javamelody.version>1.44.0</javamelody.version>
         <xstream.version>1.4.2</xstream.version>
         <itext.version>2.1.7</itext.version>
-        <liquibase.version>2.0.1</liquibase.version>
+        <liquibase.version>3.1.1</liquibase.version>
         <liquibase.log.version>1.2.1</liquibase.log.version>
         <intellij.annotations.version>12.0</intellij.annotations.version>
         <commons.io.version>2.4</commons.io.version>
@@ -195,6 +195,12 @@
             <version>${resteasy.version}</version>
             <scope>provided</scope>
         </dependency>
+        <dependency>
+            <groupId>org.jboss.resteasy</groupId>
+            <artifactId>resteasy-multipart-provider</artifactId>
+            <version>${resteasy.version}</version>
+            <scope>provided</scope>
+        </dependency>
 
         <!-- Jackson Libraries -->
         <dependency>
@@ -239,7 +245,7 @@
             <version>${lucene.version}</version>
         </dependency>
 
-        <!-- PressGangCCMS Libraries -->
+        <!-- PressGang CCMS Libraries -->
         <dependency>
             <groupId>org.jboss.pressgang.ccms</groupId>
             <artifactId>pressgang-ccms-model</artifactId>
@@ -289,6 +295,23 @@
             <groupId>org.jboss.pressgang.ccms</groupId>
             <artifactId>j2bugzilla-pressgang</artifactId>
             <version>${j2bugzilla.version}</version>
+        </dependency>
+
+        <!-- PressGang CCMS Services -->
+        <dependency>
+            <groupId>org.jboss.pressgang.ccms</groupId>
+            <artifactId>rest-provider</artifactId>
+            <version>${pressgang.ccms.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.jboss.pressgang.ccms.contentspec</groupId>
+            <artifactId>builder</artifactId>
+            <version>${pressgang.ccms.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.jboss.pressgang.ccms.services</groupId>
+            <artifactId>zanata-sync-service</artifactId>
+            <version>${pressgang.ccms.version}</version>
         </dependency>
 
         <!-- WebDAV for JAX-RS -->
@@ -389,6 +412,11 @@
         <dependency>
             <groupId>org.liquibase</groupId>
             <artifactId>liquibase-core</artifactId>
+            <version>${liquibase.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.liquibase</groupId>
+            <artifactId>liquibase-cdi</artifactId>
             <version>${liquibase.version}</version>
         </dependency>
         <dependency>
