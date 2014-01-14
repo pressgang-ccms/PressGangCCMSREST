@@ -8,7 +8,7 @@ import org.jboss.pressgang.ccms.model.config.EntitiesConfig;
 import org.jboss.pressgang.ccms.model.config.UndefinedEntity;
 import org.jboss.pressgang.ccms.rest.v1.collections.RESTServerUndefinedEntityCollectionV1;
 import org.jboss.pressgang.ccms.rest.v1.collections.items.RESTApplicationUndefinedEntityCollectionItemV1;
-import org.jboss.pressgang.ccms.rest.v1.entities.RESTServerUndefinedEntityV1;
+import org.jboss.pressgang.ccms.rest.v1.elements.RESTServerUndefinedEntityV1;
 
 @ApplicationScoped
 public class ServerUndefinedEntityCollectionV1Factory {

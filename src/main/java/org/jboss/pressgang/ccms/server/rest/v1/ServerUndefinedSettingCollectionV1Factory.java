@@ -8,7 +8,7 @@ import org.jboss.pressgang.ccms.model.config.ApplicationConfig;
 import org.jboss.pressgang.ccms.model.config.UndefinedSetting;
 import org.jboss.pressgang.ccms.rest.v1.collections.RESTServerUndefinedSettingCollectionV1;
 import org.jboss.pressgang.ccms.rest.v1.collections.items.RESTApplicationUndefinedSettingCollectionItemV1;
-import org.jboss.pressgang.ccms.rest.v1.entities.RESTServerUndefinedSettingV1;
+import org.jboss.pressgang.ccms.rest.v1.elements.RESTServerUndefinedSettingV1;
 
 @ApplicationScoped
 public class ServerUndefinedSettingCollectionV1Factory {

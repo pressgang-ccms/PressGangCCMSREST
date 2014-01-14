@@ -8,8 +8,8 @@ import org.apache.commons.configuration.ConfigurationException;
 import org.jboss.pressgang.ccms.model.config.ApplicationConfig;
 import org.jboss.pressgang.ccms.model.config.EntitiesConfig;
 import org.jboss.pressgang.ccms.provider.exception.BadRequestException;
-import org.jboss.pressgang.ccms.rest.v1.entities.RESTServerEntitiesV1;
-import org.jboss.pressgang.ccms.rest.v1.entities.RESTServerSettingsV1;
+import org.jboss.pressgang.ccms.rest.v1.elements.RESTServerEntitiesV1;
+import org.jboss.pressgang.ccms.rest.v1.elements.RESTServerSettingsV1;
 import org.jboss.resteasy.spi.InternalServerErrorException;
 
 @ApplicationScoped
