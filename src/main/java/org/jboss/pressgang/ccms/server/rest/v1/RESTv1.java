@@ -15,11 +15,8 @@ import javax.ws.rs.core.Response;
 import java.awt.geom.Rectangle2D;
 import java.io.IOException;
 import java.io.StringWriter;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Random;
-import java.util.Set;
+import java.security.MessageDigest;
+import java.util.*;
 import java.util.concurrent.atomic.AtomicInteger;
 
 import org.apache.batik.dom.GenericDOMImplementation;
@@ -114,22 +111,8 @@ import org.jboss.pressgang.ccms.rest.v1.collections.items.RESTTagCollectionItemV
 import org.jboss.pressgang.ccms.rest.v1.collections.items.RESTTopicCollectionItemV1;
 import org.jboss.pressgang.ccms.rest.v1.components.ComponentTopicV1;
 import org.jboss.pressgang.ccms.rest.v1.constants.RESTv1Constants;
-import org.jboss.pressgang.ccms.rest.v1.entities.RESTBlobConstantV1;
-import org.jboss.pressgang.ccms.rest.v1.entities.RESTCategoryV1;
-import org.jboss.pressgang.ccms.rest.v1.entities.RESTFileV1;
-import org.jboss.pressgang.ccms.rest.v1.entities.RESTFilterV1;
-import org.jboss.pressgang.ccms.rest.v1.entities.RESTImageV1;
-import org.jboss.pressgang.ccms.rest.v1.entities.RESTIntegerConstantV1;
-import org.jboss.pressgang.ccms.rest.v1.entities.RESTProjectV1;
-import org.jboss.pressgang.ccms.rest.v1.entities.RESTPropertyCategoryV1;
-import org.jboss.pressgang.ccms.rest.v1.entities.RESTPropertyTagV1;
-import org.jboss.pressgang.ccms.rest.v1.entities.RESTRoleV1;
+import org.jboss.pressgang.ccms.rest.v1.entities.*;
 import org.jboss.pressgang.ccms.rest.v1.elements.RESTServerSettingsV1;
-import org.jboss.pressgang.ccms.rest.v1.entities.RESTStringConstantV1;
-import org.jboss.pressgang.ccms.rest.v1.entities.RESTTagV1;
-import org.jboss.pressgang.ccms.rest.v1.entities.RESTTopicV1;
-import org.jboss.pressgang.ccms.rest.v1.entities.RESTTranslatedTopicV1;
-import org.jboss.pressgang.ccms.rest.v1.entities.RESTUserV1;
 import org.jboss.pressgang.ccms.rest.v1.entities.base.RESTLogDetailsV1;
 import org.jboss.pressgang.ccms.rest.v1.entities.contentspec.RESTCSNodeV1;
 import org.jboss.pressgang.ccms.rest.v1.entities.contentspec.RESTContentSpecV1;
@@ -333,6 +316,111 @@ public class RESTv1 extends BaseRESTv1 implements RESTBaseInterfaceV1, RESTInter
                                                 topic.setTopicTitle("Placeholder");
                                             }
 
+                                            em.persist(topic);
+                                        }
+
+                                        transactionManager.commit();
+                                    } catch (final Exception ex) {
+                                        try {
+                                            if (transactionManager != null) {
+                                                transactionManager.rollback();
+                                            }
+                                        } catch (final SystemException ex2) {
+                                            // nothing to do here
+                                        }
+                                    } finally {
+                                        if (em != null) {
+                                            em.close();
+                                        }
+                                        endRequest(dataStore);
+                                        dataStore = null;
+                                    }
+                                }
+
+                                private void beginRequest(final Map<String, Object> dataStore) {
+                                    final BoundRequestContext requestContext = getRequestContext();
+                                    requestContext.associate(dataStore);
+                                    requestContext.activate();
+                                }
+
+                                private void endRequest(final Map<String, Object> dataStore) {
+                                    final BoundRequestContext requestContext = getRequestContext();
+                                    try {
+                                        requestContext.invalidate();
+                                        requestContext.deactivate();
+                                    } finally {
+                                        requestContext.dissociate(dataStore);
+                                    }
+                                }
+
+                                private BoundRequestContext getRequestContext() {
+                                    return BeanUtilities.lookupBean(BoundRequestContext.class);
+                                }
+                            }
+                    );
+                } catch (final Exception ex) {
+                    final int status = transactionManager.getStatus();
+                    if (status != Status.STATUS_ROLLING_BACK && status != Status.STATUS_ROLLEDBACK && status != Status.STATUS_NO_TRANSACTION) {
+                        transactionManager.rollback();
+                    }
+                }
+            }
+        } catch (final Throwable ex) {
+            throw processError(transactionManager, ex);
+        }
+    }
+
+    @Override
+    public void recalculateMissingContentHash() {
+        try {
+            final String topicQuery = "SELECT topic.topicId FROM Topic as Topic WHERE NOT topic.topicXML = '' AND NOT topic.topicXML IS NULL" +
+                    " AND (topic.topicContentHash IS NULL OR topic.topicContentHash = '')" ;
+
+            final List<Integer> topics = entityManager.createQuery(topicQuery).getResultList();
+
+            // Since there are a lot of topics to process there is a high chance it'll hit the timeout,
+            // so break the transactions into smaller chunks
+            for (int i = 0; i < topics.size(); i += BATCH_SIZE) {
+
+                final int startTopic = i;
+
+                // allow a batch to fail while the remaining ones keep calculating
+                try {
+                    // lets just wrap up some code in a Runnable
+                    THREAD_POOL.invokeLater(
+                            new Runnable() {
+                                public void run() {
+                                    /*
+                                     * Since the envers logging we use relies on being associated with a managed context we need to
+                                     * simulate this in the runnable. This can be achieved by associating the thread with a
+                                     * RequestContext, see: http://docs.jboss.org/weld/reference/latest/en-US/html/contexts.html
+                                     */
+                                    Map<String, Object> dataStore = new HashMap<String, Object>();
+
+                                    TransactionManager transactionManager = null;
+                                    EntityManager em = null;
+
+                                    try {
+                                        beginRequest(dataStore);
+
+                                        transactionManager = JNDIUtilities.lookupJBossTransactionManager();
+                                        em = JNDIUtilities.lookupJBossEntityManagerFactory().createEntityManager();
+
+                                        // Start a Transaction
+                                        transactionManager.begin();
+
+                                        // Join the transaction we just started
+                                        em.joinTransaction();
+
+                                        for (int j = startTopic; j < topics.size() && j < startTopic + BATCH_SIZE; ++j) {
+
+                                            final Topic topic = em.find(Topic.class, topics.get(j));
+
+                                            // make some change to allow the entity to be saved
+                                            topic.setTopicContentHash(new char[64]);
+
+                                            // persisting the topic will regenerate the content hash in
+                                            // @prepersist
                                             em.persist(topic);
                                         }
 
@@ -2383,6 +2471,11 @@ public class RESTv1 extends BaseRESTv1 implements RESTBaseInterfaceV1, RESTInter
         final RESTLogDetailsV1 logDetails = generateLogDetails(message, flag, userId);
         return deleteJSONEntities(RESTTopicCollectionV1.class, Topic.class, topicFactory, dbEntityIds,
                 RESTv1Constants.TOPICS_EXPANSION_NAME, expand, logDetails);
+    }
+
+    @Override
+    public RESTMatchedTopicV1 createOrMatchJSONTopic(String expand, RESTTopicV1 dataObject, String message, Integer flag, String userId) {
+        return null;
     }
 
     // XML TOPIC FUNCTIONS

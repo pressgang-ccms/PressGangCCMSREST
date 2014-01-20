@@ -20,5 +20,4 @@ public class Constants {
      * Query strings passed in as path segments always use this as the prefix
      */
     public static final String QUERY_PATHSEGMENT_PREFIX = "query";
-
 }

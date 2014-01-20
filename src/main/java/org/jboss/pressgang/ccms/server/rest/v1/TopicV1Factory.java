@@ -2,6 +2,8 @@ package org.jboss.pressgang.ccms.server.rest.v1;
 
 import javax.enterprise.context.ApplicationScoped;
 import javax.inject.Inject;
+import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -35,6 +37,7 @@ import org.jboss.pressgang.ccms.rest.v1.entities.enums.RESTXMLDoctype;
 import org.jboss.pressgang.ccms.rest.v1.entities.join.RESTAssignedPropertyTagV1;
 import org.jboss.pressgang.ccms.rest.v1.expansion.ExpandDataTrunk;
 import org.jboss.pressgang.ccms.model.config.EntitiesConfig;
+import org.jboss.pressgang.ccms.server.constants.Constants;
 import org.jboss.pressgang.ccms.server.rest.v1.base.RESTDataObjectCollectionFactory;
 import org.jboss.pressgang.ccms.server.rest.v1.base.RESTDataObjectFactory;
 import org.jboss.pressgang.ccms.server.rest.v1.utils.RESTv1Utilities;
@@ -45,6 +48,8 @@ import org.jboss.resteasy.spi.BadRequestException;
 
 @ApplicationScoped
 public class TopicV1Factory extends RESTDataObjectFactory<RESTTopicV1, Topic, RESTTopicCollectionV1, RESTTopicCollectionItemV1> {
+
+
     @Inject
     protected TagV1Factory tagFactory;
     @Inject
@@ -93,6 +98,7 @@ public class TopicV1Factory extends RESTDataObjectFactory<RESTTopicV1, Topic, RE
         retValue.setLocale(entity.getTopicLocale());
         retValue.setXmlErrors(entity.getTopicXMLErrors());
         retValue.setXmlDoctype(RESTXMLDoctype.getXMLDoctype(entity.getXmlDoctype()));
+        retValue.setContentHash(entity.getTopicContentHash());
 
         // KEYWORDS
         if (revision == null && expand != null && expand.contains(RESTTopicV1.KEYWORDS_NAME)) {
