@@ -2476,6 +2476,7 @@ public class RESTv1 extends BaseRESTv1 implements RESTBaseInterfaceV1, RESTInter
     @Override
     public RESTMatchedTopicV1 createOrMatchJSONTopic(String expand, RESTTopicV1 dataObject, String message, Integer flag, String userId) {
         return null;
+        // use TopicUtilities.processXML to check incoming XML with existing topics.
     }
 
     // XML TOPIC FUNCTIONS
