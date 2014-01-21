@@ -2502,6 +2502,22 @@ public class RESTv1 extends BaseRESTv1 implements RESTBaseInterfaceV1, RESTInter
         try {
             final Document doc = XMLUtilities.convertStringToDocument(dataObject.getXml());
             if (doc != null) {
+
+                /*
+                    We need to get the XML as it would be saved if this were a new topic. This is so we can get
+                    an accurate hash of the content to compare to existing topics.
+
+                    So we follow the logic that would be applied if this were a new topic
+                    (TopicV1Factory.syncDBEntityWithRESTEntityFirstPass()). If the topic is a normal
+                    topic (i.e. not an abstract or revision history) and it has a title field specified, then
+                    the title of the section is overwritten.
+                 */
+                if (TopicUtilities.isTopicNormalTopic(dataObject)) {
+                    if (dataObject.getConfiguredParameters().indexOf(RESTTopicV1.TITLE_NAME) != -1)  {
+                        DocBookUtilities.setSectionTitle(dataObject.getTitle(), doc);
+                    }
+                }
+
                 final String processedXML = TopicUtilities.processXML(entityManager, doc);
                 final char[] shaHash = StringUtilities.calculateContentHash(processedXML);
 

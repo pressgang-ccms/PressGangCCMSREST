@@ -56,6 +56,8 @@ import org.jboss.pressgang.ccms.model.config.EntitiesConfig;
 import org.jboss.pressgang.ccms.model.sort.CategoryNameComparator;
 import org.jboss.pressgang.ccms.model.sort.TagNameComparator;
 import org.jboss.pressgang.ccms.model.sort.TagToCategorySortingComparator;
+import org.jboss.pressgang.ccms.rest.v1.components.ComponentTopicV1;
+import org.jboss.pressgang.ccms.rest.v1.entities.RESTTopicV1;
 import org.jboss.pressgang.ccms.server.constants.ServiceConstants;
 import org.jboss.pressgang.ccms.utils.common.CollectionUtilities;
 import org.jboss.pressgang.ccms.utils.common.DocBookUtilities;
@@ -268,6 +270,32 @@ public class TopicUtilities {
 
             // Convert the document to a String applying the XML Formatting property rules
             topic.setTopicXML(processXML(entityManager, doc));
+        }
+    }
+
+    /**
+     * Process a Topics XML and sync the topic title with the XML Title. Also reformat the XML using the formatting String
+     * Constant rules.
+     *
+     * @param entityManager An open EntityManager instance to lookup formatting constants.
+     * @param topic         The Topic to process the XML for.
+     */
+    public static void processXML(final EntityManager entityManager, final RESTTopicV1 topic) {
+        Document doc = null;
+        try {
+            doc = XMLUtilities.convertStringToDocument(topic.getXml());
+        } catch (final Exception ex) {
+            log.warn("An Error occurred transforming a XML String to a DOM Document", ex);
+            return;
+        }
+
+        if (doc != null) {
+            if (isTopicNormalTopic(topic)) {
+                DocBookUtilities.setSectionTitle(topic.getTitle(), doc);
+            }
+
+            // Convert the document to a String applying the XML Formatting property rules
+            topic.setXml(processXML(entityManager, doc));
         }
     }
 
@@ -572,6 +600,19 @@ public class TopicUtilities {
                 || topic.isTaggedWith(EntitiesConfig.getInstance().getLegalNoticeTagId())
                 || topic.isTaggedWith(EntitiesConfig.getInstance().getAuthorGroupTagId())
                 || topic.isTaggedWith(EntitiesConfig.getInstance().getAbstractTagId()));
+    }
+
+    /**
+     * Check to see if a Topic is a normal topic, instead of a Revision History or Legal Notice
+     *
+     * @param topic The topic to be checked.
+     * @return True if the topic is a normal topic, otherwise false.
+     */
+    public static boolean isTopicNormalTopic(final RESTTopicV1 topic) {
+        return !(ComponentTopicV1.hasTag(topic, EntitiesConfig.getInstance().getRevisionHistoryTagId())
+                || ComponentTopicV1.hasTag(topic, EntitiesConfig.getInstance().getLegalNoticeTagId())
+                || ComponentTopicV1.hasTag(topic, EntitiesConfig.getInstance().getAuthorGroupTagId())
+                || ComponentTopicV1.hasTag(topic, EntitiesConfig.getInstance().getAbstractTagId()));
     }
 
     /**

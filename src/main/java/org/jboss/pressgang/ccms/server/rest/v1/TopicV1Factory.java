@@ -210,7 +210,7 @@ public class TopicV1Factory extends RESTDataObjectFactory<RESTTopicV1, Topic, RE
         if (dataObject.hasParameterSet(RESTTopicV1.XML_NAME)) {
             entity.setTopicXML(dataObject.getXml());
             // the title was not manually set, so extract it from the XML and update the topic
-            if (!titlePropertySpecificallySet && TopicUtilities.isTopicNormalTopic(entity)) {
+            if (!titlePropertySpecificallySet && TopicUtilities.isTopicNormalTopic(dataObject)) {
                 final String title = DocBookUtilities.findTitle(dataObject.getXml());
                 if (title != null) {
                     entity.setTopicTitle(title);
