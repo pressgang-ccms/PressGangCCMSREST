@@ -24,6 +24,11 @@ import org.apache.batik.svggen.SVGGraphics2D;
 import org.apache.commons.threadpool.DefaultThreadPool;
 import org.apache.commons.threadpool.ThreadPool;
 import org.hibernate.Session;
+import org.hibernate.envers.AuditReader;
+import org.hibernate.envers.AuditReaderFactory;
+import org.hibernate.envers.DefaultRevisionEntity;
+import org.hibernate.envers.query.AuditEntity;
+import org.hibernate.envers.query.AuditQuery;
 import org.hibernate.search.FullTextSession;
 import org.hibernate.search.Search;
 import org.jboss.pressgang.ccms.filter.BlobConstantFieldFilter;
@@ -87,6 +92,7 @@ import org.jboss.pressgang.ccms.model.contentspec.CSNode;
 import org.jboss.pressgang.ccms.model.contentspec.ContentSpec;
 import org.jboss.pressgang.ccms.model.contentspec.TranslatedCSNode;
 import org.jboss.pressgang.ccms.model.contentspec.TranslatedContentSpec;
+import org.jboss.pressgang.ccms.rest.v1.RESTMatchedTopicV1;
 import org.jboss.pressgang.ccms.rest.v1.collections.RESTBlobConstantCollectionV1;
 import org.jboss.pressgang.ccms.rest.v1.collections.RESTCategoryCollectionV1;
 import org.jboss.pressgang.ccms.rest.v1.collections.RESTFileCollectionV1;
@@ -166,6 +172,18 @@ public class RESTv1 extends BaseRESTv1 implements RESTBaseInterfaceV1, RESTInter
     @Context HttpResponse response;
 
     /* UTILITY FUNCTIONS */
+    public RESTSystemStatsV1 getJSONSysInfo() {
+        final AuditReader reader = AuditReaderFactory.get(entityManager);
+        final Number revision = reader.getRevisionNumberForDate(new Date(Long.MAX_VALUE));
+        final Date revisionDate = reader.getRevisionDate(revision);
+
+        final RESTSystemStatsV1 retValue = new RESTSystemStatsV1();
+        retValue.setLastRevision(revision.intValue());
+        retValue.setLastRevisionDate(revisionDate);
+
+        return retValue;
+    }
+
     @Override
     public Map<Integer, Integer> getMinHashes(final String xml) {
         final List<MinHashXOR> minHashXORs = entityManager.createQuery(MinHashXOR.SELECT_ALL_QUERY).getResultList();
@@ -2473,8 +2491,6 @@ public class RESTv1 extends BaseRESTv1 implements RESTBaseInterfaceV1, RESTInter
 
     @Override
     public RESTMatchedTopicV1 createOrMatchJSONTopic(final String expand, final RESTTopicV1 dataObject, final String message, final Integer flag, final String userId) {
-        // use TopicUtilities.processXML to check incoming XML with existing topics.
-
         // make sure the incoming topic has specified some xml
         if (dataObject.getConfiguredParameters().indexOf(RESTTopicV1.XML_NAME) == -1 ||
                 dataObject.getXml() == null ||
@@ -2483,29 +2499,27 @@ public class RESTv1 extends BaseRESTv1 implements RESTBaseInterfaceV1, RESTInter
             throw new BadRequestException("The topic to be created or matched needs to have the XML field populated and added to the configured parameters.");
         }
 
-        Document doc = null;
         try {
-            doc = XMLUtilities.convertStringToDocument(dataObject.getXml());
-        } catch (final Exception ex) {
-            log.warn("An Error occurred transforming a XML String to a DOM Document", ex);
-        }
+            final Document doc = XMLUtilities.convertStringToDocument(dataObject.getXml());
+            if (doc != null) {
+                final String processedXML = TopicUtilities.processXML(entityManager, doc);
+                final char[] shaHash = StringUtilities.calculateContentHash(processedXML);
 
-        if (doc == null) {
+                final List<Topic> topics = entityManager.createQuery("SELECT topic FROM Topic as Topic WHERE topic.topicContentHash = '" + new String(shaHash) + "'").getResultList();
+
+                if (topics.size() != 0) {
+                    // we have at least one topic with identical XML, so return that
+                    return new RESTMatchedTopicV1(getJSONTopic(topics.get(0).getId(), expand), true);
+                }
+                else {
+                    // we have no matching topics, so create a new one
+                    return new RESTMatchedTopicV1(createJSONTopic(expand, dataObject, message, flag, userId), false);
+                }
+            } else {
+                throw new BadRequestException("The topic to be created or matched needs to have valid XML.");
+            }
+        } catch (final SAXException ex) {
             throw new BadRequestException("The topic to be created or matched needs to have valid XML.");
-        }
-
-        final String processedXML = TopicUtilities.processXML(entityManager, doc);
-        final char[] shaHash = StringUtilities.calculateContentHash(processedXML);
-
-        final List<Topic> topics = entityManager.createQuery("SELECT topic Topic FROM Topic WHERE topic.topicContentHash = '" + new String(shaHash) + "'").getResultList();
-
-        if (topics.size() != 0) {
-            // we have at least one topic with identical XML, so return that
-            return new RESTMatchedTopicV1(getJSONTopic(topics.get(0).getId(), expand));
-        }
-        else {
-            // we have no matching topics, so create a new one
-            return new RESTMatchedTopicV1(createJSONTopic(expand, dataObject, message, flag, userId), false);
         }
     }
 
