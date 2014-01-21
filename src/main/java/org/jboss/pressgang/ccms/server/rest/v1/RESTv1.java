@@ -131,10 +131,7 @@ import org.jboss.pressgang.ccms.server.utils.BeanUtilities;
 import org.jboss.pressgang.ccms.server.utils.ContentSpecUtilities;
 import org.jboss.pressgang.ccms.server.utils.JNDIUtilities;
 import org.jboss.pressgang.ccms.server.utils.TopicUtilities;
-import org.jboss.pressgang.ccms.utils.common.CollectionUtilities;
-import org.jboss.pressgang.ccms.utils.common.DocBookUtilities;
-import org.jboss.pressgang.ccms.utils.common.XMLUtilities;
-import org.jboss.pressgang.ccms.utils.common.ZipUtilities;
+import org.jboss.pressgang.ccms.utils.common.*;
 import org.jboss.pressgang.ccms.utils.constants.CommonFilterConstants;
 import org.jboss.resteasy.plugins.providers.atom.Feed;
 import org.jboss.resteasy.specimpl.PathSegmentImpl;
@@ -154,6 +151,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.w3c.dom.DOMImplementation;
 import org.w3c.dom.Document;
+import org.xml.sax.SAXException;
 
 /**
  * The PressGang REST interface implementation
@@ -2474,9 +2472,41 @@ public class RESTv1 extends BaseRESTv1 implements RESTBaseInterfaceV1, RESTInter
     }
 
     @Override
-    public RESTMatchedTopicV1 createOrMatchJSONTopic(String expand, RESTTopicV1 dataObject, String message, Integer flag, String userId) {
-        return null;
+    public RESTMatchedTopicV1 createOrMatchJSONTopic(final String expand, final RESTTopicV1 dataObject, final String message, final Integer flag, final String userId) {
         // use TopicUtilities.processXML to check incoming XML with existing topics.
+
+        // make sure the incoming topic has specified some xml
+        if (dataObject.getConfiguredParameters().indexOf(RESTTopicV1.XML_NAME) == -1 ||
+                dataObject.getXml() == null ||
+                dataObject.getXml().trim().length() == 0)
+        {
+            throw new BadRequestException("The topic to be created or matched needs to have the XML field populated and added to the configured parameters.");
+        }
+
+        Document doc = null;
+        try {
+            doc = XMLUtilities.convertStringToDocument(dataObject.getXml());
+        } catch (final Exception ex) {
+            log.warn("An Error occurred transforming a XML String to a DOM Document", ex);
+        }
+
+        if (doc == null) {
+            throw new BadRequestException("The topic to be created or matched needs to have valid XML.");
+        }
+
+        final String processedXML = TopicUtilities.processXML(entityManager, doc);
+        final char[] shaHash = StringUtilities.calculateContentHash(processedXML);
+
+        final List<Topic> topics = entityManager.createQuery("SELECT topic Topic FROM Topic WHERE topic.topicContentHash = '" + new String(shaHash) + "'").getResultList();
+
+        if (topics.size() != 0) {
+            // we have at least one topic with identical XML, so return that
+            return new RESTMatchedTopicV1(getJSONTopic(topics.get(0).getId(), expand));
+        }
+        else {
+            // we have no matching topics, so create a new one
+            return new RESTMatchedTopicV1(createJSONTopic(expand, dataObject, message, flag, userId), false);
+        }
     }
 
     // XML TOPIC FUNCTIONS

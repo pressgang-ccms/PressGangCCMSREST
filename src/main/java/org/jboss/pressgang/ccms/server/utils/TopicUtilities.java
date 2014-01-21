@@ -256,49 +256,59 @@ public class TopicUtilities {
         Document doc = null;
         try {
             doc = XMLUtilities.convertStringToDocument(topic.getTopicXML());
-        } catch (SAXException ex) {
-            // Do nothing with this as it's handled later by the validator
-        } catch (Exception ex) {
+        } catch (final Exception ex) {
             log.warn("An Error occurred transforming a XML String to a DOM Document", ex);
+            return;
         }
+
         if (doc != null) {
-            // Sync the topic title, if the topic is a regular topic
             if (isTopicNormalTopic(topic)) {
                 DocBookUtilities.setSectionTitle(topic.getTopicTitle(), doc);
             }
 
-            // Get the XML elements that require special formatting/processing
-            final StringConstants xmlElementsProperties = entityManager.find(StringConstants.class,
-                    EntitiesConfig.getInstance().getXMLFormattingElementsStringConstantId());
-
-            // Load the String Constants as Properties
-            final Properties prop = new Properties();
-            try {
-                prop.load(new StringReader(xmlElementsProperties.getConstantValue()));
-            } catch (IOException ex) {
-                log.error("The XML Elements Properties file couldn't be loaded as a property file", ex);
-            }
-
-            // Find the XML elements that need formatting for different display rules.
-            final String verbatimElementsString = prop.getProperty(CommonConstants.VERBATIM_XML_ELEMENTS_PROPERTY_KEY);
-            final String inlineElementsString = prop.getProperty(CommonConstants.INLINE_XML_ELEMENTS_PROPERTY_KEY);
-            final String contentsInlineElementsString = prop.getProperty(CommonConstants.CONTENTS_INLINE_XML_ELEMENTS_PROPERTY_KEY);
-
-            final ArrayList<String> verbatimElements = verbatimElementsString == null ? new ArrayList<String>() : CollectionUtilities
-                    .toArrayList(
-                    verbatimElementsString.split("[\\s]*,[\\s]*"));
-
-            final ArrayList<String> inlineElements = inlineElementsString == null ? new ArrayList<String>() : CollectionUtilities
-                    .toArrayList(
-                    inlineElementsString.split("[\\s]*,[\\s]*"));
-
-            final ArrayList<String> contentsInlineElements = contentsInlineElementsString == null ? new ArrayList<String>() :
-                    CollectionUtilities.toArrayList(
-                    contentsInlineElementsString.split("[\\s]*,[\\s]*"));
-
             // Convert the document to a String applying the XML Formatting property rules
-            topic.setTopicXML(XMLUtilities.convertNodeToString(doc, verbatimElements, inlineElements, contentsInlineElements, true));
+            topic.setTopicXML(processXML(entityManager, doc));
         }
+    }
+
+    /**
+     * Return the xml formatted with consistent whitespace and indentation
+     * @param entityManager The EntityManager used to find the elements to be inlined
+     * @param doc The source XML
+     * @return The formatted XML
+     */
+    public static String processXML(final EntityManager entityManager, final Document doc) {
+        // Get the XML elements that require special formatting/processing
+        final StringConstants xmlElementsProperties = entityManager.find(StringConstants.class,
+                EntitiesConfig.getInstance().getXMLFormattingElementsStringConstantId());
+
+        // Load the String Constants as Properties
+        final Properties prop = new Properties();
+        try {
+            prop.load(new StringReader(xmlElementsProperties.getConstantValue()));
+        } catch (IOException ex) {
+            log.error("The XML Elements Properties file couldn't be loaded as a property file", ex);
+        }
+
+        // Find the XML elements that need formatting for different display rules.
+        final String verbatimElementsString = prop.getProperty(CommonConstants.VERBATIM_XML_ELEMENTS_PROPERTY_KEY);
+        final String inlineElementsString = prop.getProperty(CommonConstants.INLINE_XML_ELEMENTS_PROPERTY_KEY);
+        final String contentsInlineElementsString = prop.getProperty(CommonConstants.CONTENTS_INLINE_XML_ELEMENTS_PROPERTY_KEY);
+
+        final ArrayList<String> verbatimElements = verbatimElementsString == null ? new ArrayList<String>() : CollectionUtilities
+                .toArrayList(
+                        verbatimElementsString.split("[\\s]*,[\\s]*"));
+
+        final ArrayList<String> inlineElements = inlineElementsString == null ? new ArrayList<String>() : CollectionUtilities
+                .toArrayList(
+                        inlineElementsString.split("[\\s]*,[\\s]*"));
+
+        final ArrayList<String> contentsInlineElements = contentsInlineElementsString == null ? new ArrayList<String>() :
+                CollectionUtilities.toArrayList(
+                        contentsInlineElementsString.split("[\\s]*,[\\s]*"));
+
+        // Convert the document to a String applying the XML Formatting property rules
+        return XMLUtilities.convertNodeToString(doc, verbatimElements, inlineElements, contentsInlineElements, true);
     }
 
     /**
