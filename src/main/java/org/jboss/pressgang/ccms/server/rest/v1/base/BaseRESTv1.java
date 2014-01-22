@@ -1469,10 +1469,36 @@ public class BaseRESTv1 extends BaseREST {
         // Rollback if a transaction is active
         try {
             if (transactionManager != null) {
-                final int status = transactionManager.getStatus();
+                /*final int status = transactionManager.getStatus();
                 if (status != Status.STATUS_ROLLING_BACK && status != Status.STATUS_ROLLEDBACK && status != Status.STATUS_NO_TRANSACTION) {
                     transactionManager.rollback();
-                }
+                }*/
+
+                /*
+                    Rolling back only active transactions leads to "Error checking for a transaction" and
+                    "Transaction is not active" errors.
+
+                    From http://techblogs.agiledigital.com.au/2013/01/03/jboss-as-7-1-transaction-reaping/
+
+                        Transaction information is stored in the thread context. Each connector can potentially share the
+                        same transaction – even across requests. The transaction is removed from the thread context when it
+                        is committed or rolled back.
+
+                        When the transaction is reaped, it is marked as rollback only. This changes the status of the
+                        transaction to STATUS_ROLLING_BACK – and then shortly thereafter STATUS_ROLLED_BACK. However, the
+                        transaction is not actually rolled back or removed from the context of the thread. It will not be
+                        removed until utx.commit() or utx.rollback() is called.
+
+                        The base servlet would never attempt to commit or rollback the transaction because:
+
+                        (utx.getStatus() == Status.STATUS_ACTIVE)
+
+                        will always be false after the transaction reaper has caused the status to change to ROLLED_BACK.
+                        Consequently, the transaction was never removed from the thread context and an attempt would be made
+                        by TxConnectionManagerImpl (seen in the stack trace above) to re-use it. Since it had been marked
+                        ROLLED_BACK it could not be re-used and an exception was thrown.
+                 */
+                transactionManager.rollback();
             }
         } catch (Throwable e) {
             return new InternalServerErrorException(e);
