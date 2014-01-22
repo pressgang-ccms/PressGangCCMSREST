@@ -130,6 +130,7 @@ import org.jboss.pressgang.ccms.rest.v1.jaxrsinterfaces.RESTBaseInterfaceV1;
 import org.jboss.pressgang.ccms.rest.v1.jaxrsinterfaces.RESTInterfaceAdvancedV1;
 import org.jboss.pressgang.ccms.server.constants.Constants;
 import org.jboss.pressgang.ccms.server.rest.v1.base.BaseRESTv1;
+import org.jboss.pressgang.ccms.server.rest.v1.thread.RESTRunnableWithTransaction;
 import org.jboss.pressgang.ccms.server.utils.BeanUtilities;
 import org.jboss.pressgang.ccms.server.utils.ContentSpecUtilities;
 import org.jboss.pressgang.ccms.server.utils.JNDIUtilities;
@@ -291,92 +292,25 @@ public class RESTv1 extends BaseRESTv1 implements RESTBaseInterfaceV1, RESTInter
 
                 final int startTopic = i;
 
-                // allow a batch to fail while the remaining ones keep calculating
-                try {
-                    // lets just wrap up some code in a Runnable
-                    THREAD_POOL.invokeLater(
-                            new Runnable() {
-                                public void run() {
-                                    /*
-                                     * Since the envers logging we use relies on being associated with a managed context we need to
-                                     * simulate this in the runnable. This can be achieved by associating the thread with a
-                                     * RequestContext, see: http://docs.jboss.org/weld/reference/latest/en-US/html/contexts.html
-                                     */
-                                    Map<String, Object> dataStore = new HashMap<String, Object>();
+                // lets just wrap up some code in a Runnable
+                THREAD_POOL.invokeLater(
+                        new RESTRunnableWithTransaction() {
+                            public void doWork(final EntityManager em, final TransactionManager transactionManager) {
+                                for (int j = startTopic; j < topics.size() && j < startTopic + BATCH_SIZE; ++j) {
 
-                                    TransactionManager transactionManager = null;
-                                    EntityManager em = null;
+                                    final Topic topic = em.find(Topic.class, topics.get(j));
+                                    org.jboss.pressgang.ccms.model.utils.TopicUtilities.recalculateMinHash(topic, minHashXORs);
 
-                                    try {
-                                        beginRequest(dataStore);
-
-                                        transactionManager = JNDIUtilities.lookupJBossTransactionManager();
-                                        em = JNDIUtilities.lookupJBossEntityManagerFactory().createEntityManager();
-
-                                        // Start a Transaction
-                                        transactionManager.begin();
-
-                                        // Join the transaction we just started
-                                        em.joinTransaction();
-
-                                        for (int j = startTopic; j < topics.size() && j < startTopic + BATCH_SIZE; ++j) {
-
-                                            final Topic topic = em.find(Topic.class, topics.get(j));
-                                            org.jboss.pressgang.ccms.model.utils.TopicUtilities.recalculateMinHash(topic, minHashXORs);
-
-                                            // Handle topics that have invalid titles.
-                                            if (topic.getTopicTitle() == null || topic.getTopicTitle().trim().isEmpty()) {
-                                                topic.setTopicTitle("Placeholder");
-                                            }
-
-                                            em.persist(topic);
-                                        }
-
-                                        transactionManager.commit();
-                                    } catch (final Exception ex) {
-                                        try {
-                                            if (transactionManager != null) {
-                                                transactionManager.rollback();
-                                            }
-                                        } catch (final SystemException ex2) {
-                                            // nothing to do here
-                                        }
-                                    } finally {
-                                        if (em != null) {
-                                            em.close();
-                                        }
-                                        endRequest(dataStore);
-                                        dataStore = null;
+                                    // Handle topics that have invalid titles.
+                                    if (topic.getTopicTitle() == null || topic.getTopicTitle().trim().isEmpty()) {
+                                        topic.setTopicTitle("Placeholder");
                                     }
-                                }
 
-                                private void beginRequest(final Map<String, Object> dataStore) {
-                                    final BoundRequestContext requestContext = getRequestContext();
-                                    requestContext.associate(dataStore);
-                                    requestContext.activate();
-                                }
-
-                                private void endRequest(final Map<String, Object> dataStore) {
-                                    final BoundRequestContext requestContext = getRequestContext();
-                                    try {
-                                        requestContext.invalidate();
-                                        requestContext.deactivate();
-                                    } finally {
-                                        requestContext.dissociate(dataStore);
-                                    }
-                                }
-
-                                private BoundRequestContext getRequestContext() {
-                                    return BeanUtilities.lookupBean(BoundRequestContext.class);
+                                    em.persist(topic);
                                 }
                             }
-                    );
-                } catch (final Exception ex) {
-                    final int status = transactionManager.getStatus();
-                    if (status != Status.STATUS_ROLLING_BACK && status != Status.STATUS_ROLLEDBACK && status != Status.STATUS_NO_TRANSACTION) {
-                        transactionManager.rollback();
-                    }
-                }
+                        }
+                );
             }
         } catch (final Throwable ex) {
             throw processError(transactionManager, ex);
@@ -397,91 +331,24 @@ public class RESTv1 extends BaseRESTv1 implements RESTBaseInterfaceV1, RESTInter
 
                 final int startTopic = i;
 
-                // allow a batch to fail while the remaining ones keep calculating
-                try {
-                    // lets just wrap up some code in a Runnable
-                    THREAD_POOL.invokeLater(
-                            new Runnable() {
-                                public void run() {
-                                    /*
-                                     * Since the envers logging we use relies on being associated with a managed context we need to
-                                     * simulate this in the runnable. This can be achieved by associating the thread with a
-                                     * RequestContext, see: http://docs.jboss.org/weld/reference/latest/en-US/html/contexts.html
-                                     */
-                                    Map<String, Object> dataStore = new HashMap<String, Object>();
+                // lets just wrap up some code in a Runnable
+                THREAD_POOL.invokeLater(
+                        new RESTRunnableWithTransaction() {
+                            public void doWork(final EntityManager em, final TransactionManager transactionManager) {
+                                for (int j = startTopic; j < topics.size() && j < startTopic + BATCH_SIZE; ++j) {
 
-                                    TransactionManager transactionManager = null;
-                                    EntityManager em = null;
+                                    final Topic topic = em.find(Topic.class, topics.get(j));
 
-                                    try {
-                                        beginRequest(dataStore);
+                                    // make some change to allow the entity to be saved
+                                    topic.setTopicContentHash(new char[64]);
 
-                                        transactionManager = JNDIUtilities.lookupJBossTransactionManager();
-                                        em = JNDIUtilities.lookupJBossEntityManagerFactory().createEntityManager();
-
-                                        // Start a Transaction
-                                        transactionManager.begin();
-
-                                        // Join the transaction we just started
-                                        em.joinTransaction();
-
-                                        for (int j = startTopic; j < topics.size() && j < startTopic + BATCH_SIZE; ++j) {
-
-                                            final Topic topic = em.find(Topic.class, topics.get(j));
-
-                                            // make some change to allow the entity to be saved
-                                            topic.setTopicContentHash(new char[64]);
-
-                                            // persisting the topic will regenerate the content hash in
-                                            // @prepersist
-                                            em.persist(topic);
-                                        }
-
-                                        transactionManager.commit();
-                                    } catch (final Exception ex) {
-                                        try {
-                                            if (transactionManager != null) {
-                                                transactionManager.rollback();
-                                            }
-                                        } catch (final SystemException ex2) {
-                                            // nothing to do here
-                                        }
-                                    } finally {
-                                        if (em != null) {
-                                            em.close();
-                                        }
-                                        endRequest(dataStore);
-                                        dataStore = null;
-                                    }
-                                }
-
-                                private void beginRequest(final Map<String, Object> dataStore) {
-                                    final BoundRequestContext requestContext = getRequestContext();
-                                    requestContext.associate(dataStore);
-                                    requestContext.activate();
-                                }
-
-                                private void endRequest(final Map<String, Object> dataStore) {
-                                    final BoundRequestContext requestContext = getRequestContext();
-                                    try {
-                                        requestContext.invalidate();
-                                        requestContext.deactivate();
-                                    } finally {
-                                        requestContext.dissociate(dataStore);
-                                    }
-                                }
-
-                                private BoundRequestContext getRequestContext() {
-                                    return BeanUtilities.lookupBean(BoundRequestContext.class);
+                                    // persisting the topic will regenerate the content hash in
+                                    // @prepersist
+                                    em.persist(topic);
                                 }
                             }
-                    );
-                } catch (final Exception ex) {
-                    final int status = transactionManager.getStatus();
-                    if (status != Status.STATUS_ROLLING_BACK && status != Status.STATUS_ROLLEDBACK && status != Status.STATUS_NO_TRANSACTION) {
-                        transactionManager.rollback();
-                    }
-                }
+                        }
+                );
             }
         } catch (final Throwable ex) {
             throw processError(transactionManager, ex);
