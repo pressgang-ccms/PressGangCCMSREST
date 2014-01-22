@@ -15,7 +15,6 @@ import javax.ws.rs.core.Response;
 import java.awt.geom.Rectangle2D;
 import java.io.IOException;
 import java.io.StringWriter;
-import java.security.MessageDigest;
 import java.util.*;
 import java.util.concurrent.atomic.AtomicInteger;
 
@@ -26,9 +25,6 @@ import org.apache.commons.threadpool.ThreadPool;
 import org.hibernate.Session;
 import org.hibernate.envers.AuditReader;
 import org.hibernate.envers.AuditReaderFactory;
-import org.hibernate.envers.DefaultRevisionEntity;
-import org.hibernate.envers.query.AuditEntity;
-import org.hibernate.envers.query.AuditQuery;
 import org.hibernate.search.FullTextSession;
 import org.hibernate.search.Search;
 import org.jboss.pressgang.ccms.filter.BlobConstantFieldFilter;
@@ -117,6 +113,7 @@ import org.jboss.pressgang.ccms.rest.v1.collections.items.RESTTagCollectionItemV
 import org.jboss.pressgang.ccms.rest.v1.collections.items.RESTTopicCollectionItemV1;
 import org.jboss.pressgang.ccms.rest.v1.components.ComponentTopicV1;
 import org.jboss.pressgang.ccms.rest.v1.constants.RESTv1Constants;
+import org.jboss.pressgang.ccms.rest.v1.elements.RESTSystemStatsV1;
 import org.jboss.pressgang.ccms.rest.v1.entities.*;
 import org.jboss.pressgang.ccms.rest.v1.elements.RESTServerSettingsV1;
 import org.jboss.pressgang.ccms.rest.v1.entities.base.RESTLogDetailsV1;
@@ -2519,9 +2516,9 @@ public class RESTv1 extends BaseRESTv1 implements RESTBaseInterfaceV1, RESTInter
                 }
 
                 final String processedXML = TopicUtilities.processXML(entityManager, doc);
-                final char[] shaHash = StringUtilities.calculateContentHash(processedXML);
+                final String shaHash = HashUtilities.generateSHA256(processedXML);
 
-                final List<Topic> topics = entityManager.createQuery("SELECT topic FROM Topic as Topic WHERE topic.topicContentHash = '" + new String(shaHash) + "'").getResultList();
+                final List<Topic> topics = entityManager.createQuery("SELECT topic FROM Topic as Topic WHERE topic.topicContentHash = '" + shaHash + "'").getResultList();
 
                 if (topics.size() != 0) {
                     // we have at least one topic with identical XML, so return that
