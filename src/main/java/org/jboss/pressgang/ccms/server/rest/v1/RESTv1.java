@@ -108,6 +108,8 @@ import org.jboss.pressgang.ccms.rest.v1.collections.contentspec.RESTContentSpecC
 import org.jboss.pressgang.ccms.rest.v1.collections.contentspec.RESTTextContentSpecCollectionV1;
 import org.jboss.pressgang.ccms.rest.v1.collections.contentspec.RESTTranslatedCSNodeCollectionV1;
 import org.jboss.pressgang.ccms.rest.v1.collections.contentspec.RESTTranslatedContentSpecCollectionV1;
+import org.jboss.pressgang.ccms.rest.v1.collections.items.RESTLanguageFileCollectionItemV1;
+import org.jboss.pressgang.ccms.rest.v1.collections.items.RESTLanguageImageCollectionItemV1;
 import org.jboss.pressgang.ccms.rest.v1.collections.items.RESTTagCollectionItemV1;
 import org.jboss.pressgang.ccms.rest.v1.collections.items.RESTTopicCollectionItemV1;
 import org.jboss.pressgang.ccms.rest.v1.components.ComponentTopicV1;
@@ -324,6 +326,12 @@ public class RESTv1 extends BaseRESTv1 implements RESTBaseInterfaceV1, RESTInter
 
             final List<Integer> topics = entityManager.createQuery(topicQuery).getResultList();
 
+            final String imageQuery = "SELECT languageimage.languageImageId FROM LanguageImage as LanguageImage WHERE NOT languageimage.imageData IS NULL" +
+                    " AND (languageimage.imageContentHash IS NULL OR languageimage.imageContentHash = '')" ;
+
+            final List<Integer> images = entityManager.createQuery(imageQuery).getResultList();
+
+
             // Since there are a lot of topics to process there is a high chance it'll hit the timeout,
             // so break the transactions into smaller chunks
             for (int i = 0; i < topics.size(); i += BATCH_SIZE) {
@@ -344,6 +352,30 @@ public class RESTv1 extends BaseRESTv1 implements RESTBaseInterfaceV1, RESTInter
                                     // persisting the topic will regenerate the content hash in
                                     // @prepersist
                                     em.persist(topic);
+                                }
+                            }
+                        }
+                );
+            }
+
+            for (int i = 0; i < images.size(); i += BATCH_SIZE) {
+
+                final int start = i;
+
+                // lets just wrap up some code in a Runnable
+                THREAD_POOL.invokeLater(
+                        new RESTRunnableWithTransaction() {
+                            public void doWork(final EntityManager em, final TransactionManager transactionManager) {
+                                for (int j = start; j < images.size() && j < start + BATCH_SIZE; ++j) {
+
+                                    final LanguageImage image = em.find(LanguageImage.class, images.get(j));
+
+                                    // make some change to allow the entity to be saved
+                                    image.setImageContentHash(new char[64]);
+
+                                    // persisting the topic will regenerate the content hash in
+                                    // @prepersist
+                                    em.persist(image);
                                 }
                             }
                         }
@@ -1931,6 +1963,40 @@ public class RESTv1 extends BaseRESTv1 implements RESTBaseInterfaceV1, RESTInter
 
         final RESTLogDetailsV1 logDetails = generateLogDetails(message, flag, userId);
         return createJSONEntity(ImageFile.class, dataObject, imageFactory, expand, logDetails);
+    }
+
+    @Override
+    public RESTMatchedImageV1 createOrMatchJSONImage(final String expand, final RESTImageV1 dataObject, final String message, final Integer flag, final String userId) {
+        // make sure the incoming topic has specified some xml
+        if (dataObject.getConfiguredParameters().indexOf(RESTImageV1.LANGUAGEIMAGES_NAME) == -1 ||
+                dataObject.getLanguageImages_OTM() == null ||
+                dataObject.getLanguageImages_OTM().getItems().size() == 0)
+        {
+            throw new BadRequestException("The image to be created or matched needs to have at least one language image added and defined to the configured parameters.");
+        }
+
+        final StringBuilder query = new StringBuilder("SELECT imageFile FROM ImageFile as ImageFile WHERE");
+
+        int count = 0;
+        for (final RESTLanguageImageCollectionItemV1 restLanguageImageCollectionItemV1 : dataObject.getLanguageImages_OTM().getItems()) {
+            if (count != 0) {
+                query.append(" AND");
+            }
+            final String hash = HashUtilities.generateSHA256(restLanguageImageCollectionItemV1.getItem().getImageData());
+            query.append(" EXISTS (SELECT languageImage FROM LanguageImage as LanguageImage WHERE languageImage.imageFile.imageFileId = imageFile.imageFileId AND languageImage.imageContentHash = '" + hash + "')");
+            ++count;
+        }
+
+        final List<ImageFile> images = entityManager.createQuery(query.toString()).getResultList();
+
+        if (images.size() != 0) {
+            // we have at least one topic with identical XML, so return that
+            return new RESTMatchedImageV1(getJSONImage(images.get(0).getId(), expand), true);
+        }
+        else {
+            // we have no matching topics, so create a new one
+            return new RESTMatchedImageV1(createJSONImage(expand, dataObject, message, flag, userId), false);
+        }
     }
 
     @Override

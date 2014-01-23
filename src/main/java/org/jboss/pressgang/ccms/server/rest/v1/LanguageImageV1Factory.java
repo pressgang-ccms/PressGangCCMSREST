@@ -42,6 +42,7 @@ public class LanguageImageV1Factory extends RESTDataObjectFactory<RESTLanguageIm
         retValue.setId(entity.getLanguageImageId());
         retValue.setLocale(entity.getLocale());
         retValue.setFilename(entity.getOriginalFileName());
+        retValue.setContentHash(entity.getImageContentHash());
 
         /* potentially large fields need to be expanded manually */
         if (expand != null && expand.contains(RESTLanguageImageV1.IMAGEDATA_NAME)) retValue.setImageData(entity.getImageData());
