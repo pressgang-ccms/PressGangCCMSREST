@@ -14,7 +14,7 @@ import org.jboss.pressgang.ccms.contentspec.buglinks.BugzillaBugLinkStrategy;
 import org.jboss.pressgang.ccms.contentspec.buglinks.BugzillaBugLinkOptions;
 import org.jboss.pressgang.ccms.contentspec.exceptions.ValidationException;
 
-public class TeiidBugLinkStrategy extends BugzillaBugLinkStrategy {
+public class TeiidBugzillaBugLinkStrategy extends BugzillaBugLinkStrategy {
     private boolean connected = false;
     private Connection connection;
 
