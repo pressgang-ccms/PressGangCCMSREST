@@ -4,7 +4,12 @@ import javax.annotation.Resource;
 import javax.enterprise.context.RequestScoped;
 import javax.inject.Inject;
 import javax.naming.NamingException;
-import javax.persistence.*;
+import javax.persistence.EntityManager;
+import javax.persistence.EntityManagerFactory;
+import javax.persistence.EntityNotFoundException;
+import javax.persistence.PersistenceException;
+import javax.persistence.PersistenceUnit;
+import javax.persistence.TypedQuery;
 import javax.persistence.criteria.CriteriaBuilder;
 import javax.persistence.criteria.CriteriaQuery;
 import javax.persistence.criteria.Root;
@@ -34,6 +39,7 @@ import org.hibernate.envers.query.AuditQuery;
 import org.jboss.pressgang.ccms.contentspec.processor.ContentSpecParser;
 import org.jboss.pressgang.ccms.contentspec.processor.ContentSpecProcessor;
 import org.jboss.pressgang.ccms.contentspec.processor.constants.ProcessorConstants;
+import org.jboss.pressgang.ccms.contentspec.processor.structures.ParserResults;
 import org.jboss.pressgang.ccms.contentspec.processor.structures.ProcessingOptions;
 import org.jboss.pressgang.ccms.contentspec.utils.logging.ErrorLogger;
 import org.jboss.pressgang.ccms.contentspec.utils.logging.ErrorLoggerManager;
@@ -47,6 +53,8 @@ import org.jboss.pressgang.ccms.model.TopicSourceUrl;
 import org.jboss.pressgang.ccms.model.TopicToPropertyTag;
 import org.jboss.pressgang.ccms.model.User;
 import org.jboss.pressgang.ccms.model.base.AuditedEntity;
+import org.jboss.pressgang.ccms.model.config.ApplicationConfig;
+import org.jboss.pressgang.ccms.model.config.EntitiesConfig;
 import org.jboss.pressgang.ccms.model.contentspec.ContentSpec;
 import org.jboss.pressgang.ccms.model.exceptions.CustomConstraintViolationException;
 import org.jboss.pressgang.ccms.provider.DBProviderFactory;
@@ -64,13 +72,10 @@ import org.jboss.pressgang.ccms.rest.v1.entities.base.RESTLogDetailsV1;
 import org.jboss.pressgang.ccms.rest.v1.entities.contentspec.RESTTextCSProcessingOptionsV1;
 import org.jboss.pressgang.ccms.rest.v1.entities.contentspec.RESTTextContentSpecV1;
 import org.jboss.pressgang.ccms.rest.v1.expansion.ExpandDataTrunk;
-import org.jboss.pressgang.ccms.model.config.ApplicationConfig;
-import org.jboss.pressgang.ccms.model.config.EntitiesConfig;
 import org.jboss.pressgang.ccms.server.ejb.EnversLoggingBean;
 import org.jboss.pressgang.ccms.server.envers.LoggingRevisionEntity;
 import org.jboss.pressgang.ccms.server.rest.BaseREST;
 import org.jboss.pressgang.ccms.server.rest.DatabaseOperation;
-import org.jboss.pressgang.ccms.server.rest.v1.ServerSettingsV1Factory;
 import org.jboss.pressgang.ccms.server.rest.v1.BlobConstantV1Factory;
 import org.jboss.pressgang.ccms.server.rest.v1.CSNodeV1Factory;
 import org.jboss.pressgang.ccms.server.rest.v1.CategoryV1Factory;
@@ -83,6 +88,7 @@ import org.jboss.pressgang.ccms.server.rest.v1.ProjectV1Factory;
 import org.jboss.pressgang.ccms.server.rest.v1.PropertyCategoryV1Factory;
 import org.jboss.pressgang.ccms.server.rest.v1.PropertyTagV1Factory;
 import org.jboss.pressgang.ccms.server.rest.v1.RoleV1Factory;
+import org.jboss.pressgang.ccms.server.rest.v1.ServerSettingsV1Factory;
 import org.jboss.pressgang.ccms.server.rest.v1.StringConstantV1Factory;
 import org.jboss.pressgang.ccms.server.rest.v1.TagV1Factory;
 import org.jboss.pressgang.ccms.server.rest.v1.TextContentSpecV1Factory;
@@ -1209,10 +1215,11 @@ public class BaseRESTv1 extends BaseREST {
                 final ContentSpecProcessor processor = new ContentSpecProcessor(providerFactory, loggerManager, processingOptions);
 
                 // Process the content spec
-                success = processContentSpecString(id, contentSpecString, parser, processor, enversLoggingBean.getUsername(), operation,
-                        dataType);
+                final ParserResults results = processContentSpecString(id, contentSpecString, parser, processor,
+                        enversLoggingBean.getUsername(), operation, dataType);
 
-                csId = parser.getContentSpec().getId();
+                csId = results.getContentSpec().getId();
+                success = results.parsedSuccessfully();
             }
 
             // If the content spec processed correctly then commit the changes, otherwise roll them back.
@@ -1279,7 +1286,7 @@ public class BaseRESTv1 extends BaseREST {
      * @param dataType
      * @return True if the Content Spec was parsed and processed successfully, otherwise false.
      */
-    private boolean processContentSpecString(final Integer id, final String contentSpecString, final ContentSpecParser parser,
+    private ParserResults processContentSpecString(final Integer id, final String contentSpecString, final ContentSpecParser parser,
             final ContentSpecProcessor processor, final String username, final DatabaseOperation operation, final String dataType) {
         final ContentSpecParser.ParsingMode mode;
         if (dataType.equals(RESTv1Constants.TEXT_URL)) {
@@ -1293,27 +1300,28 @@ public class BaseRESTv1 extends BaseREST {
         }
 
         // Parse the spec
-        boolean success = true;
-        success = parser.parse(contentSpecString, mode, true);
-        if (success) {
+        ParserResults retValue = parser.parse(contentSpecString, mode, true);
+        if (retValue.parsedSuccessfully()) {
+            final org.jboss.pressgang.ccms.contentspec.ContentSpec contentSpec = retValue.getContentSpec();
             // Check that the id matches
-            if (id != null && parser.getContentSpec() != null) {
-                if (parser.getContentSpec().getId() == null) {
+            if (id != null && contentSpec != null) {
+                if (contentSpec.getId() == null) {
                     throw new BadRequestException("The Content Spec has no ID, but the request was to update an existing Content Spec.");
-                } else if (!id.equals(parser.getContentSpec().getId())) {
+                } else if (!id.equals(contentSpec.getId())) {
                     throw new BadRequestException("The Content Spec ID doesn't match the request ID.");
                 }
-            } else if (parser.getContentSpec() != null) {
-                if (parser.getContentSpec().getId() != null) {
+            } else if (contentSpec != null) {
+                if (contentSpec.getId() != null) {
                     throw new BadRequestException("The Content Spec has an ID, but the request was to create a new Content Spec.");
                 }
             }
 
             // Process and save the spec
-            success = processor.processContentSpec(parser.getContentSpec(), username, mode);
+            boolean success = processor.processContentSpec(contentSpec, username, mode);
+            retValue = new ParserResults(success, contentSpec);
         }
 
-        return success;
+        return retValue;
     }
 
     /**
