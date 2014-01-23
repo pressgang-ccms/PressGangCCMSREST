@@ -10,7 +10,7 @@ import org.jboss.pressgang.ccms.contentspec.buglinks.BugLinkStrategyFactory;
 import org.jboss.pressgang.ccms.contentspec.enums.BugLinkType;
 import org.jboss.pressgang.ccms.model.config.ApplicationConfig;
 import org.jboss.pressgang.ccms.model.config.EntitiesConfig;
-import org.jboss.pressgang.ccms.server.contentspec.TeiidBugLinkStrategy;
+import org.jboss.pressgang.ccms.server.contentspec.TeiidBugzillaBugLinkStrategy;
 
 @Singleton
 @Startup
@@ -33,7 +33,7 @@ public class StartUp {
 
         if (appConfig.getBugzillaTeiid()) {
             // Register the Teiid bug link helper
-            BugLinkStrategyFactory.getInstance().registerStrategy(BugLinkType.BUGZILLA, 1, TeiidBugLinkStrategy.class,
+            BugLinkStrategyFactory.getInstance().registerStrategy(BugLinkType.BUGZILLA, 1, TeiidBugzillaBugLinkStrategy.class,
                     appConfig.getBugzillaUrl());
         }
     }
