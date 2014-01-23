@@ -1477,11 +1477,6 @@ public class BaseRESTv1 extends BaseREST {
         // Rollback if a transaction is active
         try {
             if (transactionManager != null) {
-                /*final int status = transactionManager.getStatus();
-                if (status != Status.STATUS_ROLLING_BACK && status != Status.STATUS_ROLLEDBACK && status != Status.STATUS_NO_TRANSACTION) {
-                    transactionManager.rollback();
-                }*/
-
                 /*
                     Rolling back only active transactions leads to "Error checking for a transaction" and
                     "Transaction is not active" errors.
@@ -1506,7 +1501,10 @@ public class BaseRESTv1 extends BaseREST {
                         by TxConnectionManagerImpl (seen in the stack trace above) to re-use it. Since it had been marked
                         ROLLED_BACK it could not be re-used and an exception was thrown.
                  */
-                transactionManager.rollback();
+                final int status = transactionManager.getStatus();
+                if (status != Status.STATUS_NO_TRANSACTION) {
+                    transactionManager.rollback();
+                }
             }
         } catch (Throwable e) {
             return new InternalServerErrorException(e);
