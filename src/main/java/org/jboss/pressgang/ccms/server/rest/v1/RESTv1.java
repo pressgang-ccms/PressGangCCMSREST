@@ -1995,7 +1995,7 @@ public class RESTv1 extends BaseRESTv1 implements RESTBaseInterfaceV1, RESTInter
         final List<ImageFile> images = entityManager.createQuery(query.toString()).getResultList();
 
         if (images.size() != 0) {
-            // we have at least one topic with identical XML, so return that
+            // we have at least one topic with identical images, so return that
             return new RESTMatchedImageV1(getJSONImage(images.get(0).getId(), expand), true);
         }
         else {
