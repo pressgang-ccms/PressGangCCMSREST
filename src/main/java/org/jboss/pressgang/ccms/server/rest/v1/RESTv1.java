@@ -1974,13 +1974,21 @@ public class RESTv1 extends BaseRESTv1 implements RESTBaseInterfaceV1, RESTInter
 
         final StringBuilder query = new StringBuilder("SELECT imageFile FROM ImageFile as ImageFile WHERE");
 
+        /*
+            Find any existing image whose language images are a match for the ones supplied. In this case we ignore the
+            presence of additional language images, so the returned image may already have some translations.
+         */
         int count = 0;
         for (final RESTLanguageImageCollectionItemV1 restLanguageImageCollectionItemV1 : dataObject.getLanguageImages_OTM().getItems()) {
             if (count != 0) {
                 query.append(" AND");
             }
             final String hash = HashUtilities.generateSHA256(restLanguageImageCollectionItemV1.getItem().getImageData());
-            query.append(" EXISTS (SELECT languageImage FROM LanguageImage as LanguageImage WHERE languageImage.imageFile.imageFileId = imageFile.imageFileId AND languageImage.imageContentHash = '" + hash + "')");
+            query.append(" EXISTS " +
+                    "(SELECT languageImage FROM LanguageImage as LanguageImage " +
+                    "WHERE languageImage.imageFile.imageFileId = imageFile.imageFileId " +
+                    "AND languageImage.imageContentHash = '" + hash + "' " +
+                    "AND languageImage.locale = '" + restLanguageImageCollectionItemV1.getItem().getLocale() + "')");
             ++count;
         }
 
