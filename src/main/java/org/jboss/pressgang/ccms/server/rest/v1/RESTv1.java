@@ -2,8 +2,6 @@ package org.jboss.pressgang.ccms.server.rest.v1;
 
 import javax.persistence.EntityManager;
 import javax.persistence.criteria.CriteriaQuery;
-import javax.transaction.Status;
-import javax.transaction.SystemException;
 import javax.transaction.TransactionManager;
 import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
@@ -108,7 +106,6 @@ import org.jboss.pressgang.ccms.rest.v1.collections.contentspec.RESTContentSpecC
 import org.jboss.pressgang.ccms.rest.v1.collections.contentspec.RESTTextContentSpecCollectionV1;
 import org.jboss.pressgang.ccms.rest.v1.collections.contentspec.RESTTranslatedCSNodeCollectionV1;
 import org.jboss.pressgang.ccms.rest.v1.collections.contentspec.RESTTranslatedContentSpecCollectionV1;
-import org.jboss.pressgang.ccms.rest.v1.collections.items.RESTLanguageFileCollectionItemV1;
 import org.jboss.pressgang.ccms.rest.v1.collections.items.RESTLanguageImageCollectionItemV1;
 import org.jboss.pressgang.ccms.rest.v1.collections.items.RESTTagCollectionItemV1;
 import org.jboss.pressgang.ccms.rest.v1.collections.items.RESTTopicCollectionItemV1;
@@ -123,7 +120,7 @@ import org.jboss.pressgang.ccms.rest.v1.entities.contentspec.RESTContentSpecV1;
 import org.jboss.pressgang.ccms.rest.v1.entities.contentspec.RESTTextContentSpecV1;
 import org.jboss.pressgang.ccms.rest.v1.entities.contentspec.RESTTranslatedCSNodeV1;
 import org.jboss.pressgang.ccms.rest.v1.entities.contentspec.RESTTranslatedContentSpecV1;
-import org.jboss.pressgang.ccms.rest.v1.entities.enums.RESTXMLDoctype;
+import org.jboss.pressgang.ccms.rest.v1.entities.enums.RESTXMLFormat;
 import org.jboss.pressgang.ccms.rest.v1.entities.wrapper.IntegerWrapper;
 import org.jboss.pressgang.ccms.rest.v1.expansion.ExpandDataDetails;
 import org.jboss.pressgang.ccms.rest.v1.expansion.ExpandDataTrunk;
@@ -2499,11 +2496,12 @@ public class RESTv1 extends BaseRESTv1 implements RESTBaseInterfaceV1, RESTInter
         assert id != null : "The id parameter can not be null";
 
         final RESTTopicV1 entity = getXMLResource(Topic.class, topicFactory, id, null);
-        if (entity.getXmlDoctype() != null) {
-            if (entity.getXmlDoctype() == RESTXMLDoctype.DOCBOOK_45) {
-                return DocBookUtilities.addDocbook45XMLDoctype(entity.getXml(), null, "section");
-            } else if (entity.getXmlDoctype() == RESTXMLDoctype.DOCBOOK_50) {
-                return DocBookUtilities.addDocbook50XMLDoctype(entity.getXml(), null, "section");
+        // TODO Account for other topic types
+        if (entity.getXmlFormat() != null) {
+            if (entity.getXmlFormat() == RESTXMLFormat.DOCBOOK_45) {
+                return DocBookUtilities.addDocBook45Doctype(entity.getXml(), null, "section");
+            } else if (entity.getXmlFormat() == RESTXMLFormat.DOCBOOK_50) {
+                return DocBookUtilities.addDocBook50Namespace(entity.getXml(), "section");
             }
         }
 
@@ -2532,11 +2530,12 @@ public class RESTv1 extends BaseRESTv1 implements RESTBaseInterfaceV1, RESTInter
         assert revision != null : "The revision parameter can not be null";
 
         final RESTTopicV1 entity = getXMLResource(Topic.class, topicFactory, id, revision, null);
-        if (entity.getXmlDoctype() != null) {
-            if (entity.getXmlDoctype() == RESTXMLDoctype.DOCBOOK_45) {
-                return DocBookUtilities.addDocbook45XMLDoctype(entity.getXml(), null, "section");
-            } else if (entity.getXmlDoctype() == RESTXMLDoctype.DOCBOOK_50) {
-                return DocBookUtilities.addDocbook50XMLDoctype(entity.getXml(), null, "section");
+        // TODO Account for other topic types
+        if (entity.getXmlFormat() != null) {
+            if (entity.getXmlFormat() == RESTXMLFormat.DOCBOOK_45) {
+                return DocBookUtilities.addDocBook45Doctype(entity.getXml(), null, "section");
+            } else if (entity.getXmlFormat() == RESTXMLFormat.DOCBOOK_50) {
+                return DocBookUtilities.addDocBook50Namespace(entity.getXml(), "section");
             }
         }
 

@@ -25,7 +25,7 @@ import org.jboss.pressgang.ccms.rest.v1.entities.RESTTranslatedTopicStringV1;
 import org.jboss.pressgang.ccms.rest.v1.entities.RESTTranslatedTopicV1;
 import org.jboss.pressgang.ccms.rest.v1.entities.base.RESTBaseEntityV1;
 import org.jboss.pressgang.ccms.rest.v1.entities.contentspec.RESTTranslatedCSNodeV1;
-import org.jboss.pressgang.ccms.rest.v1.entities.enums.RESTXMLDoctype;
+import org.jboss.pressgang.ccms.rest.v1.entities.enums.RESTXMLFormat;
 import org.jboss.pressgang.ccms.rest.v1.expansion.ExpandDataTrunk;
 import org.jboss.pressgang.ccms.server.rest.v1.base.RESTDataObjectCollectionFactory;
 import org.jboss.pressgang.ccms.server.rest.v1.base.RESTDataObjectFactory;
@@ -82,7 +82,7 @@ public class TranslatedTopicV1Factory extends RESTDataObjectFactory<RESTTranslat
         retValue.setTopicId(entity.getTranslatedTopic().getTopicId());
         retValue.setTopicRevision(entity.getTranslatedTopic().getTopicRevision());
         retValue.setContainsFuzzyTranslation(entity.containsFuzzyTranslation());
-        retValue.setXmlDoctype(RESTXMLDoctype.getXMLDoctype(entity.getTranslatedTopic().getEnversTopic(entityManager).getXmlDoctype()));
+        retValue.setXmlFormat(RESTXMLFormat.getXMLFormat(entity.getTranslatedTopic().getEnversTopic(entityManager).getXmlFormat()));
         retValue.setTranslatedXMLCondition(entity.getTranslatedTopic().getTranslatedXMLCondition());
         retValue.setTranslatedAdditionalXML(entity.getTranslatedAdditionalXml());
         retValue.setCustomEntities(entity.getTranslatedTopic().getCustomEntities());

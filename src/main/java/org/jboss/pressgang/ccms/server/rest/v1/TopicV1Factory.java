@@ -32,7 +32,7 @@ import org.jboss.pressgang.ccms.rest.v1.entities.RESTTagV1;
 import org.jboss.pressgang.ccms.rest.v1.entities.RESTTopicSourceUrlV1;
 import org.jboss.pressgang.ccms.rest.v1.entities.RESTTopicV1;
 import org.jboss.pressgang.ccms.rest.v1.entities.base.RESTBaseEntityV1;
-import org.jboss.pressgang.ccms.rest.v1.entities.enums.RESTXMLDoctype;
+import org.jboss.pressgang.ccms.rest.v1.entities.enums.RESTXMLFormat;
 import org.jboss.pressgang.ccms.rest.v1.entities.join.RESTAssignedPropertyTagV1;
 import org.jboss.pressgang.ccms.rest.v1.expansion.ExpandDataTrunk;
 import org.jboss.pressgang.ccms.server.rest.v1.base.RESTDataObjectCollectionFactory;
@@ -94,7 +94,7 @@ public class TopicV1Factory extends RESTDataObjectFactory<RESTTopicV1, Topic, RE
         retValue.setCreated(entity.getTopicTimeStamp());
         retValue.setLocale(entity.getTopicLocale());
         retValue.setXmlErrors(entity.getTopicXMLErrors());
-        retValue.setXmlDoctype(RESTXMLDoctype.getXMLDoctype(entity.getXmlDoctype()));
+        retValue.setXmlFormat(RESTXMLFormat.getXMLFormat(entity.getXmlFormat()));
         retValue.setContentHash(entity.getTopicContentHash());
 
         // KEYWORDS
@@ -215,8 +215,8 @@ public class TopicV1Factory extends RESTDataObjectFactory<RESTTopicV1, Topic, RE
             }
         }
         if (dataObject.hasParameterSet(RESTTopicV1.LOCALE_NAME)) entity.setTopicLocale(dataObject.getLocale());
-        if (dataObject.hasParameterSet(RESTTopicV1.DOCTYPE_NAME))
-            entity.setXmlDoctype(RESTXMLDoctype.getXMLDoctypeId(dataObject.getXmlDoctype()));
+        if (dataObject.hasParameterSet(RESTTopicV1.FORMAT_NAME))
+            entity.setXmlFormat(RESTXMLFormat.getXMLFormatId(dataObject.getXmlFormat()));
 
         /* One To Many - Add will create a child entity */
         if (dataObject.hasParameterSet(
@@ -366,7 +366,7 @@ public class TopicV1Factory extends RESTDataObjectFactory<RESTTopicV1, Topic, RE
 
         /* This method will set the XML errors field */
         TopicUtilities.syncXML(entityManager, entity);
-        TopicUtilities.validateXML(entityManager, entity, EntitiesConfig.getInstance().getRocBookDTDBlobConstantId());
+        TopicUtilities.validateXML(entityManager, entity, EntitiesConfig.getInstance().getRocBook45DTDBlobConstantId());
 
         /* Update the minhash signature (or skip if the min hash xors have not been created. */
         final List<MinHashXOR> minHashXORs = entityManager.createQuery(MinHashXOR.SELECT_ALL_QUERY).getResultList();

@@ -737,7 +737,7 @@ public class BaseRESTv1 extends BaseREST {
     }
 
     /**
-     * This method is just a wrapper for the {@link #getResource(Class, RESTDataObjectFactory, Object, Number, String, String)
+     * This method is just a wrapper for the {@link #getResource(Class, RESTDataObjectFactory, Integer, Number, String, String)
      * getResource()} method that will specify that the response dataType will be JSON.
      *
      * @param type              The matching Database Entity type for the REST Entity.
@@ -753,7 +753,7 @@ public class BaseRESTv1 extends BaseREST {
     }
 
     /**
-     * This method is just a wrapper for the {@link #getResource(Class, RESTDataObjectFactory, Object, Number, String, String)
+     * This method is just a wrapper for the {@link #getResource(Class, RESTDataObjectFactory, Integer, Number, String, String)
      * getResource()} method that will specify that the response dataType will be JSON.
      *
      * @param type              The matching Database Entity type for the REST Entity.
@@ -771,7 +771,7 @@ public class BaseRESTv1 extends BaseREST {
     }
 
     /**
-     * This method is just a wrapper for the {@link #getResource(Class, RESTDataObjectFactory, Object, Number, String, String)
+     * This method is just a wrapper for the {@link #getResource(Class, RESTDataObjectFactory, Integer, Number, String, String)
      * getResource()} method that will specify that the response dataType will be XML.
      *
      * @param type              The matching Database Entity type for the REST Entity.
@@ -787,7 +787,7 @@ public class BaseRESTv1 extends BaseREST {
     }
 
     /**
-     * This method is just a wrapper for the {@link #getResource(Class, RESTDataObjectFactory, Object, Number, String, String)
+     * This method is just a wrapper for the {@link #getResource(Class, RESTDataObjectFactory, Integer, Number, String, String)
      * getResource()} method that will specify that the response dataType will be XML.
      *
      * @param type              The matching Database Entity type for the REST Entity.
