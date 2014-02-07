@@ -25,7 +25,6 @@ import net.java.dev.webdav.jaxrs.xml.properties.GetLastModified;
 import net.java.dev.webdav.jaxrs.xml.properties.LockDiscovery;
 import net.java.dev.webdav.jaxrs.xml.properties.SupportedLock;
 import org.jboss.pressgang.ccms.model.Topic;
-import org.jboss.pressgang.ccms.model.config.EntitiesConfig;
 import org.jboss.pressgang.ccms.server.utils.JNDIUtilities;
 import org.jboss.pressgang.ccms.server.utils.TopicUtilities;
 import org.jboss.pressgang.ccms.server.webdav.managers.CompatibilityManager;
@@ -91,7 +90,7 @@ public class InternalResourceTopicContent extends InternalResource {
 
                 // Validate and sync the XML
                 TopicUtilities.syncXML(entityManager, topic);
-                TopicUtilities.validateXML(entityManager, topic, EntitiesConfig.getInstance().getRocBookDTDBlobConstantId());
+                TopicUtilities.validateXML(entityManager, topic);
 
                 entityManager.persist(topic);
                 entityManager.flush();

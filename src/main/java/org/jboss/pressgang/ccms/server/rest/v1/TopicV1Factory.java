@@ -12,7 +12,6 @@ import org.jboss.pressgang.ccms.model.Tag;
 import org.jboss.pressgang.ccms.model.Topic;
 import org.jboss.pressgang.ccms.model.TopicSourceUrl;
 import org.jboss.pressgang.ccms.model.TopicToPropertyTag;
-import org.jboss.pressgang.ccms.model.config.EntitiesConfig;
 import org.jboss.pressgang.ccms.rest.v1.collections.RESTBugzillaBugCollectionV1;
 import org.jboss.pressgang.ccms.rest.v1.collections.RESTMinHashCollectionV1;
 import org.jboss.pressgang.ccms.rest.v1.collections.RESTTagCollectionV1;
@@ -366,7 +365,7 @@ public class TopicV1Factory extends RESTDataObjectFactory<RESTTopicV1, Topic, RE
 
         /* This method will set the XML errors field */
         TopicUtilities.syncXML(entityManager, entity);
-        TopicUtilities.validateXML(entityManager, entity, EntitiesConfig.getInstance().getRocBook45DTDBlobConstantId());
+        TopicUtilities.validateXML(entityManager, entity);
 
         /* Update the minhash signature (or skip if the min hash xors have not been created. */
         final List<MinHashXOR> minHashXORs = entityManager.createQuery(MinHashXOR.SELECT_ALL_QUERY).getResultList();

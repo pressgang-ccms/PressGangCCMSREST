@@ -516,10 +516,18 @@ public class TopicUtilities {
      * @param entityManager  The EntityManager
      * @param blobConstantId The BlobConstants ID that is the DTD to validate against
      */
-    public static void validateXML(final EntityManager entityManager, final Topic topic, final int blobConstantId) {
+    public static void validateXML(final EntityManager entityManager, final Topic topic) {
         if (entityManager == null) throw new IllegalArgumentException("entityManager cannot be null");
-        if (blobConstantId < 0) throw new IllegalArgumentException("blobConstantId must be positive");
 
+        final Integer blobConstantId;
+        final XMLValidator.ValidationMethod validationMethod;
+        if (topic.getXmlFormat() == CommonConstants.DOCBOOK_50) {
+            blobConstantId = EntitiesConfig.getInstance().getDocBook50RNGBlobConstantId();
+            validationMethod = XMLValidator.ValidationMethod.RELAXNG;
+        } else {
+            blobConstantId = EntitiesConfig.getInstance().getRocBook45DTDBlobConstantId();
+            validationMethod = XMLValidator.ValidationMethod.DTD;
+        }
         final BlobConstants dtd = entityManager.find(BlobConstants.class, blobConstantId);
 
         if (dtd == null) throw new IllegalArgumentException("blobConstantId must be a valid BlobConstants entity id");
@@ -530,7 +538,7 @@ public class TopicUtilities {
 
             // Do a normal DTD validation on the topic
             final XMLValidator validator = new XMLValidator();
-            if (validator.validateTopicXML(doc, dtd.getConstantName(), dtd.getConstantValue()) == null) {
+            if (!validator.validate(validationMethod, doc, dtd.getConstantName(), dtd.getConstantValue())) {
                 final String errorText = validator.getErrorText();
                 if (errorText != null) {
                     xmlErrors.append(errorText);
@@ -747,11 +755,11 @@ public class TopicUtilities {
     }
 
     public static String getXMLDoctypeString(final Topic topic) {
-        if (topic.getXmlDoctype() == null) {
+        if (topic.getXmlFormat() == null) {
             return "None";
-        } else if (topic.getXmlDoctype() == CommonConstants.DOCBOOK_45) {
+        } else if (topic.getXmlFormat() == CommonConstants.DOCBOOK_45) {
             return "Docbook 4.5";
-        } else if (topic.getXmlDoctype() == CommonConstants.DOCBOOK_50) {
+        } else if (topic.getXmlFormat() == CommonConstants.DOCBOOK_50) {
             return "Docbook 5.0";
         }
 

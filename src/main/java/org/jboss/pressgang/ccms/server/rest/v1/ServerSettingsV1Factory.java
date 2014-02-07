@@ -72,7 +72,8 @@ public class ServerSettingsV1Factory {
 
         // Blob Constants
         entities.setFailPenguinBlobConstantId(entitiesConfig.getFailPenguinBlobConstantId());
-        entities.setRocBookDTDBlobConstantId(entitiesConfig.getRocBookDTDBlobConstantId());
+        entities.setRocBook45DTDBlobConstantId(entitiesConfig.getRocBook45DTDBlobConstantId());
+        entities.setDocBook50RNGBlobConstantId(entitiesConfig.getDocBook50RNGBlobConstantId());
 
         // String Constants
         entities.setXmlFormattingStringConstantId(entitiesConfig.getXMLFormattingElementsStringConstantId());
