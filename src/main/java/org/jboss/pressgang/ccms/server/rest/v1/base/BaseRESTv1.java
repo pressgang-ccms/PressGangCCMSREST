@@ -1218,8 +1218,10 @@ public class BaseRESTv1 extends BaseREST {
                 final ParserResults results = processContentSpecString(id, contentSpecString, parser, processor,
                         enversLoggingBean.getUsername(), operation, dataType);
 
-                csId = results.getContentSpec().getId();
                 success = results.parsedSuccessfully();
+                if (success) {
+                    csId = results.getContentSpec().getId();
+                }
             }
 
             // If the content spec processed correctly then commit the changes, otherwise roll them back.
