@@ -58,6 +58,7 @@ import org.jboss.pressgang.ccms.model.sort.TagNameComparator;
 import org.jboss.pressgang.ccms.model.sort.TagToCategorySortingComparator;
 import org.jboss.pressgang.ccms.rest.v1.components.ComponentTopicV1;
 import org.jboss.pressgang.ccms.rest.v1.entities.RESTTopicV1;
+import org.jboss.pressgang.ccms.rest.v1.entities.enums.RESTXMLFormat;
 import org.jboss.pressgang.ccms.server.constants.ServiceConstants;
 import org.jboss.pressgang.ccms.utils.common.CollectionUtilities;
 import org.jboss.pressgang.ccms.utils.common.DocBookUtilities;
@@ -66,6 +67,7 @@ import org.jboss.pressgang.ccms.utils.common.XMLUtilities;
 import org.jboss.pressgang.ccms.utils.common.XMLValidator;
 import org.jboss.pressgang.ccms.utils.common.ZipUtilities;
 import org.jboss.pressgang.ccms.utils.constants.CommonConstants;
+import org.jboss.pressgang.ccms.utils.structures.DocBookVersion;
 import org.jboss.pressgang.ccms.utils.structures.NameIDSortMap;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -265,7 +267,7 @@ public class TopicUtilities {
 
         if (doc != null) {
             if (isTopicNormalTopic(topic)) {
-                DocBookUtilities.setSectionTitle(topic.getTopicTitle(), doc);
+                DocBookUtilities.setSectionTitle(getTopicXMLDocBookVersion(topic), topic.getTopicTitle(), doc);
             }
 
             // Convert the document to a String applying the XML Formatting property rules
@@ -291,11 +293,31 @@ public class TopicUtilities {
 
         if (doc != null) {
             if (isTopicNormalTopic(topic)) {
-                DocBookUtilities.setSectionTitle(topic.getTitle(), doc);
+                DocBookUtilities.setSectionTitle(getTopicXMLDocBookVersion(topic), topic.getTitle(), doc);
             }
 
             // Convert the document to a String applying the XML Formatting property rules
             topic.setXml(processXML(entityManager, doc));
+        }
+    }
+
+    public static DocBookVersion getTopicXMLDocBookVersion(final Topic topic) {
+        if (topic.getXmlFormat() == CommonConstants.DOCBOOK_50) {
+            return DocBookVersion.DOCBOOK_50;
+        } else if (topic.getXmlFormat() == CommonConstants.DOCBOOK_45) {
+            return DocBookVersion.DOCBOOK_45;
+        } else {
+            return null;
+        }
+    }
+
+    public static DocBookVersion getTopicXMLDocBookVersion(final RESTTopicV1 topic) {
+        if (topic.getXmlFormat() == RESTXMLFormat.DOCBOOK_50) {
+            return DocBookVersion.DOCBOOK_50;
+        } else if (topic.getXmlFormat() == RESTXMLFormat.DOCBOOK_45) {
+            return DocBookVersion.DOCBOOK_45;
+        } else {
+            return null;
         }
     }
 

@@ -2445,7 +2445,7 @@ public class RESTv1 extends BaseRESTv1 implements RESTBaseInterfaceV1, RESTInter
                  */
                 if (TopicUtilities.isTopicNormalTopic(dataObject)) {
                     if (dataObject.getConfiguredParameters().indexOf(RESTTopicV1.TITLE_NAME) != -1)  {
-                        DocBookUtilities.setSectionTitle(dataObject.getTitle(), doc);
+                        DocBookUtilities.setSectionTitle(TopicUtilities.getTopicXMLDocBookVersion(dataObject), dataObject.getTitle(), doc);
                     }
                 }
 
