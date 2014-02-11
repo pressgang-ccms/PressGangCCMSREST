@@ -1,6 +1,7 @@
 package org.jboss.pressgang.ccms.server.rest.v1;
 
 import javax.persistence.EntityManager;
+import javax.persistence.Query;
 import javax.persistence.criteria.CriteriaQuery;
 import javax.transaction.TransactionManager;
 import javax.ws.rs.Path;
@@ -13,7 +14,12 @@ import javax.ws.rs.core.Response;
 import java.awt.geom.Rectangle2D;
 import java.io.IOException;
 import java.io.StringWriter;
-import java.util.*;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Random;
+import java.util.Set;
 import java.util.concurrent.atomic.AtomicInteger;
 
 import org.apache.batik.dom.GenericDOMImplementation;
@@ -111,9 +117,25 @@ import org.jboss.pressgang.ccms.rest.v1.collections.items.RESTTagCollectionItemV
 import org.jboss.pressgang.ccms.rest.v1.collections.items.RESTTopicCollectionItemV1;
 import org.jboss.pressgang.ccms.rest.v1.components.ComponentTopicV1;
 import org.jboss.pressgang.ccms.rest.v1.constants.RESTv1Constants;
-import org.jboss.pressgang.ccms.rest.v1.elements.RESTSystemStatsV1;
-import org.jboss.pressgang.ccms.rest.v1.entities.*;
 import org.jboss.pressgang.ccms.rest.v1.elements.RESTServerSettingsV1;
+import org.jboss.pressgang.ccms.rest.v1.elements.RESTSystemStatsV1;
+import org.jboss.pressgang.ccms.rest.v1.entities.RESTBlobConstantV1;
+import org.jboss.pressgang.ccms.rest.v1.entities.RESTCategoryV1;
+import org.jboss.pressgang.ccms.rest.v1.entities.RESTFileV1;
+import org.jboss.pressgang.ccms.rest.v1.entities.RESTFilterV1;
+import org.jboss.pressgang.ccms.rest.v1.entities.RESTImageV1;
+import org.jboss.pressgang.ccms.rest.v1.entities.RESTIntegerConstantV1;
+import org.jboss.pressgang.ccms.rest.v1.entities.RESTMatchedImageV1;
+import org.jboss.pressgang.ccms.rest.v1.entities.RESTMatchedTopicV1;
+import org.jboss.pressgang.ccms.rest.v1.entities.RESTProjectV1;
+import org.jboss.pressgang.ccms.rest.v1.entities.RESTPropertyCategoryV1;
+import org.jboss.pressgang.ccms.rest.v1.entities.RESTPropertyTagV1;
+import org.jboss.pressgang.ccms.rest.v1.entities.RESTRoleV1;
+import org.jboss.pressgang.ccms.rest.v1.entities.RESTStringConstantV1;
+import org.jboss.pressgang.ccms.rest.v1.entities.RESTTagV1;
+import org.jboss.pressgang.ccms.rest.v1.entities.RESTTopicV1;
+import org.jboss.pressgang.ccms.rest.v1.entities.RESTTranslatedTopicV1;
+import org.jboss.pressgang.ccms.rest.v1.entities.RESTUserV1;
 import org.jboss.pressgang.ccms.rest.v1.entities.base.RESTLogDetailsV1;
 import org.jboss.pressgang.ccms.rest.v1.entities.contentspec.RESTCSNodeV1;
 import org.jboss.pressgang.ccms.rest.v1.entities.contentspec.RESTContentSpecV1;
@@ -131,7 +153,11 @@ import org.jboss.pressgang.ccms.server.rest.v1.base.BaseRESTv1;
 import org.jboss.pressgang.ccms.server.rest.v1.thread.RESTRunnableWithTransaction;
 import org.jboss.pressgang.ccms.server.utils.ContentSpecUtilities;
 import org.jboss.pressgang.ccms.server.utils.TopicUtilities;
-import org.jboss.pressgang.ccms.utils.common.*;
+import org.jboss.pressgang.ccms.utils.common.CollectionUtilities;
+import org.jboss.pressgang.ccms.utils.common.DocBookUtilities;
+import org.jboss.pressgang.ccms.utils.common.HashUtilities;
+import org.jboss.pressgang.ccms.utils.common.XMLUtilities;
+import org.jboss.pressgang.ccms.utils.common.ZipUtilities;
 import org.jboss.pressgang.ccms.utils.constants.CommonFilterConstants;
 import org.jboss.resteasy.plugins.providers.atom.Feed;
 import org.jboss.resteasy.specimpl.PathSegmentImpl;
@@ -1976,20 +2002,36 @@ public class RESTv1 extends BaseRESTv1 implements RESTBaseInterfaceV1, RESTInter
             presence of additional language images, so the returned image may already have some translations.
          */
         int count = 0;
+        final Map<String, Object> parameters = new HashMap<String, Object>();
         for (final RESTLanguageImageCollectionItemV1 restLanguageImageCollectionItemV1 : dataObject.getLanguageImages_OTM().getItems()) {
             if (count != 0) {
                 query.append(" AND");
             }
-            final String hash = HashUtilities.generateSHA256(restLanguageImageCollectionItemV1.getItem().getImageData());
             query.append(" EXISTS " +
                     "(SELECT languageImage FROM LanguageImage as LanguageImage " +
                     "WHERE languageImage.imageFile.imageFileId = imageFile.imageFileId " +
-                    "AND languageImage.imageContentHash = '" + hash + "' " +
-                    "AND languageImage.locale = '" + restLanguageImageCollectionItemV1.getItem().getLocale() + "')");
+                    "AND languageImage.imageContentHash = :hash" + count + " " +
+                    "AND languageImage.locale = :locale" + count + ")");
+
+            // Add the bind parameters
+            final String hash = HashUtilities.generateSHA256(restLanguageImageCollectionItemV1.getItem().getImageData());
+            parameters.put("hash" + count, hash.toCharArray());
+            parameters.put("locale" + count, restLanguageImageCollectionItemV1.getItem().getLocale());
+
+            // increase the count
             ++count;
         }
 
-        final List<ImageFile> images = entityManager.createQuery(query.toString()).getResultList();
+        // Create the query
+        final Query query1 = entityManager.createQuery(query.toString());
+
+        // Add the bind parameters to the query
+        for (final Map.Entry<String, Object> parameter : parameters.entrySet()) {
+            query1.setParameter(parameter.getKey(), parameter.getValue());
+        }
+
+        // Execute the query
+        final List<ImageFile> images = query1.getResultList();
 
         if (images.size() != 0) {
             // we have at least one topic with identical images, so return that
