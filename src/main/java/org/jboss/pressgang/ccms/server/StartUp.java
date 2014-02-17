@@ -28,7 +28,7 @@ public class StartUp {
         final EntitiesConfig entitiesConfig = EntitiesConfig.getInstance();
         entitiesConfig.load(new File(pressGangConfigurationDir + EntitiesConfig.FILENAME));
         if (!entitiesConfig.validate()) {
-            throw new ConfigurationException();
+            throw new ConfigurationException("The entities config file at " + pressGangConfigurationDir + EntitiesConfig.FILENAME + " failed to validate.");
         }
 
         if (appConfig.getBugzillaTeiid()) {
