@@ -19,6 +19,8 @@ import javax.transaction.TransactionManager;
 import javax.validation.ConstraintViolation;
 import javax.validation.ConstraintViolationException;
 import javax.validation.ValidationException;
+import javax.ws.rs.core.Context;
+import javax.ws.rs.core.HttpHeaders;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.MultivaluedMap;
 import java.io.IOException;
@@ -31,6 +33,7 @@ import java.util.Date;
 import java.util.List;
 import java.util.Set;
 
+import org.apache.http.HttpStatus;
 import org.codehaus.jackson.map.ObjectMapper;
 import org.hibernate.envers.AuditReader;
 import org.hibernate.envers.AuditReaderFactory;
@@ -68,6 +71,7 @@ import org.jboss.pressgang.ccms.rest.v1.constants.RESTv1Constants;
 import org.jboss.pressgang.ccms.rest.v1.entities.RESTTopicV1;
 import org.jboss.pressgang.ccms.rest.v1.entities.RESTUserV1;
 import org.jboss.pressgang.ccms.rest.v1.entities.base.RESTBaseEntityV1;
+import org.jboss.pressgang.ccms.rest.v1.entities.base.RESTBasePrimaryEntityV1;
 import org.jboss.pressgang.ccms.rest.v1.entities.base.RESTLogDetailsV1;
 import org.jboss.pressgang.ccms.rest.v1.entities.contentspec.RESTTextCSProcessingOptionsV1;
 import org.jboss.pressgang.ccms.rest.v1.entities.contentspec.RESTTextContentSpecV1;
@@ -106,6 +110,7 @@ import org.jboss.resteasy.plugins.providers.atom.Entry;
 import org.jboss.resteasy.plugins.providers.atom.Feed;
 import org.jboss.resteasy.spi.BadRequestException;
 import org.jboss.resteasy.spi.Failure;
+import org.jboss.resteasy.spi.HttpResponse;
 import org.jboss.resteasy.spi.InternalServerErrorException;
 import org.jboss.resteasy.spi.NotFoundException;
 import org.jboss.resteasy.spi.UnauthorizedException;
@@ -145,6 +150,8 @@ public class BaseRESTv1 extends BaseREST {
     protected TransactionManager transactionManager;
     @PersistenceUnit(unitName = PERSISTENCE_UNIT_NAME)
     protected EntityManagerFactory entityManagerFactory;
+    @Context
+    protected HttpResponse response;
     /**
      * The EntityManager to use for this request
      */
@@ -423,7 +430,7 @@ public class BaseRESTv1 extends BaseREST {
         }
     }
 
-    protected <T extends RESTBaseEntityV1<T, V, W>, U extends AuditedEntity, V extends RESTBaseEntityCollectionV1<T, V, W>,
+    protected <T extends RESTBasePrimaryEntityV1<T, V, W>, U extends AuditedEntity, V extends RESTBaseEntityCollectionV1<T, V, W>,
             W extends RESTBaseEntityCollectionItemV1<T, V, W>> T createJSONEntity(
             final Class<U> type, final T restEntity, final RESTDataObjectFactory<T, U, V, W> factory, final String expand,
             final RESTLogDetailsV1 logDetails) {
@@ -437,11 +444,17 @@ public class BaseRESTv1 extends BaseREST {
         return updateEntity(type, restEntity, factory, RESTv1Constants.JSON_URL, expand, logDetails);
     }
 
-    protected <T extends RESTBaseEntityV1<T, V, W>, U extends AuditedEntity, V extends RESTBaseEntityCollectionV1<T, V, W>,
+    protected <T extends RESTBasePrimaryEntityV1<T, V, W>, U extends AuditedEntity, V extends RESTBaseEntityCollectionV1<T, V, W>,
             W extends RESTBaseEntityCollectionItemV1<T, V, W>> T createEntity(
             final Class<U> type, final T restEntity, final RESTDataObjectFactory<T, U, V, W> factory, final String dataType,
             final String expand, final RESTLogDetailsV1 logDetails) {
-        return createOrUpdateEntity(type, restEntity, factory, DatabaseOperation.CREATE, dataType, expand, logDetails);
+        final T newEntity = createOrUpdateEntity(type, restEntity, factory, DatabaseOperation.CREATE, dataType, expand, logDetails);
+
+        // Set the appropriate creation response values
+        response.setStatus(HttpStatus.SC_CREATED);
+        response.getOutputHeaders().add(HttpHeaders.LOCATION, newEntity.getSelfLink());
+
+        return newEntity;
     }
 
     protected <T extends RESTBaseEntityV1<T, V, W>, U extends AuditedEntity, V extends RESTBaseEntityCollectionV1<T, V, W>,
@@ -552,8 +565,13 @@ public class BaseRESTv1 extends BaseREST {
             final Class<V> collectionClass, final Class<U> type, final RESTBaseEntityCollectionV1<T, V, W> entities,
             final RESTDataObjectFactory<T, U, V, W> factory, final String expandName, final String dataType, final String expand,
             final RESTLogDetailsV1 logDetails) {
-        return createOrUpdateEntities(collectionClass, type, factory, entities, DatabaseOperation.CREATE, expandName, dataType, expand,
-                logDetails);
+        final V collection = createOrUpdateEntities(collectionClass, type, factory, entities, DatabaseOperation.CREATE, expandName,
+                dataType, expand, logDetails);
+
+        // Creation endpoints should return a 201 status
+        response.setStatus(HttpStatus.SC_CREATED);
+
+        return collection;
     }
 
     protected <T extends RESTBaseEntityV1<T, V, W>, U extends AuditedEntity, V extends RESTBaseEntityCollectionV1<T, V, W>,

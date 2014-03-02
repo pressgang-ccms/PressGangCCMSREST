@@ -7,7 +7,6 @@ import javax.transaction.TransactionManager;
 import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
 import javax.ws.rs.QueryParam;
-import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MultivaluedMap;
 import javax.ws.rs.core.PathSegment;
 import javax.ws.rs.core.Response;
@@ -162,7 +161,6 @@ import org.jboss.pressgang.ccms.utils.constants.CommonFilterConstants;
 import org.jboss.resteasy.plugins.providers.atom.Feed;
 import org.jboss.resteasy.specimpl.PathSegmentImpl;
 import org.jboss.resteasy.spi.BadRequestException;
-import org.jboss.resteasy.spi.HttpResponse;
 import org.jboss.resteasy.spi.InternalServerErrorException;
 import org.jboss.resteasy.spi.NotFoundException;
 import org.jboss.resteasy.util.Base64;
@@ -187,8 +185,6 @@ public class RESTv1 extends BaseRESTv1 implements RESTBaseInterfaceV1, RESTInter
     private static final int BATCH_SIZE = 20;
     private static final int THREAD_POOL_SIZE = 5;
     private static final ThreadPool THREAD_POOL = new DefaultThreadPool(THREAD_POOL_SIZE);
-
-    @Context HttpResponse response;
 
     /* UTILITY FUNCTIONS */
     public RESTSystemStatsV1 getJSONSysInfo() {
