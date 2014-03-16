@@ -177,6 +177,8 @@ public class ProcessManager {
             final Integer port = client.getConfig().getInt("jppf.management.port", 11198);
             jmxConnection = new ExtendedJMXDriverConnectionWrapper(host, port, sslEnabled);
             initDriverNotifications();
+        } else {
+            resetRequired.set(false);
         }
 
         persistenceManager = createPersistenceManager();
