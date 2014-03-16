@@ -20,4 +20,8 @@ public class Constants {
      * Query strings passed in as path segments always use this as the prefix
      */
     public static final String QUERY_PATHSEGMENT_PREFIX = "query";
+    /**
+     * The length of a string that contains a SHA 256 hash
+     */
+    public static final int SHA_256_HASH_LENGTH = 64;
 }

@@ -131,6 +131,7 @@ import org.jboss.pressgang.ccms.rest.v1.collections.contentspec.RESTContentSpecC
 import org.jboss.pressgang.ccms.rest.v1.collections.contentspec.RESTTextContentSpecCollectionV1;
 import org.jboss.pressgang.ccms.rest.v1.collections.contentspec.RESTTranslatedCSNodeCollectionV1;
 import org.jboss.pressgang.ccms.rest.v1.collections.contentspec.RESTTranslatedContentSpecCollectionV1;
+import org.jboss.pressgang.ccms.rest.v1.collections.items.RESTLanguageFileCollectionItemV1;
 import org.jboss.pressgang.ccms.rest.v1.collections.items.RESTLanguageImageCollectionItemV1;
 import org.jboss.pressgang.ccms.rest.v1.collections.items.RESTTagCollectionItemV1;
 import org.jboss.pressgang.ccms.rest.v1.collections.items.RESTTopicCollectionItemV1;
@@ -146,6 +147,7 @@ import org.jboss.pressgang.ccms.rest.v1.entities.RESTFileV1;
 import org.jboss.pressgang.ccms.rest.v1.entities.RESTFilterV1;
 import org.jboss.pressgang.ccms.rest.v1.entities.RESTImageV1;
 import org.jboss.pressgang.ccms.rest.v1.entities.RESTIntegerConstantV1;
+import org.jboss.pressgang.ccms.rest.v1.entities.RESTMatchedFileV1;
 import org.jboss.pressgang.ccms.rest.v1.entities.RESTMatchedImageV1;
 import org.jboss.pressgang.ccms.rest.v1.entities.RESTMatchedTopicV1;
 import org.jboss.pressgang.ccms.rest.v1.entities.RESTProjectV1;
@@ -380,14 +382,19 @@ public class RESTv1 extends BaseRESTv1 implements RESTBaseInterfaceV1, RESTInter
     public void recalculateMissingContentHash() {
         try {
             final String topicQuery = "SELECT topic.topicId FROM Topic as Topic WHERE NOT topic.topicXML = '' AND NOT topic.topicXML IS " +
-                    "NULL" + " AND (topic.topicContentHash IS NULL OR topic.topicContentHash = '')";
+                    "NULL AND (topic.topicContentHash IS NULL OR topic.topicContentHash = '')";
 
             final List<Integer> topics = entityManager.createQuery(topicQuery).getResultList();
 
             final String imageQuery = "SELECT languageimage.languageImageId FROM LanguageImage as LanguageImage WHERE NOT languageimage" +
-                    ".imageData IS NULL" + " AND (languageimage.imageContentHash IS NULL OR languageimage.imageContentHash = '')";
+                    ".imageData IS NULL AND (languageimage.imageContentHash IS NULL OR languageimage.imageContentHash = '')";
 
             final List<Integer> images = entityManager.createQuery(imageQuery).getResultList();
+
+            final String fileQuery = "SELECT languagefile.languageFileId FROM LanguageFile as LanguageFile WHERE NOT languagefile.fileData IS NULL" +
+                    " AND (languagefile.fileContentHash IS NULL OR languagefile.fileContentHash = '')" ;
+
+            final List<Integer> files = entityManager.createQuery(fileQuery).getResultList();
 
 
             // Since there are a lot of topics to process there is a high chance it'll hit the timeout,
@@ -404,7 +411,7 @@ public class RESTv1 extends BaseRESTv1 implements RESTBaseInterfaceV1, RESTInter
                             final Topic topic = em.find(Topic.class, topics.get(j));
 
                             // make some change to allow the entity to be saved
-                            topic.setTopicContentHash(new char[64]);
+                            topic.setTopicContentHash(new char[Constants.SHA_256_HASH_LENGTH]);
 
                             // persisting the topic will regenerate the content hash in
                             // @prepersist
@@ -426,7 +433,7 @@ public class RESTv1 extends BaseRESTv1 implements RESTBaseInterfaceV1, RESTInter
                             final LanguageImage image = em.find(LanguageImage.class, images.get(j));
 
                             // make some change to allow the entity to be saved
-                            image.setImageContentHash(new char[64]);
+                            image.setImageContentHash(new char[Constants.SHA_256_HASH_LENGTH]);
 
                             // persisting the topic will regenerate the content hash in
                             // @prepersist
@@ -435,6 +442,28 @@ public class RESTv1 extends BaseRESTv1 implements RESTBaseInterfaceV1, RESTInter
                     }
                 });
             }
+
+            for (int i = 0; i < files.size(); i += BATCH_SIZE) {
+
+                final int start = i;
+
+                // lets just wrap up some code in a Runnable
+                THREAD_POOL.invokeLater(new RESTRunnableWithTransaction() {
+                    public void doWork(final EntityManager em, final UserTransaction transaction) {
+                        for (int j = start; j < files.size() && j < start + BATCH_SIZE; ++j) {
+
+                            final LanguageFile file = em.find(LanguageFile.class, files.get(j));
+
+                            // make some change to allow the entity to be saved
+                            file.setFileContentHash(new char[Constants.SHA_256_HASH_LENGTH]);
+
+                            // persisting the topic will regenerate the content hash in
+                            // @prepersist
+                            em.persist(file);
+                        }
+                    }
+                        
+                });
         } catch (final Throwable ex) {
             throw RESTv1Utilities.processError(transaction, ex);
         }
@@ -2080,7 +2109,7 @@ public class RESTv1 extends BaseRESTv1 implements RESTBaseInterfaceV1, RESTInter
         final List<ImageFile> images = query1.getResultList();
 
         if (images.size() != 0) {
-            // we have at least one topic with identical images, so return that
+            // we have at least one image with identical language images, so return that
             return new RESTMatchedImageV1(getJSONImage(images.get(0).getId(), expand), true);
         } else {
             // we have no matching topics, so create a new one
@@ -3776,6 +3805,64 @@ public class RESTv1 extends BaseRESTv1 implements RESTBaseInterfaceV1, RESTInter
 
         final RESTLogDetailsV1 logDetails = generateLogDetails(message, flag, userId);
         return createJSONEntity(File.class, dataObject, fileFactory, expand, logDetails);
+    }
+
+    @Override
+    public RESTMatchedFileV1 createOrMatchJSONFile(final String expand, final RESTFileV1 dataObject, final String message, final Integer flag, final String userId) {
+        // make sure the incoming topic has specified some xml
+        if (dataObject.getConfiguredParameters().indexOf(RESTFileV1.LANGUAGE_FILES_NAME) == -1 ||
+                dataObject.getLanguageFiles_OTM() == null ||
+                dataObject.getLanguageFiles_OTM().getItems().size() == 0)
+        {
+            throw new BadRequestException("The file to be created or matched needs to have at least one language file added and defined to the configured parameters.");
+        }
+
+        final StringBuilder query = new StringBuilder("SELECT file FROM File as File WHERE");
+
+        /*
+            Find any existing image whose language images are a match for the ones supplied. In this case we ignore the
+            presence of additional language images, so the returned image may already have some translations.
+         */
+        int count = 0;
+        final Map<String, Object> parameters = new HashMap<String, Object>();
+        for (final RESTLanguageFileCollectionItemV1 restLanguageFileCollectionItemV1 : dataObject.getLanguageFiles_OTM().getItems()) {
+            if (count != 0) {
+                query.append(" AND");
+            }
+            query.append(" EXISTS " +
+                    "(SELECT languageFile FROM LanguageFile as LanguageFile " +
+                    "WHERE languageFile.file.fileId = file.fileId " +
+                    "AND languageFile.fileContentHash = :hash" + count + " " +
+                    "AND languageFile.locale = :locale" + count + ")");
+
+            // Add the bind parameters
+            final String hash = HashUtilities.generateSHA256(restLanguageFileCollectionItemV1.getItem().getFileData());
+            parameters.put("hash" + count, hash.toCharArray());
+            parameters.put("locale" + count, restLanguageFileCollectionItemV1.getItem().getLocale());
+
+            // increase the count
+            ++count;
+        }
+
+        // Create the query
+        final Query query1 = entityManager.createQuery(query.toString());
+
+        // Add the bind parameters to the query
+        for (final Map.Entry<String, Object> parameter : parameters.entrySet()) {
+            query1.setParameter(parameter.getKey(), parameter.getValue());
+        }
+
+        // Execute the query
+        final List<File> files = query1.getResultList();
+
+        if (files.size() != 0) {
+            // we have at least one image with identical language images, so return that
+            return new RESTMatchedFileV1(getJSONFile(files.get(0).getId(), expand), true);
+        }
+        else {
+            // we have no matching topics, so create a new one
+            return new RESTMatchedFileV1(createJSONFile(expand, dataObject, message, flag, userId), false);
+        }
     }
 
     @Override

@@ -40,6 +40,7 @@ public class LanguageFileV1Factory extends RESTEntityFactory<RESTLanguageFileV1,
         retValue.setId(entity.getLanguageFileId());
         retValue.setLocale(entity.getLocale());
         retValue.setFilename(entity.getOriginalFileName());
+        retValue.setContentHash(entity.getFileContentHash());
 
         // Potentially large fields need to be expanded manually
         if (expand != null && expand.contains(RESTLanguageFileV1.FILE_DATA_NAME)) retValue.setFileData(entity.getFileData());
