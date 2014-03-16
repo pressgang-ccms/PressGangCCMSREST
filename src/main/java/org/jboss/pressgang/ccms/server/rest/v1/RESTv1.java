@@ -464,6 +464,7 @@ public class RESTv1 extends BaseRESTv1 implements RESTBaseInterfaceV1, RESTInter
                     }
                         
                 });
+            }
         } catch (final Throwable ex) {
             throw RESTv1Utilities.processError(transaction, ex);
         }
