@@ -1222,7 +1222,7 @@ public class BaseRESTv1 extends BaseREST {
                 final ContentSpecProcessor processor = new ContentSpecProcessor(providerFactory, loggerManager, processingOptions);
 
                 // Process the content spec
-                final ParserResults results = processContentSpecString(id, contentSpecString, parser, processor,
+                final ParserResults results = processContentSpecString(id, contentSpecString, restEntity.getLocale(), parser, processor,
                         enversLoggingBean.getUsername(), operation, dataType);
 
                 success = results.parsedSuccessfully();
@@ -1286,16 +1286,17 @@ public class BaseRESTv1 extends BaseREST {
     /**
      * Parse and process a Content Specification as a String representation.
      *
+     *
      * @param id                The id that the content spec should be, or null if it's being created.
      * @param contentSpecString The Content Spec string representation.
-     * @param parser            The parser to use to parse the String representation.
+     * @param localeOverride
+     *@param parser            The parser to use to parse the String representation.
      * @param processor         The processor to use, to valid and save the parsed content spec.
      * @param username          The username of the user who sent the request.
      * @param operation         Whether the content spec should be created or updated.
-     * @param dataType
-     * @return True if the Content Spec was parsed and processed successfully, otherwise false.
+     * @param dataType      @return True if the Content Spec was parsed and processed successfully, otherwise false.
      */
-    private ParserResults processContentSpecString(final Integer id, final String contentSpecString, final ContentSpecParser parser,
+    private ParserResults processContentSpecString(final Integer id, final String contentSpecString, String localeOverride, final ContentSpecParser parser,
             final ContentSpecProcessor processor, final String username, final DatabaseOperation operation, final String dataType) {
         final ContentSpecParser.ParsingMode mode;
         if (dataType.equals(RESTv1Constants.TEXT_URL)) {
@@ -1323,6 +1324,11 @@ public class BaseRESTv1 extends BaseREST {
                 if (contentSpec.getId() != null) {
                     throw new BadRequestException("The Content Spec has an ID, but the request was to create a new Content Spec.");
                 }
+            }
+
+            // Override the locale if it's specified
+            if (localeOverride != null) {
+                contentSpec.setLocale(localeOverride);
             }
 
             // Process and save the spec
