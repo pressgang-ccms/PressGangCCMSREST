@@ -23,7 +23,6 @@ import java.util.Date;
 import java.util.List;
 import java.util.Set;
 
-import org.apache.http.HttpStatus;
 import org.codehaus.jackson.map.ObjectMapper;
 import org.hibernate.envers.AuditReader;
 import org.hibernate.envers.AuditReaderFactory;
@@ -439,8 +438,7 @@ public class BaseRESTv1 extends BaseREST {
             final String expand, final RESTLogDetailsV1 logDetails) {
         final T newEntity = createOrUpdateEntity(type, restEntity, factory, DatabaseOperation.CREATE, dataType, expand, logDetails);
 
-        // Set the appropriate creation response values
-        response.setStatus(HttpStatus.SC_CREATED);
+        // Set the appropriate creation header values
         response.getOutputHeaders().add(HttpHeaders.LOCATION, newEntity.getSelfLink());
 
         return newEntity;
@@ -554,13 +552,8 @@ public class BaseRESTv1 extends BaseREST {
             final Class<V> collectionClass, final Class<U> type, final RESTBaseEntityCollectionV1<T, V, W> entities,
             final RESTEntityFactory<T, U, V, W> factory, final String expandName, final String dataType, final String expand,
             final RESTLogDetailsV1 logDetails) {
-        final V collection = createOrUpdateEntities(collectionClass, type, factory, entities, DatabaseOperation.CREATE, expandName,
+        return createOrUpdateEntities(collectionClass, type, factory, entities, DatabaseOperation.CREATE, expandName,
                 dataType, expand, logDetails);
-
-        // Creation endpoints should return a 201 status
-        response.setStatus(HttpStatus.SC_CREATED);
-
-        return collection;
     }
 
     protected <T extends RESTBaseEntityV1<T, V, W>, U extends AuditedEntity, V extends RESTBaseEntityCollectionV1<T, V, W>,

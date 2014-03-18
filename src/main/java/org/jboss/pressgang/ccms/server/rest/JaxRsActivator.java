@@ -7,9 +7,21 @@ import java.util.Set;
 
 import net.java.dev.webdav.jaxrs.xml.WebDavContextResolver;
 import org.jboss.pressgang.ccms.server.rest.v1.RESTv1;
+import org.jboss.pressgang.ccms.server.rest.v1.interceptor.RESTv1CreateResponseInterceptor;
 import org.jboss.pressgang.ccms.server.rest.v1.interceptor.RESTv1VersionHeaderInterceptor;
 import org.jboss.pressgang.ccms.server.rest.v1.interceptor.RESTv1VersionInterceptor;
-import org.jboss.pressgang.ccms.server.rest.v1.mapper.*;
+import org.jboss.pressgang.ccms.server.rest.v1.mapper.BadRequestExceptionMapper;
+import org.jboss.pressgang.ccms.server.rest.v1.mapper.IllegalArgumentExceptionMapper;
+import org.jboss.pressgang.ccms.server.rest.v1.mapper.IllegalStateExceptionMapper;
+import org.jboss.pressgang.ccms.server.rest.v1.mapper.InternalServerErrorExceptionMapper;
+import org.jboss.pressgang.ccms.server.rest.v1.mapper.JAXBMarshalExceptionMapper;
+import org.jboss.pressgang.ccms.server.rest.v1.mapper.JAXBUnmarshalExceptionMapper;
+import org.jboss.pressgang.ccms.server.rest.v1.mapper.MethodNotAllowedExceptionMapper;
+import org.jboss.pressgang.ccms.server.rest.v1.mapper.NotAcceptableExceptionMapper;
+import org.jboss.pressgang.ccms.server.rest.v1.mapper.NotFoundExceptionMapper;
+import org.jboss.pressgang.ccms.server.rest.v1.mapper.ReaderExceptionMapper;
+import org.jboss.pressgang.ccms.server.rest.v1.mapper.UnauthorizedExceptionMapper;
+import org.jboss.pressgang.ccms.server.rest.v1.mapper.WriterExceptionMapper;
 import org.jboss.pressgang.ccms.server.webdav.jaxrs.WebDavResource;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -43,6 +55,7 @@ public class JaxRsActivator extends Application {
         // Interceptors
         classes.add(RESTv1VersionHeaderInterceptor.class);
         classes.add(RESTv1VersionInterceptor.class);
+        classes.add(RESTv1CreateResponseInterceptor.class);
 
         // Exception Mappers
         classes.add(BadRequestExceptionMapper.class);
