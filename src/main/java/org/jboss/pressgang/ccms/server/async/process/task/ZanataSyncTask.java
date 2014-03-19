@@ -19,16 +19,15 @@ import org.jboss.pressgang.ccms.zanata.ETagCache;
 import org.jboss.pressgang.ccms.zanata.ETagInterceptor;
 import org.jboss.pressgang.ccms.zanata.ZanataDetails;
 import org.jboss.pressgang.ccms.zanata.ZanataInterface;
+import org.jboss.resteasy.spi.ResteasyProviderFactory;
 import org.jboss.resteasy.spi.UnauthorizedException;
 import org.zanata.common.LocaleId;
-import org.zanata.rest.client.ISourceDocResource;
+import org.zanata.rest.client.ITranslatedDocResource;
+import org.zanata.rest.service.TranslatedDocResource;
 
 public class ZanataSyncTask extends ProcessRESTTask<Boolean> {
-    private static final List<Class<?>> IGNORED_RESOURCES = new ArrayList<Class<?>>() {
-        {
-            add(ISourceDocResource.class);
-        }
-    };
+    private static final List<Class<?>> ALLOWED_RESOURCES = Arrays.<Class<?>>asList(ITranslatedDocResource.class,
+            TranslatedDocResource.class);
     private final String ZANATA_CACHE_LOCATION = System.getProperty("java.io.tmpdir") + File.separator + ".zanata-cache";
 
     private final String restServerUrl;
@@ -85,8 +84,8 @@ public class ZanataSyncTask extends ProcessRESTTask<Boolean> {
             } catch (IOException e) {
                 getLogger().error("Failed to load the Zanata Cache from {}", ZANATA_CACHE_LOCATION);
             }
-            final ETagInterceptor interceptor = new ETagInterceptor(eTagCache, IGNORED_RESOURCES);
-            zanataInterface.getProxyFactory().registerPrefixInterceptor(interceptor);
+            final ETagInterceptor interceptor = new ETagInterceptor(eTagCache, ALLOWED_RESOURCES);
+            ResteasyProviderFactory.getInstance().getClientExecutionInterceptorRegistry().register(interceptor);
         }
 
         // Load the available locales into the zanata interface
