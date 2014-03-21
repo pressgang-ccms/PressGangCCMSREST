@@ -97,8 +97,16 @@ public class ServerSettingsV1Factory extends RESTElementFactory<RESTServerSettin
         // String Constants
         entities.setXmlFormattingStringConstantId(entitiesConfig.getXMLFormattingElementsStringConstantId());
         entities.setDocBookElementsStringConstantId(entitiesConfig.getDocBookElementsStringConstantId());
+
+        // Template String Constants
         entities.setTopicTemplateStringConstantId(entitiesConfig.getTopicTemplateStringConstantId());
+        entities.setAbstractTopicTemplateStringConstantId(entitiesConfig.getAbstractTemplateStringConstantId());
+        entities.setAuthorGroupTopicTemplateStringConstantId(entitiesConfig.getAuthorGroupTemplateStringConstantId());
+        entities.setLegalNoticeTopicTemplateStringConstantId(entitiesConfig.getLegalNoticeTemplateStringConstantId());
+        entities.setRevisionHistoryTopicTemplateStringConstantId(entitiesConfig.getRevisionHistoryTemplateStringConstantId());
         entities.setContentSpecTemplateStringConstantId(entitiesConfig.getContentSpecTemplateStringConstantId());
+
+        // Build String Constants
         entities.setArticleStringConstantId(entitiesConfig.getArticleStringConstantId());
         entities.setArticleInfoStringConstantId(entitiesConfig.getArticleInfoStringConstantId());
         entities.setAuthorGroupStringConstantId(entitiesConfig.getAuthorGroupStringConstantId());
