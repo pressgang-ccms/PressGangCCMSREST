@@ -13,6 +13,11 @@ import javax.transaction.UserTransaction;
  * @author lnewson
  */
 public class JNDIUtilities {
+    private static final String ENTITY_MANAGER_FACTORY_JNDI_NAME = "java:jboss/EntityManagerFactory";
+    private static final String TRANSACTION_MANAGER_JNDI_NAME = "java:jboss/TransactionManager";
+    private static final String USER_TRANSACTION_JNDI_NAME = "java:jboss/UserTransaction";
+    private static final String BEAN_MANAGER_JNDI_NAME = "java:comp/BeanManager";
+
     /**
      * Lookup the named "java:jboss/EntityManagerFactory" EntityManagerFactory associated with the underlying Application
      * Server.
@@ -22,7 +27,9 @@ public class JNDIUtilities {
      */
     public static EntityManagerFactory lookupJBossEntityManagerFactory() throws NamingException {
         final InitialContext initCtx = new InitialContext();
-        final EntityManagerFactory entityManagerFactory = (EntityManagerFactory) initCtx.lookup("java:jboss/EntityManagerFactory");
+        final EntityManagerFactory entityManagerFactory = (EntityManagerFactory) initCtx.lookup(ENTITY_MANAGER_FACTORY_JNDI_NAME);
+        if (entityManagerFactory == null)
+            throw new NamingException("Could not find the EntityManagerFactory at " + ENTITY_MANAGER_FACTORY_JNDI_NAME);
 
         return entityManagerFactory;
     }
@@ -49,12 +56,11 @@ public class JNDIUtilities {
      * @throws NamingException Thrown if a name based error occurs looking up the TransactionManager.
      */
     public static final TransactionManager lookupJBossTransactionManager() throws NamingException {
-        final String jndiName = "java:jboss/TransactionManager";
         final InitialContext initCtx = new InitialContext();
 
-        final TransactionManager transactionManager = (TransactionManager) initCtx.lookup(jndiName);
+        final TransactionManager transactionManager = (TransactionManager) initCtx.lookup(TRANSACTION_MANAGER_JNDI_NAME);
         if (transactionManager == null)
-            throw new NamingException("Could not find the TransactionManager at " + jndiName);
+            throw new NamingException("Could not find the TransactionManager at " + TRANSACTION_MANAGER_JNDI_NAME);
 
         return transactionManager;
     }
@@ -66,12 +72,11 @@ public class JNDIUtilities {
      * @throws NamingException Thrown if a name based error occurs looking up the TransactionManager.
      */
     public static final UserTransaction lookupUserTransaction() throws NamingException {
-        final String jndiName = "java:jboss/UserTransaction";
         final InitialContext initCtx = new InitialContext();
 
-        final UserTransaction userTransaction = (UserTransaction) initCtx.lookup(jndiName);
+        final UserTransaction userTransaction = (UserTransaction) initCtx.lookup(USER_TRANSACTION_JNDI_NAME);
         if (userTransaction == null)
-            throw new NamingException("Could not find the UserTransaction at " + jndiName);
+            throw new NamingException("Could not find the UserTransaction at " + USER_TRANSACTION_JNDI_NAME);
 
         return userTransaction;
     }
@@ -83,11 +88,10 @@ public class JNDIUtilities {
      * @throws NamingException Thrown if a name based error occurs looking up the Bean Manager.
      */
     public static BeanManager lookupBeanManager() throws NamingException {
-        final String jndiName = "java:comp/BeanManager";
         final InitialContext initCtx = new InitialContext();
-        final BeanManager beanManager = (BeanManager) initCtx.lookup(jndiName);
+        final BeanManager beanManager = (BeanManager) initCtx.lookup(BEAN_MANAGER_JNDI_NAME);
         if (beanManager == null)
-            throw new NamingException("Could not find the BeanManager at " + jndiName);
+            throw new NamingException("Could not find the BeanManager at " + BEAN_MANAGER_JNDI_NAME);
 
         return beanManager;
     }
