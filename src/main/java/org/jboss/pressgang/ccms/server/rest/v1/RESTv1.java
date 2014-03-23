@@ -361,14 +361,17 @@ public class RESTv1 extends BaseRESTv1 implements RESTBaseInterfaceV1, RESTInter
                         for (int j = startTopic; j < topics.size() && j < startTopic + BATCH_SIZE; ++j) {
 
                             final Topic topic = em.find(Topic.class, topics.get(j));
-                            org.jboss.pressgang.ccms.model.utils.TopicUtilities.recalculateMinHash(topic, minHashXORs);
+                            boolean topicChanged = org.jboss.pressgang.ccms.model.utils.TopicUtilities.recalculateMinHash(topic, minHashXORs);
 
                             // Handle topics that have invalid titles.
                             if (topic.getTopicTitle() == null || topic.getTopicTitle().trim().isEmpty()) {
                                 topic.setTopicTitle("Placeholder");
+                                topicChanged = true;
                             }
 
-                            em.persist(topic);
+                            if (topicChanged) {
+                                em.persist(topic);
+                            }
                         }
                     }
                 });
