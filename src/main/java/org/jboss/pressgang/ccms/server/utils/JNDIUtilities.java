@@ -67,7 +67,7 @@ public class JNDIUtilities {
     public static final UserTransaction lookupUserTransaction() throws NamingException {
         final InitialContext initCtx = new InitialContext();
 
-        final UserTransaction userTransaction = (UserTransaction) initCtx.lookup("java:comp/UserTransaction");
+        final UserTransaction userTransaction = (UserTransaction) initCtx.lookup("java:jboss/UserTransaction");
         if (userTransaction == null)
             throw new NamingException("Could not find the UserTransaction");
 
