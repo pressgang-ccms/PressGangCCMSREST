@@ -2580,12 +2580,20 @@ public class RESTv1 extends BaseRESTv1 implements RESTBaseInterfaceV1, RESTInter
                         "SELECT topic FROM Topic as Topic WHERE topic.topicContentHash = '" + shaHash + "'").getResultList();
 
                 if (topics.size() != 0) {
-                    // we have at least one topic with identical XML, so return that
-                    return new RESTMatchedTopicV1(getJSONTopic(topics.get(0).getId(), expand), true);
-                } else {
-                    // we have no matching topics, so create a new one
-                    return new RESTMatchedTopicV1(createJSONTopic(expand, dataObject, message, flag, userId), false);
+                    for (final Topic topic : topics) {
+                        /*
+                            The locale is either unspecified or is a match.
+                         */
+                        if (dataObject.getConfiguredParameters().indexOf(RESTTopicV1.LOCALE_NAME) == -1 ||
+                                topic.getTopicLocale().equals(dataObject.getLocale())) {
+                            return new RESTMatchedTopicV1(getJSONTopic(topic.getId(), expand), true);
+                        }
+                    }
                 }
+
+                // we have no matching topics, so create a new one
+                return new RESTMatchedTopicV1(createJSONTopic(expand, dataObject, message, flag, userId), false);
+
             } else {
                 throw new BadRequestException("The topic to be created or matched needs to have valid XML.");
             }
