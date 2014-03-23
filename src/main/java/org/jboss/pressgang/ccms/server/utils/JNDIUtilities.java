@@ -49,11 +49,12 @@ public class JNDIUtilities {
      * @throws NamingException Thrown if a name based error occurs looking up the TransactionManager.
      */
     public static final TransactionManager lookupJBossTransactionManager() throws NamingException {
+        final String jndiName = "java:jboss/TransactionManager";
         final InitialContext initCtx = new InitialContext();
 
-        final TransactionManager transactionManager = (TransactionManager) initCtx.lookup("java:jboss/TransactionManager");
+        final TransactionManager transactionManager = (TransactionManager) initCtx.lookup(jndiName);
         if (transactionManager == null)
-            throw new NamingException("Could not find the TransactionManager");
+            throw new NamingException("Could not find the TransactionManager at " + jndiName);
 
         return transactionManager;
     }
@@ -65,11 +66,12 @@ public class JNDIUtilities {
      * @throws NamingException Thrown if a name based error occurs looking up the TransactionManager.
      */
     public static final UserTransaction lookupUserTransaction() throws NamingException {
+        final String jndiName = "java:jboss/UserTransaction";
         final InitialContext initCtx = new InitialContext();
 
-        final UserTransaction userTransaction = (UserTransaction) initCtx.lookup("java:jboss/UserTransaction");
+        final UserTransaction userTransaction = (UserTransaction) initCtx.lookup(jndiName);
         if (userTransaction == null)
-            throw new NamingException("Could not find the UserTransaction");
+            throw new NamingException("Could not find the UserTransaction at " + jndiName);
 
         return userTransaction;
     }
@@ -81,8 +83,11 @@ public class JNDIUtilities {
      * @throws NamingException Thrown if a name based error occurs looking up the Bean Manager.
      */
     public static BeanManager lookupBeanManager() throws NamingException {
+        final String jndiName = "java:comp/BeanManager";
         final InitialContext initCtx = new InitialContext();
-        final BeanManager beanManager = (BeanManager) initCtx.lookup("java:comp/BeanManager");
+        final BeanManager beanManager = (BeanManager) initCtx.lookup(jndiName);
+        if (beanManager == null)
+            throw new NamingException("Could not find the BeanManager at " + jndiName);
 
         return beanManager;
     }
