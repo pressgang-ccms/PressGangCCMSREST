@@ -206,6 +206,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.w3c.dom.DOMImplementation;
 import org.w3c.dom.Document;
+import org.w3c.dom.Node;
 import org.xml.sax.SAXException;
 import org.zanata.common.LocaleId;
 
@@ -2256,6 +2257,34 @@ public class RESTv1 extends BaseRESTv1 implements RESTBaseInterfaceV1, RESTInter
             return wrapJsonInPadding(callback, convertObjectToJSON(getJSONTopicsWithQuery(query, expand)));
         } catch (final Exception ex) {
             throw new InternalServerErrorException("Could not marshall return value into JSON");
+        }
+    }
+
+    @Override
+    public String getJSONTopicXMLWithXSL(@PathParam("id") final Integer id, @QueryParam("includeTitle") final Boolean includeTitle) {
+        final Topic topic = entityManager.find(Topic.class, id);
+
+        if (topic == null) throw new NotFoundException("No topic was found with an ID of " + id);
+
+        final String xml = topic.getTopicXML();
+        try {
+            return addXSLToTopicXML(xml, includeTitle);
+        } catch (final SAXException ex) {
+            throw new InternalServerErrorException("The topic has invalid XML");
+        }
+    }
+
+    @Override
+    public String getJSONTopicRevisionXMLWithXSL(@PathParam("id") final Integer id, @PathParam("rev") final Integer revision, @QueryParam("includeTitle") final Boolean includeTitle) {
+        final Topic topic = getEntity(Topic.class, id, revision);
+
+        if (topic == null) throw new NotFoundException("No topic was found with an ID of " + id);
+
+        final String xml = topic.getTopicXML();
+        try {
+            return addXSLToTopicXML(xml, includeTitle);
+        } catch (final SAXException ex) {
+            throw new InternalServerErrorException("The topic has invalid XML");
         }
     }
 

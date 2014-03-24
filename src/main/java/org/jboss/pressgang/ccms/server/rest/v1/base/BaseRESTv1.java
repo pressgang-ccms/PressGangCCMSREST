@@ -97,6 +97,7 @@ import org.jboss.pressgang.ccms.server.utils.EntityUtilities;
 import org.jboss.pressgang.ccms.server.utils.EnversUtilities;
 import org.jboss.pressgang.ccms.server.utils.ProviderUtilities;
 import org.jboss.pressgang.ccms.server.utils.TopicSourceURLTitleThread;
+import org.jboss.pressgang.ccms.utils.common.XMLUtilities;
 import org.jboss.resteasy.plugins.providers.atom.Content;
 import org.jboss.resteasy.plugins.providers.atom.Entry;
 import org.jboss.resteasy.plugins.providers.atom.Feed;
@@ -106,6 +107,9 @@ import org.jboss.resteasy.spi.InternalServerErrorException;
 import org.jboss.resteasy.spi.NotFoundException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.w3c.dom.Document;
+import org.w3c.dom.Node;
+import org.xml.sax.SAXException;
 
 /**
  * This class provides the functions that retrieve, update, create and delete entities. It is expected that other classes will
@@ -197,6 +201,37 @@ public class BaseRESTv1 extends BaseREST {
     @Inject
     protected UserV1Factory userFactory;
     /* END ENTITY FACTORIES */
+
+    protected String addXSLToTopicXML(final String xml, final Boolean includeTitle) throws SAXException {
+        /*
+            Attempt to convert the XML, and throw an exception if there is an issue
+         */
+        final Document xmlDoc = XMLUtilities.convertStringToDocument(xml, true);
+        if (includeTitle != null && !includeTitle.booleanValue()) {
+            for (int childIndex = 0; childIndex < xmlDoc.getDocumentElement().getChildNodes().getLength(); ++childIndex) {
+                final Node child = xmlDoc.getDocumentElement().getChildNodes().item(childIndex);
+                if (child.getNodeName().equals("title")) {
+                    xmlDoc.getDocumentElement().removeChild(child);
+                    break;
+                }
+            }
+        }
+
+        /*
+            We need to remove and XML declarations.
+         */
+        String fixedXML = XMLUtilities.convertDocumentToString(xmlDoc);
+        final String preamble = XMLUtilities.findPreamble(fixedXML);
+        if (preamble != null) {
+            fixedXML = fixedXML.replace(preamble, "");
+        }
+
+        final StringBuilder retValue = new StringBuilder();
+        retValue.append("<?xml-stylesheet type='text/xsl' href='/pressgang-ccms-static/publican-docbook/html-single.xsl'?>\n");
+        retValue.append("<!DOCTYPE " + xmlDoc.getDocumentElement().getNodeName() + ">\n");
+        retValue.append(fixedXML);
+        return retValue.toString();
+    }
 
     /**
      * Converts a Collection of Topics into an ATOM Feed.
