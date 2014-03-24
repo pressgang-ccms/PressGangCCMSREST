@@ -97,6 +97,7 @@ import org.jboss.pressgang.ccms.server.utils.EntityUtilities;
 import org.jboss.pressgang.ccms.server.utils.EnversUtilities;
 import org.jboss.pressgang.ccms.server.utils.ProviderUtilities;
 import org.jboss.pressgang.ccms.server.utils.TopicSourceURLTitleThread;
+import org.jboss.pressgang.ccms.utils.common.DocBookUtilities;
 import org.jboss.pressgang.ccms.utils.common.XMLUtilities;
 import org.jboss.resteasy.plugins.providers.atom.Content;
 import org.jboss.resteasy.plugins.providers.atom.Entry;
@@ -202,7 +203,7 @@ public class BaseRESTv1 extends BaseREST {
     protected UserV1Factory userFactory;
     /* END ENTITY FACTORIES */
 
-    protected String addXSLToTopicXML(final String xml, final Boolean includeTitle) throws SAXException {
+    protected String addXSLToTopicXML(final String xml, final Boolean includeTitle, final String condition) throws SAXException {
         /*
             Attempt to convert the XML, and throw an exception if there is an issue
          */
@@ -215,6 +216,10 @@ public class BaseRESTv1 extends BaseREST {
                     break;
                 }
             }
+        }
+
+        if (condition != null) {
+            DocBookUtilities.processConditions(condition, xmlDoc);
         }
 
         /*

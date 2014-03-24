@@ -2261,28 +2261,35 @@ public class RESTv1 extends BaseRESTv1 implements RESTBaseInterfaceV1, RESTInter
     }
 
     @Override
-    public String getJSONTopicXMLWithXSL(@PathParam("id") final Integer id, @QueryParam("includeTitle") final Boolean includeTitle) {
+    public String getJSONTopicXMLWithXSL(
+            @PathParam("id") final Integer id,
+            @QueryParam("includeTitle") final Boolean includeTitle,
+            @QueryParam("condition") final String condition) {
         final Topic topic = entityManager.find(Topic.class, id);
 
         if (topic == null) throw new NotFoundException("No topic was found with an ID of " + id);
 
         final String xml = topic.getTopicXML();
         try {
-            return addXSLToTopicXML(xml, includeTitle);
+            return addXSLToTopicXML(xml, includeTitle, condition);
         } catch (final SAXException ex) {
             throw new InternalServerErrorException("The topic has invalid XML");
         }
     }
 
     @Override
-    public String getJSONTopicRevisionXMLWithXSL(@PathParam("id") final Integer id, @PathParam("rev") final Integer revision, @QueryParam("includeTitle") final Boolean includeTitle) {
+    public String getJSONTopicRevisionXMLWithXSL(
+            @PathParam("id") final Integer id,
+            @PathParam("rev") final Integer revision,
+            @QueryParam("includeTitle") final Boolean includeTitle,
+            @QueryParam("condition") final String condition) {
         final Topic topic = getEntity(Topic.class, id, revision);
 
         if (topic == null) throw new NotFoundException("No topic was found with an ID of " + id);
 
         final String xml = topic.getTopicXML();
         try {
-            return addXSLToTopicXML(xml, includeTitle);
+            return addXSLToTopicXML(xml, includeTitle, condition);
         } catch (final SAXException ex) {
             throw new InternalServerErrorException("The topic has invalid XML");
         }
