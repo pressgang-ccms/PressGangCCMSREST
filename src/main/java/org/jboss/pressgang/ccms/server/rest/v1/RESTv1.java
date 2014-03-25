@@ -178,6 +178,7 @@ import org.jboss.pressgang.ccms.server.rest.v1.thread.RESTRunnableWithTransactio
 import org.jboss.pressgang.ccms.server.rest.v1.utils.ProcessHelper;
 import org.jboss.pressgang.ccms.server.rest.v1.utils.RESTv1Utilities;
 import org.jboss.pressgang.ccms.server.utils.ContentSpecUtilities;
+import org.jboss.pressgang.ccms.server.utils.EnversUtilities;
 import org.jboss.pressgang.ccms.server.utils.ProviderUtilities;
 import org.jboss.pressgang.ccms.server.utils.TopicUtilities;
 import org.jboss.pressgang.ccms.utils.common.CollectionUtilities;
@@ -2272,7 +2273,7 @@ public class RESTv1 extends BaseRESTv1 implements RESTBaseInterfaceV1, RESTInter
         final Topic topic = entityManager.find(Topic.class, id);
 
         // Calculate the ETag on last modified date of user resource
-        final EntityTag etag = new EntityTag(topic.getRevision().toString());
+        final EntityTag etag = new EntityTag(EnversUtilities.getLatestRevision(entityManager, topic).toString());
 
         // Verify if it matched with etag available in http request
         final Response.ResponseBuilder rb = req.evaluatePreconditions(etag);
