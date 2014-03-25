@@ -15,10 +15,7 @@ import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
 import javax.ws.rs.QueryParam;
-import javax.ws.rs.core.MediaType;
-import javax.ws.rs.core.MultivaluedMap;
-import javax.ws.rs.core.PathSegment;
-import javax.ws.rs.core.Response;
+import javax.ws.rs.core.*;
 import java.awt.geom.Rectangle2D;
 import java.io.IOException;
 import java.io.StringWriter;
@@ -2261,35 +2258,79 @@ public class RESTv1 extends BaseRESTv1 implements RESTBaseInterfaceV1, RESTInter
     }
 
     @Override
-    public String getJSONTopicXMLWithXSL(
+    public Response getJSONTopicXMLWithXSL(
+            @Context final Request req,
             @PathParam("id") final Integer id,
             @QueryParam("includeTitle") final Boolean includeTitle,
             @QueryParam("condition") final String condition) {
+
+        //Create cache control header
+        final CacheControl cc = new CacheControl();
+        //Set max age to one year
+        cc.setMaxAge(31536000);
+
         final Topic topic = entityManager.find(Topic.class, id);
+
+        // Calculate the ETag on last modified date of user resource
+        final EntityTag etag = new EntityTag(topic.getRevision().toString());
+
+        // Verify if it matched with etag available in http request
+        final Response.ResponseBuilder rb = req.evaluatePreconditions(etag);
+
+        // If the supplied etag matches the etag we generated (in the case if the client
+        // supplies any etag it will match, because a revision never changes), return
+        // a unmodifed response.
+
+        if (rb != null) {
+            return rb.cacheControl(cc).tag(etag).build();
+        }
 
         if (topic == null) throw new NotFoundException("No topic was found with an ID of " + id);
 
         final String xml = topic.getTopicXML();
         try {
-            return addXSLToTopicXML(xml, includeTitle, condition);
+            final String retValue = addXSLToTopicXML(xml, includeTitle, condition);
+            return Response.ok(retValue).cacheControl(cc).tag(etag).build();
         } catch (final SAXException ex) {
             throw new InternalServerErrorException("The topic has invalid XML");
         }
     }
 
     @Override
-    public String getJSONTopicRevisionXMLWithXSL(
+    public Response getJSONTopicRevisionXMLWithXSL(
+            @Context final Request req,
             @PathParam("id") final Integer id,
             @PathParam("rev") final Integer revision,
             @QueryParam("includeTitle") final Boolean includeTitle,
             @QueryParam("condition") final String condition) {
+
+        //Create cache control header
+        final CacheControl cc = new CacheControl();
+        //Set max age to one year
+        cc.setMaxAge(31536000);
+
+        // Calculate the ETag on last modified date of user resource
+        final EntityTag etag = new EntityTag(revision.toString());
+
+        // Verify if it matched with etag available in http request
+        final Response.ResponseBuilder rb = req.evaluatePreconditions(etag);
+
+        // If the supplied etag matches the etag we generated (in the case if the client
+        // supplies any etag it will match, because a revision never changes), return
+        // a unmodifed response.
+
+        if (rb != null) {
+            return rb.cacheControl(cc).tag(etag).build();
+        }
+
         final Topic topic = getEntity(Topic.class, id, revision);
 
         if (topic == null) throw new NotFoundException("No topic was found with an ID of " + id);
 
         final String xml = topic.getTopicXML();
         try {
-            return addXSLToTopicXML(xml, includeTitle, condition);
+            final String retValue = addXSLToTopicXML(xml, includeTitle, condition);
+            return Response.ok(retValue).cacheControl(cc).tag(etag).build();
         } catch (final SAXException ex) {
             throw new InternalServerErrorException("The topic has invalid XML");
         }
