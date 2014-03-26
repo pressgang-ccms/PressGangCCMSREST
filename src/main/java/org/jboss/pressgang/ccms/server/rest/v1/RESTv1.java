@@ -2285,8 +2285,7 @@ public class RESTv1 extends BaseRESTv1 implements RESTBaseInterfaceV1, RESTInter
         // Verify if it matched with etag available in http request
         final Response.ResponseBuilder rb = req.evaluatePreconditions(etag);
 
-        // If the supplied etag matches the etag we generated (in the case if the client
-        // supplies any etag it will match, because a revision never changes), return
+        // If the supplied etag matches the etag we generated, return
         // a unmodifed response.
 
         if (rb != null) {
