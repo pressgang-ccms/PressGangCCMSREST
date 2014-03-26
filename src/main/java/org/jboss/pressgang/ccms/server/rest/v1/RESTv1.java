@@ -2263,7 +2263,7 @@ public class RESTv1 extends BaseRESTv1 implements RESTBaseInterfaceV1, RESTInter
             @Context final Request req,
             @PathParam("id") final Integer id,
             @QueryParam("includeTitle") final Boolean includeTitle,
-            @QueryParam("condition") final String condition) {
+            @QueryParam("csNodeId") final Integer contentSpecContext) {
 
         //Create cache control header
         final CacheControl cc = new CacheControl();
@@ -2290,7 +2290,7 @@ public class RESTv1 extends BaseRESTv1 implements RESTBaseInterfaceV1, RESTInter
 
         final String xml = topic.getTopicXML();
         try {
-            final String retValue = addXSLToTopicXML(xml, includeTitle, condition);
+            final String retValue = addXSLToTopicXML(xml, includeTitle, contentSpecContext);
             return Response.ok(retValue).cacheControl(cc).tag(etag).build();
         } catch (final SAXException ex) {
             throw new InternalServerErrorException("The topic has invalid XML");
@@ -2303,7 +2303,7 @@ public class RESTv1 extends BaseRESTv1 implements RESTBaseInterfaceV1, RESTInter
             @PathParam("id") final Integer id,
             @PathParam("rev") final Integer revision,
             @QueryParam("includeTitle") final Boolean includeTitle,
-            @QueryParam("condition") final String condition) {
+            @QueryParam("csNodeId") final Integer contentSpecContext) {
 
         //Create cache control header
         final CacheControl cc = new CacheControl();
@@ -2330,7 +2330,7 @@ public class RESTv1 extends BaseRESTv1 implements RESTBaseInterfaceV1, RESTInter
 
         final String xml = topic.getTopicXML();
         try {
-            final String retValue = addXSLToTopicXML(xml, includeTitle, condition);
+            final String retValue = addXSLToTopicXML(xml, includeTitle, contentSpecContext);
             return Response.ok(retValue).cacheControl(cc).tag(etag).build();
         } catch (final SAXException ex) {
             throw new InternalServerErrorException("The topic has invalid XML");

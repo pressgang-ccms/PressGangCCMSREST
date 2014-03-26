@@ -47,6 +47,7 @@ import org.jboss.pressgang.ccms.model.User;
 import org.jboss.pressgang.ccms.model.base.AuditedEntity;
 import org.jboss.pressgang.ccms.model.config.ApplicationConfig;
 import org.jboss.pressgang.ccms.model.config.EntitiesConfig;
+import org.jboss.pressgang.ccms.model.contentspec.CSNode;
 import org.jboss.pressgang.ccms.model.contentspec.ContentSpec;
 import org.jboss.pressgang.ccms.provider.DBProviderFactory;
 import org.jboss.pressgang.ccms.rest.v1.collections.RESTTopicCollectionV1;
@@ -99,6 +100,7 @@ import org.jboss.pressgang.ccms.server.utils.ProviderUtilities;
 import org.jboss.pressgang.ccms.server.utils.TopicSourceURLTitleThread;
 import org.jboss.pressgang.ccms.utils.common.DocBookUtilities;
 import org.jboss.pressgang.ccms.utils.common.XMLUtilities;
+import org.jboss.pressgang.ccms.utils.constants.CommonConstants;
 import org.jboss.resteasy.plugins.providers.atom.Content;
 import org.jboss.resteasy.plugins.providers.atom.Entry;
 import org.jboss.resteasy.plugins.providers.atom.Feed;
@@ -203,7 +205,7 @@ public class BaseRESTv1 extends BaseREST {
     protected UserV1Factory userFactory;
     /* END ENTITY FACTORIES */
 
-    protected String addXSLToTopicXML(final String xml, final Boolean includeTitle, final String condition) throws SAXException {
+    protected String addXSLToTopicXML(final String xml, final Boolean includeTitle, final Integer contentSpecContext) throws SAXException, IllegalArgumentException {
         /*
             Attempt to convert the XML, and throw an exception if there is an issue
          */
@@ -218,8 +220,29 @@ public class BaseRESTv1 extends BaseREST {
             }
         }
 
-        if (condition != null) {
-            DocBookUtilities.processConditions(condition, xmlDoc);
+        String entities = "";
+
+        if (contentSpecContext != null) {
+
+            final CSNode node = entityManager.find(CSNode.class, contentSpecContext);
+            if (node == null) {
+                throw new IllegalArgumentException(contentSpecContext.toString() + " is not a valid CSNode ID.");
+            }
+
+            final String condition = node.getInheritedCondition();
+            if (condition != null) {
+                DocBookUtilities.processConditions(condition, xmlDoc);
+            }
+
+            final ContentSpec spec = node.getContentSpec();
+            for (final CSNode child : spec.getCSNodes()) {
+                if (child.getCSNodeType() == CommonConstants.CS_NODE_META_DATA &&
+                        child.getCSNodeTitle().equals(CommonConstants.CS_ENTITIES_TITLE)) {
+                    entities = child.getAdditionalText();
+                    break;
+                }
+            }
+
         }
 
         /*
@@ -233,7 +256,9 @@ public class BaseRESTv1 extends BaseREST {
 
         final StringBuilder retValue = new StringBuilder();
         retValue.append("<?xml-stylesheet type='text/xsl' href='/pressgang-ccms-static/publican-docbook/html-single.xsl'?>\n");
-        retValue.append("<!DOCTYPE " + xmlDoc.getDocumentElement().getNodeName() + ">\n");
+        retValue.append("<!DOCTYPE " + xmlDoc.getDocumentElement().getNodeName() + "[\n");
+        retValue.append(entities);
+        retValue.append("]>\n");
         retValue.append(fixedXML);
         return retValue.toString();
     }
