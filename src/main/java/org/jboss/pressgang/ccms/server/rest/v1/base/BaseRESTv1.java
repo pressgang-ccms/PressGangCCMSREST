@@ -205,7 +205,7 @@ public class BaseRESTv1 extends BaseREST {
     protected UserV1Factory userFactory;
     /* END ENTITY FACTORIES */
 
-    protected String addXSLToTopicXML(final String xml, final Boolean includeTitle, final Integer contentSpecContext) throws SAXException, IllegalArgumentException {
+    protected String addXSLToTopicXML(final String xml, final Boolean includeTitle, final CSNode node) throws SAXException {
         /*
             Attempt to convert the XML, and throw an exception if there is an issue
          */
@@ -222,12 +222,7 @@ public class BaseRESTv1 extends BaseREST {
 
         String entities = "";
 
-        if (contentSpecContext != null) {
-
-            final CSNode node = entityManager.find(CSNode.class, contentSpecContext);
-            if (node == null) {
-                throw new IllegalArgumentException(contentSpecContext.toString() + " is not a valid CSNode ID.");
-            }
+        if (node != null) {
 
             final String condition = node.getInheritedCondition();
             if (condition != null) {

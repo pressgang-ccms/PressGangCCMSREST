@@ -2272,8 +2272,15 @@ public class RESTv1 extends BaseRESTv1 implements RESTBaseInterfaceV1, RESTInter
 
         final Topic topic = entityManager.find(Topic.class, id);
 
+        CSNode node = null;
+        if (contentSpecContext != null) {
+            node = entityManager.find(CSNode.class, contentSpecContext);
+        }
+
         // Calculate the ETag on last modified date of user resource
-        final EntityTag etag = new EntityTag(EnversUtilities.getLatestRevision(entityManager, topic).toString());
+        final EntityTag etag = new EntityTag(EnversUtilities.getLatestRevision(entityManager, topic).toString() +
+                (node == null ? "" : ":" + node.getId() + "-" + EnversUtilities.getLatestRevision(entityManager, node)));
+
 
         // Verify if it matched with etag available in http request
         final Response.ResponseBuilder rb = req.evaluatePreconditions(etag);
@@ -2310,8 +2317,14 @@ public class RESTv1 extends BaseRESTv1 implements RESTBaseInterfaceV1, RESTInter
         //Set max age to one year
         cc.setMaxAge(31536000);
 
+        CSNode node = null;
+        if (contentSpecContext != null) {
+            node = entityManager.find(CSNode.class, contentSpecContext);
+        }
+
         // Calculate the ETag on last modified date of user resource
-        final EntityTag etag = new EntityTag(revision.toString());
+        final EntityTag etag = new EntityTag(revision.toString() +
+                (node == null ? "" : ":" + node.getId() + "-" + EnversUtilities.getLatestRevision(entityManager, node)));
 
         // Verify if it matched with etag available in http request
         final Response.ResponseBuilder rb = req.evaluatePreconditions(etag);
@@ -2330,7 +2343,7 @@ public class RESTv1 extends BaseRESTv1 implements RESTBaseInterfaceV1, RESTInter
 
         final String xml = topic.getTopicXML();
         try {
-            final String retValue = addXSLToTopicXML(xml, includeTitle, contentSpecContext);
+            final String retValue = addXSLToTopicXML(xml, includeTitle, node);
             return Response.ok(retValue).cacheControl(cc).tag(etag).build();
         } catch (final SAXException ex) {
             throw new InternalServerErrorException("The topic has invalid XML");
