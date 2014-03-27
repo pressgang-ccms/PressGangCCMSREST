@@ -182,11 +182,13 @@ import org.jboss.pressgang.ccms.utils.common.DocBookUtilities;
 import org.jboss.pressgang.ccms.utils.common.HashUtilities;
 import org.jboss.pressgang.ccms.utils.common.XMLUtilities;
 import org.jboss.pressgang.ccms.utils.common.ZipUtilities;
+import org.jboss.pressgang.ccms.utils.constants.CommonConstants;
 import org.jboss.pressgang.ccms.utils.constants.CommonFilterConstants;
 import org.jboss.resteasy.plugins.providers.atom.Feed;
 import org.jboss.resteasy.specimpl.PathSegmentImpl;
 import org.jboss.resteasy.spi.BadRequestException;
 import org.jboss.resteasy.spi.InternalServerErrorException;
+import org.jboss.resteasy.spi.NotAcceptableException;
 import org.jboss.resteasy.spi.NotFoundException;
 import org.jboss.resteasy.util.Base64;
 import org.jfree.chart.ChartFactory;
@@ -3421,7 +3423,12 @@ public class RESTv1 extends BaseRESTv1 implements RESTBaseInterfaceV1, RESTInter
     @Override
     public Response getXMLWithXSLContentSpecNode(@Context final Request req, @PathParam("id") final Integer id) {
         final CSNode csNode = entityManager.find(CSNode.class, id);
-        if (csNode == null) throw new NotFoundException("No CSNode was found with an ID of " + id);
+        if (csNode == null) {
+            throw new NotFoundException("No CSNode was found with an ID of " + id);
+        }
+        if (!(csNode.getCSNodeType() == CommonConstants.CS_NODE_TOPIC || csNode.getCSNodeType() == CommonConstants.CS_NODE_INITIAL_CONTENT_TOPIC)) {
+            throw new NotFoundException("The CSNode with the id of " + id + " does not hold a reference to a topic.");
+        }
         /* get the topic */
         Topic topic = null;
         if (csNode.getEntityRevision() != null) {
@@ -3454,7 +3461,12 @@ public class RESTv1 extends BaseRESTv1 implements RESTBaseInterfaceV1, RESTInter
     @Override
     public Response getXMLWithXSLContentSpecNodeRevision(@Context final Request req, @PathParam("id") final Integer id, @PathParam("rev") final Integer revision) {
         final CSNode csNode = EnversUtilities.getRevision(entityManager, CSNode.class, id, revision);
-        if (csNode == null) throw new NotFoundException("No CSNode was found with an ID of " + id + " and revision " + revision);
+        if (csNode == null) {
+            throw new NotFoundException("No CSNode was found with an ID of " + id);
+        }
+        if (!(csNode.getCSNodeType() == CommonConstants.CS_NODE_TOPIC || csNode.getCSNodeType() == CommonConstants.CS_NODE_INITIAL_CONTENT_TOPIC)) {
+            throw new NotFoundException("The CSNode with the id of " + id + " does not hold a reference to a topic.");
+        }
         /* get the topic */
         Topic topic = null;
         if (csNode.getEntityRevision() != null) {
