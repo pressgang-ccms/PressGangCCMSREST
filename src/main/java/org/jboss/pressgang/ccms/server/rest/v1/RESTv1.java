@@ -2274,7 +2274,7 @@ public class RESTv1 extends BaseRESTv1 implements RESTBaseInterfaceV1, RESTInter
 
         final String xml = topic.getTopicXML();
         try {
-            final String retValue = addXSLToTopicXML(xml, includeTitle, condition, entities);
+            final String retValue = addXSLToTopicXML(xml, topic.getXmlFormat(), includeTitle, condition, entities);
             return respondWithETag(req, eTagValue, retValue);
         } catch (final SAXException ex) {
             throw new InternalServerErrorException("The topic has invalid XML");
@@ -2301,7 +2301,7 @@ public class RESTv1 extends BaseRESTv1 implements RESTBaseInterfaceV1, RESTInter
 
         final String xml = topic.getTopicXML();
         try {
-            final String retValue = addXSLToTopicXML(xml, includeTitle, condition, entities);
+            final String retValue = addXSLToTopicXML(xml, topic.getXmlFormat(), includeTitle, condition, entities);
             return respondWithETag(req, eTagValue, retValue);
         } catch (final SAXException ex) {
             throw new InternalServerErrorException("The topic has invalid XML");
