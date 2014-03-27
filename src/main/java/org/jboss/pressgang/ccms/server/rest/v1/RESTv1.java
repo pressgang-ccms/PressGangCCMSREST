@@ -10,11 +10,7 @@ import javax.persistence.criteria.CriteriaBuilder;
 import javax.persistence.criteria.CriteriaQuery;
 import javax.persistence.criteria.Root;
 import javax.transaction.UserTransaction;
-import javax.ws.rs.GET;
-import javax.ws.rs.Path;
-import javax.ws.rs.PathParam;
-import javax.ws.rs.Produces;
-import javax.ws.rs.QueryParam;
+import javax.ws.rs.*;
 import javax.ws.rs.core.*;
 import java.awt.geom.Rectangle2D;
 import java.io.IOException;
@@ -2263,41 +2259,23 @@ public class RESTv1 extends BaseRESTv1 implements RESTBaseInterfaceV1, RESTInter
             @Context final Request req,
             @PathParam("id") final Integer id,
             @QueryParam("includeTitle") final Boolean includeTitle,
-            @QueryParam("csNodeId") final Integer contentSpecContext) {
-
-        //Create cache control header
-        final CacheControl cc = new CacheControl();
-        //Set max age to one year
-        cc.setMaxAge(31536000);
+            @QueryParam("condition") final String condition,
+            @QueryParam("entities") final String entities) {
 
         final Topic topic = entityManager.find(Topic.class, id);
-
-        CSNode node = null;
-        if (contentSpecContext != null) {
-            node = entityManager.find(CSNode.class, contentSpecContext);
-        }
+        if (topic == null) throw new NotFoundException("No topic was found with an ID of " + id);
 
         // Calculate the ETag on last modified date of user resource
-        final EntityTag etag = new EntityTag(EnversUtilities.getLatestRevision(entityManager, topic).toString() +
-                (node == null ? "" : ":" + node.getId() + "-" + EnversUtilities.getLatestRevision(entityManager, node)));
-
-
-        // Verify if it matched with etag available in http request
-        final Response.ResponseBuilder rb = req.evaluatePreconditions(etag);
-
-        // If the supplied etag matches the etag we generated, return
-        // a unmodifed response.
-
-        if (rb != null) {
-            return rb.cacheControl(cc).tag(etag).build();
-        }
-
-        if (topic == null) throw new NotFoundException("No topic was found with an ID of " + id);
+        final String eTagValue = id + ":" +
+                EnversUtilities.getLatestRevision(entityManager, topic).toString() + ":" +
+                (includeTitle == null ? true : false) + ":" +
+                (condition == null ? "".hashCode() : condition.hashCode()) + ":" +
+                (entities == null ? "".hashCode() : entities.hashCode());
 
         final String xml = topic.getTopicXML();
         try {
-            final String retValue = addXSLToTopicXML(xml, includeTitle, node);
-            return Response.ok(retValue).cacheControl(cc).tag(etag).build();
+            final String retValue = addXSLToTopicXML(xml, includeTitle, condition, entities);
+            return respondWithETag(req, eTagValue, retValue);
         } catch (final SAXException ex) {
             throw new InternalServerErrorException("The topic has invalid XML");
         }
@@ -2309,41 +2287,22 @@ public class RESTv1 extends BaseRESTv1 implements RESTBaseInterfaceV1, RESTInter
             @PathParam("id") final Integer id,
             @PathParam("rev") final Integer revision,
             @QueryParam("includeTitle") final Boolean includeTitle,
-            @QueryParam("csNodeId") final Integer contentSpecContext) {
-
-        //Create cache control header
-        final CacheControl cc = new CacheControl();
-        //Set max age to one year
-        cc.setMaxAge(31536000);
-
-        CSNode node = null;
-        if (contentSpecContext != null) {
-            node = entityManager.find(CSNode.class, contentSpecContext);
-        }
-
-        // Calculate the ETag on last modified date of user resource
-        final EntityTag etag = new EntityTag(revision.toString() +
-                (node == null ? "" : ":" + node.getId() + "-" + EnversUtilities.getLatestRevision(entityManager, node)));
-
-        // Verify if it matched with etag available in http request
-        final Response.ResponseBuilder rb = req.evaluatePreconditions(etag);
-
-        // If the supplied etag matches the etag we generated (in the case if the client
-        // supplies any etag it will match, because a revision never changes), return
-        // a unmodifed response.
-
-        if (rb != null) {
-            return rb.cacheControl(cc).tag(etag).build();
-        }
+            @QueryParam("condition") final String condition,
+            @QueryParam("entities") final String entities) {
 
         final Topic topic = getEntity(Topic.class, id, revision);
-
         if (topic == null) throw new NotFoundException("No topic was found with an ID of " + id);
+
+        // Calculate the ETag on last modified date of user resource
+        final String eTagValue = revision.toString() + ":" +
+                (includeTitle == null ? true : false) + ":" +
+                (condition == null ? "".hashCode() : condition.hashCode()) + ":" +
+                (entities == null ? "".hashCode() : entities.hashCode());
 
         final String xml = topic.getTopicXML();
         try {
-            final String retValue = addXSLToTopicXML(xml, includeTitle, node);
-            return Response.ok(retValue).cacheControl(cc).tag(etag).build();
+            final String retValue = addXSLToTopicXML(xml, includeTitle, condition, entities);
+            return respondWithETag(req, eTagValue, retValue);
         } catch (final SAXException ex) {
             throw new InternalServerErrorException("The topic has invalid XML");
         }
@@ -3457,6 +3416,71 @@ public class RESTv1 extends BaseRESTv1 implements RESTBaseInterfaceV1, RESTInter
         if (revision == null) throw new BadRequestException("The revision parameter can not be null");
 
         return getJSONResource(CSNode.class, csNodeFactory, id, revision, expand);
+    }
+
+    @Override
+    public Response getXMLWithXSLContentSpecNode(@Context final Request req, @PathParam("id") final Integer id) {
+        final CSNode csNode = entityManager.find(CSNode.class, id);
+        if (csNode == null) throw new NotFoundException("No CSNode was found with an ID of " + id);
+        /* get the topic */
+        Topic topic = null;
+        if (csNode.getEntityRevision() != null) {
+            topic = EnversUtilities.getRevision(entityManager, Topic.class, csNode.getEntityId(), csNode.getEntityRevision());
+            if (topic == null) throw new NotFoundException("No Topic was found with an ID of " + id + " and a revision of " + csNode.getEntityRevision());
+        } else {
+            topic = entityManager.find(Topic.class, csNode.getEntityId());
+            if (topic == null) throw new NotFoundException("No Topic was found with an ID of " + id);
+        }
+
+        /*
+            Etag depends on the id and revision of the csnode, the revision of the spec it is included in, and the
+            revision of the topic it points to. If any of these conditions change, the xml could potentially change.
+        */
+        final String eTagValue =
+                /*SPEC NODE ID*/        id + ":" +
+                /*SPEC NODE REVISION*/  EnversUtilities.getLatestRevision(entityManager, csNode).toString() + ":" +
+                /*SPEC REVISION*/       EnversUtilities.getLatestRevision(entityManager, csNode.getContentSpec()) + ":" +
+                /*TOPIC ID*/            csNode.getEntityId() + ":" +
+                /*TOPIC REVISION*/      (csNode.getEntityRevision() != null ? csNode.getEntityRevision() : EnversUtilities.getLatestRevision(entityManager, topic));
+
+        try {
+            final String retValue = addXSLToTopicXML(csNode, topic);
+            return respondWithETag(req, eTagValue, retValue);
+        } catch (final SAXException ex) {
+            throw new InternalServerErrorException("The topic has invalid XML");
+        }
+    }
+
+    @Override
+    public Response getXMLWithXSLContentSpecNodeRevision(@Context final Request req, @PathParam("id") final Integer id, @PathParam("rev") final Integer revision) {
+        final CSNode csNode = EnversUtilities.getRevision(entityManager, CSNode.class, id, revision);
+        if (csNode == null) throw new NotFoundException("No CSNode was found with an ID of " + id + " and revision " + revision);
+        /* get the topic */
+        Topic topic = null;
+        if (csNode.getEntityRevision() != null) {
+            topic = EnversUtilities.getRevision(entityManager, Topic.class, csNode.getEntityId(), csNode.getEntityRevision());
+            if (topic == null) throw new NotFoundException("No Topic was found with an ID of " + id + " and a revision of " + csNode.getEntityRevision());
+        } else {
+            topic = entityManager.find(Topic.class, csNode.getEntityId());
+            if (topic == null) throw new NotFoundException("No Topic was found with an ID of " + id);
+        }
+
+        /*
+            Etag depends on the id and revision of the csnode and the revision of the topic it points to. If any of
+            these conditions change, the xml could potentially change.
+        */
+        final String eTagValue =
+                /*SPEC NODE ID*/        id + ":" +
+                /*SPEC NODE REVISION*/  revision.toString() + ":" +
+                /*TOPIC ID*/            csNode.getEntityId() + ":" +
+                /*TOPIC REVISION*/      (csNode.getEntityRevision() != null ? csNode.getEntityRevision() : EnversUtilities.getLatestRevision(entityManager, topic));
+
+        try {
+            final String retValue = addXSLToTopicXML(csNode, topic);
+            return respondWithETag(req, eTagValue, retValue);
+        } catch (final SAXException ex) {
+            throw new InternalServerErrorException("The topic has invalid XML");
+        }
     }
 
     @Override

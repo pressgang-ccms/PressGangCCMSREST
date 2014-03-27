@@ -11,10 +11,7 @@ import javax.persistence.criteria.CriteriaQuery;
 import javax.persistence.criteria.Root;
 import javax.transaction.Status;
 import javax.transaction.UserTransaction;
-import javax.ws.rs.core.Context;
-import javax.ws.rs.core.HttpHeaders;
-import javax.ws.rs.core.MediaType;
-import javax.ws.rs.core.MultivaluedMap;
+import javax.ws.rs.core.*;
 import java.io.IOException;
 import java.net.URI;
 import java.text.SimpleDateFormat;
@@ -205,7 +202,30 @@ public class BaseRESTv1 extends BaseREST {
     protected UserV1Factory userFactory;
     /* END ENTITY FACTORIES */
 
-    protected String addXSLToTopicXML(final String xml, final Boolean includeTitle, final CSNode node) throws SAXException {
+    protected Response respondWithETag(final Request req, final String etagValue, final Object responseEntity) {
+        //Create cache control header
+        final CacheControl cc = new CacheControl();
+        //Set max age to one year
+        cc.setMaxAge(31536000);
+
+        // Calculate the ETag on last modified date of user resource
+        final EntityTag etag = new EntityTag(etagValue);
+
+
+        // Verify if it matched with etag available in http request
+        final Response.ResponseBuilder rb = req.evaluatePreconditions(etag);
+
+        // If the supplied etag matches the etag we generated, return
+        // a unmodifed response.
+
+        if (rb != null) {
+            return rb.cacheControl(cc).tag(etag).build();
+        }
+
+        return Response.ok(responseEntity).cacheControl(cc).tag(etag).build();
+    }
+
+    protected String addXSLToTopicXML(final String xml, final Boolean includeTitle, final String conditions, final String entities) throws SAXException {
         /*
             Attempt to convert the XML, and throw an exception if there is an issue
          */
@@ -220,24 +240,10 @@ public class BaseRESTv1 extends BaseREST {
             }
         }
 
-        String entities = "";
-
-        if (node != null) {
-
-            final String condition = node.getInheritedCondition();
-            if (condition != null) {
-                DocBookUtilities.processConditions(condition, xmlDoc);
+        if (conditions != null) {
+            if (conditions != null) {
+                DocBookUtilities.processConditions(conditions, xmlDoc);
             }
-
-            final ContentSpec spec = node.getContentSpec();
-            for (final CSNode child : spec.getCSNodes()) {
-                if (child.getCSNodeType() == CommonConstants.CS_NODE_META_DATA &&
-                        child.getCSNodeTitle().equals(CommonConstants.CS_ENTITIES_TITLE)) {
-                    entities = child.getAdditionalText();
-                    break;
-                }
-            }
-
         }
 
         /*
@@ -252,10 +258,30 @@ public class BaseRESTv1 extends BaseREST {
         final StringBuilder retValue = new StringBuilder();
         retValue.append("<?xml-stylesheet type='text/xsl' href='/pressgang-ccms-static/publican-docbook/html-single.xsl'?>\n");
         retValue.append("<!DOCTYPE " + xmlDoc.getDocumentElement().getNodeName() + "[\n");
-        retValue.append(entities);
+        if (entities != null) {
+            retValue.append(entities);
+        }
         retValue.append("]>\n");
         retValue.append(fixedXML);
         return retValue.toString();
+    }
+
+    protected String addXSLToTopicXML(final CSNode node, final Topic topic) throws SAXException {
+        final ContentSpec spec = node.getContentSpec();
+        final String xml = topic.getTopicXML();
+        final String conditions = node.getInheritedCondition();
+        final boolean includeTitle = node.getCSNodeType() != CommonConstants.CS_NODE_INITIAL_CONTENT_TOPIC;
+        String entities = null;
+
+        for (final CSNode child : spec.getCSNodes()) {
+            if (child.getCSNodeType() == CommonConstants.CS_NODE_META_DATA &&
+                    child.getCSNodeTitle().equals(CommonConstants.CS_ENTITIES_TITLE)) {
+                entities = child.getAdditionalText();
+                break;
+            }
+        }
+
+        return addXSLToTopicXML(xml, includeTitle, conditions, entities);
     }
 
     /**
