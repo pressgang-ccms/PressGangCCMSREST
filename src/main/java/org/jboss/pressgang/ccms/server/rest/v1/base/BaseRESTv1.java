@@ -91,10 +91,7 @@ import org.jboss.pressgang.ccms.server.rest.v1.factory.UserV1Factory;
 import org.jboss.pressgang.ccms.server.rest.v1.factory.base.RESTEntityCollectionFactory;
 import org.jboss.pressgang.ccms.server.rest.v1.factory.base.RESTEntityFactory;
 import org.jboss.pressgang.ccms.server.rest.v1.utils.RESTv1Utilities;
-import org.jboss.pressgang.ccms.server.utils.EntityUtilities;
-import org.jboss.pressgang.ccms.server.utils.EnversUtilities;
-import org.jboss.pressgang.ccms.server.utils.ProviderUtilities;
-import org.jboss.pressgang.ccms.server.utils.TopicSourceURLTitleThread;
+import org.jboss.pressgang.ccms.server.utils.*;
 import org.jboss.pressgang.ccms.utils.common.DocBookUtilities;
 import org.jboss.pressgang.ccms.utils.common.XMLUtilities;
 import org.jboss.pressgang.ccms.utils.constants.CommonConstants;
@@ -225,11 +222,18 @@ public class BaseRESTv1 extends BaseREST {
         return Response.ok(responseEntity).cacheControl(cc).tag(etag).build();
     }
 
-    protected String addXSLToTopicXML(final String xml, final Boolean includeTitle, final String conditions, final String entities) throws SAXException {
+    protected String addXSLToTopicXML(final String xml, final Integer format, final Boolean includeTitle, final String conditions, final String entities) throws SAXException {
+
         /*
             Attempt to convert the XML, and throw an exception if there is an issue
          */
         final Document xmlDoc = XMLUtilities.convertStringToDocument(xml, true);
+
+        InjectionResolver.resolveInjections(format, xmlDoc, "javascript:void()");
+
+        /*
+            Remove the title if requested
+         */
         if (includeTitle != null && !includeTitle.booleanValue()) {
             for (int childIndex = 0; childIndex < xmlDoc.getDocumentElement().getChildNodes().getLength(); ++childIndex) {
                 final Node child = xmlDoc.getDocumentElement().getChildNodes().item(childIndex);
@@ -262,7 +266,21 @@ public class BaseRESTv1 extends BaseREST {
             retValue.append(entities);
         }
         retValue.append("]>\n");
-        retValue.append(fixedXML);
+
+        /*
+            Some topics ned to be wrapped to get them to render in the browser. See
+            BaseRenderedPresenter.java in the UI project.
+         */
+        final String documentElementNodeName = xmlDoc.getDocumentElement().getNodeName();
+        if (documentElementNodeName.equals("authorgroup") || documentElementNodeName.equals("legalnotice")) {
+            retValue.append("<book><bookinfo>\n");
+            retValue.append(fixedXML);
+            retValue.append("</bookinfo></book>");
+        } else {
+            retValue.append(fixedXML);
+        }
+
+
         return retValue.toString();
     }
 
@@ -281,7 +299,7 @@ public class BaseRESTv1 extends BaseREST {
             }
         }
 
-        return addXSLToTopicXML(xml, includeTitle, conditions, entities);
+        return addXSLToTopicXML(xml, topic.getXmlFormat(), includeTitle, conditions, entities);
     }
 
     /**
