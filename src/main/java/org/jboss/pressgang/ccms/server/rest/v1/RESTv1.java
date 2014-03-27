@@ -3495,7 +3495,7 @@ public class RESTv1 extends BaseRESTv1 implements RESTBaseInterfaceV1, RESTInter
                 /*TOPIC REVISION*/      (csNode.getEntityRevision() != null ? csNode.getEntityRevision() : EnversUtilities.getLatestRevision(entityManager, topic));
 
         try {
-            final String retValue = addXSLToTopicXML(csNode, topic);
+            final String retValue = addXSLToTopicXML(csNode, topic, baseUrl);
             return respondWithETag(req, eTagValue, retValue);
         } catch (final SAXException ex) {
             throw new InternalServerErrorException("The topic has invalid XML");
