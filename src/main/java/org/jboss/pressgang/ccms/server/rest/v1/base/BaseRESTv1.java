@@ -222,14 +222,14 @@ public class BaseRESTv1 extends BaseREST {
         return Response.ok(responseEntity).cacheControl(cc).tag(etag).build();
     }
 
-    protected String addXSLToTopicXML(final String xml, final Integer format, final Boolean includeTitle, final String conditions, final String entities) throws SAXException {
+    protected String addXSLToTopicXML(final String xml, final Integer format, final Boolean includeTitle, final String conditions, final String entities, final String baseUrl) throws SAXException {
 
         /*
             Attempt to convert the XML, and throw an exception if there is an issue
          */
         final Document xmlDoc = XMLUtilities.convertStringToDocument(xml, true);
 
-        InjectionResolver.resolveInjections(format, xmlDoc, "javascript:void()");
+        InjectionResolver.resolveInjections(format, xmlDoc, baseUrl == null ? "javascript:void()" : baseUrl);
 
         /*
             Remove the title if requested
@@ -284,7 +284,7 @@ public class BaseRESTv1 extends BaseREST {
         return retValue.toString();
     }
 
-    protected String addXSLToTopicXML(final CSNode node, final Topic topic) throws SAXException {
+    protected String addXSLToTopicXML(final CSNode node, final Topic topic, final String baseUrl) throws SAXException {
         final ContentSpec spec = node.getContentSpec();
         final String xml = topic.getTopicXML();
         final String conditions = node.getInheritedCondition();
@@ -299,7 +299,7 @@ public class BaseRESTv1 extends BaseREST {
             }
         }
 
-        return addXSLToTopicXML(xml, topic.getXmlFormat(), includeTitle, conditions, entities);
+        return addXSLToTopicXML(xml, topic.getXmlFormat(), includeTitle, conditions, entities, baseUrl);
     }
 
     /**

@@ -2262,7 +2262,8 @@ public class RESTv1 extends BaseRESTv1 implements RESTBaseInterfaceV1, RESTInter
             @PathParam("id") final Integer id,
             @QueryParam("includeTitle") final Boolean includeTitle,
             @QueryParam("condition") final String condition,
-            @QueryParam("entities") final String entities) {
+            @QueryParam("entities") final String entities,
+            @QueryParam("baseUrl") final String baseUrl) {
 
         final Topic topic = entityManager.find(Topic.class, id);
         if (topic == null) throw new NotFoundException("No topic was found with an ID of " + id);
@@ -2276,7 +2277,7 @@ public class RESTv1 extends BaseRESTv1 implements RESTBaseInterfaceV1, RESTInter
 
         final String xml = topic.getTopicXML();
         try {
-            final String retValue = addXSLToTopicXML(xml, topic.getXmlFormat(), includeTitle, condition, entities);
+            final String retValue = addXSLToTopicXML(xml, topic.getXmlFormat(), includeTitle, condition, entities, baseUrl);
             return respondWithETag(req, eTagValue, retValue);
         } catch (final SAXException ex) {
             throw new InternalServerErrorException("The topic has invalid XML");
@@ -2290,7 +2291,8 @@ public class RESTv1 extends BaseRESTv1 implements RESTBaseInterfaceV1, RESTInter
             @PathParam("rev") final Integer revision,
             @QueryParam("includeTitle") final Boolean includeTitle,
             @QueryParam("condition") final String condition,
-            @QueryParam("entities") final String entities) {
+            @QueryParam("entities") final String entities,
+            @QueryParam("baseUrl") final String baseUrl) {
 
         final Topic topic = getEntity(Topic.class, id, revision);
         if (topic == null) throw new NotFoundException("No topic was found with an ID of " + id);
@@ -2303,7 +2305,7 @@ public class RESTv1 extends BaseRESTv1 implements RESTBaseInterfaceV1, RESTInter
 
         final String xml = topic.getTopicXML();
         try {
-            final String retValue = addXSLToTopicXML(xml, topic.getXmlFormat(), includeTitle, condition, entities);
+            final String retValue = addXSLToTopicXML(xml, topic.getXmlFormat(), includeTitle, condition, entities, baseUrl);
             return respondWithETag(req, eTagValue, retValue);
         } catch (final SAXException ex) {
             throw new InternalServerErrorException("The topic has invalid XML");
@@ -3421,7 +3423,9 @@ public class RESTv1 extends BaseRESTv1 implements RESTBaseInterfaceV1, RESTInter
     }
 
     @Override
-    public Response getXMLWithXSLContentSpecNode(@Context final Request req, @PathParam("id") final Integer id) {
+    public Response getXMLWithXSLContentSpecNode(@Context final Request req,
+                                                 @PathParam("id") final Integer id,
+                                                 @QueryParam("baseUrl") final String baseUrl) {
         final CSNode csNode = entityManager.find(CSNode.class, id);
         if (csNode == null) {
             throw new NotFoundException("No CSNode was found with an ID of " + id);
@@ -3451,7 +3455,7 @@ public class RESTv1 extends BaseRESTv1 implements RESTBaseInterfaceV1, RESTInter
                 /*TOPIC REVISION*/      (csNode.getEntityRevision() != null ? csNode.getEntityRevision() : EnversUtilities.getLatestRevision(entityManager, topic));
 
         try {
-            final String retValue = addXSLToTopicXML(csNode, topic);
+            final String retValue = addXSLToTopicXML(csNode, topic, baseUrl);
             return respondWithETag(req, eTagValue, retValue);
         } catch (final SAXException ex) {
             throw new InternalServerErrorException("The topic has invalid XML");
@@ -3459,7 +3463,10 @@ public class RESTv1 extends BaseRESTv1 implements RESTBaseInterfaceV1, RESTInter
     }
 
     @Override
-    public Response getXMLWithXSLContentSpecNodeRevision(@Context final Request req, @PathParam("id") final Integer id, @PathParam("rev") final Integer revision) {
+    public Response getXMLWithXSLContentSpecNodeRevision(@Context final Request req,
+                                                         @PathParam("id") final Integer id,
+                                                         @PathParam("rev") final Integer revision,
+                                                         @QueryParam("baseUrl") final String baseUrl) {
         final CSNode csNode = EnversUtilities.getRevision(entityManager, CSNode.class, id, revision);
         if (csNode == null) {
             throw new NotFoundException("No CSNode was found with an ID of " + id);
