@@ -222,12 +222,21 @@ public class BaseRESTv1 extends BaseREST {
         return Response.ok(responseEntity).cacheControl(cc).tag(etag).build();
     }
 
-    protected String addXSLToTopicXML(final String xml, final Integer format, final Boolean includeTitle, final String conditions, final String entities, final String baseUrl) throws SAXException {
+    protected String addXSLToTopicXML(final String xml, final Integer format, final Boolean includeTitle, final String conditions, final String entities, final String baseUrl) {
+
+        if (xml == null || xml.trim().length() == 0) {
+            return "<section><note><para>This topic has no XML content, and is included here as a placeholder.</para><note></section>";
+        }
 
         /*
             Attempt to convert the XML, and throw an exception if there is an issue
          */
-        final Document xmlDoc = XMLUtilities.convertStringToDocument(xml, true);
+        Document xmlDoc = null;
+        try {
+            XMLUtilities.convertStringToDocument(xml, true);
+        } catch (final SAXException ex) {
+            return "<section><warning><para>This topic failed validation and is not included in this build.</para><warning></section>";
+        }
 
         InjectionResolver.resolveInjections(format, xmlDoc, baseUrl == null ? "/pressgang-ccms/rest/1/topic/get/xml/#TOPICID#/xslt+xml" : baseUrl);
 
@@ -284,7 +293,7 @@ public class BaseRESTv1 extends BaseREST {
         return retValue.toString();
     }
 
-    protected String addXSLToTopicXML(final CSNode node, final Topic topic, final String baseUrl) throws SAXException {
+    protected String addXSLToTopicXML(final CSNode node, final Topic topic, final String baseUrl) {
         final ContentSpec spec = node.getContentSpec();
         final String xml = topic.getTopicXML();
         final String conditions = node.getInheritedCondition();

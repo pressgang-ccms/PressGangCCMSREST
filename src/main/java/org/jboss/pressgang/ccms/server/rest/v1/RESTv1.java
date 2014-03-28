@@ -2277,12 +2277,9 @@ public class RESTv1 extends BaseRESTv1 implements RESTBaseInterfaceV1, RESTInter
                 (entities == null ? "".hashCode() : entities.hashCode());
 
         final String xml = topic.getTopicXML();
-        try {
-            final String retValue = addXSLToTopicXML(xml, topic.getXmlFormat(), includeTitle, condition, entities, baseUrl);
-            return respondWithETag(req, eTagValue, retValue);
-        } catch (final SAXException ex) {
-            throw new InternalServerErrorException("The topic has invalid XML");
-        }
+        final String retValue = addXSLToTopicXML(xml, topic.getXmlFormat(), includeTitle, condition, entities, baseUrl);
+        return respondWithETag(req, eTagValue, retValue);
+
     }
 
     @Override
@@ -2306,12 +2303,8 @@ public class RESTv1 extends BaseRESTv1 implements RESTBaseInterfaceV1, RESTInter
                 (entities == null ? "".hashCode() : entities.hashCode());
 
         final String xml = topic.getTopicXML();
-        try {
-            final String retValue = addXSLToTopicXML(xml, topic.getXmlFormat(), includeTitle, condition, entities, baseUrl);
-            return respondWithETag(req, eTagValue, retValue);
-        } catch (final SAXException ex) {
-            throw new InternalServerErrorException("The topic has invalid XML");
-        }
+        final String retValue = addXSLToTopicXML(xml, topic.getXmlFormat(), includeTitle, condition, entities, baseUrl);
+        return respondWithETag(req, eTagValue, retValue);
     }
 
     @Override
@@ -3457,12 +3450,8 @@ public class RESTv1 extends BaseRESTv1 implements RESTBaseInterfaceV1, RESTInter
                 /*TOPIC ID*/                csNode.getEntityId() + ":" +
                 /*TOPIC REVISION*/          (csNode.getEntityRevision() != null ? csNode.getEntityRevision() : EnversUtilities.getLatestRevision(entityManager, topic));
 
-        try {
-            final String retValue = addXSLToTopicXML(csNode, topic, baseUrl);
-            return respondWithETag(req, eTagValue, retValue);
-        } catch (final SAXException ex) {
-            throw new InternalServerErrorException("The topic has invalid XML");
-        }
+        final String retValue = addXSLToTopicXML(csNode, topic, baseUrl);
+        return respondWithETag(req, eTagValue, retValue);
     }
 
     @Override
@@ -3498,12 +3487,10 @@ public class RESTv1 extends BaseRESTv1 implements RESTBaseInterfaceV1, RESTInter
                 /*TOPIC ID*/                csNode.getEntityId() + ":" +
                 /*TOPIC REVISION*/          (csNode.getEntityRevision() != null ? csNode.getEntityRevision() : EnversUtilities.getLatestRevision(entityManager, topic));
 
-        try {
-            final String retValue = addXSLToTopicXML(csNode, topic, baseUrl);
-            return respondWithETag(req, eTagValue, retValue);
-        } catch (final SAXException ex) {
-            throw new InternalServerErrorException("The topic has invalid XML");
-        }
+
+        final String retValue = addXSLToTopicXML(csNode, topic, baseUrl);
+        return respondWithETag(req, eTagValue, retValue);
+
     }
 
     @Override
