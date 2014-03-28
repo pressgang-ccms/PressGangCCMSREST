@@ -229,7 +229,7 @@ public class BaseRESTv1 extends BaseREST {
          */
         final Document xmlDoc = XMLUtilities.convertStringToDocument(xml, true);
 
-        InjectionResolver.resolveInjections(format, xmlDoc, baseUrl == null ? "javascript:void()" : baseUrl);
+        InjectionResolver.resolveInjections(format, xmlDoc, baseUrl == null ? "/pressgang-ccms/rest/1/topic/get/xml/#TOPICID#/xslt+xml" : baseUrl);
 
         /*
             Remove the title if requested

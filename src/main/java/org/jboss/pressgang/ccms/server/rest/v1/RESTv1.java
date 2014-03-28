@@ -2273,6 +2273,7 @@ public class RESTv1 extends BaseRESTv1 implements RESTBaseInterfaceV1, RESTInter
                 EnversUtilities.getLatestRevision(entityManager, topic).toString() + ":" +
                 (includeTitle == null ? true : false) + ":" +
                 (condition == null ? "".hashCode() : condition.hashCode()) + ":" +
+                (baseUrl == null ? "".hashCode() : baseUrl.hashCode()) + ":" +
                 (entities == null ? "".hashCode() : entities.hashCode());
 
         final String xml = topic.getTopicXML();
@@ -2301,6 +2302,7 @@ public class RESTv1 extends BaseRESTv1 implements RESTBaseInterfaceV1, RESTInter
         final String eTagValue = revision.toString() + ":" +
                 (includeTitle == null ? true : false) + ":" +
                 (condition == null ? "".hashCode() : condition.hashCode()) + ":" +
+                (baseUrl == null ? "".hashCode() : baseUrl.hashCode()) + ":" +
                 (entities == null ? "".hashCode() : entities.hashCode());
 
         final String xml = topic.getTopicXML();
@@ -3448,11 +3450,12 @@ public class RESTv1 extends BaseRESTv1 implements RESTBaseInterfaceV1, RESTInter
             revision of the topic it points to. If any of these conditions change, the xml could potentially change.
         */
         final String eTagValue =
-                /*SPEC NODE ID*/        id + ":" +
-                /*SPEC NODE REVISION*/  EnversUtilities.getLatestRevision(entityManager, csNode).toString() + ":" +
-                /*SPEC REVISION*/       EnversUtilities.getLatestRevision(entityManager, csNode.getContentSpec()) + ":" +
-                /*TOPIC ID*/            csNode.getEntityId() + ":" +
-                /*TOPIC REVISION*/      (csNode.getEntityRevision() != null ? csNode.getEntityRevision() : EnversUtilities.getLatestRevision(entityManager, topic));
+                /*SPEC NODE ID*/            id + ":" +
+                /*SPEC NODE REVISION*/      EnversUtilities.getLatestRevision(entityManager, csNode).toString() + ":" +
+                /*SPEC REVISION*/           EnversUtilities.getLatestRevision(entityManager, csNode.getContentSpec()) + ":" +
+                /*BASE URL FOR INJECTS*/    (baseUrl == null ? "".hashCode() : baseUrl.hashCode()) + ":" +
+                /*TOPIC ID*/                csNode.getEntityId() + ":" +
+                /*TOPIC REVISION*/          (csNode.getEntityRevision() != null ? csNode.getEntityRevision() : EnversUtilities.getLatestRevision(entityManager, topic));
 
         try {
             final String retValue = addXSLToTopicXML(csNode, topic, baseUrl);
@@ -3489,10 +3492,11 @@ public class RESTv1 extends BaseRESTv1 implements RESTBaseInterfaceV1, RESTInter
             these conditions change, the xml could potentially change.
         */
         final String eTagValue =
-                /*SPEC NODE ID*/        id + ":" +
-                /*SPEC NODE REVISION*/  revision.toString() + ":" +
-                /*TOPIC ID*/            csNode.getEntityId() + ":" +
-                /*TOPIC REVISION*/      (csNode.getEntityRevision() != null ? csNode.getEntityRevision() : EnversUtilities.getLatestRevision(entityManager, topic));
+                /*SPEC NODE ID*/            id + ":" +
+                /*SPEC NODE REVISION*/      revision.toString() + ":" +
+                /*BASE URL FOR INJECTS*/    (baseUrl == null ? "".hashCode() : baseUrl.hashCode()) + ":" +
+                /*TOPIC ID*/                csNode.getEntityId() + ":" +
+                /*TOPIC REVISION*/          (csNode.getEntityRevision() != null ? csNode.getEntityRevision() : EnversUtilities.getLatestRevision(entityManager, topic));
 
         try {
             final String retValue = addXSLToTopicXML(csNode, topic, baseUrl);
