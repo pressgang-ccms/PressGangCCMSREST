@@ -2277,7 +2277,8 @@ public class RESTv1 extends BaseRESTv1 implements RESTBaseInterfaceV1, RESTInter
                 (entities == null ? "".hashCode() : entities.hashCode());
 
         final String xml = topic.getTopicXML();
-        final String retValue = addXSLToTopicXML(xml, topic.getXmlFormat(), includeTitle, condition, entities, baseUrl);
+        final String xmlErrors = topic.getTopicXMLErrors();
+        final String retValue = addXSLToTopicXML(xmlErrors, xml, topic.getXmlFormat(), includeTitle, condition, entities, baseUrl);
         return respondWithETag(req, eTagValue, retValue);
 
     }
@@ -2303,7 +2304,8 @@ public class RESTv1 extends BaseRESTv1 implements RESTBaseInterfaceV1, RESTInter
                 (entities == null ? "".hashCode() : entities.hashCode());
 
         final String xml = topic.getTopicXML();
-        final String retValue = addXSLToTopicXML(xml, topic.getXmlFormat(), includeTitle, condition, entities, baseUrl);
+        final String xmlErrors = topic.getTopicXMLErrors();
+        final String retValue = addXSLToTopicXML(xmlErrors, xml, topic.getXmlFormat(), includeTitle, condition, entities, baseUrl);
         return respondWithETag(req, eTagValue, retValue);
     }
 

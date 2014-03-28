@@ -222,10 +222,14 @@ public class BaseRESTv1 extends BaseREST {
         return Response.ok(responseEntity).cacheControl(cc).tag(etag).build();
     }
 
-    protected String addXSLToTopicXML(final String xml, final Integer format, final Boolean includeTitle, final String conditions, final String entities, final String baseUrl) {
+    protected String addXSLToTopicXML(final String xmlErrors, final String xml, final Integer format, final Boolean includeTitle, final String conditions, final String entities, final String baseUrl) {
 
         if (xml == null || xml.trim().length() == 0) {
             return "<?xml-stylesheet type='text/xsl' href='/pressgang-ccms-static/publican-docbook/html-single-diff.xsl'?><!DOCTYPE section []><section><note><para>This topic has no XML content, and is included here as a placeholder.</para></note></section>";
+        }
+
+        if (xmlErrors != null && xmlErrors.trim().length() != 0) {
+            return "<?xml-stylesheet type='text/xsl' href='/pressgang-ccms-static/publican-docbook/html-single-diff.xsl'?><!DOCTYPE section []><section><warning><para>This topic failed validation and is not included in this build.</para></warning></section>";
         }
 
         /*
@@ -296,6 +300,7 @@ public class BaseRESTv1 extends BaseREST {
     protected String addXSLToTopicXML(final CSNode node, final Topic topic, final String baseUrl) {
         final ContentSpec spec = node.getContentSpec();
         final String xml = topic.getTopicXML();
+        final String xmlErrors = topic.getTopicXMLErrors();
         final String conditions = node.getInheritedCondition();
         final boolean includeTitle = node.getCSNodeType() != CommonConstants.CS_NODE_INITIAL_CONTENT_TOPIC;
         String entities = null;
@@ -308,7 +313,7 @@ public class BaseRESTv1 extends BaseREST {
             }
         }
 
-        return addXSLToTopicXML(xml, topic.getXmlFormat(), includeTitle, conditions, entities, baseUrl);
+        return addXSLToTopicXML(xmlErrors, xml, topic.getXmlFormat(), includeTitle, conditions, entities, baseUrl);
     }
 
     /**
