@@ -260,7 +260,7 @@ public class BaseRESTv1 extends BaseREST {
         }
 
         final StringBuilder retValue = new StringBuilder();
-        retValue.append("<?xml-stylesheet type='text/xsl' href='/pressgang-ccms-static/publican-docbook/html-single.xsl'?>\n");
+        retValue.append("<?xml-stylesheet type='text/xsl' href='/pressgang-ccms-static/publican-docbook/html-single-diff.xsl'?>\n");
         retValue.append("<!DOCTYPE " + xmlDoc.getDocumentElement().getNodeName() + "[\n");
         if (entities != null) {
             retValue.append(entities);
