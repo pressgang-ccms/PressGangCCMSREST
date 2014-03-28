@@ -225,7 +225,7 @@ public class BaseRESTv1 extends BaseREST {
     protected String addXSLToTopicXML(final String xml, final Integer format, final Boolean includeTitle, final String conditions, final String entities, final String baseUrl) {
 
         if (xml == null || xml.trim().length() == 0) {
-            return "<?xml-stylesheet type='text/xsl' href='/pressgang-ccms-static/publican-docbook/html-single-diff.xsl'?><!DOCTYPE section []><section><note><para>This topic has no XML content, and is included here as a placeholder.</para><note></section>";
+            return "<?xml-stylesheet type='text/xsl' href='/pressgang-ccms-static/publican-docbook/html-single-diff.xsl'?><!DOCTYPE section []><section><note><para>This topic has no XML content, and is included here as a placeholder.</para></note></section>";
         }
 
         /*
@@ -233,9 +233,9 @@ public class BaseRESTv1 extends BaseREST {
          */
         Document xmlDoc = null;
         try {
-            XMLUtilities.convertStringToDocument(xml, true);
+            xmlDoc = XMLUtilities.convertStringToDocument(xml, true);
         } catch (final SAXException ex) {
-            return "<?xml-stylesheet type='text/xsl' href='/pressgang-ccms-static/publican-docbook/html-single-diff.xsl'?><!DOCTYPE section []><section><warning><para>This topic failed validation and is not included in this build.</para><warning></section>";
+            return "<?xml-stylesheet type='text/xsl' href='/pressgang-ccms-static/publican-docbook/html-single-diff.xsl'?><!DOCTYPE section []><section><warning><para>This topic failed validation and is not included in this build.</para></warning></section>";
         }
 
         InjectionResolver.resolveInjections(format, xmlDoc, baseUrl == null ? "/pressgang-ccms/rest/1/topic/get/xml/#TOPICID#/xslt+xml" : baseUrl);
