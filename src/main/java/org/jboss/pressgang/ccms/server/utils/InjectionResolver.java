@@ -8,6 +8,7 @@ import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import org.jboss.pressgang.ccms.model.Topic;
 import org.jboss.pressgang.ccms.rest.v1.constants.CommonFilterConstants;
 import org.jboss.pressgang.ccms.rest.v1.entities.enums.RESTXMLFormat;
 import org.jboss.pressgang.ccms.utils.common.StringUtilities;
@@ -17,6 +18,8 @@ import org.w3c.dom.Comment;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
+
+import javax.persistence.EntityManager;
 
 /**
  * For now this has been copied from the UI project. Responsibility for resolving injectiosn will probably be
@@ -98,7 +101,7 @@ public class InjectionResolver {
      *
      * @return The processed XML with the injections resolved.
      */
-    public static String resolveInjections(final Integer xmlFormat, final String xml, final String hostUrl) {
+    public static String resolveInjections(final EntityManager entityManager, final Integer xmlFormat, final String xml, final String hostUrl) {
         // Make sure we have something to process.
         if (StringUtilities.isStringNullOrEmpty(xml)) {
             return xml;
@@ -125,13 +128,13 @@ public class InjectionResolver {
                 // Generate the dummy injection elements based on the type
                 if (typeEntry.getValue() != null && typeEntry.getValue().size() > 0) {
                     if (listType == ORDEREDLIST_INJECTION_POINT) {
-                        replacement = createDummyOrderedList(xmlFormat, typeEntry.getValue(), hostUrl);
+                        replacement = createDummyOrderedList(entityManager, xmlFormat, typeEntry.getValue(), hostUrl);
                     } else if (listType == XREF_INJECTION_POINT) {
-                        replacement = createDummyXRef(xmlFormat, typeEntry.getValue().get(0), hostUrl);
+                        replacement = createDummyXRef(entityManager, xmlFormat, typeEntry.getValue().get(0), hostUrl);
                     } else if (listType == ITEMIZEDLIST_INJECTION_POINT) {
-                        replacement = createDummyItemizedList(xmlFormat, typeEntry.getValue(), hostUrl);
+                        replacement = createDummyItemizedList(entityManager, xmlFormat, typeEntry.getValue(), hostUrl);
                     } else if (listType == LIST_INJECTION_POINT) {
-                        replacement = createDummyListItems(xmlFormat, typeEntry.getValue(), hostUrl);
+                        replacement = createDummyListItems(entityManager, xmlFormat, typeEntry.getValue(), hostUrl);
                     }
                 }
 
@@ -150,7 +153,7 @@ public class InjectionResolver {
      *
      * @param doc The document to be processed.
      */
-    public static void resolveInjections(final Integer xmlFormat, final Document doc, final String hostUrl) {
+    public static void resolveInjections(final EntityManager entityManager, final Integer xmlFormat, final Document doc, final String hostUrl) {
         // Make sure we have something to process.
         if (doc == null) {
             return;
@@ -184,13 +187,13 @@ public class InjectionResolver {
                 // Generate the dummy injection elements based on the type
                 if (typeEntry.getValue() != null && typeEntry.getValue().size() > 0) {
                     if (listType == ORDEREDLIST_INJECTION_POINT) {
-                        list = Arrays.asList(createDummyOrderedList(xmlFormat, doc, typeEntry.getValue(), hostUrl));
+                        list = Arrays.asList(createDummyOrderedList(entityManager, xmlFormat, doc, typeEntry.getValue(), hostUrl));
                     } else if (listType == XREF_INJECTION_POINT) {
-                        list = createDummyXRef(xmlFormat, doc, typeEntry.getValue().get(0), hostUrl);
+                        list = createDummyXRef(entityManager, xmlFormat, doc, typeEntry.getValue().get(0), hostUrl);
                     } else if (listType == ITEMIZEDLIST_INJECTION_POINT) {
-                        list = Arrays.asList(createDummyItemizedList(xmlFormat, doc, typeEntry.getValue(), hostUrl));
+                        list = Arrays.asList(createDummyItemizedList(entityManager, xmlFormat, doc, typeEntry.getValue(), hostUrl));
                     } else if (listType == LIST_INJECTION_POINT) {
-                        list = createDummyListItems(xmlFormat, doc, typeEntry.getValue(), hostUrl);
+                        list = createDummyListItems(entityManager, xmlFormat, doc, typeEntry.getValue(), hostUrl);
                     }
                 }
 
@@ -246,7 +249,7 @@ public class InjectionResolver {
      * @param hostUrl        The host url of the application, so an editor link can be constructed.
      * @return A List of Elements that make up the injected dummy link.
      */
-    protected static String createDummyXRef(final Integer xmlFormat, final InjectionData injectionData, final String hostUrl) {
+    protected static String createDummyXRef(final EntityManager entityManager, final Integer xmlFormat, final InjectionData injectionData, final String hostUrl) {
 
         final StringBuilder retValue = new StringBuilder();
         if (injectionData.optional) {
@@ -258,7 +261,8 @@ public class InjectionResolver {
         final String url, title;
         if (injectionData.id.matches("^\\d+$")) {
             url = hostUrl.replace(HOST_URL_ID_TOKEN, injectionData.id);
-            title = "Topic " + injectionData.id;
+            final Topic destinationTopic = entityManager.find(Topic.class, Integer.parseInt(injectionData.id));
+            title = destinationTopic.getTopicTitle();
         } else {
             // TODO need to work out a way to link to a target
             url = hostUrl + "#";
@@ -291,11 +295,11 @@ public class InjectionResolver {
      * @param hostUrl        The host url of the application, so an editor link can be constructed for each topic.
      * @return The dummy itemized list representation.
      */
-    protected static String createDummyItemizedList(final Integer xmlFormat, final List<InjectionData> injectionDatas,
+    protected static String createDummyItemizedList(final EntityManager entityManager, final Integer xmlFormat, final List<InjectionData> injectionDatas,
                                                     final String hostUrl) {
         final StringBuilder retValue = new StringBuilder("<para><itemizedlist>");
 
-        retValue.append(createDummyListItems(xmlFormat, injectionDatas, hostUrl));
+        retValue.append(createDummyListItems(entityManager, xmlFormat, injectionDatas, hostUrl));
 
         retValue.append("</itemizedlist></para>");
         return retValue.toString();
@@ -309,23 +313,23 @@ public class InjectionResolver {
      * @param hostUrl        The host url of the application, so an editor link can be constructed for each topic.
      * @return The dummy ordered list representation.
      */
-    protected static String createDummyOrderedList(final Integer xmlFormat, final List<InjectionData> injectionDatas,
+    protected static String createDummyOrderedList(final EntityManager entityManager, final Integer xmlFormat, final List<InjectionData> injectionDatas,
                                                    final String hostUrl) {
         final StringBuilder retValue = new StringBuilder("<para><orderedlist>");
 
-        retValue.append(createDummyListItems(xmlFormat, injectionDatas, hostUrl));
+        retValue.append(createDummyListItems(entityManager, xmlFormat, injectionDatas, hostUrl));
 
         retValue.append("</orderedlist></para>");
         return retValue.toString();
     }
 
-    protected static String createDummyListItems(final Integer xmlFormat, final List<InjectionData> injectionDatas,
+    protected static String createDummyListItems(final EntityManager entityManager, final Integer xmlFormat, final List<InjectionData> injectionDatas,
                                                  final String hostUrl) {
         final StringBuilder retValue = new StringBuilder();
 
         for (final InjectionData topicData : injectionDatas) {
             retValue.append("<listitem><para>");
-            retValue.append(createDummyXRef(xmlFormat, topicData, hostUrl));
+            retValue.append(createDummyXRef(entityManager, xmlFormat, topicData, hostUrl));
             retValue.append("</para></listitem>");
         }
 
@@ -380,7 +384,7 @@ public class InjectionResolver {
      * @param hostUrl        The host url of the application, so an editor link can be constructed.
      * @return A List of Elements that make up the injected dummy link.
      */
-    protected static List<Element> createDummyXRef(final Integer xmlFormat, final Document doc,
+    protected static List<Element> createDummyXRef(final EntityManager entityManager, final Integer xmlFormat, final Document doc,
                                                    final InjectionData injectionData,
                                                    final String hostUrl) {
         final List<Element> retValue = new ArrayList<Element>();
@@ -394,7 +398,8 @@ public class InjectionResolver {
         final String url, title;
         if (injectionData.id.matches("^\\d+$")) {
             url = hostUrl.replace(HOST_URL_ID_TOKEN, injectionData.id);
-            title = "Topic " + injectionData.id;
+            final Topic destinationTopic = entityManager.find(Topic.class, Integer.parseInt(injectionData.id));
+            title = destinationTopic.getTopicTitle();
         } else {
             // TODO need to work out a way to link to a target
             url = hostUrl + "#";
@@ -425,14 +430,14 @@ public class InjectionResolver {
      * @param hostUrl        The host url of the application, so an editor link can be constructed for each topic.
      * @return The dummy itemized list representation.
      */
-    protected static Element createDummyItemizedList(final Integer xmlFormat, final Document doc,
+    protected static Element createDummyItemizedList(final EntityManager entityManager, final Integer xmlFormat, final Document doc,
                                                      final List<InjectionData> injectionDatas, final String hostUrl) {
         final Element para = doc.createElement("para");
 
         final Element itemizedList = doc.createElement("itemizedlist");
         para.appendChild(itemizedList);
 
-        final List<Element> listItems = createDummyListItems(xmlFormat, doc, injectionDatas, hostUrl);
+        final List<Element> listItems = createDummyListItems(entityManager, xmlFormat, doc, injectionDatas, hostUrl);
         for (final Element listItem : listItems) {
             itemizedList.appendChild(listItem);
         }
@@ -449,14 +454,14 @@ public class InjectionResolver {
      * @param hostUrl        The host url of the application, so an editor link can be constructed for each topic.
      * @return The dummy ordered list representation.
      */
-    protected static Element createDummyOrderedList(final Integer xmlFormat, final Document doc,
+    protected static Element createDummyOrderedList(final EntityManager entityManager, final Integer xmlFormat, final Document doc,
                                                     final List<InjectionData> injectionDatas, final String hostUrl) {
         final Element para = doc.createElement("para");
 
         final Element orderedList = doc.createElement("orderedlist");
         para.appendChild(orderedList);
 
-        final List<Element> listItems = createDummyListItems(xmlFormat, doc, injectionDatas, hostUrl);
+        final List<Element> listItems = createDummyListItems(entityManager, xmlFormat, doc, injectionDatas, hostUrl);
         for (final Element listItem : listItems) {
             orderedList.appendChild(listItem);
         }
@@ -465,7 +470,7 @@ public class InjectionResolver {
     }
 
 
-    protected static List<Element> createDummyListItems(final Integer xmlFormat, final Document doc,
+    protected static List<Element> createDummyListItems(final EntityManager entityManager, final Integer xmlFormat, final Document doc,
                                                         final List<InjectionData> injectionDatas, final String hostUrl) {
         final List<Element> retValue = new ArrayList<Element>();
 
@@ -476,7 +481,7 @@ public class InjectionResolver {
             final Element listItemPara = doc.createElement("para");
             listitem.appendChild(listItemPara);
 
-            final List<Element> elements = createDummyXRef(xmlFormat, doc, topicData, hostUrl);
+            final List<Element> elements = createDummyXRef(entityManager, xmlFormat, doc, topicData, hostUrl);
             for (final Element ele : elements) {
                 listItemPara.appendChild(ele);
             }

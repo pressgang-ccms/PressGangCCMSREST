@@ -222,14 +222,28 @@ public class BaseRESTv1 extends BaseREST {
         return Response.ok(responseEntity).cacheControl(cc).tag(etag).build();
     }
 
-    protected String addXSLToTopicXML(final String xmlErrors, final String xml, final Integer format, final Boolean includeTitle, final String conditions, final String entities, final String baseUrl) {
+    protected String addXSLToTopicXML(final String xmlErrors, final String xml, final String title, final Integer format, final Boolean includeTitle, final String conditions, final String entities, final String baseUrl) {
 
         if (xml == null || xml.trim().length() == 0) {
-            return "<?xml-stylesheet type='text/xsl' href='/pressgang-ccms-static/publican-docbook/html-single-diff.xsl'?><!DOCTYPE section []><section><note><para>This topic has no XML content, and is included here as a placeholder.</para></note></section>";
+            return "<?xml-stylesheet type='text/xsl' href='/pressgang-ccms-static/publican-docbook/html-single-diff.xsl'?>\n" +
+                    "<!DOCTYPE section []>\n" +
+                    "<section>\n" +
+                    "<title>" + title + "</title>" +
+                    "<note>\n" +
+                    "<para>This topic has no XML content, and is included here as a placeholder.</para>\n" +
+                    "</note>" +
+                    "</section>";
         }
 
         if (xmlErrors != null && xmlErrors.trim().length() != 0) {
-            return "<?xml-stylesheet type='text/xsl' href='/pressgang-ccms-static/publican-docbook/html-single-diff.xsl'?><!DOCTYPE section []><section><warning><para>This topic failed validation and is not included in this build.</para></warning></section>";
+            return "<?xml-stylesheet type='text/xsl' href='/pressgang-ccms-static/publican-docbook/html-single-diff.xsl'?>\n" +
+                    "<!DOCTYPE section []>\n" +
+                    "<section>\n" +
+                    "<title>" + title + "</title>" +
+                    "<warning>\n" +
+                    "<para>This topic failed validation and is not included in this build.</para>\n" +
+                    "</warning>" +
+                    "</section>";
         }
 
         /*
@@ -239,10 +253,17 @@ public class BaseRESTv1 extends BaseREST {
         try {
             xmlDoc = XMLUtilities.convertStringToDocument(xml, true);
         } catch (final SAXException ex) {
-            return "<?xml-stylesheet type='text/xsl' href='/pressgang-ccms-static/publican-docbook/html-single-diff.xsl'?><!DOCTYPE section []><section><warning><para>This topic failed validation and is not included in this build.</para></warning></section>";
+            return "<?xml-stylesheet type='text/xsl' href='/pressgang-ccms-static/publican-docbook/html-single-diff.xsl'?>\n" +
+                    "<!DOCTYPE section []>\n" +
+                    "<section>\n" +
+                    "<title>" + title + "</title>" +
+                    "<warning>\n" +
+                    "<para>This topic failed validation and is not included in this build.</para>\n" +
+                    "</warning>" +
+                    "</section>";
         }
 
-        InjectionResolver.resolveInjections(format, xmlDoc, baseUrl == null ? "/pressgang-ccms/rest/1/topic/get/xml/#TOPICID#/xslt+xml" : baseUrl);
+        InjectionResolver.resolveInjections(entityManager, format, xmlDoc, baseUrl == null ? "/pressgang-ccms/rest/1/topic/get/xml/#TOPICID#/xslt+xml" : baseUrl);
 
         /*
             Remove the title if requested
@@ -300,6 +321,7 @@ public class BaseRESTv1 extends BaseREST {
     protected String addXSLToTopicXML(final CSNode node, final Topic topic, final String baseUrl) {
         final ContentSpec spec = node.getContentSpec();
         final String xml = topic.getTopicXML();
+        final String title = topic.getTopicTitle();
         final String xmlErrors = topic.getTopicXMLErrors();
         final String conditions = node.getInheritedCondition();
         final boolean includeTitle = node.getCSNodeType() != CommonConstants.CS_NODE_INITIAL_CONTENT_TOPIC;
@@ -313,7 +335,7 @@ public class BaseRESTv1 extends BaseREST {
             }
         }
 
-        return addXSLToTopicXML(xmlErrors, xml, topic.getXmlFormat(), includeTitle, conditions, entities, baseUrl);
+        return addXSLToTopicXML(xmlErrors, xml, title, topic.getXmlFormat(), includeTitle, conditions, entities, baseUrl);
     }
 
     /**
