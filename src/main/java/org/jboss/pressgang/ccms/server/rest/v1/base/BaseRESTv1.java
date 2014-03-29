@@ -246,7 +246,7 @@ public class BaseRESTv1 extends BaseREST {
         }
 
         if (xmlErrors != null && xmlErrors.trim().length() != 0) {
-            return invalidXmlPlaceholder
+            return invalidXmlPlaceholder;
         }
 
         /*
