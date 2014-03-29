@@ -104,6 +104,7 @@ import org.jboss.resteasy.spi.InternalServerErrorException;
 import org.jboss.resteasy.spi.NotFoundException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.w3c.dom.DOMException;
 import org.w3c.dom.Document;
 import org.w3c.dom.Node;
 import org.xml.sax.SAXException;
@@ -224,6 +225,15 @@ public class BaseRESTv1 extends BaseREST {
 
     protected String addXSLToTopicXML(final String xmlErrors, final String xml, final String title, final Integer format, final Boolean includeTitle, final String conditions, final String entities, final String baseUrl) {
 
+        final String invalidXmlPlaceholder = "<?xml-stylesheet type='text/xsl' href='/pressgang-ccms-static/publican-docbook/html-single-diff.xsl'?>\n" +
+                "<!DOCTYPE section []>\n" +
+                "<section>\n" +
+                "<title>" + title + "</title>" +
+                "<warning>\n" +
+                "<para>This topic failed validation and is not included in this build.</para>\n" +
+                "</warning>" +
+                "</section>";
+
         if (xml == null || xml.trim().length() == 0) {
             return "<?xml-stylesheet type='text/xsl' href='/pressgang-ccms-static/publican-docbook/html-single-diff.xsl'?>\n" +
                     "<!DOCTYPE section []>\n" +
@@ -236,14 +246,7 @@ public class BaseRESTv1 extends BaseREST {
         }
 
         if (xmlErrors != null && xmlErrors.trim().length() != 0) {
-            return "<?xml-stylesheet type='text/xsl' href='/pressgang-ccms-static/publican-docbook/html-single-diff.xsl'?>\n" +
-                    "<!DOCTYPE section []>\n" +
-                    "<section>\n" +
-                    "<title>" + title + "</title>" +
-                    "<warning>\n" +
-                    "<para>This topic failed validation and is not included in this build.</para>\n" +
-                    "</warning>" +
-                    "</section>";
+            return invalidXmlPlaceholder
         }
 
         /*
@@ -253,14 +256,9 @@ public class BaseRESTv1 extends BaseREST {
         try {
             xmlDoc = XMLUtilities.convertStringToDocument(xml, true);
         } catch (final SAXException ex) {
-            return "<?xml-stylesheet type='text/xsl' href='/pressgang-ccms-static/publican-docbook/html-single-diff.xsl'?>\n" +
-                    "<!DOCTYPE section []>\n" +
-                    "<section>\n" +
-                    "<title>" + title + "</title>" +
-                    "<warning>\n" +
-                    "<para>This topic failed validation and is not included in this build.</para>\n" +
-                    "</warning>" +
-                    "</section>";
+            return invalidXmlPlaceholder;
+        } catch (final DOMException ex) {
+            return invalidXmlPlaceholder;
         }
 
         InjectionResolver.resolveInjections(entityManager, format, xmlDoc, baseUrl == null ? "/pressgang-ccms/rest/1/topic/get/xml/#TOPICID#/xslt+xml" : baseUrl);
