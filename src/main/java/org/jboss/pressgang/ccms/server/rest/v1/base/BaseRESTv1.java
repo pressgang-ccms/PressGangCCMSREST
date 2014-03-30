@@ -140,6 +140,8 @@ public class BaseRESTv1 extends BaseREST {
     protected UserTransaction transaction;
     @Context
     protected HttpResponse response;
+    @Context
+    protected Request request;
     /**
      * The EntityManager to use for this request
      */
@@ -219,13 +221,11 @@ public class BaseRESTv1 extends BaseREST {
         // Calculate the ETag on last modified date of user resource
         final EntityTag etag = new EntityTag(etagValue);
 
-
         // Verify if it matched with etag available in http request
         final Response.ResponseBuilder rb = req.evaluatePreconditions(etag);
 
         // If the supplied etag matches the etag we generated, return
         // a unmodifed response.
-
         if (rb != null) {
             return rb.cacheControl(cc).tag(etag).build();
         }
@@ -271,7 +271,8 @@ public class BaseRESTv1 extends BaseREST {
             return invalidXmlPlaceholder;
         }
 
-        InjectionResolver.resolveInjections(entityManager, format, xmlDoc, baseUrl == null ? "/pressgang-ccms/rest/1/topic/get/xml/#TOPICID#/xslt+xml" : baseUrl);
+        InjectionResolver.resolveInjections(entityManager, format, xmlDoc,
+                baseUrl == null ? "/pressgang-ccms/rest/1/topic/get/xml/" + InjectionResolver.HOST_URL_ID_TOKEN + "/xslt+xml" : baseUrl);
 
         /*
             Remove the title if requested
@@ -287,9 +288,7 @@ public class BaseRESTv1 extends BaseREST {
         }
 
         if (conditions != null) {
-            if (conditions != null) {
-                DocBookUtilities.processConditions(conditions, xmlDoc);
-            }
+            DocBookUtilities.processConditions(conditions, xmlDoc);
         }
 
         /*

@@ -10,8 +10,17 @@ import javax.persistence.criteria.CriteriaBuilder;
 import javax.persistence.criteria.CriteriaQuery;
 import javax.persistence.criteria.Root;
 import javax.transaction.UserTransaction;
-import javax.ws.rs.*;
-import javax.ws.rs.core.*;
+import javax.ws.rs.GET;
+import javax.ws.rs.Path;
+import javax.ws.rs.PathParam;
+import javax.ws.rs.Produces;
+import javax.ws.rs.QueryParam;
+import javax.ws.rs.core.Context;
+import javax.ws.rs.core.MediaType;
+import javax.ws.rs.core.MultivaluedMap;
+import javax.ws.rs.core.PathSegment;
+import javax.ws.rs.core.Request;
+import javax.ws.rs.core.Response;
 import java.awt.geom.Rectangle2D;
 import java.io.IOException;
 import java.io.StringWriter;
@@ -188,7 +197,6 @@ import org.jboss.resteasy.plugins.providers.atom.Feed;
 import org.jboss.resteasy.specimpl.PathSegmentImpl;
 import org.jboss.resteasy.spi.BadRequestException;
 import org.jboss.resteasy.spi.InternalServerErrorException;
-import org.jboss.resteasy.spi.NotAcceptableException;
 import org.jboss.resteasy.spi.NotFoundException;
 import org.jboss.resteasy.util.Base64;
 import org.jfree.chart.ChartFactory;
@@ -202,7 +210,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.w3c.dom.DOMImplementation;
 import org.w3c.dom.Document;
-import org.w3c.dom.Node;
 import org.xml.sax.SAXException;
 import org.zanata.common.LocaleId;
 
@@ -2257,61 +2264,6 @@ public class RESTv1 extends BaseRESTv1 implements RESTBaseInterfaceV1, RESTInter
     }
 
     @Override
-    public Response getJSONTopicXMLWithXSL(
-            @Context final Request req,
-            @PathParam("id") final Integer id,
-            @QueryParam("includeTitle") final Boolean includeTitle,
-            @QueryParam("condition") final String condition,
-            @QueryParam("entities") final String entities,
-            @QueryParam("baseUrl") final String baseUrl) {
-
-        final Topic topic = entityManager.find(Topic.class, id);
-        if (topic == null) throw new NotFoundException("No topic was found with an ID of " + id);
-
-        // Calculate the ETag on last modified date of user resource
-        final String eTagValue = id + ":" +
-                EnversUtilities.getLatestRevision(entityManager, topic).toString() + ":" +
-                (includeTitle == null ? true : false) + ":" +
-                (condition == null ? "".hashCode() : condition.hashCode()) + ":" +
-                (baseUrl == null ? "".hashCode() : baseUrl.hashCode()) + ":" +
-                (entities == null ? "".hashCode() : entities.hashCode());
-
-        final String xml = topic.getTopicXML();
-        final String title = topic.getTopicTitle();
-        final String xmlErrors = topic.getTopicXMLErrors();
-        final String retValue = addXSLToTopicXML(xmlErrors, xml, title, topic.getXmlFormat(), includeTitle, condition, entities, baseUrl);
-        return respondWithETag(true, req, eTagValue, retValue);
-
-    }
-
-    @Override
-    public Response getJSONTopicRevisionXMLWithXSL(
-            @Context final Request req,
-            @PathParam("id") final Integer id,
-            @PathParam("rev") final Integer revision,
-            @QueryParam("includeTitle") final Boolean includeTitle,
-            @QueryParam("condition") final String condition,
-            @QueryParam("entities") final String entities,
-            @QueryParam("baseUrl") final String baseUrl) {
-
-        final Topic topic = getEntity(Topic.class, id, revision);
-        if (topic == null) throw new NotFoundException("No topic was found with an ID of " + id);
-
-        // Calculate the ETag on last modified date of user resource
-        final String eTagValue = revision.toString() + ":" +
-                (includeTitle == null ? true : false) + ":" +
-                (condition == null ? "".hashCode() : condition.hashCode()) + ":" +
-                (baseUrl == null ? "".hashCode() : baseUrl.hashCode()) + ":" +
-                (entities == null ? "".hashCode() : entities.hashCode());
-
-        final String xml = topic.getTopicXML();
-        final String title = topic.getTopicTitle();
-        final String xmlErrors = topic.getTopicXMLErrors();
-        final String retValue = addXSLToTopicXML(xmlErrors, xml, title, topic.getXmlFormat(), includeTitle, condition, entities, baseUrl);
-        return respondWithETag(false, req, eTagValue, retValue);
-    }
-
-    @Override
     public String getJSONPTopics(final String expand, final String callback) {
         if (callback == null) throw new BadRequestException("The callback parameter can not be null");
 
@@ -2741,6 +2693,32 @@ public class RESTv1 extends BaseRESTv1 implements RESTBaseInterfaceV1, RESTInter
         final String retValue = ComponentTopicV1.returnXMLWithNoContainer(getXMLResource(Topic.class, topicFactory, id, null),
                 includeTitle);
         return retValue;
+    }
+
+    @Override
+    public Response getXMLTopicXMLWithXSL(final Integer id, final Boolean includeTitle, final String condition, final String entities,
+            final String baseUrl) {
+        return getXMLTopicRevisionXMLWithXSL(id, null, includeTitle, condition, entities, baseUrl);
+    }
+
+    @Override
+    public Response getXMLTopicRevisionXMLWithXSL(final Integer id, final Integer revision, final Boolean includeTitle,
+            final String condition, final String entities, final String baseUrl) {
+        final Topic topic = getEntity(Topic.class, id, revision);
+
+        // Calculate the ETag on last modified date of user resource
+        final String eTagValue = id + ":" +
+                (revision != null ? revision.toString() : EnversUtilities.getLatestRevision(entityManager, topic).toString()) + ":" +
+                (includeTitle == null ? true : false) + ":" +
+                (condition == null ? "".hashCode() : condition.hashCode()) + ":" +
+                (baseUrl == null ? "".hashCode() : baseUrl.hashCode()) + ":" +
+                (entities == null ? "".hashCode() : entities.hashCode());
+
+        final String xml = topic.getTopicXML();
+        final String title = topic.getTopicTitle();
+        final String xmlErrors = topic.getTopicXMLErrors();
+        final String retValue = addXSLToTopicXML(xmlErrors, xml, title, topic.getXmlFormat(), includeTitle, condition, entities, baseUrl);
+        return respondWithETag(revision == null, request, eTagValue, retValue);
     }
 
     // CSV TOPIC FUNCTIONS
@@ -3422,63 +3400,22 @@ public class RESTv1 extends BaseRESTv1 implements RESTBaseInterfaceV1, RESTInter
     }
 
     @Override
-    public Response getXMLWithXSLContentSpecNode(@Context final Request req,
-                                                 @PathParam("id") final Integer id,
-                                                 @QueryParam("baseUrl") final String baseUrl) {
-        final CSNode csNode = entityManager.find(CSNode.class, id);
-        if (csNode == null) {
-            throw new NotFoundException("No CSNode was found with an ID of " + id);
-        }
-        if (!(csNode.getCSNodeType() == CommonConstants.CS_NODE_TOPIC || csNode.getCSNodeType() == CommonConstants.CS_NODE_INITIAL_CONTENT_TOPIC)) {
-            throw new NotFoundException("The CSNode with the id of " + id + " does not hold a reference to a topic.");
-        }
-        /* get the topic */
-        Topic topic = null;
-        if (csNode.getEntityRevision() != null) {
-            topic = EnversUtilities.getRevision(entityManager, Topic.class, csNode.getEntityId(), csNode.getEntityRevision());
-            if (topic == null) throw new NotFoundException("No Topic was found with an ID of " + id + " and a revision of " + csNode.getEntityRevision());
-        } else {
-            topic = entityManager.find(Topic.class, csNode.getEntityId());
-            if (topic == null) throw new NotFoundException("No Topic was found with an ID of " + id);
-        }
-
-        /*
-            Etag depends on the id and revision of the csnode, the revision of the spec it is included in, and the
-            revision of the topic it points to. If any of these conditions change, the xml could potentially change.
-        */
-        final String eTagValue =
-                /*SPEC NODE ID*/            id + ":" +
-                /*SPEC NODE REVISION*/      EnversUtilities.getLatestRevision(entityManager, csNode).toString() + ":" +
-                /*SPEC REVISION*/           EnversUtilities.getLatestRevision(entityManager, csNode.getContentSpec()) + ":" +
-                /*BASE URL FOR INJECTS*/    (baseUrl == null ? "".hashCode() : baseUrl.hashCode()) + ":" +
-                /*TOPIC ID*/                csNode.getEntityId() + ":" +
-                /*TOPIC REVISION*/          (csNode.getEntityRevision() != null ? csNode.getEntityRevision() : EnversUtilities.getLatestRevision(entityManager, topic));
-
-        final String retValue = addXSLToTopicXML(csNode, topic, baseUrl);
-        return respondWithETag(true, req, eTagValue, retValue);
+    public Response getXMLWithXSLContentSpecNode(final Integer id, final String baseUrl) {
+        return getXMLWithXSLContentSpecNodeRevision(id, null, baseUrl);
     }
 
     @Override
-    public Response getXMLWithXSLContentSpecNodeRevision(@Context final Request req,
-                                                         @PathParam("id") final Integer id,
-                                                         @PathParam("rev") final Integer revision,
-                                                         @QueryParam("baseUrl") final String baseUrl) {
-        final CSNode csNode = EnversUtilities.getRevision(entityManager, CSNode.class, id, revision);
-        if (csNode == null) {
-            throw new NotFoundException("No CSNode was found with an ID of " + id);
-        }
-        if (!(csNode.getCSNodeType() == CommonConstants.CS_NODE_TOPIC || csNode.getCSNodeType() == CommonConstants.CS_NODE_INITIAL_CONTENT_TOPIC)) {
+    public Response getXMLWithXSLContentSpecNodeRevision(final Integer id, final Integer revision, final String baseUrl) {
+        final CSNode csNode = getEntity(CSNode.class, id, revision);
+        if (!csNode.isTopicNode()) {
             throw new NotFoundException("The CSNode with the id of " + id + " does not hold a reference to a topic.");
         }
-        /* get the topic */
-        Topic topic = null;
-        if (csNode.getEntityRevision() != null) {
-            topic = EnversUtilities.getRevision(entityManager, Topic.class, csNode.getEntityId(), csNode.getEntityRevision());
-            if (topic == null) throw new NotFoundException("No Topic was found with an ID of " + id + " and a revision of " + csNode.getEntityRevision());
-        } else {
-            topic = entityManager.find(Topic.class, csNode.getEntityId());
-            if (topic == null) throw new NotFoundException("No Topic was found with an ID of " + id);
-        }
+        // Get the topic
+        final Topic topic = csNode.getTopic(entityManager);
+        // The topic shouldn't be null but just double check
+        if (topic == null)
+            throw new NotFoundException("No Topic was found with an ID of " + id +
+                    (csNode.getEntityRevision() != null ? " and a revision" + " of " + csNode.getEntityRevision() : ""));
 
         /*
             Etag depends on the id and revision of the csnode and the revision of the topic it points to. If any of
@@ -3486,15 +3423,13 @@ public class RESTv1 extends BaseRESTv1 implements RESTBaseInterfaceV1, RESTInter
         */
         final String eTagValue =
                 /*SPEC NODE ID*/            id + ":" +
-                /*SPEC NODE REVISION*/      revision.toString() + ":" +
+                /*SPEC NODE REVISION*/      (revision != null ? revision.toString(): EnversUtilities.getLatestRevision(entityManager, csNode)) + ":" +
                 /*BASE URL FOR INJECTS*/    (baseUrl == null ? "".hashCode() : baseUrl.hashCode()) + ":" +
                 /*TOPIC ID*/                csNode.getEntityId() + ":" +
                 /*TOPIC REVISION*/          (csNode.getEntityRevision() != null ? csNode.getEntityRevision() : EnversUtilities.getLatestRevision(entityManager, topic));
 
-
         final String retValue = addXSLToTopicXML(csNode, topic, baseUrl);
-        return respondWithETag(false, req, eTagValue, retValue);
-
+        return respondWithETag(revision == null, request, eTagValue, retValue);
     }
 
     @Override

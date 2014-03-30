@@ -1,5 +1,8 @@
 package org.jboss.pressgang.ccms.server.utils;
 
+import static com.google.common.base.Strings.isNullOrEmpty;
+
+import javax.persistence.EntityManager;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
@@ -9,27 +12,21 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import org.jboss.pressgang.ccms.model.Topic;
-import org.jboss.pressgang.ccms.rest.v1.constants.CommonFilterConstants;
-import org.jboss.pressgang.ccms.rest.v1.entities.enums.RESTXMLFormat;
-import org.jboss.pressgang.ccms.utils.common.StringUtilities;
 import org.jboss.pressgang.ccms.utils.common.XMLUtilities;
 import org.jboss.pressgang.ccms.utils.constants.CommonConstants;
-import org.w3c.dom.Comment;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
 
-import javax.persistence.EntityManager;
-
 /**
- * For now this has been copied from the UI project. Responsibility for resolving injectiosn will probably be
+ * For now this has been copied from the UI project. Responsibility for resolving injections will probably be
  * moved from the client to the server.
  */
 public class InjectionResolver {
     /**
      * This token is replaced in a URL with the target topic id when resolving injections
      */
-    protected static final String HOST_URL_ID_TOKEN = "#TOPICID#";
+    public static final String HOST_URL_ID_TOKEN = "#TOPICID#";
     /**
      * Used to identify that an <orderedlist> should be generated for the injection point
      */
@@ -103,7 +100,7 @@ public class InjectionResolver {
      */
     public static String resolveInjections(final EntityManager entityManager, final Integer xmlFormat, final String xml, final String hostUrl) {
         // Make sure we have something to process.
-        if (StringUtilities.isStringNullOrEmpty(xml)) {
+        if (isNullOrEmpty(xml)) {
             return xml;
         }
 
