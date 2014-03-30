@@ -238,7 +238,7 @@ public class BaseRESTv1 extends BaseREST {
         final String invalidXmlPlaceholder = "<?xml-stylesheet type='text/xsl' href='/pressgang-ccms-static/publican-docbook/html-single-diff.xsl'?>\n" +
                 "<!DOCTYPE section []>\n" +
                 "<section>\n" +
-                "<title>" + title + "</title>" +
+                (includeTitle ? "<title>" + title + "</title>" : "") +
                 "<warning>\n" +
                 "<para>This topic failed validation and is not included in this build.</para>\n" +
                 "</warning>" +
@@ -248,7 +248,7 @@ public class BaseRESTv1 extends BaseREST {
             return "<?xml-stylesheet type='text/xsl' href='/pressgang-ccms-static/publican-docbook/html-single-diff.xsl'?>\n" +
                     "<!DOCTYPE section []>\n" +
                     "<section>\n" +
-                    "<title>" + title + "</title>" +
+                    (includeTitle ? "<title>" + title + "</title>" : "") +
                     "<note>\n" +
                     "<para>This topic has no XML content, and is included here as a placeholder.</para>\n" +
                     "</note>" +
