@@ -200,6 +200,16 @@ public class BaseRESTv1 extends BaseREST {
     protected UserV1Factory userFactory;
     /* END ENTITY FACTORIES */
 
+    /**
+     * http://www.mobify.com/blog/beginners-guide-to-http-cache-headers/
+     * @param revalidate true if the user agent should revalidate with the server with every request. This is set to true if
+     *                   accessing a resource that may have changed (like the latest version of a topic). It can be set to
+     *                   false for resources that will never change (i.e revisions of anything)
+     * @param req
+     * @param etagValue
+     * @param responseEntity
+     * @return
+     */
     protected Response respondWithETag(final boolean revalidate, final Request req, final String etagValue, final Object responseEntity) {
         //Create cache control header
         final CacheControl cc = new CacheControl();
