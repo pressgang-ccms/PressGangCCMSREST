@@ -200,11 +200,11 @@ public class BaseRESTv1 extends BaseREST {
     protected UserV1Factory userFactory;
     /* END ENTITY FACTORIES */
 
-    protected Response respondWithETag(final Request req, final String etagValue, final Object responseEntity) {
+    protected Response respondWithETag(final boolean revalidate, final Request req, final String etagValue, final Object responseEntity) {
         //Create cache control header
         final CacheControl cc = new CacheControl();
-        //Set max age to one year
-        cc.setMaxAge(31536000);
+        cc.setNoCache(revalidate);
+        cc.setMustRevalidate(revalidate);
 
         // Calculate the ETag on last modified date of user resource
         final EntityTag etag = new EntityTag(etagValue);

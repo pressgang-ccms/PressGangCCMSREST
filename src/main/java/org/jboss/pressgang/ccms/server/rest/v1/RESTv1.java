@@ -2280,7 +2280,7 @@ public class RESTv1 extends BaseRESTv1 implements RESTBaseInterfaceV1, RESTInter
         final String title = topic.getTopicTitle();
         final String xmlErrors = topic.getTopicXMLErrors();
         final String retValue = addXSLToTopicXML(xmlErrors, xml, title, topic.getXmlFormat(), includeTitle, condition, entities, baseUrl);
-        return respondWithETag(req, eTagValue, retValue);
+        return respondWithETag(true, req, eTagValue, retValue);
 
     }
 
@@ -2308,7 +2308,7 @@ public class RESTv1 extends BaseRESTv1 implements RESTBaseInterfaceV1, RESTInter
         final String title = topic.getTopicTitle();
         final String xmlErrors = topic.getTopicXMLErrors();
         final String retValue = addXSLToTopicXML(xmlErrors, xml, title, topic.getXmlFormat(), includeTitle, condition, entities, baseUrl);
-        return respondWithETag(req, eTagValue, retValue);
+        return respondWithETag(false, req, eTagValue, retValue);
     }
 
     @Override
@@ -3455,7 +3455,7 @@ public class RESTv1 extends BaseRESTv1 implements RESTBaseInterfaceV1, RESTInter
                 /*TOPIC REVISION*/          (csNode.getEntityRevision() != null ? csNode.getEntityRevision() : EnversUtilities.getLatestRevision(entityManager, topic));
 
         final String retValue = addXSLToTopicXML(csNode, topic, baseUrl);
-        return respondWithETag(req, eTagValue, retValue);
+        return respondWithETag(true, req, eTagValue, retValue);
     }
 
     @Override
@@ -3493,7 +3493,7 @@ public class RESTv1 extends BaseRESTv1 implements RESTBaseInterfaceV1, RESTInter
 
 
         final String retValue = addXSLToTopicXML(csNode, topic, baseUrl);
-        return respondWithETag(req, eTagValue, retValue);
+        return respondWithETag(false, req, eTagValue, retValue);
 
     }
 
