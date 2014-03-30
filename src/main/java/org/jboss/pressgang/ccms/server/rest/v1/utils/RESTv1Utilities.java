@@ -15,7 +15,6 @@ import java.sql.SQLException;
 import org.jboss.pressgang.ccms.model.base.AuditedEntity;
 import org.jboss.pressgang.ccms.model.exceptions.CustomConstraintViolationException;
 import org.jboss.pressgang.ccms.provider.exception.ProviderException;
-import org.jboss.pressgang.ccms.provider.exception.UnauthorisedException;
 import org.jboss.pressgang.ccms.rest.v1.entities.base.RESTBaseEntityV1;
 import org.jboss.pressgang.ccms.server.rest.v1.EntityCache;
 import org.jboss.resteasy.spi.BadRequestException;
@@ -46,8 +45,7 @@ public class RESTv1Utilities {
     /**
      * Process an Error/Exception and generate a RESTEasy Exception based on the error/exception produced.
      *
-     * @param transactionManager The transaction manager to handle rolling back changes.
-     * @param ex                 The Error/Exception to be processed.
+     * @param ex The Error/Exception to be processed.
      * @return A RESTEasy Exception containing the details of the Error.
      */
     public static Failure processError(final Throwable ex) {
@@ -160,7 +158,7 @@ public class RESTv1Utilities {
                 throw new InternalServerErrorException(cause);
             } else if (cause instanceof org.jboss.pressgang.ccms.provider.exception.BadRequestException) {
                 throw new BadRequestException(cause);
-            } else if (cause instanceof UnauthorisedException) {
+            } else if (cause instanceof org.jboss.pressgang.ccms.provider.exception.UnauthorisedException) {
                 throw new UnauthorizedException(cause);
             }
         }

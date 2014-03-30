@@ -40,6 +40,8 @@ public class CSNodeV1Factory extends RESTEntityFactory<RESTCSNodeV1, CSNode, RES
     @Inject
     protected CSRelatedNodeV1Factory csRelatedNodeFactory;
     @Inject
+    protected CSNodeInfoV1Factory csNodeInfoFactory;
+    @Inject
     protected TranslatedCSNodeV1Factory translatedCSNodeFactory;
 
     @Override
@@ -134,6 +136,12 @@ public class CSNodeV1Factory extends RESTEntityFactory<RESTCSNodeV1, CSNode, RES
                     RESTEntityCollectionFactory.create(RESTAssignedPropertyTagCollectionV1.class, csNodePropertyTagFactory,
                             entity.getPropertyTagsList(), RESTCSNodeV1.PROPERTIES_NAME, dataType, expand, baseUrl, revision,
                             entityManager));
+        }
+
+        // CONTENT SPEC NODE INFO
+        if (expand != null && expand.contains(RESTCSNodeV1.INFO_TOPIC_NODE_NAME) && entity.getCSInfoNode() != null) {
+            retValue.setInfoTopicNode(csNodeInfoFactory.createRESTEntityFromDBEntity(entity.getCSInfoNode(), baseUrl, dataType,
+                    expand.get(RESTCSNodeV1.INFO_TOPIC_NODE_NAME), revision, expandParentReferences));
         }
 
         retValue.setLinks(baseUrl, RESTv1Constants.CONTENT_SPEC_NODE_URL_NAME, dataType, retValue.getId());

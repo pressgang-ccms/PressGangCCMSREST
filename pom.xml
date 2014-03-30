@@ -303,11 +303,11 @@
             <artifactId>rest-provider</artifactId>
             <version>${pressgang.ccms.version}</version>
         </dependency>
-        <dependency>
+        <!--<dependency>
             <groupId>org.jboss.pressgang.ccms.contentspec</groupId>
             <artifactId>builder</artifactId>
             <version>${pressgang.ccms.version}</version>
-        </dependency>
+        </dependency>-->
         <dependency>
             <groupId>org.jboss.pressgang.ccms.services</groupId>
             <artifactId>zanata-sync-service</artifactId>

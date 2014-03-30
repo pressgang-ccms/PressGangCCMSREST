@@ -63,6 +63,7 @@ public class ServerSettingsV1Factory extends RESTElementFactory<RESTServerSettin
         entities.setAuthorGroupTagId(entitiesConfig.getAuthorGroupTagId());
         entities.setContentSpecTagId(entitiesConfig.getContentSpecTagId());
         entities.setFrozenTagId(entitiesConfig.getFrozenTagId());
+        entities.setInfoTagId(entitiesConfig.getInfoTagId());
         entities.setInternalOnlyTagId(entitiesConfig.getInternalOnlyTagId());
         entities.setLegalNoticeTagId(entitiesConfig.getLegalNoticeTagId());
         entities.setObsoleteTagId(entitiesConfig.getObsoleteTagId());
@@ -102,8 +103,10 @@ public class ServerSettingsV1Factory extends RESTElementFactory<RESTServerSettin
         entities.setTopicTemplateStringConstantId(entitiesConfig.getTopicTemplateStringConstantId());
         entities.setAbstractTopicTemplateStringConstantId(entitiesConfig.getAbstractTemplateStringConstantId());
         entities.setAuthorGroupTopicTemplateStringConstantId(entitiesConfig.getAuthorGroupTemplateStringConstantId());
+        entities.setInfoTopicTemplateStringConstantId(entitiesConfig.getInfoTemplateStringConstantId());
         entities.setLegalNoticeTopicTemplateStringConstantId(entitiesConfig.getLegalNoticeTemplateStringConstantId());
         entities.setRevisionHistoryTopicTemplateStringConstantId(entitiesConfig.getRevisionHistoryTemplateStringConstantId());
+        entities.setSectionInfoTopicTemplateStringConstantId(entitiesConfig.getSectionInfoTemplateStringConstantId());
         entities.setContentSpecTemplateStringConstantId(entitiesConfig.getContentSpecTemplateStringConstantId());
 
         // Build String Constants

@@ -69,6 +69,7 @@ import org.jboss.pressgang.ccms.utils.common.ZipUtilities;
 import org.jboss.pressgang.ccms.utils.constants.CommonConstants;
 import org.jboss.pressgang.ccms.utils.structures.DocBookVersion;
 import org.jboss.pressgang.ccms.utils.structures.NameIDSortMap;
+import org.jboss.pressgang.ccms.utils.structures.Pair;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.w3c.dom.Document;
@@ -543,12 +544,15 @@ public class TopicUtilities {
 
         final Integer blobConstantId;
         final XMLValidator.ValidationMethod validationMethod;
+        final DocBookVersion docBookVersion;
         if (topic.getXmlFormat() == CommonConstants.DOCBOOK_50) {
             blobConstantId = EntitiesConfig.getInstance().getDocBook50RNGBlobConstantId();
             validationMethod = XMLValidator.ValidationMethod.RELAXNG;
+            docBookVersion = DocBookVersion.DOCBOOK_50;
         } else {
             blobConstantId = EntitiesConfig.getInstance().getRocBook45DTDBlobConstantId();
             validationMethod = XMLValidator.ValidationMethod.DTD;
+            docBookVersion = DocBookVersion.DOCBOOK_45;
         }
         final BlobConstants dtd = entityManager.find(BlobConstants.class, blobConstantId);
 
@@ -556,11 +560,14 @@ public class TopicUtilities {
 
         try {
             final StringBuilder xmlErrors = new StringBuilder();
+            final Pair<String, String> wrappedTopic = DocBookUtilities.wrapForValidation(docBookVersion, topic.getTopicXML());
+            final String fixedTopicXml = wrappedTopic.getSecond();
+            final String rootElementName = wrappedTopic.getFirst();
             final Document doc = XMLUtilities.convertStringToDocument(topic.getTopicXML());
 
             // Do a normal DTD validation on the topic
             final XMLValidator validator = new XMLValidator();
-            if (!validator.validate(validationMethod, doc, dtd.getConstantName(), dtd.getConstantValue())) {
+            if (!validator.validate(validationMethod, fixedTopicXml, dtd.getConstantName(), dtd.getConstantValue(), rootElementName)) {
                 final String errorText = validator.getErrorText();
                 if (errorText != null) {
                     xmlErrors.append(errorText);
@@ -593,6 +600,17 @@ public class TopicUtilities {
                     // Make sure the Abstract is an abstract
                     if (!doc.getDocumentElement().getNodeName().equals("abstract")) {
                         xmlErrors.append("Root element must be <abstract> for Abstract Topics.\n");
+                    }
+                } else if (topic.isTaggedWith(EntitiesConfig.getInstance().getInfoTagId())) {
+                    // Make sure the Info topic is an info
+                    if (topic.getXmlFormat() == CommonConstants.DOCBOOK_50) {
+                        if (!doc.getDocumentElement().getNodeName().equals("info")) {
+                            xmlErrors.append("Root element must be <info> for Info Topics.\n");
+                        }
+                    } else {
+                        if (!doc.getDocumentElement().getNodeName().equals("sectioninfo")) {
+                            xmlErrors.append("Root element must be <sectioninfo> for Info Topics.\n");
+                        }
                     }
                 }
             } else {
@@ -629,7 +647,8 @@ public class TopicUtilities {
         return !(topic.isTaggedWith(EntitiesConfig.getInstance().getRevisionHistoryTagId())
                 || topic.isTaggedWith(EntitiesConfig.getInstance().getLegalNoticeTagId())
                 || topic.isTaggedWith(EntitiesConfig.getInstance().getAuthorGroupTagId())
-                || topic.isTaggedWith(EntitiesConfig.getInstance().getAbstractTagId()));
+                || topic.isTaggedWith(EntitiesConfig.getInstance().getAbstractTagId())
+                || topic.isTaggedWith(EntitiesConfig.getInstance().getInfoTagId()));
     }
 
     /**
@@ -642,6 +661,7 @@ public class TopicUtilities {
         return !(ComponentTopicV1.hasTag(topic, EntitiesConfig.getInstance().getRevisionHistoryTagId())
                 || ComponentTopicV1.hasTag(topic, EntitiesConfig.getInstance().getLegalNoticeTagId())
                 || ComponentTopicV1.hasTag(topic, EntitiesConfig.getInstance().getAuthorGroupTagId())
+                || ComponentTopicV1.hasTag(topic, EntitiesConfig.getInstance().getInfoTagId())
                 || ComponentTopicV1.hasTag(topic, EntitiesConfig.getInstance().getAbstractTagId()));
     }
 
