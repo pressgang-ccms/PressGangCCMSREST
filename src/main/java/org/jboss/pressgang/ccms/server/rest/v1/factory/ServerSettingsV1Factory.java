@@ -100,14 +100,18 @@ public class ServerSettingsV1Factory extends RESTElementFactory<RESTServerSettin
         entities.setDocBookElementsStringConstantId(entitiesConfig.getDocBookElementsStringConstantId());
 
         // Template String Constants
-        entities.setTopicTemplateStringConstantId(entitiesConfig.getTopicTemplateStringConstantId());
-        entities.setAbstractTopicTemplateStringConstantId(entitiesConfig.getAbstractTemplateStringConstantId());
-        entities.setAuthorGroupTopicTemplateStringConstantId(entitiesConfig.getAuthorGroupTemplateStringConstantId());
-        entities.setInfoTopicTemplateStringConstantId(entitiesConfig.getInfoTemplateStringConstantId());
-        entities.setLegalNoticeTopicTemplateStringConstantId(entitiesConfig.getLegalNoticeTemplateStringConstantId());
-        entities.setRevisionHistoryTopicTemplateStringConstantId(entitiesConfig.getRevisionHistoryTemplateStringConstantId());
-        entities.setSectionInfoTopicTemplateStringConstantId(entitiesConfig.getSectionInfoTemplateStringConstantId());
-        entities.setContentSpecTemplateStringConstantId(entitiesConfig.getContentSpecTemplateStringConstantId());
+        entities.setTopicTemplateId(entitiesConfig.getTopicTemplateId());
+        entities.setContentSpecTemplateId(entitiesConfig.getContentSpecTemplateId());
+        entities.setDocBook45AbstractTopicTemplateId(entitiesConfig.getDB45AbstractTopicTemplateId());
+        entities.setDocBook45AuthorGroupTopicTemplateId(entitiesConfig.getDB45AuthorGroupTopicTemplateId());
+        entities.setDocBook45InfoTopicTemplateId(entitiesConfig.getDB45InfoTopicTemplateId());
+        entities.setDocBook45LegalNoticeTopicTemplateId(entitiesConfig.getDB45LegalNoticeTopicTemplateId());
+        entities.setDocBook45RevisionHistoryTopicTemplateId(entitiesConfig.getDB45RevisionHistoryTopicTemplateId());
+        entities.setDocBook50AbstractTopicTemplateId(entitiesConfig.getDB50AbstractTopicTemplateId());
+        entities.setDocBook50AuthorGroupTopicTemplateId(entitiesConfig.getDB50AuthorGroupTopicTemplateId());
+        entities.setDocBook50InfoTopicTemplateId(entitiesConfig.getDB50InfoTopicTemplateId());
+        entities.setDocBook50LegalNoticeTopicTemplateId(entitiesConfig.getDB50LegalNoticeTopicTemplateId());
+        entities.setDocBook50RevisionHistoryTopicTemplateId(entitiesConfig.getDB50RevisionHistoryTopicTemplateId());
 
         // Build String Constants
         entities.setArticleStringConstantId(entitiesConfig.getArticleStringConstantId());
