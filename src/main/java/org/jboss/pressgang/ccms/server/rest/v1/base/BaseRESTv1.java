@@ -11,10 +11,7 @@ import javax.persistence.criteria.CriteriaQuery;
 import javax.persistence.criteria.Root;
 import javax.transaction.Status;
 import javax.transaction.UserTransaction;
-import javax.ws.rs.core.Context;
-import javax.ws.rs.core.HttpHeaders;
-import javax.ws.rs.core.MediaType;
-import javax.ws.rs.core.MultivaluedMap;
+import javax.ws.rs.core.*;
 import java.io.IOException;
 import java.net.URI;
 import java.text.SimpleDateFormat;
@@ -47,6 +44,7 @@ import org.jboss.pressgang.ccms.model.User;
 import org.jboss.pressgang.ccms.model.base.AuditedEntity;
 import org.jboss.pressgang.ccms.model.config.ApplicationConfig;
 import org.jboss.pressgang.ccms.model.config.EntitiesConfig;
+import org.jboss.pressgang.ccms.model.contentspec.CSNode;
 import org.jboss.pressgang.ccms.model.contentspec.ContentSpec;
 import org.jboss.pressgang.ccms.provider.DBProviderFactory;
 import org.jboss.pressgang.ccms.rest.v1.collections.RESTTopicCollectionV1;
@@ -93,10 +91,10 @@ import org.jboss.pressgang.ccms.server.rest.v1.factory.UserV1Factory;
 import org.jboss.pressgang.ccms.server.rest.v1.factory.base.RESTEntityCollectionFactory;
 import org.jboss.pressgang.ccms.server.rest.v1.factory.base.RESTEntityFactory;
 import org.jboss.pressgang.ccms.server.rest.v1.utils.RESTv1Utilities;
-import org.jboss.pressgang.ccms.server.utils.EntityUtilities;
-import org.jboss.pressgang.ccms.server.utils.EnversUtilities;
-import org.jboss.pressgang.ccms.server.utils.ProviderUtilities;
-import org.jboss.pressgang.ccms.server.utils.TopicSourceURLTitleThread;
+import org.jboss.pressgang.ccms.server.utils.*;
+import org.jboss.pressgang.ccms.utils.common.DocBookUtilities;
+import org.jboss.pressgang.ccms.utils.common.XMLUtilities;
+import org.jboss.pressgang.ccms.utils.constants.CommonConstants;
 import org.jboss.resteasy.plugins.providers.atom.Content;
 import org.jboss.resteasy.plugins.providers.atom.Entry;
 import org.jboss.resteasy.plugins.providers.atom.Feed;
@@ -106,6 +104,10 @@ import org.jboss.resteasy.spi.InternalServerErrorException;
 import org.jboss.resteasy.spi.NotFoundException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.w3c.dom.DOMException;
+import org.w3c.dom.Document;
+import org.w3c.dom.Node;
+import org.xml.sax.SAXException;
 
 /**
  * This class provides the functions that retrieve, update, create and delete entities. It is expected that other classes will
@@ -197,6 +199,152 @@ public class BaseRESTv1 extends BaseREST {
     @Inject
     protected UserV1Factory userFactory;
     /* END ENTITY FACTORIES */
+
+    /**
+     * http://www.mobify.com/blog/beginners-guide-to-http-cache-headers/
+     * @param revalidate true if the user agent should revalidate with the server with every request. This is set to true if
+     *                   accessing a resource that may have changed (like the latest version of a topic). It can be set to
+     *                   false for resources that will never change (i.e revisions of anything)
+     * @param req
+     * @param etagValue
+     * @param responseEntity
+     * @return
+     */
+    protected Response respondWithETag(final boolean revalidate, final Request req, final String etagValue, final Object responseEntity) {
+        //Create cache control header
+        final CacheControl cc = new CacheControl();
+        cc.setNoCache(revalidate);
+        cc.setMustRevalidate(revalidate);
+
+        // Calculate the ETag on last modified date of user resource
+        final EntityTag etag = new EntityTag(etagValue);
+
+
+        // Verify if it matched with etag available in http request
+        final Response.ResponseBuilder rb = req.evaluatePreconditions(etag);
+
+        // If the supplied etag matches the etag we generated, return
+        // a unmodifed response.
+
+        if (rb != null) {
+            return rb.cacheControl(cc).tag(etag).build();
+        }
+
+        return Response.ok(responseEntity).cacheControl(cc).tag(etag).build();
+    }
+
+    protected String addXSLToTopicXML(final String xmlErrors, final String xml, final String title, final Integer format, final Boolean includeTitle, final String conditions, final String entities, final String baseUrl) {
+
+        final String invalidXmlPlaceholder = "<?xml-stylesheet type='text/xsl' href='/pressgang-ccms-static/publican-docbook/html-single-diff.xsl'?>\n" +
+                "<!DOCTYPE section []>\n" +
+                "<section>\n" +
+                (includeTitle ? "<title>" + title + "</title>" : "") +
+                "<warning>\n" +
+                "<para>This topic failed validation and is not included in this build.</para>\n" +
+                "</warning>" +
+                "</section>";
+
+        if (xml == null || xml.trim().length() == 0) {
+            return "<?xml-stylesheet type='text/xsl' href='/pressgang-ccms-static/publican-docbook/html-single-diff.xsl'?>\n" +
+                    "<!DOCTYPE section []>\n" +
+                    "<section>\n" +
+                    (includeTitle ? "<title>" + title + "</title>" : "") +
+                    "<note>\n" +
+                    "<para>This topic has no XML content, and is included here as a placeholder.</para>\n" +
+                    "</note>" +
+                    "</section>";
+        }
+
+        if (xmlErrors != null && xmlErrors.trim().length() != 0) {
+            return invalidXmlPlaceholder;
+        }
+
+        /*
+            Attempt to convert the XML, and throw an exception if there is an issue
+         */
+        Document xmlDoc = null;
+        try {
+            xmlDoc = XMLUtilities.convertStringToDocument(xml, true);
+        } catch (final SAXException ex) {
+            return invalidXmlPlaceholder;
+        } catch (final DOMException ex) {
+            return invalidXmlPlaceholder;
+        }
+
+        InjectionResolver.resolveInjections(entityManager, format, xmlDoc, baseUrl == null ? "/pressgang-ccms/rest/1/topic/get/xml/#TOPICID#/xslt+xml" : baseUrl);
+
+        /*
+            Remove the title if requested
+         */
+        if (includeTitle != null && !includeTitle.booleanValue()) {
+            for (int childIndex = 0; childIndex < xmlDoc.getDocumentElement().getChildNodes().getLength(); ++childIndex) {
+                final Node child = xmlDoc.getDocumentElement().getChildNodes().item(childIndex);
+                if (child.getNodeName().equals("title")) {
+                    xmlDoc.getDocumentElement().removeChild(child);
+                    break;
+                }
+            }
+        }
+
+        if (conditions != null) {
+            if (conditions != null) {
+                DocBookUtilities.processConditions(conditions, xmlDoc);
+            }
+        }
+
+        /*
+            We need to remove and XML declarations.
+         */
+        String fixedXML = XMLUtilities.convertDocumentToString(xmlDoc);
+        final String preamble = XMLUtilities.findPreamble(fixedXML);
+        if (preamble != null) {
+            fixedXML = fixedXML.replace(preamble, "");
+        }
+
+        final StringBuilder retValue = new StringBuilder();
+        retValue.append("<?xml-stylesheet type='text/xsl' href='/pressgang-ccms-static/publican-docbook/html-single-diff.xsl'?>\n");
+        retValue.append("<!DOCTYPE " + xmlDoc.getDocumentElement().getNodeName() + "[\n");
+        if (entities != null) {
+            retValue.append(entities);
+        }
+        retValue.append("]>\n");
+
+        /*
+            Some topics ned to be wrapped to get them to render in the browser. See
+            BaseRenderedPresenter.java in the UI project.
+         */
+        final String documentElementNodeName = xmlDoc.getDocumentElement().getNodeName();
+        if (documentElementNodeName.equals("authorgroup") || documentElementNodeName.equals("legalnotice")) {
+            retValue.append("<book><bookinfo>\n");
+            retValue.append(fixedXML);
+            retValue.append("</bookinfo></book>");
+        } else {
+            retValue.append(fixedXML);
+        }
+
+
+        return retValue.toString();
+    }
+
+    protected String addXSLToTopicXML(final CSNode node, final Topic topic, final String baseUrl) {
+        final ContentSpec spec = node.getContentSpec();
+        final String xml = topic.getTopicXML();
+        final String title = topic.getTopicTitle();
+        final String xmlErrors = topic.getTopicXMLErrors();
+        final String conditions = node.getInheritedCondition();
+        final boolean includeTitle = node.getCSNodeType() != CommonConstants.CS_NODE_INITIAL_CONTENT_TOPIC;
+        String entities = null;
+
+        for (final CSNode child : spec.getCSNodes()) {
+            if (child.getCSNodeType() == CommonConstants.CS_NODE_META_DATA &&
+                    child.getCSNodeTitle().equals(CommonConstants.CS_ENTITIES_TITLE)) {
+                entities = child.getAdditionalText();
+                break;
+            }
+        }
+
+        return addXSLToTopicXML(xmlErrors, xml, title, topic.getXmlFormat(), includeTitle, conditions, entities, baseUrl);
+    }
 
     /**
      * Converts a Collection of Topics into an ATOM Feed.
