@@ -1224,7 +1224,13 @@ public class BaseRESTv1 extends BaseREST {
      */
     protected RESTTextContentSpecV1 createJSONContentSpecFromString(final RESTTextContentSpecV1 dataObject,
             final RESTLogDetailsV1 logDetails, final String expand) {
-        return createOrUpdateJSONContentSpecFromString(dataObject, DatabaseOperation.CREATE, logDetails, expand);
+        final RESTTextContentSpecV1 newEntity = createOrUpdateJSONContentSpecFromString(dataObject, DatabaseOperation.CREATE, logDetails,
+                expand);
+
+        // Set the appropriate creation header values
+        response.getOutputHeaders().add(HttpHeaders.LOCATION, newEntity.getSelfLink());
+
+        return newEntity;
     }
 
     /**
@@ -1258,8 +1264,11 @@ public class BaseRESTv1 extends BaseREST {
         processingOptions.setStrictTitles(strictTitles);
         contentSpec.setProcessingOptions(processingOptions);
 
-        createOrUpdateJSONContentSpecFromString(contentSpec, DatabaseOperation.CREATE, logDetails, "", RESTv1Constants.TEXT_URL,
-                loggerManager, false);
+        final RESTTextContentSpecV1 newEntity = createOrUpdateJSONContentSpecFromString(contentSpec, DatabaseOperation.CREATE, logDetails,
+                "", RESTv1Constants.TEXT_URL, loggerManager, false);
+
+        // Set the appropriate creation header values
+        response.getOutputHeaders().add(HttpHeaders.LOCATION, newEntity.getSelfLink());
 
         return loggerManager.generateLogs();
     }
