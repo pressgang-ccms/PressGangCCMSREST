@@ -232,6 +232,7 @@ public class BaseRESTv1 extends BaseREST {
 
     protected String addXSLToTopicXML(final String xmlErrors, final String xml, final String title, final Integer format, final Boolean includeTitle, final String conditions, final String entities, final String baseUrl) {
 
+        final String XSL_STYLESHEET = "<?xml-stylesheet type='text/xsl' href='/pressgang-ccms-static/publican-docbook/html-single-diff.xsl'?>";
         String invalidXMLPlaceholder = "";
         String emptyXMLPlaceholder = "";
 
@@ -240,11 +241,11 @@ public class BaseRESTv1 extends BaseREST {
             final String emptyXMLRaw = entityManager.find(StringConstants.class, entitiesConfig.getEmptyTopicStringConstantId()).getConstantValue();
 
             final Document invalidXMLDoc = XMLUtilities.convertStringToDocument(invalidXMLRaw, true);
-            final Document emptyXMLDoc = XMLUtilities.convertStringToDocument(invalidXMLRaw, true);
+            final Document emptyXMLDoc = XMLUtilities.convertStringToDocument(emptyXMLRaw, true);
 
             for (final Document doc : new Document[]{invalidXMLDoc, emptyXMLDoc}) {
                 if (doc != null) {
-                    final NodeList children = invalidXMLDoc.getDocumentElement().getChildNodes();
+                    final NodeList children = doc.getDocumentElement().getChildNodes();
                     for (int childIndex = 0; childIndex < children.getLength(); ++childIndex) {
                         final Node child = children.item(childIndex);
                         if (child.getNodeName().equals("title")) {
@@ -259,15 +260,32 @@ public class BaseRESTv1 extends BaseREST {
                 }
             }
 
-            invalidXMLPlaceholder = invalidXMLDoc != null ? XMLUtilities.convertDocumentToString(invalidXMLDoc, true) : "";
-            emptyXMLPlaceholder = emptyXMLDoc != null ? XMLUtilities.convertDocumentToString(emptyXMLDoc, true) : "";
+            if (invalidXMLDoc != null) {
+                final String xmlString = XMLUtilities.convertDocumentToString(invalidXMLDoc, true);
+                final String preamble = XMLUtilities.findPreamble(xmlString);
+                invalidXMLPlaceholder = XSL_STYLESHEET + "\n" +
+                    "<!DOCTYPE " + invalidXMLDoc.getDocumentElement().getNodeName() + "[]>\n" +
+                        xmlString.replace(preamble, "");
+            }
+
+            if (emptyXMLDoc != null) {
+                final String xmlString = XMLUtilities.convertDocumentToString(emptyXMLDoc, true);
+                final String preamble = XMLUtilities.findPreamble(xmlString);
+                emptyXMLPlaceholder = XSL_STYLESHEET + "\n" +
+                    "<!DOCTYPE " + emptyXMLDoc.getDocumentElement().getNodeName() + "[]>\n" +
+                        xmlString.replace(preamble, "");
+            }
 
         } catch (final Exception ex) {
             // do nothing - the string constants are not valid xml
         }
 
-        if (xmlErrors != null && xmlErrors.trim().length() != 0) {
+        if (xml == null || xml.trim().length() == 0) {
             return emptyXMLPlaceholder;
+        }
+
+        if (xmlErrors != null && xmlErrors.trim().length() != 0) {
+            return invalidXMLPlaceholder;
         }
 
         /*
@@ -312,7 +330,7 @@ public class BaseRESTv1 extends BaseREST {
         }
 
         final StringBuilder retValue = new StringBuilder();
-        retValue.append("<?xml-stylesheet type='text/xsl' href='/pressgang-ccms-static/publican-docbook/html-single-diff.xsl'?>\n");
+        retValue.append(XSL_STYLESHEET + "\n");
         retValue.append("<!DOCTYPE " + xmlDoc.getDocumentElement().getNodeName() + "[\n");
         if (entities != null) {
             retValue.append(entities);
