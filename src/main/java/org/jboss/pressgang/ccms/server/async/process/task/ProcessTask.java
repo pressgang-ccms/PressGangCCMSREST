@@ -33,7 +33,7 @@ public abstract class ProcessTask<T> extends AbstractTask<T> {
         final StringWriter writer = new StringWriter();
         final WriterAppender appender = createAppender(writer);
 
-        org.apache.log4j.Logger.getLogger("org.jboss.pressgang.ccms").addAppender(appender);
+        org.apache.log4j.Logger.getRootLogger().addAppender(appender);
         org.apache.log4j.Logger log4jLogger = org.apache.log4j.Logger.getLogger(name);
         log4jLogger.setLevel(Level.INFO);
 
@@ -42,13 +42,12 @@ public abstract class ProcessTask<T> extends AbstractTask<T> {
             NDC.push(getId());
             execute();
         } catch (Throwable e) {
-            setThrowable(e);
             log.error("Unexpected error", e);
             setSuccessful(false);
         } finally {
             NDC.pop();
             // Remove the appender from the log and get the logs
-            org.apache.log4j.Logger.getLogger("org.jboss.pressgang.ccms").removeAppender(appender);
+            org.apache.log4j.Logger.getRootLogger().removeAppender(appender);
             logs = writer.toString();
         }
         NDC.remove();

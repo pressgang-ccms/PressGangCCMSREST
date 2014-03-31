@@ -18,6 +18,7 @@ import org.jboss.pressgang.ccms.provider.RESTProviderFactory;
 import org.jboss.pressgang.ccms.provider.TopicProvider;
 import org.jboss.pressgang.ccms.provider.TranslatedContentSpecProvider;
 import org.jboss.pressgang.ccms.provider.TranslatedTopicProvider;
+import org.jboss.pressgang.ccms.server.utils.ProcessUtilities;
 import org.jboss.pressgang.ccms.utils.common.DocBookUtilities;
 import org.jboss.pressgang.ccms.utils.common.HashUtilities;
 import org.jboss.pressgang.ccms.utils.common.XMLUtilities;
@@ -63,6 +64,12 @@ public class ZanataPushTask extends ProcessRESTTask<Boolean> {
 
         // Log some basic details
         logDetails();
+
+        // Make sure the Zanata server isn't down
+        if (!ProcessUtilities.validateServerExists(zanataDetails.getServer())) {
+            error("Unable to connect to the Zanata Server. Please make sure that the server is online and try again.");
+            return;
+        }
 
         // Make sure the entity was found
         if (contentSpecEntity == null) {

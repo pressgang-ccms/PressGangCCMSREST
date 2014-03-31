@@ -12,6 +12,7 @@ import java.util.Set;
 import org.jboss.pressgang.ccms.provider.DataProviderFactory;
 import org.jboss.pressgang.ccms.provider.RESTProviderFactory;
 import org.jboss.pressgang.ccms.provider.ServerSettingsProvider;
+import org.jboss.pressgang.ccms.server.utils.ProcessUtilities;
 import org.jboss.pressgang.ccms.services.zanatasync.ZanataSyncService;
 import org.jboss.pressgang.ccms.utils.common.CollectionUtilities;
 import org.jboss.pressgang.ccms.wrapper.ServerSettingsWrapper;
@@ -65,6 +66,17 @@ public class ZanataSyncTask extends ProcessRESTTask<Boolean> {
         final ServerSettingsProvider settingsProvider = providerFactory.getProvider(ServerSettingsProvider.class);
         final ServerSettingsWrapper settings = settingsProvider.getServerSettings();
         final ETagCache eTagCache = new ETagCache();
+
+        // Log some basic details about the sync
+        logDetails();
+
+        // Make sure the Zanata server isn't down
+        if (!ProcessUtilities.validateServerExists(zanataDetails.getServer())) {
+            getLogger().error("Unable to connect to the Zanata Server. Please make sure that the server is online and try again.");
+            setSuccessful(false);
+            return;
+        }
+
         ZanataInterface zanataInterface;
         try {
             zanataInterface = new ZanataInterface(0.2, zanataDetails);
@@ -73,9 +85,6 @@ public class ZanataSyncTask extends ProcessRESTTask<Boolean> {
             setSuccessful(false);
             return;
         }
-
-        // Log some basic details about the sync
-        logDetails();
 
         // Load the etag cache
         if (useETagCache) {
