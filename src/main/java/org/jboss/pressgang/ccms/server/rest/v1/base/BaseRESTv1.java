@@ -962,7 +962,7 @@ public class BaseRESTv1 extends BaseREST {
      * @param dataType          The output data type. eg JSON or XML.
      * @return The REST Entity containing the information from the database entity.
      */
-    private <T extends RESTBaseEntityV1<T, V, W>, U extends AuditedEntity, V extends RESTBaseEntityCollectionV1<T, V, W>,
+    protected  <T extends RESTBaseEntityV1<T, V, W>, U extends AuditedEntity, V extends RESTBaseEntityCollectionV1<T, V, W>,
             W extends RESTBaseEntityCollectionItemV1<T, V, W>> T getResource(
             final Class<U> type, final RESTEntityFactory<T, U, V, W> dataObjectFactory, final Integer id, final Number revision,
             final String expand, final String dataType) {
@@ -1310,8 +1310,8 @@ public class BaseRESTv1 extends BaseREST {
      */
     private RESTTextContentSpecV1 createOrUpdateJSONContentSpecFromString(final RESTTextContentSpecV1 restEntity,
             final DatabaseOperation operation, final RESTLogDetailsV1 logDetails, final String expand) {
-        return createOrUpdateJSONContentSpecFromString(restEntity, operation, logDetails, expand, RESTv1Constants.JSON_URL,
-                new ErrorLoggerManager(), true);
+        return createOrUpdateJSONContentSpecFromString(restEntity, operation, logDetails, expand,
+                RESTv1Constants.JSON_URL + "+" + RESTv1Constants.TEXT_URL, new ErrorLoggerManager(), true);
     }
 
     /**
