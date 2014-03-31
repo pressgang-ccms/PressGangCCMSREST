@@ -36,11 +36,7 @@ import org.jboss.pressgang.ccms.filter.base.IFieldFilter;
 import org.jboss.pressgang.ccms.filter.base.IFilterQueryBuilder;
 import org.jboss.pressgang.ccms.filter.base.ITagFilterQueryBuilder;
 import org.jboss.pressgang.ccms.filter.utils.FilterUtilities;
-import org.jboss.pressgang.ccms.model.Filter;
-import org.jboss.pressgang.ccms.model.Topic;
-import org.jboss.pressgang.ccms.model.TopicSourceUrl;
-import org.jboss.pressgang.ccms.model.TopicToPropertyTag;
-import org.jboss.pressgang.ccms.model.User;
+import org.jboss.pressgang.ccms.model.*;
 import org.jboss.pressgang.ccms.model.base.AuditedEntity;
 import org.jboss.pressgang.ccms.model.config.ApplicationConfig;
 import org.jboss.pressgang.ccms.model.config.EntitiesConfig;
@@ -107,6 +103,7 @@ import org.slf4j.LoggerFactory;
 import org.w3c.dom.DOMException;
 import org.w3c.dom.Document;
 import org.w3c.dom.Node;
+import org.w3c.dom.NodeList;
 import org.xml.sax.SAXException;
 
 /**
@@ -235,28 +232,39 @@ public class BaseRESTv1 extends BaseREST {
 
     protected String addXSLToTopicXML(final String xmlErrors, final String xml, final String title, final Integer format, final Boolean includeTitle, final String conditions, final String entities, final String baseUrl) {
 
-        final String invalidXmlPlaceholder = "<?xml-stylesheet type='text/xsl' href='/pressgang-ccms-static/publican-docbook/html-single-diff.xsl'?>\n" +
-                "<!DOCTYPE section []>\n" +
-                "<section>\n" +
-                (includeTitle == null || includeTitle ? "<title>" + title + "</title>" : "") +
-                "<warning>\n" +
-                "<para>This topic failed validation and is not included in this build.</para>\n" +
-                "</warning>" +
-                "</section>";
+        String invalidXMLPlaceholder = "";
+        String emptyXMLPlaceholder = "";
 
-        if (xml == null || xml.trim().length() == 0) {
-            return "<?xml-stylesheet type='text/xsl' href='/pressgang-ccms-static/publican-docbook/html-single-diff.xsl'?>\n" +
-                    "<!DOCTYPE section []>\n" +
-                    "<section>\n" +
-                    (includeTitle == null || includeTitle ? "<title>" + title + "</title>" : "") +
-                    "<note>\n" +
-                    "<para>This topic has no XML content, and is included here as a placeholder.</para>\n" +
-                    "</note>" +
-                    "</section>";
+        try {
+            if (includeTitle == null || includeTitle) {
+                final String invalidXMLRaw = entityManager.find(StringConstants.class, entitiesConfig.getInvalidTopicStringConstantId()).getConstantValue();
+                final String emptyXMLRaw = entityManager.find(StringConstants.class, entitiesConfig.getEmptyTopicStringConstantId()).getConstantValue();
+
+                final Document invalidXMLDoc = XMLUtilities.convertStringToDocument(invalidXMLRaw, true);
+                final Document emptyXMLDoc = XMLUtilities.convertStringToDocument(invalidXMLRaw, true);
+
+                for (final Document doc : new Document[]{invalidXMLDoc, emptyXMLDoc}) {
+                    if (doc != null) {
+                        final NodeList children = invalidXMLDoc.getDocumentElement().getChildNodes();
+                        for (int childIndex = 0; childIndex < children.getLength(); ++childIndex) {
+                            final Node child = children.item(childIndex);
+                            if (child.getNodeName().equals("title")) {
+                                child.setTextContent(title);
+                                break;
+                            }
+                        }
+                    }
+                }
+
+                invalidXMLPlaceholder = invalidXMLDoc != null ? XMLUtilities.convertDocumentToString(invalidXMLDoc, true) : "";
+                emptyXMLPlaceholder = emptyXMLDoc != null ? XMLUtilities.convertDocumentToString(emptyXMLDoc, true) : "";
+            }
+        } catch (final Exception ex) {
+            // do nothing - the string constants are not valid xml
         }
 
         if (xmlErrors != null && xmlErrors.trim().length() != 0) {
-            return invalidXmlPlaceholder;
+            return emptyXMLPlaceholder;
         }
 
         /*
@@ -266,9 +274,9 @@ public class BaseRESTv1 extends BaseREST {
         try {
             xmlDoc = XMLUtilities.convertStringToDocument(xml, true);
         } catch (final SAXException ex) {
-            return invalidXmlPlaceholder;
+            return invalidXMLPlaceholder;
         } catch (final DOMException ex) {
-            return invalidXmlPlaceholder;
+            return invalidXMLPlaceholder;
         }
 
         InjectionResolver.resolveInjections(entityManager, format, xmlDoc,
