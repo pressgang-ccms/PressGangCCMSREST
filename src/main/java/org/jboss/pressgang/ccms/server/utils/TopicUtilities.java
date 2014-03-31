@@ -541,29 +541,31 @@ public class TopicUtilities {
      */
     public static void validateXML(final EntityManager entityManager, final Topic topic) {
         if (entityManager == null) throw new IllegalArgumentException("entityManager cannot be null");
-
-        final Integer blobConstantId;
-        final XMLValidator.ValidationMethod validationMethod;
-        final DocBookVersion docBookVersion;
-        if (topic.getXmlFormat() == CommonConstants.DOCBOOK_50) {
-            blobConstantId = EntitiesConfig.getInstance().getDocBook50RNGBlobConstantId();
-            validationMethod = XMLValidator.ValidationMethod.RELAXNG;
-            docBookVersion = DocBookVersion.DOCBOOK_50;
-        } else {
-            blobConstantId = EntitiesConfig.getInstance().getRocBook45DTDBlobConstantId();
-            validationMethod = XMLValidator.ValidationMethod.DTD;
-            docBookVersion = DocBookVersion.DOCBOOK_45;
-        }
-        final BlobConstants dtd = entityManager.find(BlobConstants.class, blobConstantId);
-
-        if (dtd == null) throw new IllegalArgumentException("blobConstantId must be a valid BlobConstants entity id");
-
         try {
+            final Integer blobConstantId;
+            final XMLValidator.ValidationMethod validationMethod;
+            final DocBookVersion docBookVersion;
+            final String fixedXML;
+            if (topic.getXmlFormat() == CommonConstants.DOCBOOK_50) {
+                blobConstantId = EntitiesConfig.getInstance().getDocBook50RNGBlobConstantId();
+                validationMethod = XMLValidator.ValidationMethod.RELAXNG;
+                docBookVersion = DocBookVersion.DOCBOOK_50;
+                fixedXML = DocBookUtilities.addDocBook50Namespace(topic.getTopicXML());
+            } else {
+                blobConstantId = EntitiesConfig.getInstance().getRocBook45DTDBlobConstantId();
+                validationMethod = XMLValidator.ValidationMethod.DTD;
+                docBookVersion = DocBookVersion.DOCBOOK_45;
+                fixedXML = topic.getTopicXML();
+            }
+            final BlobConstants dtd = entityManager.find(BlobConstants.class, blobConstantId);
+
+            if (dtd == null) throw new IllegalArgumentException("blobConstantId must be a valid BlobConstants entity id");
+
             final StringBuilder xmlErrors = new StringBuilder();
-            final Pair<String, String> wrappedTopic = DocBookUtilities.wrapForValidation(docBookVersion, topic.getTopicXML());
+            final Pair<String, String> wrappedTopic = DocBookUtilities.wrapForValidation(docBookVersion, fixedXML);
             final String fixedTopicXml = wrappedTopic.getSecond();
             final String rootElementName = wrappedTopic.getFirst();
-            final Document doc = XMLUtilities.convertStringToDocument(topic.getTopicXML());
+            final Document doc = XMLUtilities.convertStringToDocument(fixedXML);
 
             // Do a normal DTD validation on the topic
             final XMLValidator validator = new XMLValidator();
