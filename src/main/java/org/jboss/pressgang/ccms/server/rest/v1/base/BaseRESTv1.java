@@ -236,29 +236,32 @@ public class BaseRESTv1 extends BaseREST {
         String emptyXMLPlaceholder = "";
 
         try {
-            if (includeTitle == null || includeTitle) {
-                final String invalidXMLRaw = entityManager.find(StringConstants.class, entitiesConfig.getInvalidTopicStringConstantId()).getConstantValue();
-                final String emptyXMLRaw = entityManager.find(StringConstants.class, entitiesConfig.getEmptyTopicStringConstantId()).getConstantValue();
+            final String invalidXMLRaw = entityManager.find(StringConstants.class, entitiesConfig.getInvalidTopicStringConstantId()).getConstantValue();
+            final String emptyXMLRaw = entityManager.find(StringConstants.class, entitiesConfig.getEmptyTopicStringConstantId()).getConstantValue();
 
-                final Document invalidXMLDoc = XMLUtilities.convertStringToDocument(invalidXMLRaw, true);
-                final Document emptyXMLDoc = XMLUtilities.convertStringToDocument(invalidXMLRaw, true);
+            final Document invalidXMLDoc = XMLUtilities.convertStringToDocument(invalidXMLRaw, true);
+            final Document emptyXMLDoc = XMLUtilities.convertStringToDocument(invalidXMLRaw, true);
 
-                for (final Document doc : new Document[]{invalidXMLDoc, emptyXMLDoc}) {
-                    if (doc != null) {
-                        final NodeList children = invalidXMLDoc.getDocumentElement().getChildNodes();
-                        for (int childIndex = 0; childIndex < children.getLength(); ++childIndex) {
-                            final Node child = children.item(childIndex);
-                            if (child.getNodeName().equals("title")) {
+            for (final Document doc : new Document[]{invalidXMLDoc, emptyXMLDoc}) {
+                if (doc != null) {
+                    final NodeList children = invalidXMLDoc.getDocumentElement().getChildNodes();
+                    for (int childIndex = 0; childIndex < children.getLength(); ++childIndex) {
+                        final Node child = children.item(childIndex);
+                        if (child.getNodeName().equals("title")) {
+                            if (includeTitle == null || includeTitle) {
                                 child.setTextContent(title);
-                                break;
+                            } else {
+                                child.setTextContent("");
                             }
+                            break;
                         }
                     }
                 }
-
-                invalidXMLPlaceholder = invalidXMLDoc != null ? XMLUtilities.convertDocumentToString(invalidXMLDoc, true) : "";
-                emptyXMLPlaceholder = emptyXMLDoc != null ? XMLUtilities.convertDocumentToString(emptyXMLDoc, true) : "";
             }
+
+            invalidXMLPlaceholder = invalidXMLDoc != null ? XMLUtilities.convertDocumentToString(invalidXMLDoc, true) : "";
+            emptyXMLPlaceholder = emptyXMLDoc != null ? XMLUtilities.convertDocumentToString(emptyXMLDoc, true) : "";
+
         } catch (final Exception ex) {
             // do nothing - the string constants are not valid xml
         }
