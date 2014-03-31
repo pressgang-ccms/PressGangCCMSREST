@@ -11,7 +11,14 @@ import javax.persistence.criteria.CriteriaQuery;
 import javax.persistence.criteria.Root;
 import javax.transaction.Status;
 import javax.transaction.UserTransaction;
-import javax.ws.rs.core.*;
+import javax.ws.rs.core.CacheControl;
+import javax.ws.rs.core.Context;
+import javax.ws.rs.core.EntityTag;
+import javax.ws.rs.core.HttpHeaders;
+import javax.ws.rs.core.MediaType;
+import javax.ws.rs.core.MultivaluedMap;
+import javax.ws.rs.core.Request;
+import javax.ws.rs.core.Response;
 import java.io.IOException;
 import java.net.URI;
 import java.text.SimpleDateFormat;
@@ -36,7 +43,12 @@ import org.jboss.pressgang.ccms.filter.base.IFieldFilter;
 import org.jboss.pressgang.ccms.filter.base.IFilterQueryBuilder;
 import org.jboss.pressgang.ccms.filter.base.ITagFilterQueryBuilder;
 import org.jboss.pressgang.ccms.filter.utils.FilterUtilities;
-import org.jboss.pressgang.ccms.model.*;
+import org.jboss.pressgang.ccms.model.Filter;
+import org.jboss.pressgang.ccms.model.StringConstants;
+import org.jboss.pressgang.ccms.model.Topic;
+import org.jboss.pressgang.ccms.model.TopicSourceUrl;
+import org.jboss.pressgang.ccms.model.TopicToPropertyTag;
+import org.jboss.pressgang.ccms.model.User;
 import org.jboss.pressgang.ccms.model.base.AuditedEntity;
 import org.jboss.pressgang.ccms.model.config.ApplicationConfig;
 import org.jboss.pressgang.ccms.model.config.EntitiesConfig;
@@ -87,10 +99,15 @@ import org.jboss.pressgang.ccms.server.rest.v1.factory.UserV1Factory;
 import org.jboss.pressgang.ccms.server.rest.v1.factory.base.RESTEntityCollectionFactory;
 import org.jboss.pressgang.ccms.server.rest.v1.factory.base.RESTEntityFactory;
 import org.jboss.pressgang.ccms.server.rest.v1.utils.RESTv1Utilities;
-import org.jboss.pressgang.ccms.server.utils.*;
+import org.jboss.pressgang.ccms.server.utils.EntityUtilities;
+import org.jboss.pressgang.ccms.server.utils.EnversUtilities;
+import org.jboss.pressgang.ccms.server.utils.InjectionResolver;
+import org.jboss.pressgang.ccms.server.utils.ProviderUtilities;
+import org.jboss.pressgang.ccms.server.utils.TopicSourceURLTitleThread;
 import org.jboss.pressgang.ccms.utils.common.DocBookUtilities;
 import org.jboss.pressgang.ccms.utils.common.XMLUtilities;
 import org.jboss.pressgang.ccms.utils.constants.CommonConstants;
+import org.jboss.pressgang.ccms.utils.structures.DocBookVersion;
 import org.jboss.resteasy.plugins.providers.atom.Content;
 import org.jboss.resteasy.plugins.providers.atom.Entry;
 import org.jboss.resteasy.plugins.providers.atom.Feed;
@@ -100,7 +117,8 @@ import org.jboss.resteasy.spi.InternalServerErrorException;
 import org.jboss.resteasy.spi.NotFoundException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.w3c.dom.*;
+import org.w3c.dom.DOMException;
+import org.w3c.dom.Document;
 import org.xml.sax.SAXException;
 
 /**
@@ -230,91 +248,84 @@ public class BaseRESTv1 extends BaseREST {
     protected String addXSLToTopicXML(final String xmlErrors, final String xml, final String title, final Integer format, final Boolean includeTitle, final String conditions, final String entities, final String baseUrl) {
 
         final String XSL_STYLESHEET = "<?xml-stylesheet type='text/xsl' href='/pressgang-ccms-static/publican-docbook/html-single-diff.xsl'?>";
-        String invalidXMLPlaceholder = "";
-        String emptyXMLPlaceholder = "";
         final String fixedTitle = includeTitle == null || includeTitle ? title : "";
 
+        // Check the XML is not empty
+        if (xml == null || xml.trim().length() == 0) {
+            String emptyXMLPlaceholder = "";
+            try {
+                final String emptyXMLRaw = entityManager.find(StringConstants.class, entitiesConfig.getEmptyTopicStringConstantId()).getConstantValue();
+                final Document emptyXMLDoc = XMLUtilities.convertStringToDocument(emptyXMLRaw, true);
+
+                if (emptyXMLDoc != null) {
+                    XMLUtilities.setChildrenContent(emptyXMLDoc.getDocumentElement(), "title", fixedTitle, true);
+                    final String xmlString = XMLUtilities.removePreamble(XMLUtilities.convertDocumentToString(emptyXMLDoc, true));
+                    emptyXMLPlaceholder =
+                            XSL_STYLESHEET + "\n" +
+                                    "<!DOCTYPE " + emptyXMLDoc.getDocumentElement().getNodeName() + "[]>\n" +
+                                    xmlString;
+                }
+
+            } catch (final Exception ex) {
+                // do nothing - the string constants are not valid xml
+            }
+
+            return emptyXMLPlaceholder;
+        }
+
+        // Generate the invalid XML placeholder
+        String invalidXMLPlaceholder = "";
         try {
             final String invalidXMLRaw = entityManager.find(StringConstants.class, entitiesConfig.getInvalidTopicStringConstantId()).getConstantValue();
-            final String emptyXMLRaw = entityManager.find(StringConstants.class, entitiesConfig.getEmptyTopicStringConstantId()).getConstantValue();
-
             final Document invalidXMLDoc = XMLUtilities.convertStringToDocument(invalidXMLRaw, true);
-            final Document emptyXMLDoc = XMLUtilities.convertStringToDocument(emptyXMLRaw, true);
 
             if (invalidXMLDoc != null) {
                 XMLUtilities.setChildrenContent(invalidXMLDoc.getDocumentElement(), "title", fixedTitle, true);
                 final String xmlString = XMLUtilities.removePreamble(XMLUtilities.convertDocumentToString(invalidXMLDoc, true));
                 invalidXMLPlaceholder =
-                    XSL_STYLESHEET + "\n" +
-                    "<!DOCTYPE " + invalidXMLDoc.getDocumentElement().getNodeName() + "[]>\n" +
-                    xmlString;
+                        XSL_STYLESHEET + "\n" +
+                                "<!DOCTYPE " + invalidXMLDoc.getDocumentElement().getNodeName() + "[]>\n" +
+                                xmlString;
             }
-
-            if (emptyXMLDoc != null) {
-                XMLUtilities.setChildrenContent(emptyXMLDoc.getDocumentElement(), "title", fixedTitle, true);
-                final String xmlString = XMLUtilities.removePreamble(XMLUtilities.convertDocumentToString(emptyXMLDoc, true));
-                emptyXMLPlaceholder =
-                    XSL_STYLESHEET + "\n" +
-                    "<!DOCTYPE " + emptyXMLDoc.getDocumentElement().getNodeName() + "[]>\n" +
-                    xmlString;
-            }
-
         } catch (final Exception ex) {
             // do nothing - the string constants are not valid xml
-        }
-
-        if (xml == null || xml.trim().length() == 0) {
-            return emptyXMLPlaceholder;
         }
 
         if (xmlErrors != null && xmlErrors.trim().length() != 0) {
             return invalidXMLPlaceholder;
         }
 
-        /*
-            Attempt to convert the XML, and throw an exception if there is an issue
-         */
+        // Attempt to convert the XML, and throw an exception if there is an issue
         try {
             final Document xmlDoc = XMLUtilities.convertStringToDocument(xml, true);
-            /*
-                Wrap this topic up for rendering if needed
-             */
-            DocBookUtilities.wrapUpDocbookElementsForRendering(xmlDoc);
-            /*
-                Some xml formats need namespace info added to the document element
-             */
-            DocBookUtilities.addNamespaceToDocElement(format, xmlDoc);
+            // Wrap this topic up for rendering if needed
+            DocBookUtilities.wrapForRendering(xmlDoc);
 
+            // Some xml formats need namespace info added to the document element
+            DocBookUtilities.addNamespaceToDocElement(DocBookVersion.getVersionFromId(format), xmlDoc);
+
+            // Resolve the injections in the XML
             InjectionResolver.resolveInjections(entityManager, format, xmlDoc,
                     baseUrl == null ? "/pressgang-ccms/rest/1/topic/get/xml/" + InjectionResolver.HOST_URL_ID_TOKEN + "/xslt+xml" : baseUrl);
 
-            /*
-                Remove the title if requested
-             */
+            // Remove the title if requested
             if (includeTitle != null && !includeTitle.booleanValue()) {
                 XMLUtilities.removeChildrenOfType(xmlDoc.getDocumentElement(), "title");
             }
 
-            /*
-                Process any conditions
-             */
+            // Process any conditions
             if (conditions != null) {
                 DocBookUtilities.processConditions(conditions, xmlDoc);
             }
 
-            /*
-                convert the xml back to a string, and remove the preamble
-             */
+            // convert the xml back to a string, and remove the preamble
             final String fixedXML = XMLUtilities.removePreamble(XMLUtilities.convertDocumentToString(xmlDoc));
 
-            /*
-                Add the stylesheet info
-            */
+            // Add the stylesheet info
             final StringBuilder retValue = new StringBuilder(XSL_STYLESHEET + "\n");
-             /*
-                Build the doctype declaration
-             */
-            retValue.append(DocBookUtilities.buildDocbookDoctype(format, xmlDoc.getDocumentElement().getNodeName(), entities) + "\n");
+             // Build the doctype declaration
+            retValue.append(DocBookUtilities.buildDocBookDoctype(DocBookVersion.getVersionFromId(format),
+                    xmlDoc.getDocumentElement().getNodeName(), entities) + "\n");
             retValue.append(fixedXML);
             return retValue.toString();
         } catch (final SAXException ex) {
