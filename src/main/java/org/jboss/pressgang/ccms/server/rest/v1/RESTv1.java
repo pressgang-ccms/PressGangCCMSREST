@@ -3219,7 +3219,7 @@ public class RESTv1 extends BaseRESTv1 implements RESTBaseInterfaceV1, RESTInter
     public RESTTextContentSpecV1 getJSONTextContentSpec(final Integer id, final String expand) {
         if (id == null) throw new BadRequestException("The id parameter can not be null");
 
-        return getJSONResource(ContentSpec.class, textContentSpecFactory, id, expand);
+        return getResource(ContentSpec.class, textContentSpecFactory, id, null, expand, RESTv1Constants.JSON_URL + "+" + RESTv1Constants.TEXT_URL);
     }
 
     @Override
@@ -3227,20 +3227,21 @@ public class RESTv1 extends BaseRESTv1 implements RESTBaseInterfaceV1, RESTInter
         if (id == null) throw new BadRequestException("The id parameter can not be null");
         if (revision == null) throw new BadRequestException("The revision parameter can not be null");
 
-        return getJSONResource(ContentSpec.class, textContentSpecFactory, id, revision, expand);
+        return getResource(ContentSpec.class, textContentSpecFactory, id, revision, expand,
+                RESTv1Constants.JSON_URL + "+" + RESTv1Constants.TEXT_URL);
     }
 
     @Override
     public RESTTextContentSpecCollectionV1 getJSONTextContentSpecs(final String expand) {
-        return getJSONResources(RESTTextContentSpecCollectionV1.class, ContentSpec.class, textContentSpecFactory,
-                RESTv1Constants.CONTENT_SPEC_EXPANSION_NAME, expand);
+        return getResources(RESTTextContentSpecCollectionV1.class, ContentSpec.class, textContentSpecFactory,
+                RESTv1Constants.CONTENT_SPEC_EXPANSION_NAME, expand, RESTv1Constants.JSON_URL + "+" + RESTv1Constants.TEXT_URL);
     }
 
     @Override
     public RESTTextContentSpecCollectionV1 getJSONTextContentSpecsWithQuery(final PathSegment query, final String expand) {
-        return getJSONResourcesFromQuery(RESTTextContentSpecCollectionV1.class, query.getMatrixParameters(),
+        return getResourcesFromQuery(RESTTextContentSpecCollectionV1.class, query.getMatrixParameters(),
                 ContentSpecFilterQueryBuilder.class, new ContentSpecFieldFilter(), textContentSpecFactory,
-                RESTv1Constants.CONTENT_SPEC_EXPANSION_NAME, expand);
+                RESTv1Constants.CONTENT_SPEC_EXPANSION_NAME, expand, RESTv1Constants.JSON_URL + "+" + RESTv1Constants.TEXT_URL);
     }
 
     @Override
