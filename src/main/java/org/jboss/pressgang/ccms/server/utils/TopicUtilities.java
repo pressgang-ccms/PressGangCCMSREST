@@ -16,14 +16,7 @@ import javax.persistence.criteria.Root;
 import java.io.IOException;
 import java.io.StringReader;
 import java.io.UnsupportedEncodingException;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Properties;
-import java.util.Set;
-import java.util.TreeMap;
+import java.util.*;
 
 import com.j2bugzilla.base.BugzillaConnector;
 import com.j2bugzilla.base.ECSBug;
@@ -537,7 +530,7 @@ public class TopicUtilities {
      * Validate the XML, and save any errors
      *
      * @param entityManager  The EntityManager
-     * @param blobConstantId The BlobConstants ID that is the DTD to validate against
+     * @param topic The topic to validate
      */
     public static void validateXML(final EntityManager entityManager, final Topic topic) {
         if (entityManager == null) throw new IllegalArgumentException("entityManager cannot be null");
@@ -557,19 +550,29 @@ public class TopicUtilities {
                 docBookVersion = DocBookVersion.DOCBOOK_45;
                 fixedXML = topic.getTopicXML();
             }
+
+            final Document doc = XMLUtilities.convertStringToDocument(fixedXML, true, false);
+
+            // Do a normal DTD validation on the topic
             final BlobConstants dtd = entityManager.find(BlobConstants.class, blobConstantId);
-
             if (dtd == null) throw new IllegalArgumentException("blobConstantId must be a valid BlobConstants entity id");
-
             final StringBuilder xmlErrors = new StringBuilder();
             final Pair<String, String> wrappedTopic = DocBookUtilities.wrapForValidation(docBookVersion, fixedXML);
             final String fixedTopicXml = wrappedTopic.getSecond();
             final String rootElementName = wrappedTopic.getFirst();
-            final Document doc = XMLUtilities.convertStringToDocument(fixedXML);
 
-            // Do a normal DTD validation on the topic
+            /*
+                Validation does not depend on having the correct entities defined. We can't actually know what entities
+                will be available to the topic when it is finally used, as this is determined by the content spec,
+                which can be updated after the topic is saved.
+
+                So we strip out any entities before doing validation.
+             */
+            final Map<String, String> replacements = XMLUtilities.calculateEntityReplacements(fixedTopicXml);
+            final String fixedTopicXmlWithoutEntities = XMLUtilities.replaceEntities(replacements, fixedTopicXml);
+
             final XMLValidator validator = new XMLValidator();
-            if (!validator.validate(validationMethod, fixedTopicXml, dtd.getConstantName(), dtd.getConstantValue(), rootElementName)) {
+            if (!validator.validate(validationMethod, fixedTopicXmlWithoutEntities, dtd.getConstantName(), dtd.getConstantValue(), rootElementName)) {
                 final String errorText = validator.getErrorText();
                 if (errorText != null) {
                     xmlErrors.append(errorText);

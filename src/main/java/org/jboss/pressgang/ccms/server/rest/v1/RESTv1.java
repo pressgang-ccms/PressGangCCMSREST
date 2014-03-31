@@ -2707,18 +2707,20 @@ public class RESTv1 extends BaseRESTv1 implements RESTBaseInterfaceV1, RESTInter
         final Topic topic = getEntity(Topic.class, id, revision);
 
         // Calculate the ETag on last modified date of user resource
-        final String eTagValue = id + ":" +
+        /*final String eTagValue = id + ":" +
                 (revision != null ? revision.toString() : EnversUtilities.getLatestRevision(entityManager, topic).toString()) + ":" +
                 (includeTitle == null ? true : false) + ":" +
                 (condition == null ? "".hashCode() : condition.hashCode()) + ":" +
                 (baseUrl == null ? "".hashCode() : baseUrl.hashCode()) + ":" +
-                (entities == null ? "".hashCode() : entities.hashCode());
+                (entities == null ? "".hashCode() : entities.hashCode());*/
 
         final String xml = topic.getTopicXML();
         final String title = topic.getTopicTitle();
         final String xmlErrors = topic.getTopicXMLErrors();
         final String retValue = addXSLToTopicXML(xmlErrors, xml, title, topic.getXmlFormat(), includeTitle, condition, entities, baseUrl);
-        return respondWithETag(revision == null, request, eTagValue, retValue);
+        return Response.ok(retValue).build();
+
+        //return respondWithETag(revision == null, request, eTagValue, retValue);
     }
 
     // CSV TOPIC FUNCTIONS
@@ -3422,15 +3424,22 @@ public class RESTv1 extends BaseRESTv1 implements RESTBaseInterfaceV1, RESTInter
             Etag depends on the id and revision of the csnode and the revision of the topic it points to. If any of
             these conditions change, the xml could potentially change.
         */
-        final String eTagValue =
-                /*SPEC NODE ID*/            id + ":" +
-                /*SPEC NODE REVISION*/      (revision != null ? revision.toString(): EnversUtilities.getLatestRevision(entityManager, csNode)) + ":" +
-                /*BASE URL FOR INJECTS*/    (baseUrl == null ? "".hashCode() : baseUrl.hashCode()) + ":" +
-                /*TOPIC ID*/                csNode.getEntityId() + ":" +
-                /*TOPIC REVISION*/          (csNode.getEntityRevision() != null ? csNode.getEntityRevision() : EnversUtilities.getLatestRevision(entityManager, topic));
+        /*final String eTagValue =
+                // SPEC NODE ID
+                id + ":" +
+                // SPEC NODE REVISION
+                (revision != null ? revision.toString(): EnversUtilities.getLatestRevision(entityManager, csNode)) + ":" +
+                //BASE URL FOR INJECTS
+                (baseUrl == null ? "".hashCode() : baseUrl.hashCode()) + ":" +
+                //TOPIC ID
+                csNode.getEntityId() + ":" +
+                //TOPIC REVISION
+                (csNode.getEntityRevision() != null ? csNode.getEntityRevision() : EnversUtilities.getLatestRevision(entityManager, topic));*/
 
         final String retValue = addXSLToTopicXML(csNode, topic, baseUrl);
-        return respondWithETag(revision == null, request, eTagValue, retValue);
+        return Response.ok(retValue).build();
+
+        //return respondWithETag(revision == null, request, eTagValue, retValue);
     }
 
     @Override
