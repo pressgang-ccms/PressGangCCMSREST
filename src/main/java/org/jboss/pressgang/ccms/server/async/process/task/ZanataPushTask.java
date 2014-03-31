@@ -8,7 +8,6 @@ import java.util.Map;
 
 import org.jboss.pressgang.ccms.contentspec.ContentSpec;
 import org.jboss.pressgang.ccms.contentspec.ITopicNode;
-import org.jboss.pressgang.ccms.contentspec.SpecTopic;
 import org.jboss.pressgang.ccms.contentspec.structures.StringToCSNodeCollection;
 import org.jboss.pressgang.ccms.contentspec.utils.CSTransformer;
 import org.jboss.pressgang.ccms.contentspec.utils.EntityUtilities;
@@ -104,12 +103,12 @@ public class ZanataPushTask extends ProcessRESTTask<Boolean> {
         // Download all the topics first
         downloadAllTopics(providerFactory, contentSpec);
 
-        final List<SpecTopic> specTopics = contentSpec.getSpecTopics();
-        for (final SpecTopic specTopic : specTopics) {
-            if (specTopic.getDBId() != null && specTopic.getDBId() > 0 && specTopic.getRevision() == null) {
-                specTopic.setTopic(topicProvider.getTopic(specTopic.getDBId()));
-            } else if (specTopic.getDBId() != null && specTopic.getDBId() > 0 && specTopic.getRevision() != null) {
-                specTopic.setTopic(topicProvider.getTopic(specTopic.getDBId(), specTopic.getRevision()));
+        final List<ITopicNode> topicNodes = contentSpec.getAllTopicNodes();
+        for (final ITopicNode topicNode : topicNodes) {
+            if (topicNode.getDBId() != null && topicNode.getDBId() > 0 && topicNode.getRevision() == null) {
+                topicNode.setTopic(topicProvider.getTopic(topicNode.getDBId()));
+            } else if (topicNode.getDBId() != null && topicNode.getDBId() > 0 && topicNode.getRevision() != null) {
+                topicNode.setTopic(topicProvider.getTopic(topicNode.getDBId(), topicNode.getRevision()));
             }
         }
     }
