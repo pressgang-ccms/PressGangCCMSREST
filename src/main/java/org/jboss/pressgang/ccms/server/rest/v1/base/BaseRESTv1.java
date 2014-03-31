@@ -100,10 +100,7 @@ import org.jboss.resteasy.spi.InternalServerErrorException;
 import org.jboss.resteasy.spi.NotFoundException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.w3c.dom.DOMException;
-import org.w3c.dom.Document;
-import org.w3c.dom.Node;
-import org.w3c.dom.NodeList;
+import org.w3c.dom.*;
 import org.xml.sax.SAXException;
 
 /**
@@ -291,67 +288,54 @@ public class BaseRESTv1 extends BaseREST {
         /*
             Attempt to convert the XML, and throw an exception if there is an issue
          */
-        Document xmlDoc = null;
         try {
-            xmlDoc = XMLUtilities.convertStringToDocument(xml, true);
+            final Document xmlDoc = XMLUtilities.convertStringToDocument(xml, true);
+            /*
+                Wrap this topic up for rendering if needed
+             */
+            DocBookUtilities.wrapUpDocbookElementsForRendering(xmlDoc);
+            /*
+                Some xml formats need namespace info added to the document element
+             */
+            DocBookUtilities.addNamespaceToDocElement(format, xmlDoc);
+
+            InjectionResolver.resolveInjections(entityManager, format, xmlDoc,
+                    baseUrl == null ? "/pressgang-ccms/rest/1/topic/get/xml/" + InjectionResolver.HOST_URL_ID_TOKEN + "/xslt+xml" : baseUrl);
+
+            /*
+                Remove the title if requested
+             */
+            if (includeTitle != null && !includeTitle.booleanValue()) {
+                XMLUtilities.removeChildrenOfType(xmlDoc.getDocumentElement(), "title");
+            }
+
+            /*
+                Process any conditions
+             */
+            if (conditions != null) {
+                DocBookUtilities.processConditions(conditions, xmlDoc);
+            }
+
+            /*
+                convert the xml back to a string, and remove the preamble
+             */
+            final String fixedXML = XMLUtilities.removePreamble(XMLUtilities.convertDocumentToString(xmlDoc));
+
+            /*
+                Add the stylesheet info
+            */
+            final StringBuilder retValue = new StringBuilder(XSL_STYLESHEET + "\n");
+             /*
+                Build the doctype declaration
+             */
+            retValue.append(DocBookUtilities.buildDocbookDoctype(format, xmlDoc.getDocumentElement().getNodeName(), entities) + "\n");
+            retValue.append(fixedXML);
+            return retValue.toString();
         } catch (final SAXException ex) {
             return invalidXMLPlaceholder;
         } catch (final DOMException ex) {
             return invalidXMLPlaceholder;
         }
-
-        InjectionResolver.resolveInjections(entityManager, format, xmlDoc,
-                baseUrl == null ? "/pressgang-ccms/rest/1/topic/get/xml/" + InjectionResolver.HOST_URL_ID_TOKEN + "/xslt+xml" : baseUrl);
-
-        /*
-            Remove the title if requested
-         */
-        if (includeTitle != null && !includeTitle.booleanValue()) {
-            for (int childIndex = 0; childIndex < xmlDoc.getDocumentElement().getChildNodes().getLength(); ++childIndex) {
-                final Node child = xmlDoc.getDocumentElement().getChildNodes().item(childIndex);
-                if (child.getNodeName().equals("title")) {
-                    xmlDoc.getDocumentElement().removeChild(child);
-                    break;
-                }
-            }
-        }
-
-        if (conditions != null) {
-            DocBookUtilities.processConditions(conditions, xmlDoc);
-        }
-
-        /*
-            We need to remove and XML declarations.
-         */
-        String fixedXML = XMLUtilities.convertDocumentToString(xmlDoc);
-        final String preamble = XMLUtilities.findPreamble(fixedXML);
-        if (preamble != null) {
-            fixedXML = fixedXML.replace(preamble, "");
-        }
-
-        final StringBuilder retValue = new StringBuilder();
-        retValue.append(XSL_STYLESHEET + "\n");
-        retValue.append("<!DOCTYPE " + xmlDoc.getDocumentElement().getNodeName() + "[\n");
-        if (entities != null) {
-            retValue.append(entities);
-        }
-        retValue.append("]>\n");
-
-        /*
-            Some topics ned to be wrapped to get them to render in the browser. See
-            BaseRenderedPresenter.java in the UI project.
-         */
-        final String documentElementNodeName = xmlDoc.getDocumentElement().getNodeName();
-        if (documentElementNodeName.equals("authorgroup") || documentElementNodeName.equals("legalnotice")) {
-            retValue.append("<book><bookinfo>\n");
-            retValue.append(fixedXML);
-            retValue.append("</bookinfo></book>");
-        } else {
-            retValue.append(fixedXML);
-        }
-
-
-        return retValue.toString();
     }
 
     protected String addXSLToTopicXML(final CSNode node, final Topic topic, final String baseUrl) {
