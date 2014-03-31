@@ -232,6 +232,7 @@ public class BaseRESTv1 extends BaseREST {
         final String XSL_STYLESHEET = "<?xml-stylesheet type='text/xsl' href='/pressgang-ccms-static/publican-docbook/html-single-diff.xsl'?>";
         String invalidXMLPlaceholder = "";
         String emptyXMLPlaceholder = "";
+        final String fixedTitle = includeTitle == null || includeTitle ? title : "";
 
         try {
             final String invalidXMLRaw = entityManager.find(StringConstants.class, entitiesConfig.getInvalidTopicStringConstantId()).getConstantValue();
@@ -240,37 +241,22 @@ public class BaseRESTv1 extends BaseREST {
             final Document invalidXMLDoc = XMLUtilities.convertStringToDocument(invalidXMLRaw, true);
             final Document emptyXMLDoc = XMLUtilities.convertStringToDocument(emptyXMLRaw, true);
 
-            for (final Document doc : new Document[]{invalidXMLDoc, emptyXMLDoc}) {
-                if (doc != null) {
-                    final NodeList children = doc.getDocumentElement().getChildNodes();
-                    for (int childIndex = 0; childIndex < children.getLength(); ++childIndex) {
-                        final Node child = children.item(childIndex);
-                        if (child.getNodeName().equals("title")) {
-                            if (includeTitle == null || includeTitle) {
-                                child.setTextContent(title);
-                            } else {
-                                child.setTextContent("");
-                            }
-                            break;
-                        }
-                    }
-                }
-            }
-
             if (invalidXMLDoc != null) {
-                final String xmlString = XMLUtilities.convertDocumentToString(invalidXMLDoc, true);
-                final String preamble = XMLUtilities.findPreamble(xmlString);
-                invalidXMLPlaceholder = XSL_STYLESHEET + "\n" +
+                XMLUtilities.setChildrenContent(invalidXMLDoc.getDocumentElement(), "title", fixedTitle, true);
+                final String xmlString = XMLUtilities.removePreamble(XMLUtilities.convertDocumentToString(invalidXMLDoc, true));
+                invalidXMLPlaceholder =
+                    XSL_STYLESHEET + "\n" +
                     "<!DOCTYPE " + invalidXMLDoc.getDocumentElement().getNodeName() + "[]>\n" +
-                        xmlString.replace(preamble, "");
+                    xmlString;
             }
 
             if (emptyXMLDoc != null) {
-                final String xmlString = XMLUtilities.convertDocumentToString(emptyXMLDoc, true);
-                final String preamble = XMLUtilities.findPreamble(xmlString);
-                emptyXMLPlaceholder = XSL_STYLESHEET + "\n" +
+                XMLUtilities.setChildrenContent(emptyXMLDoc.getDocumentElement(), "title", fixedTitle, true);
+                final String xmlString = XMLUtilities.removePreamble(XMLUtilities.convertDocumentToString(emptyXMLDoc, true));
+                emptyXMLPlaceholder =
+                    XSL_STYLESHEET + "\n" +
                     "<!DOCTYPE " + emptyXMLDoc.getDocumentElement().getNodeName() + "[]>\n" +
-                        xmlString.replace(preamble, "");
+                    xmlString;
             }
 
         } catch (final Exception ex) {
