@@ -687,7 +687,7 @@ public class TopicUtilities {
         } else if (topic.isTaggedWith(EntitiesConfig.getInstance().getInfoTagId())) {
             // Check that the info topic doesn't contain invalid fields
             if (DocBookUtilities.checkForInvalidInfoElements(doc)) {
-                xmlErrors.append("Info topics cannot contain &lt;title&gt;, &lt;subtitle&gt; or &lt;titleabbrev&gt; elements.\n");
+                xmlErrors.append("Info topics cannot contain <title>, <subtitle> or <titleabbrev> elements.\n");
             }
         }
     }
