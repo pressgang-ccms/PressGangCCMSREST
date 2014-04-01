@@ -68,6 +68,7 @@ import org.jboss.pressgang.ccms.utils.common.XMLValidator;
 import org.jboss.pressgang.ccms.utils.common.ZipUtilities;
 import org.jboss.pressgang.ccms.utils.constants.CommonConstants;
 import org.jboss.pressgang.ccms.utils.structures.DocBookVersion;
+import org.jboss.pressgang.ccms.utils.structures.InjectionError;
 import org.jboss.pressgang.ccms.utils.structures.NameIDSortMap;
 import org.jboss.pressgang.ccms.utils.structures.Pair;
 import org.slf4j.Logger;
@@ -79,6 +80,9 @@ import org.xml.sax.SAXException;
 
 public class TopicUtilities {
     private static final Logger log = LoggerFactory.getLogger(TopicUtilities.class);
+    private static final String[] DATE_FORMATS = new String[]{"MM-dd-yyyy", "MM/dd/yyyy", "yyyy-MM-dd", "yyyy/MM/dd", "EEE MMM dd yyyy",
+            "EEE, MMM dd yyyy", "EEE MMM dd yyyy Z", "EEE dd MMM yyyy", "EEE, dd MMM yyyy", "EEE dd MMM yyyy Z", "yyyyMMdd",
+            "yyyyMMdd'T'HHmmss.SSSZ"};
 
     /**
      * Creates a CSV string representation of all the topics in the provided list.
@@ -324,8 +328,9 @@ public class TopicUtilities {
 
     /**
      * Return the xml formatted with consistent whitespace and indentation
+     *
      * @param entityManager The EntityManager used to find the elements to be inlined
-     * @param doc The source XML
+     * @param doc           The source XML
      * @return The formatted XML
      */
     public static String processXML(final EntityManager entityManager, final Document doc) {
@@ -347,16 +352,14 @@ public class TopicUtilities {
         final String contentsInlineElementsString = prop.getProperty(CommonConstants.CONTENTS_INLINE_XML_ELEMENTS_PROPERTY_KEY);
 
         final ArrayList<String> verbatimElements = verbatimElementsString == null ? new ArrayList<String>() : CollectionUtilities
-                .toArrayList(
-                        verbatimElementsString.split("[\\s]*,[\\s]*"));
+                .toArrayList(verbatimElementsString.split("[\\s]*,[\\s]*"));
 
-        final ArrayList<String> inlineElements = inlineElementsString == null ? new ArrayList<String>() : CollectionUtilities
-                .toArrayList(
-                        inlineElementsString.split("[\\s]*,[\\s]*"));
+        final ArrayList<String> inlineElements = inlineElementsString == null ? new ArrayList<String>() : CollectionUtilities.toArrayList(
+                inlineElementsString.split("[\\s]*,[\\s]*"));
 
         final ArrayList<String> contentsInlineElements = contentsInlineElementsString == null ? new ArrayList<String>() :
                 CollectionUtilities.toArrayList(
-                        contentsInlineElementsString.split("[\\s]*,[\\s]*"));
+                contentsInlineElementsString.split("[\\s]*,[\\s]*"));
 
         // Convert the document to a String applying the XML Formatting property rules
         return XMLUtilities.convertNodeToString(doc, verbatimElements, inlineElements, contentsInlineElements, true);
@@ -536,8 +539,8 @@ public class TopicUtilities {
     /**
      * Validate the XML, and save any errors
      *
-     * @param entityManager  The EntityManager
-     * @param blobConstantId The BlobConstants ID that is the DTD to validate against
+     * @param entityManager The EntityManager
+     * @param topic         The Topic to validate.
      */
     public static void validateXML(final EntityManager entityManager, final Topic topic) {
         if (entityManager == null) throw new IllegalArgumentException("entityManager cannot be null");
@@ -576,56 +579,14 @@ public class TopicUtilities {
                 }
             }
 
-            if (!isTopicNormalTopic(topic)) {
-                if (topic.isTaggedWith(EntitiesConfig.getInstance().getRevisionHistoryTagId())) {
-                    // Make sure the revision history is an appendix
-                    if (!doc.getDocumentElement().getNodeName().equals("appendix")) {
-                        xmlErrors.append("Root element must be <appendix> for Revision History Topics.\n");
-                    }
+            // Check that the root topic node is correct
+            checkTopicRootElement(topic, doc, xmlErrors);
 
-                    // Check to make sure that a revhistory entry exists
-                    final NodeList revHistoryList = doc.getElementsByTagName("revhistory");
-                    if (revHistoryList.getLength() == 0) {
-                        xmlErrors.append("No <revhistory> element found. A <revhistory> must exist for Revision Histories.\n");
-                    }
-                } else if (topic.isTaggedWith(EntitiesConfig.getInstance().getLegalNoticeTagId())) {
-                    // Make sure the Legal Notice is a legalnotice
-                    if (!doc.getDocumentElement().getNodeName().equals("legalnotice")) {
-                        xmlErrors.append("Root element must be <legalnotice> for Legal Notice Topics.\n");
-                    }
-                } else if (topic.isTaggedWith(EntitiesConfig.getInstance().getAuthorGroupTagId())) {
-                    // Make sure the Author Group is an authorgroup
-                    if (!doc.getDocumentElement().getNodeName().equals("authorgroup")) {
-                        xmlErrors.append("Root element must be <authorgroup> for Author Group Topics.\n");
-                    }
-                } else if (topic.isTaggedWith(EntitiesConfig.getInstance().getAbstractTagId())) {
-                    // Make sure the Abstract is an abstract
-                    if (!doc.getDocumentElement().getNodeName().equals("abstract")) {
-                        xmlErrors.append("Root element must be <abstract> for Abstract Topics.\n");
-                    }
-                } else if (topic.isTaggedWith(EntitiesConfig.getInstance().getInfoTagId())) {
-                    // Make sure the Info topic is an info
-                    if (topic.getXmlFormat() == CommonConstants.DOCBOOK_50) {
-                        if (!doc.getDocumentElement().getNodeName().equals("info")) {
-                            xmlErrors.append("Root element must be <info> for Info Topics.\n");
-                        }
-                    } else {
-                        if (!doc.getDocumentElement().getNodeName().equals("sectioninfo")) {
-                            xmlErrors.append("Root element must be <sectioninfo> for Info Topics.\n");
-                        }
-                    }
-                }
-            } else {
-                // Make sure the topic is a section
-                if (!doc.getDocumentElement().getNodeName().equals(DocBookUtilities.TOPIC_ROOT_NODE_NAME)) {
-                    xmlErrors.append("Root element must be <" + DocBookUtilities.TOPIC_ROOT_NODE_NAME + "> for Topics.\n");
-                }
+            // Check that the content is valid
+            checkTopicContentBasedOnType(topic, doc, xmlErrors);
 
-                // Check the tables are valid
-                if (!validateTopicTables(doc)) {
-                    xmlErrors.append("Table column declaration doesn't match the number of entry elements.\n");
-                }
-            }
+            // Check to make sure we don't have any invalid injections
+            checkForInvalidInjections(doc, xmlErrors);
 
             if (xmlErrors.length() != 0) {
                 topic.setTopicXMLErrors(xmlErrors.toString());
@@ -640,17 +601,119 @@ public class TopicUtilities {
     }
 
     /**
+     * Make sure that the root element name matches the topic type requirements.
+     *
+     * @param topic
+     * @param doc
+     * @param xmlErrors
+     */
+    protected static void checkTopicRootElement(final Topic topic, final Document doc, final StringBuilder xmlErrors) {
+        if (!isTopicNormalTopic(topic)) {
+            if (topic.isTaggedWith(EntitiesConfig.getInstance().getRevisionHistoryTagId())) {
+                // Make sure the revision history is an appendix
+                if (!doc.getDocumentElement().getNodeName().equals("appendix")) {
+                    xmlErrors.append("Root element must be <appendix> for Revision History Topics.\n");
+                }
+
+                // Check to make sure that a revhistory entry exists
+                final NodeList revHistoryList = doc.getElementsByTagName("revhistory");
+                if (revHistoryList.getLength() == 0) {
+                    xmlErrors.append("No <revhistory> element found. A <revhistory> must exist for Revision Histories.\n");
+                }
+            } else if (topic.isTaggedWith(EntitiesConfig.getInstance().getLegalNoticeTagId())) {
+                // Make sure the Legal Notice is a legalnotice
+                if (!doc.getDocumentElement().getNodeName().equals("legalnotice")) {
+                    xmlErrors.append("Root element must be <legalnotice> for Legal Notice Topics.\n");
+                }
+            } else if (topic.isTaggedWith(EntitiesConfig.getInstance().getAuthorGroupTagId())) {
+                // Make sure the Author Group is an authorgroup
+                if (!doc.getDocumentElement().getNodeName().equals("authorgroup")) {
+                    xmlErrors.append("Root element must be <authorgroup> for Author Group Topics.\n");
+                }
+            } else if (topic.isTaggedWith(EntitiesConfig.getInstance().getAbstractTagId())) {
+                // Make sure the Abstract is an abstract
+                if (!doc.getDocumentElement().getNodeName().equals("abstract")) {
+                    xmlErrors.append("Root element must be <abstract> for Abstract Topics.\n");
+                }
+            } else if (topic.isTaggedWith(EntitiesConfig.getInstance().getInfoTagId())) {
+                // Make sure the Info topic is an info
+                if (topic.getXmlFormat() == CommonConstants.DOCBOOK_50) {
+                    if (!doc.getDocumentElement().getNodeName().equals("info")) {
+                        xmlErrors.append("Root element must be <info> for Info Topics.\n");
+                    }
+                } else {
+                    if (!doc.getDocumentElement().getNodeName().equals("sectioninfo")) {
+                        xmlErrors.append("Root element must be <sectioninfo> for Info Topics.\n");
+                    }
+                }
+            }
+        } else {
+            // Make sure the topic is a section
+            if (!doc.getDocumentElement().getNodeName().equals(DocBookUtilities.TOPIC_ROOT_NODE_NAME)) {
+                xmlErrors.append("Root element must be <" + DocBookUtilities.TOPIC_ROOT_NODE_NAME + "> for Topics.\n");
+            }
+
+            // Check the tables are valid
+            if (!validateTopicTables(doc)) {
+                xmlErrors.append("Table column declaration doesn't match the number of entry elements.\n");
+            }
+        }
+    }
+
+    /**
+     * Check a topics content based on it's topic type.
+     *
+     * @param topic
+     * @param doc
+     * @return
+     */
+    protected static void checkTopicContentBasedOnType(final Topic topic, final Document doc, final StringBuilder xmlErrors) {
+        if (topic.isTaggedWith(EntitiesConfig.getInstance().getRevisionHistoryTagId())) {
+            // Check to make sure that a revhistory entry exists
+            final String revHistoryErrors = DocBookUtilities.validateRevisionHistory(doc, DATE_FORMATS);
+            if (revHistoryErrors != null) {
+                xmlErrors.append(revHistoryErrors + "\n");
+            }
+        } else if (topic.isTaggedWith(EntitiesConfig.getInstance().getInfoTagId())) {
+            // Check that the info topic doesn't contain invalid fields
+            if (DocBookUtilities.checkForInvalidInfoElements(doc)) {
+                xmlErrors.append("Info topics cannot contain &lt;title&gt;, &lt;subtitle&gt; or &lt;titleabbrev&gt; elements.\n");
+            }
+        }
+    }
+
+    /**
+     * Checks to make sure that an XML Document doesn't contain any possibly invalid XML Errors.
+     *
+     * @param doc
+     * @param xmlErrors
+     */
+    public static void checkForInvalidInjections(final Document doc, final StringBuilder xmlErrors) {
+        final List<InjectionError> injectionErrors = XMLUtilities.checkForInvalidInjections(doc);
+        if (!injectionErrors.isEmpty()) {
+            for (final InjectionError injectionError : injectionErrors) {
+                final List<String> injectionErrorMsgs = new ArrayList<String>();
+                for (final String msg : injectionError.getMessages()) {
+                    injectionErrorMsgs.add(DocBookUtilities.buildListItem(msg));
+                }
+
+                xmlErrors.append("\"" + injectionError.getInjection().trim() + "\" is possibly an invalid custom Injection Point" +
+                        ".\n    "  + CollectionUtilities.toSeperatedString(injectionErrorMsgs, "\n    "));
+            }
+        }
+    }
+
+    /**
      * Check to see if a Topic is a normal topic, instead of a Revision History or Legal Notice
      *
      * @param topic The topic to be checked.
      * @return True if the topic is a normal topic, otherwise false.
      */
     public static boolean isTopicNormalTopic(final Topic topic) {
-        return !(topic.isTaggedWith(EntitiesConfig.getInstance().getRevisionHistoryTagId())
-                || topic.isTaggedWith(EntitiesConfig.getInstance().getLegalNoticeTagId())
-                || topic.isTaggedWith(EntitiesConfig.getInstance().getAuthorGroupTagId())
-                || topic.isTaggedWith(EntitiesConfig.getInstance().getAbstractTagId())
-                || topic.isTaggedWith(EntitiesConfig.getInstance().getInfoTagId()));
+        return !(topic.isTaggedWith(EntitiesConfig.getInstance().getRevisionHistoryTagId()) || topic.isTaggedWith(
+                EntitiesConfig.getInstance().getLegalNoticeTagId()) || topic.isTaggedWith(
+                EntitiesConfig.getInstance().getAuthorGroupTagId()) || topic.isTaggedWith(
+                EntitiesConfig.getInstance().getAbstractTagId()) || topic.isTaggedWith(EntitiesConfig.getInstance().getInfoTagId()));
     }
 
     /**
@@ -660,11 +723,11 @@ public class TopicUtilities {
      * @return True if the topic is a normal topic, otherwise false.
      */
     public static boolean isTopicNormalTopic(final RESTTopicV1 topic) {
-        return !(ComponentTopicV1.hasTag(topic, EntitiesConfig.getInstance().getRevisionHistoryTagId())
-                || ComponentTopicV1.hasTag(topic, EntitiesConfig.getInstance().getLegalNoticeTagId())
-                || ComponentTopicV1.hasTag(topic, EntitiesConfig.getInstance().getAuthorGroupTagId())
-                || ComponentTopicV1.hasTag(topic, EntitiesConfig.getInstance().getInfoTagId())
-                || ComponentTopicV1.hasTag(topic, EntitiesConfig.getInstance().getAbstractTagId()));
+        return !(ComponentTopicV1.hasTag(topic, EntitiesConfig.getInstance().getRevisionHistoryTagId()) || ComponentTopicV1.hasTag(topic,
+                EntitiesConfig.getInstance().getLegalNoticeTagId()) || ComponentTopicV1.hasTag(topic,
+                EntitiesConfig.getInstance().getAuthorGroupTagId()) || ComponentTopicV1.hasTag(topic,
+                EntitiesConfig.getInstance().getInfoTagId()) || ComponentTopicV1.hasTag(topic,
+                EntitiesConfig.getInstance().getAbstractTagId()));
     }
 
     /**
@@ -819,50 +882,56 @@ public class TopicUtilities {
         final FullTextSession fullTextSession = Search.getFullTextSession(session);
         final SearchFactory searchFactory = fullTextSession.getSearchFactory();
         final IndexReader reader = searchFactory.getIndexReaderAccessor().open(Topic.class);
-        final Analyzer analyser =  fullTextSession.getSearchFactory().getAnalyzer(Topic.class);
+        final Analyzer analyser = fullTextSession.getSearchFactory().getAnalyzer(Topic.class);
 
         try {
             final MoreLikeThis mlt = new MoreLikeThis(reader);
             mlt.setAnalyzer(analyser);
 
-            final IntegerConstants minWordLen = entityManager.find(IntegerConstants.class, ServiceConstants.KEYWORD_MINIMUM_WORD_LENGTH_INT_CONSTANT_ID);
-            if (minWordLen != null && minWordLen.getConstantValue() != null)  {
+            final IntegerConstants minWordLen = entityManager.find(IntegerConstants.class,
+                    ServiceConstants.KEYWORD_MINIMUM_WORD_LENGTH_INT_CONSTANT_ID);
+            if (minWordLen != null && minWordLen.getConstantValue() != null) {
                 mlt.setMinWordLen(minWordLen.getConstantValue());
             } else {
                 mlt.setMinWordLen(ServiceConstants.KEYWORD_MINIMUM_WORD_LENGTH_DEFAULT);
             }
 
-            final IntegerConstants minDocFreq = entityManager.find(IntegerConstants.class, ServiceConstants.KEYWORD_MINIMUM_DOCUMENT_FREQUENCY_INT_CONSTANT_ID);
-            if (minDocFreq != null && minDocFreq.getConstantValue() != null)  {
+            final IntegerConstants minDocFreq = entityManager.find(IntegerConstants.class,
+                    ServiceConstants.KEYWORD_MINIMUM_DOCUMENT_FREQUENCY_INT_CONSTANT_ID);
+            if (minDocFreq != null && minDocFreq.getConstantValue() != null) {
                 mlt.setMinDocFreq(minDocFreq.getConstantValue());
-            }  else {
+            } else {
                 mlt.setMinDocFreq(ServiceConstants.KEYWORD_MINIMUM_DOCUMENT_FREQUENCY_DEFAULT);
             }
 
-            final IntegerConstants maxQueryTerms = entityManager.find(IntegerConstants.class, ServiceConstants.KEYWORD_MAX_QUERY_TERMS_INT_CONSTANT_ID);
-            if (maxQueryTerms != null && maxQueryTerms.getConstantValue() != null)  {
+            final IntegerConstants maxQueryTerms = entityManager.find(IntegerConstants.class,
+                    ServiceConstants.KEYWORD_MAX_QUERY_TERMS_INT_CONSTANT_ID);
+            if (maxQueryTerms != null && maxQueryTerms.getConstantValue() != null) {
                 mlt.setMaxQueryTerms(maxQueryTerms.getConstantValue());
-            }  else {
+            } else {
                 mlt.setMaxQueryTerms(ServiceConstants.KEYWORD_MAX_QUERY_TERMS_INT_DEFAULT);
             }
 
-            final IntegerConstants minTermFreq = entityManager.find(IntegerConstants.class, ServiceConstants.KEYWORD_MINIMUM_TERM_FREQUENCY_INT_CONSTANT_ID);
-            if (minTermFreq != null && minTermFreq.getConstantValue() != null)  {
+            final IntegerConstants minTermFreq = entityManager.find(IntegerConstants.class,
+                    ServiceConstants.KEYWORD_MINIMUM_TERM_FREQUENCY_INT_CONSTANT_ID);
+            if (minTermFreq != null && minTermFreq.getConstantValue() != null) {
                 mlt.setMinTermFreq(minTermFreq.getConstantValue());
-            }  else {
+            } else {
                 mlt.setMinTermFreq(ServiceConstants.KEYWORD_MINIMUM_TERM_FREQUENCY_DEFAULT);
             }
 
-            final IntegerConstants maxDocFreqPct = entityManager.find(IntegerConstants.class, ServiceConstants.KEYWORD_MAXIMUM_DOCUMENT_FREQUENCY_PERCENT_INT_CONSTANT_ID);
-            if (maxDocFreqPct != null && maxDocFreqPct.getConstantValue() != null)  {
+            final IntegerConstants maxDocFreqPct = entityManager.find(IntegerConstants.class,
+                    ServiceConstants.KEYWORD_MAXIMUM_DOCUMENT_FREQUENCY_PERCENT_INT_CONSTANT_ID);
+            if (maxDocFreqPct != null && maxDocFreqPct.getConstantValue() != null) {
                 mlt.setMaxDocFreqPct(maxDocFreqPct.getConstantValue());
-            }  else {
+            } else {
                 mlt.setMaxDocFreqPct(ServiceConstants.KEYWORD_MAXIMUM_DOCUMENT_FREQUENCY_PERCENT_DEFAULT);
             }
 
-            final StringConstants stopWords = entityManager.find(StringConstants.class, ServiceConstants.KEYWORDS_STOPWORDS_STRING_CONSTANT_ID);
-            if (stopWords != null && stopWords.getConstantValue() != null)  {
-                final String [] stopWordsSplit = stopWords.getConstantValue().split("\n");
+            final StringConstants stopWords = entityManager.find(StringConstants.class,
+                    ServiceConstants.KEYWORDS_STOPWORDS_STRING_CONSTANT_ID);
+            if (stopWords != null && stopWords.getConstantValue() != null) {
+                final String[] stopWordsSplit = stopWords.getConstantValue().split("\n");
                 final Set<String> stopWordsSet = new HashSet<String>();
                 for (final String stopWord : stopWordsSplit) {
                     stopWordsSet.add(stopWord);
@@ -873,7 +942,8 @@ public class TopicUtilities {
             mlt.setFieldNames(new String[]{Topic.TOPIC_SEARCH_TEXT_FIELD_NAME});
 
             final ArrayList<String> keywords = new ArrayList<String>();
-            final String[] keywordsArray = mlt.retrieveInterestingTerms(new StringReader(entity.getTopicSearchText()), Topic.TOPIC_SEARCH_TEXT_FIELD_NAME);
+            final String[] keywordsArray = mlt.retrieveInterestingTerms(new StringReader(entity.getTopicSearchText()),
+                    Topic.TOPIC_SEARCH_TEXT_FIELD_NAME);
             CollectionUtilities.addAll(keywordsArray, keywords);
             return keywords;
         } catch (final IOException ex) {
