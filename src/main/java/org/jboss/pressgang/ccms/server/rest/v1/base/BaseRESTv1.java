@@ -319,6 +319,10 @@ public class BaseRESTv1 extends BaseREST {
             // convert back to a string for final processing
             final String processedXml = XMLUtilities.convertDocumentToString(xmlDoc);
 
+            if (!XMLUtilities.allEntitiesAccountedFor(processedXml, format, entities)) {
+                return invalidXMLPlaceholder;
+            }
+
             // convert the xml back to a string, remove the preamble, and replace any standard entities
             final String fixedXML = XMLUtilities.replaceStandardEntities(
                     format,

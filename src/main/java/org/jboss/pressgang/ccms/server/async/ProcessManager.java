@@ -62,7 +62,7 @@ import org.slf4j.LoggerFactory;
 
 @DependsOn("StartUp")
 @Singleton
-@Startup
+//@Startup
 @ApplicationScoped
 @TransactionManagement(TransactionManagementType.BEAN)
 @Lock(LockType.READ)
