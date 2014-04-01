@@ -314,19 +314,28 @@ public class BaseRESTv1 extends BaseREST {
             }
 
             // Process any conditions
-            if (conditions != null) {
-                DocBookUtilities.processConditions(conditions, xmlDoc);
-            }
+            DocBookUtilities.processConditions(conditions, xmlDoc);
 
-            // convert the xml back to a string, and remove the preamble
-            final String fixedXML = XMLUtilities.removePreamble(XMLUtilities.convertDocumentToString(xmlDoc));
+            // convert back to a string for final processing
+            final String processedXml = XMLUtilities.convertDocumentToString(xmlDoc);
+
+            // convert the xml back to a string, remove the preamble, and replace any standard entities
+            final String fixedXML = XMLUtilities.replaceStandardEntities(
+                    format,
+                    XMLUtilities.removePreamble(processedXml));
 
             // Add the stylesheet info
             final StringBuilder retValue = new StringBuilder(XSL_STYLESHEET + "\n");
              // Build the doctype declaration
-            retValue.append(DocBookUtilities.buildDocBookDoctype(DocBookVersion.getVersionFromId(format),
-                    xmlDoc.getDocumentElement().getNodeName(), entities) + "\n");
+            retValue.append(
+                    DocBookUtilities.buildDocBookDoctype(
+                        DocBookVersion.getVersionFromId(format),
+                        xmlDoc.getDocumentElement().getNodeName(),
+                        entities,
+                        false
+                    ) + "\n");
             retValue.append(fixedXML);
+
             return retValue.toString();
         } catch (final SAXException ex) {
             return invalidXMLPlaceholder;
