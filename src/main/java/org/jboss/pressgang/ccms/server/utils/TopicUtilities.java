@@ -21,6 +21,7 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Properties;
 import java.util.Set;
 import java.util.TreeMap;
@@ -74,7 +75,6 @@ import org.jboss.pressgang.ccms.utils.structures.Pair;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.w3c.dom.Document;
-import org.w3c.dom.Element;
 import org.w3c.dom.NodeList;
 import org.xml.sax.SAXException;
 
@@ -560,19 +560,29 @@ public class TopicUtilities {
                 docBookVersion = DocBookVersion.DOCBOOK_45;
                 fixedXML = topic.getTopicXML();
             }
+
+            final Document doc = XMLUtilities.convertStringToDocument(fixedXML);
+
+            // Do a normal DTD validation on the topic
             final BlobConstants dtd = entityManager.find(BlobConstants.class, blobConstantId);
-
             if (dtd == null) throw new IllegalArgumentException("blobConstantId must be a valid BlobConstants entity id");
-
             final StringBuilder xmlErrors = new StringBuilder();
             final Pair<String, String> wrappedTopic = DocBookUtilities.wrapForValidation(docBookVersion, fixedXML);
             final String fixedTopicXml = wrappedTopic.getSecond();
             final String rootElementName = wrappedTopic.getFirst();
-            final Document doc = XMLUtilities.convertStringToDocument(fixedXML);
 
-            // Do a normal DTD validation on the topic
+            /*
+                Validation does not depend on having the correct entities defined. We can't actually know what entities
+                will be available to the topic when it is finally used, as this is determined by the content spec,
+                which can be updated after the topic is saved.
+
+                So we strip out any entities before doing validation.
+             */
+            final Map<String, String> replacements = XMLUtilities.calculateEntityReplacements(fixedTopicXml);
+            final String fixedTopicXmlWithoutEntities = XMLUtilities.replaceEntities(replacements, fixedTopicXml);
+
             final XMLValidator validator = new XMLValidator();
-            if (!validator.validate(validationMethod, fixedTopicXml, dtd.getConstantName(), dtd.getConstantValue(), rootElementName)) {
+            if (!validator.validate(validationMethod, fixedTopicXmlWithoutEntities, dtd.getConstantName(), dtd.getConstantValue(), rootElementName)) {
                 final String errorText = validator.getErrorText();
                 if (errorText != null) {
                     xmlErrors.append(errorText);
@@ -654,7 +664,7 @@ public class TopicUtilities {
             }
 
             // Check the tables are valid
-            if (!validateTopicTables(doc)) {
+            if (!DocBookUtilities.validateTables(doc)) {
                 xmlErrors.append("Table column declaration doesn't match the number of entry elements.\n");
             }
         }
@@ -698,7 +708,7 @@ public class TopicUtilities {
                 }
 
                 xmlErrors.append("\"" + injectionError.getInjection().trim() + "\" is possibly an invalid custom Injection Point" +
-                        ".\n    "  + CollectionUtilities.toSeperatedString(injectionErrorMsgs, "\n    "));
+                        ".\n    "  + CollectionUtilities.toSeperatedString(injectionErrorMsgs, "\n    ") + "\n");
             }
         }
     }
@@ -710,10 +720,11 @@ public class TopicUtilities {
      * @return True if the topic is a normal topic, otherwise false.
      */
     public static boolean isTopicNormalTopic(final Topic topic) {
-        return !(topic.isTaggedWith(EntitiesConfig.getInstance().getRevisionHistoryTagId()) || topic.isTaggedWith(
-                EntitiesConfig.getInstance().getLegalNoticeTagId()) || topic.isTaggedWith(
-                EntitiesConfig.getInstance().getAuthorGroupTagId()) || topic.isTaggedWith(
-                EntitiesConfig.getInstance().getAbstractTagId()) || topic.isTaggedWith(EntitiesConfig.getInstance().getInfoTagId()));
+        return !(topic.isTaggedWith(EntitiesConfig.getInstance().getRevisionHistoryTagId())
+                || topic.isTaggedWith(EntitiesConfig.getInstance().getLegalNoticeTagId())
+                || topic.isTaggedWith(EntitiesConfig.getInstance().getAuthorGroupTagId())
+                || topic.isTaggedWith(EntitiesConfig.getInstance().getAbstractTagId())
+                || topic.isTaggedWith(EntitiesConfig.getInstance().getInfoTagId()));
     }
 
     /**
@@ -723,37 +734,11 @@ public class TopicUtilities {
      * @return True if the topic is a normal topic, otherwise false.
      */
     public static boolean isTopicNormalTopic(final RESTTopicV1 topic) {
-        return !(ComponentTopicV1.hasTag(topic, EntitiesConfig.getInstance().getRevisionHistoryTagId()) || ComponentTopicV1.hasTag(topic,
-                EntitiesConfig.getInstance().getLegalNoticeTagId()) || ComponentTopicV1.hasTag(topic,
-                EntitiesConfig.getInstance().getAuthorGroupTagId()) || ComponentTopicV1.hasTag(topic,
-                EntitiesConfig.getInstance().getInfoTagId()) || ComponentTopicV1.hasTag(topic,
-                EntitiesConfig.getInstance().getAbstractTagId()));
-    }
-
-    /**
-     * Checks to see if the Rows, in XML Tables exceed the maximum number of columns.
-     *
-     * @param doc The XML DOM Document to be validated.
-     * @return True if the XML is valid, otherwise false.
-     */
-    protected static boolean validateTopicTables(final Document doc) {
-        final NodeList tables = doc.getElementsByTagName("table");
-        for (int i = 0; i < tables.getLength(); i++) {
-            final Element table = (Element) tables.item(i);
-            if (!DocBookUtilities.validateTableRows(table)) {
-                return false;
-            }
-        }
-
-        final NodeList informalTables = doc.getElementsByTagName("informaltable");
-        for (int i = 0; i < informalTables.getLength(); i++) {
-            final Element informalTable = (Element) informalTables.item(i);
-            if (!DocBookUtilities.validateTableRows(informalTable)) {
-                return false;
-            }
-        }
-
-        return true;
+        return !(ComponentTopicV1.hasTag(topic, EntitiesConfig.getInstance().getRevisionHistoryTagId())
+                || ComponentTopicV1.hasTag(topic, EntitiesConfig.getInstance().getLegalNoticeTagId())
+                || ComponentTopicV1.hasTag(topic, EntitiesConfig.getInstance().getAuthorGroupTagId())
+                || ComponentTopicV1.hasTag(topic, EntitiesConfig.getInstance().getInfoTagId())
+                || ComponentTopicV1.hasTag(topic, EntitiesConfig.getInstance().getAbstractTagId()));
     }
 
     public static TranslatedTopic createTranslatedTopic(final EntityManager entityManager, final Integer topicId, final Number revision) {
@@ -882,56 +867,50 @@ public class TopicUtilities {
         final FullTextSession fullTextSession = Search.getFullTextSession(session);
         final SearchFactory searchFactory = fullTextSession.getSearchFactory();
         final IndexReader reader = searchFactory.getIndexReaderAccessor().open(Topic.class);
-        final Analyzer analyser = fullTextSession.getSearchFactory().getAnalyzer(Topic.class);
+        final Analyzer analyser =  fullTextSession.getSearchFactory().getAnalyzer(Topic.class);
 
         try {
             final MoreLikeThis mlt = new MoreLikeThis(reader);
             mlt.setAnalyzer(analyser);
 
-            final IntegerConstants minWordLen = entityManager.find(IntegerConstants.class,
-                    ServiceConstants.KEYWORD_MINIMUM_WORD_LENGTH_INT_CONSTANT_ID);
-            if (minWordLen != null && minWordLen.getConstantValue() != null) {
+            final IntegerConstants minWordLen = entityManager.find(IntegerConstants.class, ServiceConstants.KEYWORD_MINIMUM_WORD_LENGTH_INT_CONSTANT_ID);
+            if (minWordLen != null && minWordLen.getConstantValue() != null)  {
                 mlt.setMinWordLen(minWordLen.getConstantValue());
             } else {
                 mlt.setMinWordLen(ServiceConstants.KEYWORD_MINIMUM_WORD_LENGTH_DEFAULT);
             }
 
-            final IntegerConstants minDocFreq = entityManager.find(IntegerConstants.class,
-                    ServiceConstants.KEYWORD_MINIMUM_DOCUMENT_FREQUENCY_INT_CONSTANT_ID);
-            if (minDocFreq != null && minDocFreq.getConstantValue() != null) {
+            final IntegerConstants minDocFreq = entityManager.find(IntegerConstants.class, ServiceConstants.KEYWORD_MINIMUM_DOCUMENT_FREQUENCY_INT_CONSTANT_ID);
+            if (minDocFreq != null && minDocFreq.getConstantValue() != null)  {
                 mlt.setMinDocFreq(minDocFreq.getConstantValue());
-            } else {
+            }  else {
                 mlt.setMinDocFreq(ServiceConstants.KEYWORD_MINIMUM_DOCUMENT_FREQUENCY_DEFAULT);
             }
 
-            final IntegerConstants maxQueryTerms = entityManager.find(IntegerConstants.class,
-                    ServiceConstants.KEYWORD_MAX_QUERY_TERMS_INT_CONSTANT_ID);
-            if (maxQueryTerms != null && maxQueryTerms.getConstantValue() != null) {
+            final IntegerConstants maxQueryTerms = entityManager.find(IntegerConstants.class, ServiceConstants.KEYWORD_MAX_QUERY_TERMS_INT_CONSTANT_ID);
+            if (maxQueryTerms != null && maxQueryTerms.getConstantValue() != null)  {
                 mlt.setMaxQueryTerms(maxQueryTerms.getConstantValue());
-            } else {
+            }  else {
                 mlt.setMaxQueryTerms(ServiceConstants.KEYWORD_MAX_QUERY_TERMS_INT_DEFAULT);
             }
 
-            final IntegerConstants minTermFreq = entityManager.find(IntegerConstants.class,
-                    ServiceConstants.KEYWORD_MINIMUM_TERM_FREQUENCY_INT_CONSTANT_ID);
-            if (minTermFreq != null && minTermFreq.getConstantValue() != null) {
+            final IntegerConstants minTermFreq = entityManager.find(IntegerConstants.class, ServiceConstants.KEYWORD_MINIMUM_TERM_FREQUENCY_INT_CONSTANT_ID);
+            if (minTermFreq != null && minTermFreq.getConstantValue() != null)  {
                 mlt.setMinTermFreq(minTermFreq.getConstantValue());
-            } else {
+            }  else {
                 mlt.setMinTermFreq(ServiceConstants.KEYWORD_MINIMUM_TERM_FREQUENCY_DEFAULT);
             }
 
-            final IntegerConstants maxDocFreqPct = entityManager.find(IntegerConstants.class,
-                    ServiceConstants.KEYWORD_MAXIMUM_DOCUMENT_FREQUENCY_PERCENT_INT_CONSTANT_ID);
-            if (maxDocFreqPct != null && maxDocFreqPct.getConstantValue() != null) {
+            final IntegerConstants maxDocFreqPct = entityManager.find(IntegerConstants.class, ServiceConstants.KEYWORD_MAXIMUM_DOCUMENT_FREQUENCY_PERCENT_INT_CONSTANT_ID);
+            if (maxDocFreqPct != null && maxDocFreqPct.getConstantValue() != null)  {
                 mlt.setMaxDocFreqPct(maxDocFreqPct.getConstantValue());
-            } else {
+            }  else {
                 mlt.setMaxDocFreqPct(ServiceConstants.KEYWORD_MAXIMUM_DOCUMENT_FREQUENCY_PERCENT_DEFAULT);
             }
 
-            final StringConstants stopWords = entityManager.find(StringConstants.class,
-                    ServiceConstants.KEYWORDS_STOPWORDS_STRING_CONSTANT_ID);
-            if (stopWords != null && stopWords.getConstantValue() != null) {
-                final String[] stopWordsSplit = stopWords.getConstantValue().split("\n");
+            final StringConstants stopWords = entityManager.find(StringConstants.class, ServiceConstants.KEYWORDS_STOPWORDS_STRING_CONSTANT_ID);
+            if (stopWords != null && stopWords.getConstantValue() != null)  {
+                final String [] stopWordsSplit = stopWords.getConstantValue().split("\n");
                 final Set<String> stopWordsSet = new HashSet<String>();
                 for (final String stopWord : stopWordsSplit) {
                     stopWordsSet.add(stopWord);
@@ -942,8 +921,7 @@ public class TopicUtilities {
             mlt.setFieldNames(new String[]{Topic.TOPIC_SEARCH_TEXT_FIELD_NAME});
 
             final ArrayList<String> keywords = new ArrayList<String>();
-            final String[] keywordsArray = mlt.retrieveInterestingTerms(new StringReader(entity.getTopicSearchText()),
-                    Topic.TOPIC_SEARCH_TEXT_FIELD_NAME);
+            final String[] keywordsArray = mlt.retrieveInterestingTerms(new StringReader(entity.getTopicSearchText()), Topic.TOPIC_SEARCH_TEXT_FIELD_NAME);
             CollectionUtilities.addAll(keywordsArray, keywords);
             return keywords;
         } catch (final IOException ex) {
