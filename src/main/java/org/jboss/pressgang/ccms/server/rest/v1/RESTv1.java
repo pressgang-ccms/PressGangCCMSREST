@@ -346,9 +346,10 @@ public class RESTv1 extends BaseRESTv1 implements RESTBaseInterfaceV1, RESTInter
 
     private void recalculateMinHashes(final boolean missingOnly) {
         try {
-            final String topicQuery = "SELECT topic.topicId FROM Topic as Topic WHERE NOT topic.topicXML IS " +
-                    "NULL" + (missingOnly ? " AND SIZE(topic.minHashes) != " + org.jboss.pressgang.ccms.model.constants.Constants
-                    .NUM_MIN_HASHES : "");
+            final String topicQuery =
+                "SELECT topic.topicId FROM Topic as Topic WHERE NOT (topic.topicXML IS NULL AND topic.topicXML <> '')" +
+                (missingOnly ? " AND SIZE(topic.minHashes) != " + org.jboss.pressgang.ccms.model.constants.Constants
+                .NUM_MIN_HASHES : "");
 
             final List<MinHashXOR> minHashXORs = entityManager.createQuery(MinHashXOR.SELECT_ALL_QUERY).getResultList();
             final List<Integer> topics = entityManager.createQuery(topicQuery).getResultList();
@@ -3895,26 +3896,31 @@ public class RESTv1 extends BaseRESTv1 implements RESTBaseInterfaceV1, RESTInter
     @Override
     public RESTMatchedFileV1 createOrMatchJSONFile(final String expand, final RESTFileV1 dataObject, final String message, final Integer flag, final String userId) {
         // make sure the incoming topic has specified some xml
-        if (dataObject.getConfiguredParameters().indexOf(RESTFileV1.LANGUAGE_FILES_NAME) == -1 ||
+        if (dataObject.getConfiguredParameters().indexOf(RESTFileV1.FILE_NAME) == -1 ||
+                dataObject.getFileName() == null || dataObject.getFileName().trim().isEmpty()) {
+            throw new BadRequestException("The file to be created or matched needs to have the file name and path set.");
+        }
+
+        if(dataObject.getConfiguredParameters().indexOf(RESTFileV1.LANGUAGE_FILES_NAME) == -1 ||
                 dataObject.getLanguageFiles_OTM() == null ||
                 dataObject.getLanguageFiles_OTM().getItems().size() == 0)
         {
             throw new BadRequestException("The file to be created or matched needs to have at least one language file added and defined to the configured parameters.");
         }
 
-        final StringBuilder query = new StringBuilder("SELECT file FROM File as File WHERE");
+        final Map<String, Object> parameters = new HashMap<String, Object>();
+        final StringBuilder query = new StringBuilder("SELECT file FROM File as File WHERE file.fileName = :fileName AND file.filePath = :filePath");
+        parameters.put("fileName", dataObject.getFileName());
+        parameters.put("filePath", dataObject.getFilePath() == null ? "" : dataObject.getFilePath());
 
         /*
             Find any existing image whose language images are a match for the ones supplied. In this case we ignore the
             presence of additional language images, so the returned image may already have some translations.
          */
         int count = 0;
-        final Map<String, Object> parameters = new HashMap<String, Object>();
+
         for (final RESTLanguageFileCollectionItemV1 restLanguageFileCollectionItemV1 : dataObject.getLanguageFiles_OTM().getItems()) {
-            if (count != 0) {
-                query.append(" AND");
-            }
-            query.append(" EXISTS " +
+            query.append(" AND EXISTS " +
                     "(SELECT languageFile FROM LanguageFile as LanguageFile " +
                     "WHERE languageFile.file.fileId = file.fileId " +
                     "AND languageFile.fileContentHash = :hash" + count + " " +
