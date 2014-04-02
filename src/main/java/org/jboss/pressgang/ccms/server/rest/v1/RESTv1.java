@@ -347,8 +347,8 @@ public class RESTv1 extends BaseRESTv1 implements RESTBaseInterfaceV1, RESTInter
     private void recalculateMinHashes(final boolean missingOnly) {
         try {
             final String topicQuery =
-                "SELECT topic.topicId FROM Topic as Topic WHERE NOT (topic.topicXML IS NULL AND length(trim(topic.topicXML)) <> 0)" +
-                (missingOnly ? " AND SIZE(topic.minHashes) != " + org.jboss.pressgang.ccms.model.constants.Constants
+                "SELECT topic.topicId FROM Topic as Topic" +
+                (missingOnly ? " WHERE SIZE(topic.minHashes) != " + org.jboss.pressgang.ccms.model.constants.Constants
                 .NUM_MIN_HASHES : "");
 
             final List<MinHashXOR> minHashXORs = entityManager.createQuery(MinHashXOR.SELECT_ALL_QUERY).getResultList();
