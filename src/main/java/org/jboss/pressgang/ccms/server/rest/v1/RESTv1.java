@@ -354,6 +354,8 @@ public class RESTv1 extends BaseRESTv1 implements RESTBaseInterfaceV1, RESTInter
             final List<MinHashXOR> minHashXORs = entityManager.createQuery(MinHashXOR.SELECT_ALL_QUERY).getResultList();
             final List<Integer> topics = entityManager.createQuery(topicQuery).getResultList();
 
+            log.info("Recalculating minhash values for " + topics.size() + " topics.");
+
             // Since there are a lot of topics to process there is a high chance it'll hit the timeout,
             // so break the transactions into smaller chunks
             for (int i = 0; i < topics.size(); i += BATCH_SIZE) {
@@ -363,19 +365,20 @@ public class RESTv1 extends BaseRESTv1 implements RESTBaseInterfaceV1, RESTInter
                 // lets just wrap up some code in a Runnable
                 THREAD_POOL.invokeLater(new RESTRunnableWithTransaction() {
                     public void doWork(final EntityManager em, final UserTransaction transaction) {
+                        log.info("Recalculating minhash values for topics " + startTopic + " - " + Math.min(topics.size(), startTopic + BATCH_SIZE));
                         for (int j = startTopic; j < topics.size() && j < startTopic + BATCH_SIZE; ++j) {
 
                             final Topic topic = em.find(Topic.class, topics.get(j));
                             boolean topicChanged = org.jboss.pressgang.ccms.model.utils.TopicUtilities.recalculateMinHash(topic, minHashXORs);
 
-                            // Handle topics that have invalid titles.
-                            if (topic.getTopicTitle() == null || topic.getTopicTitle().trim().isEmpty()) {
-                                topic.setTopicTitle("Placeholder");
-                                topicChanged = true;
-                            }
-
-                            if (topicChanged) {
-                                em.persist(topic);
+                            /*
+                                Some topics have no title. Trying to update these will result in an error
+                             */
+                            if (topic.getTopicTitle() != null && !topic.getTopicTitle().trim().isEmpty()) {
+                                if (topicChanged) {
+                                    log.info("Saving " + topic.getTopicId());
+                                    em.persist(topic);
+                                }
                             }
                         }
                     }
