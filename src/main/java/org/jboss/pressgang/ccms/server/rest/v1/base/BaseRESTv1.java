@@ -128,8 +128,7 @@ import org.xml.sax.SAXException;
 @RequestScoped
 public class BaseRESTv1 extends BaseREST {
     private static final Logger log = LoggerFactory.getLogger(BaseRESTv1.class);
-
-    public static final String TRANSACTION_MANAGER_NAME = "java:jboss/TransactionManager";
+    public static final int BATCH_SIZE = 20;
 
     /**
      * The format for dates passed and returned by the REST Interface
@@ -835,6 +834,7 @@ public class BaseRESTv1 extends BaseREST {
             setLogDetails(entityManager, logDetails);
 
             final List<U> returnEntities = new ArrayList<U>();
+            int count = 0;
             for (final T restEntity : entities.returnItems()) {
 
                 /*
@@ -864,6 +864,12 @@ public class BaseRESTv1 extends BaseREST {
 
                 // Save the created/updated entity
                 entityManager.persist(entity);
+
+                // Flush the changes if we've processes enough entities
+                count++;
+                if (count % BATCH_SIZE == 0) {
+                    entityManager.flush();
+                }
 
                 returnEntities.add(entity);
             }

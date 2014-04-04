@@ -45,7 +45,6 @@ import org.jboss.resteasy.spi.BadRequestException;
 @ApplicationScoped
 public class TopicV1Factory extends RESTEntityFactory<RESTTopicV1, Topic, RESTTopicCollectionV1, RESTTopicCollectionItemV1> {
 
-
     @Inject
     protected TagV1Factory tagFactory;
     @Inject
@@ -354,14 +353,19 @@ public class TopicV1Factory extends RESTEntityFactory<RESTTopicV1, Topic, RESTTo
             }
         }
 
-        /* This method will set the XML errors field */
-        TopicUtilities.syncXML(entityManager, entity);
-        TopicUtilities.validateXML(entityManager, entity);
+        // This method will set the XML errors field
+        if (requiresXMLProcessing(dataObject)) {
+            TopicUtilities.syncXML(entityManager, entity);
+            TopicUtilities.validateXML(entityManager, entity);
+        }
 
-        /* Update the minhash signature (or skip if the min hash xors have not been created. */
-        final List<MinHashXOR> minHashXORs = entityManager.createQuery(MinHashXOR.SELECT_ALL_QUERY).getResultList();
-        if (minHashXORs.size() == org.jboss.pressgang.ccms.model.constants.Constants.NUM_MIN_HASHES - 1) {
-            org.jboss.pressgang.ccms.model.utils.TopicUtilities.recalculateMinHash(entity, minHashXORs);
+        // Only update the minhash if we have a change that requires it (ie a new topic, or the XML has changed)
+        if (dataObject.getId() == null || requiresXMLProcessing(dataObject)) {
+            // Update the minhash signature (or skip if the min hash xors have not been created.
+            final List<MinHashXOR> minHashXORs = entityManager.createQuery(MinHashXOR.SELECT_ALL_QUERY).getResultList();
+            if (minHashXORs.size() == org.jboss.pressgang.ccms.model.constants.Constants.NUM_MIN_HASHES - 1) {
+                org.jboss.pressgang.ccms.model.utils.TopicUtilities.recalculateMinHash(entity, minHashXORs);
+            }
         }
 
         if (dataObject.hasParameterSet(
@@ -451,6 +455,14 @@ public class TopicV1Factory extends RESTEntityFactory<RESTTopicV1, Topic, RESTTo
                 }
             }
         }
+    }
+
+    protected boolean requiresXMLProcessing(final RESTTopicV1 dataObject) {
+        return dataObject.hasParameterSet(RESTTopicV1.XML_NAME)
+                || dataObject.hasParameterSet(RESTTopicV1.FORMAT_NAME)
+                || dataObject.hasParameterSet(RESTTopicV1.LOCALE_NAME)
+                || dataObject.hasParameterSet(RESTTopicV1.TITLE_NAME)
+                || dataObject.hasParameterSet(RESTTopicV1.TAGS_NAME);
     }
 
     @Override
