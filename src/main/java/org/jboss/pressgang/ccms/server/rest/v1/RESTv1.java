@@ -15,11 +15,9 @@ import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
 import javax.ws.rs.QueryParam;
-import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.MultivaluedMap;
 import javax.ws.rs.core.PathSegment;
-import javax.ws.rs.core.Request;
 import javax.ws.rs.core.Response;
 import java.awt.geom.Rectangle2D;
 import java.io.IOException;
@@ -183,7 +181,6 @@ import org.jboss.pressgang.ccms.server.rest.v1.thread.RESTRunnableWithTransactio
 import org.jboss.pressgang.ccms.server.rest.v1.utils.ProcessHelper;
 import org.jboss.pressgang.ccms.server.rest.v1.utils.RESTv1Utilities;
 import org.jboss.pressgang.ccms.server.utils.ContentSpecUtilities;
-import org.jboss.pressgang.ccms.server.utils.EnversUtilities;
 import org.jboss.pressgang.ccms.server.utils.ProviderUtilities;
 import org.jboss.pressgang.ccms.server.utils.TopicUtilities;
 import org.jboss.pressgang.ccms.utils.common.CollectionUtilities;
@@ -191,7 +188,6 @@ import org.jboss.pressgang.ccms.utils.common.DocBookUtilities;
 import org.jboss.pressgang.ccms.utils.common.HashUtilities;
 import org.jboss.pressgang.ccms.utils.common.XMLUtilities;
 import org.jboss.pressgang.ccms.utils.common.ZipUtilities;
-import org.jboss.pressgang.ccms.utils.constants.CommonConstants;
 import org.jboss.pressgang.ccms.utils.constants.CommonFilterConstants;
 import org.jboss.resteasy.plugins.providers.atom.Feed;
 import org.jboss.resteasy.specimpl.PathSegmentImpl;
@@ -227,6 +223,8 @@ public class RESTv1 extends BaseRESTv1 implements RESTBaseInterfaceV1, RESTInter
     private ProcessManager processManager;
     @Inject
     private ProcessHelper processHelper;
+    @Inject
+    private CachedEntityLoader cachedEntityLoader;
 
     /* UTILITY FUNCTIONS */
     public RESTSystemStatsV1 getJSONSysInfo() {
@@ -243,7 +241,7 @@ public class RESTv1 extends BaseRESTv1 implements RESTBaseInterfaceV1, RESTInter
 
     @Override
     public Map<Integer, Integer> getMinHashes(final String xml) {
-        final List<MinHashXOR> minHashXORs = entityManager.createQuery(MinHashXOR.SELECT_ALL_QUERY).getResultList();
+        final List<MinHashXOR> minHashXORs = cachedEntityLoader.getXOREntities();;
         return org.jboss.pressgang.ccms.model.utils.TopicUtilities.getMinHashes(xml, minHashXORs);
     }
 
@@ -329,6 +327,9 @@ public class RESTv1 extends BaseRESTv1 implements RESTBaseInterfaceV1, RESTInter
             // Flush the changes to the database and commit the transaction
             entityManager.flush();
             transaction.commit();
+
+            // Invalidate any cached XOR values we were using
+            cachedEntityLoader.invalidateXOREntities();
         } catch (final Throwable ex) {
             throw RESTv1Utilities.processError(transaction, ex);
         }
@@ -351,7 +352,7 @@ public class RESTv1 extends BaseRESTv1 implements RESTBaseInterfaceV1, RESTInter
                 (missingOnly ? " WHERE SIZE(topic.minHashes) != " + org.jboss.pressgang.ccms.model.constants.Constants
                 .NUM_MIN_HASHES : "");
 
-            final List<MinHashXOR> minHashXORs = entityManager.createQuery(MinHashXOR.SELECT_ALL_QUERY).getResultList();
+            final List<MinHashXOR> minHashXORs = cachedEntityLoader.getXOREntities();;
             final List<Integer> topics = entityManager.createQuery(topicQuery).getResultList();
 
             log.info("Recalculating minhash values for " + topics.size() + " topics.");

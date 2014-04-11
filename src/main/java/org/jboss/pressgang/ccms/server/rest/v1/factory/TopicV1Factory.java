@@ -34,6 +34,7 @@ import org.jboss.pressgang.ccms.rest.v1.entities.base.RESTBaseEntityV1;
 import org.jboss.pressgang.ccms.rest.v1.entities.enums.RESTXMLFormat;
 import org.jboss.pressgang.ccms.rest.v1.entities.join.RESTAssignedPropertyTagV1;
 import org.jboss.pressgang.ccms.rest.v1.expansion.ExpandDataTrunk;
+import org.jboss.pressgang.ccms.server.rest.v1.CachedEntityLoader;
 import org.jboss.pressgang.ccms.server.rest.v1.factory.base.RESTEntityCollectionFactory;
 import org.jboss.pressgang.ccms.server.rest.v1.factory.base.RESTEntityFactory;
 import org.jboss.pressgang.ccms.server.rest.v1.utils.RESTv1Utilities;
@@ -44,7 +45,8 @@ import org.jboss.resteasy.spi.BadRequestException;
 
 @ApplicationScoped
 public class TopicV1Factory extends RESTEntityFactory<RESTTopicV1, Topic, RESTTopicCollectionV1, RESTTopicCollectionItemV1> {
-
+    @Inject
+    protected CachedEntityLoader cachedEntityLoader;
     @Inject
     protected TagV1Factory tagFactory;
     @Inject
@@ -362,7 +364,7 @@ public class TopicV1Factory extends RESTEntityFactory<RESTTopicV1, Topic, RESTTo
         // Only update the minhash if we have a change that requires it (ie a new topic, or the XML has changed)
         if (dataObject.getId() == null || requiresXMLProcessing(dataObject)) {
             // Update the minhash signature (or skip if the min hash xors have not been created.
-            final List<MinHashXOR> minHashXORs = entityManager.createQuery(MinHashXOR.SELECT_ALL_QUERY).getResultList();
+            final List<MinHashXOR> minHashXORs = cachedEntityLoader.getXOREntities();
             if (minHashXORs.size() == org.jboss.pressgang.ccms.model.constants.Constants.NUM_MIN_HASHES - 1) {
                 org.jboss.pressgang.ccms.model.utils.TopicUtilities.recalculateMinHash(entity, minHashXORs);
             }
