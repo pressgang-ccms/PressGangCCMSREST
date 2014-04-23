@@ -29,7 +29,7 @@ public class BaseArquillianIntegrationTest {
                 EntityManager.class).addAsResource("test-persistence.xml", "META-INF/persistence.xml").addAsResource(
                 "test-resourceserver.properties", "META-INF/resourceserver.properties").addAsResource("test-import.sql",
                 "import.sql").addAsWebInfResource("testserver-ds.xml").addAsWebInfResource(EmptyAsset.INSTANCE,
-                "beans.xml").addAsWebInfResource("test-web.xml", "web.xml").addAsWebInfResource("test-jboss-deployment-structure.xml",
+                "beans.xml").addAsWebInfResource("test-web.xml", "WEB-INF/web.xml").addAsWebInfResource("test-jboss-deployment-structure.xml",
                 "jboss-deployment-structure.xml").addAsLibraries(
                 DependencyResolvers.use(MavenDependencyResolver.class).includeDependenciesFromPom(
                         "src/test/resources/general/test-pom.xml").resolveAs(JavaArchive.class));

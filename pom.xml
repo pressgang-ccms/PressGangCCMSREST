@@ -109,6 +109,7 @@
                         </manifest>
                         <manifestEntries>
                             <Implementation-Build>${maven.build.timestamp}</Implementation-Build>
+                            <Dependencies>org.hornetq, org.jboss.netty</Dependencies>
                         </manifestEntries>
                     </archive>
                 </configuration>
@@ -386,6 +387,13 @@
             </exclusions>
         </dependency>
 
+        <!-- HornetQ REST -->
+        <dependency>
+            <groupId>org.hornetq.rest</groupId>
+            <artifactId>hornetq-rest</artifactId>
+            <version>2.4.1.Final</version>
+        </dependency>
+
         <!-- Other Libraries -->
         <dependency>
             <groupId>com.intellij</groupId>
@@ -546,17 +554,6 @@
                 <jboss.spec.verison>3.0.2.Final</jboss.spec.verison>
                 <resteasy.version>2.3.6.Final</resteasy.version>
             </properties>
-        </profile>
-        <profile>
-            <id>belay</id>
-            <dependencies>
-                <!-- Belay Library -->
-                <dependency>
-                    <groupId>org.jboss.pressgang.belay</groupId>
-                    <artifactId>resource-server-provider</artifactId>
-                    <version>1.0-SNAPSHOT</version>
-                </dependency>
-            </dependencies>
         </profile>
         <profile>
             <!-- When built in OpenShift the 'openshift' profile will be 
@@ -759,14 +756,6 @@
                     </plugin>
                 </plugins>
             </build>
-            <dependencies>
-                <!-- Belay Library -->
-                <dependency>
-                    <groupId>org.jboss.pressgang.belay</groupId>
-                    <artifactId>resource-server-provider</artifactId>
-                    <version>1.0-SNAPSHOT</version>
-                </dependency>
-            </dependencies>
         </profile>
     </profiles>
 </project>
