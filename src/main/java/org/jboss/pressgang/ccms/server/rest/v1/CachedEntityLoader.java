@@ -6,6 +6,7 @@ import javax.persistence.EntityManager;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 
 import org.jboss.pressgang.ccms.model.MinHashXOR;
 import org.jboss.pressgang.ccms.model.base.AuditedEntity;
@@ -17,7 +18,7 @@ import org.jboss.pressgang.ccms.model.base.AuditedEntity;
  */
 @ApplicationScoped
 public class CachedEntityLoader {
-    private final Map<String, List<? extends AuditedEntity>> results = new HashMap<String, List<? extends AuditedEntity>>();
+    private final Map<String, List<? extends AuditedEntity>> results = new ConcurrentHashMap<String, List<? extends AuditedEntity>>();
     @Inject
     private EntityManager entityManager;
 
