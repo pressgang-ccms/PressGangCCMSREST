@@ -241,7 +241,7 @@ public class RESTv1 extends BaseRESTv1 implements RESTBaseInterfaceV1, RESTInter
 
     @Override
     public Map<Integer, Integer> getMinHashes(final String xml) {
-        final List<MinHashXOR> minHashXORs = cachedEntityLoader.getXOREntities();;
+        final List<MinHashXOR> minHashXORs = cachedEntityLoader.getXOREntities();
         return org.jboss.pressgang.ccms.model.utils.TopicUtilities.getMinHashes(xml, minHashXORs);
     }
 
@@ -352,7 +352,7 @@ public class RESTv1 extends BaseRESTv1 implements RESTBaseInterfaceV1, RESTInter
                 (missingOnly ? " WHERE SIZE(topic.minHashes) != " + org.jboss.pressgang.ccms.model.constants.Constants
                 .NUM_MIN_HASHES : "");
 
-            final List<MinHashXOR> minHashXORs = cachedEntityLoader.getXOREntities();;
+            final List<MinHashXOR> minHashXORs = cachedEntityLoader.getXOREntities();
             final List<Integer> topics = entityManager.createQuery(topicQuery).getResultList();
 
             log.info("Recalculating minhash values for " + topics.size() + " topics.");
