@@ -26,6 +26,17 @@ import java.util.List;
  * and then replicated to this server after some undefined period of time. By using a periodic query we
  * are assured that the changes we are broadcasting are actually available on this server, and we avoid
  * having to sync broadcast messages with database replication cycles.
+ *
+ * This code assumes the presence of two JMS topics:
+ *
+ *  <jms-destinations>
+ *      <jms-topic name="UpdatedTopic">
+ *          <entry name="java:jboss/queues/updatedtopic"/>
+ *      </jms-topic>
+ *      <jms-topic name="UpdatedSpec">
+ *          <entry name="java:jboss/queues/updatedspec"/>
+ *      </jms-topic>
+ *  </jms-destinations>
  */
 @Singleton
 @Startup
