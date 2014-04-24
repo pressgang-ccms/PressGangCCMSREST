@@ -2,6 +2,7 @@ package org.jboss.pressgang.ccms.server.messaging;
 
 import org.jboss.pressgang.ccms.filter.utils.EntityUtilities;
 import org.jboss.pressgang.ccms.model.Topic;
+import org.jboss.pressgang.ccms.model.contentspec.ContentSpec;
 import org.jboss.pressgang.ccms.utils.common.CollectionUtilities;
 import org.joda.time.DateTime;
 
@@ -45,6 +46,7 @@ public class UpdatedEntities {
      * Milliseconds between database queries
      */
     private static final long REFRESH = 10 * 1000;
+    private static final String EJB_REFRESH = "*/10";
     private static final String INITIAL_CONTEXT_FACTORY = "org.jboss.as.naming.InitialContextFactory";
     private static final String URL_PKG_PREFIXES = "org.jboss.naming:org.jnp.interfaces";
     private static final String PROVIDER_URL = "jnp://localhost:1099";
@@ -59,6 +61,7 @@ public class UpdatedEntities {
     private static final String SPEC_UPDATE_QUEUE = "java:jboss/topics/updatedspec";
     private final Hashtable<String, String> env = new Hashtable<String, String>();
     private DateTime lastTopicUpdate = null;
+    private DateTime specTopicUpdate = null;
     private Context ctx = null;
     private ConnectionFactory cf;
     private Connection connection;
@@ -67,7 +70,7 @@ public class UpdatedEntities {
     @Inject
     protected EntityManager entityManager;
 
-    @Schedule(hour="*", minute="*", second="*/10")
+    @Schedule(hour="*", minute="*", second=EJB_REFRESH)
     public void checkForUpdatedTopics() {
         final DateTime thisTopicUpdate = new DateTime();
 
@@ -87,6 +90,33 @@ public class UpdatedEntities {
                 to set thisTopicUpdate and execute the query. This is a pretty small window though.
             */
             lastTopicUpdate = thisTopicUpdate;
+
+        } catch (final Exception ex) {
+            // the message could not be sent. it will be retried as lastTopicUpdate was not updated
+            ex.printStackTrace();
+        }
+    }
+
+    @Schedule(hour="*", minute="*", second=EJB_REFRESH)
+    public void checkForUpdatedSpecs() {
+        final DateTime thisTopicUpdate = new DateTime();
+
+        if (specTopicUpdate == null) {
+            specTopicUpdate = thisTopicUpdate.minus(REFRESH);
+        }
+
+        try {
+            final List<Integer> specs = EntityUtilities.getEditedEntities(entityManager, ContentSpec.class, "contentSpecId", specTopicUpdate, null);
+
+            if (specs.size() != 0) {
+                sendMessage(SPEC_UPDATE_QUEUE, CollectionUtilities.toSeperatedString(specs));
+            }
+
+            /*
+                There is a possibility that a topic will be found twice if it is edited in the time it takes
+                to set thisTopicUpdate and execute the query. This is a pretty small window though.
+            */
+            specTopicUpdate = thisTopicUpdate;
 
         } catch (final Exception ex) {
             // the message could not be sent. it will be retried as lastTopicUpdate was not updated
