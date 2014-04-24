@@ -70,7 +70,10 @@ public class UpdatedEntities {
         try {
             final List<Integer> topics = EntityUtilities.getEditedEntities(entityManager, Topic.class, "topicId", lastTopicUpdate, null);
 
-            sendMessage(TOPIC_UPDATE_QUEUE, CollectionUtilities.toSeperatedString(topics));
+            if (topics.size() != 0) {
+                sendMessage(TOPIC_UPDATE_QUEUE, CollectionUtilities.toSeperatedString(topics));
+            }
+
             /*
                 There is a possibility that a topic will be found twice if it is edited in the time it takes
                 to set thisTopicUpdate and execute the query. This is a pretty small window though.
@@ -119,7 +122,7 @@ public class UpdatedEntities {
             final MessageProducer producer = session.createProducer(queue);
 
             // Create a Text Message and send it using the producer
-            final TextMessage message = session.createTextMessage(jmsMessage);
+            final ObjectMessage message = session.createObjectMessage(jmsMessage);
             producer.send(message);
         }
     }
