@@ -147,7 +147,8 @@ public class UpdatedEntities {
             // Create a JMS Message Producer to send a message on the queue
             final MessageProducer producer = session.createProducer(topic);
 
-            // Create a Text Message and send it using the producer
+            // Create a Text Message and send it using the producer. The HornetQ REST server requires the use
+            // of Object messages.
             final ObjectMessage message = session.createObjectMessage(jmsMessage);
             producer.send(message);
         }
