@@ -31,7 +31,12 @@ import java.util.Hashtable;
 import java.util.List;
 
 /**
- * Created by mcasperson on 24/04/14.
+ * This EJB will poll the database periodically looking for changes that can be broadcast via the message
+ * queues. We do this with a periodic database query rather than intercepting changes through the REST
+ * interface in order to support clustered environments where changes may be made on a different server,
+ * and then replicated to this server after some undefined period of time. By using a periodic query we
+ * are assured that the changes we are broadcasting are actually available on this server, and we avoid
+ * having to sync broadcast messages with database replication cycles.
  */
 @Singleton
 @Startup
