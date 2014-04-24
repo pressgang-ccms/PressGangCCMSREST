@@ -41,13 +41,21 @@ import java.util.List;
 @Singleton
 @Startup
 public class UpdatedEntities {
-
+    /**
+     * Milliseconds between database queries
+     */
     private static final long REFRESH = 10 * 1000;
     private static final String INITIAL_CONTEXT_FACTORY = "org.jboss.as.naming.InitialContextFactory";
     private static final String URL_PKG_PREFIXES = "org.jboss.naming:org.jnp.interfaces";
     private static final String PROVIDER_URL = "jnp://localhost:1099";
     private static final String CONNECTION_FACTORY = "/ConnectionFactory";
+    /**
+     * JNDI name for the JMS topic that will be notified of updated topics
+     */
     private static final String TOPIC_UPDATE_QUEUE = "java:jboss/queues/updatedtopic";
+    /**
+     * JNDI name for the JMS topic that will be notified of updated content specs
+     */
     private static final String SPEC_UPDATE_QUEUE = "java:jboss/queues/updatedspec";
     private final Hashtable<String, String> env = new Hashtable<String, String>();
     private DateTime lastTopicUpdate = null;
@@ -87,6 +95,9 @@ public class UpdatedEntities {
     }
 
     @PostConstruct
+    /**
+     * Connect to the JMS subsystem
+     */
     private void setup()  {
         try {
             env.put(Context.PROVIDER_URL, PROVIDER_URL);
@@ -105,21 +116,36 @@ public class UpdatedEntities {
         }
     }
 
+    /**
+     * Close the connection to the JMS subsystem
+     */
     @PreDestroy
-    private void shutdown() throws JMSException {
-        if (connection != null) {
-            connection.close();
+    private void shutdown() {
+        try {
+            if (connection != null) {
+                connection.close();
+            }
+        } catch (final Exception ex) {
+
+        } finally {
             connection = null;
         }
     }
 
-    private void sendMessage(final String queueName, final String jmsMessage) throws NamingException, JMSException {
+    /**
+     * Send a message to a JMS topic
+     * @param topicName  The JNDI name of the JMS topic
+     * @param jmsMessage The message to be sent
+     * @throws NamingException
+     * @throws JMSException
+     */
+    private void sendMessage(final String topicName, final String jmsMessage) throws NamingException, JMSException {
         if (ctx != null && session != null) {
             // Lookup the JMS queue
-            final javax.jms.Topic queue = (javax.jms.Topic) ctx.lookup(queueName);
+            final javax.jms.Topic topic = (javax.jms.Topic) ctx.lookup(topicName);
 
             // Create a JMS Message Producer to send a message on the queue
-            final MessageProducer producer = session.createProducer(queue);
+            final MessageProducer producer = session.createProducer(topic);
 
             // Create a Text Message and send it using the producer
             final ObjectMessage message = session.createObjectMessage(jmsMessage);
