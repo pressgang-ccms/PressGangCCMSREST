@@ -31,10 +31,10 @@ import java.util.List;
  *
  *  <jms-destinations>
  *      <jms-topic name="UpdatedTopic">
- *          <entry name="java:jboss/queues/updatedtopic"/>
+ *          <entry name="java:jboss/topics/updatedtopic"/>
  *      </jms-topic>
  *      <jms-topic name="UpdatedSpec">
- *          <entry name="java:jboss/queues/updatedspec"/>
+ *          <entry name="java:jboss/topics/updatedspec"/>
  *      </jms-topic>
  *  </jms-destinations>
  */
@@ -52,11 +52,11 @@ public class UpdatedEntities {
     /**
      * JNDI name for the JMS topic that will be notified of updated topics
      */
-    private static final String TOPIC_UPDATE_QUEUE = "java:jboss/queues/updatedtopic";
+    private static final String TOPIC_UPDATE_QUEUE = "java:jboss/topics/updatedtopic";
     /**
      * JNDI name for the JMS topic that will be notified of updated content specs
      */
-    private static final String SPEC_UPDATE_QUEUE = "java:jboss/queues/updatedspec";
+    private static final String SPEC_UPDATE_QUEUE = "java:jboss/topics/updatedspec";
     private final Hashtable<String, String> env = new Hashtable<String, String>();
     private DateTime lastTopicUpdate = null;
     private Context ctx = null;
