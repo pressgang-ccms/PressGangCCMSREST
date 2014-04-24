@@ -1,2 +1,0 @@
-Comment: This file is overwritten by maven, but is required by IntelliJ when debugging
-Dependencies: org.hornetq, org.jboss.netty
