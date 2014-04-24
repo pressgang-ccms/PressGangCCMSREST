@@ -1,14 +1,8 @@
 package org.jboss.pressgang.ccms.server.messaging;
 
-import org.hibernate.envers.AuditReader;
-import org.hibernate.envers.AuditReaderFactory;
-import org.hibernate.envers.RevisionType;
-import org.hibernate.envers.query.AuditEntity;
-import org.hibernate.envers.query.AuditQuery;
 import org.jboss.pressgang.ccms.filter.utils.EntityUtilities;
 import org.jboss.pressgang.ccms.model.Topic;
 import org.jboss.pressgang.ccms.utils.common.CollectionUtilities;
-import org.jboss.pressgang.ccms.utils.common.StringUtilities;
 import org.joda.time.DateTime;
 
 import javax.annotation.PostConstruct;
@@ -16,17 +10,12 @@ import javax.annotation.PreDestroy;
 import javax.ejb.Schedule;
 import javax.ejb.Singleton;
 import javax.ejb.Startup;
-import javax.enterprise.context.ApplicationScoped;
 import javax.inject.Inject;
 import javax.jms.*;
 import javax.naming.Context;
 import javax.naming.InitialContext;
 import javax.naming.NamingException;
 import javax.persistence.EntityManager;
-import javax.persistence.criteria.CriteriaBuilder;
-import javax.persistence.criteria.CriteriaQuery;
-import javax.persistence.criteria.Root;
-import java.util.Date;
 import java.util.Hashtable;
 import java.util.List;
 
