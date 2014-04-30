@@ -15,6 +15,7 @@ import org.jboss.pressgang.ccms.contentspec.utils.TranslationUtilities;
 import org.jboss.pressgang.ccms.provider.ContentSpecProvider;
 import org.jboss.pressgang.ccms.provider.DataProviderFactory;
 import org.jboss.pressgang.ccms.provider.RESTProviderFactory;
+import org.jboss.pressgang.ccms.provider.RESTTopicProvider;
 import org.jboss.pressgang.ccms.provider.TopicProvider;
 import org.jboss.pressgang.ccms.provider.TranslatedContentSpecProvider;
 import org.jboss.pressgang.ccms.provider.TranslatedTopicProvider;
@@ -59,6 +60,8 @@ public class ZanataPushTask extends ProcessRESTTask<Boolean> {
     @Override
     public void execute() {
         final RESTProviderFactory providerFactory = RESTProviderFactory.create(restServerUrl);
+        // Set topics to expand their translations by default
+        providerFactory.getProvider(RESTTopicProvider.class).setExpandTranslations(true);
         final ContentSpecProvider contentSpecProvider = providerFactory.getProvider(ContentSpecProvider.class);
         final ContentSpecWrapper contentSpecEntity = contentSpecProvider.getContentSpec(contentSpecId);
 

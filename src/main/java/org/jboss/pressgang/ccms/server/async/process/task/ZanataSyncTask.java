@@ -9,8 +9,8 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
-import org.jboss.pressgang.ccms.provider.DataProviderFactory;
 import org.jboss.pressgang.ccms.provider.RESTProviderFactory;
+import org.jboss.pressgang.ccms.provider.RESTTopicProvider;
 import org.jboss.pressgang.ccms.provider.ServerSettingsProvider;
 import org.jboss.pressgang.ccms.server.utils.ProcessUtilities;
 import org.jboss.pressgang.ccms.services.zanatasync.ZanataSyncService;
@@ -62,7 +62,9 @@ public class ZanataSyncTask extends ProcessRESTTask<Boolean> {
 
     @Override
     public void execute() {
-        final DataProviderFactory providerFactory = RESTProviderFactory.create(restServerUrl);
+        final RESTProviderFactory providerFactory = RESTProviderFactory.create(restServerUrl);
+        // Set topics to expand their translations by default
+        providerFactory.getProvider(RESTTopicProvider.class).setExpandTranslations(true);
         final ServerSettingsProvider settingsProvider = providerFactory.getProvider(ServerSettingsProvider.class);
         final ServerSettingsWrapper settings = settingsProvider.getServerSettings();
         final ETagCache eTagCache = new ETagCache();
