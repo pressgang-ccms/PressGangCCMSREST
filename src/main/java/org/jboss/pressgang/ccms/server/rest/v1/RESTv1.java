@@ -2591,10 +2591,12 @@ public class RESTv1 extends BaseRESTv1 implements RESTBaseInterfaceV1, RESTInter
                 if (topics.size() != 0) {
                     for (final Topic topic : topics) {
                         /*
-                            The locale is either unspecified or is a match.
+                            The locale and format are either unspecified or match.
                          */
-                        if (dataObject.getConfiguredParameters().indexOf(RESTTopicV1.LOCALE_NAME) == -1 ||
-                                topic.getTopicLocale().equals(dataObject.getLocale())) {
+                        if ((dataObject.getConfiguredParameters().indexOf(RESTTopicV1.LOCALE_NAME) == -1 ||
+                                topic.getTopicLocale().equals(dataObject.getLocale())) &&
+                                (dataObject.getConfiguredParameters().indexOf(RESTTopicV1.FORMAT_NAME) == -1 ||
+                                TopicUtilities.getTopicXMLDocBookVersion(topic) == TopicUtilities.getTopicXMLDocBookVersion(dataObject))  ) {
                             return new RESTMatchedTopicV1(getJSONTopic(topic.getId(), expand), true);
                         }
                     }
