@@ -1,3 +1,5 @@
+# Save this config file to jppd.properties to run the REST server without a process server present
+
 # list of drivers this client may connect to
 #jppf.drivers = driver-1
 jppf.remote.execution.enabled=false
