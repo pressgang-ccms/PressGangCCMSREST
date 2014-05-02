@@ -33,14 +33,14 @@ public class InternalResourceTopicVirtualFolder extends InternalResource {
     }
 
     @Override
-    public MultiStatusReturnValue propfind(final int depth) {
+    public MultiStatusReturnValue propfind(final String depth) {
         LOGGER.debug("ENTER InternalResourceTopicVirtualFolder.propfind() " + depth + " " + getStringId());
 
         if (getUriInfo() == null) {
             throw new IllegalStateException("Can not perform propfind without uriInfo");
         }
 
-        if (depth == 0) {
+        if ("0".equals(depth)) {
             /* A depth of zero means we are returning information about this item only */
             return new MultiStatusReturnValue(207, new MultiStatus(getFolderProperties(getUriInfo())));
         } else {

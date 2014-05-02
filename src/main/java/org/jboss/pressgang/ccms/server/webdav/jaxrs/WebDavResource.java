@@ -101,7 +101,7 @@ public class WebDavResource {
     @PROPFIND
     public javax.ws.rs.core.Response propfind(@Context final UriInfo uriInfo, @Context final HttpServletRequest req,
             @HeaderParam(WebDavConstants.X_FORWARD_FOR_HEADER) final String xForwardForHeader,
-            @HeaderParam(DEPTH) final int depth) throws URISyntaxException, IOException {
+            @HeaderParam(DEPTH) final String depth) throws URISyntaxException, IOException {
         LOGGER.debug("ENTER WebDavResource.propfind()");
         return InternalResource.propfind(compatibilityManager, WebDavUtils.getRemoteAddress(req, xForwardForHeader), uriInfo, depth);
     }

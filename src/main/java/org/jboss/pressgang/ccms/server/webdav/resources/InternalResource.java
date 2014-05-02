@@ -125,12 +125,12 @@ public abstract class InternalResource {
         throw new UnsupportedOperationException();
     }
 
-    public MultiStatusReturnValue propfind(final int depth) {
+    public MultiStatusReturnValue propfind(final String depth) {
         throw new UnsupportedOperationException();
     }
 
     public static javax.ws.rs.core.Response propfind(@NotNull final CompatibilityManager compatibilityManager, @NotNull final String remoteAddress,
-            @NotNull final UriInfo uriInfo, final int depth) {
+            @NotNull final UriInfo uriInfo, final String depth) {
         LOGGER.debug("ENTER InternalResource.propfind() " + uriInfo.getPath() + " " + depth + " " + remoteAddress);
 
         final InternalResource sourceResource = InternalResource.getInternalResource(uriInfo, compatibilityManager, remoteAddress,

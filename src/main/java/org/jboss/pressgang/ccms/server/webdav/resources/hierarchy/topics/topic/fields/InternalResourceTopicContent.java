@@ -173,7 +173,7 @@ public class InternalResourceTopicContent extends InternalResource {
     }
 
     @Override
-    public MultiStatusReturnValue propfind(final int depth) {
+    public MultiStatusReturnValue propfind(final String depth) {
         if (getUriInfo() == null) {
             throw new IllegalStateException("Can not perform propfind without uriInfo");
         }
