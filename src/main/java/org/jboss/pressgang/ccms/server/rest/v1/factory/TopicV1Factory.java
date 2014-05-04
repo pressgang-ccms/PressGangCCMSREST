@@ -2,6 +2,7 @@ package org.jboss.pressgang.ccms.server.rest.v1.factory;
 
 import javax.enterprise.context.ApplicationScoped;
 import javax.inject.Inject;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -37,6 +38,7 @@ import org.jboss.pressgang.ccms.rest.v1.expansion.ExpandDataTrunk;
 import org.jboss.pressgang.ccms.server.rest.v1.CachedEntityLoader;
 import org.jboss.pressgang.ccms.server.rest.v1.factory.base.RESTEntityCollectionFactory;
 import org.jboss.pressgang.ccms.server.rest.v1.factory.base.RESTEntityFactory;
+import org.jboss.pressgang.ccms.server.rest.v1.utils.KeywordExtractor;
 import org.jboss.pressgang.ccms.server.rest.v1.utils.RESTv1Utilities;
 import org.jboss.pressgang.ccms.server.utils.EnversUtilities;
 import org.jboss.pressgang.ccms.server.utils.TopicUtilities;
@@ -99,7 +101,11 @@ public class TopicV1Factory extends RESTEntityFactory<RESTTopicV1, Topic, RESTTo
 
         // KEYWORDS
         if (revision == null && expand != null && expand.contains(RESTTopicV1.KEYWORDS_NAME)) {
-            retValue.setKeywords(TopicUtilities.getTopicKeywords(entity, entityManager));
+            try {
+                retValue.setKeywords(new KeywordExtractor().findKeywordStrings(entity.getTopicText()));
+            } catch (final IOException ex) {
+                // don't fill the collection if there was an exception
+            }
         }
 
         // REVISIONS

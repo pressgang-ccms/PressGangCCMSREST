@@ -858,11 +858,13 @@ public class TopicUtilities {
         return "Unknown";
     }
 
+    // Removing hibernate search for easier deployment in a cluster (https://bugzilla.redhat.com/show_bug.cgi?id=1090748)
+    /*
     public static List<String> getTopicKeywords(final Topic entity, final EntityManager entityManager) {
-        /*
-         * Keywords are extracted from the lucene index managed by Hibernate search.
-         * http://docs.jboss.org/hibernate/search/4.5/reference/en-US/html_single/#IndexReaders
-         */
+
+         //Keywords are extracted from the lucene index managed by Hibernate search.
+         //http://docs.jboss.org/hibernate/search/4.5/reference/en-US/html_single/#IndexReaders
+
         final Session session = (Session) entityManager.getDelegate();
         final FullTextSession fullTextSession = Search.getFullTextSession(session);
         final SearchFactory searchFactory = fullTextSession.getSearchFactory();
@@ -932,4 +934,5 @@ public class TopicUtilities {
 
         return null;
     }
+    */
 }

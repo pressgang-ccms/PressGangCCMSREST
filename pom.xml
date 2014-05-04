@@ -15,6 +15,7 @@
     <properties>
         <pressgang.ccms.version>1.6-SNAPSHOT</pressgang.ccms.version>
 
+        <lucene.version>4.7.2</lucene.version>
         <jboss.bom.version>1.0.3.Final</jboss.bom.version>
         <jboss.spec.verison>3.0.1.Final</jboss.spec.verison>
         <jbossasplugin.version>7.1.1.Final</jbossasplugin.version>
@@ -464,6 +465,20 @@
             <artifactId>batik-xml</artifactId>
             <version>${batik.version}</version>
         </dependency>
+
+        <!-- Lucene -->
+        <dependency>
+            <groupId>org.apache.lucene</groupId>
+            <artifactId>lucene-core</artifactId>
+            <version>${lucene.version>}</version>
+        </dependency>
+
+        <dependency>
+            <groupId>org.apache.lucene</groupId>
+            <artifactId>lucene-analyzers-common</artifactId>
+            <version>${lucene.version>}</version>
+        </dependency>
+
 
         <!-- Testing Libraries -->
         <dependency>
