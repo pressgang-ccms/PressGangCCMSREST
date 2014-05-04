@@ -484,14 +484,8 @@ public class RESTv1 extends BaseRESTv1 implements RESTBaseInterfaceV1, RESTInter
 
     /* SYSTEM FUNCTIONS */
     @Override
-    public void reIndexLuceneDatabase() {
-        try {
-            final Session session = (Session) entityManager.getDelegate();
-            final FullTextSession fullTextSession = Search.getFullTextSession(session);
-            fullTextSession.createIndexer().start();
-        } catch (final Exception ex) {
-            log.error("An error reindexing the Lucene database", ex);
-        }
+    public boolean isReadonly() {
+        return ApplicationConfig.getInstance().getReadOnly();
     }
 
     @Override
