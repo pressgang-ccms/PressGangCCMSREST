@@ -1,15 +1,10 @@
 package org.jboss.pressgang.ccms.server.rest.v1.utils;
 
-import org.apache.lucene.analysis.TokenStream;
-import org.apache.lucene.analysis.core.LowerCaseFilter;
-import org.apache.lucene.analysis.core.StopFilter;
+import org.apache.lucene.analysis.*;
 import org.apache.lucene.analysis.en.EnglishAnalyzer;
-import org.apache.lucene.analysis.en.PorterStemFilter;
-import org.apache.lucene.analysis.miscellaneous.ASCIIFoldingFilter;
 import org.apache.lucene.analysis.standard.ClassicFilter;
 import org.apache.lucene.analysis.standard.ClassicTokenizer;
 import org.apache.lucene.analysis.tokenattributes.CharTermAttribute;
-import org.apache.lucene.analysis.util.CharArraySet;
 import org.apache.lucene.util.Version;
 
 import java.io.IOException;
@@ -24,7 +19,7 @@ import java.util.*;
 public class KeywordExtractor {
 
     /** Lucene version. */
-    private static Version LUCENE_VERSION = Version.LUCENE_47;
+    private static Version LUCENE_VERSION = Version.LUCENE_35;
 
     /**
      * Keyword holder, composed by a unique stem, its frequency, and a set of found corresponding
@@ -218,10 +213,10 @@ public class KeywordExtractor {
         // convert any char to ASCII
         tokenStream = new ASCIIFoldingFilter(tokenStream);
         // remove english stop words
-        tokenStream = new StopFilter(LUCENE_VERSION, tokenStream, new CharArraySet(LUCENE_VERSION, EnglishAnalyzer.getDefaultStopSet(), true));
+        tokenStream = new StopFilter(LUCENE_VERSION, tokenStream, EnglishAnalyzer.getDefaultStopSet(), true);
 
-        List<Keyword> keywords = new LinkedList<Keyword>();
-        CharTermAttribute token = tokenStream.getAttribute(CharTermAttribute.class);
+        final List<Keyword> keywords = new LinkedList<Keyword>();
+        final CharTermAttribute token = tokenStream.getAttribute(CharTermAttribute.class);
 
         // for each token
         while (tokenStream.incrementToken()) {

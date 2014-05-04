@@ -15,7 +15,7 @@
     <properties>
         <pressgang.ccms.version>1.6-SNAPSHOT</pressgang.ccms.version>
 
-        <lucene.version>4.7.2</lucene.version>
+        <lucene.version>3.5.0</lucene.version>
         <jboss.bom.version>1.0.3.Final</jboss.bom.version>
         <jboss.spec.verison>3.0.1.Final</jboss.spec.verison>
         <jbossasplugin.version>7.1.1.Final</jbossasplugin.version>
@@ -29,7 +29,6 @@
         <j2bugzilla.version>1.4</j2bugzilla.version>
         <cors.filter.version>1.7.1</cors.filter.version>
         <htmlcleaner.version>2.2</htmlcleaner.version>
-        <lucene.version>3.5.0</lucene.version>
         <jppf.version>4.0.0</jppf.version>
         <arquillian.version>1.0.3.Final</arquillian.version>
         <jbossarquillian.version>7.1.1.Final</jbossarquillian.version>
@@ -231,20 +230,20 @@
             <artifactId>hibernate-core</artifactId>
             <scope>provided</scope>
         </dependency>
-        <dependency>
+        <!--<dependency>
             <groupId>org.hibernate</groupId>
             <artifactId>hibernate-search</artifactId>
-        </dependency>
+        </dependency>-->
         <dependency>
             <groupId>org.hibernate</groupId>
             <artifactId>hibernate-validator</artifactId>
             <scope>provided</scope>
         </dependency>
-        <dependency>
+        <!--<dependency>
             <groupId>org.apache.lucene</groupId>
             <artifactId>lucene-queries</artifactId>
             <version>${lucene.version}</version>
-        </dependency>
+        </dependency>-->
 
         <!-- PressGang CCMS Libraries -->
         <dependency>
@@ -470,13 +469,7 @@
         <dependency>
             <groupId>org.apache.lucene</groupId>
             <artifactId>lucene-core</artifactId>
-            <version>${lucene.version>}</version>
-        </dependency>
-
-        <dependency>
-            <groupId>org.apache.lucene</groupId>
-            <artifactId>lucene-analyzers-common</artifactId>
-            <version>${lucene.version>}</version>
+            <version>${lucene.version}</version>
         </dependency>
 
 
