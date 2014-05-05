@@ -61,7 +61,7 @@ public class UpdatedEntities {
     private static final String SPEC_UPDATE_QUEUE = "java:jboss/topics/updatedspec";
     private final Hashtable<String, String> env = new Hashtable<String, String>();
     private DateTime lastTopicUpdate = null;
-    private DateTime specTopicUpdate = null;
+    private DateTime lastSpecUpdate = null;
     private Context ctx = null;
     private ConnectionFactory cf;
     private Connection connection;
@@ -99,14 +99,14 @@ public class UpdatedEntities {
 
     @Schedule(hour="*", minute="*", second=EJB_REFRESH)
     public void checkForUpdatedSpecs() {
-        final DateTime thisTopicUpdate = new DateTime();
+        final DateTime thisSpecUpdate = new DateTime();
 
-        if (specTopicUpdate == null) {
-            specTopicUpdate = thisTopicUpdate.minus(REFRESH);
+        if (lastSpecUpdate == null) {
+            lastSpecUpdate = thisSpecUpdate.minus(REFRESH);
         }
 
         try {
-            final List<Integer> specs = EntityUtilities.getEditedEntities(entityManager, ContentSpec.class, "contentSpecId", specTopicUpdate, null);
+            final List<Integer> specs = EntityUtilities.getEditedEntities(entityManager, ContentSpec.class, "contentSpecId", lastSpecUpdate, null);
 
             if (specs.size() != 0) {
                 sendMessage(SPEC_UPDATE_QUEUE, CollectionUtilities.toSeperatedString(specs));
@@ -116,7 +116,7 @@ public class UpdatedEntities {
                 There is a possibility that a topic will be found twice if it is edited in the time it takes
                 to set thisTopicUpdate and execute the query. This is a pretty small window though.
             */
-            specTopicUpdate = thisTopicUpdate;
+            lastSpecUpdate = thisSpecUpdate;
 
         } catch (final Exception ex) {
             // the message could not be sent. it will be retried as lastTopicUpdate was not updated
