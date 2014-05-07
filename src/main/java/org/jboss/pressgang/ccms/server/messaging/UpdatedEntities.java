@@ -3,8 +3,10 @@ package org.jboss.pressgang.ccms.server.messaging;
 import org.jboss.pressgang.ccms.filter.utils.EntityUtilities;
 import org.jboss.pressgang.ccms.model.Topic;
 import org.jboss.pressgang.ccms.model.contentspec.ContentSpec;
+import org.jboss.pressgang.ccms.server.utils.ResourceProducer;
 import org.jboss.pressgang.ccms.utils.common.CollectionUtilities;
 import org.joda.time.DateTime;
+import org.jppf.classloader.ResourceProvider;
 
 import javax.annotation.PostConstruct;
 import javax.annotation.PreDestroy;
@@ -17,6 +19,7 @@ import javax.naming.Context;
 import javax.naming.InitialContext;
 import javax.naming.NamingException;
 import javax.persistence.EntityManager;
+import javax.persistence.PersistenceContext;
 import java.util.Hashtable;
 import java.util.List;
 
@@ -67,7 +70,7 @@ public class UpdatedEntities {
     private Connection connection;
     private Session session;
 
-    @Inject
+    @PersistenceContext(unitName = ResourceProducer.PERSISTENCE_UNIT_NAME)
     protected EntityManager entityManager;
 
     @Schedule(hour="*", minute="*", second=EJB_REFRESH)
