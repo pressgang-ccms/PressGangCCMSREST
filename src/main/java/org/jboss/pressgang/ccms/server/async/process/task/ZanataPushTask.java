@@ -301,7 +301,7 @@ public class ZanataPushTask extends ProcessRESTTask<Boolean> {
             resource.setType(ResourceType.FILE);
 
             // Get the translatable nodes
-            final List<StringToNodeCollection> translatableStrings = DocBookUtilities.getTranslatableStringsV2(doc, false);
+            final List<StringToNodeCollection> translatableStrings = DocBookUtilities.getTranslatableStringsV3(doc, false);
 
             // Add the translatable nodes to the zanata document
             for (final StringToNodeCollection translatableStringData : translatableStrings) {
