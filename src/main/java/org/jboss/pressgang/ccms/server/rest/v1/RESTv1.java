@@ -4121,7 +4121,7 @@ public class RESTv1 extends BaseRESTv1 implements RESTBaseInterfaceV1, RESTInter
 
     @Override
     public RESTProcessInformationV1 pushContentSpecForTranslation(final Integer id, final String serverId, final String expand,
-            final String name, final boolean contentSpecOnly, final String username, final String apikey) {
+            final String name, final boolean contentSpecOnly, final boolean disableCopyTrans, final String username, final String apikey) {
         if (id == null) throw new BadRequestException("The id parameter can not be null");
 
         // Check that a push isn't already running
@@ -4133,7 +4133,8 @@ public class RESTv1 extends BaseRESTv1 implements RESTBaseInterfaceV1, RESTInter
             // Unmarshall the expand string
             final ExpandDataTrunk expandDataTrunk = unmarshallExpand(expand);
 
-            final Process process = processHelper.createZanataPushProcess(getBaseUrl(), id, name, contentSpecOnly, serverId, username, apikey);
+            final Process process = processHelper.createZanataPushProcess(getBaseUrl(), id, name, contentSpecOnly, disableCopyTrans,
+                    serverId, username, apikey);
             return processInformationFactory.createRESTEntityFromObject(process, getBaseUrl(), RESTv1Constants.JSON_URL, expandDataTrunk);
         } catch (Throwable e) {
             throw RESTv1Utilities.processError(e);

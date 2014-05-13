@@ -64,7 +64,8 @@ public class ProcessHelper {
     }
 
     public Process createZanataPushProcess(final String baseUrl, final Integer contentSpecId, final String processName,
-            final boolean contentSpecOnly, final String zanataServerId, final String username, final String apikey) throws Failure {
+            final boolean contentSpecOnly, final boolean disableCopyTrans, final String zanataServerId, final String username,
+            final String apikey) throws Failure {
         final ZanataDetails zanataDetails = createZanataDetails(zanataServerId, username, apikey);
 
         try {
@@ -91,7 +92,7 @@ public class ProcessHelper {
             // process.setStartedBy();
 
             // Add the task
-            process.addTask(new ZanataPushTask(baseUrl, contentSpecId, contentSpecOnly, zanataDetails));
+            process.addTask(new ZanataPushTask(baseUrl, contentSpecId, contentSpecOnly, disableCopyTrans, zanataDetails));
 
             // Add the process to the content spec
             final ContentSpecToProcess contentSpecToProcess = new ContentSpecToProcess();
