@@ -178,11 +178,13 @@ public class KeywordExtractor {
         return example;
     }
 
-    public static List<String> findKeywordStrings(final String input) throws IOException {
+    public static Set<String> findKeywordStrings(final String input) throws IOException {
         final List<Keyword> keywords = findKeywords(input);
-        final List<String> retValue = new ArrayList<String>();
+        final Set<String> retValue = new HashSet<String>();
         for (final Keyword keyword : keywords) {
-            retValue.add(keyword.getStem());
+            for (final String term : keyword.getTerms()) {
+                retValue.add(term);
+            }
         }
         return retValue;
     }

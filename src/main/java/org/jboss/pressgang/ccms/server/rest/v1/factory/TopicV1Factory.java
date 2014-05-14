@@ -102,7 +102,8 @@ public class TopicV1Factory extends RESTEntityFactory<RESTTopicV1, Topic, RESTTo
         // KEYWORDS
         if (revision == null && expand != null && expand.contains(RESTTopicV1.KEYWORDS_NAME)) {
             try {
-                retValue.setKeywords(new KeywordExtractor().findKeywordStrings(entity.getTopicText()));
+                retValue.setKeywords(new ArrayList<String>());
+                retValue.getKeywords().addAll(new KeywordExtractor().findKeywordStrings(entity.getTopicSearchText()));
             } catch (final IOException ex) {
                 // don't fill the collection if there was an exception
             }
