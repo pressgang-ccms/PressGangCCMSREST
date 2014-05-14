@@ -263,11 +263,12 @@ public class RESTv1 extends BaseRESTv1 implements RESTBaseInterfaceV1, RESTInter
 
         final Map<Integer, Integer> minHashes = getMinHashes(xml);
 
-        final List<Integer> topics = org.jboss.pressgang.ccms.model.utils.TopicUtilities.getMatchingMinHash(entityManager, minHashes,
-                threshold);
+        final List<Integer> topics = org.jboss.pressgang.ccms.model.utils.TopicUtilities.getMatchingMinHash(entityManager, minHashes, threshold);
 
         if (topics != null) {
-            final String topicIds = CollectionUtilities.toSeperatedString(topics, ",");
+            final List<Integer> subTopics = topics.subList(0, topics.size() > Constants.MAX_NUMBER_SIMILAR_TOPICS ? Constants.MAX_NUMBER_SIMILAR_TOPICS : topics.size());
+
+            final String topicIds = CollectionUtilities.toSeperatedString(subTopics, ",");
 
             final PathSegment filter = new PathSegmentImpl(Constants.QUERY_PATHSEGMENT_PREFIX, false);
             filter.getMatrixParameters().add(CommonFilterConstants.TOPIC_IDS_FILTER_VAR, topicIds);
@@ -2580,7 +2581,7 @@ public class RESTv1 extends BaseRESTv1 implements RESTBaseInterfaceV1, RESTInter
                 final String shaHash = HashUtilities.generateSHA256(processedXML);
 
                 final List<Topic> topics = entityManager.createQuery(
-                        "SELECT topic FROM Topic as Topic WHERE topic.topicContentHash = '" + shaHash + "'").getResultList();
+                        "SELECT topic FROM Topic as topic WHERE topic.topicContentHash = '" + shaHash + "'").getResultList();
 
                 if (topics.size() != 0) {
                     for (final Topic topic : topics) {

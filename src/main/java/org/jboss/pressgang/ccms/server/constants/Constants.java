@@ -24,4 +24,8 @@ public class Constants {
      * The length of a string that contains a SHA 256 hash
      */
     public static final int SHA_256_HASH_LENGTH = 64;
+    /**
+     * This is the maximum number of topics to return when finding similar topics
+     */
+    public static final int MAX_NUMBER_SIMILAR_TOPICS = 100;
 }
