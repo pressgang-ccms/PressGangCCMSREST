@@ -10,12 +10,9 @@ import javax.persistence.criteria.CriteriaBuilder;
 import javax.persistence.criteria.CriteriaQuery;
 import javax.persistence.criteria.Root;
 import javax.transaction.UserTransaction;
-import javax.ws.rs.GET;
 import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
-import javax.ws.rs.Produces;
 import javax.ws.rs.QueryParam;
-import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.MultivaluedMap;
 import javax.ws.rs.core.PathSegment;
 import javax.ws.rs.core.Response;
@@ -106,7 +103,6 @@ import org.jboss.pressgang.ccms.model.User;
 import org.jboss.pressgang.ccms.model.config.ApplicationConfig;
 import org.jboss.pressgang.ccms.model.contentspec.CSNode;
 import org.jboss.pressgang.ccms.model.contentspec.ContentSpec;
-import org.jboss.pressgang.ccms.model.contentspec.ContentSpecToProcess;
 import org.jboss.pressgang.ccms.model.contentspec.TranslatedCSNode;
 import org.jboss.pressgang.ccms.model.contentspec.TranslatedContentSpec;
 import org.jboss.pressgang.ccms.provider.DBProviderFactory;
@@ -173,7 +169,6 @@ import org.jboss.pressgang.ccms.rest.v1.jaxrsinterfaces.RESTBaseInterfaceV1;
 import org.jboss.pressgang.ccms.rest.v1.jaxrsinterfaces.RESTInterfaceAdvancedV1;
 import org.jboss.pressgang.ccms.server.async.ProcessManager;
 import org.jboss.pressgang.ccms.server.async.process.PGProcess;
-import org.jboss.pressgang.ccms.server.async.process.task.TestTask;
 import org.jboss.pressgang.ccms.server.constants.Constants;
 import org.jboss.pressgang.ccms.server.rest.v1.base.BaseRESTv1;
 import org.jboss.pressgang.ccms.server.rest.v1.factory.base.RESTElementCollectionFactory;
@@ -201,7 +196,6 @@ import org.jfree.chart.plot.PiePlot3D;
 import org.jfree.chart.plot.PlotOrientation;
 import org.jfree.data.category.DefaultCategoryDataset;
 import org.jfree.data.general.DefaultPieDataset;
-import org.jppf.JPPFException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.w3c.dom.DOMImplementation;
@@ -3295,19 +3289,36 @@ public class RESTv1 extends BaseRESTv1 implements RESTBaseInterfaceV1, RESTInter
     }
 
     @Override
-    public RESTContentSpecV1 createJSONContentSpecSnapshot(final Integer id, final String expand, final boolean useLatestRevisions,
-            final String message, final Integer flag, final String userId) {
+    public RESTContentSpecV1 freezeJSONContentSpec(final Integer id, final String expand, final boolean useLatestRevisions,
+            final Integer maxRevision, final boolean createNewSpec, final String message, final Integer flag, final String userId) {
         if (id == null) throw new BadRequestException("The id parameter can not be null");
 
-        final String snapshot = previewTEXTContentSpecSnapshot(id, useLatestRevisions);
+        final String snapshot = previewTEXTContentSpecFreeze(id, useLatestRevisions, maxRevision, createNewSpec);
         final RESTTextContentSpecV1 textContentSpec = new RESTTextContentSpecV1();
         textContentSpec.explicitSetText(snapshot);
-        final RESTTextContentSpecV1 contentSpec = createJSONTextContentSpec("", textContentSpec, message, flag, userId);
+
+        // Add the Frozen Tag
+        final RESTTagCollectionV1 tags = new RESTTagCollectionV1();
+        final RESTTagV1 tag = new RESTTagV1();
+        tag.setId(entitiesConfig.getFrozenTagId());
+        tags.addNewItem(tag);
+        textContentSpec.explicitSetTags(tags);
+
+        // Save/create the frozen spec
+        final RESTTextContentSpecV1 contentSpec;
+        if (createNewSpec) {
+            contentSpec = createJSONTextContentSpec("", textContentSpec, message, flag, userId);
+        } else {
+            textContentSpec.setId(id);
+            contentSpec = updateJSONTextContentSpec("", textContentSpec, message, flag, userId);
+        }
+
         return getJSONContentSpec(contentSpec.getId(), expand);
     }
 
     @Override
-    public String previewTEXTContentSpecSnapshot(final Integer id, final boolean useLatestRevisions) {
+    public String previewTEXTContentSpecFreeze(final Integer id, final boolean useLatestRevisions, final Integer maxRevision,
+            final boolean createNewSpec) {
         if (id == null) throw new BadRequestException("The id parameter can not be null");
 
         // Make sure that the content spec doesn't have a failure, as if it doesn't we can't do a preview as we need a valid spec
@@ -3324,22 +3335,84 @@ public class RESTv1 extends BaseRESTv1 implements RESTBaseInterfaceV1, RESTInter
         final SnapshotOptions snapshotOptions = new SnapshotOptions();
         snapshotOptions.setAddRevisions(true);
         snapshotOptions.setUpdateRevisions(useLatestRevisions);
+        snapshotOptions.setRevision(maxRevision);
 
         // Create the snapshot
         final SnapshotProcessor snapshotProcessor = new SnapshotProcessor(providerFactory);
         snapshotProcessor.processContentSpec(contentSpec, snapshotOptions);
-        return contentSpec.toString();
+        if (createNewSpec) {
+            contentSpec.setId(null);
+            contentSpec.setChecksum(null);
+        }
+        return contentSpec.toString(false);
     }
 
     @Override
-    public RESTTextContentSpecV1 createJSONTextContentSpecSnapshot(final Integer id, final String expand, final boolean useLatestRevisions,
-            final String message, final Integer flag, final String userId) {
+    public String previewTEXTContentSpecRevisionFreeze(final Integer id, final Integer revision, final boolean useLatestRevisions,
+            final Integer maxRevision, final boolean createNewSpec) {
+        if (id == null) throw new BadRequestException("The id parameter can not be null");
+        if (revision == null) throw new BadRequestException("The revision parameter can not be null");
+
+        // Make sure that the content spec doesn't have a failure, as if it doesn't we can't do a preview as we need a valid spec
+        final ContentSpec entity = getEntity(ContentSpec.class, id, revision);
+        if (!isNullOrEmpty(entity.getFailedContentSpec())) {
+            throw new BadRequestException("The content spec has failures and therefore a snapshot cannot be generated");
+        }
+
+        // Convert the entity into a ContentSpec object that can be manipulated
+        final DBProviderFactory providerFactory = ProviderUtilities.getDBProviderFactory(entityManager);
+        final org.jboss.pressgang.ccms.contentspec.ContentSpec contentSpec = ContentSpecUtilities.getContentSpec(id, revision,
+                providerFactory);
+
+        // Setup the processing options
+        final SnapshotOptions snapshotOptions = new SnapshotOptions();
+        snapshotOptions.setAddRevisions(true);
+        snapshotOptions.setUpdateRevisions(useLatestRevisions);
+        snapshotOptions.setRevision(maxRevision == null ? revision : maxRevision);
+
+        // Create the snapshot
+        final SnapshotProcessor snapshotProcessor = new SnapshotProcessor(providerFactory);
+        snapshotProcessor.processContentSpec(contentSpec, snapshotOptions);
+        if (createNewSpec) {
+            contentSpec.setId(null);
+            contentSpec.setChecksum(null);
+        }
+        return contentSpec.toString(false);
+    }
+
+    @Override
+    public RESTTextContentSpecV1 freezeJSONTextContentSpec(final Integer id, final String expand, final boolean useLatestRevisions,
+            final Integer maxRevision, final boolean createNewSpec, final String message, final Integer flag, final String userId) {
         if (id == null) throw new BadRequestException("The id parameter can not be null");
 
-        final String snapshot = previewTEXTContentSpecSnapshot(id, useLatestRevisions);
+        final String snapshot = previewTEXTContentSpecFreeze(id, useLatestRevisions, maxRevision, createNewSpec);
         final RESTTextContentSpecV1 textContentSpec = new RESTTextContentSpecV1();
         textContentSpec.explicitSetText(snapshot);
-        return createJSONTextContentSpec(expand, textContentSpec, message, flag, userId);
+
+        // Add the Frozen Tag
+        final RESTTagCollectionV1 tags = new RESTTagCollectionV1();
+        final RESTTagV1 tag = new RESTTagV1();
+        tag.setId(entitiesConfig.getFrozenTagId());
+        tags.addNewItem(tag);
+        textContentSpec.explicitSetTags(tags);
+
+        // Save/create the frozen spec
+        if (createNewSpec) {
+            return createJSONTextContentSpec(expand, textContentSpec, message, flag, userId);
+        } else {
+            textContentSpec.setId(id);
+            return updateJSONTextContentSpec(expand, textContentSpec, message, flag, userId);
+        }
+    }
+
+    @Override
+    public String freezeTEXTContentSpec(final Integer id, final boolean useLatestRevisions, final Integer maxRevision,
+            final boolean createNewSpec, final String message, final Integer flag, final String userId) {
+        if (id == null) throw new BadRequestException("The id parameter can not be null");
+
+        final RESTTextContentSpecV1 textContentSpec = freezeJSONTextContentSpec(id, "", useLatestRevisions, maxRevision, createNewSpec,
+                message, flag, userId);
+        return getTEXTContentSpec(textContentSpec.getId());
     }
 
     /* CONTENT SPEC NODE FUNCTIONS */
@@ -4116,7 +4189,7 @@ public class RESTv1 extends BaseRESTv1 implements RESTBaseInterfaceV1, RESTInter
 
     @Override
     public RESTProcessInformationV1 pushContentSpecForTranslation(final Integer id, final String serverId, final String expand,
-            final String name, final boolean contentSpecOnly, final String username, final String apikey) {
+            final String name, final boolean contentSpecOnly, final boolean disableCopyTrans, final String username, final String apikey) {
         if (id == null) throw new BadRequestException("The id parameter can not be null");
 
         // Check that a push isn't already running
@@ -4128,7 +4201,8 @@ public class RESTv1 extends BaseRESTv1 implements RESTBaseInterfaceV1, RESTInter
             // Unmarshall the expand string
             final ExpandDataTrunk expandDataTrunk = unmarshallExpand(expand);
 
-            final Process process = processHelper.createZanataPushProcess(getBaseUrl(), id, name, contentSpecOnly, serverId, username, apikey);
+            final Process process = processHelper.createZanataPushProcess(getBaseUrl(), id, name, contentSpecOnly, disableCopyTrans,
+                    serverId, username, apikey);
             return processInformationFactory.createRESTEntityFromObject(process, getBaseUrl(), RESTv1Constants.JSON_URL, expandDataTrunk);
         } catch (Throwable e) {
             throw RESTv1Utilities.processError(e);

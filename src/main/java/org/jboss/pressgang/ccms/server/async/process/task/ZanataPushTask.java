@@ -46,14 +46,16 @@ public class ZanataPushTask extends ProcessRESTTask<Boolean> {
     private static final String DEFAULT_CONDITION = "default";
     private final Integer contentSpecId;
     private final boolean contentSpecOnly;
+    private final boolean disableCopyTrans;
     private final String restServerUrl;
     private final ZanataDetails zanataDetails;
 
     public ZanataPushTask(final String restServerUrl, final Integer contentSpecId, final boolean contentSpecOnly,
-            final ZanataDetails zanataDetails) {
+            final boolean disableCopyTrans, final ZanataDetails zanataDetails) {
         this.restServerUrl = restServerUrl;
         this.contentSpecId = contentSpecId;
         this.contentSpecOnly = contentSpecOnly;
+        this.disableCopyTrans = disableCopyTrans;
         this.zanataDetails = zanataDetails;
     }
 
@@ -301,7 +303,7 @@ public class ZanataPushTask extends ProcessRESTTask<Boolean> {
             resource.setType(ResourceType.FILE);
 
             // Get the translatable nodes
-            final List<StringToNodeCollection> translatableStrings = DocBookUtilities.getTranslatableStringsV2(doc, false);
+            final List<StringToNodeCollection> translatableStrings = DocBookUtilities.getTranslatableStringsV3(doc, false);
 
             // Add the translatable nodes to the zanata document
             for (final StringToNodeCollection translatableStringData : translatableStrings) {
@@ -319,7 +321,7 @@ public class ZanataPushTask extends ProcessRESTTask<Boolean> {
 
             try {
                 // Create the document in zanata and then in PressGang if the document was successfully created in Zanata.
-                if (!zanataInterface.createFile(resource)) {
+                if (!zanataInterface.createFile(resource, !disableCopyTrans)) {
                     getLogger().error("\tTopic ID {}, Revision {} failed to be created in Zanata.", topic.getId(), topic.getRevision());
                     error = true;
                 } else if (!translatedTopicExists) {
@@ -439,7 +441,7 @@ public class ZanataPushTask extends ProcessRESTTask<Boolean> {
 
             try {
                 // Create the document in Zanata
-                if (!zanataInterface.createFile(resource)) {
+                if (!zanataInterface.createFile(resource, !disableCopyTrans)) {
                     getLogger().error("\tContent Spec ID {}, Revision {} failed to be created in Zanata.", contentSpecEntity.getId(),
                             contentSpecEntity.getRevision());
                     return null;
