@@ -15,6 +15,7 @@ import javax.ejb.Singleton;
 import javax.ejb.Startup;
 import javax.inject.Inject;
 import javax.jms.*;
+import javax.jms.IllegalStateException;
 import javax.naming.Context;
 import javax.naming.InitialContext;
 import javax.naming.NamingException;
@@ -62,6 +63,12 @@ public class UpdatedEntities {
      * JNDI name for the JMS topic that will be notified of updated content specs
      */
     private static final String SPEC_UPDATE_QUEUE = "java:jboss/topics/updatedspec";
+
+    /**
+     * How many times to retry opening a connection and resending a message
+     */
+    private static final int RETRIES = 1;
+
     private final Hashtable<String, String> env = new Hashtable<String, String>();
     private DateTime lastTopicUpdate = null;
     private DateTime lastSpecUpdate = null;
@@ -75,6 +82,7 @@ public class UpdatedEntities {
 
     @Schedule(hour="*", minute="*", second=EJB_REFRESH)
     public void checkForUpdatedTopics() {
+
         final DateTime thisTopicUpdate = new DateTime();
 
         if (lastTopicUpdate == null) {
@@ -165,6 +173,10 @@ public class UpdatedEntities {
         }
     }
 
+    private void sendMessage(final String topicName, final String jmsMessage) throws NamingException, JMSException {
+        sendMessage(topicName, jmsMessage, 0);
+    }
+
     /**
      * Send a message to a JMS topic
      * @param topicName  The JNDI name of the JMS topic
@@ -172,18 +184,32 @@ public class UpdatedEntities {
      * @throws NamingException
      * @throws JMSException
      */
-    private void sendMessage(final String topicName, final String jmsMessage) throws NamingException, JMSException {
-        if (ctx != null && session != null) {
-            // Lookup the JMS queue
-            final javax.jms.Topic topic = (javax.jms.Topic) ctx.lookup(topicName);
+    private void sendMessage(final String topicName, final String jmsMessage, final int retries) throws NamingException, JMSException {
+        try {
+            if (retries < RETRIES && ctx != null && session != null) {
+                // Lookup the JMS queue
+                final javax.jms.Topic topic = (javax.jms.Topic) ctx.lookup(topicName);
 
-            // Create a JMS Message Producer to send a message on the queue
-            final MessageProducer producer = session.createProducer(topic);
+                // Create a JMS Message Producer to send a message on the queue
+                final MessageProducer producer = session.createProducer(topic);
 
-            // Create a Text Message and send it using the producer. The HornetQ REST server requires the use
-            // of Object messages.
-            final ObjectMessage message = session.createObjectMessage(jmsMessage);
-            producer.send(message);
+                // Create a Text Message and send it using the producer. The HornetQ REST server requires the use
+                // of Object messages.
+                final ObjectMessage message = session.createObjectMessage(jmsMessage);
+                producer.send(message);
+            }
+        } catch (final IllegalStateException ex) {
+            /*
+                If the session is closed (and this can happen without calling shutdown()) we'll get
+                the following error:
+
+                javax.jms.IllegalStateException: HQ119019: Session is closed
+
+                in this case, shutdown, startup and retry.
+             */
+            shutdown();
+            setup();
+            sendMessage(topicName, jmsMessage, retries + 1);
         }
     }
 }
