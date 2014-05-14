@@ -10,6 +10,7 @@ import org.jboss.resteasy.spi.HttpRequest;
 import org.jboss.resteasy.spi.interception.PreProcessInterceptor;
 
 import javax.ws.rs.HttpMethod;
+import javax.ws.rs.Path;
 import javax.ws.rs.WebApplicationException;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.ext.Provider;
@@ -23,14 +24,23 @@ public class RESTv1ReadOnlyInterceptor implements PreProcessInterceptor {
 
     @Override
     public ServerResponse preProcess(final HttpRequest httpRequest, final ResourceMethod resourceMethod) throws Failure, WebApplicationException {
-        if (ApplicationConfig.getInstance().getReadOnly() &&
-            (resourceMethod.getHttpMethods().contains(HttpMethod.PUT)) ||
-            resourceMethod.getHttpMethods().contains(HttpMethod.POST) ||
-            resourceMethod.getHttpMethods().contains(HttpMethod.DELETE)) {
-            return new ServerResponse(
-                    "The server is readonly, and forbids all calls to POST, PUT and DELETE endpoints",
-                    Response.Status.FORBIDDEN.getStatusCode(),
-                    new Headers<Object>());
+        if (ApplicationConfig.getInstance().getReadOnly()) {
+
+            final Path path = resourceMethod.getMethod().getAnnotation(Path.class);
+            /*
+                Although this is a post method, it does not modify the database, so is allowed
+             */
+            if (!path.value().equals("/holdxml")) {
+                if (resourceMethod.getHttpMethods().contains(HttpMethod.PUT) ||
+                        resourceMethod.getHttpMethods().contains(HttpMethod.POST) ||
+                        resourceMethod.getHttpMethods().contains(HttpMethod.DELETE)) {
+                    return new ServerResponse(
+                            "The server is readonly, and forbids all calls to POST, PUT and DELETE endpoints",
+                            Response.Status.FORBIDDEN.getStatusCode(),
+                            new Headers<Object>()
+                    );
+                }
+            }
         }
 
         return null;
