@@ -49,6 +49,7 @@ public class ServerSettingsV1Factory extends RESTElementFactory<RESTServerSettin
         retValue.setUiUrl(applicationConfig.getUIUrl());
         retValue.setDocBookTemplateIds(applicationConfig.getDocBookTemplateStringConstantIds());
         retValue.setSeoCategoryIds(applicationConfig.getSEOCategoryIds());
+        retValue.setReadOnly(applicationConfig.getReadOnly());
 
         // Undefined Settings
         retValue.setUndefinedSettings(
@@ -149,14 +150,18 @@ public class ServerSettingsV1Factory extends RESTElementFactory<RESTServerSettin
     public void updateObjectFromRESTEntity(final ApplicationConfig applicationConfig, final RESTServerSettingsV1 dataObject) {
         if (dataObject.hasParameterSet(RESTServerSettingsV1.DEFAULT_LOCALE_NAME))
             applicationConfig.setDefaultLocale(dataObject.getDefaultLocale());
-        if (dataObject.hasParameterSet(RESTServerSettingsV1.LOCALES_NAME)) applicationConfig.setLocales(dataObject.getLocales());
+        if (dataObject.hasParameterSet(RESTServerSettingsV1.LOCALES_NAME))
+            applicationConfig.setLocales(dataObject.getLocales());
         if (dataObject.hasParameterSet(RESTServerSettingsV1.DOCBOOK_TEMPLATES_NAME))
             applicationConfig.setDocBookTemplateStringConstantIds(dataObject.getDocBookTemplateIds());
         if (dataObject.hasParameterSet(RESTServerSettingsV1.SEO_CATEGORIES_NAME))
             applicationConfig.setSEOCategoryIds(dataObject.getSeoCategoryIds());
         if (dataObject.hasParameterSet(RESTServerSettingsV1.DOCBUILDER_URL_NAME))
             applicationConfig.setDocBuilderUrl(dataObject.getDocBuilderUrl());
-        if (dataObject.hasParameterSet(RESTServerSettingsV1.UI_URL_NAME)) applicationConfig.setUIUrl(dataObject.getUiUrl());
+        if (dataObject.hasParameterSet(RESTServerSettingsV1.UI_URL_NAME))
+            applicationConfig.setUIUrl(dataObject.getUiUrl());
+        if (dataObject.hasParameterSet(RESTServerSettingsV1.READONLY_NAME))
+            applicationConfig.setReadOnly(dataObject.isReadOnly());
 
         if (dataObject.hasParameterSet(RESTServerSettingsV1.UNDEFINED_SETTINGS_NAME)) {
             try {
