@@ -6,9 +6,9 @@ import java.util.HashSet;
 import java.util.Set;
 
 import net.java.dev.webdav.jaxrs.xml.WebDavContextResolver;
+import org.jboss.pressgang.ccms.server.interceptor.ReadOnlyInterceptor;
 import org.jboss.pressgang.ccms.server.rest.v1.RESTv1;
 import org.jboss.pressgang.ccms.server.rest.v1.interceptor.RESTv1CreateResponseInterceptor;
-import org.jboss.pressgang.ccms.server.rest.v1.interceptor.RESTv1ReadOnlyInterceptor;
 import org.jboss.pressgang.ccms.server.rest.v1.interceptor.RESTv1VersionHeaderInterceptor;
 import org.jboss.pressgang.ccms.server.rest.v1.interceptor.RESTv1VersionInterceptor;
 import org.jboss.pressgang.ccms.server.rest.v1.mapper.BadRequestExceptionMapper;
@@ -57,7 +57,7 @@ public class JaxRsActivator extends Application {
         classes.add(RESTv1VersionHeaderInterceptor.class);
         classes.add(RESTv1VersionInterceptor.class);
         classes.add(RESTv1CreateResponseInterceptor.class);
-        classes.add(RESTv1ReadOnlyInterceptor.class);
+        classes.add(ReadOnlyInterceptor.class);
 
         // Exception Mappers
         classes.add(BadRequestExceptionMapper.class);

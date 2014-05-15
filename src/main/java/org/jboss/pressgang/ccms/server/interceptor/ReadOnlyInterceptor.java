@@ -1,4 +1,4 @@
-package org.jboss.pressgang.ccms.server.rest.v1.interceptor;
+package org.jboss.pressgang.ccms.server.interceptor;
 
 import org.jboss.pressgang.ccms.model.config.ApplicationConfig;
 import org.jboss.resteasy.annotations.interception.ServerInterceptor;
@@ -14,13 +14,22 @@ import javax.ws.rs.Path;
 import javax.ws.rs.WebApplicationException;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.ext.Provider;
+import java.util.regex.Pattern;
 
 /**
  * Prevent access to PUT, POST or DELETE methods when the server is readonly.
  */
 @Provider
 @ServerInterceptor
-public class RESTv1ReadOnlyInterceptor implements PreProcessInterceptor {
+public class ReadOnlyInterceptor implements PreProcessInterceptor {
+
+    /**
+     * These regexs define endpoints that can be updated even when the server is readonly.
+     */
+    private static final Pattern[] EXEMPT_ENDPOINTS = new Pattern[] {
+        Pattern.compile("^/holdxml$"),
+        Pattern.compile("^/settings/.*?$"),
+    };
 
     @Override
     public ServerResponse preProcess(final HttpRequest httpRequest, final ResourceMethod resourceMethod) throws Failure, WebApplicationException {
@@ -30,7 +39,14 @@ public class RESTv1ReadOnlyInterceptor implements PreProcessInterceptor {
             /*
                 Although this is a post method, it does not modify the database, so is allowed
              */
-            if (!path.value().equals("/holdxml")) {
+            boolean exempt = false;
+            for(final Pattern pattern : EXEMPT_ENDPOINTS) {
+                if (pattern.matcher(path.value()).matches()) {
+                    exempt = true;
+                }
+            }
+
+            if (!exempt) {
                 if (resourceMethod.getHttpMethods().contains(HttpMethod.PUT) ||
                         resourceMethod.getHttpMethods().contains(HttpMethod.POST) ||
                         resourceMethod.getHttpMethods().contains(HttpMethod.DELETE)) {

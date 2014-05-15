@@ -479,11 +479,6 @@ public class RESTv1 extends BaseRESTv1 implements RESTBaseInterfaceV1, RESTInter
 
     /* SYSTEM FUNCTIONS */
     @Override
-    public boolean isReadonly() {
-        return ApplicationConfig.getInstance().getReadOnly();
-    }
-
-    @Override
     public ExpandDataTrunk getJSONExpandTrunkExample() {
         final ExpandDataTrunk expand = new ExpandDataTrunk();
         final ExpandDataTrunk collection = new ExpandDataTrunk(new ExpandDataDetails("collectionname"));
