@@ -50,6 +50,7 @@ public class ServerSettingsV1Factory extends RESTElementFactory<RESTServerSettin
         retValue.setDocBookTemplateIds(applicationConfig.getDocBookTemplateStringConstantIds());
         retValue.setSeoCategoryIds(applicationConfig.getSEOCategoryIds());
         retValue.setReadOnly(applicationConfig.getReadOnly());
+        retValue.setJmsUpdateFrequency(applicationConfig.getJmsUpdateFrequency());
 
         // Undefined Settings
         retValue.setUndefinedSettings(
@@ -162,6 +163,8 @@ public class ServerSettingsV1Factory extends RESTElementFactory<RESTServerSettin
             applicationConfig.setUIUrl(dataObject.getUiUrl());
         if (dataObject.hasParameterSet(RESTServerSettingsV1.READONLY_NAME))
             applicationConfig.setReadOnly(dataObject.isReadOnly());
+        if (dataObject.hasParameterSet(RESTServerSettingsV1.JMS_UPDATE_FREQUENCY))
+            applicationConfig.setJmsUpdateFrequency(dataObject.getJmsUpdateFrequency());
 
         if (dataObject.hasParameterSet(RESTServerSettingsV1.UNDEFINED_SETTINGS_NAME)) {
             try {

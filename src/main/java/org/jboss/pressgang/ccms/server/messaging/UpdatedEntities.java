@@ -2,6 +2,7 @@ package org.jboss.pressgang.ccms.server.messaging;
 
 import org.jboss.pressgang.ccms.filter.utils.EntityUtilities;
 import org.jboss.pressgang.ccms.model.Topic;
+import org.jboss.pressgang.ccms.model.config.ApplicationConfig;
 import org.jboss.pressgang.ccms.model.contentspec.ContentSpec;
 import org.jboss.pressgang.ccms.server.utils.ResourceProducer;
 import org.jboss.pressgang.ccms.utils.common.CollectionUtilities;
@@ -10,9 +11,8 @@ import org.jppf.classloader.ResourceProvider;
 
 import javax.annotation.PostConstruct;
 import javax.annotation.PreDestroy;
-import javax.ejb.Schedule;
-import javax.ejb.Singleton;
-import javax.ejb.Startup;
+import javax.annotation.Resource;
+import javax.ejb.*;
 import javax.inject.Inject;
 import javax.jms.*;
 import javax.jms.IllegalStateException;
@@ -23,6 +23,7 @@ import javax.persistence.EntityManager;
 import javax.persistence.PersistenceContext;
 import java.util.Hashtable;
 import java.util.List;
+import javax.ejb.Timer;
 
 /**
  * This EJB will poll the database periodically looking for changes that can be broadcast via the message
@@ -46,10 +47,6 @@ import java.util.List;
 @Singleton
 @Startup
 public class UpdatedEntities {
-    /**
-     * Milliseconds between database queries
-     */
-    private static final long REFRESH = 10 * 1000;
     private static final String EJB_REFRESH = "*/10";
     private static final String INITIAL_CONTEXT_FACTORY = "org.jboss.as.naming.InitialContextFactory";
     private static final String URL_PKG_PREFIXES = "org.jboss.naming:org.jnp.interfaces";
@@ -80,13 +77,22 @@ public class UpdatedEntities {
     @PersistenceContext(unitName = ResourceProducer.PERSISTENCE_UNIT_NAME)
     protected EntityManager entityManager;
 
-    @Schedule(hour="*", minute="*", second=EJB_REFRESH)
-    public void checkForUpdatedTopics() {
+    @Resource
+    private SessionContext context;
+
+    @Timeout
+    public void onTimeout(final Timer timer) {
+        checkForUpdatedTopics(timer);
+        checkForUpdatedSpecs(timer);
+        triggerNextTimeout(timer);
+    }
+
+    private void checkForUpdatedTopics(final Timer timer) {
 
         final DateTime thisTopicUpdate = new DateTime();
 
         if (lastTopicUpdate == null) {
-            lastTopicUpdate = thisTopicUpdate.minus(REFRESH);
+            lastTopicUpdate = thisTopicUpdate.minus((Integer)timer.getInfo() * 1000);
         }
 
         try {
@@ -108,12 +114,11 @@ public class UpdatedEntities {
         }
     }
 
-    @Schedule(hour="*", minute="*", second=EJB_REFRESH)
-    public void checkForUpdatedSpecs() {
+    public void checkForUpdatedSpecs(final Timer timer) {
         final DateTime thisSpecUpdate = new DateTime();
 
         if (lastSpecUpdate == null) {
-            lastSpecUpdate = thisSpecUpdate.minus(REFRESH);
+            lastSpecUpdate = thisSpecUpdate.minus((Integer)timer.getInfo() * 1000);
         }
 
         try {
@@ -133,6 +138,20 @@ public class UpdatedEntities {
             // the message could not be sent. it will be retried as lastTopicUpdate was not updated
             ex.printStackTrace();
         }
+    }
+
+    public void triggerNextTimeout(final Timer timer) {
+        createNewTimer();
+    }
+
+    private void createNewTimer() {
+        final TimerConfig config = new TimerConfig();
+        config.setPersistent(false);
+        config.setInfo(ApplicationConfig.getInstance().getJmsUpdateFrequency() * 1000);
+
+        context.getTimerService().createSingleActionTimer(
+                ApplicationConfig.getInstance().getJmsUpdateFrequency() * 1000,
+                config);
     }
 
     @PostConstruct
@@ -155,6 +174,8 @@ public class UpdatedEntities {
             connection = null;
             session = null;
         }
+
+        createNewTimer();
     }
 
     /**
