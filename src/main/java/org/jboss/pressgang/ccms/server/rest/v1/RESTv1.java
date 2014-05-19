@@ -33,11 +33,8 @@ import org.apache.batik.dom.GenericDOMImplementation;
 import org.apache.batik.svggen.SVGGraphics2D;
 import org.apache.commons.threadpool.DefaultThreadPool;
 import org.apache.commons.threadpool.ThreadPool;
-import org.hibernate.Session;
 import org.hibernate.envers.AuditReader;
 import org.hibernate.envers.AuditReaderFactory;
-import org.hibernate.search.FullTextSession;
-import org.hibernate.search.Search;
 import org.jboss.pressgang.ccms.contentspec.processor.SnapshotProcessor;
 import org.jboss.pressgang.ccms.contentspec.processor.structures.SnapshotOptions;
 import org.jboss.pressgang.ccms.filter.BlobConstantFieldFilter;
@@ -3288,16 +3285,20 @@ public class RESTv1 extends BaseRESTv1 implements RESTBaseInterfaceV1, RESTInter
             final Integer maxRevision, final boolean createNewSpec, final String message, final Integer flag, final String userId) {
         if (id == null) throw new BadRequestException("The id parameter can not be null");
 
+        final ContentSpec entity = getEntity(ContentSpec.class, id);
+
         final String snapshot = previewTEXTContentSpecFreeze(id, useLatestRevisions, maxRevision, createNewSpec);
         final RESTTextContentSpecV1 textContentSpec = new RESTTextContentSpecV1();
         textContentSpec.explicitSetText(snapshot);
 
-        // Add the Frozen Tag
-        final RESTTagCollectionV1 tags = new RESTTagCollectionV1();
-        final RESTTagV1 tag = new RESTTagV1();
-        tag.setId(entitiesConfig.getFrozenTagId());
-        tags.addNewItem(tag);
-        textContentSpec.explicitSetTags(tags);
+        if (!entity.isTaggedWith(entitiesConfig.getFrozenTagId())) {
+            // Add the Frozen Tag
+            final RESTTagCollectionV1 tags = new RESTTagCollectionV1();
+            final RESTTagV1 tag = new RESTTagV1();
+            tag.setId(entitiesConfig.getFrozenTagId());
+            tags.addNewItem(tag);
+            textContentSpec.explicitSetTags(tags);
+        }
 
         // Save/create the frozen spec
         final RESTTextContentSpecV1 contentSpec;
@@ -3380,16 +3381,20 @@ public class RESTv1 extends BaseRESTv1 implements RESTBaseInterfaceV1, RESTInter
             final Integer maxRevision, final boolean createNewSpec, final String message, final Integer flag, final String userId) {
         if (id == null) throw new BadRequestException("The id parameter can not be null");
 
+        final ContentSpec entity = getEntity(ContentSpec.class, id);
+
         final String snapshot = previewTEXTContentSpecFreeze(id, useLatestRevisions, maxRevision, createNewSpec);
         final RESTTextContentSpecV1 textContentSpec = new RESTTextContentSpecV1();
         textContentSpec.explicitSetText(snapshot);
 
-        // Add the Frozen Tag
-        final RESTTagCollectionV1 tags = new RESTTagCollectionV1();
-        final RESTTagV1 tag = new RESTTagV1();
-        tag.setId(entitiesConfig.getFrozenTagId());
-        tags.addNewItem(tag);
-        textContentSpec.explicitSetTags(tags);
+        if (!entity.isTaggedWith(entitiesConfig.getFrozenTagId())) {
+            // Add the Frozen Tag
+            final RESTTagCollectionV1 tags = new RESTTagCollectionV1();
+            final RESTTagV1 tag = new RESTTagV1();
+            tag.setId(entitiesConfig.getFrozenTagId());
+            tags.addNewItem(tag);
+            textContentSpec.explicitSetTags(tags);
+        }
 
         // Save/create the frozen spec
         if (createNewSpec) {
