@@ -144,6 +144,11 @@ public class UpdatedEntities {
         createNewTimer();
     }
 
+    /**
+     * Here we create a single action timer that reads the JMS Update Frequency value from the
+     * application config and schedules the next refresh. This allows us to define the refresh
+     * frequency as part of the config, and alter it at runtime.
+     */
     private void createNewTimer() {
         final TimerConfig config = new TimerConfig();
         config.setPersistent(false);
@@ -169,6 +174,7 @@ public class UpdatedEntities {
             session = connection.createSession(false, Session.AUTO_ACKNOWLEDGE);
             connection.start();
         } catch (final Exception ex) {
+            ex.printStackTrace();
             ctx = null;
             cf = null;
             connection = null;

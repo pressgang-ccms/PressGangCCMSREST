@@ -1,0 +1,12 @@
+<messaging-deployment xmlns="urn:jboss:messaging-deployment:1.0">
+    <hornetq-server>
+        <jms-destinations>
+            <jms-topic name="UpdatedTopic">
+                <entry name="java:jboss/topics/updatedtopic"/>
+            </jms-topic>
+            <jms-topic name="UpdatedSpec">
+                <entry name="java:jboss/topics/updatedspec"/>
+            </jms-topic>
+        </jms-destinations>
+    </hornetq-server>
+</messaging-deployment>
