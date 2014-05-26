@@ -1,5 +1,7 @@
 package org.jboss.pressgang.ccms.server.messaging;
 
+import org.hibernate.envers.AuditReader;
+import org.hibernate.envers.AuditReaderFactory;
 import org.jboss.pressgang.ccms.filter.utils.EntityUtilities;
 import org.jboss.pressgang.ccms.model.Topic;
 import org.jboss.pressgang.ccms.model.config.ApplicationConfig;
@@ -21,6 +23,7 @@ import javax.naming.InitialContext;
 import javax.naming.NamingException;
 import javax.persistence.EntityManager;
 import javax.persistence.PersistenceContext;
+import java.util.Date;
 import java.util.Hashtable;
 import java.util.List;
 import javax.ejb.Timer;
@@ -67,8 +70,14 @@ public class UpdatedEntities {
     private static final int RETRIES = 1;
 
     private final Hashtable<String, String> env = new Hashtable<String, String>();
-    private DateTime lastTopicUpdate = null;
-    private DateTime lastSpecUpdate = null;
+    /**
+     * The last highest revision that we checked for updates against
+     */
+    private Integer lastTopicUpdate = null;
+    /**
+     * The last highest revision that we checked for updates against
+     */
+    private Integer lastSpecUpdate = null;
     private Context ctx = null;
     private ConnectionFactory cf;
     private Connection connection;
@@ -89,54 +98,60 @@ public class UpdatedEntities {
 
     private void checkForUpdatedTopics(final Timer timer) {
 
-        final DateTime thisTopicUpdate = new DateTime();
+        final AuditReader reader = AuditReaderFactory.get(entityManager);
+        final int thisTopicUpdate = reader.getRevisionNumberForDate(new Date(Long.MAX_VALUE)).intValue();
 
         if (lastTopicUpdate == null) {
-            lastTopicUpdate = thisTopicUpdate.minus((Integer)timer.getInfo() * 1000);
-        }
+            // getEditedEntitiesByRevision will get revisions between and inclusive of the supplied revisions.
+            // we are only interested in revisions above the last largest one.
+            lastTopicUpdate = thisTopicUpdate + 1;
+        } else {
 
-        try {
-            final List<Integer> topics = EntityUtilities.getEditedEntities(entityManager, Topic.class, "topicId", lastTopicUpdate, null);
+            try {
+                final List<Integer> topics = EntityUtilities.getEditedEntitiesByRevision(entityManager, Topic.class, "topicId", lastTopicUpdate, null);
 
-            if (topics.size() != 0) {
-                sendMessage(TOPIC_UPDATE_QUEUE, CollectionUtilities.toSeperatedString(topics));
+                if (topics.size() != 0) {
+                    sendMessage(TOPIC_UPDATE_QUEUE, CollectionUtilities.toSeperatedString(topics));
+                }
+
+                /*
+                    There is a possibility that a topic will be found twice if it is edited in the time it takes
+                    to set thisTopicUpdate and execute the query. This is a pretty small window though.
+                */
+                lastTopicUpdate = thisTopicUpdate + 1;
+
+            } catch (final Exception ex) {
+                // the message could not be sent. it will be retried as lastTopicUpdate was not updated
+                ex.printStackTrace();
             }
-
-            /*
-                There is a possibility that a topic will be found twice if it is edited in the time it takes
-                to set thisTopicUpdate and execute the query. This is a pretty small window though.
-            */
-            lastTopicUpdate = thisTopicUpdate;
-
-        } catch (final Exception ex) {
-            // the message could not be sent. it will be retried as lastTopicUpdate was not updated
-            ex.printStackTrace();
         }
     }
 
     public void checkForUpdatedSpecs(final Timer timer) {
-        final DateTime thisSpecUpdate = new DateTime();
+        final AuditReader reader = AuditReaderFactory.get(entityManager);
+        final int thisSpecUpdate = reader.getRevisionNumberForDate(new Date(Long.MAX_VALUE)).intValue();
 
         if (lastSpecUpdate == null) {
-            lastSpecUpdate = thisSpecUpdate.minus((Integer)timer.getInfo() * 1000);
-        }
+            lastSpecUpdate = thisSpecUpdate + 1;
+        } else {
 
-        try {
-            final List<Integer> specs = EntityUtilities.getEditedEntities(entityManager, ContentSpec.class, "contentSpecId", lastSpecUpdate, null);
+            try {
+                final List<Integer> specs = EntityUtilities.getEditedEntitiesByRevision(entityManager, ContentSpec.class, "contentSpecId", lastSpecUpdate, null);
 
-            if (specs.size() != 0) {
-                sendMessage(SPEC_UPDATE_QUEUE, CollectionUtilities.toSeperatedString(specs));
+                if (specs.size() != 0) {
+                    sendMessage(SPEC_UPDATE_QUEUE, CollectionUtilities.toSeperatedString(specs));
+                }
+
+                /*
+                    There is a possibility that a topic will be found twice if it is edited in the time it takes
+                    to set thisTopicUpdate and execute the query. This is a pretty small window though.
+                */
+                lastSpecUpdate = thisSpecUpdate + 1;
+
+            } catch (final Exception ex) {
+                // the message could not be sent. it will be retried as lastTopicUpdate was not updated
+                ex.printStackTrace();
             }
-
-            /*
-                There is a possibility that a topic will be found twice if it is edited in the time it takes
-                to set thisTopicUpdate and execute the query. This is a pretty small window though.
-            */
-            lastSpecUpdate = thisSpecUpdate;
-
-        } catch (final Exception ex) {
-            // the message could not be sent. it will be retried as lastTopicUpdate was not updated
-            ex.printStackTrace();
         }
     }
 
