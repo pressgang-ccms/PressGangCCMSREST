@@ -22,6 +22,7 @@ import javax.naming.Context;
 import javax.naming.InitialContext;
 import javax.naming.NamingException;
 import javax.persistence.EntityManager;
+import javax.persistence.NamedNativeQuery;
 import javax.persistence.PersistenceContext;
 import java.util.Date;
 import java.util.Hashtable;
@@ -64,6 +65,8 @@ public class UpdatedEntities {
      */
     private static final String SPEC_UPDATE_QUEUE = "java:jboss/topics/updatedspec";
 
+    private static final String MAX_REV_QUERY = "SELECT MAX( REV ) FROM Skynet.REVINFO";
+
     /**
      * How many times to retry opening a connection and resending a message
      */
@@ -99,7 +102,7 @@ public class UpdatedEntities {
     private void checkForUpdatedTopics(final Timer timer) {
 
         final AuditReader reader = AuditReaderFactory.get(entityManager);
-        final int thisTopicUpdate = reader.getRevisionNumberForDate(new Date(Long.MAX_VALUE)).intValue();
+        final Integer thisTopicUpdate = (Integer)entityManager.createNativeQuery(MAX_REV_QUERY).getSingleResult();
 
         if (lastTopicUpdate == null) {
             // getEditedEntitiesByRevision will get revisions between and inclusive of the supplied revisions.
@@ -129,7 +132,7 @@ public class UpdatedEntities {
 
     public void checkForUpdatedSpecs(final Timer timer) {
         final AuditReader reader = AuditReaderFactory.get(entityManager);
-        final int thisSpecUpdate = reader.getRevisionNumberForDate(new Date(Long.MAX_VALUE)).intValue();
+        final Integer thisSpecUpdate = (Integer)entityManager.createNativeQuery(MAX_REV_QUERY).getSingleResult();
 
         if (lastSpecUpdate == null) {
             lastSpecUpdate = thisSpecUpdate + 1;
