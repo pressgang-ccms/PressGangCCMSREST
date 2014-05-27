@@ -96,12 +96,13 @@ public class UpdatedEntities {
         final Integer thisLatestRevision = getLatestRevision();
         checkForUpdatedTopics(timer, thisLatestRevision);
         checkForUpdatedSpecs(timer, thisLatestRevision);
-        triggerNextTimeout(timer);
+        createNewTimer();
     }
 
     protected Integer getLatestRevision() {
         return (Integer) entityManager.createQuery("SELECT MAX(id) FROM LoggingRevisionEntity").getSingleResult();
     }
+
     private void checkForUpdatedTopics(final Timer timer, final Integer thisLatestRevision) {
 
         if (lastTopicRevision != null) {
@@ -141,10 +142,6 @@ public class UpdatedEntities {
         } else {
             lastSpecRevision = thisLatestRevision + 1;
         }
-    }
-
-    public void triggerNextTimeout(final Timer timer) {
-        createNewTimer();
     }
 
     /**
