@@ -172,7 +172,6 @@ public class UpdatedEntities {
         }
     }
 
-
     /**
      * Connect to the JMS subsystem
      */
