@@ -1,33 +1,35 @@
 package org.jboss.pressgang.ccms.server.messaging;
 
-import org.hibernate.envers.AuditReader;
-import org.hibernate.envers.AuditReaderFactory;
+import javax.annotation.PostConstruct;
+import javax.annotation.PreDestroy;
+import javax.annotation.Resource;
+import javax.ejb.SessionContext;
+import javax.ejb.Singleton;
+import javax.ejb.Startup;
+import javax.ejb.Timeout;
+import javax.ejb.Timer;
+import javax.ejb.TimerConfig;
+import javax.jms.Connection;
+import javax.jms.ConnectionFactory;
+import javax.jms.IllegalStateException;
+import javax.jms.JMSException;
+import javax.jms.MessageProducer;
+import javax.jms.ObjectMessage;
+import javax.jms.Session;
+import javax.naming.Context;
+import javax.naming.InitialContext;
+import javax.naming.NamingException;
+import javax.persistence.EntityManager;
+import javax.persistence.PersistenceContext;
+import java.util.Hashtable;
+import java.util.List;
+
 import org.jboss.pressgang.ccms.filter.utils.EntityUtilities;
 import org.jboss.pressgang.ccms.model.Topic;
 import org.jboss.pressgang.ccms.model.config.ApplicationConfig;
 import org.jboss.pressgang.ccms.model.contentspec.ContentSpec;
 import org.jboss.pressgang.ccms.server.utils.ResourceProducer;
 import org.jboss.pressgang.ccms.utils.common.CollectionUtilities;
-import org.joda.time.DateTime;
-import org.jppf.classloader.ResourceProvider;
-
-import javax.annotation.PostConstruct;
-import javax.annotation.PreDestroy;
-import javax.annotation.Resource;
-import javax.ejb.*;
-import javax.inject.Inject;
-import javax.jms.*;
-import javax.jms.IllegalStateException;
-import javax.naming.Context;
-import javax.naming.InitialContext;
-import javax.naming.NamingException;
-import javax.persistence.EntityManager;
-import javax.persistence.NamedNativeQuery;
-import javax.persistence.PersistenceContext;
-import java.util.Date;
-import java.util.Hashtable;
-import java.util.List;
-import javax.ejb.Timer;
 
 /**
  * This EJB will poll the database periodically looking for changes that can be broadcast via the message
@@ -65,8 +67,6 @@ public class UpdatedEntities {
      */
     private static final String SPEC_UPDATE_QUEUE = "java:jboss/topics/updatedspec";
 
-    private static final String MAX_REV_QUERY = "SELECT MAX( REV ) FROM Skynet.REVINFO";
-
     private static final String SERVER_RESTART = "SERVER_RESTART";
 
     /**
@@ -78,7 +78,6 @@ public class UpdatedEntities {
     /**
      * The last highest revision that we checked for updates against
      */
-    private Integer lastLatestRevision = null;
     private Integer lastSpecRevision = null;
     private Integer lastTopicRevision = null;
     private Context ctx = null;
@@ -94,14 +93,15 @@ public class UpdatedEntities {
 
     @Timeout
     public void onTimeout(final Timer timer) {
-        final AuditReader reader = AuditReaderFactory.get(entityManager);
-        final Integer thisLatestRevision = (Integer)entityManager.createNativeQuery(MAX_REV_QUERY).getSingleResult();
-
+        final Integer thisLatestRevision = getLatestRevision();
         checkForUpdatedTopics(timer, thisLatestRevision);
         checkForUpdatedSpecs(timer, thisLatestRevision);
         triggerNextTimeout(timer);
     }
 
+    protected Integer getLatestRevision() {
+        return (Integer) entityManager.createQuery("SELECT MAX(id) FROM LoggingRevisionEntity").getSingleResult();
+    }
     private void checkForUpdatedTopics(final Timer timer, final Integer thisLatestRevision) {
 
         if (lastTopicRevision != null) {
