@@ -76,11 +76,7 @@ public class UpdatedEntities {
     /**
      * The last highest revision that we checked for updates against
      */
-    private Integer lastTopicUpdate = null;
-    /**
-     * The last highest revision that we checked for updates against
-     */
-    private Integer lastSpecUpdate = null;
+    private Integer lastLatestRevision = null;
     private Context ctx = null;
     private ConnectionFactory cf;
     private Connection connection;
@@ -94,34 +90,25 @@ public class UpdatedEntities {
 
     @Timeout
     public void onTimeout(final Timer timer) {
+        final AuditReader reader = AuditReaderFactory.get(entityManager);
+        final Integer thisLatestRevision = (Integer)entityManager.createNativeQuery(MAX_REV_QUERY).getSingleResult();
+
         checkForUpdatedTopics(timer);
         checkForUpdatedSpecs(timer);
         triggerNextTimeout(timer);
+
+        lastLatestRevision = thisLatestRevision + 1;
     }
 
     private void checkForUpdatedTopics(final Timer timer) {
 
-        final AuditReader reader = AuditReaderFactory.get(entityManager);
-        final Integer thisTopicUpdate = (Integer)entityManager.createNativeQuery(MAX_REV_QUERY).getSingleResult();
-
-        if (lastTopicUpdate == null) {
-            // getEditedEntitiesByRevision will get revisions between and inclusive of the supplied revisions.
-            // we are only interested in revisions above the last largest one.
-            lastTopicUpdate = thisTopicUpdate + 1;
-        } else {
-
+        if (lastLatestRevision != null) {
             try {
-                final List<Integer> topics = EntityUtilities.getEditedEntitiesByRevision(entityManager, Topic.class, "topicId", lastTopicUpdate, null);
+                final List<Integer> topics = EntityUtilities.getEditedEntitiesByRevision(entityManager, Topic.class, "topicId", lastLatestRevision, null);
 
                 if (topics.size() != 0) {
                     sendMessage(TOPIC_UPDATE_QUEUE, CollectionUtilities.toSeperatedString(topics));
                 }
-
-                /*
-                    There is a possibility that a topic will be found twice if it is edited in the time it takes
-                    to set thisTopicUpdate and execute the query. This is a pretty small window though.
-                */
-                lastTopicUpdate = thisTopicUpdate + 1;
 
             } catch (final Exception ex) {
                 // the message could not be sent. it will be retried as lastTopicUpdate was not updated
@@ -131,25 +118,13 @@ public class UpdatedEntities {
     }
 
     public void checkForUpdatedSpecs(final Timer timer) {
-        final AuditReader reader = AuditReaderFactory.get(entityManager);
-        final Integer thisSpecUpdate = (Integer)entityManager.createNativeQuery(MAX_REV_QUERY).getSingleResult();
-
-        if (lastSpecUpdate == null) {
-            lastSpecUpdate = thisSpecUpdate + 1;
-        } else {
-
+        if (lastLatestRevision != null) {
             try {
-                final List<Integer> specs = EntityUtilities.getEditedEntitiesByRevision(entityManager, ContentSpec.class, "contentSpecId", lastSpecUpdate, null);
+                final List<Integer> specs = EntityUtilities.getEditedEntitiesByRevision(entityManager, ContentSpec.class, "contentSpecId", lastLatestRevision, null);
 
                 if (specs.size() != 0) {
                     sendMessage(SPEC_UPDATE_QUEUE, CollectionUtilities.toSeperatedString(specs));
                 }
-
-                /*
-                    There is a possibility that a topic will be found twice if it is edited in the time it takes
-                    to set thisTopicUpdate and execute the query. This is a pretty small window though.
-                */
-                lastSpecUpdate = thisSpecUpdate + 1;
 
             } catch (final Exception ex) {
                 // the message could not be sent. it will be retried as lastTopicUpdate was not updated
