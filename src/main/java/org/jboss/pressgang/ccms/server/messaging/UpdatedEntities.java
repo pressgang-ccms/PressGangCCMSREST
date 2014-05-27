@@ -67,6 +67,8 @@ public class UpdatedEntities {
 
     private static final String MAX_REV_QUERY = "SELECT MAX( REV ) FROM Skynet.REVINFO";
 
+    private static final String SERVER_RESTART = "SERVER_RESTART";
+
     /**
      * How many times to retry opening a connection and resending a message
      */
@@ -77,6 +79,8 @@ public class UpdatedEntities {
      * The last highest revision that we checked for updates against
      */
     private Integer lastLatestRevision = null;
+    private Integer lastSpecRevision = null;
+    private Integer lastTopicRevision = null;
     private Context ctx = null;
     private ConnectionFactory cf;
     private Connection connection;
@@ -93,43 +97,49 @@ public class UpdatedEntities {
         final AuditReader reader = AuditReaderFactory.get(entityManager);
         final Integer thisLatestRevision = (Integer)entityManager.createNativeQuery(MAX_REV_QUERY).getSingleResult();
 
-        checkForUpdatedTopics(timer);
-        checkForUpdatedSpecs(timer);
+        checkForUpdatedTopics(timer, thisLatestRevision);
+        checkForUpdatedSpecs(timer, thisLatestRevision);
         triggerNextTimeout(timer);
-
-        lastLatestRevision = thisLatestRevision + 1;
     }
 
-    private void checkForUpdatedTopics(final Timer timer) {
+    private void checkForUpdatedTopics(final Timer timer, final Integer thisLatestRevision) {
 
-        if (lastLatestRevision != null) {
+        if (lastTopicRevision != null) {
             try {
-                final List<Integer> topics = EntityUtilities.getEditedEntitiesByRevision(entityManager, Topic.class, "topicId", lastLatestRevision, null);
+                final List<Integer> topics = EntityUtilities.getEditedEntitiesByRevision(entityManager, Topic.class, "topicId", lastTopicRevision, null);
 
                 if (topics.size() != 0) {
                     sendMessage(TOPIC_UPDATE_QUEUE, CollectionUtilities.toSeperatedString(topics));
                 }
 
+                lastTopicRevision = thisLatestRevision + 1;
+
             } catch (final Exception ex) {
-                // the message could not be sent. it will be retried as lastTopicUpdate was not updated
+                // the message could not be sent. it will be retried as lastTopicRevision was not updated
                 ex.printStackTrace();
             }
+        } else {
+            lastTopicRevision = thisLatestRevision + 1;
         }
     }
 
-    public void checkForUpdatedSpecs(final Timer timer) {
-        if (lastLatestRevision != null) {
+    public void checkForUpdatedSpecs(final Timer timer, final Integer thisLatestRevision) {
+        if (lastSpecRevision != null) {
             try {
-                final List<Integer> specs = EntityUtilities.getEditedEntitiesByRevision(entityManager, ContentSpec.class, "contentSpecId", lastLatestRevision, null);
+                final List<Integer> specs = EntityUtilities.getEditedEntitiesByRevision(entityManager, ContentSpec.class, "contentSpecId", lastSpecRevision, null);
 
                 if (specs.size() != 0) {
                     sendMessage(SPEC_UPDATE_QUEUE, CollectionUtilities.toSeperatedString(specs));
                 }
 
+                lastSpecRevision = thisLatestRevision + 1;
+
             } catch (final Exception ex) {
-                // the message could not be sent. it will be retried as lastTopicUpdate was not updated
+                // the message could not be sent. it will be retried as lastSpecRevision was not updated
                 ex.printStackTrace();
             }
+        } else {
+            lastSpecRevision = thisLatestRevision + 1;
         }
     }
 
@@ -153,6 +163,19 @@ public class UpdatedEntities {
     }
 
     @PostConstruct
+    private void sendStartupMessage() {
+        setup();
+
+        try {
+            sendMessage(TOPIC_UPDATE_QUEUE, SERVER_RESTART);
+            sendMessage(SPEC_UPDATE_QUEUE, SERVER_RESTART);
+        } catch (final Exception ex) {
+            // the message could not be sent.
+            ex.printStackTrace();
+        }
+    }
+
+
     /**
      * Connect to the JMS subsystem
      */
