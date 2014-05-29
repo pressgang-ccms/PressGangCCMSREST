@@ -13,7 +13,7 @@
     <packaging>war</packaging>
 
     <properties>
-        <pressgang.ccms.version>1.6</pressgang.ccms.version>
+        <pressgang.ccms.version>1.7-SNAPSHOT</pressgang.ccms.version>
         <jboss.bom.version>1.0.3.Final</jboss.bom.version>
         <jboss.spec.verison>3.0.1.Final</jboss.spec.verison>
         <jbossasplugin.version>7.1.1.Final</jbossasplugin.version>
