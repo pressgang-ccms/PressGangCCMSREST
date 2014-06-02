@@ -1427,7 +1427,7 @@ public class BaseRESTv1 extends BaseREST {
             // If the content spec processed correctly then commit the changes, otherwise roll them back.
             if (!success) {
                 final int status = transaction.getStatus();
-                if (status != Status.STATUS_ROLLING_BACK && status != Status.STATUS_ROLLEDBACK && status != Status.STATUS_NO_TRANSACTION) {
+                if (status != Status.STATUS_NO_TRANSACTION) {
                     transaction.rollback();
                 }
             } else {
