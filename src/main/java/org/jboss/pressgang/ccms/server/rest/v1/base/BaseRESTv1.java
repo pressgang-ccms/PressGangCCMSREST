@@ -99,6 +99,7 @@ import org.jboss.pressgang.ccms.server.rest.v1.factory.UserV1Factory;
 import org.jboss.pressgang.ccms.server.rest.v1.factory.base.RESTEntityCollectionFactory;
 import org.jboss.pressgang.ccms.server.rest.v1.factory.base.RESTEntityFactory;
 import org.jboss.pressgang.ccms.server.rest.v1.utils.RESTv1Utilities;
+import org.jboss.pressgang.ccms.server.utils.EntityManagerWrapper;
 import org.jboss.pressgang.ccms.server.utils.EntityUtilities;
 import org.jboss.pressgang.ccms.server.utils.EnversUtilities;
 import org.jboss.pressgang.ccms.server.utils.InjectionResolver;
@@ -157,7 +158,7 @@ public class BaseRESTv1 extends BaseREST {
      * The EntityManager to use for this request
      */
     @Inject
-    protected EntityManager entityManager;
+    protected EntityManagerWrapper entityManager;
     /**
      * The cache used to store new and updated entities.
      */
@@ -1546,6 +1547,9 @@ public class BaseRESTv1 extends BaseREST {
         final Integer id = restEntity.getId();
 
         try {
+            // Reload the entity manager to work around an envers issue. See https://hibernate.onjira.com/browse/HHH-7682
+            entityManager.reloadEntityManager();
+
             // Start a Transaction
             transaction.begin();
 

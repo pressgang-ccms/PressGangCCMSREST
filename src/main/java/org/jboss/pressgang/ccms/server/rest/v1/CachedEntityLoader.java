@@ -2,14 +2,13 @@ package org.jboss.pressgang.ccms.server.rest.v1;
 
 import javax.enterprise.context.ApplicationScoped;
 import javax.inject.Inject;
-import javax.persistence.EntityManager;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
 import org.jboss.pressgang.ccms.model.MinHashXOR;
 import org.jboss.pressgang.ccms.model.base.AuditedEntity;
+import org.jboss.pressgang.ccms.server.utils.EntityManagerWrapper;
 
 /*
  * Note: Nothing is synchronised here as we assume that queries being executed a few times won't matter. This gives us a performance gain
@@ -20,7 +19,7 @@ import org.jboss.pressgang.ccms.model.base.AuditedEntity;
 public class CachedEntityLoader {
     private final Map<String, List<? extends AuditedEntity>> results = new ConcurrentHashMap<String, List<? extends AuditedEntity>>();
     @Inject
-    private EntityManager entityManager;
+    private EntityManagerWrapper entityManager;
 
     public List<MinHashXOR> getXOREntities() {
         if (!results.containsKey(MinHashXOR.SELECT_ALL_QUERY)) {

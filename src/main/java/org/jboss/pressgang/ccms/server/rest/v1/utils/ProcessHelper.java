@@ -5,7 +5,6 @@ import static com.google.common.base.Strings.isNullOrEmpty;
 import javax.annotation.Resource;
 import javax.enterprise.context.RequestScoped;
 import javax.inject.Inject;
-import javax.persistence.EntityManager;
 import javax.transaction.UserTransaction;
 import java.util.Collection;
 import java.util.Date;
@@ -22,6 +21,7 @@ import org.jboss.pressgang.ccms.server.async.ProcessManager;
 import org.jboss.pressgang.ccms.server.async.process.PGProcess;
 import org.jboss.pressgang.ccms.server.async.process.task.ZanataPushTask;
 import org.jboss.pressgang.ccms.server.async.process.task.ZanataSyncTask;
+import org.jboss.pressgang.ccms.server.utils.EntityManagerWrapper;
 import org.jboss.pressgang.ccms.server.utils.EntityUtilities;
 import org.jboss.pressgang.ccms.server.utils.EnversUtilities;
 import org.jboss.pressgang.ccms.zanata.ZanataDetails;
@@ -37,7 +37,7 @@ public class ProcessHelper {
     @Inject
     private ProcessManager processManager;
     @Inject
-    private EntityManager entityManager;
+    private EntityManagerWrapper entityManager;
     @Resource
     private UserTransaction transaction;
 

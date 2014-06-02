@@ -2,7 +2,6 @@ package org.jboss.pressgang.ccms.server.rest.v1.factory;
 
 import javax.enterprise.context.ApplicationScoped;
 import javax.inject.Inject;
-import javax.persistence.EntityManager;
 import java.util.Date;
 
 import org.jboss.pressgang.ccms.model.User;
@@ -10,13 +9,14 @@ import org.jboss.pressgang.ccms.model.base.AuditedEntity;
 import org.jboss.pressgang.ccms.rest.v1.entities.base.RESTLogDetailsV1;
 import org.jboss.pressgang.ccms.rest.v1.expansion.ExpandDataTrunk;
 import org.jboss.pressgang.ccms.server.envers.LoggingRevisionEntity;
+import org.jboss.pressgang.ccms.server.utils.EntityManagerWrapper;
 import org.jboss.pressgang.ccms.server.utils.EntityUtilities;
 import org.jboss.pressgang.ccms.server.utils.EnversUtilities;
 
 @ApplicationScoped
 public class LogDetailsV1Factory {
     @Inject
-    protected EntityManager entityManager;
+    protected EntityManagerWrapper entityManager;
     @Inject
     protected UserV1Factory userFactory;
 

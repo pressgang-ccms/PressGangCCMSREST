@@ -10,6 +10,7 @@ import org.jboss.pressgang.ccms.rest.v1.entities.base.RESTBaseEntityV1;
 import org.jboss.pressgang.ccms.rest.v1.expansion.ExpandDataTrunk;
 import org.jboss.pressgang.ccms.server.rest.v1.EntityCache;
 import org.jboss.pressgang.ccms.server.rest.v1.factory.LogDetailsV1Factory;
+import org.jboss.pressgang.ccms.server.utils.EntityManagerWrapper;
 import org.jboss.pressgang.ccms.server.utils.EnversUtilities;
 import org.jboss.resteasy.spi.BadRequestException;
 import org.jboss.resteasy.spi.InternalServerErrorException;
@@ -27,7 +28,7 @@ public abstract class RESTEntityFactory<T extends RESTBaseEntityV1<T, V, W>, U e
     @Inject
     protected EntityCache entityCache;
     @Inject
-    protected EntityManager entityManager;
+    protected EntityManagerWrapper entityManager;
     @Inject
     protected LogDetailsV1Factory logDetailsFactory;
 
