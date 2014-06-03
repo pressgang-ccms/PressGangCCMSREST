@@ -550,6 +550,14 @@
             </properties>
         </profile>
         <profile>
+            <id>jboss-eap-6.2</id>
+            <properties>
+                <jboss.bom.version>1.0.7.Final</jboss.bom.version>
+                <jboss.spec.verison>3.0.2.Final</jboss.spec.verison>
+                <resteasy.version>2.3.7.Final</resteasy.version>
+            </properties>
+        </profile>
+        <profile>
             <id>belay</id>
             <dependencies>
                 <!-- Belay Library -->
