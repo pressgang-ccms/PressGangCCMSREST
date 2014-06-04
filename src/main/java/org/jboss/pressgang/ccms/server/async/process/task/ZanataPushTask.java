@@ -16,6 +16,7 @@ import org.jboss.pressgang.ccms.provider.ContentSpecProvider;
 import org.jboss.pressgang.ccms.provider.DataProviderFactory;
 import org.jboss.pressgang.ccms.provider.RESTProviderFactory;
 import org.jboss.pressgang.ccms.provider.RESTTopicProvider;
+import org.jboss.pressgang.ccms.provider.ServerSettingsProvider;
 import org.jboss.pressgang.ccms.provider.TopicProvider;
 import org.jboss.pressgang.ccms.provider.TranslatedContentSpecProvider;
 import org.jboss.pressgang.ccms.provider.TranslatedTopicProvider;
@@ -26,6 +27,7 @@ import org.jboss.pressgang.ccms.utils.common.XMLUtilities;
 import org.jboss.pressgang.ccms.utils.structures.Pair;
 import org.jboss.pressgang.ccms.utils.structures.StringToNodeCollection;
 import org.jboss.pressgang.ccms.wrapper.ContentSpecWrapper;
+import org.jboss.pressgang.ccms.wrapper.ServerSettingsWrapper;
 import org.jboss.pressgang.ccms.wrapper.TopicWrapper;
 import org.jboss.pressgang.ccms.wrapper.TranslatedCSNodeWrapper;
 import org.jboss.pressgang.ccms.wrapper.TranslatedContentSpecWrapper;
@@ -47,15 +49,17 @@ public class ZanataPushTask extends ProcessRESTTask<Boolean> {
     private final Integer contentSpecId;
     private final boolean contentSpecOnly;
     private final boolean disableCopyTrans;
+    private final boolean allowUnfrozenPush;
     private final String restServerUrl;
     private final ZanataDetails zanataDetails;
 
     public ZanataPushTask(final String restServerUrl, final Integer contentSpecId, final boolean contentSpecOnly,
-            final boolean disableCopyTrans, final ZanataDetails zanataDetails) {
+            final boolean disableCopyTrans, boolean allowUnfrozenPush, final ZanataDetails zanataDetails) {
         this.restServerUrl = restServerUrl;
         this.contentSpecId = contentSpecId;
         this.contentSpecOnly = contentSpecOnly;
         this.disableCopyTrans = disableCopyTrans;
+        this.allowUnfrozenPush = allowUnfrozenPush;
         this.zanataDetails = zanataDetails;
     }
 
@@ -66,6 +70,7 @@ public class ZanataPushTask extends ProcessRESTTask<Boolean> {
         providerFactory.getProvider(RESTTopicProvider.class).setExpandTranslations(true);
         final ContentSpecProvider contentSpecProvider = providerFactory.getProvider(ContentSpecProvider.class);
         final ContentSpecWrapper contentSpecEntity = contentSpecProvider.getContentSpec(contentSpecId);
+        final ServerSettingsWrapper serverSettings = providerFactory.getProvider(ServerSettingsProvider.class).getServerSettings();
 
         // Log some basic details
         logDetails();
@@ -85,6 +90,13 @@ public class ZanataPushTask extends ProcessRESTTask<Boolean> {
         // Check that the content spec isn't a failed one
         if (contentSpecEntity.getFailed() != null) {
             error("The Content Specification has validation errors, please fix any errors and try again.");
+            return;
+        }
+
+        // Check that the content spec is frozen
+        if (!allowUnfrozenPush && !contentSpecEntity.hasTag(serverSettings.getEntities().getFrozenTagId())) {
+            error("The Content Specification must be frozen to be able to be pushed for translation. Please freeze the Content " +
+                    "Specification and then try again.");
             return;
         }
 
