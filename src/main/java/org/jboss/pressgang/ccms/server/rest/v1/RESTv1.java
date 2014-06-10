@@ -3529,66 +3529,66 @@ public class RESTv1 extends BaseRESTv1 implements RESTBaseInterfaceV1, RESTInter
                 new ContentSpecNodeFieldFilter(), csNodeFactory, RESTv1Constants.CONTENT_SPEC_NODE_EXPANSION_NAME, expand);
     }
 
-//    @Override
-//    public RESTCSNodeV1 updateJSONContentSpecNode(final String expand, final RESTCSNodeV1 dataObject, final String message,
-//            final Integer flag, final String userId) {
-//        if (dataObject == null) throw new BadRequestException("The dataObject parameter can not be null");
-//        if (dataObject.getId() == null) throw new BadRequestException("The dataObject.getId() parameter can not be null");
-//
-//        final RESTLogDetailsV1 logDetails = generateLogDetails(message, flag, userId);
-//        return updateJSONEntity(CSNode.class, dataObject, csNodeFactory, expand, logDetails);
-//    }
-//
-//    @Override
-//    public RESTCSNodeCollectionV1 updateJSONContentSpecNodes(final String expand, final RESTCSNodeCollectionV1 dataObjects,
-//            final String message, final Integer flag, final String userId) {
-//        if (dataObjects == null) throw new BadRequestException("The dataObjects parameter can not be null");
-//        if (dataObjects.getItems() == null) throw new BadRequestException("The dataObjects.getItems() parameter can not be null");
-//
-//        final RESTLogDetailsV1 logDetails = generateLogDetails(message, flag, userId);
-//        return updateJSONEntities(RESTCSNodeCollectionV1.class, CSNode.class, dataObjects, csNodeFactory,
-//                RESTv1Constants.CONTENT_SPEC_NODE_EXPANSION_NAME, expand, logDetails);
-//    }
-//
-//    @Override
-//    public RESTCSNodeV1 createJSONContentSpecNode(final String expand, final RESTCSNodeV1 dataObject, final String message,
-//            final Integer flag, final String userId) {
-//        if (dataObject == null) throw new BadRequestException("The dataObject parameter can not be null");
-//
-//        final RESTLogDetailsV1 logDetails = generateLogDetails(message, flag, userId);
-//        return createJSONEntity(CSNode.class, dataObject, csNodeFactory, expand, logDetails);
-//    }
-//
-//    @Override
-//    public RESTCSNodeCollectionV1 createJSONContentSpecNodes(final String expand, final RESTCSNodeCollectionV1 dataObjects,
-//            final String message, final Integer flag, final String userId) {
-//        if (dataObjects == null) throw new BadRequestException("The dataObjects parameter can not be null");
-//        if (dataObjects.getItems() == null) throw new BadRequestException("The dataObjects.getItems() parameter can not be null");
-//
-//        final RESTLogDetailsV1 logDetails = generateLogDetails(message, flag, userId);
-//        return createJSONEntities(RESTCSNodeCollectionV1.class, CSNode.class, dataObjects, csNodeFactory,
-//                RESTv1Constants.CONTENT_SPEC_NODE_EXPANSION_NAME, expand, logDetails);
-//    }
-//
-//    @Override
-//    public RESTCSNodeV1 deleteJSONContentSpecNode(final Integer id, final String message, final Integer flag, final String userId,
-//            final String expand) {
-//        if (id == null) throw new BadRequestException("The dataObject parameter can not be null");
-//
-//        final RESTLogDetailsV1 logDetails = generateLogDetails(message, flag, userId);
-//        return deleteJSONEntity(CSNode.class, csNodeFactory, id, expand, logDetails);
-//    }
-//
-//    @Override
-//    public RESTCSNodeCollectionV1 deleteJSONContentSpecNodes(final PathSegment ids, final String message, final Integer flag,
-//            final String userId, final String expand) {
-//        if (ids == null) throw new BadRequestException("The dataObjects parameter can not be null");
-//
-//        final Set<String> dbEntityIds = ids.getMatrixParameters().keySet();
-//        final RESTLogDetailsV1 logDetails = generateLogDetails(message, flag, userId);
-//        return deleteJSONEntities(RESTCSNodeCollectionV1.class, CSNode.class, csNodeFactory, dbEntityIds,
-//                RESTv1Constants.CONTENT_SPEC_NODE_EXPANSION_NAME, expand, logDetails);
-//    }
+    @Override
+    public RESTCSNodeV1 updateJSONContentSpecNode(final String expand, final RESTCSNodeV1 dataObject, final String message,
+            final Integer flag, final String userId) {
+        if (dataObject == null) throw new BadRequestException("The dataObject parameter can not be null");
+        if (dataObject.getId() == null) throw new BadRequestException("The dataObject.getId() parameter can not be null");
+
+        final RESTLogDetailsV1 logDetails = generateLogDetails(message, flag, userId);
+        return updateJSONEntity(CSNode.class, dataObject, csNodeFactory, expand, logDetails);
+    }
+
+    @Override
+    public RESTCSNodeCollectionV1 updateJSONContentSpecNodes(final String expand, final RESTCSNodeCollectionV1 dataObjects,
+            final String message, final Integer flag, final String userId) {
+        if (dataObjects == null) throw new BadRequestException("The dataObjects parameter can not be null");
+        if (dataObjects.getItems() == null) throw new BadRequestException("The dataObjects.getItems() parameter can not be null");
+
+        final RESTLogDetailsV1 logDetails = generateLogDetails(message, flag, userId);
+        return updateJSONEntities(RESTCSNodeCollectionV1.class, CSNode.class, dataObjects, csNodeFactory,
+                RESTv1Constants.CONTENT_SPEC_NODE_EXPANSION_NAME, expand, logDetails);
+    }
+
+    @Override
+    public RESTCSNodeV1 createJSONContentSpecNode(final String expand, final RESTCSNodeV1 dataObject, final String message,
+            final Integer flag, final String userId) {
+        if (dataObject == null) throw new BadRequestException("The dataObject parameter can not be null");
+
+        final RESTLogDetailsV1 logDetails = generateLogDetails(message, flag, userId);
+        return createJSONEntity(CSNode.class, dataObject, csNodeFactory, expand, logDetails);
+    }
+
+    @Override
+    public RESTCSNodeCollectionV1 createJSONContentSpecNodes(final String expand, final RESTCSNodeCollectionV1 dataObjects,
+            final String message, final Integer flag, final String userId) {
+        if (dataObjects == null) throw new BadRequestException("The dataObjects parameter can not be null");
+        if (dataObjects.getItems() == null) throw new BadRequestException("The dataObjects.getItems() parameter can not be null");
+
+        final RESTLogDetailsV1 logDetails = generateLogDetails(message, flag, userId);
+        return createJSONEntities(RESTCSNodeCollectionV1.class, CSNode.class, dataObjects, csNodeFactory,
+                RESTv1Constants.CONTENT_SPEC_NODE_EXPANSION_NAME, expand, logDetails);
+    }
+
+    @Override
+    public RESTCSNodeV1 deleteJSONContentSpecNode(final Integer id, final String message, final Integer flag, final String userId,
+            final String expand) {
+        if (id == null) throw new BadRequestException("The dataObject parameter can not be null");
+
+        final RESTLogDetailsV1 logDetails = generateLogDetails(message, flag, userId);
+        return deleteJSONEntity(CSNode.class, csNodeFactory, id, expand, logDetails);
+    }
+
+    @Override
+    public RESTCSNodeCollectionV1 deleteJSONContentSpecNodes(final PathSegment ids, final String message, final Integer flag,
+            final String userId, final String expand) {
+        if (ids == null) throw new BadRequestException("The dataObjects parameter can not be null");
+
+        final Set<String> dbEntityIds = ids.getMatrixParameters().keySet();
+        final RESTLogDetailsV1 logDetails = generateLogDetails(message, flag, userId);
+        return deleteJSONEntities(RESTCSNodeCollectionV1.class, CSNode.class, csNodeFactory, dbEntityIds,
+                RESTv1Constants.CONTENT_SPEC_NODE_EXPANSION_NAME, expand, logDetails);
+    }
 
     /* TRANSLATED CONTENT SPEC FUNCTIONS */
     /* JSONP FUNCTIONS */
