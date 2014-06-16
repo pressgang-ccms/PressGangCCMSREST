@@ -19,7 +19,6 @@ import java.io.UnsupportedEncodingException;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Properties;
@@ -31,17 +30,9 @@ import com.j2bugzilla.base.ECSBug;
 import com.j2bugzilla.rpc.BugSearch;
 import com.j2bugzilla.rpc.GetBug;
 import com.j2bugzilla.rpc.LogIn;
-/*import org.apache.lucene.analysis.Analyzer;
-import org.apache.lucene.index.IndexReader;
-import org.apache.lucene.search.similar.MoreLikeThis;
-import org.hibernate.Session;
-import org.hibernate.search.FullTextSession;
-import org.hibernate.search.Search;
-import org.hibernate.search.SearchFactory;*/
 import org.jboss.pressgang.ccms.model.BlobConstants;
 import org.jboss.pressgang.ccms.model.BugzillaBug;
 import org.jboss.pressgang.ccms.model.Category;
-import org.jboss.pressgang.ccms.model.IntegerConstants;
 import org.jboss.pressgang.ccms.model.StringConstants;
 import org.jboss.pressgang.ccms.model.Tag;
 import org.jboss.pressgang.ccms.model.TagToCategory;
@@ -60,7 +51,6 @@ import org.jboss.pressgang.ccms.model.sort.TagToCategorySortingComparator;
 import org.jboss.pressgang.ccms.rest.v1.components.ComponentTopicV1;
 import org.jboss.pressgang.ccms.rest.v1.entities.RESTTopicV1;
 import org.jboss.pressgang.ccms.rest.v1.entities.enums.RESTXMLFormat;
-import org.jboss.pressgang.ccms.server.constants.ServiceConstants;
 import org.jboss.pressgang.ccms.utils.common.CollectionUtilities;
 import org.jboss.pressgang.ccms.utils.common.DocBookUtilities;
 import org.jboss.pressgang.ccms.utils.common.StringUtilities;
@@ -77,6 +67,14 @@ import org.slf4j.LoggerFactory;
 import org.w3c.dom.Document;
 import org.w3c.dom.NodeList;
 import org.xml.sax.SAXException;
+
+/*import org.apache.lucene.analysis.Analyzer;
+import org.apache.lucene.index.IndexReader;
+import org.apache.lucene.search.similar.MoreLikeThis;
+import org.hibernate.Session;
+import org.hibernate.search.FullTextSession;
+import org.hibernate.search.Search;
+import org.hibernate.search.SearchFactory;*/
 
 public class TopicUtilities {
     private static final Logger log = LoggerFactory.getLogger(TopicUtilities.class);
@@ -264,7 +262,7 @@ public class TopicUtilities {
     public static void processXML(final EntityManager entityManager, final Topic topic) {
         Document doc = null;
         try {
-            doc = XMLUtilities.convertStringToDocument(topic.getTopicXML());
+            doc = XMLUtilities.convertStringToDocument(fixTopicXMLForFormat(topic.getTopicXML(), topic.getXmlFormat()));
         } catch (final Exception ex) {
             log.warn("An Error occurred transforming a XML String to a DOM Document", ex);
             return;
@@ -274,6 +272,9 @@ public class TopicUtilities {
             if (isTopicNormalTopic(topic)) {
                 DocBookUtilities.setSectionTitle(getTopicXMLDocBookVersion(topic), topic.getTopicTitle(), doc);
             }
+
+            // Remove the added content
+            removeTopicFormatContent(doc, topic.getXmlFormat());
 
             // Convert the document to a String applying the XML Formatting property rules
             topic.setTopicXML(processXML(entityManager, doc));
@@ -290,7 +291,8 @@ public class TopicUtilities {
     public static void processXML(final EntityManager entityManager, final RESTTopicV1 topic) {
         Document doc = null;
         try {
-            doc = XMLUtilities.convertStringToDocument(topic.getXml());
+            doc = XMLUtilities.convertStringToDocument(
+                    fixTopicXMLForFormat(topic.getXml(), RESTXMLFormat.getXMLFormatId(topic.getXmlFormat())));
         } catch (final Exception ex) {
             log.warn("An Error occurred transforming a XML String to a DOM Document", ex);
             return;
@@ -300,6 +302,9 @@ public class TopicUtilities {
             if (isTopicNormalTopic(topic)) {
                 DocBookUtilities.setSectionTitle(getTopicXMLDocBookVersion(topic), topic.getTitle(), doc);
             }
+
+            // Remove the added content
+            removeTopicFormatContent(doc, RESTXMLFormat.getXMLFormatId(topic.getXmlFormat()));
 
             // Convert the document to a String applying the XML Formatting property rules
             topic.setXml(processXML(entityManager, doc));
@@ -363,6 +368,33 @@ public class TopicUtilities {
 
         // Convert the document to a String applying the XML Formatting property rules
         return XMLUtilities.convertNodeToString(doc, verbatimElements, inlineElements, contentsInlineElements, true);
+    }
+
+    protected static void removeTopicFormatContent(final Document doc, final Integer format) {
+        if (doc == null) return;
+
+        if (format == CommonConstants.DOCBOOK_50) {
+            doc.getDocumentElement().removeAttribute("version");
+            doc.getDocumentElement().removeAttribute("xmlns");
+            doc.getDocumentElement().removeAttribute("xmlns:xlink");
+        }
+    }
+
+    /**
+     * Fixes/adjusts the XML so that it is valid for the specified format id.
+     *
+     * @param xml      The XML content to be "fixed".
+     * @param formatId The integer constant id for the topic format.
+     * @return The fixed xml.
+     */
+    public static String fixTopicXMLForFormat(final String xml, final Integer formatId) {
+        if (xml == null) {
+            return null;
+        } else if (formatId == CommonConstants.DOCBOOK_50) {
+            return DocBookUtilities.addDocBook50Namespace(xml);
+        } else {
+            return xml;
+        }
     }
 
     /**

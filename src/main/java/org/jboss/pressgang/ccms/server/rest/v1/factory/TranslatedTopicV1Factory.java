@@ -27,10 +27,11 @@ import org.jboss.pressgang.ccms.rest.v1.entities.base.RESTBaseEntityV1;
 import org.jboss.pressgang.ccms.rest.v1.entities.contentspec.RESTTranslatedCSNodeV1;
 import org.jboss.pressgang.ccms.rest.v1.entities.enums.RESTXMLFormat;
 import org.jboss.pressgang.ccms.rest.v1.expansion.ExpandDataTrunk;
-import org.jboss.pressgang.ccms.server.rest.v1.factory.base.RESTEntityFactory;
 import org.jboss.pressgang.ccms.server.rest.v1.factory.base.RESTEntityCollectionFactory;
+import org.jboss.pressgang.ccms.server.rest.v1.factory.base.RESTEntityFactory;
 import org.jboss.pressgang.ccms.server.rest.v1.utils.RESTv1Utilities;
 import org.jboss.pressgang.ccms.server.utils.EnversUtilities;
+import org.jboss.pressgang.ccms.server.utils.TopicUtilities;
 import org.jboss.pressgang.ccms.server.utils.TranslatedTopicUtilities;
 import org.jboss.pressgang.ccms.utils.common.DocBookUtilities;
 import org.jboss.resteasy.spi.BadRequestException;
@@ -88,7 +89,9 @@ public class TranslatedTopicV1Factory extends RESTEntityFactory<RESTTranslatedTo
         retValue.setCustomEntities(entity.getTranslatedTopic().getCustomEntities());
 
         // Get the title from the XML or if the XML is null then use the original topics title.
-        String title = DocBookUtilities.findTitle(entity.getTranslatedXml());
+        final String fixedTranslatedXML = TopicUtilities.fixTopicXMLForFormat(entity.getTranslatedXml(),
+                entity.getTranslatedTopic().getEnversTopic(entityManager).getXmlFormat());
+        String title = DocBookUtilities.findTitle(fixedTranslatedXML);
         if (title == null) title = entity.getTranslatedTopic().getEnversTopic(entityManager).getTopicTitle();
 
         // Prefix the locale to the title if its a dummy translation to show that it is missing the related translated topic
@@ -168,18 +171,17 @@ public class TranslatedTopicV1Factory extends RESTEntityFactory<RESTTranslatedTo
 
         // PROPERTY TAGS
         if (expand != null && expand.contains(RESTTranslatedTopicV1.PROPERTIES_NAME)) {
-            retValue.setProperties(
-                    RESTEntityCollectionFactory.create(RESTAssignedPropertyTagCollectionV1.class, topicPropertyTagFactory,
-                            entity.getTranslatedTopic().getEnversTopic(entityManager).getPropertyTagsList(),
-                            RESTTranslatedTopicV1.PROPERTIES_NAME, dataType, expand, baseUrl,
-                            entity.getTranslatedTopic().getTopicRevision(), entityManager));
+            retValue.setProperties(RESTEntityCollectionFactory.create(RESTAssignedPropertyTagCollectionV1.class, topicPropertyTagFactory,
+                    entity.getTranslatedTopic().getEnversTopic(entityManager).getPropertyTagsList(), RESTTranslatedTopicV1.PROPERTIES_NAME,
+                    dataType, expand, baseUrl, entity.getTranslatedTopic().getTopicRevision(), entityManager));
         }
 
         // TRANSLATED CS NODE
-        if (expand != null && expand.contains(RESTTranslatedTopicV1.TRANSLATED_CSNODE_NAME) && entity.getTranslatedTopic().getTranslatedCSNode() != null) {
+        if (expand != null && expand.contains(
+                RESTTranslatedTopicV1.TRANSLATED_CSNODE_NAME) && entity.getTranslatedTopic().getTranslatedCSNode() != null) {
             retValue.setTranslatedCSNode(
-                    translatedCSNodeFactory.createRESTEntityFromDBEntity(entity.getTranslatedTopic().getTranslatedCSNode(), baseUrl, dataType,
-                            expand.get(RESTTranslatedTopicV1.TRANSLATED_CSNODE_NAME), revision, true));
+                    translatedCSNodeFactory.createRESTEntityFromDBEntity(entity.getTranslatedTopic().getTranslatedCSNode(), baseUrl,
+                            dataType, expand.get(RESTTranslatedTopicV1.TRANSLATED_CSNODE_NAME), revision, true));
         }
 
         retValue.setLinks(baseUrl, RESTv1Constants.TRANSLATEDTOPIC_URL_NAME, dataType, retValue.getId());
@@ -264,7 +266,8 @@ public class TranslatedTopicV1Factory extends RESTEntityFactory<RESTTranslatedTo
             query.orderBy(builder.desc(root.get("translatedTopic").get("topicRevision")));
 
             final List<TranslatedTopicData> previousTranslatedTopicList = entityManager.createQuery(query).setMaxResults(1).getResultList();
-            final TranslatedTopicData previousTranslatedTopic = previousTranslatedTopicList.size() > 0 ? previousTranslatedTopicList.get(0) : null;
+            final TranslatedTopicData previousTranslatedTopic = previousTranslatedTopicList.size() > 0 ? previousTranslatedTopicList.get(
+                    0) : null;
             if (previousTranslatedTopic != null) {
                 entity.setTranslatedAdditionalXml(previousTranslatedTopic.getTranslatedAdditionalXml());
             }
