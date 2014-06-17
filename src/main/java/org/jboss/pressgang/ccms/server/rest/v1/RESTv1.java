@@ -2545,7 +2545,8 @@ public class RESTv1 extends BaseRESTv1 implements RESTBaseInterfaceV1, RESTInter
         }
 
         try {
-            final Document doc = XMLUtilities.convertStringToDocument(dataObject.getXml());
+            final Document doc = org.jboss.pressgang.ccms.utils.common.TopicUtilities.convertXMLStringToDocument(dataObject.getXml(),
+                    RESTXMLFormat.getXMLFormatId(dataObject.getXmlFormat()));
             if (doc != null) {
 
                 /*

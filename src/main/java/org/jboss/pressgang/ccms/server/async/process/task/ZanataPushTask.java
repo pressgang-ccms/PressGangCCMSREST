@@ -23,6 +23,7 @@ import org.jboss.pressgang.ccms.provider.TranslatedTopicProvider;
 import org.jboss.pressgang.ccms.server.utils.ProcessUtilities;
 import org.jboss.pressgang.ccms.utils.common.DocBookUtilities;
 import org.jboss.pressgang.ccms.utils.common.HashUtilities;
+import org.jboss.pressgang.ccms.utils.common.TopicUtilities;
 import org.jboss.pressgang.ccms.utils.common.XMLUtilities;
 import org.jboss.pressgang.ccms.utils.structures.Pair;
 import org.jboss.pressgang.ccms.utils.structures.StringToNodeCollection;
@@ -172,7 +173,7 @@ public class ZanataPushTask extends ProcessRESTTask<Boolean> {
                 // Convert the XML String into a DOM object.
                 Document doc = null;
                 try {
-                    doc = XMLUtilities.convertStringToDocument(topic.getXml());
+                    doc = TopicUtilities.convertXMLStringToDocument(topic.getXml(), topic.getXmlFormat());
                 } catch (Exception e) {
                     // Do Nothing as we handle the error below.
                 }
