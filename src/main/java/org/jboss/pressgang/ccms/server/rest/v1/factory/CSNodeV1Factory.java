@@ -6,6 +6,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.jboss.pressgang.ccms.model.PropertyTag;
+import org.jboss.pressgang.ccms.model.contentspec.CSInfoNode;
 import org.jboss.pressgang.ccms.model.contentspec.CSNode;
 import org.jboss.pressgang.ccms.model.contentspec.CSNodeToCSNode;
 import org.jboss.pressgang.ccms.model.contentspec.CSNodeToPropertyTag;
@@ -18,6 +19,7 @@ import org.jboss.pressgang.ccms.rest.v1.collections.items.join.RESTAssignedPrope
 import org.jboss.pressgang.ccms.rest.v1.collections.join.RESTAssignedPropertyTagCollectionV1;
 import org.jboss.pressgang.ccms.rest.v1.constants.RESTv1Constants;
 import org.jboss.pressgang.ccms.rest.v1.entities.base.RESTBaseEntityV1;
+import org.jboss.pressgang.ccms.rest.v1.entities.contentspec.RESTCSInfoNodeV1;
 import org.jboss.pressgang.ccms.rest.v1.entities.contentspec.RESTCSNodeV1;
 import org.jboss.pressgang.ccms.rest.v1.entities.contentspec.RESTContentSpecV1;
 import org.jboss.pressgang.ccms.rest.v1.entities.contentspec.enums.RESTCSNodeRelationshipTypeV1;
@@ -25,8 +27,8 @@ import org.jboss.pressgang.ccms.rest.v1.entities.contentspec.enums.RESTCSNodeTyp
 import org.jboss.pressgang.ccms.rest.v1.entities.contentspec.join.RESTCSRelatedNodeV1;
 import org.jboss.pressgang.ccms.rest.v1.entities.join.RESTAssignedPropertyTagV1;
 import org.jboss.pressgang.ccms.rest.v1.expansion.ExpandDataTrunk;
-import org.jboss.pressgang.ccms.server.rest.v1.factory.base.RESTEntityFactory;
 import org.jboss.pressgang.ccms.server.rest.v1.factory.base.RESTEntityCollectionFactory;
+import org.jboss.pressgang.ccms.server.rest.v1.factory.base.RESTEntityFactory;
 import org.jboss.pressgang.ccms.server.rest.v1.utils.RESTv1Utilities;
 import org.jboss.pressgang.ccms.server.utils.EnversUtilities;
 import org.jboss.resteasy.spi.BadRequestException;
@@ -278,6 +280,32 @@ public class CSNodeV1Factory extends RESTEntityFactory<RESTCSNodeV1, CSNode, RES
                 }
             }
         }
+
+        // Set the Info Node (one to one)
+        if (dataObject.hasParameterSet(RESTCSNodeV1.INFO_TOPIC_NODE_NAME)) {
+            final RESTCSInfoNodeV1 restEntity = dataObject.getInfoTopicNode();
+
+            if (restEntity != null) {
+                final CSInfoNode dbEntity;
+                if (restEntity.getId() != null) {
+                    dbEntity = RESTv1Utilities.findEntity(entityManager, entityCache, restEntity, CSInfoNode.class);
+
+                    if (dbEntity == null)
+                        throw new BadRequestException("No CSInfoNode entity was found with the primary key " + restEntity.getId());
+
+                    csNodeInfoFactory.updateDBEntityFromRESTEntity(dbEntity, restEntity);
+                } else {
+                    dbEntity = csNodeInfoFactory.createDBEntityFromRESTEntity(restEntity);
+                }
+
+                entity.setCSInfoNode(dbEntity);
+            } else if (entity.getCSInfoNode() != null) {
+                entity.getCSInfoNode().setCSNode(null);
+                entity.setCSInfoNode(null);
+            } else {
+                entity.setCSInfoNode(null);
+            }
+        }
     }
 
     @Override
@@ -297,6 +325,20 @@ public class CSNodeV1Factory extends RESTEntityFactory<RESTCSNodeV1, CSNode, RES
                 entity.setNext(null);
             } else {
                 entity.setNext(null);
+            }
+        }
+
+        // Set the Info Node
+        if (dataObject.hasParameterSet(RESTCSNodeV1.INFO_TOPIC_NODE_NAME)) {
+            final RESTCSInfoNodeV1 restEntity = dataObject.getInfoTopicNode();
+
+            if (restEntity != null) {
+                final CSInfoNode dbEntity = RESTv1Utilities.findEntity(entityManager, entityCache, restEntity, CSInfoNode.class);
+
+                if (dbEntity == null)
+                    throw new BadRequestException("No CSInfoNode entity was found with the primary key " + restEntity.getId());
+
+                csNodeInfoFactory.syncDBEntityWithRESTEntitySecondPass(dbEntity, restEntity);
             }
         }
 
