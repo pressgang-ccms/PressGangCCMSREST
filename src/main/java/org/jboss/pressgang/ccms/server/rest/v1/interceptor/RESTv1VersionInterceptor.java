@@ -26,12 +26,12 @@ public class RESTv1VersionInterceptor implements PreProcessInterceptor, Accepted
     private static final String RESTv1_VERSION = VersionUtilities.getAPIVersion(RESTInterfaceV1.class);
     private static final boolean IS_RESTv1_SNAPSHOT = isSnapshotVersion(RESTv1_VERSION);
     private static final int MIN_CSP_MAJOR_VERSION = 1;
-    private static final int MIN_CSP_MINOR_VERSION = 6;
+    private static final int MIN_CSP_MINOR_VERSION = 7;
 
     private static final String REST_VERSION_ERROR_MSG = "The REST Client Implementation is out of date, " +
-            "" + "and no longer supported. Please update the REST Client library.";
+            "and no longer supported. Please update the REST Client library.";
     private static final String CSP_VERSION_ERROR_MSG = "The csprocessor application is out of date, " +
-            "" + "and no longer compatible. Please update the csprocessor application.";
+            "and no longer compatible. Please update the csprocessor application.";
 
     @Override
     public ServerResponse preProcess(HttpRequest request, ResourceMethod method) throws Failure, WebApplicationException {
