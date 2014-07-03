@@ -65,6 +65,7 @@ import org.jboss.pressgang.ccms.utils.structures.Pair;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.w3c.dom.Document;
+import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 import org.xml.sax.SAXException;
 
@@ -720,6 +721,12 @@ public class TopicUtilities {
             // Check that the info topic doesn't contain invalid fields
             if (DocBookUtilities.checkForInvalidInfoElements(doc)) {
                 xmlErrors.append("Info topics cannot contain <title>, <subtitle> or <titleabbrev> elements.\n");
+            }
+        } else if (isTopicNormalTopic(topic)) {
+            // Check that nested sections aren't used
+            final List<Node> subSections = XMLUtilities.getDirectChildNodes(doc.getDocumentElement(), "section");
+            if (subSections.size() > 0) {
+                xmlErrors.append("Nested sections cannot be used in topics. Please consider breaking the content into multiple topics.\n");
             }
         }
     }
