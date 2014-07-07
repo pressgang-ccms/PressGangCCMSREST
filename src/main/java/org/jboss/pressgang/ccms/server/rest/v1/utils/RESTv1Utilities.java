@@ -17,6 +17,7 @@ import org.jboss.pressgang.ccms.model.exceptions.CustomConstraintViolationExcept
 import org.jboss.pressgang.ccms.provider.exception.ProviderException;
 import org.jboss.pressgang.ccms.rest.v1.entities.base.RESTBaseEntityV1;
 import org.jboss.pressgang.ccms.server.rest.v1.EntityCache;
+import org.jboss.pressgang.ccms.utils.common.ExceptionUtilities;
 import org.jboss.resteasy.spi.BadRequestException;
 import org.jboss.resteasy.spi.Failure;
 import org.jboss.resteasy.spi.InternalServerErrorException;
@@ -144,7 +145,7 @@ public class RESTv1Utilities {
         } else if (cause instanceof EntityNotFoundException) {
             return new NotFoundException(cause);
         } else if (cause instanceof org.hibernate.exception.ConstraintViolationException) {
-            return new BadRequestException(cause.getMessage());
+            return new BadRequestException(ExceptionUtilities.getRootCause(cause).getMessage());
         } else if (cause instanceof ValidationException || cause instanceof CustomConstraintViolationException) {
             return new BadRequestException(cause);
         } else if (cause instanceof RollbackException) {
