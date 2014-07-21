@@ -17,6 +17,7 @@
         <class>org.jboss.pressgang.ccms.model.contentspec.ContentSpecToTag</class>
         <class>org.jboss.pressgang.ccms.model.contentspec.CSInfoNode</class>
         <class>org.jboss.pressgang.ccms.model.contentspec.CSNode</class>
+        <class>org.jboss.pressgang.ccms.model.contentspec.CSNodeURL</class>
         <class>org.jboss.pressgang.ccms.model.contentspec.CSNodeToCSNode</class>
         <class>org.jboss.pressgang.ccms.model.contentspec.CSNodeToPropertyTag</class>
         <class>org.jboss.pressgang.ccms.model.contentspec.TranslatedContentSpec</class>

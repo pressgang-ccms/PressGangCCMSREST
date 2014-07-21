@@ -1,5 +1,7 @@
 package org.jboss.pressgang.ccms.server.rest.v1.factory;
 
+import static com.google.common.base.Strings.isNullOrEmpty;
+
 import javax.enterprise.context.ApplicationScoped;
 import javax.inject.Inject;
 import java.util.ArrayList;
@@ -75,6 +77,10 @@ public class CSNodeV1Factory extends RESTEntityFactory<RESTCSNodeV1, CSNode, RES
         retValue.setNodeType(RESTCSNodeTypeV1.getNodeType(entity.getCSNodeType()));
         retValue.setEntityId(entity.getEntityId());
         retValue.setEntityRevision(entity.getEntityRevision());
+
+        if (entity.getCSNodeURL() != null) {
+            retValue.setFixedUrl(entity.getCSNodeURL().getUrl());
+        }
 
         // REVISIONS
         if (revision == null && expand != null && expand.contains(RESTBaseEntityV1.REVISIONS_NAME)) {
@@ -154,19 +160,22 @@ public class CSNodeV1Factory extends RESTEntityFactory<RESTCSNodeV1, CSNode, RES
     @Override
     public void syncDBEntityWithRESTEntityFirstPass(final CSNode entity, final RESTCSNodeV1 dataObject) {
         if (dataObject.hasParameterSet(RESTCSNodeV1.TITLE_NAME)) entity.setCSNodeTitle(dataObject.getTitle());
-
         if (dataObject.hasParameterSet(RESTCSNodeV1.TARGET_ID_NAME)) entity.setCSNodeTargetId(dataObject.getTargetId());
-
         if (dataObject.hasParameterSet(RESTCSNodeV1.ADDITIONAL_TEXT_NAME)) entity.setAdditionalText(dataObject.getAdditionalText());
-
         if (dataObject.hasParameterSet(RESTCSNodeV1.CONDITION_NAME)) entity.setCondition(dataObject.getCondition());
-
         if (dataObject.hasParameterSet(RESTCSNodeV1.NODE_TYPE_NAME))
             entity.setCSNodeType(RESTCSNodeTypeV1.getNodeTypeId(dataObject.getNodeType()));
-
         if (dataObject.hasParameterSet(RESTCSNodeV1.ENTITY_ID_NAME)) entity.setEntityId(dataObject.getEntityId());
-
         if (dataObject.hasParameterSet(RESTCSNodeV1.ENTITY_REVISION_NAME)) entity.setEntityRevision(dataObject.getEntityRevision());
+        if (dataObject.hasParameterSet(RESTCSNodeV1.FIXED_URL_NAME)) {
+            // If the value is null or empty then we should remove the CSNodeURL
+            if (isNullOrEmpty(dataObject.getFixedUrl()) && entity.getCSNodeURL() != null) {
+                entityManager.remove(entity.getCSNodeURL());
+                entity.setCSNodeURL(null);
+            } else {
+                entity.setFixedUrl(dataObject.getFixedUrl());
+            }
+        }
 
         // One To Many - Add will create a new mapping
         if (dataObject.hasParameterSet(
