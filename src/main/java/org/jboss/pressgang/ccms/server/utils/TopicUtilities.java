@@ -30,6 +30,7 @@ import com.j2bugzilla.base.ECSBug;
 import com.j2bugzilla.rpc.BugSearch;
 import com.j2bugzilla.rpc.GetBug;
 import com.j2bugzilla.rpc.LogIn;
+import org.jboss.pressgang.ccms.contentspec.utils.CustomTopicXMLValidator;
 import org.jboss.pressgang.ccms.model.BlobConstants;
 import org.jboss.pressgang.ccms.model.BugzillaBug;
 import org.jboss.pressgang.ccms.model.Category;
@@ -48,6 +49,8 @@ import org.jboss.pressgang.ccms.model.config.EntitiesConfig;
 import org.jboss.pressgang.ccms.model.sort.CategoryNameComparator;
 import org.jboss.pressgang.ccms.model.sort.TagNameComparator;
 import org.jboss.pressgang.ccms.model.sort.TagToCategorySortingComparator;
+import org.jboss.pressgang.ccms.provider.DBProviderFactory;
+import org.jboss.pressgang.ccms.provider.ServerSettingsProvider;
 import org.jboss.pressgang.ccms.rest.v1.components.ComponentTopicV1;
 import org.jboss.pressgang.ccms.rest.v1.entities.RESTTopicV1;
 import org.jboss.pressgang.ccms.rest.v1.entities.enums.RESTXMLFormat;
@@ -62,26 +65,15 @@ import org.jboss.pressgang.ccms.utils.structures.DocBookVersion;
 import org.jboss.pressgang.ccms.utils.structures.InjectionError;
 import org.jboss.pressgang.ccms.utils.structures.NameIDSortMap;
 import org.jboss.pressgang.ccms.utils.structures.Pair;
+import org.jboss.pressgang.ccms.wrapper.DBTopicWrapper;
+import org.jboss.pressgang.ccms.wrapper.ServerSettingsWrapper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.w3c.dom.Document;
-import org.w3c.dom.Node;
-import org.w3c.dom.NodeList;
 import org.xml.sax.SAXException;
-
-/*import org.apache.lucene.analysis.Analyzer;
-import org.apache.lucene.index.IndexReader;
-import org.apache.lucene.search.similar.MoreLikeThis;
-import org.hibernate.Session;
-import org.hibernate.search.FullTextSession;
-import org.hibernate.search.Search;
-import org.hibernate.search.SearchFactory;*/
 
 public class TopicUtilities {
     private static final Logger log = LoggerFactory.getLogger(TopicUtilities.class);
-    private static final String[] DATE_FORMATS = new String[]{"MM-dd-yyyy", "MM/dd/yyyy", "yyyy-MM-dd", "yyyy/MM/dd", "EEE MMM dd yyyy",
-            "EEE, MMM dd yyyy", "EEE MMM dd yyyy Z", "EEE dd MMM yyyy", "EEE, dd MMM yyyy", "EEE dd MMM yyyy Z", "yyyyMMdd",
-            "yyyyMMdd'T'HHmmss.SSSZ"};
 
     /**
      * Creates a CSV string representation of all the topics in the provided list.
@@ -622,11 +614,13 @@ public class TopicUtilities {
                 }
             }
 
-            // Check that the root topic node is correct
-            checkTopicRootElement(topic, doc, xmlErrors);
+            // Apply the custom validation rules
+            final DBProviderFactory providerFactory = DBProviderFactory.create(entityManager);
+            final DBTopicWrapper topicWrapper = new DBTopicWrapper(providerFactory, topic, false);
+            final ServerSettingsWrapper settings = providerFactory.getProvider(ServerSettingsProvider.class).getServerSettings();
 
-            // Check that the content is valid
-            checkTopicContentBasedOnType(topic, doc, xmlErrors);
+            final List<String> customXMLErrors = CustomTopicXMLValidator.checkTopicForInvalidContent(settings, topicWrapper, doc, false);
+            xmlErrors.append(CollectionUtilities.toSeperatedString(customXMLErrors, "\n"));
 
             // Check to make sure we don't have any invalid injections
             checkForInvalidInjections(doc, xmlErrors);
@@ -640,94 +634,6 @@ public class TopicUtilities {
             topic.setTopicXMLErrors(e.getMessage());
         } catch (Exception e) {
             topic.setTopicXMLErrors(e.getMessage());
-        }
-    }
-
-    /**
-     * Make sure that the root element name matches the topic type requirements.
-     *
-     * @param topic
-     * @param doc
-     * @param xmlErrors
-     */
-    protected static void checkTopicRootElement(final Topic topic, final Document doc, final StringBuilder xmlErrors) {
-        if (!isTopicNormalTopic(topic)) {
-            if (topic.isTaggedWith(EntitiesConfig.getInstance().getRevisionHistoryTagId())) {
-                // Make sure the revision history is an appendix
-                if (!doc.getDocumentElement().getNodeName().equals("appendix")) {
-                    xmlErrors.append("Root element must be <appendix> for Revision History Topics.\n");
-                }
-
-                // Check to make sure that a revhistory entry exists
-                final NodeList revHistoryList = doc.getElementsByTagName("revhistory");
-                if (revHistoryList.getLength() == 0) {
-                    xmlErrors.append("No <revhistory> element found. A <revhistory> must exist for Revision Histories.\n");
-                }
-            } else if (topic.isTaggedWith(EntitiesConfig.getInstance().getLegalNoticeTagId())) {
-                // Make sure the Legal Notice is a legalnotice
-                if (!doc.getDocumentElement().getNodeName().equals("legalnotice")) {
-                    xmlErrors.append("Root element must be <legalnotice> for Legal Notice Topics.\n");
-                }
-            } else if (topic.isTaggedWith(EntitiesConfig.getInstance().getAuthorGroupTagId())) {
-                // Make sure the Author Group is an authorgroup
-                if (!doc.getDocumentElement().getNodeName().equals("authorgroup")) {
-                    xmlErrors.append("Root element must be <authorgroup> for Author Group Topics.\n");
-                }
-            } else if (topic.isTaggedWith(EntitiesConfig.getInstance().getAbstractTagId())) {
-                // Make sure the Abstract is an abstract
-                if (!doc.getDocumentElement().getNodeName().equals("abstract")) {
-                    xmlErrors.append("Root element must be <abstract> for Abstract Topics.\n");
-                }
-            } else if (topic.isTaggedWith(EntitiesConfig.getInstance().getInfoTagId())) {
-                // Make sure the Info topic is an info
-                if (topic.getXmlFormat() == CommonConstants.DOCBOOK_50) {
-                    if (!doc.getDocumentElement().getNodeName().equals("info")) {
-                        xmlErrors.append("Root element must be <info> for Info Topics.\n");
-                    }
-                } else {
-                    if (!doc.getDocumentElement().getNodeName().equals("sectioninfo")) {
-                        xmlErrors.append("Root element must be <sectioninfo> for Info Topics.\n");
-                    }
-                }
-            }
-        } else {
-            // Make sure the topic is a section
-            if (!doc.getDocumentElement().getNodeName().equals(DocBookUtilities.TOPIC_ROOT_NODE_NAME)) {
-                xmlErrors.append("Root element must be <" + DocBookUtilities.TOPIC_ROOT_NODE_NAME + "> for Topics.\n");
-            }
-
-            // Check the tables are valid
-            if (!DocBookUtilities.validateTables(doc)) {
-                xmlErrors.append("Table column declaration doesn't match the number of entry elements.\n");
-            }
-        }
-    }
-
-    /**
-     * Check a topics content based on it's topic type.
-     *
-     * @param topic
-     * @param doc
-     * @return
-     */
-    protected static void checkTopicContentBasedOnType(final Topic topic, final Document doc, final StringBuilder xmlErrors) {
-        if (topic.isTaggedWith(EntitiesConfig.getInstance().getRevisionHistoryTagId())) {
-            // Check to make sure that a revhistory entry exists
-            final String revHistoryErrors = DocBookUtilities.validateRevisionHistory(doc, DATE_FORMATS);
-            if (revHistoryErrors != null) {
-                xmlErrors.append(revHistoryErrors + "\n");
-            }
-        } else if (topic.isTaggedWith(EntitiesConfig.getInstance().getInfoTagId())) {
-            // Check that the info topic doesn't contain invalid fields
-            if (DocBookUtilities.checkForInvalidInfoElements(doc)) {
-                xmlErrors.append("Info topics cannot contain <title>, <subtitle> or <titleabbrev> elements.\n");
-            }
-        } else if (isTopicNormalTopic(topic)) {
-            // Check that nested sections aren't used
-            final List<Node> subSections = XMLUtilities.getDirectChildNodes(doc.getDocumentElement(), "section");
-            if (subSections.size() > 0) {
-                xmlErrors.append("Nested sections cannot be used in topics. Please consider breaking the content into multiple topics.\n");
-            }
         }
     }
 
