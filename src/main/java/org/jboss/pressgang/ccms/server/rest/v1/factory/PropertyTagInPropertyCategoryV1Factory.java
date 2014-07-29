@@ -32,6 +32,7 @@ import org.jboss.pressgang.ccms.rest.v1.constants.RESTv1Constants;
 import org.jboss.pressgang.ccms.rest.v1.entities.base.RESTBaseEntityV1;
 import org.jboss.pressgang.ccms.rest.v1.entities.join.RESTPropertyTagInPropertyCategoryV1;
 import org.jboss.pressgang.ccms.rest.v1.expansion.ExpandDataTrunk;
+import org.jboss.pressgang.ccms.server.rest.v1.RESTChangeAction;
 import org.jboss.pressgang.ccms.server.rest.v1.factory.base.RESTEntityCollectionFactory;
 import org.jboss.pressgang.ccms.server.rest.v1.factory.base.RESTEntityFactory;
 import org.jboss.pressgang.ccms.server.utils.EnversUtilities;
@@ -86,7 +87,13 @@ public class PropertyTagInPropertyCategoryV1Factory extends RESTEntityFactory<RE
     }
 
     @Override
-    public void syncDBEntityWithRESTEntityFirstPass(final PropertyTagToPropertyTagCategory entity,
+    public void collectChangeInformation(final RESTChangeAction<RESTPropertyTagInPropertyCategoryV1> parent,
+            final RESTPropertyTagInPropertyCategoryV1 dataObject) {
+        // PropertyTagInPropertyCategory has no children that can be changed, so we have no changes to collect
+    }
+
+    @Override
+    public void syncBaseDetails(final PropertyTagToPropertyTagCategory entity,
             final RESTPropertyTagInPropertyCategoryV1 dataObject) {
         if (dataObject.hasParameterSet(RESTPropertyTagInPropertyCategoryV1.RELATIONSHIP_SORT_NAME))
             entity.setSorting(dataObject.getRelationshipSort());

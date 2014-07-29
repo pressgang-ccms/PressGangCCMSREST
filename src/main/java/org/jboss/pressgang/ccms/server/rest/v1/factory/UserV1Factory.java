@@ -26,9 +26,9 @@ import java.util.List;
 
 import org.jboss.pressgang.ccms.model.Role;
 import org.jboss.pressgang.ccms.model.User;
+import org.jboss.pressgang.ccms.model.base.AuditedEntity;
 import org.jboss.pressgang.ccms.rest.v1.collections.RESTRoleCollectionV1;
 import org.jboss.pressgang.ccms.rest.v1.collections.RESTUserCollectionV1;
-import org.jboss.pressgang.ccms.rest.v1.collections.items.RESTRoleCollectionItemV1;
 import org.jboss.pressgang.ccms.rest.v1.collections.items.RESTUserCollectionItemV1;
 import org.jboss.pressgang.ccms.rest.v1.constants.RESTv1Constants;
 import org.jboss.pressgang.ccms.rest.v1.entities.RESTRoleV1;
@@ -36,8 +36,9 @@ import org.jboss.pressgang.ccms.rest.v1.entities.RESTTopicV1;
 import org.jboss.pressgang.ccms.rest.v1.entities.RESTUserV1;
 import org.jboss.pressgang.ccms.rest.v1.entities.base.RESTBaseEntityV1;
 import org.jboss.pressgang.ccms.rest.v1.expansion.ExpandDataTrunk;
-import org.jboss.pressgang.ccms.server.rest.v1.factory.base.RESTEntityFactory;
+import org.jboss.pressgang.ccms.server.rest.v1.RESTChangeAction;
 import org.jboss.pressgang.ccms.server.rest.v1.factory.base.RESTEntityCollectionFactory;
+import org.jboss.pressgang.ccms.server.rest.v1.factory.base.RESTEntityFactory;
 import org.jboss.pressgang.ccms.server.rest.v1.utils.RESTv1Utilities;
 import org.jboss.pressgang.ccms.server.utils.EnversUtilities;
 import org.jboss.resteasy.spi.BadRequestException;
@@ -86,7 +87,16 @@ public class UserV1Factory extends RESTEntityFactory<RESTUserV1, User, RESTUserC
     }
 
     @Override
-    public void syncDBEntityWithRESTEntityFirstPass(final User entity, final RESTUserV1 dataObject) {
+    public void collectChangeInformation(final RESTChangeAction<RESTUserV1> parent, final RESTUserV1 dataObject) {
+        if (dataObject.hasParameterSet(RESTUserV1.ROLES_NAME)
+                && dataObject.getRoles() != null
+                && dataObject.getRoles().getItems() != null) {
+            collectChangeInformationFromCollection(parent, dataObject.getRoles(), roleFactory);
+        }
+    }
+
+    @Override
+    public void syncBaseDetails(final User entity, final RESTUserV1 dataObject) {
         if (dataObject.hasParameterSet(RESTUserV1.DESCRIPTION_NAME))
             entity.setDescription(dataObject.getDescription());
         if (dataObject.hasParameterSet(RESTUserV1.NAME_NAME))
@@ -94,28 +104,55 @@ public class UserV1Factory extends RESTEntityFactory<RESTUserV1, User, RESTUserC
     }
 
     @Override
-    public void syncDBEntityWithRESTEntitySecondPass(User entity, RESTUserV1 dataObject) {
-        // Many to Many
-        if (dataObject.hasParameterSet(
-                RESTUserV1.ROLES_NAME) && dataObject.getRoles() != null && dataObject.getRoles().getItems() != null) {
-            dataObject.getRoles().removeInvalidChangeItemRequests();
+    protected void doDeleteChildAction(final User entity, final RESTUserV1 dataObject, final RESTChangeAction<?> action) {
+        final RESTBaseEntityV1<?, ?, ?> restEntity = action.getRESTEntity();
 
-            for (final RESTRoleCollectionItemV1 restEntityItem : dataObject.getRoles().getItems()) {
-                final RESTRoleV1 restEntity = restEntityItem.getItem();
+        if (restEntity instanceof RESTRoleV1) {
+            final Role dbEntity = entityManager.find(Role.class, restEntity.getId());
+            if (dbEntity == null) throw new BadRequestException(
+                    "No Role entity was found with the primary key " + restEntity.getId());
 
-                if (restEntityItem.returnIsAddItem() || restEntityItem.returnIsRemoveItem()) {
-                    final Role dbEntity = RESTv1Utilities.findEntity(entityManager, entityCache, restEntity, Role.class);
-                    if (dbEntity == null)
-                        throw new BadRequestException("No entity was found with the primary key " + restEntity.getId());
-
-                    if (restEntityItem.returnIsAddItem()) {
-                        entity.addRole(dbEntity);
-                    } else if (restEntityItem.returnIsRemoveItem()) {
-                        entity.removeRole(dbEntity);
-                    }
-                }
-            }
+            entity.removeRole(dbEntity);
         }
+    }
+
+    @Override
+    protected AuditedEntity doCreateChildAction(final User entity, final RESTUserV1 dataObject, final RESTChangeAction<?> action) {
+        final RESTBaseEntityV1<?, ?, ?> restEntity = action.getRESTEntity();
+        final AuditedEntity dbEntity;
+
+        if (restEntity instanceof RESTRoleV1) {
+            dbEntity = entityManager.find(Role.class, restEntity.getId());
+            if (dbEntity == null) {
+                throw new BadRequestException("No Role entity was found with the primary key " + restEntity.getId());
+            }
+
+            entity.addRole((Role) dbEntity);
+        } else {
+            throw new IllegalArgumentException("Item is not a child of User");
+        }
+
+        return dbEntity;
+    }
+
+    @Override
+    protected AuditedEntity getChildEntityForAction(final User entity, final RESTUserV1 dataObject, final RESTChangeAction<?> action) {
+        final RESTBaseEntityV1<?, ?, ?> restEntity = action.getRESTEntity();
+
+        final AuditedEntity dbEntity;
+        if (restEntity instanceof RESTRoleV1) {
+            dbEntity = RESTv1Utilities.findEntity(entityManager, entityCache, (RESTRoleV1) restEntity, Role.class);
+            if (dbEntity == null) {
+                throw new BadRequestException("No Role entity was found with the primary key " + restEntity.getId());
+            } else if (!entity.getRoles().contains(dbEntity)) {
+                throw new BadRequestException(
+                        "No Role entity was found with the primary key " + restEntity.getId() + " for User " + entity.getId());
+            }
+        } else {
+            throw new IllegalArgumentException("Item is not a child of User");
+        }
+
+        return dbEntity;
     }
 
     @Override

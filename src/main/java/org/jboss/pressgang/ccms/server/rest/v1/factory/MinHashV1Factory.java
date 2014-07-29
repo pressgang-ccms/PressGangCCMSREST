@@ -30,6 +30,7 @@ import org.jboss.pressgang.ccms.rest.v1.collections.items.RESTMinHashCollectionI
 import org.jboss.pressgang.ccms.rest.v1.entities.RESTMinHashV1;
 import org.jboss.pressgang.ccms.rest.v1.entities.base.RESTBaseEntityV1;
 import org.jboss.pressgang.ccms.rest.v1.expansion.ExpandDataTrunk;
+import org.jboss.pressgang.ccms.server.rest.v1.RESTChangeAction;
 import org.jboss.pressgang.ccms.server.rest.v1.factory.base.RESTEntityCollectionFactory;
 import org.jboss.pressgang.ccms.server.rest.v1.factory.base.RESTEntityFactory;
 import org.jboss.pressgang.ccms.server.utils.EnversUtilities;
@@ -64,12 +65,12 @@ public class MinHashV1Factory extends RESTEntityFactory<RESTMinHashV1, MinHash, 
     }
 
     @Override
-    public void syncDBEntityWithRESTEntityFirstPass(final MinHash entity, final RESTMinHashV1 dataObject) {
-        // The generation of minhashes is done in the TopicV1Factory. These values can not be set by the client.
+    public void collectChangeInformation(final RESTChangeAction<RESTMinHashV1> parent, final RESTMinHashV1 dataObject) {
+        // MinHash has no children that can be changed, so we have no changes to collect
     }
 
     @Override
-    public void syncDBEntityWithRESTEntitySecondPass(final MinHash entity, final RESTMinHashV1 dataObject) {
+    public void syncBaseDetails(final MinHash entity, final RESTMinHashV1 dataObject) {
         // The generation of minhashes is done in the TopicV1Factory. These values can not be set by the client.
     }
 

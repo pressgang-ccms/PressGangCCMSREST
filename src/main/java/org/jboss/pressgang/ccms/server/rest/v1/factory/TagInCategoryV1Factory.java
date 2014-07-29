@@ -36,8 +36,9 @@ import org.jboss.pressgang.ccms.rest.v1.entities.RESTTagV1;
 import org.jboss.pressgang.ccms.rest.v1.entities.base.RESTBaseEntityV1;
 import org.jboss.pressgang.ccms.rest.v1.entities.join.RESTTagInCategoryV1;
 import org.jboss.pressgang.ccms.rest.v1.expansion.ExpandDataTrunk;
-import org.jboss.pressgang.ccms.server.rest.v1.factory.base.RESTEntityFactory;
+import org.jboss.pressgang.ccms.server.rest.v1.RESTChangeAction;
 import org.jboss.pressgang.ccms.server.rest.v1.factory.base.RESTEntityCollectionFactory;
+import org.jboss.pressgang.ccms.server.rest.v1.factory.base.RESTEntityFactory;
 import org.jboss.pressgang.ccms.server.utils.EnversUtilities;
 
 /**
@@ -132,7 +133,12 @@ public class TagInCategoryV1Factory extends RESTEntityFactory<RESTTagInCategoryV
     }
 
     @Override
-    public void syncDBEntityWithRESTEntityFirstPass(final TagToCategory entity, final RESTTagInCategoryV1 dataObject) {
+    public void collectChangeInformation(final RESTChangeAction<RESTTagInCategoryV1> parent, final RESTTagInCategoryV1 dataObject) {
+        // TagToCategory has no children that can be changed, so we have no changes to collect
+    }
+
+    @Override
+    public void syncBaseDetails(final TagToCategory entity, final RESTTagInCategoryV1 dataObject) {
         if (dataObject.hasParameterSet(RESTTagInCategoryV1.RELATIONSHIP_SORT_NAME)) entity.setSorting(dataObject.getRelationshipSort());
     }
 

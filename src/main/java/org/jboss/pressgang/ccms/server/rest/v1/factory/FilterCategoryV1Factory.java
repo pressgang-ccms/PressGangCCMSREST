@@ -34,8 +34,9 @@ import org.jboss.pressgang.ccms.rest.v1.entities.RESTFilterCategoryV1;
 import org.jboss.pressgang.ccms.rest.v1.entities.RESTProjectV1;
 import org.jboss.pressgang.ccms.rest.v1.entities.base.RESTBaseEntityV1;
 import org.jboss.pressgang.ccms.rest.v1.expansion.ExpandDataTrunk;
-import org.jboss.pressgang.ccms.server.rest.v1.factory.base.RESTEntityFactory;
+import org.jboss.pressgang.ccms.server.rest.v1.RESTChangeAction;
 import org.jboss.pressgang.ccms.server.rest.v1.factory.base.RESTEntityCollectionFactory;
+import org.jboss.pressgang.ccms.server.rest.v1.factory.base.RESTEntityFactory;
 import org.jboss.pressgang.ccms.server.rest.v1.utils.RESTv1Utilities;
 import org.jboss.pressgang.ccms.server.utils.EnversUtilities;
 import org.jboss.resteasy.spi.BadRequestException;
@@ -96,12 +97,17 @@ public class FilterCategoryV1Factory extends RESTEntityFactory<RESTFilterCategor
     }
 
     @Override
-    public void syncDBEntityWithRESTEntityFirstPass(final FilterCategory entity, final RESTFilterCategoryV1 dataObject) {
+    public void collectChangeInformation(final RESTChangeAction<RESTFilterCategoryV1> parent, final RESTFilterCategoryV1 dataObject) {
+        // FilterCategory has no children that can be changed, so we have no changes to collect
+    }
+
+    @Override
+    public void syncBaseDetails(final FilterCategory entity, final RESTFilterCategoryV1 dataObject) {
         if (dataObject.hasParameterSet(RESTFilterCategoryV1.STATE_NAME)) entity.setCategoryState(dataObject.getState());
     }
 
     @Override
-    public void syncDBEntityWithRESTEntitySecondPass(final FilterCategory entity, final RESTFilterCategoryV1 dataObject) {
+    public void syncAdditionalDetails(final FilterCategory entity, final RESTFilterCategoryV1 dataObject) {
         // Set the Category for the FilterCategory
         if (dataObject.hasParameterSet(RESTFilterCategoryV1.CATEGORY_NAME)) {
             final RESTCategoryV1 restEntity = dataObject.getCategory();

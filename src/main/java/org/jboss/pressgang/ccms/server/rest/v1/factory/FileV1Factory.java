@@ -26,15 +26,16 @@ import java.util.List;
 
 import org.jboss.pressgang.ccms.model.File;
 import org.jboss.pressgang.ccms.model.LanguageFile;
+import org.jboss.pressgang.ccms.model.base.AuditedEntity;
 import org.jboss.pressgang.ccms.rest.v1.collections.RESTFileCollectionV1;
 import org.jboss.pressgang.ccms.rest.v1.collections.RESTLanguageFileCollectionV1;
 import org.jboss.pressgang.ccms.rest.v1.collections.items.RESTFileCollectionItemV1;
-import org.jboss.pressgang.ccms.rest.v1.collections.items.RESTLanguageFileCollectionItemV1;
 import org.jboss.pressgang.ccms.rest.v1.constants.RESTv1Constants;
 import org.jboss.pressgang.ccms.rest.v1.entities.RESTFileV1;
 import org.jboss.pressgang.ccms.rest.v1.entities.RESTLanguageFileV1;
 import org.jboss.pressgang.ccms.rest.v1.entities.base.RESTBaseEntityV1;
 import org.jboss.pressgang.ccms.rest.v1.expansion.ExpandDataTrunk;
+import org.jboss.pressgang.ccms.server.rest.v1.RESTChangeAction;
 import org.jboss.pressgang.ccms.server.rest.v1.factory.base.RESTEntityCollectionFactory;
 import org.jboss.pressgang.ccms.server.rest.v1.factory.base.RESTEntityFactory;
 import org.jboss.pressgang.ccms.server.rest.v1.utils.RESTv1Utilities;
@@ -88,64 +89,69 @@ public class FileV1Factory extends RESTEntityFactory<RESTFileV1, File, RESTFileC
     }
 
     @Override
-    public void syncDBEntityWithRESTEntityFirstPass(final File entity, final RESTFileV1 dataObject) {
-        if (dataObject.hasParameterSet(RESTFileV1.DESCRIPTION_NAME)) entity.setDescription(dataObject.getDescription());
-        if (dataObject.hasParameterSet(RESTFileV1.FILE_NAME)) entity.setFileName(dataObject.getFileName());
-        if (dataObject.hasParameterSet(RESTFileV1.FILE_PATH_NAME)) entity.setFilePath(dataObject.getFilePath());
-        if (dataObject.hasParameterSet(RESTFileV1.EXPLODE_ARCHIVE_NAME)) entity.setExplodeArchive(dataObject.getExplodeArchive());
-
-        /* One To Many - Add will create a child entity */
-        if (dataObject.hasParameterSet(
-                RESTFileV1.LANGUAGE_FILES_NAME) && dataObject.getLanguageFiles_OTM() != null && dataObject.getLanguageFiles_OTM()
-                .getItems() != null) {
-            dataObject.getLanguageFiles_OTM().removeInvalidChangeItemRequests();
-
-            for (final RESTLanguageFileCollectionItemV1 restEntityItem : dataObject.getLanguageFiles_OTM().getItems()) {
-                final RESTLanguageFileV1 restEntity = restEntityItem.getItem();
-
-                if (restEntityItem.returnIsAddItem()) {
-                    final LanguageFile dbEntity = languageFileFactory.createDBEntityFromRESTEntity(restEntity);
-                    entity.addLanguageFile(dbEntity);
-                } else if (restEntityItem.returnIsRemoveItem()) {
-                    final LanguageFile dbEntity = entityManager.find(LanguageFile.class, restEntity.getId());
-                    if (dbEntity == null)
-                        throw new BadRequestException("No LanguageFile entity was found with the primary key " + restEntity.getId());
-
-                    entity.removeLanguageFile(dbEntity);
-                    entityManager.remove(dbEntity);
-                } else if (restEntityItem.returnIsUpdateItem()) {
-                    final LanguageFile dbEntity = entityManager.find(LanguageFile.class, restEntity.getId());
-                    if (dbEntity == null)
-                        throw new BadRequestException("No LanguageFile entity was found with the primary key " + restEntity.getId());
-                    if (!entity.getLanguageFiles().contains(dbEntity)) throw new BadRequestException(
-                            "No LanguageFile entity was found with the primary key " + restEntity.getId() + " for File " + entity.getId());
-
-                    languageFileFactory.updateDBEntityFromRESTEntity(dbEntity, restEntity);
-                }
-            }
+    public void collectChangeInformation(final RESTChangeAction<RESTFileV1> parent, final RESTFileV1 dataObject) {
+        if (dataObject.hasParameterSet(RESTFileV1.LANGUAGE_FILES_NAME)
+                && dataObject.getLanguageFiles_OTM() != null
+                && dataObject.getLanguageFiles_OTM().getItems() != null) {
+            collectChangeInformationFromCollection(parent, dataObject.getLanguageFiles_OTM(), languageFileFactory);
         }
     }
 
     @Override
-    public void syncDBEntityWithRESTEntitySecondPass(final File entity, final RESTFileV1 dataObject) {
-        // One To Many - Do the second pass on update or added items
-        if (dataObject.hasParameterSet(
-                RESTFileV1.LANGUAGE_FILES_NAME) && dataObject.getLanguageFiles_OTM() != null && dataObject.getLanguageFiles_OTM()
-                .getItems() != null) {
-            dataObject.getLanguageFiles_OTM().removeInvalidChangeItemRequests();
+    public void syncBaseDetails(final File entity, final RESTFileV1 dataObject) {
+        if (dataObject.hasParameterSet(RESTFileV1.DESCRIPTION_NAME)) entity.setDescription(dataObject.getDescription());
+        if (dataObject.hasParameterSet(RESTFileV1.FILE_NAME)) entity.setFileName(dataObject.getFileName());
+        if (dataObject.hasParameterSet(RESTFileV1.FILE_PATH_NAME)) entity.setFilePath(dataObject.getFilePath());
+        if (dataObject.hasParameterSet(RESTFileV1.EXPLODE_ARCHIVE_NAME)) entity.setExplodeArchive(dataObject.getExplodeArchive());
+    }
 
-            for (final RESTLanguageFileCollectionItemV1 restEntityItem : dataObject.getLanguageFiles_OTM().getItems()) {
-                final RESTLanguageFileV1 restEntity = restEntityItem.getItem();
+    @Override
+    protected void doDeleteChildAction(final File entity, final RESTFileV1 dataObject, final RESTChangeAction<?> action) {
+        final RESTBaseEntityV1<?, ?, ?> restEntity = action.getRESTEntity();
 
-                if (restEntityItem.returnIsAddItem() || restEntityItem.returnIsUpdateItem()) {
-                    final LanguageFile dbEntity = RESTv1Utilities.findEntity(entityManager, entityCache, restEntity, LanguageFile.class);
-                    if (dbEntity == null)
-                        throw new BadRequestException("No LanguageFile entity was found with the primary key " + restEntity.getId());
+        if (restEntity instanceof RESTLanguageFileV1) {
+            final LanguageFile dbEntity = entityManager.find(LanguageFile.class, restEntity.getId());
+            if (dbEntity == null) throw new BadRequestException(
+                    "No LanguageFile entity was found with the primary key " + restEntity.getId());
 
-                    languageFileFactory.syncDBEntityWithRESTEntitySecondPass(dbEntity, restEntity);
-                }
-            }
+            entity.removeLanguageFile(dbEntity);
+            entityManager.remove(dbEntity);
         }
+    }
+
+    @Override
+    protected AuditedEntity doCreateChildAction(final File entity, final RESTFileV1 dataObject, final RESTChangeAction<?> action) {
+        final RESTBaseEntityV1<?, ?, ?> restEntity = action.getRESTEntity();
+        final AuditedEntity dbEntity;
+
+        if (restEntity instanceof RESTLanguageFileV1) {
+            dbEntity = action.getFactory().createDBEntity(restEntity);
+            entity.addLanguageFile((LanguageFile) dbEntity);
+        } else {
+            throw new IllegalArgumentException("Item is not a child of File");
+        }
+
+        return dbEntity;
+    }
+
+    @Override
+    protected AuditedEntity getChildEntityForAction(final File entity, final RESTFileV1 dataObject, final RESTChangeAction<?> action) {
+        final RESTBaseEntityV1<?, ?, ?> restEntity = action.getRESTEntity();
+
+        final AuditedEntity dbEntity;
+        if (restEntity instanceof RESTLanguageFileV1) {
+            dbEntity = RESTv1Utilities.findEntity(entityManager, entityCache, (RESTLanguageFileV1) restEntity, LanguageFile.class);
+            if (dbEntity == null) {
+                throw new BadRequestException("No LanguageFile entity was found with the primary key " + restEntity.getId());
+            } else if (!entity.getLanguageFiles().contains(dbEntity)) {
+                throw new BadRequestException(
+                        "No LanguageFile entity was found with the primary key " + restEntity.getId() + " for File " + entity.getId());
+            }
+        } else {
+            throw new IllegalArgumentException("Item is not a child of File");
+        }
+
+        return dbEntity;
     }
 
     @Override

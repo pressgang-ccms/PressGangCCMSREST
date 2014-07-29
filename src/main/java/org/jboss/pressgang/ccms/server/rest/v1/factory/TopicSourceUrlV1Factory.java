@@ -30,6 +30,7 @@ import org.jboss.pressgang.ccms.rest.v1.entities.RESTTopicSourceUrlV1;
 import org.jboss.pressgang.ccms.rest.v1.entities.RESTTopicV1;
 import org.jboss.pressgang.ccms.rest.v1.entities.base.RESTBaseEntityV1;
 import org.jboss.pressgang.ccms.rest.v1.expansion.ExpandDataTrunk;
+import org.jboss.pressgang.ccms.server.rest.v1.RESTChangeAction;
 import org.jboss.pressgang.ccms.server.rest.v1.factory.base.RESTEntityFactory;
 import org.jboss.pressgang.ccms.server.rest.v1.factory.base.RESTEntityCollectionFactory;
 import org.jboss.pressgang.ccms.server.utils.EnversUtilities;
@@ -68,7 +69,12 @@ public class TopicSourceUrlV1Factory extends RESTEntityFactory<RESTTopicSourceUr
     }
 
     @Override
-    public void syncDBEntityWithRESTEntityFirstPass(final TopicSourceUrl entity, final RESTTopicSourceUrlV1 dataObject) {
+    public void collectChangeInformation(final RESTChangeAction<RESTTopicSourceUrlV1> parent, final RESTTopicSourceUrlV1 dataObject) {
+        // TopicToSourceUrl has no children that can be changed, so we have no changes to collect
+    }
+
+    @Override
+    public void syncBaseDetails(final TopicSourceUrl entity, final RESTTopicSourceUrlV1 dataObject) {
         if (dataObject.hasParameterSet(RESTTopicSourceUrlV1.TITLE_NAME)) entity.setTitle(dataObject.getTitle());
         if (dataObject.hasParameterSet(RESTTopicSourceUrlV1.DESCRIPTION_NAME)) entity.setDescription(dataObject.getDescription());
         if (dataObject.hasParameterSet(RESTTopicSourceUrlV1.URL_NAME)) entity.setSourceUrl(dataObject.getUrl());

@@ -25,9 +25,12 @@ import javax.persistence.EntityManager;
 import org.jboss.pressgang.ccms.model.base.AuditedEntity;
 import org.jboss.pressgang.ccms.rest.v1.collections.base.RESTBaseEntityCollectionItemV1;
 import org.jboss.pressgang.ccms.rest.v1.collections.base.RESTBaseEntityCollectionV1;
+import org.jboss.pressgang.ccms.rest.v1.collections.base.RESTUpdateCollectionItemV1;
 import org.jboss.pressgang.ccms.rest.v1.entities.base.RESTBaseEntityV1;
 import org.jboss.pressgang.ccms.rest.v1.expansion.ExpandDataTrunk;
+import org.jboss.pressgang.ccms.server.rest.DatabaseOperation;
 import org.jboss.pressgang.ccms.server.rest.v1.EntityCache;
+import org.jboss.pressgang.ccms.server.rest.v1.RESTChangeAction;
 import org.jboss.pressgang.ccms.server.rest.v1.factory.LogDetailsV1Factory;
 import org.jboss.pressgang.ccms.server.utils.EntityManagerWrapper;
 import org.jboss.pressgang.ccms.server.utils.EnversUtilities;
@@ -42,6 +45,7 @@ import org.jboss.resteasy.spi.InternalServerErrorException;
  * @param <V> The REST object collection type
  * @param <W> The REST object collection item type
  */
+@SuppressWarnings("unchecked")
 public abstract class RESTEntityFactory<T extends RESTBaseEntityV1<T, V, W>, U extends AuditedEntity,
         V extends RESTBaseEntityCollectionV1<T, V, W>, W extends RESTBaseEntityCollectionItemV1<T, V, W>> {
     @Inject
@@ -120,7 +124,8 @@ public abstract class RESTEntityFactory<T extends RESTBaseEntityV1<T, V, W>, U e
 
         // Add the log details
         retValue.setLogDetails(
-                logDetailsFactory.create(entity, fixedRevision, RESTBaseEntityV1.LOG_DETAILS_NAME, expand, dataType, baseUrl));
+                logDetailsFactory.createRESTEntityFromAuditedEntity(entity, fixedRevision, RESTBaseEntityV1.LOG_DETAILS_NAME, expand,
+                        dataType, baseUrl));
 
         return retValue;
     }
@@ -140,47 +145,16 @@ public abstract class RESTEntityFactory<T extends RESTBaseEntityV1<T, V, W>, U e
             final ExpandDataTrunk expand, final Number revision, final boolean expandParentReferences);
 
     /**
-     * Populates the values of a database entity from a REST entity. This step should iterate over "One to Many" or "Many to Many"
-     * collections and do the following:<br />
-     * <br />
-     * 1. Process any Remove items.<br />
-     * 2. Create any "One to Many" Add items and do the First Pass on the new entities.<br />
-     * 3. Do the First Pass on any Update items.<br />
+     * Creates and returns a new database entity from a REST entity
      *
-     * @param entity     The database entity to be synced from the REST Entity.
-     * @param dataObject The REST entity object.
+     * @param restEntity
+     * @return A new database entity
      */
-    protected abstract void syncDBEntityWithRESTEntityFirstPass(final U entity, final T dataObject);
-
-    /**
-     * Populates the entities for new entities, that were created in the first pass. This step should iterate over "One to Many" or "Many
-     * to Many"
-     * collections and do the following:<br />
-     * <br />
-     * 1. Do the Second Pass "One to Many" Add items.<br />
-     * 2. Add the "Many to Many" Add items.<br />
-     * 3. Do the Second Pass on any Update items.<br />
-     * 4. Set the singular entities, so new entities can be found.<br />
-     *
-     * @param entity     The database entity to be synced from the REST Entity.
-     * @param dataObject The REST entity object.
-     */
-    public void syncDBEntityWithRESTEntitySecondPass(final U entity, final T dataObject) {
-
-    }
-
-    /**
-     * Creates, populates and returns a new database entity from a REST entity
-     *
-     * @param dataObject The REST entity used to populate the database entity's values
-     * @return A new database entity with the values supplied from the dataObject
-     */
-    public U createDBEntityFromRESTEntity(final T dataObject) {
+    public U createDBEntity(T restEntity) {
         try {
-            final U entity = getDatabaseClass().newInstance();
-            syncDBEntityWithRESTEntityFirstPass(entity, dataObject);
-            entityCache.addNew(dataObject, entity);
-            return entity;
+            final U dbEntity = getDatabaseClass().newInstance();
+            syncBaseDetails(dbEntity, restEntity);
+            return dbEntity;
         } catch (InstantiationException e) {
             throw new InternalServerErrorException(e);
         } catch (IllegalAccessException e) {
@@ -188,15 +162,97 @@ public abstract class RESTEntityFactory<T extends RESTBaseEntityV1<T, V, W>, U e
         }
     }
 
-    /**
-     * Updates a database entity from a REST entity
-     *
-     * @param entity     The database entity to be synced from the REST Entity.
-     * @param dataObject The REST entity used to populate the database entity's values
-     */
-    public void updateDBEntityFromRESTEntity(final U entity, final T dataObject) {
-        syncDBEntityWithRESTEntityFirstPass(entity, dataObject);
-        entityCache.addUpdated(dataObject, entity);
+    public void syncDBEntityDeleteChanges(final AuditedEntity entity, final RESTBaseEntityV1<?, ?, ?> dataObject,
+            final RESTChangeAction<?> action) {
+        for (final RESTChangeAction<?> childAction : action.getDeleteChildActions()) {
+            doDeleteChildAction((U) entity, (T) dataObject, childAction);
+        }
+    }
+
+    public void syncDBEntityCreateChanges(final AuditedEntity entity, final RESTBaseEntityV1<?, ?, ?> dataObject,
+            final RESTChangeAction<?> action) {
+        for (final RESTChangeAction<?> childAction : action.getCreateChildActions()) {
+            final AuditedEntity createdEntity = doCreateChildAction((U) entity, (T) dataObject, childAction);
+            childAction.setDBEntity(createdEntity);
+            childAction.getFactory().syncDBEntityCreateChanges(createdEntity, childAction.getRESTEntity(), childAction);
+            entityCache.addNew(childAction.getRESTEntity(), createdEntity);
+        }
+    }
+
+    public void syncDBEntityUpdateChanges(final AuditedEntity entity, final RESTBaseEntityV1<?, ?, ?> dataObject,
+            final RESTChangeAction<?> action) {
+        if (action.getType() == DatabaseOperation.UPDATE) {
+            syncBaseDetails((U) entity, (T) dataObject);
+        }
+
+        // We'll need to sync any additional content for create changes, so do it here
+        for (final RESTChangeAction<?> childAction : action.getCreateChildActions()) {
+            childAction.getFactory().syncDBEntityUpdateChanges(childAction.getDBEntity(), childAction.getRESTEntity(), childAction);
+        }
+
+        for (final RESTChangeAction<?> childAction : action.getUpdateChildActions()) {
+            final AuditedEntity updatedEntity = getChildEntityForAction((U) entity, (T) dataObject, childAction);
+            childAction.getFactory().syncDBEntityUpdateChanges(updatedEntity, childAction.getRESTEntity(), childAction);
+            entityCache.addUpdated(childAction.getRESTEntity(), updatedEntity);
+        }
+
+        // Sync the additional details now that the child actions have been performed
+        syncAdditionalDetails((U) entity, (T) dataObject);
+    }
+
+    public abstract void collectChangeInformation(RESTChangeAction<T> parent, T dataObject);
+    public abstract void syncBaseDetails(U entity, T dataObject);
+    public void syncAdditionalDetails(U entity, T dataObject) {}
+    protected void doDeleteChildAction(U entity, T dataObject, RESTChangeAction<?> action) {}
+
+    protected AuditedEntity doCreateChildAction(U entity, T dataObject, RESTChangeAction<?> action) {
+        throw new UnsupportedOperationException("No implementation exists for doCreateChildAction()");
+    }
+
+    protected AuditedEntity getChildEntityForAction(U entity, T dataObject, RESTChangeAction<?> action) {
+        throw new UnsupportedOperationException("No implementation exists for getChildEntityForAction()");
+    }
+
+    protected <T extends RESTBaseEntityV1<T, V, W>,
+            U extends AuditedEntity,
+            V extends RESTBaseEntityCollectionV1<T, V, W>,
+            W extends RESTBaseEntityCollectionItemV1<T, V, W>>
+            void collectChangeInformationFromCollection(final RESTChangeAction<?> parent, final V collection,
+            final RESTEntityFactory<T, U, V, W> collectionFactory) {
+        collectChangeInformationFromCollection(parent, collection, collectionFactory, null);
+    }
+
+    protected <T extends RESTBaseEntityV1<T, V, W>,
+            U extends AuditedEntity,
+            V extends RESTBaseEntityCollectionV1<T, V, W>,
+            W extends RESTBaseEntityCollectionItemV1<T, V, W>>
+    void collectChangeInformationFromCollection(final RESTChangeAction<?> parent, final V collection,
+            final RESTEntityFactory<T, U, V, W> collectionFactory, final String uniqueId) {
+        collection.removeInvalidChangeItemRequests();
+
+        for (final W restEntityItem : collection.getItems()) {
+            final T restEntity = restEntityItem.getItem();
+
+            DatabaseOperation operation = null;
+            if (restEntityItem.returnIsRemoveItem()) {
+                operation = DatabaseOperation.DELETE;
+            } else if (restEntityItem.returnIsAddItem()) {
+                operation = DatabaseOperation.CREATE;
+            } else if (restEntityItem instanceof RESTUpdateCollectionItemV1
+                    && ((RESTUpdateCollectionItemV1) restEntityItem).returnIsUpdateItem()) {
+                operation = DatabaseOperation.UPDATE;
+            }
+
+            // Create the actionable node
+            final RESTChangeAction<T> childAction = new RESTChangeAction(parent, collectionFactory, restEntity, operation);
+            childAction.setUniqueId(uniqueId);
+            parent.addChildAction(childAction);
+
+            if (operation != DatabaseOperation.DELETE) {
+                // For deletes there is no need to go any further down the chain, as deleting the parent will delete the children
+                collectionFactory.collectChangeInformation(childAction, restEntity);
+            }
+        }
     }
 
     /**

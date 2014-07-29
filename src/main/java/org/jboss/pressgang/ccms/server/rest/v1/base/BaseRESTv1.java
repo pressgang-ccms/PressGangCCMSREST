@@ -92,6 +92,7 @@ import org.jboss.pressgang.ccms.server.envers.LoggingRevisionEntity;
 import org.jboss.pressgang.ccms.server.rest.BaseREST;
 import org.jboss.pressgang.ccms.server.rest.DatabaseOperation;
 import org.jboss.pressgang.ccms.server.rest.v1.EntityCache;
+import org.jboss.pressgang.ccms.server.rest.v1.RESTChangeAction;
 import org.jboss.pressgang.ccms.server.rest.v1.XMLEchoCache;
 import org.jboss.pressgang.ccms.server.rest.v1.factory.BlobConstantV1Factory;
 import org.jboss.pressgang.ccms.server.rest.v1.factory.CSNodeV1Factory;
@@ -689,6 +690,10 @@ public class BaseRESTv1 extends BaseREST {
             // Store the log details into the Logging Java Bean
             setLogDetails(entityManager, logDetails);
 
+            // Collect the change information so we can replay it in the right order
+            final RESTChangeAction<T> rootAction = new RESTChangeAction<T>(factory, restEntity, operation);
+            factory.collectChangeInformation(rootAction, restEntity);
+
             /*
              * The difference between creating or updating an entity is that we create a new instance of U, or find an existing
              * instance of U.
@@ -701,21 +706,19 @@ public class BaseRESTv1 extends BaseREST {
                 // Find the entity and check that it actually exists
                 entity = entityManager.find(type, restEntity.getId());
                 if (entity == null) throw new BadRequestException("No entity was found with the primary key " + restEntity.getId());
-
-                // Sync the changes from the REST Entity to the Database.
-                factory.updateDBEntityFromRESTEntity(entity, restEntity);
-                factory.syncDBEntityWithRESTEntitySecondPass(entity, restEntity);
-
             } else if (operation == DatabaseOperation.CREATE) {
                 // Create a new Database Entity using the REST Entity.
-                entity = factory.createDBEntityFromRESTEntity(restEntity);
-                factory.syncDBEntityWithRESTEntitySecondPass(entity, restEntity);
+                entity = factory.createDBEntity(restEntity);
 
                 // Check that a entity was able to be successfully created.
                 if (entity == null) throw new BadRequestException("The entity could not be created");
             }
 
-            assert entity != null : "entity should not be null";
+            // Sync the changes
+            factory.syncDBEntityDeleteChanges(entity, restEntity, rootAction);
+            entityManager.flush();
+            factory.syncDBEntityCreateChanges(entity, restEntity, rootAction);
+            factory.syncDBEntityUpdateChanges(entity, restEntity, rootAction);
 
             // Persist the changes
             entityManager.persist(entity);
@@ -868,45 +871,54 @@ public class BaseRESTv1 extends BaseREST {
             // Store the log details into the Logging Java Bean
             setLogDetails(entityManager, logDetails);
 
+            // Collect the change information so we can replay it in the right order
+            final List<RESTChangeAction<T>> actions = new ArrayList<RESTChangeAction<T>>();
             final List<U> returnEntities = new ArrayList<U>();
-            int count = 0;
             for (final T restEntity : entities.returnItems()) {
+                final RESTChangeAction<T> childAction = new RESTChangeAction<T>(factory, restEntity, operation);
+                factory.collectChangeInformation(childAction, restEntity);
 
                 /*
-                 * The difference between creating or updating an entity is that we create a new instance of U, or find an
-                 * existing instance of U.
+                 * The difference between creating or updating an entity is that we create a new instance of U, or find an existing
+                 * instance of U.
                  */
                 U entity = null;
                 if (operation == DatabaseOperation.UPDATE) {
-                    // Have to have an ID for the entity we are deleting or updating
+                    /* Have to have an ID for the entity we are deleting or updating */
                     if (restEntity.getId() == null) throw new BadRequestException("An id needs to be set for update operations");
 
-                    // Load the entity from the database and verify it exists
+                    // Find the entity and check that it actually exists
                     entity = entityManager.find(type, restEntity.getId());
                     if (entity == null) throw new BadRequestException("No entity was found with the primary key " + restEntity.getId());
-
-                    // Sync the database entity with the REST Entity
-                    factory.updateDBEntityFromRESTEntity(entity, restEntity);
-                    factory.syncDBEntityWithRESTEntitySecondPass(entity, restEntity);
                 } else if (operation == DatabaseOperation.CREATE) {
-                    // Create a Database Entity using the information from the REST Entity.
-                    entity = factory.createDBEntityFromRESTEntity(restEntity);
-                    factory.syncDBEntityWithRESTEntitySecondPass(entity, restEntity);
+                    // Create a new Database Entity using the REST Entity.
+                    entity = factory.createDBEntity(restEntity);
 
-                    // Check that the entity was successfully created
+                    // Check that a entity was able to be successfully created.
                     if (entity == null) throw new BadRequestException("The entity could not be created");
                 }
 
-                // Save the created/updated entity
-                entityManager.persist(entity);
-
-                // Flush the changes if we've processes enough entities
-                count++;
-                if (count % BATCH_SIZE == 0) {
-                    entityManager.flush();
-                }
-
+                childAction.setDBEntity(entity);
                 returnEntities.add(entity);
+                actions.add(childAction);
+            }
+
+            // Process the delete the changes
+            for (final RESTChangeAction<T> childAction : actions) {
+                factory.syncDBEntityDeleteChanges(childAction.getDBEntity(), childAction.getRESTEntity(), childAction);
+            }
+
+            // Flush to the db to remove indexes
+            entityManager.flush();
+
+            // Process the create changes
+            for (final RESTChangeAction<T> childAction : actions) {
+                factory.syncDBEntityCreateChanges(childAction.getDBEntity(), childAction.getRESTEntity(), childAction);
+            }
+
+            // Process the update changes
+            for (final RESTChangeAction<T> childAction : actions) {
+                factory.syncDBEntityUpdateChanges(childAction.getDBEntity(), childAction.getRESTEntity(), childAction);
             }
 
             // Flush and commit the changes to the database.
@@ -1410,11 +1422,24 @@ public class BaseRESTv1 extends BaseREST {
             // Join the transaction we just started
             entityManager.joinTransaction();
 
-            // Check the current entity exists
-            if (id != null) {
-                if (entityManager.find(ContentSpec.class, id) == null) {
+            // Create the root change action
+            final RESTChangeAction<RESTTextContentSpecV1> rootAction = new RESTChangeAction<RESTTextContentSpecV1>(textContentSpecFactory,
+                    restEntity, operation);
+
+            // Make sure the entity exists and delete any child nodes before we do the processing
+            if (operation == DatabaseOperation.UPDATE) {
+                // Find the entity and check that it actually exists
+                final ContentSpec entity = entityManager.find(ContentSpec.class, id);
+                if (entity == null) {
                     throw new NotFoundException("No entity was found with the primary key " + id);
                 }
+
+                // Collect the change information so we can replay it in the right order
+                textContentSpecFactory.collectChangeInformation(rootAction, restEntity);
+
+                // process the delete changes
+                textContentSpecFactory.syncDBEntityDeleteChanges(entity, restEntity, rootAction);
+                entityManager.flush();
             }
 
             // Store the log details into the Logging Java Bean
@@ -1451,22 +1476,20 @@ public class BaseRESTv1 extends BaseREST {
                     transaction.rollback();
                 }
             } else {
-                // Get the updated or created entity
+                // Make sure we have the correct reference
                 final ContentSpec entity = entityManager.find(ContentSpec.class, csId);
 
-                if (entity != null) {
-                    // Process any additional changes
-                    textContentSpecFactory.updateDBEntityFromRESTEntity(entity, restEntity);
-                    textContentSpecFactory.syncDBEntityWithRESTEntitySecondPass(entity, restEntity);
+                // Process any additional changes
+                textContentSpecFactory.syncDBEntityCreateChanges(entity, restEntity, rootAction);
+                textContentSpecFactory.syncDBEntityUpdateChanges(entity, restEntity, rootAction);
 
-                    // Remove any errors that occurred previously
-                    if (textProcessed) {
-                        entity.setErrors(loggerManager.generateLogs());
-                        entity.setFailedContentSpec(null);
-                    }
-
-                    entityManager.persist(entity);
+                // Remove any errors that occurred previously
+                if (textProcessed) {
+                    entity.setErrors(loggerManager.generateLogs());
+                    entity.setFailedContentSpec(null);
                 }
+
+                entityManager.persist(entity);
                 transaction.commit();
 
                 // Get the revision and log a message
@@ -1564,6 +1587,7 @@ public class BaseRESTv1 extends BaseREST {
     private Integer setContentSpecErrors(final RESTTextContentSpecV1 restEntity, final String contentSpecString, final String errors,
             final RESTLogDetailsV1 logDetails) {
         final Integer id = restEntity.getId();
+        final DatabaseOperation operation = DatabaseOperation.UPDATE;
 
         try {
             // Reload the entity manager to work around an envers issue. See https://hibernate.onjira.com/browse/HHH-7682
@@ -1574,6 +1598,10 @@ public class BaseRESTv1 extends BaseREST {
 
             // Join the transaction we just started
             entityManager.joinTransaction();
+
+            // Create the root change action
+            final RESTChangeAction<RESTTextContentSpecV1> rootAction = new RESTChangeAction<RESTTextContentSpecV1>(textContentSpecFactory,
+                    restEntity, operation);
 
             // Store the log details into the Logging Java Bean
             setLogDetails(entityManager, logDetails);
@@ -1588,12 +1616,19 @@ public class BaseRESTv1 extends BaseREST {
 
             if (entity == null) throw new BadRequestException("No entity was found with the primary key " + id);
 
+            // Collect the change information so we can replay it in the right order
+            textContentSpecFactory.collectChangeInformation(rootAction, restEntity);
+
+            // Process the delete changes
+            textContentSpecFactory.syncDBEntityDeleteChanges(entity, restEntity, rootAction);
+            entityManager.flush();
+
             entity.setErrors(errors);
             entity.setFailedContentSpec(contentSpecString);
 
             // Process any additional changes
-            textContentSpecFactory.updateDBEntityFromRESTEntity(entity, restEntity);
-            textContentSpecFactory.syncDBEntityWithRESTEntitySecondPass(entity, restEntity);
+            textContentSpecFactory.syncDBEntityCreateChanges(entity, restEntity, rootAction);
+            textContentSpecFactory.syncDBEntityUpdateChanges(entity, restEntity, rootAction);
 
             // Save the error messages
             entityManager.persist(entity);

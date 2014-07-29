@@ -32,6 +32,7 @@ import org.jboss.pressgang.ccms.rest.v1.constants.RESTv1Constants;
 import org.jboss.pressgang.ccms.rest.v1.entities.base.RESTBaseEntityV1;
 import org.jboss.pressgang.ccms.rest.v1.entities.join.RESTCategoryInTagV1;
 import org.jboss.pressgang.ccms.rest.v1.expansion.ExpandDataTrunk;
+import org.jboss.pressgang.ccms.server.rest.v1.RESTChangeAction;
 import org.jboss.pressgang.ccms.server.rest.v1.factory.base.RESTEntityCollectionFactory;
 import org.jboss.pressgang.ccms.server.rest.v1.factory.base.RESTEntityFactory;
 import org.jboss.pressgang.ccms.server.utils.EnversUtilities;
@@ -85,7 +86,13 @@ public class CategoryInTagV1Factory extends RESTEntityFactory<RESTCategoryInTagV
     }
 
     @Override
-    public void syncDBEntityWithRESTEntityFirstPass(final TagToCategory entity, final RESTCategoryInTagV1 dataObject) {
+    public void collectChangeInformation(final RESTChangeAction<RESTCategoryInTagV1> parent,
+            final RESTCategoryInTagV1 dataObject) {
+        // CategoryInTags has no children that can be changed, so we have no changes to collect
+    }
+
+    @Override
+    public void syncBaseDetails(final TagToCategory entity, final RESTCategoryInTagV1 dataObject) {
         if (dataObject.hasParameterSet(RESTCategoryInTagV1.RELATIONSHIP_SORT_NAME)) entity.setSorting(dataObject.getRelationshipSort());
     }
 

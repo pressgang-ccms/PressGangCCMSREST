@@ -32,6 +32,7 @@ import org.jboss.pressgang.ccms.model.Tag;
 import org.jboss.pressgang.ccms.model.Topic;
 import org.jboss.pressgang.ccms.model.TopicSourceUrl;
 import org.jboss.pressgang.ccms.model.TopicToPropertyTag;
+import org.jboss.pressgang.ccms.model.base.AuditedEntity;
 import org.jboss.pressgang.ccms.rest.v1.collections.RESTBugzillaBugCollectionV1;
 import org.jboss.pressgang.ccms.rest.v1.collections.RESTMinHashCollectionV1;
 import org.jboss.pressgang.ccms.rest.v1.collections.RESTTagCollectionV1;
@@ -39,11 +40,7 @@ import org.jboss.pressgang.ccms.rest.v1.collections.RESTTopicCollectionV1;
 import org.jboss.pressgang.ccms.rest.v1.collections.RESTTopicSourceUrlCollectionV1;
 import org.jboss.pressgang.ccms.rest.v1.collections.RESTTranslatedTopicCollectionV1;
 import org.jboss.pressgang.ccms.rest.v1.collections.contentspec.RESTContentSpecCollectionV1;
-import org.jboss.pressgang.ccms.rest.v1.collections.items.RESTBugzillaBugCollectionItemV1;
-import org.jboss.pressgang.ccms.rest.v1.collections.items.RESTTagCollectionItemV1;
 import org.jboss.pressgang.ccms.rest.v1.collections.items.RESTTopicCollectionItemV1;
-import org.jboss.pressgang.ccms.rest.v1.collections.items.RESTTopicSourceUrlCollectionItemV1;
-import org.jboss.pressgang.ccms.rest.v1.collections.items.join.RESTAssignedPropertyTagCollectionItemV1;
 import org.jboss.pressgang.ccms.rest.v1.collections.join.RESTAssignedPropertyTagCollectionV1;
 import org.jboss.pressgang.ccms.rest.v1.constants.RESTv1Constants;
 import org.jboss.pressgang.ccms.rest.v1.entities.RESTBugzillaBugV1;
@@ -55,6 +52,7 @@ import org.jboss.pressgang.ccms.rest.v1.entities.enums.RESTXMLFormat;
 import org.jboss.pressgang.ccms.rest.v1.entities.join.RESTAssignedPropertyTagV1;
 import org.jboss.pressgang.ccms.rest.v1.expansion.ExpandDataTrunk;
 import org.jboss.pressgang.ccms.server.rest.v1.CachedEntityLoader;
+import org.jboss.pressgang.ccms.server.rest.v1.RESTChangeAction;
 import org.jboss.pressgang.ccms.server.rest.v1.factory.base.RESTEntityCollectionFactory;
 import org.jboss.pressgang.ccms.server.rest.v1.factory.base.RESTEntityFactory;
 import org.jboss.pressgang.ccms.server.rest.v1.utils.KeywordExtractor;
@@ -203,8 +201,46 @@ public class TopicV1Factory extends RESTEntityFactory<RESTTopicV1, Topic, RESTTo
     }
 
     @Override
-    public void syncDBEntityWithRESTEntityFirstPass(final Topic entity, final RESTTopicV1 dataObject) {
+    public void collectChangeInformation(final RESTChangeAction<RESTTopicV1> parent, final RESTTopicV1 dataObject) {
+        if (dataObject.hasParameterSet(RESTTopicV1.SOURCE_URLS_NAME)
+                && dataObject.getSourceUrls_OTM() != null
+                && dataObject.getSourceUrls_OTM().getItems() != null) {
+            collectChangeInformationFromCollection(parent, dataObject.getSourceUrls_OTM(), topicSourceUrlFactory);
+        }
 
+        if (dataObject.hasParameterSet(RESTTopicV1.TAGS_NAME)
+                && dataObject.getTags() != null
+                && dataObject.getTags().getItems() != null) {
+            collectChangeInformationFromCollection(parent, dataObject.getTags(), tagFactory);
+        }
+
+        if (dataObject.hasParameterSet(RESTTopicV1.PROPERTIES_NAME)
+                && dataObject.getProperties() != null
+                && dataObject.getProperties().getItems() != null) {
+            collectChangeInformationFromCollection(parent, dataObject.getProperties(), topicPropertyTagFactory);
+        }
+
+        if (dataObject.hasParameterSet(RESTTopicV1.BUGZILLABUGS_NAME)
+                && dataObject.getBugzillaBugs_OTM() != null
+                && dataObject.getBugzillaBugs_OTM().getItems() != null) {
+            collectChangeInformationFromCollection(parent, dataObject.getBugzillaBugs_OTM(), bugzillaBugFactory);
+        }
+
+        if (dataObject.hasParameterSet(RESTTopicV1.OUTGOING_NAME)
+                && dataObject.getOutgoingRelationships() != null
+                && dataObject.getOutgoingRelationships().getItems() != null) {
+            collectChangeInformationFromCollection(parent, dataObject.getOutgoingRelationships(), this, RESTTopicV1.OUTGOING_NAME);
+        }
+
+        if (dataObject.hasParameterSet(RESTTopicV1.INCOMING_NAME)
+                && dataObject.getIncomingRelationships() != null
+                && dataObject.getIncomingRelationships().getItems() != null) {
+            collectChangeInformationFromCollection(parent, dataObject.getIncomingRelationships(), this, RESTTopicV1.INCOMING_NAME);
+        }
+    }
+
+    @Override
+    public void syncBaseDetails(final Topic entity, final RESTTopicV1 dataObject) {
         /*
             The topic title can either be set specifically from the title property, or it can be inferred from
             the XML itself.
@@ -234,153 +270,10 @@ public class TopicV1Factory extends RESTEntityFactory<RESTTopicV1, Topic, RESTTo
         if (dataObject.hasParameterSet(RESTTopicV1.LOCALE_NAME)) entity.setTopicLocale(dataObject.getLocale());
         if (dataObject.hasParameterSet(RESTTopicV1.FORMAT_NAME))
             entity.setXmlFormat(RESTXMLFormat.getXMLFormatId(dataObject.getXmlFormat()));
-
-        /* One To Many - Add will create a child entity */
-        if (dataObject.hasParameterSet(
-                RESTTopicV1.SOURCE_URLS_NAME) && dataObject.getSourceUrls_OTM() != null && dataObject.getSourceUrls_OTM().getItems() !=
-                null) {
-            dataObject.getSourceUrls_OTM().removeInvalidChangeItemRequests();
-
-            for (final RESTTopicSourceUrlCollectionItemV1 restEntityItem : dataObject.getSourceUrls_OTM().getItems()) {
-                final RESTTopicSourceUrlV1 restEntity = restEntityItem.getItem();
-
-                if (restEntityItem.returnIsRemoveItem()) {
-                    final TopicSourceUrl dbEntity = entityManager.find(TopicSourceUrl.class, restEntity.getId());
-                    if (dbEntity == null)
-                        throw new BadRequestException("No TopicSourceUrl entity was found with the primary key " + restEntity.getId());
-
-                    entity.removeTopicSourceUrl(restEntity.getId());
-                } else if (restEntityItem.returnIsAddItem()) {
-                    final TopicSourceUrl dbEntity = topicSourceUrlFactory.createDBEntityFromRESTEntity(restEntity);
-                    entity.addTopicSourceUrl(dbEntity);
-                } else if (restEntityItem.returnIsUpdateItem()) {
-                    final TopicSourceUrl dbEntity = entityManager.find(TopicSourceUrl.class, restEntity.getId());
-                    if (dbEntity == null)
-                        throw new BadRequestException("No TopicSourceUrl entity was found with the primary key " + restEntity.getId());
-                    if (!entity.getTopicSourceUrls().contains(dbEntity))
-                        throw new BadRequestException("No TopicSourceUrl entity was found with the primary key " + restEntity.getId() +
-                                " for Topic " + entity.getId());
-
-                    topicSourceUrlFactory.updateDBEntityFromRESTEntity(dbEntity, restEntity);
-                }
-            }
-        }
-
-        /* One To Many - Add will create a child entity */
-        if (dataObject.hasParameterSet(
-                RESTTopicV1.BUGZILLABUGS_NAME) && dataObject.getBugzillaBugs_OTM() != null && dataObject.getBugzillaBugs_OTM().getItems()
-                != null) {
-            dataObject.getBugzillaBugs_OTM().removeInvalidChangeItemRequests();
-
-            for (final RESTBugzillaBugCollectionItemV1 restEntityItem : dataObject.getBugzillaBugs_OTM().getItems()) {
-                final RESTBugzillaBugV1 restEntity = restEntityItem.getItem();
-
-                if (restEntityItem.returnIsRemoveItem()) {
-                    final BugzillaBug dbEntity = entityManager.find(BugzillaBug.class, restEntity.getId());
-                    if (dbEntity == null)
-                        throw new BadRequestException("No BugzillaBug entity was found with the primary key " + restEntity.getId());
-
-                    entity.removeBugzillaBug(restEntity.getId());
-                } else if (restEntityItem.returnIsAddItem()) {
-                    final BugzillaBug dbEntity = bugzillaBugFactory.createDBEntityFromRESTEntity(restEntity);
-                    entity.addBugzillaBug(dbEntity);
-                } else if (restEntityItem.returnIsUpdateItem()) {
-                    final BugzillaBug dbEntity = entityManager.find(BugzillaBug.class, restEntity.getId());
-                    if (dbEntity == null)
-                        throw new BadRequestException("No BugzillaBug entity was found with the primary key " + restEntity.getId());
-                    if (!entity.getBugzillaBugs().contains(dbEntity))
-                        throw new BadRequestException("No BugzillaBug entity was found with the primary key " + restEntity.getId() +
-                                " for Topic " + entity.getId());
-
-                    bugzillaBugFactory.updateDBEntityFromRESTEntity(dbEntity, restEntity);
-                }
-            }
-        }
-
-        // Many to Many
-        if (dataObject.hasParameterSet(
-                RESTTopicV1.PROPERTIES_NAME) && dataObject.getProperties() != null && dataObject.getProperties().getItems() != null) {
-            dataObject.getProperties().removeInvalidChangeItemRequests();
-
-            for (final RESTAssignedPropertyTagCollectionItemV1 restEntityItem : dataObject.getProperties().getItems()) {
-                final RESTAssignedPropertyTagV1 restEntity = restEntityItem.getItem();
-
-                if (restEntityItem.returnIsRemoveItem()) {
-                    final TopicToPropertyTag dbEntity = entityManager.find(TopicToPropertyTag.class, restEntity.getRelationshipId());
-                    if (dbEntity == null) throw new BadRequestException(
-                            "No TopicToPropertyTag entity was found with the primary key " + restEntity.getRelationshipId());
-
-                    entity.removePropertyTag(dbEntity);
-                } else if (restEntityItem.returnIsUpdateItem()) {
-                    final TopicToPropertyTag dbEntity = entityManager.find(TopicToPropertyTag.class, restEntity.getRelationshipId());
-                    if (dbEntity == null) throw new BadRequestException(
-                            "No TopicToPropertyTag entity was found with the primary key " + restEntity.getRelationshipId());
-                    if (!entity.getTopicToPropertyTags().contains(dbEntity)) throw new BadRequestException(
-                            "No TopicToPropertyTag entity was found with the primary key " + restEntity.getRelationshipId() +
-                                    " for Topic " + entity.getId());
-
-                    topicPropertyTagFactory.updateDBEntityFromRESTEntity(dbEntity, restEntity);
-                }
-            }
-        }
     }
 
     @Override
-    public void syncDBEntityWithRESTEntitySecondPass(Topic entity, RESTTopicV1 dataObject) {
-        // Many to Many
-        if (dataObject.hasParameterSet(RESTTopicV1.TAGS_NAME) && dataObject.getTags() != null && dataObject.getTags().getItems() != null) {
-            dataObject.getTags().removeInvalidChangeItemRequests();
-
-            /* Remove Tags first to ensure mutual exclusion is done correctly */
-            for (final RESTTagCollectionItemV1 restEntityItem : dataObject.getTags().getItems()) {
-                final RESTTagV1 restEntity = restEntityItem.getItem();
-
-                if (restEntityItem.returnIsRemoveItem()) {
-                    final Tag tagEntity = entityManager.find(Tag.class, restEntity.getId());
-                    if (tagEntity == null)
-                        throw new BadRequestException("No Tag entity was found with the primary key " + restEntity.getId());
-
-                    entity.removeTag(restEntity.getId());
-                }
-            }
-
-            for (final RESTTagCollectionItemV1 restEntityItem : dataObject.getTags().getItems()) {
-                final RESTTagV1 restEntity = restEntityItem.getItem();
-
-                if (restEntityItem.returnIsAddItem()) {
-                    final Tag tagEntity = RESTv1Utilities.findEntity(entityManager, entityCache, restEntity, Tag.class);
-                    if (tagEntity == null)
-                        throw new BadRequestException("No Tag entity was found with the primary key " + restEntity.getId());
-
-                    entity.addTag(entityManager, restEntity.getId());
-                }
-            }
-        }
-
-        // Many to Many
-        if (dataObject.hasParameterSet(
-                RESTTopicV1.PROPERTIES_NAME) && dataObject.getProperties() != null && dataObject.getProperties().getItems() != null) {
-            dataObject.getProperties().removeInvalidChangeItemRequests();
-
-            for (final RESTAssignedPropertyTagCollectionItemV1 restEntityItem : dataObject.getProperties().getItems()) {
-                final RESTAssignedPropertyTagV1 restEntity = restEntityItem.getItem();
-
-                if (restEntityItem.returnIsAddItem()) {
-                    final PropertyTag dbEntity = RESTv1Utilities.findEntity(entityManager, entityCache, restEntity, PropertyTag.class);
-                    if (dbEntity == null)
-                        throw new BadRequestException("No PropertyTag entity was found with the primary key " + restEntity.getId());
-
-                    entity.addPropertyTag(dbEntity, restEntity.getValue());
-                } else if (restEntityItem.returnIsUpdateItem()) {
-                    final TopicToPropertyTag dbEntity = entityManager.find(TopicToPropertyTag.class, restEntity.getRelationshipId());
-                    if (dbEntity == null) throw new BadRequestException(
-                            "No TopicToPropertyTag entity was found with the primary key " + restEntity.getRelationshipId());
-
-                    topicPropertyTagFactory.syncDBEntityWithRESTEntitySecondPass(dbEntity, restEntity);
-                }
-            }
-        }
-
+    public void syncAdditionalDetails(final Topic entity, final RESTTopicV1 dataObject) {
         // This method will set the XML errors field
         if (requiresXMLProcessing(dataObject)) {
             TopicUtilities.syncXML(entityManager, entity);
@@ -395,94 +288,158 @@ public class TopicV1Factory extends RESTEntityFactory<RESTTopicV1, Topic, RESTTo
                 org.jboss.pressgang.ccms.model.utils.TopicUtilities.recalculateMinHash(entity, minHashXORs);
             }
         }
+    }
 
-        if (dataObject.hasParameterSet(
-                RESTTopicV1.OUTGOING_NAME) && dataObject.getOutgoingRelationships() != null && dataObject.getOutgoingRelationships()
-                .getItems() != null) {
-            dataObject.getOutgoingRelationships().removeInvalidChangeItemRequests();
+    @Override
+    protected void doDeleteChildAction(final Topic entity, final RESTTopicV1 dataObject, final RESTChangeAction<?> action) {
+        final RESTBaseEntityV1<?, ?, ?> restEntity = action.getRESTEntity();
 
-            for (final RESTTopicCollectionItemV1 restEntityItem : dataObject.getOutgoingRelationships().getItems()) {
-                final RESTTopicV1 restEntity = restEntityItem.getItem();
+        if (restEntity instanceof RESTTagV1) {
+            final Tag dbEntity = entityManager.find(Tag.class, restEntity.getId());
+            if (dbEntity == null) throw new BadRequestException("No Tag entity was found with the primary key " + restEntity.getId());
 
-                if (restEntityItem.returnIsRemoveItem()) {
-                    final Topic otherTopic = entityManager.find(Topic.class, restEntity.getId());
-                    if (otherTopic == null)
-                        throw new BadRequestException("No Topic entity was found with the primary key " + restEntity.getId());
+            entity.removeTag(dbEntity);
+        } else if (restEntity instanceof RESTAssignedPropertyTagV1) {
+            final RESTAssignedPropertyTagV1 propertyTag = (RESTAssignedPropertyTagV1) restEntity;
+            final TopicToPropertyTag dbEntity = entityManager.find(TopicToPropertyTag.class, propertyTag.getRelationshipId());
+            if (dbEntity == null) throw new BadRequestException(
+                    "No TopicToPropertyTag entity was found with the primary key " + propertyTag.getRelationshipId());
 
-                    entity.removeRelationshipTo(restEntity.getId(), 1);
-                } else if (restEntityItem.returnIsAddItem()) {
-                    final Topic otherTopic = RESTv1Utilities.findEntity(entityManager, entityCache, restEntity, Topic.class);
-                    if (otherTopic == null)
-                        throw new BadRequestException("No Topic entity was found with the primary key " + restEntity.getId());
-
-                    entity.addRelationshipTo(entityManager, restEntity.getId(), 1);
-                }
+            entity.removePropertyTag(dbEntity);
+        } else if (restEntity instanceof RESTTopicSourceUrlV1) {
+            final TopicSourceUrl dbEntity = entityManager.find(TopicSourceUrl.class, restEntity.getId());
+            if (dbEntity == null) {
+                throw new BadRequestException("No TopicSourceUrl entity was found with the primary key " + restEntity.getId());
             }
+
+            entity.removeTopicSourceUrl(dbEntity);
+        } else if (restEntity instanceof RESTTopicV1) {
+            final Topic dbEntity = entityManager.find(Topic.class, restEntity.getId());
+            if (dbEntity == null) {
+                throw new BadRequestException("No Topic entity was found with the primary key " + restEntity.getId());
+            }
+
+            if (RESTTopicV1.INCOMING_NAME.equals(action.getUniqueId())) {
+                dbEntity.removeRelationshipTo(entity.getTopicId(), 1);
+            } else {
+                entity.removeRelationshipFrom(dbEntity.getTopicId(), 1);
+            }
+        } else if (restEntity instanceof RESTBugzillaBugV1) {
+            final BugzillaBug dbEntity = entityManager.find(BugzillaBug.class, restEntity.getId());
+            if (dbEntity == null) {
+                throw new BadRequestException("No BugzillaBug entity was found with the primary key " + restEntity.getId());
+            }
+
+            entity.removeBugzillaBug(dbEntity.getId());
+        }
+    }
+
+    @Override
+    protected AuditedEntity doCreateChildAction(final Topic entity, final RESTTopicV1 dataObject,
+            final RESTChangeAction<?> action) {
+        final RESTBaseEntityV1<?, ?, ?> restEntity = action.getRESTEntity();
+        final AuditedEntity dbEntity;
+
+        if (restEntity instanceof RESTTagV1) {
+            dbEntity = entityManager.find(Tag.class, restEntity.getId());
+            if (dbEntity == null) {
+                throw new BadRequestException("No Tag entity was found with the primary key " + restEntity.getId());
+            }
+
+            entity.addTag((Tag) dbEntity);
+        } else if (restEntity instanceof RESTAssignedPropertyTagV1) {
+            dbEntity = action.getFactory().createDBEntity(restEntity);
+            final PropertyTag propertyTag = entityManager.find(PropertyTag.class, restEntity.getId());
+            if (propertyTag == null) {
+                throw new BadRequestException("No PropertyTag entity was found with the primary key " + restEntity.getId());
+            }
+
+            final TopicToPropertyTag topicToProp = (TopicToPropertyTag) dbEntity;
+            topicToProp.setPropertyTag(propertyTag);
+            entity.addPropertyTag(topicToProp);
+        } else if (restEntity instanceof RESTTopicSourceUrlV1) {
+            dbEntity = action.getFactory().createDBEntity(restEntity);
+            entity.addTopicSourceUrl((TopicSourceUrl) dbEntity);
+        } else if (restEntity instanceof RESTTopicV1) {
+            dbEntity = entityManager.find(Topic.class, restEntity.getId());
+            if (dbEntity == null) {
+                throw new BadRequestException("No Topic entity was found with the primary key " + restEntity.getId());
+            }
+
+            if (RESTTopicV1.INCOMING_NAME.equals(action.getUniqueId())) {
+                entity.addRelationshipFrom(entityManager, restEntity.getId(), 1);
+            } else {
+                entity.addRelationshipTo(entityManager, restEntity.getId(), 1);
+            }
+        } else if (restEntity instanceof RESTBugzillaBugV1) {
+            dbEntity = action.getFactory().createDBEntity(restEntity);
+            entity.addBugzillaBug((BugzillaBug) dbEntity);
+        } else {
+            throw new IllegalArgumentException("Item is not a child of Topic");
         }
 
-        // Many to Many
-        if (dataObject.hasParameterSet(
-                RESTTopicV1.INCOMING_NAME) && dataObject.getIncomingRelationships() != null && dataObject.getIncomingRelationships()
-                .getItems() != null) {
-            dataObject.getIncomingRelationships().removeInvalidChangeItemRequests();
+        return dbEntity;
+    }
 
-            for (final RESTTopicCollectionItemV1 restEntityItem : dataObject.getIncomingRelationships().getItems()) {
-                final RESTTopicV1 restEntity = restEntityItem.getItem();
+    @Override
+    protected AuditedEntity getChildEntityForAction(final Topic entity, final RESTTopicV1 dataObject, final RESTChangeAction<?> action) {
+        final RESTBaseEntityV1<?, ?, ?> restEntity = action.getRESTEntity();
 
-                if (restEntityItem.returnIsRemoveItem()) {
-                    final Topic dbEntity = entityManager.find(Topic.class, restEntity.getId());
-                    if (dbEntity == null)
-                        throw new BadRequestException("No Topic entity was found with the primary key " + restEntity.getId());
-
-                    dbEntity.removeRelationshipTo(entity.getTopicId(), 1);
-                } else if (restEntityItem.returnIsAddItem()) {
-                    final Topic otherTopic = RESTv1Utilities.findEntity(entityManager, entityCache, restEntity, Topic.class);
-                    if (otherTopic == null)
-                        throw new BadRequestException("No Topic entity was found with the primary key " + restEntity.getId());
-
-                    entity.addRelationshipFrom(entityManager, otherTopic.getTopicId(), 1);
+        final AuditedEntity dbEntity;
+        if (restEntity instanceof RESTTagV1) {
+            dbEntity = RESTv1Utilities.findEntity(entityManager, entityCache, (RESTTagV1) restEntity, Tag.class);
+            if (dbEntity == null) {
+                throw new BadRequestException("No Tag entity was found with the primary key " + restEntity.getId());
+            } else if (!entity.getTags().contains(dbEntity)) {
+                throw new BadRequestException(
+                        "No Tag entity was found with the primary key " + restEntity.getId() + " for Topic " + entity.getId());
+            }
+        } else if (restEntity instanceof RESTAssignedPropertyTagV1) {
+            final RESTAssignedPropertyTagV1 assignedPropertyTag = (RESTAssignedPropertyTagV1) restEntity;
+            dbEntity = entityManager.find(TopicToPropertyTag.class, assignedPropertyTag.getRelationshipId());
+            if (dbEntity == null) {
+                throw new BadRequestException("No TopicToPropertyTag entity was found with the primary key " + assignedPropertyTag
+                        .getRelationshipId());
+            } else if (!entity.getTopicToPropertyTags().contains(dbEntity)) {
+                throw new BadRequestException(
+                        "No TopicToPropertyTag entity was found with the primary key " + assignedPropertyTag.getRelationshipId() +
+                                " for Topic " + entity.getId());
+            }
+        } else if (restEntity instanceof RESTTopicSourceUrlV1) {
+            dbEntity = RESTv1Utilities.findEntity(entityManager, entityCache, (RESTTopicSourceUrlV1) restEntity, TopicSourceUrl.class);
+            if (dbEntity == null) {
+                throw new BadRequestException("No TopicSourceUrl entity was found with the primary key " + restEntity.getId());
+            } else if (!entity.getTopicSourceUrls().contains(dbEntity)) {
+                throw new BadRequestException(
+                        "No TopicSourceUrl entity was found with the primary key " + restEntity.getId() + " for Topic " + entity.getId());
+            }
+        } else if (restEntity instanceof RESTTopicV1) {
+            dbEntity = RESTv1Utilities.findEntity(entityManager, entityCache, (RESTTopicV1) restEntity, Topic.class);
+            if (dbEntity == null) {
+                throw new BadRequestException("No Topic entity was found with the primary key " + restEntity.getId());
+            } else {
+                if (RESTTopicV1.INCOMING_NAME.equals(action.getUniqueId()) && !entity.getIncomingRelatedTopicsArray().contains(dbEntity)) {
+                    throw new BadRequestException(
+                            "No Topic entity was found with the primary key " + restEntity.getId() + " for Topic " + entity.getId());
+                } else if (RESTTopicV1.OUTGOING_NAME.equals(action.getUniqueId()) && !entity.getOutgoingRelatedTopicsArray().contains
+                        (dbEntity)) {
+                    throw new BadRequestException(
+                            "No Topic entity was found with the primary key " + restEntity.getId() + " for Topic " + entity.getId());
                 }
             }
-        }
-
-        // One To Many - Run the second pass on added or updated entities
-        if (dataObject.hasParameterSet(
-                RESTTopicV1.SOURCE_URLS_NAME) && dataObject.getSourceUrls_OTM() != null && dataObject.getSourceUrls_OTM().getItems() !=
-                null) {
-            dataObject.getSourceUrls_OTM().removeInvalidChangeItemRequests();
-
-            for (final RESTTopicSourceUrlCollectionItemV1 restEntityItem : dataObject.getSourceUrls_OTM().getItems()) {
-                final RESTTopicSourceUrlV1 restEntity = restEntityItem.getItem();
-
-                if (restEntityItem.returnIsAddItem() || restEntityItem.returnIsUpdateItem()) {
-                    final TopicSourceUrl dbEntity = RESTv1Utilities.findEntity(entityManager, entityCache, restEntity,
-                            TopicSourceUrl.class);
-                    if (dbEntity == null)
-                        throw new BadRequestException("No TopicSourceUrl entity was found with the primary key " + restEntity.getId());
-
-                    topicSourceUrlFactory.syncDBEntityWithRESTEntitySecondPass(dbEntity, restEntity);
-                }
+        } else if (restEntity instanceof RESTBugzillaBugV1) {
+            dbEntity = RESTv1Utilities.findEntity(entityManager, entityCache, (RESTBugzillaBugV1) restEntity, BugzillaBug.class);
+            if (dbEntity == null) {
+                throw new BadRequestException("No BugzillaBug entity was found with the primary key " + restEntity.getId());
+            } else if (!entity.getTopicSourceUrls().contains(dbEntity)) {
+                throw new BadRequestException(
+                        "No BugzillaBug entity was found with the primary key " + restEntity.getId() + " for Topic " + entity.getId());
             }
+        } else {
+            throw new IllegalArgumentException("Item is not a child of Topic");
         }
 
-        // One To Many - Run the second pass on added or updated entities
-        if (dataObject.hasParameterSet(
-                RESTTopicV1.BUGZILLABUGS_NAME) && dataObject.getBugzillaBugs_OTM() != null && dataObject.getBugzillaBugs_OTM().getItems()
-                != null) {
-            dataObject.getBugzillaBugs_OTM().removeInvalidChangeItemRequests();
-
-            for (final RESTBugzillaBugCollectionItemV1 restEntityItem : dataObject.getBugzillaBugs_OTM().getItems()) {
-                final RESTBugzillaBugV1 restEntity = restEntityItem.getItem();
-
-                if (restEntityItem.returnIsAddItem() || restEntityItem.returnIsUpdateItem()) {
-                    final BugzillaBug dbEntity = RESTv1Utilities.findEntity(entityManager, entityCache, restEntity, BugzillaBug.class);
-                    if (dbEntity == null)
-                        throw new BadRequestException("No BugzillaBug entity was found with the primary key " + restEntity.getId());
-
-                    bugzillaBugFactory.syncDBEntityWithRESTEntitySecondPass(dbEntity, restEntity);
-                }
-            }
-        }
+        return dbEntity;
     }
 
     protected boolean requiresXMLProcessing(final RESTTopicV1 dataObject) {

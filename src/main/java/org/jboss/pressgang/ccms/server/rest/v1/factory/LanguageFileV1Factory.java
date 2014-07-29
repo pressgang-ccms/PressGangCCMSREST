@@ -30,6 +30,7 @@ import org.jboss.pressgang.ccms.rest.v1.collections.items.RESTLanguageFileCollec
 import org.jboss.pressgang.ccms.rest.v1.entities.RESTLanguageFileV1;
 import org.jboss.pressgang.ccms.rest.v1.entities.base.RESTBaseEntityV1;
 import org.jboss.pressgang.ccms.rest.v1.expansion.ExpandDataTrunk;
+import org.jboss.pressgang.ccms.server.rest.v1.RESTChangeAction;
 import org.jboss.pressgang.ccms.server.rest.v1.factory.base.RESTEntityFactory;
 import org.jboss.pressgang.ccms.server.rest.v1.factory.base.RESTEntityCollectionFactory;
 import org.jboss.pressgang.ccms.server.utils.EnversUtilities;
@@ -81,7 +82,12 @@ public class LanguageFileV1Factory extends RESTEntityFactory<RESTLanguageFileV1,
     }
 
     @Override
-    public void syncDBEntityWithRESTEntityFirstPass(final LanguageFile entity, final RESTLanguageFileV1 dataObject) {
+    public void collectChangeInformation(final RESTChangeAction<RESTLanguageFileV1> parent, final RESTLanguageFileV1 dataObject) {
+        // LanguageFile has no children that can be changed, so we have no changes to collect
+    }
+
+    @Override
+    public void syncBaseDetails(final LanguageFile entity, final RESTLanguageFileV1 dataObject) {
         if (dataObject.hasParameterSet(RESTLanguageFileV1.LOCALE_NAME)) entity.setLocale(dataObject.getLocale());
         if (dataObject.hasParameterSet(RESTLanguageFileV1.FILE_DATA_NAME)) entity.setFileData(dataObject.getFileData());
         if (dataObject.hasParameterSet(RESTLanguageFileV1.FILENAME_NAME)) entity.setOriginalFileName(dataObject.getFilename());

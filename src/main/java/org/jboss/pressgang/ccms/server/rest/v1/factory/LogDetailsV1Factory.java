@@ -39,8 +39,8 @@ public class LogDetailsV1Factory {
     @Inject
     protected UserV1Factory userFactory;
 
-    public <T extends AuditedEntity> RESTLogDetailsV1 create(final T entity, final Number revision, final String expandName,
-            final ExpandDataTrunk expand, final String dataType, final String baseUrl) {
+    public <T extends AuditedEntity> RESTLogDetailsV1 createRESTEntityFromAuditedEntity(final T entity, final Number revision,
+            final String expandName, final ExpandDataTrunk expand, final String dataType, final String baseUrl) {
         if (expand != null && expand.get(expandName) != null) {
             final LoggingRevisionEntity revisionEntity = EnversUtilities.getRevisionEntity(entityManager, entity, revision);
 

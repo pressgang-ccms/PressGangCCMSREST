@@ -26,17 +26,18 @@ import java.util.List;
 
 import org.jboss.pressgang.ccms.model.Project;
 import org.jboss.pressgang.ccms.model.Tag;
+import org.jboss.pressgang.ccms.model.base.AuditedEntity;
 import org.jboss.pressgang.ccms.rest.v1.collections.RESTProjectCollectionV1;
 import org.jboss.pressgang.ccms.rest.v1.collections.RESTTagCollectionV1;
 import org.jboss.pressgang.ccms.rest.v1.collections.items.RESTProjectCollectionItemV1;
-import org.jboss.pressgang.ccms.rest.v1.collections.items.RESTTagCollectionItemV1;
 import org.jboss.pressgang.ccms.rest.v1.constants.RESTv1Constants;
 import org.jboss.pressgang.ccms.rest.v1.entities.RESTProjectV1;
 import org.jboss.pressgang.ccms.rest.v1.entities.RESTTagV1;
 import org.jboss.pressgang.ccms.rest.v1.entities.base.RESTBaseEntityV1;
 import org.jboss.pressgang.ccms.rest.v1.expansion.ExpandDataTrunk;
-import org.jboss.pressgang.ccms.server.rest.v1.factory.base.RESTEntityFactory;
+import org.jboss.pressgang.ccms.server.rest.v1.RESTChangeAction;
 import org.jboss.pressgang.ccms.server.rest.v1.factory.base.RESTEntityCollectionFactory;
+import org.jboss.pressgang.ccms.server.rest.v1.factory.base.RESTEntityFactory;
 import org.jboss.pressgang.ccms.server.rest.v1.utils.RESTv1Utilities;
 import org.jboss.pressgang.ccms.server.utils.EnversUtilities;
 import org.jboss.resteasy.spi.BadRequestException;
@@ -85,34 +86,70 @@ public class ProjectV1Factory extends RESTEntityFactory<RESTProjectV1, Project, 
     }
 
     @Override
-    public void syncDBEntityWithRESTEntityFirstPass(final Project entity, final RESTProjectV1 dataObject) {
+    public void collectChangeInformation(RESTChangeAction<RESTProjectV1> parent, RESTProjectV1 dataObject) {
+        if (dataObject.hasParameterSet(RESTProjectV1.TAGS_NAME)
+                && dataObject.getTags() != null
+                && dataObject.getTags().getItems() != null) {
+            collectChangeInformationFromCollection(parent, dataObject.getTags(), tagFactory);
+        }
+    }
+
+    @Override
+    public void syncBaseDetails(final Project entity, final RESTProjectV1 dataObject) {
         if (dataObject.hasParameterSet(RESTProjectV1.DESCRIPTION_NAME)) entity.setProjectDescription(dataObject.getDescription());
         if (dataObject.hasParameterSet(RESTProjectV1.NAME_NAME)) entity.setProjectName(dataObject.getName());
     }
 
     @Override
-    public void syncDBEntityWithRESTEntitySecondPass(final Project entity, final RESTProjectV1 dataObject) {
-        /* Many To Many - Add will create a mapping */
-        if (dataObject.hasParameterSet(
-                RESTProjectV1.TAGS_NAME) && dataObject.getTags() != null && dataObject.getTags().getItems() != null) {
-            dataObject.getTags().removeInvalidChangeItemRequests();
+    protected void doDeleteChildAction(final Project entity, final RESTProjectV1 dataObject, final RESTChangeAction<?> action) {
+        final RESTBaseEntityV1<?, ?, ?> restEntity = action.getRESTEntity();
 
-            for (final RESTTagCollectionItemV1 restEntityItem : dataObject.getTags().getItems()) {
-                final RESTTagV1 restEntity = restEntityItem.getItem();
+        if (restEntity instanceof RESTTagV1) {
+            final Tag dbEntity = entityManager.find(Tag.class, restEntity.getId());
+            if (dbEntity == null) throw new BadRequestException(
+                    "No Tag entity was found with the primary key " + restEntity.getId());
 
-                if (restEntityItem.returnIsAddItem() || restEntityItem.returnIsRemoveItem()) {
-                    final Tag dbEntity = RESTv1Utilities.findEntity(entityManager, entityCache, restEntity, Tag.class);
-                    if (dbEntity == null)
-                        throw new BadRequestException("No Tag entity was found with the primary key " + restEntity.getId());
-
-                    if (restEntityItem.returnIsAddItem()) {
-                        entity.addRelationshipTo(dbEntity);
-                    } else if (restEntityItem.returnIsRemoveItem()) {
-                        entity.removeRelationshipTo(dbEntity.getTagId());
-                    }
-                }
-            }
+            entity.removeRelationshipTo(dbEntity.getTagId());
         }
+    }
+
+    @Override
+    protected AuditedEntity doCreateChildAction(final Project entity, final RESTProjectV1 dataObject, final RESTChangeAction<?> action) {
+        final RESTBaseEntityV1<?, ?, ?> restEntity = action.getRESTEntity();
+        final AuditedEntity dbEntity;
+
+        if (restEntity instanceof RESTTagV1) {
+            dbEntity = entityManager.find(Tag.class, restEntity.getId());
+            if (dbEntity == null) {
+                throw new BadRequestException("No Tag entity was found with the primary key " + restEntity.getId());
+            }
+
+            entity.addRelationshipTo((Tag) dbEntity);
+        } else {
+            throw new IllegalArgumentException("Item is not a child of Project");
+        }
+
+        return dbEntity;
+    }
+
+    @Override
+    protected AuditedEntity getChildEntityForAction(final Project entity, final RESTProjectV1 dataObject, final RESTChangeAction<?> action) {
+        final RESTBaseEntityV1<?, ?, ?> restEntity = action.getRESTEntity();
+
+        final AuditedEntity dbEntity;
+        if (restEntity instanceof RESTTagV1) {
+            dbEntity = RESTv1Utilities.findEntity(entityManager, entityCache, (RESTTagV1) restEntity, Tag.class);
+            if (dbEntity == null) {
+                throw new BadRequestException("No Tag entity was found with the primary key " + restEntity.getId());
+            } else if (!entity.getTags().contains(dbEntity)) {
+                throw new BadRequestException(
+                        "No Tag entity was found with the primary key " + restEntity.getId() + " for Project " + entity.getId());
+            }
+        } else {
+            throw new IllegalArgumentException("Item is not a child of Project");
+        }
+
+        return dbEntity;
     }
 
     @Override

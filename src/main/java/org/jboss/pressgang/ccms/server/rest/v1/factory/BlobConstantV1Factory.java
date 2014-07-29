@@ -30,6 +30,7 @@ import org.jboss.pressgang.ccms.rest.v1.constants.RESTv1Constants;
 import org.jboss.pressgang.ccms.rest.v1.entities.RESTBlobConstantV1;
 import org.jboss.pressgang.ccms.rest.v1.entities.base.RESTBaseEntityV1;
 import org.jboss.pressgang.ccms.rest.v1.expansion.ExpandDataTrunk;
+import org.jboss.pressgang.ccms.server.rest.v1.RESTChangeAction;
 import org.jboss.pressgang.ccms.server.rest.v1.factory.base.RESTEntityFactory;
 import org.jboss.pressgang.ccms.server.rest.v1.factory.base.RESTEntityCollectionFactory;
 import org.jboss.pressgang.ccms.server.utils.EnversUtilities;
@@ -71,7 +72,13 @@ public class BlobConstantV1Factory extends RESTEntityFactory<RESTBlobConstantV1,
     }
 
     @Override
-    public void syncDBEntityWithRESTEntityFirstPass(final BlobConstants entity, final RESTBlobConstantV1 dataObject) {
+    public void collectChangeInformation(final RESTChangeAction<RESTBlobConstantV1> parent,
+            final RESTBlobConstantV1 dataObject) {
+        // Blob constant has no children so we have no changes to collect
+    }
+
+    @Override
+    public void syncBaseDetails(final BlobConstants entity, final RESTBlobConstantV1 dataObject) {
         if (dataObject.hasParameterSet(RESTBlobConstantV1.NAME_NAME)) entity.setConstantName(dataObject.getName());
         if (dataObject.hasParameterSet(RESTBlobConstantV1.VALUE_NAME)) entity.setConstantValue(dataObject.getValue());
     }

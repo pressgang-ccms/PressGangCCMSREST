@@ -31,6 +31,7 @@ import org.jboss.pressgang.ccms.rest.v1.entities.RESTTopicV1;
 import org.jboss.pressgang.ccms.rest.v1.entities.RESTTranslatedTopicStringV1;
 import org.jboss.pressgang.ccms.rest.v1.entities.base.RESTBaseEntityV1;
 import org.jboss.pressgang.ccms.rest.v1.expansion.ExpandDataTrunk;
+import org.jboss.pressgang.ccms.server.rest.v1.RESTChangeAction;
 import org.jboss.pressgang.ccms.server.rest.v1.factory.base.RESTEntityCollectionFactory;
 import org.jboss.pressgang.ccms.server.rest.v1.factory.base.RESTEntityFactory;
 import org.jboss.pressgang.ccms.server.utils.EnversUtilities;
@@ -82,7 +83,13 @@ public class TranslatedTopicStringV1Factory extends RESTEntityFactory<RESTTransl
     }
 
     @Override
-    public void syncDBEntityWithRESTEntityFirstPass(final TranslatedTopicString entity, final RESTTranslatedTopicStringV1 dataObject) {
+    public void collectChangeInformation(final RESTChangeAction<RESTTranslatedTopicStringV1> parent,
+            final RESTTranslatedTopicStringV1 dataObject) {
+        // TranslatedTopicString has no children that can be changed, so we have no changes to collect
+    }
+
+    @Override
+    public void syncBaseDetails(final TranslatedTopicString entity, final RESTTranslatedTopicStringV1 dataObject) {
         if (dataObject.hasParameterSet(RESTTranslatedTopicStringV1.ORIGINALSTRING_NAME))
             entity.setOriginalString(dataObject.getOriginalString());
         if (dataObject.hasParameterSet(RESTTranslatedTopicStringV1.TRANSLATEDSTRING_NAME))

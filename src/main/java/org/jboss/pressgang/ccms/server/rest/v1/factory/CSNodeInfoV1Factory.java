@@ -32,6 +32,7 @@ import org.jboss.pressgang.ccms.rest.v1.entities.base.RESTBaseEntityV1;
 import org.jboss.pressgang.ccms.rest.v1.entities.contentspec.RESTCSInfoNodeV1;
 import org.jboss.pressgang.ccms.rest.v1.entities.contentspec.RESTCSNodeV1;
 import org.jboss.pressgang.ccms.rest.v1.expansion.ExpandDataTrunk;
+import org.jboss.pressgang.ccms.server.rest.v1.RESTChangeAction;
 import org.jboss.pressgang.ccms.server.rest.v1.factory.base.RESTEntityCollectionFactory;
 import org.jboss.pressgang.ccms.server.rest.v1.factory.base.RESTEntityFactory;
 import org.jboss.pressgang.ccms.server.utils.EnversUtilities;
@@ -97,18 +98,15 @@ public class CSNodeInfoV1Factory extends RESTEntityFactory<RESTCSInfoNodeV1, CSI
     }
 
     @Override
-    public void syncDBEntityWithRESTEntityFirstPass(final CSInfoNode entity, final RESTCSInfoNodeV1 dataObject) {
-        if (dataObject.hasParameterSet(RESTCSInfoNodeV1.TOPIC_ID_NAME)) entity.setTopicId(dataObject.getTopicId());
-
-        if (dataObject.hasParameterSet(RESTCSInfoNodeV1.TOPIC_REVISION_NAME)) entity.setTopicRevision(dataObject.getTopicRevision());
-
-
-        if (dataObject.hasParameterSet(RESTCSNodeV1.CONDITION_NAME)) entity.setCondition(dataObject.getCondition());
+    public void collectChangeInformation(RESTChangeAction<RESTCSInfoNodeV1> parent, RESTCSInfoNodeV1 dataObject) {
+        // CSNodeInfo has no children that can be changed, so we have no changes to collect
     }
 
     @Override
-    public void syncDBEntityWithRESTEntitySecondPass(final CSInfoNode entity, final RESTCSInfoNodeV1 dataObject) {
-
+    public void syncBaseDetails(CSInfoNode entity, RESTCSInfoNodeV1 dataObject) {
+        if (dataObject.hasParameterSet(RESTCSInfoNodeV1.TOPIC_ID_NAME)) entity.setTopicId(dataObject.getTopicId());
+        if (dataObject.hasParameterSet(RESTCSInfoNodeV1.TOPIC_REVISION_NAME)) entity.setTopicRevision(dataObject.getTopicRevision());
+        if (dataObject.hasParameterSet(RESTCSNodeV1.CONDITION_NAME)) entity.setCondition(dataObject.getCondition());
     }
 
     @Override

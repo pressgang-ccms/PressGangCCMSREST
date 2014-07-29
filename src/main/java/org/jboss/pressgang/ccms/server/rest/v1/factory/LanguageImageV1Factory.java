@@ -30,6 +30,7 @@ import org.jboss.pressgang.ccms.rest.v1.collections.items.RESTLanguageImageColle
 import org.jboss.pressgang.ccms.rest.v1.entities.RESTLanguageImageV1;
 import org.jboss.pressgang.ccms.rest.v1.entities.base.RESTBaseEntityV1;
 import org.jboss.pressgang.ccms.rest.v1.expansion.ExpandDataTrunk;
+import org.jboss.pressgang.ccms.server.rest.v1.RESTChangeAction;
 import org.jboss.pressgang.ccms.server.rest.v1.factory.base.RESTEntityCollectionFactory;
 import org.jboss.pressgang.ccms.server.rest.v1.factory.base.RESTEntityFactory;
 import org.jboss.pressgang.ccms.server.utils.EnversUtilities;
@@ -86,7 +87,12 @@ public class LanguageImageV1Factory extends RESTEntityFactory<RESTLanguageImageV
     }
 
     @Override
-    public void syncDBEntityWithRESTEntityFirstPass(final LanguageImage entity, final RESTLanguageImageV1 dataObject) {
+    public void collectChangeInformation(final RESTChangeAction<RESTLanguageImageV1> parent, final RESTLanguageImageV1 dataObject) {
+        // LanguageImage has no children that can be changed, so we have no changes to collect
+    }
+
+    @Override
+    public void syncBaseDetails(final LanguageImage entity, final RESTLanguageImageV1 dataObject) {
         if (dataObject.hasParameterSet(RESTLanguageImageV1.LOCALE_NAME)) entity.setLocale(dataObject.getLocale());
         if (dataObject.hasParameterSet(RESTLanguageImageV1.IMAGEDATA_NAME)) entity.setImageData(dataObject.getImageData());
         if (dataObject.hasParameterSet(RESTLanguageImageV1.FILENAME_NAME)) entity.setOriginalFileName(dataObject.getFilename());

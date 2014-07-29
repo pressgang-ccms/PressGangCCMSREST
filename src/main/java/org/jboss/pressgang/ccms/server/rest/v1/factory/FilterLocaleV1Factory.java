@@ -30,6 +30,7 @@ import org.jboss.pressgang.ccms.rest.v1.collections.items.RESTFilterLocaleCollec
 import org.jboss.pressgang.ccms.rest.v1.entities.RESTFilterLocaleV1;
 import org.jboss.pressgang.ccms.rest.v1.entities.base.RESTBaseEntityV1;
 import org.jboss.pressgang.ccms.rest.v1.expansion.ExpandDataTrunk;
+import org.jboss.pressgang.ccms.server.rest.v1.RESTChangeAction;
 import org.jboss.pressgang.ccms.server.rest.v1.factory.base.RESTEntityCollectionFactory;
 import org.jboss.pressgang.ccms.server.rest.v1.factory.base.RESTEntityFactory;
 import org.jboss.pressgang.ccms.server.utils.EnversUtilities;
@@ -74,7 +75,12 @@ public class FilterLocaleV1Factory extends RESTEntityFactory<RESTFilterLocaleV1,
     }
 
     @Override
-    public void syncDBEntityWithRESTEntityFirstPass(final FilterLocale entity, final RESTFilterLocaleV1 dataObject) {
+    public void collectChangeInformation(final RESTChangeAction<RESTFilterLocaleV1> parent, final RESTFilterLocaleV1 dataObject) {
+        // FilterLocale has no children that can be changed, so we have no changes to collect
+    }
+
+    @Override
+    public void syncBaseDetails(final FilterLocale entity, final RESTFilterLocaleV1 dataObject) {
         if (dataObject.hasParameterSet(RESTFilterLocaleV1.LOCALE_NAME)) entity.setLocaleName(dataObject.getLocale());
         if (dataObject.hasParameterSet(RESTFilterLocaleV1.STATE_NAME)) entity.setLocaleState(dataObject.getState());
     }

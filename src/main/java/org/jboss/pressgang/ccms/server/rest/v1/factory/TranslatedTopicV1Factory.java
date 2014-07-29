@@ -31,13 +31,13 @@ import java.util.List;
 import org.jboss.pressgang.ccms.model.TranslatedTopic;
 import org.jboss.pressgang.ccms.model.TranslatedTopicData;
 import org.jboss.pressgang.ccms.model.TranslatedTopicString;
+import org.jboss.pressgang.ccms.model.base.AuditedEntity;
 import org.jboss.pressgang.ccms.model.contentspec.TranslatedCSNode;
 import org.jboss.pressgang.ccms.rest.v1.collections.RESTTagCollectionV1;
 import org.jboss.pressgang.ccms.rest.v1.collections.RESTTopicSourceUrlCollectionV1;
 import org.jboss.pressgang.ccms.rest.v1.collections.RESTTranslatedTopicCollectionV1;
 import org.jboss.pressgang.ccms.rest.v1.collections.RESTTranslatedTopicStringCollectionV1;
 import org.jboss.pressgang.ccms.rest.v1.collections.items.RESTTranslatedTopicCollectionItemV1;
-import org.jboss.pressgang.ccms.rest.v1.collections.items.RESTTranslatedTopicStringCollectionItemV1;
 import org.jboss.pressgang.ccms.rest.v1.collections.join.RESTAssignedPropertyTagCollectionV1;
 import org.jboss.pressgang.ccms.rest.v1.constants.RESTv1Constants;
 import org.jboss.pressgang.ccms.rest.v1.entities.RESTTranslatedTopicStringV1;
@@ -46,6 +46,7 @@ import org.jboss.pressgang.ccms.rest.v1.entities.base.RESTBaseEntityV1;
 import org.jboss.pressgang.ccms.rest.v1.entities.contentspec.RESTTranslatedCSNodeV1;
 import org.jboss.pressgang.ccms.rest.v1.entities.enums.RESTXMLFormat;
 import org.jboss.pressgang.ccms.rest.v1.expansion.ExpandDataTrunk;
+import org.jboss.pressgang.ccms.server.rest.v1.RESTChangeAction;
 import org.jboss.pressgang.ccms.server.rest.v1.factory.base.RESTEntityCollectionFactory;
 import org.jboss.pressgang.ccms.server.rest.v1.factory.base.RESTEntityFactory;
 import org.jboss.pressgang.ccms.server.rest.v1.utils.RESTv1Utilities;
@@ -209,7 +210,16 @@ public class TranslatedTopicV1Factory extends RESTEntityFactory<RESTTranslatedTo
     }
 
     @Override
-    public void syncDBEntityWithRESTEntityFirstPass(TranslatedTopicData entity, RESTTranslatedTopicV1 dataObject) {
+    public void collectChangeInformation(final RESTChangeAction<RESTTranslatedTopicV1> parent, final RESTTranslatedTopicV1 dataObject) {
+        if (dataObject.getConfiguredParameters().contains(RESTTranslatedTopicV1.TRANSLATEDTOPICSTRING_NAME)
+                && dataObject.getTranslatedTopicStrings_OTM() != null
+                && dataObject.getTranslatedTopicStrings_OTM().getItems() != null) {
+            collectChangeInformationFromCollection(parent, dataObject.getTranslatedTopicStrings_OTM(), translatedTopicStringFactory);
+        }
+    }
+
+    @Override
+    public void syncBaseDetails(final TranslatedTopicData entity, final RESTTranslatedTopicV1 dataObject) {
         /*
          * Since this factory is the rare case where two entities are combined into one. Check if it has a parent, if not then
          * check if one exists that matches otherwise create one. If one exists then update it.
@@ -293,66 +303,66 @@ public class TranslatedTopicV1Factory extends RESTEntityFactory<RESTTranslatedTo
         }
 
         translatedTopic.getTranslatedTopicDatas().add(entity);
+    }
 
-        // One To Many - Add will create a child entity
-        if (dataObject.hasParameterSet(
-                RESTTranslatedTopicV1.TRANSLATEDTOPICSTRING_NAME) && dataObject.getTranslatedTopicStrings_OTM() != null && dataObject
-                .getTranslatedTopicStrings_OTM().getItems() != null) {
-            dataObject.getTranslatedTopicStrings_OTM().removeInvalidChangeItemRequests();
+    @Override
+    public void syncAdditionalDetails(final TranslatedTopicData entity, final RESTTranslatedTopicV1 dataObject) {
+        /* This method will set the XML errors field */
+        TranslatedTopicUtilities.processXML(entityManager, entity);
+    }
 
-            // Add, Remove or Update the Translated Strings
-            for (final RESTTranslatedTopicStringCollectionItemV1 restEntityItem : dataObject.getTranslatedTopicStrings_OTM().getItems()) {
-                final RESTTranslatedTopicStringV1 restEntity = restEntityItem.getItem();
+    @Override
+    protected void doDeleteChildAction(final TranslatedTopicData entity, final RESTTranslatedTopicV1 dataObject,
+            final RESTChangeAction<?> action) {
+        final RESTBaseEntityV1<?, ?, ?> restEntity = action.getRESTEntity();
 
-                if (restEntityItem.returnIsRemoveItem()) {
-                    final TranslatedTopicString dbEntity = entityManager.find(TranslatedTopicString.class, restEntity.getId());
-                    if (dbEntity == null) throw new BadRequestException(
-                            "No TranslatedTopicString entity was found with the primary key " + restEntity.getId());
+        if (restEntity instanceof RESTTranslatedTopicStringV1) {
+            final TranslatedTopicString dbEntity = entityManager.find(TranslatedTopicString.class, restEntity.getId());
+            if (dbEntity == null) throw new BadRequestException(
+                    "No TranslatedTopicString entity was found with the primary key " + restEntity.getId());
 
-                    entity.removeTranslatedString(dbEntity);
-                    entityManager.remove(dbEntity);
-                } else if (restEntityItem.returnIsAddItem()) {
-                    final TranslatedTopicString dbEntity = translatedTopicStringFactory.createDBEntityFromRESTEntity(restEntity);
-                    entity.addTranslatedString(dbEntity);
-                } else if (restEntityItem.returnIsUpdateItem()) {
-                    final TranslatedTopicString dbEntity = entityManager.find(TranslatedTopicString.class, restEntity.getId());
-                    if (dbEntity == null) throw new BadRequestException(
-                            "No TranslatedTopicString entity was found with the primary key " + restEntity.getId());
-                    if (!entity.getTranslatedTopicStrings().contains(dbEntity)) throw new BadRequestException(
-                            "No TranslatedTopicString entity was found with the primary key " + restEntity.getId() + " for " +
-                                    "TranslatedTopicData " + entity.getId());
-
-                    translatedTopicStringFactory.updateDBEntityFromRESTEntity(dbEntity, restEntity);
-                }
-            }
+            entity.removeTranslatedString(dbEntity);
+            entityManager.remove(dbEntity);
         }
     }
 
     @Override
-    public void syncDBEntityWithRESTEntitySecondPass(final TranslatedTopicData entity, final RESTTranslatedTopicV1 dataObject) {
-        /* This method will set the XML errors field */
-        TranslatedTopicUtilities.processXML(entityManager, entity);
+    protected AuditedEntity doCreateChildAction(final TranslatedTopicData entity, final RESTTranslatedTopicV1 dataObject,
+            final RESTChangeAction<?> action) {
+        final RESTBaseEntityV1<?, ?, ?> restEntity = action.getRESTEntity();
+        final AuditedEntity dbEntity;
 
-        // One To Many - Iterate over and do the second pass on any new items
-        if (dataObject.hasParameterSet(
-                RESTTranslatedTopicV1.TRANSLATEDTOPICSTRING_NAME) && dataObject.getTranslatedTopicStrings_OTM() != null && dataObject
-                .getTranslatedTopicStrings_OTM().getItems() != null) {
-            dataObject.getTranslatedTopicStrings_OTM().removeInvalidChangeItemRequests();
-
-            // Do the second pass on Added or Updated Translated Strings
-            for (final RESTTranslatedTopicStringCollectionItemV1 restEntityItem : dataObject.getTranslatedTopicStrings_OTM().getItems()) {
-                final RESTTranslatedTopicStringV1 restEntity = restEntityItem.getItem();
-
-                if (restEntityItem.returnIsAddItem() || restEntityItem.returnIsUpdateItem()) {
-                    final TranslatedTopicString dbEntity = RESTv1Utilities.findEntity(entityManager, entityCache, restEntity,
-                            TranslatedTopicString.class);
-                    if (dbEntity == null) throw new BadRequestException(
-                            "No TranslatedTopicString entity was found with the primary key " + restEntity.getId());
-
-                    translatedTopicStringFactory.syncDBEntityWithRESTEntitySecondPass(dbEntity, restEntity);
-                }
-            }
+        if (restEntity instanceof RESTTranslatedTopicStringV1) {
+            dbEntity = action.getFactory().createDBEntity(restEntity);
+            entity.addTranslatedString((TranslatedTopicString) dbEntity);
+        } else {
+            throw new IllegalArgumentException("Item is not a child of TranslatedTopicData");
         }
+
+        return dbEntity;
+    }
+
+    @Override
+    protected AuditedEntity getChildEntityForAction(final TranslatedTopicData entity, final RESTTranslatedTopicV1 dataObject,
+            final RESTChangeAction<?> action) {
+        final RESTBaseEntityV1<?, ?, ?> restEntity = action.getRESTEntity();
+
+        final AuditedEntity dbEntity;
+        if (restEntity instanceof RESTTranslatedTopicStringV1) {
+            dbEntity = RESTv1Utilities.findEntity(entityManager, entityCache, (RESTTranslatedTopicStringV1) restEntity,
+                    TranslatedTopicString.class);
+            if (dbEntity == null) {
+                throw new BadRequestException("No TranslatedTopicString entity was found with the primary key " + restEntity.getId());
+            } else if (!entity.getTranslatedTopicStrings().contains(dbEntity)) {
+                throw new BadRequestException(
+                        "No TranslatedTopicString entity was found with the primary key " + restEntity.getId() + " for TranslatedTopicData "
+                                + entity.getId());
+            }
+        } else {
+            throw new IllegalArgumentException("Item is not a child of TranslatedTopicData");
+        }
+
+        return dbEntity;
     }
 
     @Override

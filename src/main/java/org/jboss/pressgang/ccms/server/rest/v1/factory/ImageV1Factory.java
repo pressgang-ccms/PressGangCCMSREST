@@ -26,15 +26,16 @@ import java.util.List;
 
 import org.jboss.pressgang.ccms.model.ImageFile;
 import org.jboss.pressgang.ccms.model.LanguageImage;
+import org.jboss.pressgang.ccms.model.base.AuditedEntity;
 import org.jboss.pressgang.ccms.rest.v1.collections.RESTImageCollectionV1;
 import org.jboss.pressgang.ccms.rest.v1.collections.RESTLanguageImageCollectionV1;
 import org.jboss.pressgang.ccms.rest.v1.collections.items.RESTImageCollectionItemV1;
-import org.jboss.pressgang.ccms.rest.v1.collections.items.RESTLanguageImageCollectionItemV1;
 import org.jboss.pressgang.ccms.rest.v1.constants.RESTv1Constants;
 import org.jboss.pressgang.ccms.rest.v1.entities.RESTImageV1;
 import org.jboss.pressgang.ccms.rest.v1.entities.RESTLanguageImageV1;
 import org.jboss.pressgang.ccms.rest.v1.entities.base.RESTBaseEntityV1;
 import org.jboss.pressgang.ccms.rest.v1.expansion.ExpandDataTrunk;
+import org.jboss.pressgang.ccms.server.rest.v1.RESTChangeAction;
 import org.jboss.pressgang.ccms.server.rest.v1.factory.base.RESTEntityCollectionFactory;
 import org.jboss.pressgang.ccms.server.rest.v1.factory.base.RESTEntityFactory;
 import org.jboss.pressgang.ccms.server.rest.v1.utils.RESTv1Utilities;
@@ -86,63 +87,66 @@ public class ImageV1Factory extends RESTEntityFactory<RESTImageV1, ImageFile, RE
     }
 
     @Override
-    public void syncDBEntityWithRESTEntityFirstPass(final ImageFile entity, final RESTImageV1 dataObject) {
-        if (dataObject.hasParameterSet(RESTImageV1.DESCRIPTION_NAME)) entity.setDescription(dataObject.getDescription());
-
-        /* One To Many - Add will create a child entity */
-        if (dataObject.hasParameterSet(
-                RESTImageV1.LANGUAGEIMAGES_NAME) && dataObject.getLanguageImages_OTM() != null && dataObject.getLanguageImages_OTM()
-                .getItems() != null) {
-            dataObject.getLanguageImages_OTM().removeInvalidChangeItemRequests();
-
-            for (final RESTLanguageImageCollectionItemV1 restEntityItem : dataObject.getLanguageImages_OTM().getItems()) {
-                final RESTLanguageImageV1 restEntity = restEntityItem.getItem();
-
-                if (restEntityItem.returnIsAddItem()) {
-                    final LanguageImage dbEntity = languageImageFactory.createDBEntityFromRESTEntity(restEntity);
-                    entity.addLanguageImage(dbEntity);
-                } else if (restEntityItem.returnIsRemoveItem()) {
-                    final LanguageImage dbEntity = entityManager.find(LanguageImage.class, restEntity.getId());
-                    if (dbEntity == null)
-                        throw new BadRequestException("No LanguageImage entity was found with the primary key " + restEntity.getId());
-
-                    entity.removeLanguageImage(dbEntity);
-                    entityManager.remove(dbEntity);
-                } else if (restEntityItem.returnIsUpdateItem()) {
-                    final LanguageImage dbEntity = entityManager.find(LanguageImage.class, restEntity.getId());
-                    if (dbEntity == null)
-                        throw new BadRequestException("No LanguageImage entity was found with the primary key " + restEntity.getId());
-                    if (!entity.getLanguageImages().contains(dbEntity)) throw new BadRequestException(
-                            "No LanguageImage entity was found with the primary key " + restEntity.getId() + " for Image " + entity.getId
-                                    ());
-
-                    languageImageFactory.updateDBEntityFromRESTEntity(dbEntity, restEntity);
-                }
-            }
+    public void collectChangeInformation(final RESTChangeAction<RESTImageV1> parent, final RESTImageV1 dataObject) {
+        if (dataObject.hasParameterSet(RESTImageV1.LANGUAGEIMAGES_NAME)
+                && dataObject.getLanguageImages_OTM() != null
+                && dataObject.getLanguageImages_OTM().getItems() != null) {
+            collectChangeInformationFromCollection(parent, dataObject.getLanguageImages_OTM(), languageImageFactory);
         }
     }
 
     @Override
-    public void syncDBEntityWithRESTEntitySecondPass(ImageFile entity, RESTImageV1 dataObject) {
-        // One To Many - Do the second pass on the add or update items
-        if (dataObject.hasParameterSet(
-                RESTImageV1.LANGUAGEIMAGES_NAME) && dataObject.getLanguageImages_OTM() != null && dataObject.getLanguageImages_OTM()
-                .getItems() != null) {
-            dataObject.getLanguageImages_OTM().removeInvalidChangeItemRequests();
+    public void syncBaseDetails(final ImageFile entity, final RESTImageV1 dataObject) {
+        if (dataObject.hasParameterSet(RESTImageV1.DESCRIPTION_NAME)) entity.setDescription(dataObject.getDescription());
+    }
 
-            for (final RESTLanguageImageCollectionItemV1 restEntityItem : dataObject.getLanguageImages_OTM().getItems()) {
-                final RESTLanguageImageV1 restEntity = restEntityItem.getItem();
+    @Override
+    protected void doDeleteChildAction(final ImageFile entity, final RESTImageV1 dataObject, final RESTChangeAction<?> action) {
+        final RESTBaseEntityV1<?, ?, ?> restEntity = action.getRESTEntity();
 
-                if (restEntityItem.returnIsAddItem() || restEntityItem.returnIsUpdateItem()) {
-                    final LanguageImage dbEntity = RESTv1Utilities.findEntity(entityManager, entityCache, restEntity,
-                            LanguageImage.class);
-                    if (dbEntity == null)
-                        throw new BadRequestException("No LanguageImage entity was found with the primary key " + restEntity.getId());
+        if (restEntity instanceof RESTLanguageImageV1) {
+            final LanguageImage dbEntity = entityManager.find(LanguageImage.class, restEntity.getId());
+            if (dbEntity == null) throw new BadRequestException(
+                    "No LanguageImage entity was found with the primary key " + restEntity.getId());
 
-                    languageImageFactory.syncDBEntityWithRESTEntitySecondPass(dbEntity, restEntity);
-                }
-            }
+            entity.removeLanguageImage(dbEntity);
+            entityManager.remove(dbEntity);
         }
+    }
+
+    @Override
+    protected AuditedEntity doCreateChildAction(final ImageFile entity, final RESTImageV1 dataObject, final RESTChangeAction<?> action) {
+        final RESTBaseEntityV1<?, ?, ?> restEntity = action.getRESTEntity();
+        final AuditedEntity dbEntity;
+
+        if (restEntity instanceof RESTLanguageImageV1) {
+            dbEntity = action.getFactory().createDBEntity(restEntity);
+            entity.addLanguageImage((LanguageImage) dbEntity);
+        } else {
+            throw new IllegalArgumentException("Item is not a child of Image");
+        }
+
+        return dbEntity;
+    }
+
+    @Override
+    protected AuditedEntity getChildEntityForAction(final ImageFile entity, final RESTImageV1 dataObject, final RESTChangeAction<?> action) {
+        final RESTBaseEntityV1<?, ?, ?> restEntity = action.getRESTEntity();
+
+        final AuditedEntity dbEntity;
+        if (restEntity instanceof RESTLanguageImageV1) {
+            dbEntity = RESTv1Utilities.findEntity(entityManager, entityCache, (RESTLanguageImageV1) restEntity, LanguageImage.class);
+            if (dbEntity == null) {
+                throw new BadRequestException("No LanguageImage entity was found with the primary key " + restEntity.getId());
+            } else if (!entity.getLanguageImages().contains(dbEntity)) {
+                throw new BadRequestException(
+                        "No LanguageImage entity was found with the primary key " + restEntity.getId() + " for Image " + entity.getId());
+            }
+        } else {
+            throw new IllegalArgumentException("Item is not a child of Image");
+        }
+
+        return dbEntity;
     }
 
     @Override

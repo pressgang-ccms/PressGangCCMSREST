@@ -26,6 +26,7 @@ import java.util.List;
 
 import org.jboss.pressgang.ccms.model.PropertyTag;
 import org.jboss.pressgang.ccms.model.Tag;
+import org.jboss.pressgang.ccms.model.base.AuditedEntity;
 import org.jboss.pressgang.ccms.model.contentspec.CSNode;
 import org.jboss.pressgang.ccms.model.contentspec.ContentSpec;
 import org.jboss.pressgang.ccms.model.contentspec.ContentSpecToPropertyTag;
@@ -34,8 +35,6 @@ import org.jboss.pressgang.ccms.rest.v1.collections.RESTTagCollectionV1;
 import org.jboss.pressgang.ccms.rest.v1.collections.contentspec.RESTTextContentSpecCollectionV1;
 import org.jboss.pressgang.ccms.rest.v1.collections.contentspec.RESTTranslatedContentSpecCollectionV1;
 import org.jboss.pressgang.ccms.rest.v1.collections.contentspec.items.RESTTextContentSpecCollectionItemV1;
-import org.jboss.pressgang.ccms.rest.v1.collections.items.RESTTagCollectionItemV1;
-import org.jboss.pressgang.ccms.rest.v1.collections.items.join.RESTAssignedPropertyTagCollectionItemV1;
 import org.jboss.pressgang.ccms.rest.v1.collections.join.RESTAssignedPropertyTagCollectionV1;
 import org.jboss.pressgang.ccms.rest.v1.constants.RESTv1Constants;
 import org.jboss.pressgang.ccms.rest.v1.entities.RESTTagV1;
@@ -45,6 +44,7 @@ import org.jboss.pressgang.ccms.rest.v1.entities.contentspec.RESTTextContentSpec
 import org.jboss.pressgang.ccms.rest.v1.entities.contentspec.enums.RESTContentSpecTypeV1;
 import org.jboss.pressgang.ccms.rest.v1.entities.join.RESTAssignedPropertyTagV1;
 import org.jboss.pressgang.ccms.rest.v1.expansion.ExpandDataTrunk;
+import org.jboss.pressgang.ccms.server.rest.v1.RESTChangeAction;
 import org.jboss.pressgang.ccms.server.rest.v1.factory.base.RESTElementCollectionFactory;
 import org.jboss.pressgang.ccms.server.rest.v1.factory.base.RESTEntityCollectionFactory;
 import org.jboss.pressgang.ccms.server.rest.v1.factory.base.RESTEntityFactory;
@@ -145,100 +145,106 @@ public class TextContentSpecV1Factory extends RESTEntityFactory<RESTTextContentS
     }
 
     @Override
-    public void syncDBEntityWithRESTEntityFirstPass(final ContentSpec entity, final RESTTextContentSpecV1 dataObject) {
-        if (dataObject.hasParameterSet(RESTTextContentSpecV1.LOCALE_NAME)) entity.setLocale(dataObject.getLocale());
+    public void syncBaseDetails(final ContentSpec entity, final RESTTextContentSpecV1 dataObject) {
+        if (dataObject.hasParameterSet(RESTContentSpecV1.LOCALE_NAME)) entity.setLocale(dataObject.getLocale());
+        if (dataObject.hasParameterSet(RESTContentSpecV1.LAST_PUBLISHED_NAME)) entity.setLastPublished(dataObject.getLastPublished());
+    }
 
-        // Many to Many
-        if (dataObject.hasParameterSet(
-                RESTTextContentSpecV1.PROPERTIES_NAME) && dataObject.getProperties() != null && dataObject.getProperties().getItems() !=
-                null) {
-            dataObject.getProperties().removeInvalidChangeItemRequests();
+    @Override
+    public void collectChangeInformation(final RESTChangeAction<RESTTextContentSpecV1> parent,
+            final RESTTextContentSpecV1 dataObject) {
+        if (dataObject.hasParameterSet(RESTTextContentSpecV1.PROPERTIES_NAME)
+                && dataObject.getProperties() != null
+                && dataObject.getProperties().getItems() != null) {
+            collectChangeInformationFromCollection(parent, dataObject.getProperties(), contentSpecPropertyTagFactory);
+        }
 
-            for (final RESTAssignedPropertyTagCollectionItemV1 restEntityItem : dataObject.getProperties().getItems()) {
-                final RESTAssignedPropertyTagV1 restEntity = restEntityItem.getItem();
-
-                if (restEntityItem.returnIsRemoveItem()) {
-                    final ContentSpecToPropertyTag dbEntity = entityManager.find(ContentSpecToPropertyTag.class,
-                            restEntity.getRelationshipId());
-                    if (dbEntity == null) throw new BadRequestException(
-                            "No ContentSpecToPropertyTag entity was found with the primary key " + restEntity.getRelationshipId());
-
-                    entity.removePropertyTag(dbEntity);
-                } else if (restEntityItem.returnIsUpdateItem()) {
-                    final ContentSpecToPropertyTag dbEntity = entityManager.find(ContentSpecToPropertyTag.class,
-                            restEntity.getRelationshipId());
-                    if (dbEntity == null) throw new BadRequestException(
-                            "No ContentSpecToPropertyTag entity was found with the primary key " + restEntity.getRelationshipId());
-                    if (!entity.getContentSpecToPropertyTags().contains(dbEntity)) throw new BadRequestException(
-                            "No ContentSpecToPropertyTag entity was found with the primary key " + restEntity.getRelationshipId() + " for" +
-                                    " ContentSpec " + entity.getId());
-
-                    contentSpecPropertyTagFactory.updateDBEntityFromRESTEntity(dbEntity, restEntity);
-                }
-            }
+        if (dataObject.hasParameterSet(RESTTextContentSpecV1.TAGS_NAME)
+                && dataObject.getTags() != null
+                && dataObject.getTags().getItems() != null) {
+            collectChangeInformationFromCollection(parent, dataObject.getTags(), tagFactory, RESTTextContentSpecV1.TAGS_NAME);
         }
     }
 
     @Override
-    public void syncDBEntityWithRESTEntitySecondPass(final ContentSpec entity, final RESTTextContentSpecV1 dataObject) {
-        // Many to Many
-        if (dataObject.hasParameterSet(
-                RESTContentSpecV1.PROPERTIES_NAME) && dataObject.getProperties() != null && dataObject.getProperties().getItems() != null) {
-            dataObject.getProperties().removeInvalidChangeItemRequests();
+    protected void doDeleteChildAction(final ContentSpec entity, final RESTTextContentSpecV1 dataObject, final RESTChangeAction<?> action) {
+        final RESTBaseEntityV1<?, ?, ?> restEntity = action.getRESTEntity();
 
-            for (final RESTAssignedPropertyTagCollectionItemV1 restEntityItem : dataObject.getProperties().getItems()) {
-                final RESTAssignedPropertyTagV1 restEntity = restEntityItem.getItem();
+        if (restEntity instanceof RESTTagV1) {
+            final Tag dbEntity = entityManager.find(Tag.class, restEntity.getId());
+            if (dbEntity == null) throw new BadRequestException("No Tag entity was found with the primary key " + restEntity.getId());
 
-                if (restEntityItem.returnIsAddItem()) {
-                    final PropertyTag dbEntity = RESTv1Utilities.findEntity(entityManager, entityCache, restEntity, PropertyTag.class);
-                    if (dbEntity == null)
-                        throw new BadRequestException("No PropertyTag entity was found with the primary key " + restEntity.getId());
+            entity.removeTag(dbEntity);
+        } else if (restEntity instanceof RESTAssignedPropertyTagV1) {
+            final RESTAssignedPropertyTagV1 propertyTag = (RESTAssignedPropertyTagV1) restEntity;
+            final ContentSpecToPropertyTag dbEntity = entityManager.find(ContentSpecToPropertyTag.class, propertyTag.getRelationshipId());
+            if (dbEntity == null) throw new BadRequestException(
+                    "No ContentSpecToPropertyTag entity was found with the primary key " + propertyTag.getRelationshipId());
 
-                    entity.addPropertyTag(dbEntity, restEntity.getValue());
-                } else if (restEntityItem.returnIsUpdateItem()) {
-                    final ContentSpecToPropertyTag dbEntity = entityManager.find(ContentSpecToPropertyTag.class,
-                            restEntity.getRelationshipId());
-                    if (dbEntity == null) throw new BadRequestException(
-                            "No ContentSpecToPropertyTag entity was found with the primary key " + restEntity.getRelationshipId());
-                    if (!entity.getContentSpecToPropertyTags().contains(dbEntity)) throw new BadRequestException(
-                            "No ContentSpecToPropertyTag entity was found with the primary key " + restEntity.getRelationshipId() + " for" +
-                                    " ContentSpec " + entity.getId());
+            entity.removePropertyTag(dbEntity);
+        }
+    }
 
-                    contentSpecPropertyTagFactory.syncDBEntityWithRESTEntitySecondPass(dbEntity, restEntity);
-                }
+    @Override
+    protected AuditedEntity doCreateChildAction(final ContentSpec entity, final RESTTextContentSpecV1 dataObject,
+            final RESTChangeAction<?> action) {
+        final RESTBaseEntityV1<?, ?, ?> restEntity = action.getRESTEntity();
+        final AuditedEntity dbEntity;
+
+        if (restEntity instanceof RESTTagV1) {
+            dbEntity = entityManager.find(Tag.class, restEntity.getId());
+            if (dbEntity == null) {
+                throw new BadRequestException("No Tag entity was found with the primary key " + restEntity.getId());
             }
+
+            entity.addTag((Tag) dbEntity);
+        } else if (restEntity instanceof RESTAssignedPropertyTagV1) {
+            dbEntity = action.getFactory().createDBEntity(restEntity);
+            final PropertyTag propertyTag = entityManager.find(PropertyTag.class, restEntity.getId());
+            if (propertyTag == null) {
+                throw new BadRequestException("No PropertyTag entity was found with the primary key " + restEntity.getId());
+            }
+
+            final ContentSpecToPropertyTag csToProp = (ContentSpecToPropertyTag) dbEntity;
+            csToProp.setPropertyTag(propertyTag);
+            entity.addPropertyTag(csToProp);
+        } else {
+            throw new IllegalArgumentException("Item is not a child of ContentSpec");
         }
 
-        // Many to Many
-        if (dataObject.hasParameterSet(
-                RESTContentSpecV1.TAGS_NAME) && dataObject.getTags() != null && dataObject.getTags().getItems() != null) {
-            dataObject.getTags().removeInvalidChangeItemRequests();
+        return dbEntity;
+    }
 
-            // Remove Tags first to ensure mutual exclusion is done correctly
-            for (final RESTTagCollectionItemV1 restEntityItem : dataObject.getTags().getItems()) {
-                final RESTTagV1 restEntity = restEntityItem.getItem();
+    @Override
+    protected AuditedEntity getChildEntityForAction(final ContentSpec entity, final RESTTextContentSpecV1 dataObject,
+            final RESTChangeAction<?> action) {
+        final RESTBaseEntityV1<?, ?, ?> restEntity = action.getRESTEntity();
 
-                if (restEntityItem.returnIsRemoveItem()) {
-                    final Tag dbEntity = entityManager.find(Tag.class, restEntity.getId());
-                    if (dbEntity == null)
-                        throw new BadRequestException("No Tag entity was found with the primary key " + restEntity.getId());
-
-                    entity.removeTag(dbEntity);
-                }
+        final AuditedEntity dbEntity;
+        if (restEntity instanceof RESTTagV1) {
+            dbEntity = RESTv1Utilities.findEntity(entityManager, entityCache, (RESTTagV1) restEntity, Tag.class);
+            if (dbEntity == null) {
+                throw new BadRequestException("No Tag entity was found with the primary key " + restEntity.getId());
+            } else if (!entity.getTags().contains(dbEntity)) {
+                throw new BadRequestException(
+                        "No Tag entity was found with the primary key " + restEntity.getId() + " for ContentSpec " + entity.getId());
             }
-
-            for (final RESTTagCollectionItemV1 restEntityItem : dataObject.getTags().getItems()) {
-                final RESTTagV1 restEntity = restEntityItem.getItem();
-
-                if (restEntityItem.returnIsAddItem()) {
-                    final Tag dbEntity = RESTv1Utilities.findEntity(entityManager, entityCache, restEntity, Tag.class);
-                    if (dbEntity == null)
-                        throw new BadRequestException("No Tag entity was found with the primary key " + restEntity.getId());
-
-                    entity.addTag(dbEntity);
-                }
+        } else if (restEntity instanceof RESTAssignedPropertyTagV1) {
+            final RESTAssignedPropertyTagV1 assignedPropertyTag = (RESTAssignedPropertyTagV1) restEntity;
+            dbEntity = entityManager.find(ContentSpecToPropertyTag.class, assignedPropertyTag.getRelationshipId());
+            if (dbEntity == null) {
+                throw new BadRequestException("No ContentSpecToPropertyTag entity was found with the primary key " + assignedPropertyTag
+                        .getRelationshipId());
+            } else if (!entity.getContentSpecToPropertyTags().contains(dbEntity)) {
+                throw new BadRequestException(
+                        "No ContentSpecToPropertyTag entity was found with the primary key " + assignedPropertyTag.getRelationshipId() +
+                                " for ContentSpec " + entity.getId());
             }
+        } else {
+            throw new IllegalArgumentException("Item is not a child of ContentSpec");
         }
+
+        return dbEntity;
     }
 
     @Override

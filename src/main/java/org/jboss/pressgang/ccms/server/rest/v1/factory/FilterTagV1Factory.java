@@ -32,6 +32,7 @@ import org.jboss.pressgang.ccms.rest.v1.entities.RESTFilterTagV1;
 import org.jboss.pressgang.ccms.rest.v1.entities.RESTTagV1;
 import org.jboss.pressgang.ccms.rest.v1.entities.base.RESTBaseEntityV1;
 import org.jboss.pressgang.ccms.rest.v1.expansion.ExpandDataTrunk;
+import org.jboss.pressgang.ccms.server.rest.v1.RESTChangeAction;
 import org.jboss.pressgang.ccms.server.rest.v1.factory.base.RESTEntityCollectionFactory;
 import org.jboss.pressgang.ccms.server.rest.v1.factory.base.RESTEntityFactory;
 import org.jboss.pressgang.ccms.server.rest.v1.utils.RESTv1Utilities;
@@ -87,12 +88,17 @@ public class FilterTagV1Factory extends RESTEntityFactory<RESTFilterTagV1, Filte
     }
 
     @Override
-    public void syncDBEntityWithRESTEntityFirstPass(final FilterTag entity, final RESTFilterTagV1 dataObject) {
+    public void collectChangeInformation(final RESTChangeAction<RESTFilterTagV1> parent, final RESTFilterTagV1 dataObject) {
+        // FilterTag has no children that can be changed, so we have no changes to collect
+    }
+
+    @Override
+    public void syncBaseDetails(final FilterTag entity, final RESTFilterTagV1 dataObject) {
         if (dataObject.hasParameterSet(RESTFilterTagV1.STATE_NAME)) entity.setTagState(dataObject.getState());
     }
 
     @Override
-    public void syncDBEntityWithRESTEntitySecondPass(FilterTag entity, RESTFilterTagV1 dataObject) {
+    public void syncAdditionalDetails(FilterTag entity, RESTFilterTagV1 dataObject) {
         // Set the Tag for the FilterTag
         if (dataObject.hasParameterSet(RESTFilterTagV1.TAG_NAME)) {
             final RESTTagV1 restEntity = dataObject.getTag();

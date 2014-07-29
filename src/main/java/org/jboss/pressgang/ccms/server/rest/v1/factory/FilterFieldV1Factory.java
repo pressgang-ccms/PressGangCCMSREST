@@ -30,6 +30,7 @@ import org.jboss.pressgang.ccms.rest.v1.collections.items.RESTFilterFieldCollect
 import org.jboss.pressgang.ccms.rest.v1.entities.RESTFilterFieldV1;
 import org.jboss.pressgang.ccms.rest.v1.entities.base.RESTBaseEntityV1;
 import org.jboss.pressgang.ccms.rest.v1.expansion.ExpandDataTrunk;
+import org.jboss.pressgang.ccms.server.rest.v1.RESTChangeAction;
 import org.jboss.pressgang.ccms.server.rest.v1.factory.base.RESTEntityCollectionFactory;
 import org.jboss.pressgang.ccms.server.rest.v1.factory.base.RESTEntityFactory;
 import org.jboss.pressgang.ccms.server.utils.EnversUtilities;
@@ -77,7 +78,12 @@ public class FilterFieldV1Factory extends RESTEntityFactory<RESTFilterFieldV1, F
     }
 
     @Override
-    public void syncDBEntityWithRESTEntityFirstPass(final FilterField entity, final RESTFilterFieldV1 dataObject) {
+    public void collectChangeInformation(final RESTChangeAction<RESTFilterFieldV1> parent, final RESTFilterFieldV1 dataObject) {
+        // FilterField has no children that can be changed, so we have no changes to collect
+    }
+
+    @Override
+    public void syncBaseDetails(final FilterField entity, final RESTFilterFieldV1 dataObject) {
         if (dataObject.hasParameterSet(RESTFilterFieldV1.DESCRIPTION_NAME)) entity.setDescription(dataObject.getDescription());
         if (dataObject.hasParameterSet(RESTFilterFieldV1.NAME_NAME)) entity.setField(dataObject.getName());
         if (dataObject.hasParameterSet(RESTFilterFieldV1.VALUE_NAME)) entity.setValue(dataObject.getValue());

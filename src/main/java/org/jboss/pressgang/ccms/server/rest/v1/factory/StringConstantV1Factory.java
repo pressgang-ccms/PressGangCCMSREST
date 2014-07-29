@@ -30,8 +30,9 @@ import org.jboss.pressgang.ccms.rest.v1.constants.RESTv1Constants;
 import org.jboss.pressgang.ccms.rest.v1.entities.RESTStringConstantV1;
 import org.jboss.pressgang.ccms.rest.v1.entities.base.RESTBaseEntityV1;
 import org.jboss.pressgang.ccms.rest.v1.expansion.ExpandDataTrunk;
-import org.jboss.pressgang.ccms.server.rest.v1.factory.base.RESTEntityFactory;
+import org.jboss.pressgang.ccms.server.rest.v1.RESTChangeAction;
 import org.jboss.pressgang.ccms.server.rest.v1.factory.base.RESTEntityCollectionFactory;
+import org.jboss.pressgang.ccms.server.rest.v1.factory.base.RESTEntityFactory;
 import org.jboss.pressgang.ccms.server.utils.EnversUtilities;
 
 @ApplicationScoped
@@ -68,7 +69,12 @@ public class StringConstantV1Factory extends RESTEntityFactory<RESTStringConstan
     }
 
     @Override
-    public void syncDBEntityWithRESTEntityFirstPass(final StringConstants entity, final RESTStringConstantV1 dataObject) {
+    public void collectChangeInformation(final RESTChangeAction<RESTStringConstantV1> parent, final RESTStringConstantV1 dataObject) {
+        // StringConstant has no children that can be changed, so we have no changes to collect
+    }
+
+    @Override
+    public void syncBaseDetails(final StringConstants entity, final RESTStringConstantV1 dataObject) {
         if (dataObject.hasParameterSet(RESTStringConstantV1.NAME_NAME)) entity.setConstantName(dataObject.getName());
         if (dataObject.hasParameterSet(RESTStringConstantV1.VALUE_NAME)) entity.setConstantValue(dataObject.getValue());
     }

@@ -69,7 +69,7 @@ public class ProcessInformationV1Factory extends RESTElementFactory<RESTProcessI
     }
 
     @Override
-    public void updateObjectFromRESTEntity(Process object, RESTProcessInformationV1 dataObject) {
+    public void updateObjectFromRESTEntity(final Process object, final RESTProcessInformationV1 dataObject) {
         throw new BadRequestException("Processes cannot be updated via the REST API");
     }
 }

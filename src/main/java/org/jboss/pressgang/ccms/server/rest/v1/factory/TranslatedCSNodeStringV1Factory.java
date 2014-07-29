@@ -30,6 +30,7 @@ import org.jboss.pressgang.ccms.rest.v1.collections.contentspec.items.RESTTransl
 import org.jboss.pressgang.ccms.rest.v1.entities.base.RESTBaseEntityV1;
 import org.jboss.pressgang.ccms.rest.v1.entities.contentspec.RESTTranslatedCSNodeStringV1;
 import org.jboss.pressgang.ccms.rest.v1.expansion.ExpandDataTrunk;
+import org.jboss.pressgang.ccms.server.rest.v1.RESTChangeAction;
 import org.jboss.pressgang.ccms.server.rest.v1.factory.base.RESTEntityCollectionFactory;
 import org.jboss.pressgang.ccms.server.rest.v1.factory.base.RESTEntityFactory;
 import org.jboss.pressgang.ccms.server.utils.EnversUtilities;
@@ -76,8 +77,13 @@ public class TranslatedCSNodeStringV1Factory extends RESTEntityFactory<RESTTrans
     }
 
     @Override
-    public void syncDBEntityWithRESTEntityFirstPass(final TranslatedCSNodeString entity, final RESTTranslatedCSNodeStringV1 dataObject) {
+    public void collectChangeInformation(final RESTChangeAction<RESTTranslatedCSNodeStringV1> parent,
+            final RESTTranslatedCSNodeStringV1 dataObject) {
+        // TranslatedCSNodeString has no children that can be changed, so we have no changes to collect
+    }
 
+    @Override
+    public void syncBaseDetails(final TranslatedCSNodeString entity, final RESTTranslatedCSNodeStringV1 dataObject) {
         if (dataObject.hasParameterSet(RESTTranslatedCSNodeStringV1.TRANSLATEDSTRING_NAME))
             entity.setTranslatedString(dataObject.getTranslatedString());
         if (dataObject.hasParameterSet(RESTTranslatedCSNodeStringV1.FUZZY_TRANSLATION_NAME))

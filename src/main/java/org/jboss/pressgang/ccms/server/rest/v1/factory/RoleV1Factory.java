@@ -27,19 +27,22 @@ import java.util.List;
 import org.jboss.pressgang.ccms.model.Role;
 import org.jboss.pressgang.ccms.model.RoleToRoleRelationship;
 import org.jboss.pressgang.ccms.model.User;
+import org.jboss.pressgang.ccms.model.base.AuditedEntity;
 import org.jboss.pressgang.ccms.rest.v1.collections.RESTRoleCollectionV1;
 import org.jboss.pressgang.ccms.rest.v1.collections.RESTUserCollectionV1;
 import org.jboss.pressgang.ccms.rest.v1.collections.items.RESTRoleCollectionItemV1;
-import org.jboss.pressgang.ccms.rest.v1.collections.items.RESTUserCollectionItemV1;
 import org.jboss.pressgang.ccms.rest.v1.constants.RESTv1Constants;
 import org.jboss.pressgang.ccms.rest.v1.entities.RESTRoleV1;
 import org.jboss.pressgang.ccms.rest.v1.entities.RESTUserV1;
 import org.jboss.pressgang.ccms.rest.v1.entities.base.RESTBaseEntityV1;
 import org.jboss.pressgang.ccms.rest.v1.expansion.ExpandDataTrunk;
+import org.jboss.pressgang.ccms.server.rest.v1.RESTChangeAction;
 import org.jboss.pressgang.ccms.server.rest.v1.factory.base.RESTEntityCollectionFactory;
 import org.jboss.pressgang.ccms.server.rest.v1.factory.base.RESTEntityFactory;
+import org.jboss.pressgang.ccms.server.rest.v1.utils.RESTv1Utilities;
 import org.jboss.pressgang.ccms.server.utils.EnversUtilities;
 import org.jboss.resteasy.spi.BadRequestException;
+import org.jboss.resteasy.spi.InternalServerErrorException;
 
 /*
  * Note: Since roles and users are going to be re-done soon using Katie's OAuth Library, I've left out the ability to update the
@@ -109,82 +112,126 @@ public class RoleV1Factory extends RESTEntityFactory<RESTRoleV1, Role, RESTRoleC
     }
 
     @Override
-    public void syncDBEntityWithRESTEntityFirstPass(final Role entity, final RESTRoleV1 dataObject) {
-        if (dataObject.hasParameterSet(RESTUserV1.DESCRIPTION_NAME)) entity.setDescription(dataObject.getDescription());
-        if (dataObject.hasParameterSet(RESTUserV1.NAME_NAME)) entity.setRoleName(dataObject.getName());
+    public void collectChangeInformation(final RESTChangeAction<RESTRoleV1> parent, final RESTRoleV1 dataObject) {
+        if (dataObject.hasParameterSet(RESTRoleV1.USERS_NAME)
+                && dataObject.getUsers() != null
+                && dataObject.getUsers().getItems() != null) {
+            collectChangeInformationFromCollection(parent, dataObject.getUsers(), userFactory);
+        }
 
+        if (dataObject.hasParameterSet(RESTRoleV1.PARENTROLES_NAME)
+                && dataObject.getUsers() != null
+                && dataObject.getUsers().getItems() != null) {
+            collectChangeInformationFromCollection(parent, dataObject.getUsers(), userFactory, RESTRoleV1.PARENTROLES_NAME);
+        }
+
+        if (dataObject.hasParameterSet(RESTRoleV1.CHILDROLES_NAME)
+                && dataObject.getUsers() != null
+                && dataObject.getUsers().getItems() != null) {
+            collectChangeInformationFromCollection(parent, dataObject.getUsers(), userFactory, RESTRoleV1.CHILDROLES_NAME);
+        }
     }
 
     @Override
-    public void syncDBEntityWithRESTEntitySecondPass(Role entity, RESTRoleV1 dataObject) {
-        /* Many To Many - Add will create a mapping */
-        if (dataObject.hasParameterSet(
-                RESTRoleV1.USERS_NAME) && dataObject.getUsers() != null && dataObject.getUsers().getItems() != null) {
-            dataObject.getUsers().removeInvalidChangeItemRequests();
+    public void syncBaseDetails(final Role entity, final RESTRoleV1 dataObject) {
+        if (dataObject.hasParameterSet(RESTUserV1.DESCRIPTION_NAME)) entity.setDescription(dataObject.getDescription());
+        if (dataObject.hasParameterSet(RESTUserV1.NAME_NAME)) entity.setRoleName(dataObject.getName());
+    }
 
-            for (final RESTUserCollectionItemV1 restEntityItem : dataObject.getUsers().getItems()) {
-                final RESTUserV1 restEntity = restEntityItem.getItem();
+    @Override
+    protected void doDeleteChildAction(final Role entity, final RESTRoleV1 dataObject, final RESTChangeAction<?> action) {
+        final RESTBaseEntityV1<?, ?, ?> restEntity = action.getRESTEntity();
 
-                final User dbEntity = entityManager.find(User.class, restEntity.getId());
-                if (dbEntity == null)
-                    throw new BadRequestException("No User entity was found with the primary key " + restEntity.getId());
+        if (restEntity instanceof RESTUserV1) {
+            final User dbEntity = entityManager.find(User.class, restEntity.getId());
+            if (dbEntity == null) throw new BadRequestException(
+                    "No User entity was found with the primary key " + restEntity.getId());
 
-                if (restEntityItem.returnIsAddItem()) {
-                    entity.addUser(dbEntity);
-                } else if (restEntityItem.returnIsRemoveItem()) {
-                    entity.removeUser(dbEntity);
-                }
+            entity.removeUser(dbEntity);
+        } else if (restEntity instanceof RESTRoleV1) {
+            final Role dbEntity = entityManager.find(Role.class, restEntity.getId());
+            final RoleToRoleRelationship dbRelationshipEntity = entityManager.find(RoleToRoleRelationship.class, ROLE_TO_ROLE_ID);
+            if (dbEntity == null) {
+                throw new BadRequestException(
+                        "No Role entity was found with the primary key " + restEntity.getId());
+            } else if (dbRelationshipEntity == null) {
+                throw new InternalServerErrorException("No RoleToRoleRelationship entity was found with the primary key "
+                        + ROLE_TO_ROLE_ID);
+            }
+
+            if (RESTRoleV1.PARENTROLES_NAME.equals(action.getUniqueId())) {
+                entity.removeParentRole(dbEntity, dbRelationshipEntity);
+            } else {
+                entity.removeChildRole(dbEntity, dbRelationshipEntity);
             }
         }
+    }
 
-        /* Many To Many - Add will create a mapping */
-        if (dataObject.hasParameterSet(
-                RESTRoleV1.PARENTROLES_NAME) && dataObject.getParentRoles() != null && dataObject.getParentRoles().getItems() != null) {
-            dataObject.getParentRoles().removeInvalidChangeItemRequests();
+    @Override
+    protected AuditedEntity doCreateChildAction(final Role entity, final RESTRoleV1 dataObject, final RESTChangeAction<?> action) {
+        final RESTBaseEntityV1<?, ?, ?> restEntity = action.getRESTEntity();
+        final AuditedEntity dbEntity;
 
-            for (final RESTRoleCollectionItemV1 restEntityItem : dataObject.getParentRoles().getItems()) {
-                final RESTRoleV1 restEntity = restEntityItem.getItem();
-
-                final Role dbEntity = entityManager.find(Role.class, restEntity.getId());
-                final RoleToRoleRelationship dbRelationshipEntity = entityManager.find(RoleToRoleRelationship.class, ROLE_TO_ROLE_ID);
-
-                if (dbEntity == null)
-                    throw new BadRequestException("No Role entity was found with the primary key " + restEntity.getId());
-                else if (dbRelationshipEntity == null)
-                    throw new BadRequestException("No RoleToRoleRelationship entity was found with the primary key " + ROLE_TO_ROLE_ID);
-
-                if (restEntityItem.returnIsAddItem()) {
-                    entity.addParentRole(dbEntity, dbRelationshipEntity);
-                } else if (restEntityItem.returnIsRemoveItem()) {
-                    entity.removeParentRole(dbEntity, dbRelationshipEntity);
-                }
+        if (restEntity instanceof RESTUserV1) {
+            dbEntity = RESTv1Utilities.findEntity(entityManager, entityCache, (RESTUserV1) restEntity, User.class);
+            if (dbEntity == null) {
+                throw new BadRequestException("No User entity was found with the primary key " + restEntity.getId());
             }
+
+            entity.addUser((User) dbEntity);
+        } else if (restEntity instanceof RESTRoleV1) {
+            dbEntity = entityManager.find(Role.class, restEntity.getId());
+            final RoleToRoleRelationship dbRelationshipEntity = entityManager.find(RoleToRoleRelationship.class, ROLE_TO_ROLE_ID);
+            if (dbEntity == null) {
+                throw new BadRequestException("No Role entity was found with the primary key " + restEntity.getId());
+            } else if (dbRelationshipEntity == null) {
+                throw new InternalServerErrorException("No RoleToRoleRelationship entity was found with the primary key "
+                        + ROLE_TO_ROLE_ID);
+            }
+
+            if (RESTRoleV1.PARENTROLES_NAME.equals(action.getUniqueId())) {
+                entity.addParentRole((Role) dbEntity, dbRelationshipEntity);
+            } else {
+                entity.addChildRole((Role) dbEntity, dbRelationshipEntity);
+            }
+        } else {
+            throw new IllegalArgumentException("Item is not a child of Role");
         }
 
-        /* Many To Many - Add will create a mapping */
-        if (dataObject.hasParameterSet(
-                RESTRoleV1.CHILDROLES_NAME) && dataObject.getChildRoles() != null && dataObject.getChildRoles().getItems() != null) {
-            dataObject.getChildRoles().removeInvalidChangeItemRequests();
+        return dbEntity;
+    }
 
-            for (final RESTRoleCollectionItemV1 restEntityItem : dataObject.getChildRoles().getItems()) {
-                final RESTRoleV1 restEntity = restEntityItem.getItem();
+    @Override
+    protected AuditedEntity getChildEntityForAction(final Role entity, final RESTRoleV1 dataObject, final RESTChangeAction<?> action) {
+        final RESTBaseEntityV1<?, ?, ?> restEntity = action.getRESTEntity();
 
-                final Role dbEntity = entityManager.find(Role.class, restEntity.getId());
-                final RoleToRoleRelationship dbRelationshipEntity = entityManager.find(RoleToRoleRelationship.class, ROLE_TO_ROLE_ID);
-
-                if (dbEntity == null)
-                    throw new BadRequestException("No Role entity was found with the primary key " + restEntity.getId());
-                else if (dbRelationshipEntity == null)
-                    throw new BadRequestException("No RoleToRoleRelationship entity was found with the primary key "
-                            + ROLE_TO_ROLE_ID);
-
-                if (restEntityItem.returnIsAddItem()) {
-                    entity.addChildRole(dbEntity, dbRelationshipEntity);
-                } else if (restEntityItem.returnIsRemoveItem()) {
-                    entity.removeChildRole(dbEntity, dbRelationshipEntity);
+        final AuditedEntity dbEntity;
+        if (restEntity instanceof RESTUserV1) {
+            dbEntity = RESTv1Utilities.findEntity(entityManager, entityCache, (RESTUserV1) restEntity, User.class);
+            if (dbEntity == null) {
+                throw new BadRequestException("No User entity was found with the primary key " + restEntity.getId());
+            } else if (!entity.getUsers().contains(dbEntity)) {
+                throw new BadRequestException(
+                        "No User entity was found with the primary key " + restEntity.getId() + " for Role " + entity.getId());
+            }
+        } else if (restEntity instanceof RESTRoleV1) {
+            dbEntity = RESTv1Utilities.findEntity(entityManager, entityCache, (RESTRoleV1) restEntity, Role.class);
+            if (dbEntity == null) {
+                throw new BadRequestException("No Role entity was found with the primary key " + restEntity.getId());
+            } else {
+                if (RESTRoleV1.CHILDROLES_NAME.equals(action.getUniqueId()) && !entity.getChildRoles().contains(dbEntity)) {
+                    throw new BadRequestException(
+                            "No Role entity was found with the primary key " + restEntity.getId() + " for Role " + entity.getId());
+                } else if (RESTRoleV1.PARENTROLES_NAME.equals(action.getUniqueId()) && !entity.getParentRoles().contains(dbEntity)) {
+                    throw new BadRequestException(
+                            "No Role entity was found with the primary key " + restEntity.getId() + " for Role " + entity.getId());
                 }
             }
+        } else {
+            throw new IllegalArgumentException("Item is not a child of Role");
         }
+
+        return dbEntity;
     }
 
     @Override

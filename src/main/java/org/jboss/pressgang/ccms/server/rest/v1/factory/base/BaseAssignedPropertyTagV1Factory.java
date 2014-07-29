@@ -32,6 +32,7 @@ import org.jboss.pressgang.ccms.rest.v1.entities.base.RESTBaseEntityV1;
 import org.jboss.pressgang.ccms.rest.v1.entities.base.RESTBasePropertyTagV1;
 import org.jboss.pressgang.ccms.rest.v1.entities.join.RESTAssignedPropertyTagV1;
 import org.jboss.pressgang.ccms.rest.v1.expansion.ExpandDataTrunk;
+import org.jboss.pressgang.ccms.server.rest.v1.RESTChangeAction;
 import org.jboss.pressgang.ccms.server.rest.v1.factory.PropertyCategoryInPropertyTagV1Factory;
 import org.jboss.pressgang.ccms.server.utils.EnversUtilities;
 
@@ -83,7 +84,13 @@ public abstract class BaseAssignedPropertyTagV1Factory<T extends ToPropertyTag<T
     }
 
     @Override
-    public void syncDBEntityWithRESTEntityFirstPass(final T entity, final RESTAssignedPropertyTagV1 dataObject) {
+    public void collectChangeInformation(final RESTChangeAction<RESTAssignedPropertyTagV1> parent,
+            final RESTAssignedPropertyTagV1 dataObject) {
+        // Assigned Properties has no children that can be changed, so we have no changes to collect
+    }
+
+    @Override
+    public void syncBaseDetails(final T entity, final RESTAssignedPropertyTagV1 dataObject) {
         if (dataObject.hasParameterSet(RESTAssignedPropertyTagV1.VALUE_NAME)) entity.setValue(dataObject.getValue());
     }
 }

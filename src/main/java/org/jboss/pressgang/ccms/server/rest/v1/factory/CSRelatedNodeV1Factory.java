@@ -36,6 +36,7 @@ import org.jboss.pressgang.ccms.rest.v1.entities.contentspec.enums.RESTCSNodeRel
 import org.jboss.pressgang.ccms.rest.v1.entities.contentspec.enums.RESTCSNodeTypeV1;
 import org.jboss.pressgang.ccms.rest.v1.entities.contentspec.join.RESTCSRelatedNodeV1;
 import org.jboss.pressgang.ccms.rest.v1.expansion.ExpandDataTrunk;
+import org.jboss.pressgang.ccms.server.rest.v1.RESTChangeAction;
 import org.jboss.pressgang.ccms.server.rest.v1.factory.base.RESTEntityCollectionFactory;
 import org.jboss.pressgang.ccms.server.rest.v1.factory.base.RESTEntityFactory;
 import org.jboss.pressgang.ccms.server.utils.EnversUtilities;
@@ -121,7 +122,12 @@ public class CSRelatedNodeV1Factory extends RESTEntityFactory<RESTCSRelatedNodeV
     }
 
     @Override
-    public void syncDBEntityWithRESTEntityFirstPass(final CSNodeToCSNode entity, final RESTCSRelatedNodeV1 dataObject) {
+    public void collectChangeInformation(RESTChangeAction<RESTCSRelatedNodeV1> parent, RESTCSRelatedNodeV1 dataObject) {
+        // CSRelatedNode has no children that can be changed, so we have no changes to collect
+    }
+
+    @Override
+    public void syncBaseDetails(CSNodeToCSNode entity, RESTCSRelatedNodeV1 dataObject) {
         if (dataObject.hasParameterSet(RESTCSRelatedNodeV1.RELATIONSHIP_TYPE_NAME))
             entity.setRelationshipType(RESTCSNodeRelationshipTypeV1.getRelationshipTypeId(dataObject.getRelationshipType()));
         if (dataObject.hasParameterSet(RESTCSRelatedNodeV1.RELATIONSHIP_SORT_NAME))
