@@ -34,6 +34,7 @@
         <class>org.jboss.pressgang.ccms.model.IntegerConstants</class>
         <class>org.jboss.pressgang.ccms.model.LanguageFile</class>
         <class>org.jboss.pressgang.ccms.model.LanguageImage</class>
+        <class>org.jboss.pressgang.ccms.model.Locale</class>
         <class>org.jboss.pressgang.ccms.model.MinHash</class>
         <class>org.jboss.pressgang.ccms.model.MinHashXOR</class>
         <class>org.jboss.pressgang.ccms.model.Process</class>

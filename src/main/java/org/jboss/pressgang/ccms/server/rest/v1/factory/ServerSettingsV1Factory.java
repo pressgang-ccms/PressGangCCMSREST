@@ -19,12 +19,16 @@
 
 package org.jboss.pressgang.ccms.server.rest.v1.factory;
 
+import static com.google.common.base.Strings.isNullOrEmpty;
+
 import javax.enterprise.context.ApplicationScoped;
 import javax.inject.Inject;
 import java.util.ArrayList;
 import java.util.Map;
 
 import org.apache.commons.configuration.ConfigurationException;
+import org.hibernate.Session;
+import org.jboss.pressgang.ccms.model.Locale;
 import org.jboss.pressgang.ccms.model.config.ApplicationConfig;
 import org.jboss.pressgang.ccms.model.config.EntitiesConfig;
 import org.jboss.pressgang.ccms.model.config.ZanataServerConfig;
@@ -40,15 +44,21 @@ import org.jboss.pressgang.ccms.rest.v1.elements.RESTServerSettingsV1;
 import org.jboss.pressgang.ccms.rest.v1.elements.RESTServerUndefinedEntityV1;
 import org.jboss.pressgang.ccms.rest.v1.elements.RESTServerUndefinedSettingV1;
 import org.jboss.pressgang.ccms.rest.v1.elements.RESTZanataServerSettingsV1;
+import org.jboss.pressgang.ccms.rest.v1.entities.RESTTopicV1;
 import org.jboss.pressgang.ccms.rest.v1.expansion.ExpandDataTrunk;
 import org.jboss.pressgang.ccms.server.rest.v1.factory.base.RESTElementCollectionFactory;
 import org.jboss.pressgang.ccms.server.rest.v1.factory.base.RESTElementFactory;
+import org.jboss.pressgang.ccms.server.utils.EntityManagerWrapper;
 import org.jboss.resteasy.spi.InternalServerErrorException;
 
 @ApplicationScoped
 public class ServerSettingsV1Factory extends RESTElementFactory<RESTServerSettingsV1, ApplicationConfig> {
     private final EntitiesConfig entitiesConfig = EntitiesConfig.getInstance();
 
+    @Inject
+    private EntityManagerWrapper entityManager;
+    @Inject
+    private LocaleV1Factory localeFactory;
     @Inject
     private ServerUndefinedEntityV1Factory serverUndefinedEntityV1Factory;
     @Inject
@@ -62,14 +72,22 @@ public class ServerSettingsV1Factory extends RESTElementFactory<RESTServerSettin
         final RESTServerSettingsV1 retValue = new RESTServerSettingsV1();
 
         // Settings
-        retValue.setDefaultLocale(applicationConfig.getDefaultLocale());
-        retValue.setLocales(applicationConfig.getLocales());
         retValue.setDocBuilderUrl(applicationConfig.getDocBuilderUrl());
         retValue.setUiUrl(applicationConfig.getUIUrl());
         retValue.setDocBookTemplateIds(applicationConfig.getDocBookTemplateStringConstantIds());
         retValue.setSeoCategoryIds(applicationConfig.getSEOCategoryIds());
         retValue.setReadOnly(applicationConfig.getReadOnly());
         retValue.setJmsUpdateFrequency(applicationConfig.getJmsUpdateFrequency());
+
+        // Default Locale
+        if (!isNullOrEmpty(applicationConfig.getDefaultLocale())) {
+            final Session session = entityManager.unwrap(Session.class);
+            final Locale locale = (Locale) session.bySimpleNaturalId(Locale.class).load(applicationConfig.getDefaultLocale());
+            final ExpandDataTrunk childExpand = expand == null ? null: expand.get(RESTTopicV1.LOCALE_NAME);
+            retValue.setDefaultLocale(localeFactory.createRESTEntityFromDBEntity(locale, baseUrl, dataType, childExpand));
+        } else {
+            retValue.setDefaultLocale(null);
+        }
 
         // Undefined Settings
         retValue.setUndefinedSettings(
@@ -169,9 +187,7 @@ public class ServerSettingsV1Factory extends RESTElementFactory<RESTServerSettin
     @Override
     public void updateObjectFromRESTEntity(final ApplicationConfig applicationConfig, final RESTServerSettingsV1 dataObject) {
         if (dataObject.hasParameterSet(RESTServerSettingsV1.DEFAULT_LOCALE_NAME))
-            applicationConfig.setDefaultLocale(dataObject.getDefaultLocale());
-        if (dataObject.hasParameterSet(RESTServerSettingsV1.LOCALES_NAME))
-            applicationConfig.setLocales(dataObject.getLocales());
+            applicationConfig.setDefaultLocale(dataObject.getDefaultLocale() == null ? null : dataObject.getDefaultLocale().getValue());
         if (dataObject.hasParameterSet(RESTServerSettingsV1.DOCBOOK_TEMPLATES_NAME))
             applicationConfig.setDocBookTemplateStringConstantIds(dataObject.getDocBookTemplateIds());
         if (dataObject.hasParameterSet(RESTServerSettingsV1.SEO_CATEGORIES_NAME))

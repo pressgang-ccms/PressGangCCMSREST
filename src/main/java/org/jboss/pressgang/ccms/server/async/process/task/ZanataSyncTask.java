@@ -28,13 +28,16 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
+import org.jboss.pressgang.ccms.provider.LocaleProvider;
 import org.jboss.pressgang.ccms.provider.RESTProviderFactory;
 import org.jboss.pressgang.ccms.provider.RESTTopicProvider;
 import org.jboss.pressgang.ccms.provider.ServerSettingsProvider;
 import org.jboss.pressgang.ccms.server.utils.ProcessUtilities;
 import org.jboss.pressgang.ccms.services.zanatasync.ZanataSyncService;
 import org.jboss.pressgang.ccms.utils.common.CollectionUtilities;
+import org.jboss.pressgang.ccms.wrapper.LocaleWrapper;
 import org.jboss.pressgang.ccms.wrapper.ServerSettingsWrapper;
+import org.jboss.pressgang.ccms.wrapper.collection.CollectionWrapper;
 import org.jboss.pressgang.ccms.zanata.ETagCache;
 import org.jboss.pressgang.ccms.zanata.ETagInterceptor;
 import org.jboss.pressgang.ccms.zanata.ZanataDetails;
@@ -120,15 +123,16 @@ public class ZanataSyncTask extends ProcessRESTTask<Boolean> {
 
         // Load the available locales into the zanata interface
         final List<LocaleId> localeIds = new ArrayList<LocaleId>();
-        for (final String locale : settings.getLocales()) {
+        final CollectionWrapper<LocaleWrapper> locales = providerFactory.getProvider(LocaleProvider.class).getLocales();
+        for (final LocaleWrapper locale : locales.getItems()) {
             // Covert the language into a LocaleId
-            localeIds.add(LocaleId.fromJavaName(locale));
+            localeIds.add(LocaleId.fromJavaName(locale.getTranslationValue()));
         }
         zanataInterface.getLocaleManager().setLocales(localeIds);
 
         // Create the sync service and perform the sync
         final ZanataSyncService syncService = new ZanataSyncService(providerFactory, zanataInterface, settings);
-        syncService.sync(ids, null, locales.isEmpty() ? null : locales);
+        syncService.sync(ids, null, this.locales.isEmpty() ? null : this.locales);
 
         // Save the etag cache
         if (useETagCache) {

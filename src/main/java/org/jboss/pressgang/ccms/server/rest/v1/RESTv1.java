@@ -104,6 +104,7 @@ import org.jboss.pressgang.ccms.model.ImageFile;
 import org.jboss.pressgang.ccms.model.IntegerConstants;
 import org.jboss.pressgang.ccms.model.LanguageFile;
 import org.jboss.pressgang.ccms.model.LanguageImage;
+import org.jboss.pressgang.ccms.model.Locale;
 import org.jboss.pressgang.ccms.model.MinHashXOR;
 import org.jboss.pressgang.ccms.model.Process;
 import org.jboss.pressgang.ccms.model.ProcessType;
@@ -128,6 +129,7 @@ import org.jboss.pressgang.ccms.rest.v1.collections.RESTFileCollectionV1;
 import org.jboss.pressgang.ccms.rest.v1.collections.RESTFilterCollectionV1;
 import org.jboss.pressgang.ccms.rest.v1.collections.RESTImageCollectionV1;
 import org.jboss.pressgang.ccms.rest.v1.collections.RESTIntegerConstantCollectionV1;
+import org.jboss.pressgang.ccms.rest.v1.collections.RESTLocaleCollectionV1;
 import org.jboss.pressgang.ccms.rest.v1.collections.RESTProcessInformationCollectionV1;
 import org.jboss.pressgang.ccms.rest.v1.collections.RESTProjectCollectionV1;
 import org.jboss.pressgang.ccms.rest.v1.collections.RESTPropertyCategoryCollectionV1;
@@ -159,6 +161,7 @@ import org.jboss.pressgang.ccms.rest.v1.entities.RESTFileV1;
 import org.jboss.pressgang.ccms.rest.v1.entities.RESTFilterV1;
 import org.jboss.pressgang.ccms.rest.v1.entities.RESTImageV1;
 import org.jboss.pressgang.ccms.rest.v1.entities.RESTIntegerConstantV1;
+import org.jboss.pressgang.ccms.rest.v1.entities.RESTLocaleV1;
 import org.jboss.pressgang.ccms.rest.v1.entities.RESTMatchedFileV1;
 import org.jboss.pressgang.ccms.rest.v1.entities.RESTMatchedImageV1;
 import org.jboss.pressgang.ccms.rest.v1.entities.RESTMatchedTopicV1;
@@ -594,6 +597,103 @@ public class RESTv1 extends BaseRESTv1 implements RESTBaseInterfaceV1, RESTInter
 
         // Return the new settings
         return getJSONServerSettings();
+    }
+
+    /* LOCALES */
+    /* JSONP FUNCTIONS */
+    @Override
+    public String getJSONPLocale(final Integer id, final String expand, final String callback) {
+        if (callback == null) throw new BadRequestException("The callback parameter can not be null");
+
+        try {
+            return wrapJsonInPadding(callback, convertObjectToJSON(getJSONLocale(id, expand)));
+        } catch (final Exception ex) {
+            throw new InternalServerErrorException("Could not marshall return value into JSON");
+        }
+    }
+
+    @Override
+    public String getJSONPLocaleRevision(final  Integer id, final Integer revision, final String expand, final String callback) {
+        if (callback == null) throw new BadRequestException("The callback parameter can not be null");
+
+        try {
+            return wrapJsonInPadding(callback, convertObjectToJSON(getJSONLocaleRevision(id, revision, expand)));
+        } catch (final Exception ex) {
+            throw new InternalServerErrorException("Could not marshall return value into JSON");
+        }
+    }
+
+    @Override
+    public String getJSONPLocales(final String expand, final String callback) {
+        if (callback == null) throw new BadRequestException("The callback parameter can not be null");
+
+        try {
+            return wrapJsonInPadding(callback, convertObjectToJSON(getJSONLocales(expand)));
+        } catch (final Exception ex) {
+            throw new InternalServerErrorException("Could not marshall return value into JSON");
+        }
+    }
+
+    /* JSON FUNCTIONS */
+    @Override
+    public RESTLocaleV1 getJSONLocale(final Integer id, final String expand) {
+        if (id == null) throw new BadRequestException("The id parameter can not be null");
+
+        return getJSONResource(Locale.class, localeFactory, id, expand);
+    }
+
+    @Override
+    public RESTLocaleV1 getJSONLocaleRevision(final Integer id, final Integer revision, final String expand) {
+        if (id == null) throw new BadRequestException("The id parameter can not be null");
+        if (revision == null) throw new BadRequestException("The revision parameter can not be null");
+
+        return getJSONResource(Locale.class, localeFactory, id, revision, expand);
+    }
+
+    @Override
+    public RESTLocaleCollectionV1 getJSONLocales(final String expand) {
+        return getJSONResources(RESTLocaleCollectionV1.class, Locale.class, localeFactory, RESTv1Constants.LOCALES_EXPANSION_NAME, expand);
+    }
+
+    @Override
+    public RESTLocaleV1 updateJSONLocale(final String expand, final RESTLocaleV1 dataObject, final String message, final Integer flag,
+            final String userId) {
+        if (dataObject == null) throw new BadRequestException("The dataObject parameter can not be null");
+        if (dataObject.getId() == null) throw new BadRequestException("The dataObject.getId() parameter can not be null");
+
+        final RESTLogDetailsV1 logDetails = generateLogDetails(message, flag, userId);
+        return updateJSONEntity(Locale.class, dataObject, localeFactory, expand, logDetails);
+    }
+
+    @Override
+    public RESTLocaleCollectionV1 updateJSONLocales(final String expand, final RESTLocaleCollectionV1 dataObjects,
+            final String message, final Integer flag, final String userId) {
+        if (dataObjects == null) throw new BadRequestException("The dataObjects parameter can not be null");
+        if (dataObjects.getItems() == null) throw new BadRequestException("The dataObjects.getItems() parameter can not be null");
+
+        final RESTLogDetailsV1 logDetails = generateLogDetails(message, flag, userId);
+        return updateJSONEntities(RESTLocaleCollectionV1.class, Locale.class, dataObjects, localeFactory,
+                RESTv1Constants.LOCALES_EXPANSION_NAME, expand, logDetails);
+    }
+
+    @Override
+    public RESTLocaleV1 createJSONLocale(final String expand, final RESTLocaleV1 dataObject, final String message, final Integer flag,
+            final String userId) {
+        if (dataObject == null) throw new BadRequestException("The dataObject parameter can not be null");
+
+        final RESTLogDetailsV1 logDetails = generateLogDetails(message, flag, userId);
+        return createJSONEntity(Locale.class, dataObject, localeFactory, expand, logDetails);
+    }
+
+    @Override
+    public RESTLocaleCollectionV1 createJSONLocales(final String expand, final RESTLocaleCollectionV1 dataObjects, final String message,
+            final Integer flag, final String userId) {
+        if (dataObjects == null) throw new BadRequestException("The dataObjects parameter can not be null");
+        if (dataObjects.getItems() == null) throw new BadRequestException("The dataObjects.getItems() parameter can not be null");
+
+        final RESTLogDetailsV1 logDetails = generateLogDetails(message, flag, userId);
+        return createJSONEntities(RESTLocaleCollectionV1.class, Locale.class, dataObjects, localeFactory,
+                RESTv1Constants.LOCALES_EXPANSION_NAME, expand, logDetails);
     }
 
     /* BLOBCONSTANTS FUNCTIONS */
@@ -2171,14 +2271,14 @@ public class RESTv1 extends BaseRESTv1 implements RESTBaseInterfaceV1, RESTInter
 
         // Try and find the locale specified first
         for (final LanguageImage languageImage : entity.getLanguageImages()) {
-            if (fixedLocale.equalsIgnoreCase(languageImage.getLocale())) {
+            if (fixedLocale.equalsIgnoreCase(languageImage.getLocale().getValue())) {
                 return Response.ok(languageImage.getImageData(), languageImage.getMimeType()).build();
             }
         }
 
         // If the specified locale can't be found then use the default
         for (final LanguageImage languageImage : entity.getLanguageImages()) {
-            if (ApplicationConfig.getInstance().getDefaultLocale().equalsIgnoreCase(languageImage.getLocale())) {
+            if (ApplicationConfig.getInstance().getDefaultLocale().equalsIgnoreCase(languageImage.getLocale().getValue())) {
                 return Response.ok(languageImage.getImageData(), languageImage.getMimeType()).build();
             }
         }
@@ -2196,14 +2296,14 @@ public class RESTv1 extends BaseRESTv1 implements RESTBaseInterfaceV1, RESTInter
 
         // Try and find the locale specified first
         for (final LanguageImage languageImage : entity.getLanguageImages()) {
-            if (fixedLocale.equalsIgnoreCase(languageImage.getLocale())) {
+            if (fixedLocale.equalsIgnoreCase(languageImage.getLocale().getValue())) {
                 return Response.ok(languageImage.getImageData(), languageImage.getMimeType()).build();
             }
         }
 
         // If the specified locale can't be found then use the default
         for (final LanguageImage languageImage : entity.getLanguageImages()) {
-            if (ApplicationConfig.getInstance().getDefaultLocale().equalsIgnoreCase(languageImage.getLocale())) {
+            if (ApplicationConfig.getInstance().getDefaultLocale().equalsIgnoreCase(languageImage.getLocale().getValue())) {
                 return Response.ok(languageImage.getImageData(), languageImage.getMimeType()).build();
             }
         }
@@ -2223,7 +2323,7 @@ public class RESTv1 extends BaseRESTv1 implements RESTBaseInterfaceV1, RESTInter
 
             // Try and find the locale specified first
             for (final LanguageImage languageImage : entity.getLanguageImages()) {
-                if (fixedLocale.equalsIgnoreCase(languageImage.getLocale())) {
+                if (fixedLocale.equalsIgnoreCase(languageImage.getLocale().getValue())) {
                     foundLanguageImage = languageImage;
                     break;
                 }
@@ -2232,7 +2332,7 @@ public class RESTv1 extends BaseRESTv1 implements RESTBaseInterfaceV1, RESTInter
             if (foundLanguageImage == null) {
                 // If the specified locale can't be found then use the default */
                 for (final LanguageImage languageImage : entity.getLanguageImages()) {
-                    if (ApplicationConfig.getInstance().getDefaultLocale().equalsIgnoreCase(languageImage.getLocale())) {
+                    if (ApplicationConfig.getInstance().getDefaultLocale().equalsIgnoreCase(languageImage.getLocale().getValue())) {
                         foundLanguageImage = languageImage;
                         break;
                     }
@@ -2595,7 +2695,7 @@ public class RESTv1 extends BaseRESTv1 implements RESTBaseInterfaceV1, RESTInter
                             The locale and format are either unspecified or match.
                          */
                         if ((dataObject.getConfiguredParameters().indexOf(RESTTopicV1.LOCALE_NAME) == -1 ||
-                                topic.getTopicLocale().equals(dataObject.getLocale())) &&
+                                topic.getLocale().equals(dataObject.getLocale())) &&
                                 (dataObject.getConfiguredParameters().indexOf(RESTTopicV1.FORMAT_NAME) == -1 ||
                                 TopicUtilities.getTopicXMLDocBookVersion(topic) == TopicUtilities.getTopicXMLDocBookVersion(dataObject))  ) {
                             return new RESTMatchedTopicV1(getJSONTopic(topic.getId(), expand), true);
@@ -4089,7 +4189,7 @@ public class RESTv1 extends BaseRESTv1 implements RESTBaseInterfaceV1, RESTInter
 
         // Try and find the locale specified first
         for (final LanguageFile languageFile : entity.getLanguageFiles()) {
-            if (fixedLocale.equalsIgnoreCase(languageFile.getLocale())) {
+            if (fixedLocale.equalsIgnoreCase(languageFile.getLocale().getValue())) {
                 response.getOutputHeaders().putSingle("Content-Disposition", "filename=" + entity.getFileName());
                 return languageFile.getFileData();
             }
@@ -4097,7 +4197,7 @@ public class RESTv1 extends BaseRESTv1 implements RESTBaseInterfaceV1, RESTInter
 
         // If the specified locale can't be found then use the default
         for (final LanguageFile languageFile : entity.getLanguageFiles()) {
-            if (ApplicationConfig.getInstance().getDefaultLocale().equalsIgnoreCase(languageFile.getLocale())) {
+            if (ApplicationConfig.getInstance().getDefaultLocale().equalsIgnoreCase(languageFile.getLocale().getValue())) {
                 response.getOutputHeaders().putSingle("Content-Disposition", "filename=" + entity.getFileName());
                 return languageFile.getFileData();
             }
@@ -4116,7 +4216,7 @@ public class RESTv1 extends BaseRESTv1 implements RESTBaseInterfaceV1, RESTInter
 
         // Try and find the locale specified first
         for (final LanguageFile languageFile : entity.getLanguageFiles()) {
-            if (fixedLocale.equalsIgnoreCase(languageFile.getLocale())) {
+            if (fixedLocale.equalsIgnoreCase(languageFile.getLocale().getValue())) {
                 response.getOutputHeaders().putSingle("Content-Disposition", "filename=" + entity.getFileName());
                 return languageFile.getFileData();
             }
@@ -4124,7 +4224,7 @@ public class RESTv1 extends BaseRESTv1 implements RESTBaseInterfaceV1, RESTInter
 
         // If the specified locale can't be found then use the default
         for (final LanguageFile languageFile : entity.getLanguageFiles()) {
-            if (ApplicationConfig.getInstance().getDefaultLocale().equalsIgnoreCase(languageFile.getLocale())) {
+            if (ApplicationConfig.getInstance().getDefaultLocale().equalsIgnoreCase(languageFile.getLocale().getValue())) {
                 response.getOutputHeaders().putSingle("Content-Disposition", "filename=" + entity.getFileName());
                 return languageFile.getFileData();
             }

@@ -49,10 +49,12 @@ import com.j2bugzilla.base.ECSBug;
 import com.j2bugzilla.rpc.BugSearch;
 import com.j2bugzilla.rpc.GetBug;
 import com.j2bugzilla.rpc.LogIn;
+import org.hibernate.Session;
 import org.jboss.pressgang.ccms.contentspec.utils.CustomTopicXMLValidator;
 import org.jboss.pressgang.ccms.model.BlobConstants;
 import org.jboss.pressgang.ccms.model.BugzillaBug;
 import org.jboss.pressgang.ccms.model.Category;
+import org.jboss.pressgang.ccms.model.Locale;
 import org.jboss.pressgang.ccms.model.StringConstants;
 import org.jboss.pressgang.ccms.model.Tag;
 import org.jboss.pressgang.ccms.model.TagToCategory;
@@ -729,12 +731,18 @@ public class TopicUtilities {
              */
             final Topic revisionTopic = entityManager.find(Topic.class, topicId);
             if (revisionTopic != null) {
-                final String locale = revisionTopic.getTopicLocale();
+                final Locale locale;
+                if (revisionTopic.getLocale() != null) {
+                    locale = revisionTopic.getLocale();
+                } else {
+                    final Session session = entityManager.unwrap(Session.class);
+                    locale = (Locale) session.bySimpleNaturalId(Locale.class).load(ApplicationConfig.getInstance().getDefaultLocale());
+                }
 
                 final TranslatedTopicData translatedTopicData = new TranslatedTopicData();
                 translatedTopicData.setTranslatedTopic(translatedTopic);
                 translatedTopicData.setTranslatedXml(revisionTopic.getTopicXML());
-                translatedTopicData.setTranslationLocale(locale == null ? ApplicationConfig.getInstance().getDefaultLocale() : locale);
+                translatedTopicData.setLocale(locale);
                 translatedTopicData.setTranslationPercentage(100);
                 translatedTopic.getTranslatedTopicDatas().add(translatedTopicData);
             }

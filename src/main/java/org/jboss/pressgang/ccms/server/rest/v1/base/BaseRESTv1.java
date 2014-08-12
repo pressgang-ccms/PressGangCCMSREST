@@ -102,6 +102,7 @@ import org.jboss.pressgang.ccms.server.rest.v1.factory.FileV1Factory;
 import org.jboss.pressgang.ccms.server.rest.v1.factory.FilterV1Factory;
 import org.jboss.pressgang.ccms.server.rest.v1.factory.ImageV1Factory;
 import org.jboss.pressgang.ccms.server.rest.v1.factory.IntegerConstantV1Factory;
+import org.jboss.pressgang.ccms.server.rest.v1.factory.LocaleV1Factory;
 import org.jboss.pressgang.ccms.server.rest.v1.factory.ProcessInformationV1Factory;
 import org.jboss.pressgang.ccms.server.rest.v1.factory.ProjectV1Factory;
 import org.jboss.pressgang.ccms.server.rest.v1.factory.PropertyCategoryV1Factory;
@@ -208,6 +209,8 @@ public class BaseRESTv1 extends BaseREST {
     protected ImageV1Factory imageFactory;
     @Inject
     protected IntegerConstantV1Factory integerConstantFactory;
+    @Inject
+    protected LocaleV1Factory localeFactory;
     @Inject
     protected ProjectV1Factory projectFactory;
     @Inject
@@ -921,6 +924,11 @@ public class BaseRESTv1 extends BaseREST {
                 factory.syncDBEntityUpdateChanges(childAction.getDBEntity(), childAction.getRESTEntity(), childAction);
             }
 
+            // Persist the changes
+            for (final U entity : returnEntities) {
+                entityManager.persist(entity);
+            }
+
             // Flush and commit the changes to the database.
             entityManager.flush();
             transaction.commit();
@@ -1460,8 +1468,8 @@ public class BaseRESTv1 extends BaseREST {
                 final ContentSpecProcessor processor = new ContentSpecProcessor(providerFactory, loggerManager, processingOptions);
 
                 // Process the content spec
-                final ParserResults results = processContentSpecString(id, contentSpecString, restEntity.getLocale(), parser, processor,
-                        enversLoggingBean.getUsername(), operation, dataType);
+                final ParserResults results = processContentSpecString(id, contentSpecString, null, parser,
+                        processor, enversLoggingBean.getUsername(), operation, dataType);
 
                 success = results.parsedSuccessfully();
                 if (success) {
@@ -1532,8 +1540,9 @@ public class BaseRESTv1 extends BaseREST {
      * @param operation         Whether the content spec should be created or updated.
      * @param dataType      @return True if the Content Spec was parsed and processed successfully, otherwise false.
      */
-    private ParserResults processContentSpecString(final Integer id, final String contentSpecString, String localeOverride, final ContentSpecParser parser,
-            final ContentSpecProcessor processor, final String username, final DatabaseOperation operation, final String dataType) {
+    private ParserResults processContentSpecString(final Integer id, final String contentSpecString, final String localeOverride,
+            final ContentSpecParser parser, final ContentSpecProcessor processor, final String username,
+            final DatabaseOperation operation, final String dataType) {
         final ContentSpecParser.ParsingMode mode;
         if (dataType.equals(RESTv1Constants.TEXT_URL)) {
             if (operation == DatabaseOperation.CREATE) {

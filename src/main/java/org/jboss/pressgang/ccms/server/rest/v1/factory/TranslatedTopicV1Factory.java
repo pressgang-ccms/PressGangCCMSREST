@@ -28,6 +28,7 @@ import javax.persistence.criteria.Root;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.jboss.pressgang.ccms.model.Locale;
 import org.jboss.pressgang.ccms.model.TranslatedTopic;
 import org.jboss.pressgang.ccms.model.TranslatedTopicData;
 import org.jboss.pressgang.ccms.model.TranslatedTopicString;
@@ -40,6 +41,7 @@ import org.jboss.pressgang.ccms.rest.v1.collections.RESTTranslatedTopicStringCol
 import org.jboss.pressgang.ccms.rest.v1.collections.items.RESTTranslatedTopicCollectionItemV1;
 import org.jboss.pressgang.ccms.rest.v1.collections.join.RESTAssignedPropertyTagCollectionV1;
 import org.jboss.pressgang.ccms.rest.v1.constants.RESTv1Constants;
+import org.jboss.pressgang.ccms.rest.v1.entities.RESTLocaleV1;
 import org.jboss.pressgang.ccms.rest.v1.entities.RESTTranslatedTopicStringV1;
 import org.jboss.pressgang.ccms.rest.v1.entities.RESTTranslatedTopicV1;
 import org.jboss.pressgang.ccms.rest.v1.entities.base.RESTBaseEntityV1;
@@ -59,6 +61,8 @@ import org.jboss.resteasy.spi.BadRequestException;
 @ApplicationScoped
 public class TranslatedTopicV1Factory extends RESTEntityFactory<RESTTranslatedTopicV1, TranslatedTopicData,
         RESTTranslatedTopicCollectionV1, RESTTranslatedTopicCollectionItemV1> {
+    @Inject
+    protected LocaleV1Factory localeFactory;
     @Inject
     protected TopicV1Factory topicFactory;
     @Inject
@@ -115,13 +119,18 @@ public class TranslatedTopicV1Factory extends RESTEntityFactory<RESTTranslatedTo
         if (title == null) title = entity.getTranslatedTopic().getEnversTopic(entityManager).getTopicTitle();
 
         // Prefix the locale to the title if its a dummy translation to show that it is missing the related translated topic
-        if (entity.getId() < 0) title = "[" + entity.getTranslationLocale() + "] " + title;
+        if (entity.getId() < 0) title = "[" + entity.getLocale() + "] " + title;
         retValue.setTitle(title);
 
         retValue.setXml(entity.getTranslatedXml());
         retValue.setXmlErrors(entity.getTranslatedXmlErrors());
-        retValue.setLocale(entity.getTranslationLocale());
         retValue.setTranslationPercentage(entity.getTranslationPercentage());
+
+        // LOCALE
+        if (entity.getLocale() != null) {
+            final ExpandDataTrunk childExpand = expand == null ? null: expand.get(RESTTranslatedTopicV1.LOCALE_NAME);
+            retValue.setLocale(localeFactory.createRESTEntityFromDBEntity(entity.getLocale(), baseUrl, dataType, childExpand, revision));
+        }
 
         // Set the object references
         if (expandParentReferences && expand != null && expand.contains(
@@ -267,7 +276,6 @@ public class TranslatedTopicV1Factory extends RESTEntityFactory<RESTTranslatedTo
 
         if (dataObject.hasParameterSet(RESTTranslatedTopicV1.XML_ERRORS_NAME)) entity.setTranslatedXmlErrors(dataObject.getXmlErrors());
         if (dataObject.hasParameterSet(RESTTranslatedTopicV1.XML_NAME)) entity.setTranslatedXml(dataObject.getXml());
-        if (dataObject.hasParameterSet(RESTTranslatedTopicV1.LOCALE_NAME)) entity.setTranslationLocale(dataObject.getLocale());
         if (dataObject.hasParameterSet(RESTTranslatedTopicV1.TRANSLATIONPERCENTAGE_NAME))
             entity.setTranslationPercentage(dataObject.getTranslationPercentage());
 
@@ -281,12 +289,12 @@ public class TranslatedTopicV1Factory extends RESTEntityFactory<RESTTranslatedTo
          * If the additional XML wasn't set and this is a new entity then try and get the previous topic's additional XML. We need to do
          * this otherwise every time one little change is made the additional xml will be lost and have to be re-added.
          */
-        if (!additionalXMLSet && entity.getId() == null && entity.getTranslationLocale() != null) {
+        if (!additionalXMLSet && entity.getId() == null && entity.getLocale() != null) {
             final CriteriaBuilder builder = entityManager.getCriteriaBuilder();
             final CriteriaQuery<TranslatedTopicData> query = builder.createQuery(TranslatedTopicData.class);
             final Root<TranslatedTopicData> root = query.from(TranslatedTopicData.class);
 
-            final Predicate localeMatches = builder.equal(root.get("translationLocale"), entity.getTranslationLocale());
+            final Predicate localeMatches = builder.equal(root.get("translationLocale"), entity.getLocale());
             final Predicate topicIdMatches = builder.equal(root.get("translatedTopic").get("topicId"),
                     entity.getTranslatedTopic().getTopicId());
             query.where(builder.and(localeMatches, topicIdMatches));
@@ -307,6 +315,29 @@ public class TranslatedTopicV1Factory extends RESTEntityFactory<RESTTranslatedTo
 
     @Override
     public void syncAdditionalDetails(final TranslatedTopicData entity, final RESTTranslatedTopicV1 dataObject) {
+        // Set the Locale
+        if (dataObject.hasParameterSet(RESTTranslatedTopicV1.LOCALE_NAME)) {
+            final RESTLocaleV1 restEntity = dataObject.getLocale();
+
+            if (restEntity != null) {
+                final Locale dbEntity;
+                if (restEntity.getId() != null) {
+                    dbEntity = RESTv1Utilities.findEntity(entityManager, entityCache, restEntity, Locale.class);
+                } else {
+                    dbEntity = localeFactory.createDBEntity(restEntity);
+                }
+
+                if (dbEntity == null)
+                    throw new BadRequestException("No Locale entity was found with the primary key " + restEntity.getId());
+
+                localeFactory.syncBaseDetails(dbEntity, restEntity);
+
+                entity.setLocale(dbEntity);
+            } else {
+                entity.setLocale(null);
+            }
+        }
+
         /* This method will set the XML errors field */
         TranslatedTopicUtilities.processXML(entityManager, entity);
     }

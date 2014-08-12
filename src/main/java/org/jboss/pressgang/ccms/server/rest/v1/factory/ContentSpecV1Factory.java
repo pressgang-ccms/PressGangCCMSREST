@@ -24,6 +24,7 @@ import javax.inject.Inject;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.jboss.pressgang.ccms.model.Locale;
 import org.jboss.pressgang.ccms.model.PropertyTag;
 import org.jboss.pressgang.ccms.model.Tag;
 import org.jboss.pressgang.ccms.model.base.AuditedEntity;
@@ -39,6 +40,7 @@ import org.jboss.pressgang.ccms.rest.v1.collections.contentspec.RESTTranslatedCo
 import org.jboss.pressgang.ccms.rest.v1.collections.contentspec.items.RESTContentSpecCollectionItemV1;
 import org.jboss.pressgang.ccms.rest.v1.collections.join.RESTAssignedPropertyTagCollectionV1;
 import org.jboss.pressgang.ccms.rest.v1.constants.RESTv1Constants;
+import org.jboss.pressgang.ccms.rest.v1.entities.RESTLocaleV1;
 import org.jboss.pressgang.ccms.rest.v1.entities.RESTTagV1;
 import org.jboss.pressgang.ccms.rest.v1.entities.base.RESTBaseEntityV1;
 import org.jboss.pressgang.ccms.rest.v1.entities.contentspec.RESTCSNodeV1;
@@ -58,6 +60,8 @@ import org.jboss.resteasy.spi.BadRequestException;
 @ApplicationScoped
 public class ContentSpecV1Factory extends RESTEntityFactory<RESTContentSpecV1, ContentSpec, RESTContentSpecCollectionV1,
         RESTContentSpecCollectionItemV1> {
+    @Inject
+    protected LocaleV1Factory localeFactory;
     @Inject
     protected CSNodeV1Factory csNodeFactory;
     @Inject
@@ -93,13 +97,18 @@ public class ContentSpecV1Factory extends RESTEntityFactory<RESTContentSpecV1, C
         retValue.setExpand(expandOptions);
 
         retValue.setId(entity.getId());
-        retValue.setLocale(entity.getLocale());
         retValue.setCondition(entity.getCondition());
         retValue.setType(RESTContentSpecTypeV1.getContentSpecType(entity.getContentSpecType()));
         retValue.setLastPublished(entity.getLastPublished());
         retValue.setLastModified(EnversUtilities.getFixedLastModifiedDate(entityManager, entity));
         retValue.setErrors(entity.getErrors());
         retValue.setFailedContentSpec(ContentSpecUtilities.fixFailedContentSpec(entity));
+
+        // LOCALE
+        if (entity.getLocale() != null) {
+            final ExpandDataTrunk childExpand = expand == null ? null: expand.get(RESTContentSpecV1.LOCALE_NAME);
+            retValue.setLocale(localeFactory.createRESTEntityFromDBEntity(entity.getLocale(), baseUrl, dataType, childExpand, revision));
+        }
 
         // REVISIONS
         if (revision == null && expand != null && expand.contains(RESTBaseEntityV1.REVISIONS_NAME)) {
@@ -172,7 +181,6 @@ public class ContentSpecV1Factory extends RESTEntityFactory<RESTContentSpecV1, C
 
     @Override
     public void syncBaseDetails(final ContentSpec entity, final RESTContentSpecV1 dataObject) {
-        if (dataObject.hasParameterSet(RESTContentSpecV1.LOCALE_NAME)) entity.setLocale(dataObject.getLocale());
         if (dataObject.hasParameterSet(RESTContentSpecV1.CONDITION_NAME)) entity.setCondition(dataObject.getCondition());
         if (dataObject.hasParameterSet(RESTContentSpecV1.LAST_PUBLISHED_NAME)) entity.setLastPublished(dataObject.getLastPublished());
         if (dataObject.hasParameterSet(RESTContentSpecV1.TYPE_NAME))
@@ -181,6 +189,32 @@ public class ContentSpecV1Factory extends RESTEntityFactory<RESTContentSpecV1, C
         // Remove any error content
         entity.setErrors(null);
         entity.setFailedContentSpec(null);
+    }
+
+    @Override
+    public void syncAdditionalDetails(final ContentSpec entity, final RESTContentSpecV1 dataObject) {
+        // Set the Locale
+        if (dataObject.hasParameterSet(RESTContentSpecV1.LOCALE_NAME)) {
+            final RESTLocaleV1 restEntity = dataObject.getLocale();
+
+            if (restEntity != null) {
+                final Locale dbEntity;
+                if (restEntity.getId() != null) {
+                    dbEntity = RESTv1Utilities.findEntity(entityManager, entityCache, restEntity, Locale.class);
+                } else {
+                    dbEntity = localeFactory.createDBEntity(restEntity);
+                }
+
+                if (dbEntity == null)
+                    throw new BadRequestException("No Locale entity was found with the primary key " + restEntity.getId());
+
+                localeFactory.syncBaseDetails(dbEntity, restEntity);
+
+                entity.setLocale(dbEntity);
+            } else {
+                entity.setLocale(null);
+            }
+        }
     }
 
     @Override

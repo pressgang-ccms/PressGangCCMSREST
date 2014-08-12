@@ -25,19 +25,25 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.jboss.pressgang.ccms.model.LanguageImage;
+import org.jboss.pressgang.ccms.model.Locale;
 import org.jboss.pressgang.ccms.rest.v1.collections.RESTLanguageImageCollectionV1;
 import org.jboss.pressgang.ccms.rest.v1.collections.items.RESTLanguageImageCollectionItemV1;
 import org.jboss.pressgang.ccms.rest.v1.entities.RESTLanguageImageV1;
+import org.jboss.pressgang.ccms.rest.v1.entities.RESTLocaleV1;
 import org.jboss.pressgang.ccms.rest.v1.entities.base.RESTBaseEntityV1;
 import org.jboss.pressgang.ccms.rest.v1.expansion.ExpandDataTrunk;
 import org.jboss.pressgang.ccms.server.rest.v1.RESTChangeAction;
 import org.jboss.pressgang.ccms.server.rest.v1.factory.base.RESTEntityCollectionFactory;
 import org.jboss.pressgang.ccms.server.rest.v1.factory.base.RESTEntityFactory;
+import org.jboss.pressgang.ccms.server.rest.v1.utils.RESTv1Utilities;
 import org.jboss.pressgang.ccms.server.utils.EnversUtilities;
+import org.jboss.resteasy.spi.BadRequestException;
 
 @ApplicationScoped
 public class LanguageImageV1Factory extends RESTEntityFactory<RESTLanguageImageV1, LanguageImage, RESTLanguageImageCollectionV1,
         RESTLanguageImageCollectionItemV1> {
+    @Inject
+    protected LocaleV1Factory localeFactory;
     @Inject
     protected ImageV1Factory imageFactory;
 
@@ -60,7 +66,6 @@ public class LanguageImageV1Factory extends RESTEntityFactory<RESTLanguageImageV
         retValue.setExpand(expandOptions);
 
         retValue.setId(entity.getLanguageImageId());
-        retValue.setLocale(entity.getLocale());
         retValue.setFilename(entity.getOriginalFileName());
         retValue.setContentHash(entity.getImageContentHash());
 
@@ -69,6 +74,12 @@ public class LanguageImageV1Factory extends RESTEntityFactory<RESTLanguageImageV
         if (expand != null && expand.contains(RESTLanguageImageV1.IMAGEDATABASE64_NAME))
             retValue.setImageDataBase64(entity.getImageDataBase64());
         if (expand != null && expand.contains(RESTLanguageImageV1.THUMBNAIL_NAME)) retValue.setThumbnail(entity.getThumbnailData());
+
+        // LOCALE
+        if (entity.getLocale() != null) {
+            final ExpandDataTrunk childExpand = expand == null ? null: expand.get(RESTLanguageImageV1.LOCALE_NAME);
+            retValue.setLocale(localeFactory.createRESTEntityFromDBEntity(entity.getLocale(), baseUrl, dataType, childExpand, revision));
+        }
 
         /* Set the object references */
         if (expandParentReferences && expand != null && expand.contains(RESTLanguageImageV1.IMAGE_NAME) && entity.getImageFile() != null) {
@@ -93,9 +104,34 @@ public class LanguageImageV1Factory extends RESTEntityFactory<RESTLanguageImageV
 
     @Override
     public void syncBaseDetails(final LanguageImage entity, final RESTLanguageImageV1 dataObject) {
-        if (dataObject.hasParameterSet(RESTLanguageImageV1.LOCALE_NAME)) entity.setLocale(dataObject.getLocale());
         if (dataObject.hasParameterSet(RESTLanguageImageV1.IMAGEDATA_NAME)) entity.setImageData(dataObject.getImageData());
         if (dataObject.hasParameterSet(RESTLanguageImageV1.FILENAME_NAME)) entity.setOriginalFileName(dataObject.getFilename());
+    }
+
+    @Override
+    public void syncAdditionalDetails(final LanguageImage entity, final RESTLanguageImageV1 dataObject) {
+        // Set the Locale
+        if (dataObject.hasParameterSet(RESTLanguageImageV1.LOCALE_NAME)) {
+            final RESTLocaleV1 restEntity = dataObject.getLocale();
+
+            if (restEntity != null) {
+                final Locale dbEntity;
+                if (restEntity.getId() != null) {
+                    dbEntity = RESTv1Utilities.findEntity(entityManager, entityCache, restEntity, Locale.class);
+                } else {
+                    dbEntity = localeFactory.createDBEntity(restEntity);
+                }
+
+                if (dbEntity == null)
+                    throw new BadRequestException("No Locale entity was found with the primary key " + restEntity.getId());
+
+                localeFactory.syncBaseDetails(dbEntity, restEntity);
+
+                entity.setLocale(dbEntity);
+            } else {
+                entity.setLocale(null);
+            }
+        }
     }
 
     @Override

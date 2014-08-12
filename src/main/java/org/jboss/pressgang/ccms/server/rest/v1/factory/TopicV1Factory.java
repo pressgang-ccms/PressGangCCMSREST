@@ -26,6 +26,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.jboss.pressgang.ccms.model.BugzillaBug;
+import org.jboss.pressgang.ccms.model.Locale;
 import org.jboss.pressgang.ccms.model.MinHashXOR;
 import org.jboss.pressgang.ccms.model.PropertyTag;
 import org.jboss.pressgang.ccms.model.Tag;
@@ -44,6 +45,7 @@ import org.jboss.pressgang.ccms.rest.v1.collections.items.RESTTopicCollectionIte
 import org.jboss.pressgang.ccms.rest.v1.collections.join.RESTAssignedPropertyTagCollectionV1;
 import org.jboss.pressgang.ccms.rest.v1.constants.RESTv1Constants;
 import org.jboss.pressgang.ccms.rest.v1.entities.RESTBugzillaBugV1;
+import org.jboss.pressgang.ccms.rest.v1.entities.RESTLocaleV1;
 import org.jboss.pressgang.ccms.rest.v1.entities.RESTTagV1;
 import org.jboss.pressgang.ccms.rest.v1.entities.RESTTopicSourceUrlV1;
 import org.jboss.pressgang.ccms.rest.v1.entities.RESTTopicV1;
@@ -64,6 +66,8 @@ import org.jboss.resteasy.spi.BadRequestException;
 
 @ApplicationScoped
 public class TopicV1Factory extends RESTEntityFactory<RESTTopicV1, Topic, RESTTopicCollectionV1, RESTTopicCollectionItemV1> {
+    @Inject
+    protected LocaleV1Factory localeFactory;
     @Inject
     protected CachedEntityLoader cachedEntityLoader;
     @Inject
@@ -111,10 +115,15 @@ public class TopicV1Factory extends RESTEntityFactory<RESTTopicV1, Topic, RESTTo
         retValue.setXml(entity.getTopicXML());
         retValue.setLastModified(EnversUtilities.getFixedLastModifiedDate(entityManager, entity));
         retValue.setCreated(entity.getTopicTimeStamp());
-        retValue.setLocale(entity.getTopicLocale());
         retValue.setXmlErrors(entity.getTopicXMLErrors());
         retValue.setXmlFormat(RESTXMLFormat.getXMLFormat(entity.getXmlFormat()));
         retValue.setContentHash(entity.getTopicContentHash());
+
+        // LOCALE
+        if (entity.getLocale() != null) {
+            final ExpandDataTrunk childExpand = expand == null ? null: expand.get(RESTTopicV1.LOCALE_NAME);
+            retValue.setLocale(localeFactory.createRESTEntityFromDBEntity(entity.getLocale(), baseUrl, dataType, childExpand));
+        }
 
         // KEYWORDS
         if (revision == null && expand != null && expand.contains(RESTTopicV1.KEYWORDS_NAME)) {
@@ -267,13 +276,35 @@ public class TopicV1Factory extends RESTEntityFactory<RESTTopicV1, Topic, RESTTo
                 }
             }
         }
-        if (dataObject.hasParameterSet(RESTTopicV1.LOCALE_NAME)) entity.setTopicLocale(dataObject.getLocale());
         if (dataObject.hasParameterSet(RESTTopicV1.FORMAT_NAME))
             entity.setXmlFormat(RESTXMLFormat.getXMLFormatId(dataObject.getXmlFormat()));
     }
 
     @Override
     public void syncAdditionalDetails(final Topic entity, final RESTTopicV1 dataObject) {
+        // Set the Locale
+        if (dataObject.hasParameterSet(RESTTopicV1.LOCALE_NAME)) {
+            final RESTLocaleV1 restEntity = dataObject.getLocale();
+
+            if (restEntity != null) {
+                final Locale dbEntity;
+                if (restEntity.getId() != null) {
+                    dbEntity = RESTv1Utilities.findEntity(entityManager, entityCache, restEntity, Locale.class);
+                } else {
+                    dbEntity = localeFactory.createDBEntity(restEntity);
+                }
+
+                if (dbEntity == null)
+                    throw new BadRequestException("No Locale entity was found with the primary key " + restEntity.getId());
+
+                localeFactory.syncBaseDetails(dbEntity, restEntity);
+
+                entity.setLocale(dbEntity);
+            } else {
+                entity.setLocale(null);
+            }
+        }
+
         // This method will set the XML errors field
         if (requiresXMLProcessing(dataObject)) {
             TopicUtilities.syncXML(entityManager, entity);
