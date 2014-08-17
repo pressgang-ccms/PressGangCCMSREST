@@ -28,7 +28,7 @@ import org.jboss.pressgang.ccms.rest.v1.collections.RESTStringConstantCollection
 import org.jboss.pressgang.ccms.rest.v1.collections.items.RESTStringConstantCollectionItemV1;
 import org.jboss.pressgang.ccms.rest.v1.constants.RESTv1Constants;
 import org.jboss.pressgang.ccms.rest.v1.entities.RESTStringConstantV1;
-import org.jboss.pressgang.ccms.rest.v1.entities.base.RESTBaseEntityV1;
+import org.jboss.pressgang.ccms.rest.v1.entities.base.RESTBaseAuditedEntityV1;
 import org.jboss.pressgang.ccms.rest.v1.expansion.ExpandDataTrunk;
 import org.jboss.pressgang.ccms.server.rest.v1.RESTChangeAction;
 import org.jboss.pressgang.ccms.server.rest.v1.factory.base.RESTEntityCollectionFactory;
@@ -47,8 +47,8 @@ public class StringConstantV1Factory extends RESTEntityFactory<RESTStringConstan
         final RESTStringConstantV1 retValue = new RESTStringConstantV1();
 
         final List<String> expandOptions = new ArrayList<String>();
-        expandOptions.add(RESTBaseEntityV1.LOG_DETAILS_NAME);
-        if (revision == null) expandOptions.add(RESTBaseEntityV1.REVISIONS_NAME);
+        expandOptions.add(RESTBaseAuditedEntityV1.LOG_DETAILS_NAME);
+        if (revision == null) expandOptions.add(RESTBaseAuditedEntityV1.REVISIONS_NAME);
         retValue.setExpand(expandOptions);
 
         retValue.setId(entity.getStringConstantsId());
@@ -56,10 +56,10 @@ public class StringConstantV1Factory extends RESTEntityFactory<RESTStringConstan
         retValue.setValue(entity.getConstantValue());
 
         // REVISIONS
-        if (revision == null && expand != null && expand.contains(RESTBaseEntityV1.REVISIONS_NAME)) {
+        if (revision == null && expand != null && expand.contains(RESTBaseAuditedEntityV1.REVISIONS_NAME)) {
             retValue.setRevisions(
                     RESTEntityCollectionFactory.create(RESTStringConstantCollectionV1.class, this, entity,
-                            EnversUtilities.getRevisions(entityManager, entity), RESTBaseEntityV1.REVISIONS_NAME, dataType, expand, baseUrl,
+                            EnversUtilities.getRevisions(entityManager, entity), RESTBaseAuditedEntityV1.REVISIONS_NAME, dataType, expand, baseUrl,
                             entityManager));
         }
 

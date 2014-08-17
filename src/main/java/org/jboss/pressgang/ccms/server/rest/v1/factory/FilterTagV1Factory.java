@@ -30,7 +30,7 @@ import org.jboss.pressgang.ccms.rest.v1.collections.RESTFilterTagCollectionV1;
 import org.jboss.pressgang.ccms.rest.v1.collections.items.RESTFilterTagCollectionItemV1;
 import org.jboss.pressgang.ccms.rest.v1.entities.RESTFilterTagV1;
 import org.jboss.pressgang.ccms.rest.v1.entities.RESTTagV1;
-import org.jboss.pressgang.ccms.rest.v1.entities.base.RESTBaseEntityV1;
+import org.jboss.pressgang.ccms.rest.v1.entities.base.RESTBaseAuditedEntityV1;
 import org.jboss.pressgang.ccms.rest.v1.expansion.ExpandDataTrunk;
 import org.jboss.pressgang.ccms.server.rest.v1.RESTChangeAction;
 import org.jboss.pressgang.ccms.server.rest.v1.factory.base.RESTEntityCollectionFactory;
@@ -57,8 +57,8 @@ public class FilterTagV1Factory extends RESTEntityFactory<RESTFilterTagV1, Filte
 
         final List<String> expandOptions = new ArrayList<String>();
         expandOptions.add(RESTFilterTagV1.TAG_NAME);
-        expandOptions.add(RESTBaseEntityV1.LOG_DETAILS_NAME);
-        if (revision == null) expandOptions.add(RESTBaseEntityV1.REVISIONS_NAME);
+        expandOptions.add(RESTBaseAuditedEntityV1.LOG_DETAILS_NAME);
+        if (revision == null) expandOptions.add(RESTBaseAuditedEntityV1.REVISIONS_NAME);
 
         retValue.setExpand(expandOptions);
 
@@ -66,9 +66,9 @@ public class FilterTagV1Factory extends RESTEntityFactory<RESTFilterTagV1, Filte
         retValue.setState(entity.getTagState());
 
         // REVISIONS
-        if (revision == null && expand != null && expand.contains(RESTBaseEntityV1.REVISIONS_NAME)) {
+        if (revision == null && expand != null && expand.contains(RESTBaseAuditedEntityV1.REVISIONS_NAME)) {
             retValue.setRevisions(RESTEntityCollectionFactory.create(RESTFilterTagCollectionV1.class, this, entity,
-                    EnversUtilities.getRevisions(entityManager, entity), RESTBaseEntityV1.REVISIONS_NAME, dataType, expand, baseUrl,
+                    EnversUtilities.getRevisions(entityManager, entity), RESTBaseAuditedEntityV1.REVISIONS_NAME, dataType, expand, baseUrl,
                     entityManager));
         }
 

@@ -29,7 +29,7 @@ import org.jboss.pressgang.ccms.model.FilterCategory;
 import org.jboss.pressgang.ccms.model.FilterField;
 import org.jboss.pressgang.ccms.model.FilterLocale;
 import org.jboss.pressgang.ccms.model.FilterTag;
-import org.jboss.pressgang.ccms.model.base.AuditedEntity;
+import org.jboss.pressgang.ccms.model.base.PressGangEntity;
 import org.jboss.pressgang.ccms.rest.v1.collections.RESTFilterCategoryCollectionV1;
 import org.jboss.pressgang.ccms.rest.v1.collections.RESTFilterCollectionV1;
 import org.jboss.pressgang.ccms.rest.v1.collections.RESTFilterFieldCollectionV1;
@@ -42,6 +42,7 @@ import org.jboss.pressgang.ccms.rest.v1.entities.RESTFilterFieldV1;
 import org.jboss.pressgang.ccms.rest.v1.entities.RESTFilterLocaleV1;
 import org.jboss.pressgang.ccms.rest.v1.entities.RESTFilterTagV1;
 import org.jboss.pressgang.ccms.rest.v1.entities.RESTFilterV1;
+import org.jboss.pressgang.ccms.rest.v1.entities.base.RESTBaseAuditedEntityV1;
 import org.jboss.pressgang.ccms.rest.v1.entities.base.RESTBaseEntityV1;
 import org.jboss.pressgang.ccms.rest.v1.entities.enums.RESTFilterTypeV1;
 import org.jboss.pressgang.ccms.rest.v1.expansion.ExpandDataTrunk;
@@ -75,8 +76,8 @@ public class FilterV1Factory extends RESTEntityFactory<RESTFilterV1, Filter, RES
         expandOptions.add(RESTFilterV1.FILTER_CATEGORIES_NAME);
         expandOptions.add(RESTFilterV1.FILTER_LOCALES_NAME);
         expandOptions.add(RESTFilterV1.FILTER_TAGS_NAME);
-        expandOptions.add(RESTBaseEntityV1.LOG_DETAILS_NAME);
-        if (revision == null) expandOptions.add(RESTBaseEntityV1.REVISIONS_NAME);
+        expandOptions.add(RESTBaseAuditedEntityV1.LOG_DETAILS_NAME);
+        if (revision == null) expandOptions.add(RESTBaseAuditedEntityV1.REVISIONS_NAME);
 
         retValue.setExpand(expandOptions);
 
@@ -85,9 +86,9 @@ public class FilterV1Factory extends RESTEntityFactory<RESTFilterV1, Filter, RES
         retValue.setType(RESTFilterTypeV1.getFilterType(entity.getFilterClassType()));
 
         // REVISIONS
-        if (revision == null && expand != null && expand.contains(RESTBaseEntityV1.REVISIONS_NAME)) {
+        if (revision == null && expand != null && expand.contains(RESTBaseAuditedEntityV1.REVISIONS_NAME)) {
             retValue.setRevisions(RESTEntityCollectionFactory.create(RESTFilterCollectionV1.class, this, entity,
-                    EnversUtilities.getRevisions(entityManager, entity), RESTBaseEntityV1.REVISIONS_NAME, dataType, expand, baseUrl,
+                    EnversUtilities.getRevisions(entityManager, entity), RESTBaseAuditedEntityV1.REVISIONS_NAME, dataType, expand, baseUrl,
                     entityManager));
         }
 
@@ -165,7 +166,7 @@ public class FilterV1Factory extends RESTEntityFactory<RESTFilterV1, Filter, RES
 
     @Override
     public void doDeleteChildAction(final Filter entity, final RESTFilterV1 dataObject, final RESTChangeAction<?> action) {
-        final RESTBaseEntityV1<?, ?, ?> restEntity = action.getRESTEntity();
+        final RESTBaseEntityV1<?> restEntity = action.getRESTEntity();
 
         if (restEntity instanceof RESTFilterTagV1) {
             final FilterTag dbEntity = entityManager.find(FilterTag.class, restEntity.getId());
@@ -198,9 +199,9 @@ public class FilterV1Factory extends RESTEntityFactory<RESTFilterV1, Filter, RES
     }
 
     @Override
-    protected AuditedEntity doCreateChildAction(final Filter entity, final RESTFilterV1 dataObject, final RESTChangeAction<?> action) {
-        final RESTBaseEntityV1<?, ?, ?> restEntity = action.getRESTEntity();
-        final AuditedEntity dbEntity;
+    protected PressGangEntity doCreateChildAction(final Filter entity, final RESTFilterV1 dataObject, final RESTChangeAction<?> action) {
+        final RESTBaseEntityV1<?> restEntity = action.getRESTEntity();
+        final PressGangEntity dbEntity;
 
         if (restEntity instanceof RESTFilterTagV1) {
             dbEntity = action.getFactory().createDBEntity(restEntity);
@@ -222,11 +223,10 @@ public class FilterV1Factory extends RESTEntityFactory<RESTFilterV1, Filter, RES
     }
 
     @Override
-    protected AuditedEntity getChildEntityForAction(final Filter entity, final RESTFilterV1 dataObject,
-            final RESTChangeAction<?> action) {
-        final RESTBaseEntityV1<?, ?, ?> restEntity = action.getRESTEntity();
+    protected PressGangEntity getChildEntityForAction(final Filter entity, final RESTFilterV1 dataObject, final RESTChangeAction<?> action) {
+        final RESTBaseEntityV1<?> restEntity = action.getRESTEntity();
 
-        final AuditedEntity dbEntity;
+        final PressGangEntity dbEntity;
         if (restEntity instanceof RESTFilterTagV1) {
             dbEntity = RESTv1Utilities.findEntity(entityManager, entityCache, (RESTFilterTagV1) restEntity, FilterTag.class);
             if (dbEntity == null) {

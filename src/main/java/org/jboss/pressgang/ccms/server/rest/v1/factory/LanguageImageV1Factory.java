@@ -26,10 +26,12 @@ import java.util.List;
 
 import org.jboss.pressgang.ccms.model.LanguageImage;
 import org.jboss.pressgang.ccms.model.Locale;
+import org.jboss.pressgang.ccms.model.base.PressGangEntity;
 import org.jboss.pressgang.ccms.rest.v1.collections.RESTLanguageImageCollectionV1;
 import org.jboss.pressgang.ccms.rest.v1.collections.items.RESTLanguageImageCollectionItemV1;
 import org.jboss.pressgang.ccms.rest.v1.entities.RESTLanguageImageV1;
 import org.jboss.pressgang.ccms.rest.v1.entities.RESTLocaleV1;
+import org.jboss.pressgang.ccms.rest.v1.entities.base.RESTBaseAuditedEntityV1;
 import org.jboss.pressgang.ccms.rest.v1.entities.base.RESTBaseEntityV1;
 import org.jboss.pressgang.ccms.rest.v1.expansion.ExpandDataTrunk;
 import org.jboss.pressgang.ccms.server.rest.v1.RESTChangeAction;
@@ -59,9 +61,9 @@ public class LanguageImageV1Factory extends RESTEntityFactory<RESTLanguageImageV
         expandOptions.add(RESTLanguageImageV1.IMAGEDATA_NAME);
         expandOptions.add(RESTLanguageImageV1.IMAGEDATABASE64_NAME);
         expandOptions.add(RESTLanguageImageV1.THUMBNAIL_NAME);
-        expandOptions.add(RESTBaseEntityV1.LOG_DETAILS_NAME);
+        expandOptions.add(RESTBaseAuditedEntityV1.LOG_DETAILS_NAME);
 
-        if (revision == null) expandOptions.add(RESTBaseEntityV1.REVISIONS_NAME);
+        if (revision == null) expandOptions.add(RESTBaseAuditedEntityV1.REVISIONS_NAME);
 
         retValue.setExpand(expandOptions);
 
@@ -88,9 +90,9 @@ public class LanguageImageV1Factory extends RESTEntityFactory<RESTLanguageImageV
         }
 
         // REVISIONS
-        if (revision == null && expand != null && expand.contains(RESTBaseEntityV1.REVISIONS_NAME)) {
+        if (revision == null && expand != null && expand.contains(RESTBaseAuditedEntityV1.REVISIONS_NAME)) {
             retValue.setRevisions(RESTEntityCollectionFactory.create(RESTLanguageImageCollectionV1.class, this, entity,
-                    EnversUtilities.getRevisions(entityManager, entity), RESTBaseEntityV1.REVISIONS_NAME, dataType, expand, baseUrl,
+                    EnversUtilities.getRevisions(entityManager, entity), RESTBaseAuditedEntityV1.REVISIONS_NAME, dataType, expand, baseUrl,
                     entityManager));
         }
 
@@ -99,7 +101,10 @@ public class LanguageImageV1Factory extends RESTEntityFactory<RESTLanguageImageV
 
     @Override
     public void collectChangeInformation(final RESTChangeAction<RESTLanguageImageV1> parent, final RESTLanguageImageV1 dataObject) {
-        // LanguageImage has no children that can be changed, so we have no changes to collect
+        // ENTITIES
+        if (dataObject.hasParameterSet(RESTLanguageImageV1.LOCALE_NAME)) {
+            collectChangeInformationFromEntity(parent, dataObject.getLocale(), localeFactory, RESTLanguageImageV1.LOCALE_NAME);
+        }
     }
 
     @Override
@@ -109,29 +114,52 @@ public class LanguageImageV1Factory extends RESTEntityFactory<RESTLanguageImageV
     }
 
     @Override
-    public void syncAdditionalDetails(final LanguageImage entity, final RESTLanguageImageV1 dataObject) {
-        // Set the Locale
-        if (dataObject.hasParameterSet(RESTLanguageImageV1.LOCALE_NAME)) {
-            final RESTLocaleV1 restEntity = dataObject.getLocale();
+    protected void doDeleteChildAction(final LanguageImage entity, final RESTLanguageImageV1 dataObject, final RESTChangeAction<?> action) {
+        final RESTBaseEntityV1<?> restEntity = action.getRESTEntity();
 
-            if (restEntity != null) {
-                final Locale dbEntity;
-                if (restEntity.getId() != null) {
-                    dbEntity = RESTv1Utilities.findEntity(entityManager, entityCache, restEntity, Locale.class);
-                } else {
-                    dbEntity = localeFactory.createDBEntity(restEntity);
-                }
-
-                if (dbEntity == null)
-                    throw new BadRequestException("No Locale entity was found with the primary key " + restEntity.getId());
-
-                localeFactory.syncBaseDetails(dbEntity, restEntity);
-
-                entity.setLocale(dbEntity);
-            } else {
-                entity.setLocale(null);
-            }
+        if (restEntity instanceof RESTLocaleV1 || RESTLanguageImageV1.LOCALE_NAME.equals(action.getUniqueId())) {
+            entity.setLocale(null);
         }
+    }
+
+    @Override
+    protected PressGangEntity doCreateChildAction(final LanguageImage entity, final RESTLanguageImageV1 dataObject,
+            final RESTChangeAction<?> action) {
+        final RESTBaseEntityV1<?> restEntity = action.getRESTEntity();
+        final PressGangEntity dbEntity;
+
+        if (restEntity instanceof RESTLocaleV1) {
+            dbEntity = entityManager.find(Locale.class, restEntity.getId());
+            if (dbEntity == null) {
+                throw new BadRequestException("No Locale entity was found with the primary key " + restEntity.getId());
+            }
+
+            entity.setLocale((Locale) dbEntity);
+        } else {
+            throw new IllegalArgumentException("Item is not a child of LanguageImage");
+        }
+
+        return dbEntity;
+    }
+
+    @Override
+    protected PressGangEntity getChildEntityForAction(final LanguageImage entity, final RESTLanguageImageV1 dataObject,
+            final RESTChangeAction<?> action) {
+        final RESTBaseEntityV1<?> restEntity = action.getRESTEntity();
+
+        final PressGangEntity dbEntity;
+        if (restEntity instanceof RESTLocaleV1) {
+            dbEntity = RESTv1Utilities.findEntity(entityManager, entityCache, (RESTLocaleV1) restEntity, Locale.class);
+            if (dbEntity == null) {
+                throw new BadRequestException("No Locale entity was found with the primary key " + restEntity.getId());
+            }
+
+            entity.setLocale((Locale) dbEntity);
+        } else {
+            throw new IllegalArgumentException("Item is not a child of LanguageImage");
+        }
+
+        return dbEntity;
     }
 
     @Override

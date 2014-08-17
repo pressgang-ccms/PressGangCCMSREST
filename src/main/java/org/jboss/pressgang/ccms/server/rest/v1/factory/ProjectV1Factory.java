@@ -26,13 +26,14 @@ import java.util.List;
 
 import org.jboss.pressgang.ccms.model.Project;
 import org.jboss.pressgang.ccms.model.Tag;
-import org.jboss.pressgang.ccms.model.base.AuditedEntity;
+import org.jboss.pressgang.ccms.model.base.PressGangEntity;
 import org.jboss.pressgang.ccms.rest.v1.collections.RESTProjectCollectionV1;
 import org.jboss.pressgang.ccms.rest.v1.collections.RESTTagCollectionV1;
 import org.jboss.pressgang.ccms.rest.v1.collections.items.RESTProjectCollectionItemV1;
 import org.jboss.pressgang.ccms.rest.v1.constants.RESTv1Constants;
 import org.jboss.pressgang.ccms.rest.v1.entities.RESTProjectV1;
 import org.jboss.pressgang.ccms.rest.v1.entities.RESTTagV1;
+import org.jboss.pressgang.ccms.rest.v1.entities.base.RESTBaseAuditedEntityV1;
 import org.jboss.pressgang.ccms.rest.v1.entities.base.RESTBaseEntityV1;
 import org.jboss.pressgang.ccms.rest.v1.expansion.ExpandDataTrunk;
 import org.jboss.pressgang.ccms.server.rest.v1.RESTChangeAction;
@@ -61,15 +62,15 @@ public class ProjectV1Factory extends RESTEntityFactory<RESTProjectV1, Project, 
 
         final List<String> expandOptions = new ArrayList<String>();
         expandOptions.add(RESTv1Constants.TAGS_EXPANSION_NAME);
-        expandOptions.add(RESTBaseEntityV1.LOG_DETAILS_NAME);
-        if (revision == null) expandOptions.add(RESTBaseEntityV1.REVISIONS_NAME);
+        expandOptions.add(RESTBaseAuditedEntityV1.LOG_DETAILS_NAME);
+        if (revision == null) expandOptions.add(RESTBaseAuditedEntityV1.REVISIONS_NAME);
 
         retValue.setExpand(expandOptions);
 
         // REVISIONS
-        if (revision == null && expand != null && expand.contains(RESTBaseEntityV1.REVISIONS_NAME)) {
+        if (revision == null && expand != null && expand.contains(RESTBaseAuditedEntityV1.REVISIONS_NAME)) {
             retValue.setRevisions(RESTEntityCollectionFactory.create(RESTProjectCollectionV1.class, this, entity,
-                    EnversUtilities.getRevisions(entityManager, entity), RESTBaseEntityV1.REVISIONS_NAME, dataType, expand, baseUrl,
+                    EnversUtilities.getRevisions(entityManager, entity), RESTBaseAuditedEntityV1.REVISIONS_NAME, dataType, expand, baseUrl,
                     entityManager));
         }
 
@@ -102,7 +103,7 @@ public class ProjectV1Factory extends RESTEntityFactory<RESTProjectV1, Project, 
 
     @Override
     protected void doDeleteChildAction(final Project entity, final RESTProjectV1 dataObject, final RESTChangeAction<?> action) {
-        final RESTBaseEntityV1<?, ?, ?> restEntity = action.getRESTEntity();
+        final RESTBaseEntityV1<?> restEntity = action.getRESTEntity();
 
         if (restEntity instanceof RESTTagV1) {
             final Tag dbEntity = entityManager.find(Tag.class, restEntity.getId());
@@ -114,9 +115,9 @@ public class ProjectV1Factory extends RESTEntityFactory<RESTProjectV1, Project, 
     }
 
     @Override
-    protected AuditedEntity doCreateChildAction(final Project entity, final RESTProjectV1 dataObject, final RESTChangeAction<?> action) {
-        final RESTBaseEntityV1<?, ?, ?> restEntity = action.getRESTEntity();
-        final AuditedEntity dbEntity;
+    protected PressGangEntity doCreateChildAction(final Project entity, final RESTProjectV1 dataObject, final RESTChangeAction<?> action) {
+        final RESTBaseEntityV1<?> restEntity = action.getRESTEntity();
+        final PressGangEntity dbEntity;
 
         if (restEntity instanceof RESTTagV1) {
             dbEntity = entityManager.find(Tag.class, restEntity.getId());
@@ -133,10 +134,11 @@ public class ProjectV1Factory extends RESTEntityFactory<RESTProjectV1, Project, 
     }
 
     @Override
-    protected AuditedEntity getChildEntityForAction(final Project entity, final RESTProjectV1 dataObject, final RESTChangeAction<?> action) {
-        final RESTBaseEntityV1<?, ?, ?> restEntity = action.getRESTEntity();
+    protected PressGangEntity getChildEntityForAction(final Project entity, final RESTProjectV1 dataObject,
+            final RESTChangeAction<?> action) {
+        final RESTBaseEntityV1<?> restEntity = action.getRESTEntity();
 
-        final AuditedEntity dbEntity;
+        final PressGangEntity dbEntity;
         if (restEntity instanceof RESTTagV1) {
             dbEntity = RESTv1Utilities.findEntity(entityManager, entityCache, (RESTTagV1) restEntity, Tag.class);
             if (dbEntity == null) {

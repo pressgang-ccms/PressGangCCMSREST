@@ -25,8 +25,10 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
+import org.jboss.pressgang.ccms.model.Locale;
 import org.jboss.pressgang.ccms.model.MinHashXOR;
-import org.jboss.pressgang.ccms.model.base.AuditedEntity;
+import org.jboss.pressgang.ccms.model.TranslationServer;
+import org.jboss.pressgang.ccms.model.base.PressGangEntity;
 import org.jboss.pressgang.ccms.server.utils.EntityManagerWrapper;
 
 /*
@@ -36,7 +38,7 @@ import org.jboss.pressgang.ccms.server.utils.EntityManagerWrapper;
  */
 @ApplicationScoped
 public class CachedEntityLoader {
-    private final Map<String, List<? extends AuditedEntity>> results = new ConcurrentHashMap<String, List<? extends AuditedEntity>>();
+    private final Map<String, List<? extends PressGangEntity>> results = new ConcurrentHashMap<String, List<? extends PressGangEntity>>();
     @Inject
     private EntityManagerWrapper entityManager;
 
@@ -48,11 +50,35 @@ public class CachedEntityLoader {
         }
     }
 
+    public List<Locale> getLocaleEntities() {
+        if (!results.containsKey(Locale.SELECT_ALL_QUERY)) {
+            return performAndCacheQuery(Locale.SELECT_ALL_QUERY);
+        } else {
+            return (List<Locale>) results.get(Locale.SELECT_ALL_QUERY);
+        }
+    }
+
+    public List<TranslationServer> getTranslationServerEntities() {
+        if (!results.containsKey(TranslationServer.SELECT_ALL_QUERY)) {
+            return performAndCacheQuery(TranslationServer.SELECT_ALL_QUERY);
+        } else {
+            return (List<TranslationServer>) results.get(TranslationServer.SELECT_ALL_QUERY);
+        }
+    }
+
     public void invalidateXOREntities() {
         results.remove(MinHashXOR.SELECT_ALL_QUERY);
     }
 
-    protected <T extends AuditedEntity> List<T> performAndCacheQuery(final String query) {
+    public void invalidateLocaleEntities() {
+        results.remove(Locale.SELECT_ALL_QUERY);
+    }
+
+    public void invalidateTranslationServerEntities() {
+        results.remove(TranslationServer.SELECT_ALL_QUERY);
+    }
+
+    protected <T extends PressGangEntity> List<T> performAndCacheQuery(final String query) {
         final List<T> results = entityManager.createQuery(query).getResultList();
         this.results.put(query, results);
         return results;

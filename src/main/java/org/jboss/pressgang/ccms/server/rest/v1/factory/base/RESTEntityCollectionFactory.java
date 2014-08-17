@@ -26,6 +26,7 @@ import java.util.List;
 
 import org.jboss.pressgang.ccms.filter.utils.JPAUtils;
 import org.jboss.pressgang.ccms.model.base.AuditedEntity;
+import org.jboss.pressgang.ccms.model.base.PressGangEntity;
 import org.jboss.pressgang.ccms.rest.v1.collections.base.RESTBaseEntityCollectionItemV1;
 import org.jboss.pressgang.ccms.rest.v1.collections.base.RESTBaseEntityCollectionV1;
 import org.jboss.pressgang.ccms.rest.v1.entities.base.RESTBaseEntityV1;
@@ -39,7 +40,7 @@ import org.jboss.resteasy.spi.InternalServerErrorException;
  */
 public class RESTEntityCollectionFactory {
 
-    public static <T extends RESTBaseEntityV1<T, V, W>, U extends AuditedEntity, V extends RESTBaseEntityCollectionV1<T, V, W>,
+    public static <T extends RESTBaseEntityV1<T>, U extends PressGangEntity, V extends RESTBaseEntityCollectionV1<T, V, W>,
             W extends RESTBaseEntityCollectionItemV1<T, V, W>> V create(
             final Class<V> clazz, final RESTEntityFactory<T, U, V, W> dataObjectFactory, final List<U> entities,
             final String expandName, final String dataType, final ExpandDataTrunk parentExpand, final String baseUrl,
@@ -48,7 +49,7 @@ public class RESTEntityCollectionFactory {
                 entityManager);
     }
 
-    public static <T extends RESTBaseEntityV1<T, V, W>, U extends AuditedEntity, V extends RESTBaseEntityCollectionV1<T, V, W>,
+    public static <T extends RESTBaseEntityV1<T>, U extends PressGangEntity, V extends RESTBaseEntityCollectionV1<T, V, W>,
             W extends RESTBaseEntityCollectionItemV1<T, V, W>> V create(
             final Class<V> clazz, final RESTEntityFactory<T, U, V, W> dataObjectFactory, final List<U> entities,
             final String expandName, final String dataType, final ExpandDataTrunk parentExpand, final String baseUrl, final Number revision,
@@ -57,7 +58,7 @@ public class RESTEntityCollectionFactory {
                 entityManager);
     }
 
-    public static <T extends RESTBaseEntityV1<T, V, W>, U extends AuditedEntity, V extends RESTBaseEntityCollectionV1<T, V, W>,
+    public static <T extends RESTBaseEntityV1<T>, U extends PressGangEntity, V extends RESTBaseEntityCollectionV1<T, V, W>,
             W extends RESTBaseEntityCollectionItemV1<T, V, W>> V create(
             final Class<V> clazz, final RESTEntityFactory<T, U, V, W> dataObjectFactory, final U parent, final List<Number> revisions,
             final String expandName, final String dataType, final ExpandDataTrunk parentExpand, final String baseUrl,
@@ -81,7 +82,7 @@ public class RESTEntityCollectionFactory {
      * @param entityManager     The EntityManager being used to provide data for the collection.
      * @return A REST collection from a collection of database entities.
      */
-    public static <T extends RESTBaseEntityV1<T, V, W>, U extends AuditedEntity, V extends RESTBaseEntityCollectionV1<T, V, W>,
+    public static <T extends RESTBaseEntityV1<T>, U extends PressGangEntity, V extends RESTBaseEntityCollectionV1<T, V, W>,
             W extends RESTBaseEntityCollectionItemV1<T, V, W>> V create(
             final Class<V> clazz, final RESTEntityFactory<T, U, V, W> dataObjectFactory, final U parent, final List<Number> revisions,
             final String expandName, final String dataType, final ExpandDataTrunk parentExpand, final String baseUrl, final Number revision,
@@ -105,7 +106,7 @@ public class RESTEntityCollectionFactory {
      * @param entityManager          The EntityManager being used to provide data for the collection.
      * @return a REST collection from a collection of database entities.
      */
-    public static <T extends RESTBaseEntityV1<T, V, W>, U extends AuditedEntity, V extends RESTBaseEntityCollectionV1<T, V, W>,
+    public static <T extends RESTBaseEntityV1<T>, U extends PressGangEntity, V extends RESTBaseEntityCollectionV1<T, V, W>,
             W extends RESTBaseEntityCollectionItemV1<T, V, W>> V create(
             final Class<V> clazz, final RESTEntityFactory<T, U, V, W> dataObjectFactory, final List<U> entities,
             final String expandName, final String dataType, final ExpandDataTrunk parentExpand, final String baseUrl,
@@ -130,7 +131,7 @@ public class RESTEntityCollectionFactory {
      * @param entityManager          The EntityManager being used to provide data for the collection.
      * @return a REST collection from a collection of database entities.
      */
-    public static <T extends RESTBaseEntityV1<T, V, W>, U extends AuditedEntity, V extends RESTBaseEntityCollectionV1<T, V, W>,
+    public static <T extends RESTBaseEntityV1<T>, U extends PressGangEntity, V extends RESTBaseEntityCollectionV1<T, V, W>,
             W extends RESTBaseEntityCollectionItemV1<T, V, W>> V create(
             final Class<V> clazz, final RESTEntityFactory<T, U, V, W> dataObjectFactory, final List<U> entities,
             final String expandName, final String dataType, final ExpandDataTrunk parentExpand, final String baseUrl, final Number revision,
@@ -157,7 +158,7 @@ public class RESTEntityCollectionFactory {
      * @param entityManager          The EntityManager being used to provide data for the collection.
      * @return a REST collection from a collection of database entities.
      */
-    public static <T extends RESTBaseEntityV1<T, V, W>, U extends AuditedEntity, V extends RESTBaseEntityCollectionV1<T, V, W>,
+    public static <T extends RESTBaseEntityV1<T>, U extends PressGangEntity, V extends RESTBaseEntityCollectionV1<T, V, W>,
             W extends RESTBaseEntityCollectionItemV1<T, V, W>> V create(
             final Class<V> clazz, final RESTEntityFactory<T, U, V, W> dataObjectFactory, final List<U> entities, final U parent,
             final Number parentRevision, final List<Number> revisions, final String expandName, final String dataType,
@@ -234,7 +235,7 @@ public class RESTEntityCollectionFactory {
 
                     // Find the Entity to be used
                     Number revision = parentRevision;
-                    if (usingRevisions) {
+                    if (usingRevisions  && parent instanceof AuditedEntity) {
                         /*
                          * Looking up an Envers previous version is an expensive operation. So instead of getting a complete
                          * collection and only adding those we need to the REST collection (like we do with standard related
@@ -245,8 +246,7 @@ public class RESTEntityCollectionFactory {
                          * revisions parameter) instead of having to request every revision.
                          */
                         revision = revisions.get(i);
-                        dbEntity = EnversUtilities.getRevision(entityManager, parent, revision);
-
+                        dbEntity = (U) EnversUtilities.getRevision(entityManager, (AuditedEntity) parent, revision);
                     } else {
                         dbEntity = entities.get(i);
                     }
@@ -281,7 +281,7 @@ public class RESTEntityCollectionFactory {
      * @param entityManager          The EntityManager being used to provide data for the collection.
      * @return a REST collection from a collection of database entities.
      */
-    public static <T extends RESTBaseEntityV1<T, V, W>, U extends AuditedEntity, V extends RESTBaseEntityCollectionV1<T, V, W>,
+    public static <T extends RESTBaseEntityV1<T>, U extends PressGangEntity, V extends RESTBaseEntityCollectionV1<T, V, W>,
             W extends RESTBaseEntityCollectionItemV1<T, V, W>> V create(
             final Class<V> clazz, final RESTEntityFactory<T, U, V, W> dataObjectFactory, final CriteriaQuery<U> query,
             final String expandName, final String dataType, final ExpandDataTrunk parentExpand, final String baseUrl,

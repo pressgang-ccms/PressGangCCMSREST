@@ -30,7 +30,7 @@ import org.jboss.pressgang.ccms.model.PropertyTag;
 import org.jboss.pressgang.ccms.model.Tag;
 import org.jboss.pressgang.ccms.model.TagToCategory;
 import org.jboss.pressgang.ccms.model.TagToPropertyTag;
-import org.jboss.pressgang.ccms.model.base.AuditedEntity;
+import org.jboss.pressgang.ccms.model.base.PressGangEntity;
 import org.jboss.pressgang.ccms.rest.v1.collections.RESTProjectCollectionV1;
 import org.jboss.pressgang.ccms.rest.v1.collections.RESTTagCollectionV1;
 import org.jboss.pressgang.ccms.rest.v1.collections.items.RESTTagCollectionItemV1;
@@ -40,6 +40,7 @@ import org.jboss.pressgang.ccms.rest.v1.constants.RESTv1Constants;
 import org.jboss.pressgang.ccms.rest.v1.entities.RESTProjectV1;
 import org.jboss.pressgang.ccms.rest.v1.entities.RESTTagV1;
 import org.jboss.pressgang.ccms.rest.v1.entities.RESTTopicV1;
+import org.jboss.pressgang.ccms.rest.v1.entities.base.RESTBaseAuditedEntityV1;
 import org.jboss.pressgang.ccms.rest.v1.entities.base.RESTBaseEntityV1;
 import org.jboss.pressgang.ccms.rest.v1.entities.join.RESTAssignedPropertyTagV1;
 import org.jboss.pressgang.ccms.rest.v1.entities.join.RESTCategoryInTagV1;
@@ -74,9 +75,9 @@ public class TagV1Factory extends RESTEntityFactory<RESTTagV1, Tag, RESTTagColle
         expandOptions.add(RESTTagV1.CHILD_TAGS_NAME);
         expandOptions.add(RESTTagV1.PROJECTS_NAME);
         expandOptions.add(RESTTagV1.PROPERTIES_NAME);
-        expandOptions.add(RESTBaseEntityV1.LOG_DETAILS_NAME);
+        expandOptions.add(RESTBaseAuditedEntityV1.LOG_DETAILS_NAME);
 
-        if (revision == null) expandOptions.add(RESTBaseEntityV1.REVISIONS_NAME);
+        if (revision == null) expandOptions.add(RESTBaseAuditedEntityV1.REVISIONS_NAME);
 
         retValue.setExpand(expandOptions);
 
@@ -88,7 +89,7 @@ public class TagV1Factory extends RESTEntityFactory<RESTTagV1, Tag, RESTTagColle
         // REVISIONS
         if (revision == null && expand != null && expand.contains(RESTTopicV1.REVISIONS_NAME)) {
             retValue.setRevisions(RESTEntityCollectionFactory.create(RESTTagCollectionV1.class, this, entity,
-                    EnversUtilities.getRevisions(entityManager, entity), RESTBaseEntityV1.REVISIONS_NAME, dataType, expand, baseUrl,
+                    EnversUtilities.getRevisions(entityManager, entity), RESTBaseAuditedEntityV1.REVISIONS_NAME, dataType, expand, baseUrl,
                     entityManager));
         }
 
@@ -170,7 +171,7 @@ public class TagV1Factory extends RESTEntityFactory<RESTTagV1, Tag, RESTTagColle
 
     @Override
     public void doDeleteChildAction(final Tag entity, final RESTTagV1 dataObject, final RESTChangeAction<?> action) {
-        final RESTBaseEntityV1<?, ?, ?> restEntity = action.getRESTEntity();
+        final RESTBaseEntityV1<?> restEntity = action.getRESTEntity();
 
         if (restEntity instanceof RESTCategoryInTagV1) {
             final RESTCategoryInTagV1 categoryInTag = (RESTCategoryInTagV1) restEntity;
@@ -215,10 +216,9 @@ public class TagV1Factory extends RESTEntityFactory<RESTTagV1, Tag, RESTTagColle
     }
 
     @Override
-    protected AuditedEntity doCreateChildAction(final Tag entity, final RESTTagV1 dataObject,
-            final RESTChangeAction<?> action) {
-        final RESTBaseEntityV1<?, ?, ?> restEntity = action.getRESTEntity();
-        final AuditedEntity dbEntity;
+    protected PressGangEntity doCreateChildAction(final Tag entity, final RESTTagV1 dataObject, final RESTChangeAction<?> action) {
+        final RESTBaseEntityV1<?> restEntity = action.getRESTEntity();
+        final PressGangEntity dbEntity;
 
         if (restEntity instanceof RESTCategoryInTagV1) {
             dbEntity = action.getFactory().createDBEntity(restEntity);
@@ -265,11 +265,10 @@ public class TagV1Factory extends RESTEntityFactory<RESTTagV1, Tag, RESTTagColle
     }
 
     @Override
-    protected AuditedEntity getChildEntityForAction(final Tag entity, final RESTTagV1 dataObject,
-            final RESTChangeAction<?> action) {
-        final RESTBaseEntityV1<?, ?, ?> restEntity = action.getRESTEntity();
+    protected PressGangEntity getChildEntityForAction(final Tag entity, final RESTTagV1 dataObject, final RESTChangeAction<?> action) {
+        final RESTBaseEntityV1<?> restEntity = action.getRESTEntity();
 
-        final AuditedEntity dbEntity;
+        final PressGangEntity dbEntity;
         if (restEntity instanceof RESTCategoryInTagV1) {
             final RESTCategoryInTagV1 categoryInTag = (RESTCategoryInTagV1) restEntity;
             dbEntity = entityManager.find(TagToCategory.class, categoryInTag.getRelationshipId());

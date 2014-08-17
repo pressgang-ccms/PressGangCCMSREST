@@ -29,6 +29,7 @@ import java.util.List;
 import java.util.Set;
 
 import org.jboss.pressgang.ccms.provider.LocaleProvider;
+import org.jboss.pressgang.ccms.provider.RESTContentSpecProvider;
 import org.jboss.pressgang.ccms.provider.RESTProviderFactory;
 import org.jboss.pressgang.ccms.provider.RESTTopicProvider;
 import org.jboss.pressgang.ccms.provider.ServerSettingsProvider;
@@ -41,7 +42,6 @@ import org.jboss.pressgang.ccms.wrapper.collection.CollectionWrapper;
 import org.jboss.pressgang.ccms.zanata.ETagCache;
 import org.jboss.pressgang.ccms.zanata.ETagInterceptor;
 import org.jboss.pressgang.ccms.zanata.ZanataDetails;
-import org.jboss.pressgang.ccms.zanata.ZanataInterface;
 import org.jboss.resteasy.spi.ResteasyProviderFactory;
 import org.jboss.resteasy.spi.UnauthorizedException;
 import org.zanata.common.LocaleId;
@@ -87,6 +87,7 @@ public class ZanataSyncTask extends ProcessRESTTask<Boolean> {
         final RESTProviderFactory providerFactory = RESTProviderFactory.create(restServerUrl);
         // Set topics to expand their translations by default
         providerFactory.getProvider(RESTTopicProvider.class).setExpandTranslations(true);
+        providerFactory.getProvider(RESTContentSpecProvider.class).setExpandTranslationDetails(true);
         final ServerSettingsProvider settingsProvider = providerFactory.getProvider(ServerSettingsProvider.class);
         final ServerSettingsWrapper settings = settingsProvider.getServerSettings();
         final ETagCache eTagCache = new ETagCache();
@@ -97,15 +98,6 @@ public class ZanataSyncTask extends ProcessRESTTask<Boolean> {
         // Make sure the Zanata server isn't down
         if (!ProcessUtilities.validateServerExists(zanataDetails.getServer())) {
             getLogger().error("Unable to connect to the Zanata Server. Please make sure that the server is online and try again.");
-            setSuccessful(false);
-            return;
-        }
-
-        ZanataInterface zanataInterface;
-        try {
-            zanataInterface = new ZanataInterface(0.2, zanataDetails);
-        } catch (UnauthorizedException e) {
-            getLogger().error(e.getMessage());
             setSuccessful(false);
             return;
         }
@@ -128,11 +120,16 @@ public class ZanataSyncTask extends ProcessRESTTask<Boolean> {
             // Covert the language into a LocaleId
             localeIds.add(LocaleId.fromJavaName(locale.getTranslationValue()));
         }
-        zanataInterface.getLocaleManager().setLocales(localeIds);
 
         // Create the sync service and perform the sync
-        final ZanataSyncService syncService = new ZanataSyncService(providerFactory, zanataInterface, settings);
-        syncService.sync(ids, null, this.locales.isEmpty() ? null : this.locales);
+        try {
+            final ZanataSyncService syncService = new ZanataSyncService(providerFactory, settings, 0.2, zanataDetails);
+            syncService.syncContentSpecs(ids, localeIds);
+        } catch (UnauthorizedException e) {
+            getLogger().error("Unauthorised Request! Please check your Zanata username and api key are correct.");
+            setSuccessful(false);
+            return;
+        }
 
         // Save the etag cache
         if (useETagCache) {

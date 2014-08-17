@@ -26,13 +26,14 @@ import java.util.List;
 
 import org.jboss.pressgang.ccms.model.File;
 import org.jboss.pressgang.ccms.model.LanguageFile;
-import org.jboss.pressgang.ccms.model.base.AuditedEntity;
+import org.jboss.pressgang.ccms.model.base.PressGangEntity;
 import org.jboss.pressgang.ccms.rest.v1.collections.RESTFileCollectionV1;
 import org.jboss.pressgang.ccms.rest.v1.collections.RESTLanguageFileCollectionV1;
 import org.jboss.pressgang.ccms.rest.v1.collections.items.RESTFileCollectionItemV1;
 import org.jboss.pressgang.ccms.rest.v1.constants.RESTv1Constants;
 import org.jboss.pressgang.ccms.rest.v1.entities.RESTFileV1;
 import org.jboss.pressgang.ccms.rest.v1.entities.RESTLanguageFileV1;
+import org.jboss.pressgang.ccms.rest.v1.entities.base.RESTBaseAuditedEntityV1;
 import org.jboss.pressgang.ccms.rest.v1.entities.base.RESTBaseEntityV1;
 import org.jboss.pressgang.ccms.rest.v1.expansion.ExpandDataTrunk;
 import org.jboss.pressgang.ccms.server.rest.v1.RESTChangeAction;
@@ -57,9 +58,9 @@ public class FileV1Factory extends RESTEntityFactory<RESTFileV1, File, RESTFileC
 
         final List<String> expandOptions = new ArrayList<String>();
         expandOptions.add(RESTFileV1.LANGUAGE_FILES_NAME);
-        expandOptions.add(RESTBaseEntityV1.LOG_DETAILS_NAME);
+        expandOptions.add(RESTBaseAuditedEntityV1.LOG_DETAILS_NAME);
         if (revision == null) {
-            expandOptions.add(RESTBaseEntityV1.REVISIONS_NAME);
+            expandOptions.add(RESTBaseAuditedEntityV1.REVISIONS_NAME);
         }
         retValue.setExpand(expandOptions);
 
@@ -70,9 +71,9 @@ public class FileV1Factory extends RESTEntityFactory<RESTFileV1, File, RESTFileC
         retValue.setExplodeArchive(entity.getExplodeArchive());
 
         // REVISIONS
-        if (revision == null && expand != null && expand.contains(RESTBaseEntityV1.REVISIONS_NAME)) {
+        if (revision == null && expand != null && expand.contains(RESTBaseAuditedEntityV1.REVISIONS_NAME)) {
             retValue.setRevisions(RESTEntityCollectionFactory.create(RESTFileCollectionV1.class, this, entity,
-                    EnversUtilities.getRevisions(entityManager, entity), RESTBaseEntityV1.REVISIONS_NAME, dataType, expand, baseUrl,
+                    EnversUtilities.getRevisions(entityManager, entity), RESTBaseAuditedEntityV1.REVISIONS_NAME, dataType, expand, baseUrl,
                     entityManager));
         }
 
@@ -107,7 +108,7 @@ public class FileV1Factory extends RESTEntityFactory<RESTFileV1, File, RESTFileC
 
     @Override
     protected void doDeleteChildAction(final File entity, final RESTFileV1 dataObject, final RESTChangeAction<?> action) {
-        final RESTBaseEntityV1<?, ?, ?> restEntity = action.getRESTEntity();
+        final RESTBaseEntityV1<?> restEntity = action.getRESTEntity();
 
         if (restEntity instanceof RESTLanguageFileV1) {
             final LanguageFile dbEntity = entityManager.find(LanguageFile.class, restEntity.getId());
@@ -120,9 +121,9 @@ public class FileV1Factory extends RESTEntityFactory<RESTFileV1, File, RESTFileC
     }
 
     @Override
-    protected AuditedEntity doCreateChildAction(final File entity, final RESTFileV1 dataObject, final RESTChangeAction<?> action) {
-        final RESTBaseEntityV1<?, ?, ?> restEntity = action.getRESTEntity();
-        final AuditedEntity dbEntity;
+    protected PressGangEntity doCreateChildAction(final File entity, final RESTFileV1 dataObject, final RESTChangeAction<?> action) {
+        final RESTBaseEntityV1<?> restEntity = action.getRESTEntity();
+        final PressGangEntity dbEntity;
 
         if (restEntity instanceof RESTLanguageFileV1) {
             dbEntity = action.getFactory().createDBEntity(restEntity);
@@ -135,10 +136,10 @@ public class FileV1Factory extends RESTEntityFactory<RESTFileV1, File, RESTFileC
     }
 
     @Override
-    protected AuditedEntity getChildEntityForAction(final File entity, final RESTFileV1 dataObject, final RESTChangeAction<?> action) {
-        final RESTBaseEntityV1<?, ?, ?> restEntity = action.getRESTEntity();
+    protected PressGangEntity getChildEntityForAction(final File entity, final RESTFileV1 dataObject, final RESTChangeAction<?> action) {
+        final RESTBaseEntityV1<?> restEntity = action.getRESTEntity();
 
-        final AuditedEntity dbEntity;
+        final PressGangEntity dbEntity;
         if (restEntity instanceof RESTLanguageFileV1) {
             dbEntity = RESTv1Utilities.findEntity(entityManager, entityCache, (RESTLanguageFileV1) restEntity, LanguageFile.class);
             if (dbEntity == null) {

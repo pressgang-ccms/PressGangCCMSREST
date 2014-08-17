@@ -32,7 +32,7 @@ import org.jboss.pressgang.ccms.model.Locale;
 import org.jboss.pressgang.ccms.model.TranslatedTopic;
 import org.jboss.pressgang.ccms.model.TranslatedTopicData;
 import org.jboss.pressgang.ccms.model.TranslatedTopicString;
-import org.jboss.pressgang.ccms.model.base.AuditedEntity;
+import org.jboss.pressgang.ccms.model.base.PressGangEntity;
 import org.jboss.pressgang.ccms.model.contentspec.TranslatedCSNode;
 import org.jboss.pressgang.ccms.rest.v1.collections.RESTTagCollectionV1;
 import org.jboss.pressgang.ccms.rest.v1.collections.RESTTopicSourceUrlCollectionV1;
@@ -44,6 +44,7 @@ import org.jboss.pressgang.ccms.rest.v1.constants.RESTv1Constants;
 import org.jboss.pressgang.ccms.rest.v1.entities.RESTLocaleV1;
 import org.jboss.pressgang.ccms.rest.v1.entities.RESTTranslatedTopicStringV1;
 import org.jboss.pressgang.ccms.rest.v1.entities.RESTTranslatedTopicV1;
+import org.jboss.pressgang.ccms.rest.v1.entities.base.RESTBaseAuditedEntityV1;
 import org.jboss.pressgang.ccms.rest.v1.entities.base.RESTBaseEntityV1;
 import org.jboss.pressgang.ccms.rest.v1.entities.contentspec.RESTTranslatedCSNodeV1;
 import org.jboss.pressgang.ccms.rest.v1.entities.enums.RESTXMLFormat;
@@ -97,7 +98,7 @@ public class TranslatedTopicV1Factory extends RESTEntityFactory<RESTTranslatedTo
         expandOptions.add(RESTTranslatedTopicV1.LOG_DETAILS_NAME);
         expandOptions.add(RESTTranslatedTopicV1.TRANSLATED_CSNODE_NAME);
 
-        if (revision == null) expandOptions.add(RESTBaseEntityV1.REVISIONS_NAME);
+        if (revision == null) expandOptions.add(RESTBaseAuditedEntityV1.REVISIONS_NAME);
 
         retValue.setExpand(expandOptions);
 
@@ -144,7 +145,7 @@ public class TranslatedTopicV1Factory extends RESTEntityFactory<RESTTranslatedTo
         // REVISIONS
         if (revision == null && expand != null && expand.contains(RESTTranslatedTopicV1.REVISIONS_NAME)) {
             retValue.setRevisions(RESTEntityCollectionFactory.create(RESTTranslatedTopicCollectionV1.class, this, entity,
-                    EnversUtilities.getRevisions(entityManager, entity), RESTBaseEntityV1.REVISIONS_NAME, dataType, expand, baseUrl,
+                    EnversUtilities.getRevisions(entityManager, entity), RESTBaseAuditedEntityV1.REVISIONS_NAME, dataType, expand, baseUrl,
                     entityManager));
         }
 
@@ -220,6 +221,12 @@ public class TranslatedTopicV1Factory extends RESTEntityFactory<RESTTranslatedTo
 
     @Override
     public void collectChangeInformation(final RESTChangeAction<RESTTranslatedTopicV1> parent, final RESTTranslatedTopicV1 dataObject) {
+        // ENTITIES
+        if (dataObject.hasParameterSet(RESTTranslatedTopicV1.LOCALE_NAME)) {
+            collectChangeInformationFromEntity(parent, dataObject.getLocale(), localeFactory, RESTTranslatedTopicV1.LOCALE_NAME);
+        }
+
+        // COLLECTIONS
         if (dataObject.getConfiguredParameters().contains(RESTTranslatedTopicV1.TRANSLATEDTOPICSTRING_NAME)
                 && dataObject.getTranslatedTopicStrings_OTM() != null
                 && dataObject.getTranslatedTopicStrings_OTM().getItems() != null) {
@@ -315,29 +322,6 @@ public class TranslatedTopicV1Factory extends RESTEntityFactory<RESTTranslatedTo
 
     @Override
     public void syncAdditionalDetails(final TranslatedTopicData entity, final RESTTranslatedTopicV1 dataObject) {
-        // Set the Locale
-        if (dataObject.hasParameterSet(RESTTranslatedTopicV1.LOCALE_NAME)) {
-            final RESTLocaleV1 restEntity = dataObject.getLocale();
-
-            if (restEntity != null) {
-                final Locale dbEntity;
-                if (restEntity.getId() != null) {
-                    dbEntity = RESTv1Utilities.findEntity(entityManager, entityCache, restEntity, Locale.class);
-                } else {
-                    dbEntity = localeFactory.createDBEntity(restEntity);
-                }
-
-                if (dbEntity == null)
-                    throw new BadRequestException("No Locale entity was found with the primary key " + restEntity.getId());
-
-                localeFactory.syncBaseDetails(dbEntity, restEntity);
-
-                entity.setLocale(dbEntity);
-            } else {
-                entity.setLocale(null);
-            }
-        }
-
         /* This method will set the XML errors field */
         TranslatedTopicUtilities.processXML(entityManager, entity);
     }
@@ -345,7 +329,7 @@ public class TranslatedTopicV1Factory extends RESTEntityFactory<RESTTranslatedTo
     @Override
     protected void doDeleteChildAction(final TranslatedTopicData entity, final RESTTranslatedTopicV1 dataObject,
             final RESTChangeAction<?> action) {
-        final RESTBaseEntityV1<?, ?, ?> restEntity = action.getRESTEntity();
+        final RESTBaseEntityV1<?> restEntity = action.getRESTEntity();
 
         if (restEntity instanceof RESTTranslatedTopicStringV1) {
             final TranslatedTopicString dbEntity = entityManager.find(TranslatedTopicString.class, restEntity.getId());
@@ -354,18 +338,27 @@ public class TranslatedTopicV1Factory extends RESTEntityFactory<RESTTranslatedTo
 
             entity.removeTranslatedString(dbEntity);
             entityManager.remove(dbEntity);
+        } else if (restEntity instanceof RESTLocaleV1 || RESTTranslatedTopicV1.LOCALE_NAME.equals(action.getUniqueId())) {
+            entity.setLocale(null);
         }
     }
 
     @Override
-    protected AuditedEntity doCreateChildAction(final TranslatedTopicData entity, final RESTTranslatedTopicV1 dataObject,
+    protected PressGangEntity doCreateChildAction(final TranslatedTopicData entity, final RESTTranslatedTopicV1 dataObject,
             final RESTChangeAction<?> action) {
-        final RESTBaseEntityV1<?, ?, ?> restEntity = action.getRESTEntity();
-        final AuditedEntity dbEntity;
+        final RESTBaseEntityV1<?> restEntity = action.getRESTEntity();
+        final PressGangEntity dbEntity;
 
         if (restEntity instanceof RESTTranslatedTopicStringV1) {
             dbEntity = action.getFactory().createDBEntity(restEntity);
             entity.addTranslatedString((TranslatedTopicString) dbEntity);
+        } else if (restEntity instanceof RESTLocaleV1) {
+            dbEntity = entityManager.find(Locale.class, restEntity.getId());
+            if (dbEntity == null) {
+                throw new BadRequestException("No Locale entity was found with the primary key " + restEntity.getId());
+            }
+
+            entity.setLocale((Locale) dbEntity);
         } else {
             throw new IllegalArgumentException("Item is not a child of TranslatedTopicData");
         }
@@ -374,11 +367,11 @@ public class TranslatedTopicV1Factory extends RESTEntityFactory<RESTTranslatedTo
     }
 
     @Override
-    protected AuditedEntity getChildEntityForAction(final TranslatedTopicData entity, final RESTTranslatedTopicV1 dataObject,
+    protected PressGangEntity getChildEntityForAction(final TranslatedTopicData entity, final RESTTranslatedTopicV1 dataObject,
             final RESTChangeAction<?> action) {
-        final RESTBaseEntityV1<?, ?, ?> restEntity = action.getRESTEntity();
+        final RESTBaseEntityV1<?> restEntity = action.getRESTEntity();
 
-        final AuditedEntity dbEntity;
+        final PressGangEntity dbEntity;
         if (restEntity instanceof RESTTranslatedTopicStringV1) {
             dbEntity = RESTv1Utilities.findEntity(entityManager, entityCache, (RESTTranslatedTopicStringV1) restEntity,
                     TranslatedTopicString.class);
@@ -389,6 +382,13 @@ public class TranslatedTopicV1Factory extends RESTEntityFactory<RESTTranslatedTo
                         "No TranslatedTopicString entity was found with the primary key " + restEntity.getId() + " for TranslatedTopicData "
                                 + entity.getId());
             }
+        } else if (restEntity instanceof RESTLocaleV1) {
+            dbEntity = RESTv1Utilities.findEntity(entityManager, entityCache, (RESTLocaleV1) restEntity, Locale.class);
+            if (dbEntity == null) {
+                throw new BadRequestException("No Locale entity was found with the primary key " + restEntity.getId());
+            }
+
+            entity.setLocale((Locale) dbEntity);
         } else {
             throw new IllegalArgumentException("Item is not a child of TranslatedTopicData");
         }

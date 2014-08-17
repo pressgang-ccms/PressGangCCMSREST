@@ -23,14 +23,17 @@ import javax.inject.Inject;
 import javax.persistence.EntityManager;
 
 import org.jboss.pressgang.ccms.model.base.AuditedEntity;
+import org.jboss.pressgang.ccms.model.base.PressGangEntity;
 import org.jboss.pressgang.ccms.rest.v1.collections.base.RESTBaseEntityCollectionItemV1;
 import org.jboss.pressgang.ccms.rest.v1.collections.base.RESTBaseEntityCollectionV1;
 import org.jboss.pressgang.ccms.rest.v1.collections.base.RESTUpdateCollectionItemV1;
+import org.jboss.pressgang.ccms.rest.v1.entities.base.RESTBaseAuditedEntityV1;
 import org.jboss.pressgang.ccms.rest.v1.entities.base.RESTBaseEntityV1;
 import org.jboss.pressgang.ccms.rest.v1.expansion.ExpandDataTrunk;
 import org.jboss.pressgang.ccms.server.rest.DatabaseOperation;
 import org.jboss.pressgang.ccms.server.rest.v1.EntityCache;
 import org.jboss.pressgang.ccms.server.rest.v1.RESTChangeAction;
+import org.jboss.pressgang.ccms.server.rest.v1.RESTSingleChangeAction;
 import org.jboss.pressgang.ccms.server.rest.v1.factory.LogDetailsV1Factory;
 import org.jboss.pressgang.ccms.server.utils.EntityManagerWrapper;
 import org.jboss.pressgang.ccms.server.utils.EnversUtilities;
@@ -46,7 +49,7 @@ import org.jboss.resteasy.spi.InternalServerErrorException;
  * @param <W> The REST object collection item type
  */
 @SuppressWarnings("unchecked")
-public abstract class RESTEntityFactory<T extends RESTBaseEntityV1<T, V, W>, U extends AuditedEntity,
+public abstract class RESTEntityFactory<T extends RESTBaseEntityV1<T>, U extends PressGangEntity,
         V extends RESTBaseEntityCollectionV1<T, V, W>, W extends RESTBaseEntityCollectionItemV1<T, V, W>> {
     @Inject
     protected EntityCache entityCache;
@@ -117,15 +120,20 @@ public abstract class RESTEntityFactory<T extends RESTBaseEntityV1<T, V, W>, U e
 
         final T retValue = createRESTEntityFromDBEntityInternal(entity, baseUrl, dataType, expand, revision, expandParentReferences);
 
-        // Set the entities revision
-        final Number fixedRevision = revision == null ? EnversUtilities.getLatestRevision(entityManager,
-                entity) : EnversUtilities.getClosestRevision(entityManager, entity, revision);
-        retValue.setRevision(fixedRevision.intValue());
+        if (entity instanceof AuditedEntity && retValue instanceof RESTBaseAuditedEntityV1) {
+            final AuditedEntity auditedEntity = (AuditedEntity) entity;
+            final RESTBaseAuditedEntityV1 auditedRestEntity = (RESTBaseAuditedEntityV1) retValue;
 
-        // Add the log details
-        retValue.setLogDetails(
-                logDetailsFactory.createRESTEntityFromAuditedEntity(entity, fixedRevision, RESTBaseEntityV1.LOG_DETAILS_NAME, expand,
-                        dataType, baseUrl));
+            // Set the entities revision
+            final Number fixedRevision = revision == null ? EnversUtilities.getLatestRevision(entityManager,
+                    auditedEntity) : EnversUtilities.getClosestRevision(entityManager, auditedEntity, revision);
+            auditedRestEntity.setRevision(fixedRevision.intValue());
+
+            // Add the log details
+            auditedRestEntity.setLogDetails(
+                    logDetailsFactory.createRESTEntityFromAuditedEntity(auditedEntity, fixedRevision, RESTBaseAuditedEntityV1.LOG_DETAILS_NAME,
+                            expand, dataType, baseUrl));
+        }
 
         return retValue;
     }
@@ -162,24 +170,43 @@ public abstract class RESTEntityFactory<T extends RESTBaseEntityV1<T, V, W>, U e
         }
     }
 
-    public void syncDBEntityDeleteChanges(final AuditedEntity entity, final RESTBaseEntityV1<?, ?, ?> dataObject,
+    public void syncDBEntityDeleteChanges(final PressGangEntity entity, final RESTBaseEntityV1<?> dataObject,
             final RESTChangeAction<?> action) {
         for (final RESTChangeAction<?> childAction : action.getDeleteChildActions()) {
             doDeleteChildAction((U) entity, (T) dataObject, childAction);
         }
+
+        // Update changes might have child delete items, so loop over them as well
+        for (final RESTChangeAction<?> childAction : action.getUpdateChildActions()) {
+            final PressGangEntity updateEntity = getChildEntityForAction((U) entity, (T) dataObject, childAction);
+            childAction.setDBEntity(updateEntity);
+            childAction.getFactory().syncDBEntityDeleteChanges(updateEntity, childAction.getRESTEntity(), childAction);
+        }
     }
 
-    public void syncDBEntityCreateChanges(final AuditedEntity entity, final RESTBaseEntityV1<?, ?, ?> dataObject,
+    public void syncDBEntityCreateChanges(final PressGangEntity entity, final RESTBaseEntityV1<?> dataObject,
             final RESTChangeAction<?> action) {
         for (final RESTChangeAction<?> childAction : action.getCreateChildActions()) {
-            final AuditedEntity createdEntity = doCreateChildAction((U) entity, (T) dataObject, childAction);
+            final PressGangEntity createdEntity = doCreateChildAction((U) entity, (T) dataObject, childAction);
             childAction.setDBEntity(createdEntity);
             childAction.getFactory().syncDBEntityCreateChanges(createdEntity, childAction.getRESTEntity(), childAction);
             entityCache.addNew(childAction.getRESTEntity(), createdEntity);
         }
+
+        // Update changes might have child create items, so loop over them as well
+        for (final RESTChangeAction<?> childAction : action.getUpdateChildActions()) {
+            final PressGangEntity updateEntity;
+            if (childAction.getDBEntity() == null) {
+                updateEntity = getChildEntityForAction((U) entity, (T) dataObject, childAction);
+                childAction.setDBEntity(updateEntity);
+            } else {
+                updateEntity = childAction.getDBEntity();
+            }
+            childAction.getFactory().syncDBEntityCreateChanges(updateEntity, childAction.getRESTEntity(), childAction);
+        }
     }
 
-    public void syncDBEntityUpdateChanges(final AuditedEntity entity, final RESTBaseEntityV1<?, ?, ?> dataObject,
+    public void syncDBEntityUpdateChanges(final PressGangEntity entity, final RESTBaseEntityV1<?> dataObject,
             final RESTChangeAction<?> action) {
         if (action.getType() == DatabaseOperation.UPDATE) {
             syncBaseDetails((U) entity, (T) dataObject);
@@ -191,9 +218,14 @@ public abstract class RESTEntityFactory<T extends RESTBaseEntityV1<T, V, W>, U e
         }
 
         for (final RESTChangeAction<?> childAction : action.getUpdateChildActions()) {
-            final AuditedEntity updatedEntity = getChildEntityForAction((U) entity, (T) dataObject, childAction);
-            childAction.getFactory().syncDBEntityUpdateChanges(updatedEntity, childAction.getRESTEntity(), childAction);
-            entityCache.addUpdated(childAction.getRESTEntity(), updatedEntity);
+            final PressGangEntity updateEntity;
+            if (childAction.getDBEntity() == null) {
+                updateEntity = getChildEntityForAction((U) entity, (T) dataObject, childAction);
+            } else {
+                updateEntity = childAction.getDBEntity();
+            }
+            childAction.getFactory().syncDBEntityUpdateChanges(updateEntity, childAction.getRESTEntity(), childAction);
+            entityCache.addUpdated(childAction.getRESTEntity(), updateEntity);
         }
 
         // Sync the additional details now that the child actions have been performed
@@ -205,16 +237,16 @@ public abstract class RESTEntityFactory<T extends RESTBaseEntityV1<T, V, W>, U e
     public void syncAdditionalDetails(U entity, T dataObject) {}
     protected void doDeleteChildAction(U entity, T dataObject, RESTChangeAction<?> action) {}
 
-    protected AuditedEntity doCreateChildAction(U entity, T dataObject, RESTChangeAction<?> action) {
+    protected PressGangEntity doCreateChildAction(U entity, T dataObject, RESTChangeAction<?> action) {
         throw new UnsupportedOperationException("No implementation exists for doCreateChildAction()");
     }
 
-    protected AuditedEntity getChildEntityForAction(U entity, T dataObject, RESTChangeAction<?> action) {
+    protected PressGangEntity getChildEntityForAction(U entity, T dataObject, RESTChangeAction<?> action) {
         throw new UnsupportedOperationException("No implementation exists for getChildEntityForAction()");
     }
 
-    protected <T extends RESTBaseEntityV1<T, V, W>,
-            U extends AuditedEntity,
+    protected <T extends RESTBaseEntityV1<T>,
+            U extends PressGangEntity,
             V extends RESTBaseEntityCollectionV1<T, V, W>,
             W extends RESTBaseEntityCollectionItemV1<T, V, W>>
             void collectChangeInformationFromCollection(final RESTChangeAction<?> parent, final V collection,
@@ -222,18 +254,18 @@ public abstract class RESTEntityFactory<T extends RESTBaseEntityV1<T, V, W>, U e
         collectChangeInformationFromCollection(parent, collection, collectionFactory, null);
     }
 
-    protected <T extends RESTBaseEntityV1<T, V, W>,
-            U extends AuditedEntity,
+    protected <T extends RESTBaseEntityV1<T>,
+            U extends PressGangEntity,
             V extends RESTBaseEntityCollectionV1<T, V, W>,
             W extends RESTBaseEntityCollectionItemV1<T, V, W>>
     void collectChangeInformationFromCollection(final RESTChangeAction<?> parent, final V collection,
-            final RESTEntityFactory<T, U, V, W> collectionFactory, final String uniqueId) {
+            final RESTEntityFactory<T, U, V, W> factory, final String uniqueId) {
         collection.removeInvalidChangeItemRequests();
 
         for (final W restEntityItem : collection.getItems()) {
             final T restEntity = restEntityItem.getItem();
 
-            DatabaseOperation operation = null;
+            DatabaseOperation operation = DatabaseOperation.NONE;
             if (restEntityItem.returnIsRemoveItem()) {
                 operation = DatabaseOperation.DELETE;
             } else if (restEntityItem.returnIsAddItem()) {
@@ -244,14 +276,39 @@ public abstract class RESTEntityFactory<T extends RESTBaseEntityV1<T, V, W>, U e
             }
 
             // Create the actionable node
-            final RESTChangeAction<T> childAction = new RESTChangeAction(parent, collectionFactory, restEntity, operation);
+            final RESTChangeAction<T> childAction = new RESTChangeAction(parent, factory, restEntity, operation);
             childAction.setUniqueId(uniqueId);
             parent.addChildAction(childAction);
 
             if (operation != DatabaseOperation.DELETE) {
                 // For deletes there is no need to go any further down the chain, as deleting the parent will delete the children
-                collectionFactory.collectChangeInformation(childAction, restEntity);
+                factory.collectChangeInformation(childAction, restEntity);
             }
+        }
+    }
+
+    protected <T extends RESTBaseEntityV1<T>,
+            U extends PressGangEntity,
+            V extends RESTBaseEntityCollectionV1<T, V, W>,
+            W extends RESTBaseEntityCollectionItemV1<T, V, W>>
+    void collectChangeInformationFromEntity(final RESTChangeAction<?> parent, final T entity,
+            final RESTEntityFactory<T, U, V, W> factory) {
+        collectChangeInformationFromEntity(parent, entity, factory, null);
+    }
+
+    protected <T extends RESTBaseEntityV1<T>,
+            U extends PressGangEntity,
+            V extends RESTBaseEntityCollectionV1<T, V, W>,
+            W extends RESTBaseEntityCollectionItemV1<T, V, W>>
+    void collectChangeInformationFromEntity(final RESTChangeAction<?> parent, final T entity,
+            final RESTEntityFactory<T, U, V, W> factory, final String uniqueId) {
+        final RESTChangeAction<T> childAction = new RESTSingleChangeAction<T>(parent, factory, entity);
+        childAction.setUniqueId(uniqueId);
+        parent.addChildAction(childAction);
+
+        // Collect the changes for the children, if there are any
+        if (entity != null) {
+            factory.collectChangeInformation(childAction, entity);
         }
     }
 

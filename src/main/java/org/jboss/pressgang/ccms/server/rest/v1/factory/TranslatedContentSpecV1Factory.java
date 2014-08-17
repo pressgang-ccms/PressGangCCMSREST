@@ -24,13 +24,14 @@ import javax.inject.Inject;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.jboss.pressgang.ccms.model.base.AuditedEntity;
+import org.jboss.pressgang.ccms.model.base.PressGangEntity;
 import org.jboss.pressgang.ccms.model.contentspec.TranslatedCSNode;
 import org.jboss.pressgang.ccms.model.contentspec.TranslatedContentSpec;
 import org.jboss.pressgang.ccms.rest.v1.collections.contentspec.RESTTranslatedCSNodeCollectionV1;
 import org.jboss.pressgang.ccms.rest.v1.collections.contentspec.RESTTranslatedContentSpecCollectionV1;
 import org.jboss.pressgang.ccms.rest.v1.collections.contentspec.items.RESTTranslatedContentSpecCollectionItemV1;
 import org.jboss.pressgang.ccms.rest.v1.constants.RESTv1Constants;
+import org.jboss.pressgang.ccms.rest.v1.entities.base.RESTBaseAuditedEntityV1;
 import org.jboss.pressgang.ccms.rest.v1.entities.base.RESTBaseEntityV1;
 import org.jboss.pressgang.ccms.rest.v1.entities.contentspec.RESTTranslatedCSNodeV1;
 import org.jboss.pressgang.ccms.rest.v1.entities.contentspec.RESTTranslatedContentSpecV1;
@@ -59,10 +60,10 @@ public class TranslatedContentSpecV1Factory extends RESTEntityFactory<RESTTransl
         final RESTTranslatedContentSpecV1 retValue = new RESTTranslatedContentSpecV1();
 
         final List<String> expandOptions = new ArrayList<String>();
-        expandOptions.add(RESTBaseEntityV1.LOG_DETAILS_NAME);
+        expandOptions.add(RESTBaseAuditedEntityV1.LOG_DETAILS_NAME);
         expandOptions.add(RESTTranslatedContentSpecV1.CONTENT_SPEC_NAME);
         expandOptions.add(RESTTranslatedContentSpecV1.TRANSLATED_NODES_NAME);
-        if (revision == null) expandOptions.add(RESTBaseEntityV1.REVISIONS_NAME);
+        if (revision == null) expandOptions.add(RESTBaseAuditedEntityV1.REVISIONS_NAME);
         retValue.setExpand(expandOptions);
 
         retValue.setId(entity.getId());
@@ -79,9 +80,9 @@ public class TranslatedContentSpecV1Factory extends RESTEntityFactory<RESTTransl
         }
 
         // REVISIONS
-        if (revision == null && expand != null && expand.contains(RESTBaseEntityV1.REVISIONS_NAME)) {
+        if (revision == null && expand != null && expand.contains(RESTBaseAuditedEntityV1.REVISIONS_NAME)) {
             retValue.setRevisions(RESTEntityCollectionFactory.create(RESTTranslatedContentSpecCollectionV1.class, this, entity,
-                    EnversUtilities.getRevisions(entityManager, entity), RESTBaseEntityV1.REVISIONS_NAME, dataType, expand, baseUrl,
+                    EnversUtilities.getRevisions(entityManager, entity), RESTBaseAuditedEntityV1.REVISIONS_NAME, dataType, expand, baseUrl,
                     entityManager));
         }
 
@@ -118,7 +119,7 @@ public class TranslatedContentSpecV1Factory extends RESTEntityFactory<RESTTransl
 
     @Override
     protected void doDeleteChildAction(final TranslatedContentSpec entity, final RESTTranslatedContentSpecV1 dataObject, final RESTChangeAction<?> action) {
-        final RESTBaseEntityV1<?, ?, ?> restEntity = action.getRESTEntity();
+        final RESTBaseEntityV1<?> restEntity = action.getRESTEntity();
 
         if (restEntity instanceof RESTTranslatedCSNodeV1) {
             final TranslatedCSNode dbEntity = entityManager.find(TranslatedCSNode.class, restEntity.getId());
@@ -130,9 +131,10 @@ public class TranslatedContentSpecV1Factory extends RESTEntityFactory<RESTTransl
     }
 
     @Override
-    protected AuditedEntity doCreateChildAction(final TranslatedContentSpec entity, final RESTTranslatedContentSpecV1 dataObject, final RESTChangeAction<?> action) {
-        final RESTBaseEntityV1<?, ?, ?> restEntity = action.getRESTEntity();
-        final AuditedEntity dbEntity;
+    protected PressGangEntity doCreateChildAction(final TranslatedContentSpec entity, final RESTTranslatedContentSpecV1 dataObject,
+            final RESTChangeAction<?> action) {
+        final RESTBaseEntityV1<?> restEntity = action.getRESTEntity();
+        final PressGangEntity dbEntity;
 
         if (restEntity instanceof RESTTranslatedCSNodeV1) {
             dbEntity = action.getFactory().createDBEntity(restEntity);
@@ -145,10 +147,11 @@ public class TranslatedContentSpecV1Factory extends RESTEntityFactory<RESTTransl
     }
 
     @Override
-    protected AuditedEntity getChildEntityForAction(final TranslatedContentSpec entity, final RESTTranslatedContentSpecV1 dataObject, final RESTChangeAction<?> action) {
-        final RESTBaseEntityV1<?, ?, ?> restEntity = action.getRESTEntity();
+    protected PressGangEntity getChildEntityForAction(final TranslatedContentSpec entity, final RESTTranslatedContentSpecV1 dataObject,
+            final RESTChangeAction<?> action) {
+        final RESTBaseEntityV1<?> restEntity = action.getRESTEntity();
 
-        final AuditedEntity dbEntity;
+        final PressGangEntity dbEntity;
         if (restEntity instanceof RESTTranslatedCSNodeV1) {
             dbEntity = RESTv1Utilities.findEntity(entityManager, entityCache, (RESTTranslatedCSNodeV1) restEntity, TranslatedCSNode.class);
             if (dbEntity == null) {

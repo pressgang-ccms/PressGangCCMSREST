@@ -25,10 +25,12 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.jboss.pressgang.ccms.model.Locale;
+import org.jboss.pressgang.ccms.model.base.PressGangEntity;
 import org.jboss.pressgang.ccms.model.contentspec.TranslatedCSNodeString;
 import org.jboss.pressgang.ccms.rest.v1.collections.contentspec.RESTTranslatedCSNodeStringCollectionV1;
 import org.jboss.pressgang.ccms.rest.v1.collections.contentspec.items.RESTTranslatedCSNodeStringCollectionItemV1;
 import org.jboss.pressgang.ccms.rest.v1.entities.RESTLocaleV1;
+import org.jboss.pressgang.ccms.rest.v1.entities.base.RESTBaseAuditedEntityV1;
 import org.jboss.pressgang.ccms.rest.v1.entities.base.RESTBaseEntityV1;
 import org.jboss.pressgang.ccms.rest.v1.entities.contentspec.RESTTranslatedCSNodeStringV1;
 import org.jboss.pressgang.ccms.rest.v1.expansion.ExpandDataTrunk;
@@ -56,8 +58,8 @@ public class TranslatedCSNodeStringV1Factory extends RESTEntityFactory<RESTTrans
         final RESTTranslatedCSNodeStringV1 retValue = new RESTTranslatedCSNodeStringV1();
 
         final List<String> expandOptions = new ArrayList<String>();
-        expandOptions.add(RESTBaseEntityV1.LOG_DETAILS_NAME);
-        if (revision == null) expandOptions.add(RESTBaseEntityV1.REVISIONS_NAME);
+        expandOptions.add(RESTBaseAuditedEntityV1.LOG_DETAILS_NAME);
+        if (revision == null) expandOptions.add(RESTBaseAuditedEntityV1.REVISIONS_NAME);
         retValue.setExpand(expandOptions);
 
         retValue.setId(entity.getId());
@@ -71,9 +73,9 @@ public class TranslatedCSNodeStringV1Factory extends RESTEntityFactory<RESTTrans
         }
 
         // REVISIONS
-        if (revision == null && expand != null && expand.contains(RESTBaseEntityV1.REVISIONS_NAME)) {
+        if (revision == null && expand != null && expand.contains(RESTBaseAuditedEntityV1.REVISIONS_NAME)) {
             retValue.setRevisions(RESTEntityCollectionFactory.create(RESTTranslatedCSNodeStringCollectionV1.class, this, entity,
-                    EnversUtilities.getRevisions(entityManager, entity), RESTBaseEntityV1.REVISIONS_NAME, dataType, expand, baseUrl,
+                    EnversUtilities.getRevisions(entityManager, entity), RESTBaseAuditedEntityV1.REVISIONS_NAME, dataType, expand, baseUrl,
                     entityManager));
         }
 
@@ -90,7 +92,10 @@ public class TranslatedCSNodeStringV1Factory extends RESTEntityFactory<RESTTrans
     @Override
     public void collectChangeInformation(final RESTChangeAction<RESTTranslatedCSNodeStringV1> parent,
             final RESTTranslatedCSNodeStringV1 dataObject) {
-        // TranslatedCSNodeString has no children that can be changed, so we have no changes to collect
+        // ENTITIES
+        if (dataObject.hasParameterSet(RESTTranslatedCSNodeStringV1.LOCALE_NAME)) {
+            collectChangeInformationFromEntity(parent, dataObject.getLocale(), localeFactory, RESTTranslatedCSNodeStringV1.LOCALE_NAME);
+        }
     }
 
     @Override
@@ -102,29 +107,52 @@ public class TranslatedCSNodeStringV1Factory extends RESTEntityFactory<RESTTrans
     }
 
     @Override
-    public void syncAdditionalDetails(final TranslatedCSNodeString entity, final RESTTranslatedCSNodeStringV1 dataObject) {
-        // Set the Locale
-        if (dataObject.hasParameterSet(RESTTranslatedCSNodeStringV1.LOCALE_NAME)) {
-            final RESTLocaleV1 restEntity = dataObject.getLocale();
+    protected void doDeleteChildAction(final TranslatedCSNodeString entity, final RESTTranslatedCSNodeStringV1 dataObject,
+            final RESTChangeAction<?> action) {
+        final RESTBaseEntityV1<?> restEntity = action.getRESTEntity();
 
-            if (restEntity != null) {
-                final Locale dbEntity;
-                if (restEntity.getId() != null) {
-                    dbEntity = RESTv1Utilities.findEntity(entityManager, entityCache, restEntity, Locale.class);
-                } else {
-                    dbEntity = localeFactory.createDBEntity(restEntity);
-                }
-
-                if (dbEntity == null)
-                    throw new BadRequestException("No Locale entity was found with the primary key " + restEntity.getId());
-
-                localeFactory.syncBaseDetails(dbEntity, restEntity);
-
-                entity.setLocale(dbEntity);
-            } else {
-                entity.setLocale(null);
-            }
+        if (restEntity instanceof RESTLocaleV1 || RESTTranslatedCSNodeStringV1.LOCALE_NAME.equals(action.getUniqueId())) {
+            entity.setLocale(null);
         }
+    }
+
+    @Override
+    protected PressGangEntity doCreateChildAction(final TranslatedCSNodeString entity, final RESTTranslatedCSNodeStringV1 dataObject,
+            final RESTChangeAction<?> action) {
+        final RESTBaseEntityV1<?> restEntity = action.getRESTEntity();
+        final PressGangEntity dbEntity;
+
+        if (restEntity instanceof RESTLocaleV1) {
+            dbEntity = entityManager.find(Locale.class, restEntity.getId());
+            if (dbEntity == null) {
+                throw new BadRequestException("No Locale entity was found with the primary key " + restEntity.getId());
+            }
+
+            entity.setLocale((Locale) dbEntity);
+        } else {
+            throw new IllegalArgumentException("Item is not a child of TranslatedCSNodeString");
+        }
+
+        return dbEntity;
+    }
+
+    @Override
+    protected PressGangEntity getChildEntityForAction(final TranslatedCSNodeString entity, final RESTTranslatedCSNodeStringV1 dataObject,
+            final RESTChangeAction<?> action) {
+        final RESTBaseEntityV1<?> restEntity = action.getRESTEntity();
+
+        final PressGangEntity dbEntity;
+        if (restEntity instanceof RESTLocaleV1) {
+            dbEntity = RESTv1Utilities.findEntity(entityManager, entityCache, (RESTLocaleV1) restEntity, Locale.class);
+            if (dbEntity == null) {
+                throw new BadRequestException("No Locale entity was found with the primary key " + restEntity.getId());
+            }
+            entity.setLocale((Locale) dbEntity);
+        } else {
+            throw new IllegalArgumentException("Item is not a child of TranslatedCSNodeString");
+        }
+
+        return dbEntity;
     }
 
     @Override

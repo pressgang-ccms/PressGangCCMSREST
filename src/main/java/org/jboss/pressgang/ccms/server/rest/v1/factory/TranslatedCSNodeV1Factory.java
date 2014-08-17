@@ -25,7 +25,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.jboss.pressgang.ccms.model.TranslatedTopicData;
-import org.jboss.pressgang.ccms.model.base.AuditedEntity;
+import org.jboss.pressgang.ccms.model.base.PressGangEntity;
 import org.jboss.pressgang.ccms.model.contentspec.TranslatedCSNode;
 import org.jboss.pressgang.ccms.model.contentspec.TranslatedCSNodeString;
 import org.jboss.pressgang.ccms.model.contentspec.TranslatedContentSpec;
@@ -35,6 +35,7 @@ import org.jboss.pressgang.ccms.rest.v1.collections.contentspec.RESTTranslatedCS
 import org.jboss.pressgang.ccms.rest.v1.collections.contentspec.items.RESTTranslatedCSNodeCollectionItemV1;
 import org.jboss.pressgang.ccms.rest.v1.constants.RESTv1Constants;
 import org.jboss.pressgang.ccms.rest.v1.entities.RESTTranslatedTopicV1;
+import org.jboss.pressgang.ccms.rest.v1.entities.base.RESTBaseAuditedEntityV1;
 import org.jboss.pressgang.ccms.rest.v1.entities.base.RESTBaseEntityV1;
 import org.jboss.pressgang.ccms.rest.v1.entities.contentspec.RESTTranslatedCSNodeStringV1;
 import org.jboss.pressgang.ccms.rest.v1.entities.contentspec.RESTTranslatedCSNodeV1;
@@ -68,12 +69,12 @@ public class TranslatedCSNodeV1Factory extends RESTEntityFactory<RESTTranslatedC
         final RESTTranslatedCSNodeV1 retValue = new RESTTranslatedCSNodeV1();
 
         final List<String> expandOptions = new ArrayList<String>();
-        expandOptions.add(RESTBaseEntityV1.LOG_DETAILS_NAME);
+        expandOptions.add(RESTBaseAuditedEntityV1.LOG_DETAILS_NAME);
         expandOptions.add(RESTTranslatedCSNodeV1.NODE_NAME);
         expandOptions.add(RESTTranslatedCSNodeV1.TRANSLATED_STRING_NAME);
         expandOptions.add(RESTTranslatedCSNodeV1.TRANSLATED_CONTENT_SPEC_NAME);
         expandOptions.add(RESTTranslatedCSNodeV1.TRANSLATED_TOPICS_NAME);
-        if (revision == null) expandOptions.add(RESTBaseEntityV1.REVISIONS_NAME);
+        if (revision == null) expandOptions.add(RESTBaseAuditedEntityV1.REVISIONS_NAME);
         retValue.setExpand(expandOptions);
 
         retValue.setId(entity.getId());
@@ -90,9 +91,9 @@ public class TranslatedCSNodeV1Factory extends RESTEntityFactory<RESTTranslatedC
         }
 
         // REVISIONS
-        if (revision == null && expand != null && expand.contains(RESTBaseEntityV1.REVISIONS_NAME)) {
+        if (revision == null && expand != null && expand.contains(RESTBaseAuditedEntityV1.REVISIONS_NAME)) {
             retValue.setRevisions(RESTEntityCollectionFactory.create(RESTTranslatedCSNodeCollectionV1.class, this, entity,
-                    EnversUtilities.getRevisions(entityManager, entity), RESTBaseEntityV1.REVISIONS_NAME, dataType, expand, baseUrl,
+                    EnversUtilities.getRevisions(entityManager, entity), RESTBaseAuditedEntityV1.REVISIONS_NAME, dataType, expand, baseUrl,
                     entityManager));
         }
 
@@ -164,7 +165,7 @@ public class TranslatedCSNodeV1Factory extends RESTEntityFactory<RESTTranslatedC
 
     @Override
     protected void doDeleteChildAction(final TranslatedCSNode entity, final RESTTranslatedCSNodeV1 dataObject, final RESTChangeAction<?> action) {
-        final RESTBaseEntityV1<?, ?, ?> restEntity = action.getRESTEntity();
+        final RESTBaseEntityV1<?> restEntity = action.getRESTEntity();
 
         if (restEntity instanceof RESTTranslatedCSNodeStringV1) {
             final TranslatedCSNodeString dbEntity = entityManager.find(TranslatedCSNodeString.class, restEntity.getId());
@@ -183,9 +184,10 @@ public class TranslatedCSNodeV1Factory extends RESTEntityFactory<RESTTranslatedC
     }
 
     @Override
-    protected AuditedEntity doCreateChildAction(final TranslatedCSNode entity, final RESTTranslatedCSNodeV1 dataObject, final RESTChangeAction<?> action) {
-        final RESTBaseEntityV1<?, ?, ?> restEntity = action.getRESTEntity();
-        final AuditedEntity dbEntity;
+    protected PressGangEntity doCreateChildAction(final TranslatedCSNode entity, final RESTTranslatedCSNodeV1 dataObject,
+            final RESTChangeAction<?> action) {
+        final RESTBaseEntityV1<?> restEntity = action.getRESTEntity();
+        final PressGangEntity dbEntity;
 
         if (restEntity instanceof RESTTranslatedCSNodeStringV1) {
             dbEntity = action.getFactory().createDBEntity(restEntity);
@@ -205,10 +207,11 @@ public class TranslatedCSNodeV1Factory extends RESTEntityFactory<RESTTranslatedC
     }
 
     @Override
-    protected AuditedEntity getChildEntityForAction(final TranslatedCSNode entity, final RESTTranslatedCSNodeV1 dataObject, final RESTChangeAction<?> action) {
-        final RESTBaseEntityV1<?, ?, ?> restEntity = action.getRESTEntity();
+    protected PressGangEntity getChildEntityForAction(final TranslatedCSNode entity, final RESTTranslatedCSNodeV1 dataObject,
+            final RESTChangeAction<?> action) {
+        final RESTBaseEntityV1<?> restEntity = action.getRESTEntity();
 
-        final AuditedEntity dbEntity;
+        final PressGangEntity dbEntity;
         if (restEntity instanceof RESTTranslatedCSNodeStringV1) {
             dbEntity = RESTv1Utilities.findEntity(entityManager, entityCache, (RESTTranslatedCSNodeStringV1) restEntity,
                     TranslatedCSNodeString.class);

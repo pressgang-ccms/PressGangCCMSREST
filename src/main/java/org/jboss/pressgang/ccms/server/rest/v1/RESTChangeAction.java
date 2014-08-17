@@ -23,20 +23,21 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
-import org.jboss.pressgang.ccms.model.base.AuditedEntity;
+import org.jboss.pressgang.ccms.model.base.PressGangEntity;
 import org.jboss.pressgang.ccms.rest.v1.entities.base.RESTBaseEntityV1;
 import org.jboss.pressgang.ccms.server.rest.DatabaseOperation;
 import org.jboss.pressgang.ccms.server.rest.v1.factory.base.RESTEntityFactory;
 
-public class RESTChangeAction<T extends RESTBaseEntityV1<T, ?, ?>> {
+public class RESTChangeAction<T extends RESTBaseEntityV1<T>> {
     private final RESTChangeAction<?> parent;
     private final RESTEntityFactory factory;
     private final T restEntity;
-    private AuditedEntity dbEntity;
+    private PressGangEntity dbEntity;
     private final DatabaseOperation type;
     private List<RESTChangeAction<?>> deleteChildren = new ArrayList<RESTChangeAction<?>>();
     private List<RESTChangeAction<?>> createChildren = new ArrayList<RESTChangeAction<?>>();
     private List<RESTChangeAction<?>> updateChildren = new ArrayList<RESTChangeAction<?>>();
+    private List<RESTChangeAction<?>> noChangeChildren = new ArrayList<RESTChangeAction<?>>();
     private String uniqueId;
 
     public RESTChangeAction(final RESTEntityFactory<T, ?, ?, ?> factory, final T restEntity, final DatabaseOperation type) {
@@ -66,6 +67,9 @@ public class RESTChangeAction<T extends RESTBaseEntityV1<T, ?, ?>> {
             case UPDATE:
                 updateChildren.add(actionNode);
                 break;
+            case NONE:
+                noChangeChildren.add(actionNode);
+                break;
         }
     }
 
@@ -81,6 +85,10 @@ public class RESTChangeAction<T extends RESTBaseEntityV1<T, ?, ?>> {
         return Collections.unmodifiableList(updateChildren);
     }
 
+    public List<RESTChangeAction<?>> getNoChangeChildActions() {
+        return Collections.unmodifiableList(noChangeChildren);
+    }
+
     public RESTEntityFactory getFactory() {
         return factory;
     }
@@ -93,11 +101,11 @@ public class RESTChangeAction<T extends RESTBaseEntityV1<T, ?, ?>> {
         return type;
     }
 
-    public AuditedEntity getDBEntity() {
+    public PressGangEntity getDBEntity() {
         return dbEntity;
     }
 
-    public void setDBEntity(AuditedEntity dbEntity) {
+    public void setDBEntity(PressGangEntity dbEntity) {
         this.dbEntity = dbEntity;
     }
 

@@ -31,7 +31,7 @@ import javax.validation.ValidationException;
 import java.sql.BatchUpdateException;
 import java.sql.SQLException;
 
-import org.jboss.pressgang.ccms.model.base.AuditedEntity;
+import org.jboss.pressgang.ccms.model.base.PressGangEntity;
 import org.jboss.pressgang.ccms.model.exceptions.CustomConstraintViolationException;
 import org.jboss.pressgang.ccms.provider.exception.ProviderException;
 import org.jboss.pressgang.ccms.rest.v1.entities.base.RESTBaseEntityV1;
@@ -48,7 +48,7 @@ import org.slf4j.LoggerFactory;
 public class RESTv1Utilities {
     private static final Logger LOG = LoggerFactory.getLogger(RESTv1Utilities.class);
 
-    public static <U extends AuditedEntity, T extends RESTBaseEntityV1<T, ?, ?>> U findEntity(final EntityManager entityManager,
+    public static <U extends PressGangEntity, T extends RESTBaseEntityV1<T>> U findEntity(final EntityManager entityManager,
             EntityCache entityCache, final T restEntity, final Class<U> databaseClass) {
         if (restEntity.getId() == null) {
             // If the id is null than there is no possible way a matching entity could be found, so return null
@@ -165,8 +165,10 @@ public class RESTv1Utilities {
             return new NotFoundException(cause);
         } else if (cause instanceof org.hibernate.exception.ConstraintViolationException) {
             return new BadRequestException(ExceptionUtilities.getRootCause(cause).getMessage());
-        } else if (cause instanceof ValidationException || cause instanceof CustomConstraintViolationException) {
+        } else if (cause instanceof ValidationException) {
             return new BadRequestException(cause);
+        } else if (cause instanceof CustomConstraintViolationException) {
+            return new BadRequestException(cause.getMessage());
         } else if (cause instanceof RollbackException) {
             return new BadRequestException(
                     "This is most likely caused by the fact that two users are trying to save the same entity at the same time.\n" + "You" +

@@ -39,7 +39,6 @@ import java.awt.geom.Rectangle2D;
 import java.io.IOException;
 import java.io.StringWriter;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
@@ -116,6 +115,7 @@ import org.jboss.pressgang.ccms.model.StringConstants;
 import org.jboss.pressgang.ccms.model.Tag;
 import org.jboss.pressgang.ccms.model.Topic;
 import org.jboss.pressgang.ccms.model.TranslatedTopicData;
+import org.jboss.pressgang.ccms.model.TranslationServer;
 import org.jboss.pressgang.ccms.model.User;
 import org.jboss.pressgang.ccms.model.config.ApplicationConfig;
 import org.jboss.pressgang.ccms.model.contentspec.CSNode;
@@ -139,6 +139,7 @@ import org.jboss.pressgang.ccms.rest.v1.collections.RESTStringConstantCollection
 import org.jboss.pressgang.ccms.rest.v1.collections.RESTTagCollectionV1;
 import org.jboss.pressgang.ccms.rest.v1.collections.RESTTopicCollectionV1;
 import org.jboss.pressgang.ccms.rest.v1.collections.RESTTranslatedTopicCollectionV1;
+import org.jboss.pressgang.ccms.rest.v1.collections.RESTTranslationServerCollectionV1;
 import org.jboss.pressgang.ccms.rest.v1.collections.RESTUserCollectionV1;
 import org.jboss.pressgang.ccms.rest.v1.collections.contentspec.RESTCSNodeCollectionV1;
 import org.jboss.pressgang.ccms.rest.v1.collections.contentspec.RESTContentSpecCollectionV1;
@@ -173,6 +174,7 @@ import org.jboss.pressgang.ccms.rest.v1.entities.RESTStringConstantV1;
 import org.jboss.pressgang.ccms.rest.v1.entities.RESTTagV1;
 import org.jboss.pressgang.ccms.rest.v1.entities.RESTTopicV1;
 import org.jboss.pressgang.ccms.rest.v1.entities.RESTTranslatedTopicV1;
+import org.jboss.pressgang.ccms.rest.v1.entities.RESTTranslationServerV1;
 import org.jboss.pressgang.ccms.rest.v1.entities.RESTUserV1;
 import org.jboss.pressgang.ccms.rest.v1.entities.base.RESTLogDetailsV1;
 import org.jboss.pressgang.ccms.rest.v1.entities.contentspec.RESTCSNodeV1;
@@ -220,7 +222,6 @@ import org.slf4j.LoggerFactory;
 import org.w3c.dom.DOMImplementation;
 import org.w3c.dom.Document;
 import org.xml.sax.SAXException;
-import org.zanata.common.LocaleId;
 
 /**
  * The PressGang REST interface implementation
@@ -569,7 +570,7 @@ public class RESTv1 extends BaseRESTv1 implements RESTBaseInterfaceV1, RESTInter
         if (callback == null) throw new BadRequestException("The callback parameter can not be null");
 
         try {
-            return wrapJsonInPadding(callback, convertObjectToJSON(getJSONServerSettings()));
+            return wrapJsonInPadding(callback, convertObjectToJSON(getJSONServerSettings("")));
         } catch (final Exception ex) {
             throw new InternalServerErrorException("Could not marshall return value into JSON");
         }
@@ -577,26 +578,46 @@ public class RESTv1 extends BaseRESTv1 implements RESTBaseInterfaceV1, RESTInter
 
     /* JSON FUNCTIONS */
     @Override
-    public RESTServerSettingsV1 getJSONServerSettings() {
-        final ExpandDataTrunk expand = new ExpandDataTrunk();
-        expand.setBranches(Arrays.asList(
-                new ExpandDataTrunk(new ExpandDataDetails(RESTServerSettingsV1.UNDEFINED_SETTINGS_NAME)),
-                new ExpandDataTrunk(new ExpandDataDetails(RESTServerSettingsV1.ZANATA_SETTINGS_NAME)),
-                new ExpandDataTrunk(new ExpandDataDetails(RESTServerEntitiesV1.UNDEFINED_ENTITIES_NAME))
-        ));
+    public RESTServerSettingsV1 getJSONServerSettings(String expand) {
+        try {
+            // Unmarshall the expand string into the ExpandDataTrunk object.
+            final ExpandDataTrunk expandDataTrunk = unmarshallExpand(expand);
 
-        return serverSettingsFactory.createRESTEntityFromObject(applicationConfig, getBaseUrl(), RESTv1Constants.JSON_URL, expand);
+            // Add some default values
+            if (expandDataTrunk.getBranches() == null) {
+                expandDataTrunk.setBranches(new ArrayList<ExpandDataTrunk>());
+            }
+            expandDataTrunk.getBranches().add(new ExpandDataTrunk(new ExpandDataDetails(RESTServerSettingsV1.UNDEFINED_SETTINGS_NAME)));
+            expandDataTrunk.getBranches().add(new ExpandDataTrunk(new ExpandDataDetails(RESTServerEntitiesV1.UNDEFINED_ENTITIES_NAME)));
+
+            return serverSettingsFactory.createRESTEntityFromObject(applicationConfig, getBaseUrl(), RESTv1Constants.JSON_URL,
+                    expandDataTrunk);
+        } catch (Throwable e) {
+            throw RESTv1Utilities.processError(e);
+        }
     }
 
     @Override
-    public RESTServerSettingsV1 updateJSONServerSettings(final RESTServerSettingsV1 dataObject) {
+    public RESTServerSettingsV1 updateJSONServerSettings(final String expand, final RESTServerSettingsV1 dataObject) {
         if (dataObject == null) throw new BadRequestException("The dataObject parameter can not be null");
 
-        // Update the settings
-        serverSettingsFactory.updateObjectFromRESTEntity(applicationConfig, dataObject);
+        try {
+            // Start the transaction
+            transaction.begin();
+            entityManager.joinTransaction();
 
-        // Return the new settings
-        return getJSONServerSettings();
+            // Update the settings
+            serverSettingsFactory.updateObjectFromRESTEntity(applicationConfig, dataObject);
+
+            // Commit the transaction
+            entityManager.flush();
+            transaction.commit();
+
+            // Return the new settings
+            return getJSONServerSettings(expand);
+        } catch (Throwable e) {
+            throw RESTv1Utilities.processError(transaction, e);
+        }
     }
 
     /* LOCALES */
@@ -607,17 +628,6 @@ public class RESTv1 extends BaseRESTv1 implements RESTBaseInterfaceV1, RESTInter
 
         try {
             return wrapJsonInPadding(callback, convertObjectToJSON(getJSONLocale(id, expand)));
-        } catch (final Exception ex) {
-            throw new InternalServerErrorException("Could not marshall return value into JSON");
-        }
-    }
-
-    @Override
-    public String getJSONPLocaleRevision(final  Integer id, final Integer revision, final String expand, final String callback) {
-        if (callback == null) throw new BadRequestException("The callback parameter can not be null");
-
-        try {
-            return wrapJsonInPadding(callback, convertObjectToJSON(getJSONLocaleRevision(id, revision, expand)));
         } catch (final Exception ex) {
             throw new InternalServerErrorException("Could not marshall return value into JSON");
         }
@@ -643,14 +653,6 @@ public class RESTv1 extends BaseRESTv1 implements RESTBaseInterfaceV1, RESTInter
     }
 
     @Override
-    public RESTLocaleV1 getJSONLocaleRevision(final Integer id, final Integer revision, final String expand) {
-        if (id == null) throw new BadRequestException("The id parameter can not be null");
-        if (revision == null) throw new BadRequestException("The revision parameter can not be null");
-
-        return getJSONResource(Locale.class, localeFactory, id, revision, expand);
-    }
-
-    @Override
     public RESTLocaleCollectionV1 getJSONLocales(final String expand) {
         return getJSONResources(RESTLocaleCollectionV1.class, Locale.class, localeFactory, RESTv1Constants.LOCALES_EXPANSION_NAME, expand);
     }
@@ -660,6 +662,9 @@ public class RESTv1 extends BaseRESTv1 implements RESTBaseInterfaceV1, RESTInter
             final String userId) {
         if (dataObject == null) throw new BadRequestException("The dataObject parameter can not be null");
         if (dataObject.getId() == null) throw new BadRequestException("The dataObject.getId() parameter can not be null");
+
+        // Invalidate any cached locales
+        cachedEntityLoader.invalidateLocaleEntities();
 
         final RESTLogDetailsV1 logDetails = generateLogDetails(message, flag, userId);
         return updateJSONEntity(Locale.class, dataObject, localeFactory, expand, logDetails);
@@ -671,6 +676,9 @@ public class RESTv1 extends BaseRESTv1 implements RESTBaseInterfaceV1, RESTInter
         if (dataObjects == null) throw new BadRequestException("The dataObjects parameter can not be null");
         if (dataObjects.getItems() == null) throw new BadRequestException("The dataObjects.getItems() parameter can not be null");
 
+        // Invalidate any cached locales
+        cachedEntityLoader.invalidateLocaleEntities();
+
         final RESTLogDetailsV1 logDetails = generateLogDetails(message, flag, userId);
         return updateJSONEntities(RESTLocaleCollectionV1.class, Locale.class, dataObjects, localeFactory,
                 RESTv1Constants.LOCALES_EXPANSION_NAME, expand, logDetails);
@@ -680,6 +688,9 @@ public class RESTv1 extends BaseRESTv1 implements RESTBaseInterfaceV1, RESTInter
     public RESTLocaleV1 createJSONLocale(final String expand, final RESTLocaleV1 dataObject, final String message, final Integer flag,
             final String userId) {
         if (dataObject == null) throw new BadRequestException("The dataObject parameter can not be null");
+
+        // Invalidate any cached locales
+        cachedEntityLoader.invalidateLocaleEntities();
 
         final RESTLogDetailsV1 logDetails = generateLogDetails(message, flag, userId);
         return createJSONEntity(Locale.class, dataObject, localeFactory, expand, logDetails);
@@ -691,9 +702,102 @@ public class RESTv1 extends BaseRESTv1 implements RESTBaseInterfaceV1, RESTInter
         if (dataObjects == null) throw new BadRequestException("The dataObjects parameter can not be null");
         if (dataObjects.getItems() == null) throw new BadRequestException("The dataObjects.getItems() parameter can not be null");
 
+        // Invalidate any cached locales
+        cachedEntityLoader.invalidateLocaleEntities();
+
         final RESTLogDetailsV1 logDetails = generateLogDetails(message, flag, userId);
         return createJSONEntities(RESTLocaleCollectionV1.class, Locale.class, dataObjects, localeFactory,
                 RESTv1Constants.LOCALES_EXPANSION_NAME, expand, logDetails);
+    }
+
+    /* TRANSLATION_SERVERS */
+    /* JSONP FUNCTIONS */
+    @Override
+    public String getJSONPTranslationServer(final Integer id, final String expand, final String callback) {
+        if (callback == null) throw new BadRequestException("The callback parameter can not be null");
+
+        try {
+            return wrapJsonInPadding(callback, convertObjectToJSON(getJSONTranslationServer(id, expand)));
+        } catch (final Exception ex) {
+            throw new InternalServerErrorException("Could not marshall return value into JSON");
+        }
+    }
+
+    @Override
+    public String getJSONPTranslationServers(final String expand, final String callback) {
+        if (callback == null) throw new BadRequestException("The callback parameter can not be null");
+
+        try {
+            return wrapJsonInPadding(callback, convertObjectToJSON(getJSONTranslationServers(expand)));
+        } catch (final Exception ex) {
+            throw new InternalServerErrorException("Could not marshall return value into JSON");
+        }
+    }
+
+    /* JSON FUNCTIONS */
+    @Override
+    public RESTTranslationServerV1 getJSONTranslationServer(final Integer id, final String expand) {
+        if (id == null) throw new BadRequestException("The id parameter can not be null");
+
+        return getJSONResource(TranslationServer.class, translationServerFactory, id, expand);
+    }
+
+    @Override
+    public RESTTranslationServerCollectionV1 getJSONTranslationServers(final String expand) {
+        return getJSONResources(RESTTranslationServerCollectionV1.class, TranslationServer.class, translationServerFactory, RESTv1Constants.TRANSLATION_SERVERS_EXPANSION_NAME, expand);
+    }
+
+    @Override
+    public RESTTranslationServerV1 updateJSONTranslationServer(final String expand, final RESTTranslationServerV1 dataObject, final String message, final Integer flag,
+            final String userId) {
+        if (dataObject == null) throw new BadRequestException("The dataObject parameter can not be null");
+        if (dataObject.getId() == null) throw new BadRequestException("The dataObject.getId() parameter can not be null");
+
+        // Invalidate any cached translation servers
+        cachedEntityLoader.invalidateTranslationServerEntities();
+
+        final RESTLogDetailsV1 logDetails = generateLogDetails(message, flag, userId);
+        return updateJSONEntity(TranslationServer.class, dataObject, translationServerFactory, expand, logDetails);
+    }
+
+    @Override
+    public RESTTranslationServerCollectionV1 updateJSONTranslationServers(final String expand, final RESTTranslationServerCollectionV1 dataObjects,
+            final String message, final Integer flag, final String userId) {
+        if (dataObjects == null) throw new BadRequestException("The dataObjects parameter can not be null");
+        if (dataObjects.getItems() == null) throw new BadRequestException("The dataObjects.getItems() parameter can not be null");
+
+        // Invalidate any cached translation servers
+        cachedEntityLoader.invalidateTranslationServerEntities();
+
+        final RESTLogDetailsV1 logDetails = generateLogDetails(message, flag, userId);
+        return updateJSONEntities(RESTTranslationServerCollectionV1.class, TranslationServer.class, dataObjects, translationServerFactory,
+                RESTv1Constants.TRANSLATION_SERVERS_EXPANSION_NAME, expand, logDetails);
+    }
+
+    @Override
+    public RESTTranslationServerV1 createJSONTranslationServer(final String expand, final RESTTranslationServerV1 dataObject, final String message, final Integer flag,
+            final String userId) {
+        if (dataObject == null) throw new BadRequestException("The dataObject parameter can not be null");
+
+        // Invalidate any cached translation servers
+        cachedEntityLoader.invalidateTranslationServerEntities();
+
+        final RESTLogDetailsV1 logDetails = generateLogDetails(message, flag, userId);
+        return createJSONEntity(TranslationServer.class, dataObject, translationServerFactory, expand, logDetails);
+    }
+
+    @Override
+    public RESTTranslationServerCollectionV1 createJSONTranslationServers(final String expand, final RESTTranslationServerCollectionV1 dataObjects, final String message,
+            final Integer flag, final String userId) {
+        if (dataObjects == null) throw new BadRequestException("The dataObjects parameter can not be null");
+        if (dataObjects.getItems() == null) throw new BadRequestException("The dataObjects.getItems() parameter can not be null");
+
+        // Invalidate any cached translation servers
+        cachedEntityLoader.invalidateTranslationServerEntities();
+
+        final RESTLogDetailsV1 logDetails = generateLogDetails(message, flag, userId);
+        return createJSONEntities(RESTTranslationServerCollectionV1.class, TranslationServer.class, dataObjects, translationServerFactory,
+                RESTv1Constants.TRANSLATION_SERVERS_EXPANSION_NAME, expand, logDetails);
     }
 
     /* BLOBCONSTANTS FUNCTIONS */
@@ -2199,12 +2303,12 @@ public class RESTv1 extends BaseRESTv1 implements RESTBaseInterfaceV1, RESTInter
                     "(SELECT languageImage FROM LanguageImage as LanguageImage " +
                     "WHERE languageImage.imageFile.imageFileId = imageFile.imageFileId " +
                     "AND languageImage.imageContentHash = :hash" + count + " " +
-                    "AND languageImage.locale = :locale" + count + ")");
+                    "AND languageImage.locale.localeId = :locale" + count + ")");
 
             // Add the bind parameters
             final String hash = HashUtilities.generateSHA256(restLanguageImageCollectionItemV1.getItem().getImageData());
             parameters.put("hash" + count, hash.toCharArray());
-            parameters.put("locale" + count, restLanguageImageCollectionItemV1.getItem().getLocale());
+            parameters.put("locale" + count, restLanguageImageCollectionItemV1.getItem().getLocale().getId());
 
             // increase the count
             ++count;
@@ -2695,7 +2799,7 @@ public class RESTv1 extends BaseRESTv1 implements RESTBaseInterfaceV1, RESTInter
                             The locale and format are either unspecified or match.
                          */
                         if ((dataObject.getConfiguredParameters().indexOf(RESTTopicV1.LOCALE_NAME) == -1 ||
-                                topic.getLocale().equals(dataObject.getLocale())) &&
+                                topic.getLocale().getId().equals(dataObject.getLocale().getId())) &&
                                 (dataObject.getConfiguredParameters().indexOf(RESTTopicV1.FORMAT_NAME) == -1 ||
                                 TopicUtilities.getTopicXMLDocBookVersion(topic) == TopicUtilities.getTopicXMLDocBookVersion(dataObject))  ) {
                             return new RESTMatchedTopicV1(getJSONTopic(topic.getId(), expand), true);
@@ -3329,7 +3433,7 @@ public class RESTv1 extends BaseRESTv1 implements RESTBaseInterfaceV1, RESTInter
     public RESTTextContentSpecV1 getJSONTextContentSpec(final Integer id, final String expand) {
         if (id == null) throw new BadRequestException("The id parameter can not be null");
 
-        return getResource(ContentSpec.class, textContentSpecFactory, id, null, expand, RESTv1Constants.JSON_URL + "+" + RESTv1Constants.TEXT_URL);
+        return getResource(ContentSpec.class, textContentSpecFactory, id, expand, RESTv1Constants.JSON_URL + "+" + RESTv1Constants.TEXT_URL);
     }
 
     @Override
@@ -3337,7 +3441,7 @@ public class RESTv1 extends BaseRESTv1 implements RESTBaseInterfaceV1, RESTInter
         if (id == null) throw new BadRequestException("The id parameter can not be null");
         if (revision == null) throw new BadRequestException("The revision parameter can not be null");
 
-        return getResource(ContentSpec.class, textContentSpecFactory, id, revision, expand,
+        return getRevisionResource(ContentSpec.class, textContentSpecFactory, id, revision, expand,
                 RESTv1Constants.JSON_URL + "+" + RESTv1Constants.TEXT_URL);
     }
 
@@ -4118,12 +4222,12 @@ public class RESTv1 extends BaseRESTv1 implements RESTBaseInterfaceV1, RESTInter
                     "(SELECT languageFile FROM LanguageFile as LanguageFile " +
                     "WHERE languageFile.file.fileId = file.fileId " +
                     "AND languageFile.fileContentHash = :hash" + count + " " +
-                    "AND languageFile.locale = :locale" + count + ")");
+                    "AND languageFile.locale.localeId = :locale" + count + ")");
 
             // Add the bind parameters
             final String hash = HashUtilities.generateSHA256(restLanguageFileCollectionItemV1.getItem().getFileData());
             parameters.put("hash" + count, hash.toCharArray());
-            parameters.put("locale" + count, restLanguageFileCollectionItemV1.getItem().getLocale());
+            parameters.put("locale" + count, restLanguageFileCollectionItemV1.getItem().getLocale().getId());
 
             // increase the count
             ++count;
@@ -4308,8 +4412,8 @@ public class RESTv1 extends BaseRESTv1 implements RESTBaseInterfaceV1, RESTInter
     }
 
     @Override
-    public RESTProcessInformationV1 pushContentSpecForTranslation(final Integer id, final String serverId, final String expand,
-            final String name, final boolean contentSpecOnly, final boolean disableCopyTrans, final boolean allowUnfrozenPush,
+    public RESTProcessInformationV1 pushContentSpecForTranslation(final Integer id, final String expand, final String name,
+            final boolean contentSpecOnly, final boolean disableCopyTrans, final boolean allowUnfrozenPush,
             final String username, final String apikey) {
         if (id == null) throw new BadRequestException("The id parameter can not be null");
 
@@ -4323,7 +4427,7 @@ public class RESTv1 extends BaseRESTv1 implements RESTBaseInterfaceV1, RESTInter
             final ExpandDataTrunk expandDataTrunk = unmarshallExpand(expand);
 
             final Process process = processHelper.createZanataPushProcess(getBaseUrl(), id, name, contentSpecOnly, disableCopyTrans,
-                    serverId, allowUnfrozenPush, username, apikey);
+                    allowUnfrozenPush, username, apikey);
             return processInformationFactory.createRESTEntityFromObject(process, getBaseUrl(), RESTv1Constants.JSON_URL, expandDataTrunk);
         } catch (Throwable e) {
             throw RESTv1Utilities.processError(e);
@@ -4331,8 +4435,8 @@ public class RESTv1 extends BaseRESTv1 implements RESTBaseInterfaceV1, RESTInter
     }
 
     @Override
-    public RESTProcessInformationV1 syncContentSpecTranslations(final Integer id, final String serverId, final String expand,
-            final String name, final String locales, final String username, final String apikey) {
+    public RESTProcessInformationV1 syncContentSpecTranslations(final Integer id, final String expand, final String name,
+            final String locales, final String username, final String apikey) {
         if (id == null) throw new BadRequestException("The id parameter can not be null");
 
         // Check that a sync isn't already running
@@ -4345,14 +4449,8 @@ public class RESTv1 extends BaseRESTv1 implements RESTBaseInterfaceV1, RESTInter
             // Unmarshall the expand string
             final ExpandDataTrunk expandDataTrunk = unmarshallExpand(expand);
 
-            // Convert the locales
-            final String[] localeArray = locales == null ? new String[0] : locales.split(",");
-            final List<LocaleId> localeList = new ArrayList<LocaleId>();
-            for (final String locale : localeArray) {
-                localeList.add(LocaleId.fromJavaName(locale));
-            }
-
-            final Process process = processHelper.createZanataSyncProcess(getBaseUrl(), id, name, localeList, serverId, username, apikey);
+            // Create and start the process
+            final Process process = processHelper.createZanataSyncProcess(getBaseUrl(), id, name, locales, username, apikey);
             return processInformationFactory.createRESTEntityFromObject(process, getBaseUrl(), RESTv1Constants.JSON_URL, expandDataTrunk);
         } catch (Throwable e) {
             throw RESTv1Utilities.processError(e);

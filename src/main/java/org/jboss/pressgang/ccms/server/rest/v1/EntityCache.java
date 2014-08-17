@@ -26,6 +26,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.atomic.AtomicInteger;
 
+import org.jboss.pressgang.ccms.model.base.PressGangEntity;
 import org.jboss.pressgang.ccms.rest.v1.entities.base.RESTBaseEntityV1;
 import org.jboss.pressgang.ccms.utils.structures.Pair;
 
@@ -35,18 +36,18 @@ public class EntityCache {
     private static final Integer UPDATED_STATE = 1;
     private final AtomicInteger counter = new AtomicInteger(-10000);
 
-    private Map<RESTBaseEntityV1, Pair<Object, Integer>> entities = new HashMap<RESTBaseEntityV1, Pair<Object, Integer>>();
+    private Map<RESTBaseEntityV1, Pair<PressGangEntity, Integer>> entities = new HashMap<RESTBaseEntityV1, Pair<PressGangEntity, Integer>>();
 
-    public <U> void addNew(RESTBaseEntityV1 restEntity, U dbEntity) {
+    public <U extends PressGangEntity> void addNew(RESTBaseEntityV1 restEntity, U dbEntity) {
         if (restEntity.getId() == null) {
             restEntity.setId(getNextId());
         }
 
-        entities.put(restEntity, new Pair<Object, Integer>(dbEntity, NEW_STATE));
+        entities.put(restEntity, new Pair<PressGangEntity, Integer>(dbEntity, NEW_STATE));
     }
 
-    public void addUpdated(RESTBaseEntityV1 restEntity, Object dbEntity) {
-        entities.put(restEntity, new Pair<Object, Integer>(dbEntity, UPDATED_STATE));
+    public void addUpdated(RESTBaseEntityV1 restEntity, PressGangEntity dbEntity) {
+        entities.put(restEntity, new Pair<PressGangEntity, Integer>(dbEntity, UPDATED_STATE));
     }
 
     public void remove(RESTBaseEntityV1 restEntity) {
@@ -57,8 +58,8 @@ public class EntityCache {
         return entities.containsKey(restEntity);
     }
 
-    public Object get(final RESTBaseEntityV1 restEntity) {
-        final Pair<Object, Integer> entity = entities.get(restEntity);
+    public PressGangEntity get(final RESTBaseEntityV1 restEntity) {
+        final Pair<PressGangEntity, Integer> entity = entities.get(restEntity);
         return entity == null ? null : entity.getFirst();
     }
 
@@ -72,7 +73,7 @@ public class EntityCache {
 
     public <U> List<U> getEntities(final Class<U> clazz) {
         final List<U> entities = new ArrayList<U>();
-        for (final Map.Entry<RESTBaseEntityV1, Pair<Object, Integer>> entry : this.entities.entrySet()) {
+        for (final Map.Entry<RESTBaseEntityV1, Pair<PressGangEntity, Integer>> entry : this.entities.entrySet()) {
             if (entry.getValue().getFirst().getClass().equals(clazz)) {
                 entities.add((U) entry.getValue().getFirst());
             }
@@ -81,9 +82,9 @@ public class EntityCache {
         return entities;
     }
 
-    public List<Object> getAllEntities() {
-        final List<Object> entities = new ArrayList<Object>();
-        for (final Map.Entry<RESTBaseEntityV1, Pair<Object, Integer>> entry : this.entities.entrySet()) {
+    public List<PressGangEntity> getAllEntities() {
+        final List<PressGangEntity> entities = new ArrayList<PressGangEntity>();
+        for (final Map.Entry<RESTBaseEntityV1, Pair<PressGangEntity, Integer>> entry : this.entities.entrySet()) {
             entities.add(entry.getValue().getFirst());
         }
 
@@ -92,7 +93,7 @@ public class EntityCache {
 
     protected <U> List<U> getEntitiesWithState(final Class<U> clazz, final Integer state) {
         final List<U> entities = new ArrayList<U>();
-        for (final Map.Entry<RESTBaseEntityV1, Pair<Object, Integer>> entry : this.entities.entrySet()) {
+        for (final Map.Entry<RESTBaseEntityV1, Pair<PressGangEntity, Integer>> entry : this.entities.entrySet()) {
             if (entry.getValue().getSecond().equals(state) && entry.getValue().getFirst().getClass().equals(clazz)) {
                 entities.add((U) entry.getValue().getFirst());
             }

@@ -33,7 +33,7 @@ import org.jboss.pressgang.ccms.model.Tag;
 import org.jboss.pressgang.ccms.model.Topic;
 import org.jboss.pressgang.ccms.model.TopicSourceUrl;
 import org.jboss.pressgang.ccms.model.TopicToPropertyTag;
-import org.jboss.pressgang.ccms.model.base.AuditedEntity;
+import org.jboss.pressgang.ccms.model.base.PressGangEntity;
 import org.jboss.pressgang.ccms.rest.v1.collections.RESTBugzillaBugCollectionV1;
 import org.jboss.pressgang.ccms.rest.v1.collections.RESTMinHashCollectionV1;
 import org.jboss.pressgang.ccms.rest.v1.collections.RESTTagCollectionV1;
@@ -49,6 +49,7 @@ import org.jboss.pressgang.ccms.rest.v1.entities.RESTLocaleV1;
 import org.jboss.pressgang.ccms.rest.v1.entities.RESTTagV1;
 import org.jboss.pressgang.ccms.rest.v1.entities.RESTTopicSourceUrlV1;
 import org.jboss.pressgang.ccms.rest.v1.entities.RESTTopicV1;
+import org.jboss.pressgang.ccms.rest.v1.entities.base.RESTBaseAuditedEntityV1;
 import org.jboss.pressgang.ccms.rest.v1.entities.base.RESTBaseEntityV1;
 import org.jboss.pressgang.ccms.rest.v1.entities.enums.RESTXMLFormat;
 import org.jboss.pressgang.ccms.rest.v1.entities.join.RESTAssignedPropertyTagV1;
@@ -104,7 +105,7 @@ public class TopicV1Factory extends RESTEntityFactory<RESTTopicV1, Topic, RESTTo
         expandOptions.add(RESTTopicV1.CONTENTSPECS_NAME);
         expandOptions.add(RESTTopicV1.KEYWORDS_NAME);
         expandOptions.add(RESTTopicV1.MINHASHES_NAME);
-        if (revision == null) expandOptions.add(RESTBaseEntityV1.REVISIONS_NAME);
+        if (revision == null) expandOptions.add(RESTBaseAuditedEntityV1.REVISIONS_NAME);
 
         retValue.setExpand(expandOptions);
 
@@ -138,7 +139,7 @@ public class TopicV1Factory extends RESTEntityFactory<RESTTopicV1, Topic, RESTTo
         // REVISIONS
         if (revision == null && expand != null && expand.contains(RESTTopicV1.REVISIONS_NAME)) {
             retValue.setRevisions(RESTEntityCollectionFactory.create(RESTTopicCollectionV1.class, this, entity,
-                    EnversUtilities.getRevisions(entityManager, entity), RESTBaseEntityV1.REVISIONS_NAME, dataType, expand, baseUrl,
+                    EnversUtilities.getRevisions(entityManager, entity), RESTBaseAuditedEntityV1.REVISIONS_NAME, dataType, expand, baseUrl,
                     entityManager));
         }
 
@@ -211,6 +212,12 @@ public class TopicV1Factory extends RESTEntityFactory<RESTTopicV1, Topic, RESTTo
 
     @Override
     public void collectChangeInformation(final RESTChangeAction<RESTTopicV1> parent, final RESTTopicV1 dataObject) {
+        // ENTITIES
+        if (dataObject.hasParameterSet(RESTTopicV1.LOCALE_NAME)) {
+            collectChangeInformationFromEntity(parent, dataObject.getLocale(), localeFactory, RESTTopicV1.LOCALE_NAME);
+        }
+
+        // COLLECTIONS
         if (dataObject.hasParameterSet(RESTTopicV1.SOURCE_URLS_NAME)
                 && dataObject.getSourceUrls_OTM() != null
                 && dataObject.getSourceUrls_OTM().getItems() != null) {
@@ -282,29 +289,6 @@ public class TopicV1Factory extends RESTEntityFactory<RESTTopicV1, Topic, RESTTo
 
     @Override
     public void syncAdditionalDetails(final Topic entity, final RESTTopicV1 dataObject) {
-        // Set the Locale
-        if (dataObject.hasParameterSet(RESTTopicV1.LOCALE_NAME)) {
-            final RESTLocaleV1 restEntity = dataObject.getLocale();
-
-            if (restEntity != null) {
-                final Locale dbEntity;
-                if (restEntity.getId() != null) {
-                    dbEntity = RESTv1Utilities.findEntity(entityManager, entityCache, restEntity, Locale.class);
-                } else {
-                    dbEntity = localeFactory.createDBEntity(restEntity);
-                }
-
-                if (dbEntity == null)
-                    throw new BadRequestException("No Locale entity was found with the primary key " + restEntity.getId());
-
-                localeFactory.syncBaseDetails(dbEntity, restEntity);
-
-                entity.setLocale(dbEntity);
-            } else {
-                entity.setLocale(null);
-            }
-        }
-
         // This method will set the XML errors field
         if (requiresXMLProcessing(dataObject)) {
             TopicUtilities.syncXML(entityManager, entity);
@@ -323,7 +307,7 @@ public class TopicV1Factory extends RESTEntityFactory<RESTTopicV1, Topic, RESTTo
 
     @Override
     protected void doDeleteChildAction(final Topic entity, final RESTTopicV1 dataObject, final RESTChangeAction<?> action) {
-        final RESTBaseEntityV1<?, ?, ?> restEntity = action.getRESTEntity();
+        final RESTBaseEntityV1<?> restEntity = action.getRESTEntity();
 
         if (restEntity instanceof RESTTagV1) {
             final Tag dbEntity = entityManager.find(Tag.class, restEntity.getId());
@@ -362,14 +346,15 @@ public class TopicV1Factory extends RESTEntityFactory<RESTTopicV1, Topic, RESTTo
             }
 
             entity.removeBugzillaBug(dbEntity.getId());
+        } else if (restEntity instanceof RESTLocaleV1 || RESTTopicV1.LOCALE_NAME.equals(action.getUniqueId())) {
+            entity.setLocale(null);
         }
     }
 
     @Override
-    protected AuditedEntity doCreateChildAction(final Topic entity, final RESTTopicV1 dataObject,
-            final RESTChangeAction<?> action) {
-        final RESTBaseEntityV1<?, ?, ?> restEntity = action.getRESTEntity();
-        final AuditedEntity dbEntity;
+    protected PressGangEntity doCreateChildAction(final Topic entity, final RESTTopicV1 dataObject, final RESTChangeAction<?> action) {
+        final RESTBaseEntityV1<?> restEntity = action.getRESTEntity();
+        final PressGangEntity dbEntity;
 
         if (restEntity instanceof RESTTagV1) {
             dbEntity = entityManager.find(Tag.class, restEntity.getId());
@@ -405,6 +390,13 @@ public class TopicV1Factory extends RESTEntityFactory<RESTTopicV1, Topic, RESTTo
         } else if (restEntity instanceof RESTBugzillaBugV1) {
             dbEntity = action.getFactory().createDBEntity(restEntity);
             entity.addBugzillaBug((BugzillaBug) dbEntity);
+        } else if (restEntity instanceof RESTLocaleV1) {
+            dbEntity = entityManager.find(Locale.class, restEntity.getId());
+            if (dbEntity == null) {
+                throw new BadRequestException("No Locale entity was found with the primary key " + restEntity.getId());
+            }
+
+            entity.setLocale((Locale) dbEntity);
         } else {
             throw new IllegalArgumentException("Item is not a child of Topic");
         }
@@ -413,10 +405,10 @@ public class TopicV1Factory extends RESTEntityFactory<RESTTopicV1, Topic, RESTTo
     }
 
     @Override
-    protected AuditedEntity getChildEntityForAction(final Topic entity, final RESTTopicV1 dataObject, final RESTChangeAction<?> action) {
-        final RESTBaseEntityV1<?, ?, ?> restEntity = action.getRESTEntity();
+    protected PressGangEntity getChildEntityForAction(final Topic entity, final RESTTopicV1 dataObject, final RESTChangeAction<?> action) {
+        final RESTBaseEntityV1<?> restEntity = action.getRESTEntity();
 
-        final AuditedEntity dbEntity;
+        final PressGangEntity dbEntity;
         if (restEntity instanceof RESTTagV1) {
             dbEntity = RESTv1Utilities.findEntity(entityManager, entityCache, (RESTTagV1) restEntity, Tag.class);
             if (dbEntity == null) {
@@ -466,6 +458,12 @@ public class TopicV1Factory extends RESTEntityFactory<RESTTopicV1, Topic, RESTTo
                 throw new BadRequestException(
                         "No BugzillaBug entity was found with the primary key " + restEntity.getId() + " for Topic " + entity.getId());
             }
+        } else if (restEntity instanceof RESTLocaleV1) {
+            dbEntity = RESTv1Utilities.findEntity(entityManager, entityCache, (RESTLocaleV1) restEntity, Locale.class);
+            if (dbEntity == null) {
+                throw new BadRequestException("No Locale entity was found with the primary key " + restEntity.getId());
+            }
+            entity.setLocale((Locale) dbEntity);
         } else {
             throw new IllegalArgumentException("Item is not a child of Topic");
         }

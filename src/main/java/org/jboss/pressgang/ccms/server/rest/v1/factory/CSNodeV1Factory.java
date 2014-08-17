@@ -27,7 +27,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.jboss.pressgang.ccms.model.PropertyTag;
-import org.jboss.pressgang.ccms.model.base.AuditedEntity;
+import org.jboss.pressgang.ccms.model.base.PressGangEntity;
 import org.jboss.pressgang.ccms.model.contentspec.CSInfoNode;
 import org.jboss.pressgang.ccms.model.contentspec.CSNode;
 import org.jboss.pressgang.ccms.model.contentspec.CSNodeToCSNode;
@@ -39,6 +39,7 @@ import org.jboss.pressgang.ccms.rest.v1.collections.contentspec.items.RESTCSNode
 import org.jboss.pressgang.ccms.rest.v1.collections.contentspec.join.RESTCSRelatedNodeCollectionV1;
 import org.jboss.pressgang.ccms.rest.v1.collections.join.RESTAssignedPropertyTagCollectionV1;
 import org.jboss.pressgang.ccms.rest.v1.constants.RESTv1Constants;
+import org.jboss.pressgang.ccms.rest.v1.entities.base.RESTBaseAuditedEntityV1;
 import org.jboss.pressgang.ccms.rest.v1.entities.base.RESTBaseEntityV1;
 import org.jboss.pressgang.ccms.rest.v1.entities.contentspec.RESTCSInfoNodeV1;
 import org.jboss.pressgang.ccms.rest.v1.entities.contentspec.RESTCSNodeV1;
@@ -78,14 +79,14 @@ public class CSNodeV1Factory extends RESTEntityFactory<RESTCSNodeV1, CSNode, RES
         final List<String> expandOptions = new ArrayList<String>();
         expandOptions.add(RESTCSNodeV1.CHILDREN_NAME);
         expandOptions.add(RESTCSNodeV1.INHERITED_CONDITION_NAME);
-        expandOptions.add(RESTBaseEntityV1.LOG_DETAILS_NAME);
+        expandOptions.add(RESTBaseAuditedEntityV1.LOG_DETAILS_NAME);
         expandOptions.add(RESTCSNodeV1.NEXT_NODE_NAME);
         expandOptions.add(RESTCSNodeV1.PARENT_NAME);
         expandOptions.add(RESTCSNodeV1.PROPERTIES_NAME);
         expandOptions.add(RESTCSNodeV1.RELATED_FROM_NAME);
         expandOptions.add(RESTCSNodeV1.RELATED_TO_NAME);
         expandOptions.add(RESTCSNodeV1.TRANSLATED_NODES_NAME);
-        if (revision == null) expandOptions.add(RESTBaseEntityV1.REVISIONS_NAME);
+        if (revision == null) expandOptions.add(RESTBaseAuditedEntityV1.REVISIONS_NAME);
         retValue.setExpand(expandOptions);
 
         retValue.setId(entity.getId());
@@ -102,9 +103,9 @@ public class CSNodeV1Factory extends RESTEntityFactory<RESTCSNodeV1, CSNode, RES
         }
 
         // REVISIONS
-        if (revision == null && expand != null && expand.contains(RESTBaseEntityV1.REVISIONS_NAME)) {
+        if (revision == null && expand != null && expand.contains(RESTBaseAuditedEntityV1.REVISIONS_NAME)) {
             retValue.setRevisions(RESTEntityCollectionFactory.create(RESTCSNodeCollectionV1.class, this, entity,
-                    EnversUtilities.getRevisions(entityManager, entity), RESTBaseEntityV1.REVISIONS_NAME, dataType, expand, baseUrl,
+                    EnversUtilities.getRevisions(entityManager, entity), RESTBaseAuditedEntityV1.REVISIONS_NAME, dataType, expand, baseUrl,
                     entityManager));
         }
 
@@ -177,7 +178,13 @@ public class CSNodeV1Factory extends RESTEntityFactory<RESTCSNodeV1, CSNode, RES
     }
 
     @Override
-    public void collectChangeInformation(RESTChangeAction<RESTCSNodeV1> parent, RESTCSNodeV1 dataObject) {
+    public void collectChangeInformation(final RESTChangeAction<RESTCSNodeV1> parent, final RESTCSNodeV1 dataObject) {
+        // ENTITIES
+        if (dataObject.hasParameterSet(RESTCSNodeV1.INFO_TOPIC_NODE_NAME)) {
+            collectChangeInformationFromEntity(parent, dataObject.getInfoTopicNode(), csNodeInfoFactory, RESTCSNodeV1.INFO_TOPIC_NODE_NAME);
+        }
+
+        // COLLECTIONS
         if (dataObject.hasParameterSet(RESTCSNodeV1.PROPERTIES_NAME)
                 && dataObject.getProperties() != null
                 && dataObject.getProperties().getItems() != null) {
@@ -228,32 +235,6 @@ public class CSNodeV1Factory extends RESTEntityFactory<RESTCSNodeV1, CSNode, RES
 
     @Override
     public void syncAdditionalDetails(final CSNode entity, final RESTCSNodeV1 dataObject) {
-        // Set the Info Node
-        if (dataObject.hasParameterSet(RESTCSNodeV1.INFO_TOPIC_NODE_NAME)) {
-            final RESTCSInfoNodeV1 restEntity = dataObject.getInfoTopicNode();
-
-            if (restEntity != null) {
-                final CSInfoNode dbEntity;
-                if (restEntity.getId() != null) {
-                    dbEntity = RESTv1Utilities.findEntity(entityManager, entityCache, restEntity, CSInfoNode.class);
-                } else {
-                    dbEntity = csNodeInfoFactory.createDBEntity(restEntity);
-                }
-
-                if (dbEntity == null)
-                    throw new BadRequestException("No CSInfoNode entity was found with the primary key " + restEntity.getId());
-
-                csNodeInfoFactory.syncBaseDetails(dbEntity, restEntity);
-
-                entity.setCSInfoNode(dbEntity);
-            } else if (entity.getCSInfoNode() != null) {
-                entity.getCSInfoNode().setCSNode(null);
-                entity.setCSInfoNode(null);
-            } else {
-                entity.setCSInfoNode(null);
-            }
-        }
-
         // Set the Next Node
         if (dataObject.hasParameterSet(RESTCSNodeV1.NEXT_NODE_NAME)) {
             final RESTCSNodeV1 restEntity = dataObject.getNextNode();
@@ -275,7 +256,7 @@ public class CSNodeV1Factory extends RESTEntityFactory<RESTCSNodeV1, CSNode, RES
 
     @Override
     protected void doDeleteChildAction(final CSNode entity, final RESTCSNodeV1 dataObject, final RESTChangeAction<?> action) {
-        final RESTBaseEntityV1<?, ?, ?> restEntity = action.getRESTEntity();
+        final RESTBaseEntityV1<?> restEntity = action.getRESTEntity();
 
         if (restEntity instanceof RESTCSRelatedNodeV1) {
             final RESTCSRelatedNodeV1 relatedNode = (RESTCSRelatedNodeV1) restEntity;
@@ -307,14 +288,20 @@ public class CSNodeV1Factory extends RESTEntityFactory<RESTCSNodeV1, CSNode, RES
 
             entity.removeChild(dbEntity);
             entityManager.remove(dbEntity);
+        } else if (restEntity instanceof RESTCSInfoNodeV1 || RESTCSNodeV1.INFO_TOPIC_NODE_NAME.equals(action.getUniqueId())) {
+            if (entity.getCSInfoNode() != null) {
+                final CSInfoNode infoNode = entity.getCSInfoNode();
+                infoNode.setCSNode(null);
+                entityManager.remove(infoNode);
+            }
+            entity.setCSInfoNode(null);
         }
     }
 
     @Override
-    protected AuditedEntity doCreateChildAction(final CSNode entity, final RESTCSNodeV1 dataObject,
-            final RESTChangeAction<?> action) {
-        final RESTBaseEntityV1<?, ?, ?> restEntity = action.getRESTEntity();
-        final AuditedEntity dbEntity;
+    protected PressGangEntity doCreateChildAction(final CSNode entity, final RESTCSNodeV1 dataObject, final RESTChangeAction<?> action) {
+        final RESTBaseEntityV1<?> restEntity = action.getRESTEntity();
+        final PressGangEntity dbEntity;
 
         if (restEntity instanceof RESTCSRelatedNodeV1) {
             dbEntity = action.getFactory().createDBEntity(restEntity);
@@ -344,6 +331,11 @@ public class CSNodeV1Factory extends RESTEntityFactory<RESTCSNodeV1, CSNode, RES
         } else if (restEntity instanceof RESTCSNodeV1) {
             dbEntity = action.getFactory().createDBEntity(restEntity);
             entity.addChild((CSNode) dbEntity);
+        } else if (restEntity instanceof RESTCSInfoNodeV1) {
+            dbEntity = action.getFactory().createDBEntity(restEntity);
+            final CSInfoNode csInfoNode = (CSInfoNode) dbEntity;
+            csInfoNode.setCSNode(entity);
+            entity.setCSInfoNode(csInfoNode);
         } else {
             throw new IllegalArgumentException("Item is not a child of CSNode");
         }
@@ -352,11 +344,10 @@ public class CSNodeV1Factory extends RESTEntityFactory<RESTCSNodeV1, CSNode, RES
     }
 
     @Override
-    protected AuditedEntity getChildEntityForAction(final CSNode entity, final RESTCSNodeV1 dataObject,
-            final RESTChangeAction<?> action) {
-        final RESTBaseEntityV1<?, ?, ?> restEntity = action.getRESTEntity();
+    protected PressGangEntity getChildEntityForAction(final CSNode entity, final RESTCSNodeV1 dataObject, final RESTChangeAction<?> action) {
+        final RESTBaseEntityV1<?> restEntity = action.getRESTEntity();
 
-        final AuditedEntity dbEntity;
+        final PressGangEntity dbEntity;
         if (restEntity instanceof RESTCSRelatedNodeV1) {
             final RESTCSRelatedNodeV1 relatedNode = (RESTCSRelatedNodeV1) restEntity;
             dbEntity = entityManager.find(CSNodeToCSNode.class, relatedNode.getRelationshipId());
@@ -392,6 +383,11 @@ public class CSNodeV1Factory extends RESTEntityFactory<RESTCSNodeV1, CSNode, RES
             } else if (!entity.getChildren().contains(dbEntity)) {
                 throw new BadRequestException(
                         "No CSNode entity was found with the primary key " + restEntity.getId() + " for CSNode " + entity.getId());
+            }
+        } else if (restEntity instanceof RESTCSInfoNodeV1) {
+            dbEntity = RESTv1Utilities.findEntity(entityManager, entityCache, (RESTCSInfoNodeV1) restEntity, CSInfoNode.class);
+            if (dbEntity == null) {
+                throw new BadRequestException("No CSInfoNode entity was found with the primary key " + restEntity.getId());
             }
         } else {
             throw new IllegalArgumentException("Item is not a child of ContentSpec");

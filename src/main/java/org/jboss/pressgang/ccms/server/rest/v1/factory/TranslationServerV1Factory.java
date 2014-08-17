@@ -23,33 +23,33 @@ import javax.enterprise.context.ApplicationScoped;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.jboss.pressgang.ccms.model.Locale;
-import org.jboss.pressgang.ccms.rest.v1.collections.RESTLocaleCollectionV1;
-import org.jboss.pressgang.ccms.rest.v1.collections.items.RESTLocaleCollectionItemV1;
+import org.jboss.pressgang.ccms.model.TranslationServer;
+import org.jboss.pressgang.ccms.rest.v1.collections.RESTTranslationServerCollectionV1;
+import org.jboss.pressgang.ccms.rest.v1.collections.items.RESTTranslationServerCollectionItemV1;
 import org.jboss.pressgang.ccms.rest.v1.constants.RESTv1Constants;
-import org.jboss.pressgang.ccms.rest.v1.entities.RESTLocaleV1;
+import org.jboss.pressgang.ccms.rest.v1.entities.RESTTranslationServerV1;
 import org.jboss.pressgang.ccms.rest.v1.expansion.ExpandDataTrunk;
 import org.jboss.pressgang.ccms.server.rest.v1.RESTChangeAction;
 import org.jboss.pressgang.ccms.server.rest.v1.factory.base.RESTEntityFactory;
 
 @ApplicationScoped
-public class LocaleV1Factory extends RESTEntityFactory<RESTLocaleV1, Locale, RESTLocaleCollectionV1, RESTLocaleCollectionItemV1> {
+public class TranslationServerV1Factory extends RESTEntityFactory<RESTTranslationServerV1, TranslationServer,
+        RESTTranslationServerCollectionV1, RESTTranslationServerCollectionItemV1> {
 
     @Override
-    public RESTLocaleV1 createRESTEntityFromDBEntityInternal(final Locale entity, final String baseUrl, final String dataType,
-            final ExpandDataTrunk expand, final Number revision, final boolean expandParentReferences) {
+    public RESTTranslationServerV1 createRESTEntityFromDBEntityInternal(final TranslationServer entity, final String baseUrl,
+            final String dataType, final ExpandDataTrunk expand, final Number revision, final boolean expandParentReferences) {
         assert entity != null : "Parameter entity can not be null";
         assert baseUrl != null : "Parameter baseUrl can not be null";
 
-        final RESTLocaleV1 retValue = new RESTLocaleV1();
+        final RESTTranslationServerV1 retValue = new RESTTranslationServerV1();
 
         final List<String> expandOptions = new ArrayList<String>();
         retValue.setExpand(expandOptions);
 
-        retValue.setId(entity.getLocaleId());
-        retValue.setValue(entity.getValue());
-        retValue.setBuildValue(entity.getBuildValue());
-        retValue.setTranslationValue(entity.getTranslationValue());
+        retValue.setId(entity.getId());
+        retValue.setName(entity.getName());
+        retValue.setUrl(entity.getUrl());
 
         retValue.setLinks(baseUrl, RESTv1Constants.LOCALE_URL_NAME, dataType, retValue.getId());
 
@@ -57,20 +57,19 @@ public class LocaleV1Factory extends RESTEntityFactory<RESTLocaleV1, Locale, RES
     }
 
     @Override
-    public void collectChangeInformation(final RESTChangeAction<RESTLocaleV1> parent,
-            final RESTLocaleV1 dataObject) {
-        // Locale has no children so we have no changes to collect
+    public void collectChangeInformation(final RESTChangeAction<RESTTranslationServerV1> parent,
+            final RESTTranslationServerV1 dataObject) {
+        // TranslationServer has no children so we have no changes to collect
     }
 
     @Override
-    public void syncBaseDetails(final Locale entity, final RESTLocaleV1 dataObject) {
-        if (dataObject.hasParameterSet(RESTLocaleV1.VALUE_NAME)) entity.setValue(dataObject.getValue());
-        if (dataObject.hasParameterSet(RESTLocaleV1.TRANSLATION_VALUE_NAME)) entity.setTranslationValue(dataObject.getTranslationValue());
-        if (dataObject.hasParameterSet(RESTLocaleV1.BUILD_VALUE_NAME)) entity.setBuildValue(dataObject.getBuildValue());
+    public void syncBaseDetails(final TranslationServer entity, final RESTTranslationServerV1 dataObject) {
+        if (dataObject.hasParameterSet(RESTTranslationServerV1.NAME_NAME)) entity.setName(dataObject.getName());
+        if (dataObject.hasParameterSet(RESTTranslationServerV1.URL_NAME)) entity.setUrl(dataObject.getUrl());
     }
 
     @Override
-    protected Class<Locale> getDatabaseClass() {
-        return Locale.class;
+    protected Class<TranslationServer> getDatabaseClass() {
+        return TranslationServer.class;
     }
 }

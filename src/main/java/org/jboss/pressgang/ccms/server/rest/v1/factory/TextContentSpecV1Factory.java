@@ -27,8 +27,9 @@ import java.util.List;
 import org.jboss.pressgang.ccms.model.Locale;
 import org.jboss.pressgang.ccms.model.PropertyTag;
 import org.jboss.pressgang.ccms.model.Tag;
-import org.jboss.pressgang.ccms.model.base.AuditedEntity;
+import org.jboss.pressgang.ccms.model.base.PressGangEntity;
 import org.jboss.pressgang.ccms.model.contentspec.CSNode;
+import org.jboss.pressgang.ccms.model.contentspec.CSTranslationDetail;
 import org.jboss.pressgang.ccms.model.contentspec.ContentSpec;
 import org.jboss.pressgang.ccms.model.contentspec.ContentSpecToPropertyTag;
 import org.jboss.pressgang.ccms.rest.v1.collections.RESTProcessInformationCollectionV1;
@@ -40,7 +41,9 @@ import org.jboss.pressgang.ccms.rest.v1.collections.join.RESTAssignedPropertyTag
 import org.jboss.pressgang.ccms.rest.v1.constants.RESTv1Constants;
 import org.jboss.pressgang.ccms.rest.v1.entities.RESTLocaleV1;
 import org.jboss.pressgang.ccms.rest.v1.entities.RESTTagV1;
+import org.jboss.pressgang.ccms.rest.v1.entities.base.RESTBaseAuditedEntityV1;
 import org.jboss.pressgang.ccms.rest.v1.entities.base.RESTBaseEntityV1;
+import org.jboss.pressgang.ccms.rest.v1.entities.contentspec.RESTCSTranslationDetailV1;
 import org.jboss.pressgang.ccms.rest.v1.entities.contentspec.RESTContentSpecV1;
 import org.jboss.pressgang.ccms.rest.v1.entities.contentspec.RESTTextContentSpecV1;
 import org.jboss.pressgang.ccms.rest.v1.entities.contentspec.enums.RESTContentSpecTypeV1;
@@ -61,6 +64,8 @@ public class TextContentSpecV1Factory extends RESTEntityFactory<RESTTextContentS
     @Inject
     protected LocaleV1Factory localeFactory;
     @Inject
+    protected CSTranslationDetailV1Factory translationDetailFactory;
+    @Inject
     protected ContentSpecPropertyTagV1Factory contentSpecPropertyTagFactory;
     @Inject
     protected TranslatedContentSpecV1Factory translatedContentSpecFactory;
@@ -78,13 +83,14 @@ public class TextContentSpecV1Factory extends RESTEntityFactory<RESTTextContentS
         final RESTTextContentSpecV1 retValue = new RESTTextContentSpecV1();
 
         final List<String> expandOptions = new ArrayList<String>();
-        expandOptions.add(RESTBaseEntityV1.LOG_DETAILS_NAME);
+        expandOptions.add(RESTBaseAuditedEntityV1.LOG_DETAILS_NAME);
         expandOptions.add(RESTTextContentSpecV1.PROPERTIES_NAME);
         expandOptions.add(RESTTextContentSpecV1.TAGS_NAME);
         expandOptions.add(RESTTextContentSpecV1.TEXT_NAME);
         expandOptions.add(RESTTextContentSpecV1.TRANSLATED_CONTENT_SPECS_NAME);
+        expandOptions.add(RESTTextContentSpecV1.TRANSLATION_DETAILS_NAME);
         expandOptions.add(RESTTextContentSpecV1.PROCESSES_NAME);
-        if (revision == null) expandOptions.add(RESTBaseEntityV1.REVISIONS_NAME);
+        if (revision == null) expandOptions.add(RESTBaseAuditedEntityV1.REVISIONS_NAME);
         retValue.setExpand(expandOptions);
 
         retValue.setId(entity.getId());
@@ -106,10 +112,18 @@ public class TextContentSpecV1Factory extends RESTEntityFactory<RESTTextContentS
             retValue.setLocale(localeFactory.createRESTEntityFromDBEntity(entity.getLocale(), baseUrl, dataType, childExpand, revision));
         }
 
+        // TRANSLATION DETAILS
+        if (expand == null ? null: expand.contains(RESTContentSpecV1.TRANSLATION_DETAILS_NAME)
+                && entity.getTranslationDetails(entityManager) != null) {
+            final ExpandDataTrunk childExpand = expand == null ? null: expand.get(RESTContentSpecV1.TRANSLATION_DETAILS_NAME);
+            retValue.setTranslationDetails(translationDetailFactory.createRESTEntityFromDBEntity(entity.getTranslationDetails(entityManager),
+                    baseUrl, dataType, childExpand));
+        }
+
         // REVISIONS
-        if (revision == null && expand != null && expand.contains(RESTBaseEntityV1.REVISIONS_NAME)) {
+        if (revision == null && expand != null && expand.contains(RESTBaseAuditedEntityV1.REVISIONS_NAME)) {
             retValue.setRevisions(RESTEntityCollectionFactory.create(RESTTextContentSpecCollectionV1.class, this, entity,
-                    EnversUtilities.getRevisions(entityManager, entity), RESTBaseEntityV1.REVISIONS_NAME, dataType, expand, baseUrl,
+                    EnversUtilities.getRevisions(entityManager, entity), RESTBaseAuditedEntityV1.REVISIONS_NAME, dataType, expand, baseUrl,
                     entityManager));
         }
 
@@ -159,34 +173,19 @@ public class TextContentSpecV1Factory extends RESTEntityFactory<RESTTextContentS
     }
 
     @Override
-    public void syncAdditionalDetails(final ContentSpec entity, final RESTTextContentSpecV1 dataObject) {
-        // Set the Locale
-        if (dataObject.hasParameterSet(RESTContentSpecV1.LOCALE_NAME)) {
-            final RESTLocaleV1 restEntity = dataObject.getLocale();
-
-            if (restEntity != null) {
-                final Locale dbEntity;
-                if (restEntity.getId() != null) {
-                    dbEntity = RESTv1Utilities.findEntity(entityManager, entityCache, restEntity, Locale.class);
-                } else {
-                    dbEntity = localeFactory.createDBEntity(restEntity);
-                }
-
-                if (dbEntity == null)
-                    throw new BadRequestException("No Locale entity was found with the primary key " + restEntity.getId());
-
-                localeFactory.syncBaseDetails(dbEntity, restEntity);
-
-                entity.setLocale(dbEntity);
-            } else {
-                entity.setLocale(null);
-            }
-        }
-    }
-
-    @Override
     public void collectChangeInformation(final RESTChangeAction<RESTTextContentSpecV1> parent,
             final RESTTextContentSpecV1 dataObject) {
+        // ENTITIES
+        if (dataObject.hasParameterSet(RESTTextContentSpecV1.LOCALE_NAME)) {
+            collectChangeInformationFromEntity(parent, dataObject.getLocale(), localeFactory, RESTTextContentSpecV1.LOCALE_NAME);
+        }
+
+        if (dataObject.hasParameterSet(RESTTextContentSpecV1.TRANSLATION_DETAILS_NAME)) {
+            collectChangeInformationFromEntity(parent, dataObject.getTranslationDetails(), translationDetailFactory,
+                    RESTTextContentSpecV1.TRANSLATION_DETAILS_NAME);
+        }
+
+        // COLLECTIONS
         if (dataObject.hasParameterSet(RESTTextContentSpecV1.PROPERTIES_NAME)
                 && dataObject.getProperties() != null
                 && dataObject.getProperties().getItems() != null) {
@@ -202,7 +201,7 @@ public class TextContentSpecV1Factory extends RESTEntityFactory<RESTTextContentS
 
     @Override
     protected void doDeleteChildAction(final ContentSpec entity, final RESTTextContentSpecV1 dataObject, final RESTChangeAction<?> action) {
-        final RESTBaseEntityV1<?, ?, ?> restEntity = action.getRESTEntity();
+        final RESTBaseEntityV1<?> restEntity = action.getRESTEntity();
 
         if (restEntity instanceof RESTTagV1) {
             final Tag dbEntity = entityManager.find(Tag.class, restEntity.getId());
@@ -216,14 +215,23 @@ public class TextContentSpecV1Factory extends RESTEntityFactory<RESTTextContentS
                     "No ContentSpecToPropertyTag entity was found with the primary key " + propertyTag.getRelationshipId());
 
             entity.removePropertyTag(dbEntity);
+        } else if (restEntity instanceof RESTLocaleV1 || RESTTextContentSpecV1.LOCALE_NAME.equals(action.getUniqueId())) {
+            entity.setLocale(null);
+        } else if (restEntity instanceof RESTCSTranslationDetailV1
+                || RESTTextContentSpecV1.TRANSLATION_DETAILS_NAME.equals(action.getUniqueId())) {
+            if (entity.getTranslationDetails() != null) {
+                entity.getTranslationDetails().setContentSpec(null);
+                entityManager.remove(entity.getTranslationDetails());
+            }
+            entity.setTranslationDetails(null);
         }
     }
 
     @Override
-    protected AuditedEntity doCreateChildAction(final ContentSpec entity, final RESTTextContentSpecV1 dataObject,
+    protected PressGangEntity doCreateChildAction(final ContentSpec entity, final RESTTextContentSpecV1 dataObject,
             final RESTChangeAction<?> action) {
-        final RESTBaseEntityV1<?, ?, ?> restEntity = action.getRESTEntity();
-        final AuditedEntity dbEntity;
+        final RESTBaseEntityV1<?> restEntity = action.getRESTEntity();
+        final PressGangEntity dbEntity;
 
         if (restEntity instanceof RESTTagV1) {
             dbEntity = entityManager.find(Tag.class, restEntity.getId());
@@ -242,6 +250,18 @@ public class TextContentSpecV1Factory extends RESTEntityFactory<RESTTextContentS
             final ContentSpecToPropertyTag csToProp = (ContentSpecToPropertyTag) dbEntity;
             csToProp.setPropertyTag(propertyTag);
             entity.addPropertyTag(csToProp);
+        } else if (restEntity instanceof RESTLocaleV1) {
+            dbEntity = entityManager.find(Locale.class, restEntity.getId());
+            if (dbEntity == null) {
+                throw new BadRequestException("No Locale entity was found with the primary key " + restEntity.getId());
+            }
+
+            entity.setLocale((Locale) dbEntity);
+        } else if (restEntity instanceof RESTCSTranslationDetailV1) {
+            dbEntity = action.getFactory().createDBEntity(restEntity);
+            final CSTranslationDetail translationDetail = (CSTranslationDetail) dbEntity;
+            translationDetail.setContentSpec(entity);
+            entity.setTranslationDetails(translationDetail);
         } else {
             throw new IllegalArgumentException("Item is not a child of ContentSpec");
         }
@@ -250,11 +270,11 @@ public class TextContentSpecV1Factory extends RESTEntityFactory<RESTTextContentS
     }
 
     @Override
-    protected AuditedEntity getChildEntityForAction(final ContentSpec entity, final RESTTextContentSpecV1 dataObject,
+    protected PressGangEntity getChildEntityForAction(final ContentSpec entity, final RESTTextContentSpecV1 dataObject,
             final RESTChangeAction<?> action) {
-        final RESTBaseEntityV1<?, ?, ?> restEntity = action.getRESTEntity();
+        final RESTBaseEntityV1<?> restEntity = action.getRESTEntity();
 
-        final AuditedEntity dbEntity;
+        final PressGangEntity dbEntity;
         if (restEntity instanceof RESTTagV1) {
             dbEntity = RESTv1Utilities.findEntity(entityManager, entityCache, (RESTTagV1) restEntity, Tag.class);
             if (dbEntity == null) {
@@ -273,6 +293,19 @@ public class TextContentSpecV1Factory extends RESTEntityFactory<RESTTextContentS
                 throw new BadRequestException(
                         "No ContentSpecToPropertyTag entity was found with the primary key " + assignedPropertyTag.getRelationshipId() +
                                 " for ContentSpec " + entity.getId());
+            }
+        } else if (restEntity instanceof RESTLocaleV1) {
+            dbEntity = RESTv1Utilities.findEntity(entityManager, entityCache, (RESTLocaleV1) restEntity, Locale.class);
+            if (dbEntity == null) {
+                throw new BadRequestException("No Locale entity was found with the primary key " + restEntity.getId());
+            }
+
+            entity.setLocale((Locale) dbEntity);
+        } else if (restEntity instanceof RESTCSTranslationDetailV1) {
+            dbEntity = RESTv1Utilities.findEntity(entityManager, entityCache, (RESTCSTranslationDetailV1) restEntity,
+                    CSTranslationDetail.class);
+            if (dbEntity == null) {
+                throw new BadRequestException("No CSTranslationDetail entity was found with the primary key " + restEntity.getId());
             }
         } else {
             throw new IllegalArgumentException("Item is not a child of ContentSpec");

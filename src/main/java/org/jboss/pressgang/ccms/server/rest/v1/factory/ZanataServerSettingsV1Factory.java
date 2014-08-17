@@ -26,6 +26,7 @@ import org.jboss.pressgang.ccms.rest.v1.elements.RESTZanataServerSettingsV1;
 import org.jboss.pressgang.ccms.rest.v1.expansion.ExpandDataTrunk;
 import org.jboss.pressgang.ccms.server.rest.v1.factory.base.RESTElementFactory;
 
+@Deprecated
 @ApplicationScoped
 public class ZanataServerSettingsV1Factory extends RESTElementFactory<RESTZanataServerSettingsV1, ZanataServerConfig> {
     @Override

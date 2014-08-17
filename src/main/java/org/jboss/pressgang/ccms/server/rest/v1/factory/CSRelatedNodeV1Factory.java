@@ -29,7 +29,7 @@ import org.jboss.pressgang.ccms.rest.v1.collections.contentspec.items.join.RESTC
 import org.jboss.pressgang.ccms.rest.v1.collections.contentspec.join.RESTCSRelatedNodeCollectionV1;
 import org.jboss.pressgang.ccms.rest.v1.collections.join.RESTAssignedPropertyTagCollectionV1;
 import org.jboss.pressgang.ccms.rest.v1.constants.RESTv1Constants;
-import org.jboss.pressgang.ccms.rest.v1.entities.base.RESTBaseEntityV1;
+import org.jboss.pressgang.ccms.rest.v1.entities.base.RESTBaseAuditedEntityV1;
 import org.jboss.pressgang.ccms.rest.v1.entities.contentspec.RESTCSNodeV1;
 import org.jboss.pressgang.ccms.rest.v1.entities.contentspec.enums.RESTCSNodeRelationshipModeV1;
 import org.jboss.pressgang.ccms.rest.v1.entities.contentspec.enums.RESTCSNodeRelationshipTypeV1;
@@ -61,12 +61,12 @@ public class CSRelatedNodeV1Factory extends RESTEntityFactory<RESTCSRelatedNodeV
 
         final List<String> expandOptions = new ArrayList<String>();
         expandOptions.add(RESTCSRelatedNodeV1.INHERITED_CONDITION_NAME);
-        expandOptions.add(RESTBaseEntityV1.LOG_DETAILS_NAME);
+        expandOptions.add(RESTBaseAuditedEntityV1.LOG_DETAILS_NAME);
         expandOptions.add(RESTCSRelatedNodeV1.PARENT_NAME);
         expandOptions.add(RESTCSRelatedNodeV1.PROPERTIES_NAME);
         expandOptions.add(RESTCSRelatedNodeV1.RELATED_FROM_NAME);
         expandOptions.add(RESTCSRelatedNodeV1.RELATED_TO_NAME);
-        if (revision == null) expandOptions.add(RESTBaseEntityV1.REVISIONS_NAME);
+        if (revision == null) expandOptions.add(RESTBaseAuditedEntityV1.REVISIONS_NAME);
         retValue.setExpand(expandOptions);
 
         retValue.setId(entity.getRelatedNode().getId());
@@ -83,9 +83,9 @@ public class CSRelatedNodeV1Factory extends RESTEntityFactory<RESTCSRelatedNodeV
         retValue.setEntityRevision(entity.getRelatedNode().getEntityRevision());
 
         // REVISIONS
-        if (revision == null && expand != null && expand.contains(RESTBaseEntityV1.REVISIONS_NAME)) {
+        if (revision == null && expand != null && expand.contains(RESTBaseAuditedEntityV1.REVISIONS_NAME)) {
             retValue.setRevisions(RESTEntityCollectionFactory.create(RESTCSRelatedNodeCollectionV1.class, this, entity,
-                    EnversUtilities.getRevisions(entityManager, entity), RESTBaseEntityV1.REVISIONS_NAME, dataType, expand, baseUrl,
+                    EnversUtilities.getRevisions(entityManager, entity), RESTBaseAuditedEntityV1.REVISIONS_NAME, dataType, expand, baseUrl,
                     entityManager));
         }
 

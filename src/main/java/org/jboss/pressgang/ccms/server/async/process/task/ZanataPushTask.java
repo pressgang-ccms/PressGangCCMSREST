@@ -171,7 +171,7 @@ public class ZanataPushTask extends ProcessRESTTask<Boolean> {
         try {
             zanataInterface = new ZanataInterface(0.2, zanataDetails);
         } catch (UnauthorizedException e) {
-            getLogger().error(e.getMessage());
+            getLogger().error("Unauthorised Request! Please check your Zanata username and api key are correct.");
             return false;
         }
         final List<Entity> entities = XMLUtilities.parseEntitiesFromString(contentSpec.getEntities());
@@ -329,7 +329,7 @@ public class ZanataPushTask extends ProcessRESTTask<Boolean> {
             final Resource resource = new Resource();
 
             resource.setContentType(ContentType.TextPlain);
-            resource.setLang(LocaleId.fromJavaName(topic.getLocale().getValue()));
+            resource.setLang(LocaleId.fromJavaName(topic.getLocale().getTranslationValue()));
             resource.setName(zanataId);
             resource.setRevision(1);
             resource.setType(ResourceType.FILE);
@@ -343,7 +343,7 @@ public class ZanataPushTask extends ProcessRESTTask<Boolean> {
                 if (!translatableString.trim().isEmpty()) {
                     final TextFlow textFlow = new TextFlow();
                     textFlow.setContents(translatableString);
-                    textFlow.setLang(LocaleId.fromJavaName(topic.getLocale().getValue()));
+                    textFlow.setLang(LocaleId.fromJavaName(topic.getLocale().getTranslationValue()));
                     textFlow.setId(HashUtilities.generateMD5(translatableString));
                     textFlow.setRevision(1);
 
@@ -450,7 +450,7 @@ public class ZanataPushTask extends ProcessRESTTask<Boolean> {
             final Resource resource = new Resource();
 
             resource.setContentType(ContentType.TextPlain);
-            resource.setLang(LocaleId.fromJavaName(contentSpecEntity.getLocale().getValue()));
+            resource.setLang(LocaleId.fromJavaName(contentSpecEntity.getLocale().getTranslationValue()));
             resource.setName(zanataId);
             resource.setRevision(1);
             resource.setType(ResourceType.FILE);
@@ -463,7 +463,7 @@ public class ZanataPushTask extends ProcessRESTTask<Boolean> {
                 if (!translatableString.trim().isEmpty()) {
                     final TextFlow textFlow = new TextFlow();
                     textFlow.setContents(translatableString);
-                    textFlow.setLang(LocaleId.fromJavaName(contentSpecEntity.getLocale().getValue()));
+                    textFlow.setLang(LocaleId.fromJavaName(contentSpecEntity.getLocale().getTranslationValue()));
                     textFlow.setId(HashUtilities.generateMD5(translatableString));
                     textFlow.setRevision(1);
 

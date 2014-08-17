@@ -20,6 +20,8 @@
         <class>org.jboss.pressgang.ccms.model.contentspec.CSNodeURL</class>
         <class>org.jboss.pressgang.ccms.model.contentspec.CSNodeToCSNode</class>
         <class>org.jboss.pressgang.ccms.model.contentspec.CSNodeToPropertyTag</class>
+        <class>org.jboss.pressgang.ccms.model.contentspec.CSTranslationDetail</class>
+        <class>org.jboss.pressgang.ccms.model.contentspec.CSTranslationDetailToLocale</class>
         <class>org.jboss.pressgang.ccms.model.contentspec.TranslatedContentSpec</class>
         <class>org.jboss.pressgang.ccms.model.contentspec.TranslatedCSNode</class>
         <class>org.jboss.pressgang.ccms.model.contentspec.TranslatedCSNodeString</class>
@@ -65,11 +67,10 @@
         <class>org.jboss.pressgang.ccms.model.TranslatedTopicData</class>
         <class>org.jboss.pressgang.ccms.model.TranslatedTopicSecondOrderData</class>
         <class>org.jboss.pressgang.ccms.model.TranslatedTopicString</class>
+        <class>org.jboss.pressgang.ccms.model.TranslationServer</class>
         <class>org.jboss.pressgang.ccms.model.User</class>
         <class>org.jboss.pressgang.ccms.model.UserRole</class>
         <class>org.jboss.pressgang.ccms.server.envers.LoggingRevisionEntity</class>
-        <!--<class>org.jboss.pressgang.belay.oauth2.resourceserver.data.model.OAuth2RSScope</class>
-        <class>org.jboss.pressgang.belay.oauth2.resourceserver.data.model.OAuth2RSEndpoint</class>-->
 
         <properties>
             <property name="hibernate.dialect" value="org.jboss.pressgang.ccms.server.entity.dialect.MySql5BitBooleanDialect"/>

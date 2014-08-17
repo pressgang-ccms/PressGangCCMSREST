@@ -27,12 +27,13 @@ import java.util.List;
 import org.jboss.pressgang.ccms.model.PropertyTag;
 import org.jboss.pressgang.ccms.model.PropertyTagCategory;
 import org.jboss.pressgang.ccms.model.PropertyTagToPropertyTagCategory;
-import org.jboss.pressgang.ccms.model.base.AuditedEntity;
+import org.jboss.pressgang.ccms.model.base.PressGangEntity;
 import org.jboss.pressgang.ccms.rest.v1.collections.RESTPropertyCategoryCollectionV1;
 import org.jboss.pressgang.ccms.rest.v1.collections.items.RESTPropertyCategoryCollectionItemV1;
 import org.jboss.pressgang.ccms.rest.v1.collections.join.RESTPropertyTagInPropertyCategoryCollectionV1;
 import org.jboss.pressgang.ccms.rest.v1.constants.RESTv1Constants;
 import org.jboss.pressgang.ccms.rest.v1.entities.RESTPropertyCategoryV1;
+import org.jboss.pressgang.ccms.rest.v1.entities.base.RESTBaseAuditedEntityV1;
 import org.jboss.pressgang.ccms.rest.v1.entities.base.RESTBaseEntityV1;
 import org.jboss.pressgang.ccms.rest.v1.entities.join.RESTPropertyTagInPropertyCategoryV1;
 import org.jboss.pressgang.ccms.rest.v1.expansion.ExpandDataTrunk;
@@ -58,8 +59,8 @@ public class PropertyCategoryV1Factory extends RESTEntityFactory<RESTPropertyCat
 
         final List<String> expandOptions = new ArrayList<String>();
         expandOptions.add(RESTPropertyCategoryV1.PROPERTY_TAGS_NAME);
-        expandOptions.add(RESTBaseEntityV1.LOG_DETAILS_NAME);
-        if (revision == null) expandOptions.add(RESTBaseEntityV1.REVISIONS_NAME);
+        expandOptions.add(RESTBaseAuditedEntityV1.LOG_DETAILS_NAME);
+        if (revision == null) expandOptions.add(RESTBaseAuditedEntityV1.REVISIONS_NAME);
         retValue.setExpand(expandOptions);
 
         retValue.setId(entity.getId());
@@ -67,9 +68,9 @@ public class PropertyCategoryV1Factory extends RESTEntityFactory<RESTPropertyCat
         retValue.setDescription(entity.getPropertyTagCategoryDescription());
 
         // REVISIONS
-        if (revision == null && expand != null && expand.contains(RESTBaseEntityV1.REVISIONS_NAME)) {
+        if (revision == null && expand != null && expand.contains(RESTBaseAuditedEntityV1.REVISIONS_NAME)) {
             retValue.setRevisions(RESTEntityCollectionFactory.create(RESTPropertyCategoryCollectionV1.class, this, entity,
-                    EnversUtilities.getRevisions(entityManager, entity), RESTBaseEntityV1.REVISIONS_NAME, dataType, expand, baseUrl,
+                    EnversUtilities.getRevisions(entityManager, entity), RESTBaseAuditedEntityV1.REVISIONS_NAME, dataType, expand, baseUrl,
                     entityManager));
         }
 
@@ -104,7 +105,7 @@ public class PropertyCategoryV1Factory extends RESTEntityFactory<RESTPropertyCat
     @Override
     protected void doDeleteChildAction(final PropertyTagCategory entity, final RESTPropertyCategoryV1 dataObject,
             final RESTChangeAction<?> action) {
-        final RESTBaseEntityV1<?, ?, ?> restEntity = action.getRESTEntity();
+        final RESTBaseEntityV1<?> restEntity = action.getRESTEntity();
 
         if (restEntity instanceof RESTPropertyTagInPropertyCategoryV1) {
             final PropertyTag dbEntity = entityManager.find(PropertyTag.class, restEntity.getId());
@@ -116,10 +117,10 @@ public class PropertyCategoryV1Factory extends RESTEntityFactory<RESTPropertyCat
     }
 
     @Override
-    protected AuditedEntity doCreateChildAction(final PropertyTagCategory entity, final RESTPropertyCategoryV1 dataObject,
+    protected PressGangEntity doCreateChildAction(final PropertyTagCategory entity, final RESTPropertyCategoryV1 dataObject,
             final RESTChangeAction<?> action) {
-        final RESTBaseEntityV1<?, ?, ?> restEntity = action.getRESTEntity();
-        final AuditedEntity dbEntity;
+        final RESTBaseEntityV1<?> restEntity = action.getRESTEntity();
+        final PressGangEntity dbEntity;
 
         if (restEntity instanceof RESTPropertyTagInPropertyCategoryV1) {
             dbEntity = action.getFactory().createDBEntity(restEntity);
@@ -141,11 +142,11 @@ public class PropertyCategoryV1Factory extends RESTEntityFactory<RESTPropertyCat
     }
 
     @Override
-    protected AuditedEntity getChildEntityForAction(final PropertyTagCategory entity, final RESTPropertyCategoryV1 dataObject,
+    protected PressGangEntity getChildEntityForAction(final PropertyTagCategory entity, final RESTPropertyCategoryV1 dataObject,
             final RESTChangeAction<?> action) {
-        final RESTBaseEntityV1<?, ?, ?> restEntity = action.getRESTEntity();
+        final RESTBaseEntityV1<?> restEntity = action.getRESTEntity();
 
-        final AuditedEntity dbEntity;
+        final PressGangEntity dbEntity;
         if (restEntity instanceof RESTPropertyTagInPropertyCategoryV1) {
             final RESTPropertyTagInPropertyCategoryV1 propertyTag = (RESTPropertyTagInPropertyCategoryV1) restEntity;
             dbEntity = entityManager.find(PropertyTagToPropertyTagCategory.class, propertyTag.getRelationshipId());

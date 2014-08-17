@@ -26,13 +26,14 @@ import java.util.List;
 
 import org.jboss.pressgang.ccms.model.ImageFile;
 import org.jboss.pressgang.ccms.model.LanguageImage;
-import org.jboss.pressgang.ccms.model.base.AuditedEntity;
+import org.jboss.pressgang.ccms.model.base.PressGangEntity;
 import org.jboss.pressgang.ccms.rest.v1.collections.RESTImageCollectionV1;
 import org.jboss.pressgang.ccms.rest.v1.collections.RESTLanguageImageCollectionV1;
 import org.jboss.pressgang.ccms.rest.v1.collections.items.RESTImageCollectionItemV1;
 import org.jboss.pressgang.ccms.rest.v1.constants.RESTv1Constants;
 import org.jboss.pressgang.ccms.rest.v1.entities.RESTImageV1;
 import org.jboss.pressgang.ccms.rest.v1.entities.RESTLanguageImageV1;
+import org.jboss.pressgang.ccms.rest.v1.entities.base.RESTBaseAuditedEntityV1;
 import org.jboss.pressgang.ccms.rest.v1.entities.base.RESTBaseEntityV1;
 import org.jboss.pressgang.ccms.rest.v1.expansion.ExpandDataTrunk;
 import org.jboss.pressgang.ccms.server.rest.v1.RESTChangeAction;
@@ -57,9 +58,9 @@ public class ImageV1Factory extends RESTEntityFactory<RESTImageV1, ImageFile, RE
 
         final List<String> expandOptions = new ArrayList<String>();
         expandOptions.add(RESTImageV1.LANGUAGEIMAGES_NAME);
-        expandOptions.add(RESTBaseEntityV1.LOG_DETAILS_NAME);
+        expandOptions.add(RESTBaseAuditedEntityV1.LOG_DETAILS_NAME);
         if (revision == null) {
-            expandOptions.add(RESTBaseEntityV1.REVISIONS_NAME);
+            expandOptions.add(RESTBaseAuditedEntityV1.REVISIONS_NAME);
         }
         retValue.setExpand(expandOptions);
 
@@ -67,9 +68,9 @@ public class ImageV1Factory extends RESTEntityFactory<RESTImageV1, ImageFile, RE
         retValue.setDescription(entity.getDescription());
 
         // REVISIONS
-        if (revision == null && expand != null && expand.contains(RESTBaseEntityV1.REVISIONS_NAME)) {
+        if (revision == null && expand != null && expand.contains(RESTBaseAuditedEntityV1.REVISIONS_NAME)) {
             retValue.setRevisions(RESTEntityCollectionFactory.create(RESTImageCollectionV1.class, this, entity,
-                    EnversUtilities.getRevisions(entityManager, entity), RESTBaseEntityV1.REVISIONS_NAME, dataType, expand, baseUrl,
+                    EnversUtilities.getRevisions(entityManager, entity), RESTBaseAuditedEntityV1.REVISIONS_NAME, dataType, expand, baseUrl,
                     entityManager));
         }
 
@@ -102,7 +103,7 @@ public class ImageV1Factory extends RESTEntityFactory<RESTImageV1, ImageFile, RE
 
     @Override
     protected void doDeleteChildAction(final ImageFile entity, final RESTImageV1 dataObject, final RESTChangeAction<?> action) {
-        final RESTBaseEntityV1<?, ?, ?> restEntity = action.getRESTEntity();
+        final RESTBaseEntityV1<?> restEntity = action.getRESTEntity();
 
         if (restEntity instanceof RESTLanguageImageV1) {
             final LanguageImage dbEntity = entityManager.find(LanguageImage.class, restEntity.getId());
@@ -115,9 +116,9 @@ public class ImageV1Factory extends RESTEntityFactory<RESTImageV1, ImageFile, RE
     }
 
     @Override
-    protected AuditedEntity doCreateChildAction(final ImageFile entity, final RESTImageV1 dataObject, final RESTChangeAction<?> action) {
-        final RESTBaseEntityV1<?, ?, ?> restEntity = action.getRESTEntity();
-        final AuditedEntity dbEntity;
+    protected PressGangEntity doCreateChildAction(final ImageFile entity, final RESTImageV1 dataObject, final RESTChangeAction<?> action) {
+        final RESTBaseEntityV1<?> restEntity = action.getRESTEntity();
+        final PressGangEntity dbEntity;
 
         if (restEntity instanceof RESTLanguageImageV1) {
             dbEntity = action.getFactory().createDBEntity(restEntity);
@@ -130,10 +131,11 @@ public class ImageV1Factory extends RESTEntityFactory<RESTImageV1, ImageFile, RE
     }
 
     @Override
-    protected AuditedEntity getChildEntityForAction(final ImageFile entity, final RESTImageV1 dataObject, final RESTChangeAction<?> action) {
-        final RESTBaseEntityV1<?, ?, ?> restEntity = action.getRESTEntity();
+    protected PressGangEntity getChildEntityForAction(final ImageFile entity, final RESTImageV1 dataObject,
+            final RESTChangeAction<?> action) {
+        final RESTBaseEntityV1<?> restEntity = action.getRESTEntity();
 
-        final AuditedEntity dbEntity;
+        final PressGangEntity dbEntity;
         if (restEntity instanceof RESTLanguageImageV1) {
             dbEntity = RESTv1Utilities.findEntity(entityManager, entityCache, (RESTLanguageImageV1) restEntity, LanguageImage.class);
             if (dbEntity == null) {

@@ -25,14 +25,19 @@ import javax.annotation.Resource;
 import javax.enterprise.context.RequestScoped;
 import javax.inject.Inject;
 import javax.transaction.UserTransaction;
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Date;
+import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
+import org.jboss.pressgang.ccms.model.Locale;
 import org.jboss.pressgang.ccms.model.Process;
 import org.jboss.pressgang.ccms.model.ProcessType;
+import org.jboss.pressgang.ccms.model.TranslationServer;
 import org.jboss.pressgang.ccms.model.config.ApplicationConfig;
-import org.jboss.pressgang.ccms.model.config.ZanataServerConfig;
+import org.jboss.pressgang.ccms.model.contentspec.CSTranslationDetail;
 import org.jboss.pressgang.ccms.model.contentspec.ContentSpec;
 import org.jboss.pressgang.ccms.model.contentspec.ContentSpecToProcess;
 import org.jboss.pressgang.ccms.provider.exception.BadRequestException;
@@ -83,9 +88,8 @@ public class ProcessHelper {
     }
 
     public Process createZanataPushProcess(final String baseUrl, final Integer contentSpecId, final String processName,
-            final boolean contentSpecOnly, final boolean disableCopyTrans, final String zanataServerId, final boolean allowUnfrozenPush,
-            final String username, final String apikey) throws Failure {
-        final ZanataDetails zanataDetails = createZanataDetails(zanataServerId, username, apikey);
+            final boolean contentSpecOnly, final boolean disableCopyTrans, final boolean allowUnfrozenPush, final String username,
+            final String apikey) throws Failure {
 
         try {
             transaction.begin();
@@ -94,6 +98,9 @@ public class ProcessHelper {
             // Load the content spec
             final ContentSpec contentSpec = getContentSpec(contentSpecId);
             final Number revision = EnversUtilities.getLatestRevision(entityManager, contentSpec);
+
+            // Load the zanata details
+            final ZanataDetails zanataDetails = createZanataDetails(contentSpec.getTranslationDetails(), username, apikey);
 
             // Fix the process name if one wasn't specified
             final String fixedProcessName = "Content Spec Translation Push for " + contentSpec.getId() + "-" + revision.intValue() +
@@ -137,8 +144,7 @@ public class ProcessHelper {
     }
 
     public Process createZanataSyncProcess(final String baseUrl, final Integer contentSpecId, final String processName,
-            final Collection<LocaleId> localeList, final String zanataServerId, final String username, final String apikey) throws Failure {
-        final ZanataDetails zanataDetails = createZanataDetails(zanataServerId, username, apikey);
+            final String locales, final String username, final String apikey) throws Failure {
 
         try {
             transaction.begin();
@@ -146,6 +152,12 @@ public class ProcessHelper {
 
             // Load the content spec to make sure it exists
             final ContentSpec contentSpec = getContentSpec(contentSpecId);
+
+            // Get the translation details
+            final ZanataDetails zanataDetails = createZanataDetails(contentSpec.getTranslationDetails(), username, apikey);
+
+            // Convert and check the locales
+            final Collection<LocaleId> localeList = buildLocaleList(contentSpec.getTranslationDetails().getLocales(), locales);
 
             // Fix the process name if one wasn't specified
             final String fixedProcessName = "Content Spec Translation Sync for " + contentSpec.getId() +
@@ -188,22 +200,42 @@ public class ProcessHelper {
         }
     }
 
-    protected ZanataDetails createZanataDetails(final String zanataServerId, final String username, final String apikey) {
-        final Map<String, ZanataServerConfig> zanataServers = applicationConfig.getZanataServers();
-
-        if (zanataServers.containsKey(zanataServerId)) {
-            final ZanataServerConfig config = zanataServers.get(zanataServerId);
-            // Create the zanata details
-            final ZanataDetails zanataDetails = new ZanataDetails();
-            zanataDetails.setServer(config.getUrl());
-            zanataDetails.setProject(config.getProject());
-            zanataDetails.setVersion(config.getProjectVersion());
-            zanataDetails.setUsername(username);
-            zanataDetails.setToken(apikey);
-            return zanataDetails;
-        } else {
-            throw new BadRequestException("No Zanata Server exists with the specified id");
+    protected ZanataDetails createZanataDetails(final CSTranslationDetail translationDetails, final String username, final String apikey) {
+        if (translationDetails == null || translationDetails.getTranslationServer() == null) {
+            throw new BadRequestException("No Zanata Server has been configured for the Content Specification");
         }
+
+        // Create the zanata details
+        final TranslationServer translationServer = translationDetails.getTranslationServer();
+        final ZanataDetails zanataDetails = new ZanataDetails();
+        zanataDetails.setServer(translationServer.getUrl());
+        zanataDetails.setProject(translationDetails.getProject());
+        zanataDetails.setVersion(translationDetails.getProjectVersion());
+        zanataDetails.setUsername(username);
+        zanataDetails.setToken(apikey);
+        return zanataDetails;
+    }
+
+    protected List<LocaleId> buildLocaleList(final List<Locale> contentSpecLocales, final String locales) {
+        // Build the translation locale list
+        final Map<String, Locale> validLocales = new HashMap<String, Locale>();
+        for (final Locale locale : contentSpecLocales) {
+            validLocales.put(locale.getValue(), locale);
+        }
+
+        // Convert the locales
+        final String[] localeArray = locales == null ? new String[0] : locales.split(",");
+        final List<LocaleId> localeList = new ArrayList<LocaleId>();
+        for (final String locale : localeArray) {
+            if (validLocales.containsKey(locale)) {
+                final Locale localeEntity = validLocales.get(locale);
+                localeList.add(LocaleId.fromJavaName(localeEntity.getTranslationValue()));
+            } else {
+                throw new BadRequestException(locale + " is not configured as a translation locale for the Content Specification");
+            }
+        }
+
+        return localeList;
     }
 
     /**

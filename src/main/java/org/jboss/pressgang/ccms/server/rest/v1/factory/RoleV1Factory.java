@@ -27,13 +27,14 @@ import java.util.List;
 import org.jboss.pressgang.ccms.model.Role;
 import org.jboss.pressgang.ccms.model.RoleToRoleRelationship;
 import org.jboss.pressgang.ccms.model.User;
-import org.jboss.pressgang.ccms.model.base.AuditedEntity;
+import org.jboss.pressgang.ccms.model.base.PressGangEntity;
 import org.jboss.pressgang.ccms.rest.v1.collections.RESTRoleCollectionV1;
 import org.jboss.pressgang.ccms.rest.v1.collections.RESTUserCollectionV1;
 import org.jboss.pressgang.ccms.rest.v1.collections.items.RESTRoleCollectionItemV1;
 import org.jboss.pressgang.ccms.rest.v1.constants.RESTv1Constants;
 import org.jboss.pressgang.ccms.rest.v1.entities.RESTRoleV1;
 import org.jboss.pressgang.ccms.rest.v1.entities.RESTUserV1;
+import org.jboss.pressgang.ccms.rest.v1.entities.base.RESTBaseAuditedEntityV1;
 import org.jboss.pressgang.ccms.rest.v1.entities.base.RESTBaseEntityV1;
 import org.jboss.pressgang.ccms.rest.v1.expansion.ExpandDataTrunk;
 import org.jboss.pressgang.ccms.server.rest.v1.RESTChangeAction;
@@ -69,8 +70,8 @@ public class RoleV1Factory extends RESTEntityFactory<RESTRoleV1, Role, RESTRoleC
         expandOptions.add(RESTRoleV1.USERS_NAME);
         expandOptions.add(RESTRoleV1.CHILDROLES_NAME);
         expandOptions.add(RESTRoleV1.PARENTROLES_NAME);
-        expandOptions.add(RESTBaseEntityV1.LOG_DETAILS_NAME);
-        if (revision == null) expandOptions.add(RESTBaseEntityV1.REVISIONS_NAME);
+        expandOptions.add(RESTBaseAuditedEntityV1.LOG_DETAILS_NAME);
+        if (revision == null) expandOptions.add(RESTBaseAuditedEntityV1.REVISIONS_NAME);
 
         retValue.setExpand(expandOptions);
 
@@ -79,9 +80,9 @@ public class RoleV1Factory extends RESTEntityFactory<RESTRoleV1, Role, RESTRoleC
         retValue.setDescription(entity.getDescription());
 
         // REVISIONS
-        if (revision == null && expand != null && expand.contains(RESTBaseEntityV1.REVISIONS_NAME)) {
+        if (revision == null && expand != null && expand.contains(RESTBaseAuditedEntityV1.REVISIONS_NAME)) {
             retValue.setRevisions(RESTEntityCollectionFactory.create(RESTRoleCollectionV1.class, this, entity,
-                    EnversUtilities.getRevisions(entityManager, entity), RESTBaseEntityV1.REVISIONS_NAME, dataType, expand, baseUrl,
+                    EnversUtilities.getRevisions(entityManager, entity), RESTBaseAuditedEntityV1.REVISIONS_NAME, dataType, expand, baseUrl,
                     entityManager));
         }
 
@@ -140,7 +141,7 @@ public class RoleV1Factory extends RESTEntityFactory<RESTRoleV1, Role, RESTRoleC
 
     @Override
     protected void doDeleteChildAction(final Role entity, final RESTRoleV1 dataObject, final RESTChangeAction<?> action) {
-        final RESTBaseEntityV1<?, ?, ?> restEntity = action.getRESTEntity();
+        final RESTBaseEntityV1<?> restEntity = action.getRESTEntity();
 
         if (restEntity instanceof RESTUserV1) {
             final User dbEntity = entityManager.find(User.class, restEntity.getId());
@@ -168,9 +169,9 @@ public class RoleV1Factory extends RESTEntityFactory<RESTRoleV1, Role, RESTRoleC
     }
 
     @Override
-    protected AuditedEntity doCreateChildAction(final Role entity, final RESTRoleV1 dataObject, final RESTChangeAction<?> action) {
-        final RESTBaseEntityV1<?, ?, ?> restEntity = action.getRESTEntity();
-        final AuditedEntity dbEntity;
+    protected PressGangEntity doCreateChildAction(final Role entity, final RESTRoleV1 dataObject, final RESTChangeAction<?> action) {
+        final RESTBaseEntityV1<?> restEntity = action.getRESTEntity();
+        final PressGangEntity dbEntity;
 
         if (restEntity instanceof RESTUserV1) {
             dbEntity = RESTv1Utilities.findEntity(entityManager, entityCache, (RESTUserV1) restEntity, User.class);
@@ -202,10 +203,10 @@ public class RoleV1Factory extends RESTEntityFactory<RESTRoleV1, Role, RESTRoleC
     }
 
     @Override
-    protected AuditedEntity getChildEntityForAction(final Role entity, final RESTRoleV1 dataObject, final RESTChangeAction<?> action) {
-        final RESTBaseEntityV1<?, ?, ?> restEntity = action.getRESTEntity();
+    protected PressGangEntity getChildEntityForAction(final Role entity, final RESTRoleV1 dataObject, final RESTChangeAction<?> action) {
+        final RESTBaseEntityV1<?> restEntity = action.getRESTEntity();
 
-        final AuditedEntity dbEntity;
+        final PressGangEntity dbEntity;
         if (restEntity instanceof RESTUserV1) {
             dbEntity = RESTv1Utilities.findEntity(entityManager, entityCache, (RESTUserV1) restEntity, User.class);
             if (dbEntity == null) {

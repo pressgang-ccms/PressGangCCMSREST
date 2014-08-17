@@ -24,30 +24,34 @@ import static com.google.common.base.Strings.isNullOrEmpty;
 import javax.enterprise.context.ApplicationScoped;
 import javax.inject.Inject;
 import java.util.ArrayList;
-import java.util.Map;
+import java.util.List;
 
 import org.apache.commons.configuration.ConfigurationException;
 import org.hibernate.Session;
 import org.jboss.pressgang.ccms.model.Locale;
+import org.jboss.pressgang.ccms.model.TranslationServer;
 import org.jboss.pressgang.ccms.model.config.ApplicationConfig;
 import org.jboss.pressgang.ccms.model.config.EntitiesConfig;
-import org.jboss.pressgang.ccms.model.config.ZanataServerConfig;
 import org.jboss.pressgang.ccms.provider.exception.BadRequestException;
+import org.jboss.pressgang.ccms.rest.v1.collections.RESTLocaleCollectionV1;
 import org.jboss.pressgang.ccms.rest.v1.collections.RESTServerUndefinedEntityCollectionV1;
 import org.jboss.pressgang.ccms.rest.v1.collections.RESTServerUndefinedSettingCollectionV1;
-import org.jboss.pressgang.ccms.rest.v1.collections.RESTZanataServerSettingsCollectionV1;
+import org.jboss.pressgang.ccms.rest.v1.collections.RESTTranslationServerExtendedCollectionV1;
+import org.jboss.pressgang.ccms.rest.v1.collections.items.RESTLocaleCollectionItemV1;
 import org.jboss.pressgang.ccms.rest.v1.collections.items.RESTServerUndefinedEntityCollectionItemV1;
 import org.jboss.pressgang.ccms.rest.v1.collections.items.RESTServerUndefinedSettingCollectionItemV1;
-import org.jboss.pressgang.ccms.rest.v1.collections.items.RESTZanataServerSettingsCollectionItemV1;
+import org.jboss.pressgang.ccms.rest.v1.collections.items.RESTTranslationServerExtendedCollectionItemV1;
 import org.jboss.pressgang.ccms.rest.v1.elements.RESTServerEntitiesV1;
 import org.jboss.pressgang.ccms.rest.v1.elements.RESTServerSettingsV1;
 import org.jboss.pressgang.ccms.rest.v1.elements.RESTServerUndefinedEntityV1;
 import org.jboss.pressgang.ccms.rest.v1.elements.RESTServerUndefinedSettingV1;
-import org.jboss.pressgang.ccms.rest.v1.elements.RESTZanataServerSettingsV1;
-import org.jboss.pressgang.ccms.rest.v1.entities.RESTTopicV1;
+import org.jboss.pressgang.ccms.rest.v1.entities.RESTLocaleV1;
+import org.jboss.pressgang.ccms.rest.v1.entities.RESTTranslationServerExtendedV1;
 import org.jboss.pressgang.ccms.rest.v1.expansion.ExpandDataTrunk;
+import org.jboss.pressgang.ccms.server.rest.v1.CachedEntityLoader;
 import org.jboss.pressgang.ccms.server.rest.v1.factory.base.RESTElementCollectionFactory;
 import org.jboss.pressgang.ccms.server.rest.v1.factory.base.RESTElementFactory;
+import org.jboss.pressgang.ccms.server.rest.v1.factory.base.RESTEntityCollectionFactory;
 import org.jboss.pressgang.ccms.server.utils.EntityManagerWrapper;
 import org.jboss.resteasy.spi.InternalServerErrorException;
 
@@ -60,16 +64,23 @@ public class ServerSettingsV1Factory extends RESTElementFactory<RESTServerSettin
     @Inject
     private LocaleV1Factory localeFactory;
     @Inject
+    private TranslationServerExtendedV1Factory translationServerFactory;
+    @Inject
     private ServerUndefinedEntityV1Factory serverUndefinedEntityV1Factory;
     @Inject
     private ServerUndefinedSettingV1Factory serverUndefinedSettingV1Factory;
     @Inject
-    private ZanataServerSettingsV1Factory zanataServerSettingsV1Factory;
+    private CachedEntityLoader cachedEntityLoader;
 
     @Override
     public RESTServerSettingsV1 createRESTEntityFromObject(final ApplicationConfig applicationConfig, final String baseUrl,
             final String dataType, final ExpandDataTrunk expand) {
         final RESTServerSettingsV1 retValue = new RESTServerSettingsV1();
+
+        final List<String> expands = new ArrayList<String>();
+        expands.add(RESTServerSettingsV1.LOCALES_NAME);
+        expands.add(RESTServerSettingsV1.TRANSLATION_SERVERS_NAME);
+        retValue.setExpand(expands);
 
         // Settings
         retValue.setDocBuilderUrl(applicationConfig.getDocBuilderUrl());
@@ -83,7 +94,7 @@ public class ServerSettingsV1Factory extends RESTElementFactory<RESTServerSettin
         if (!isNullOrEmpty(applicationConfig.getDefaultLocale())) {
             final Session session = entityManager.unwrap(Session.class);
             final Locale locale = (Locale) session.bySimpleNaturalId(Locale.class).load(applicationConfig.getDefaultLocale());
-            final ExpandDataTrunk childExpand = expand == null ? null: expand.get(RESTTopicV1.LOCALE_NAME);
+            final ExpandDataTrunk childExpand = expand == null ? null: expand.get(RESTServerSettingsV1.DEFAULT_LOCALE_NAME);
             retValue.setDefaultLocale(localeFactory.createRESTEntityFromDBEntity(locale, baseUrl, dataType, childExpand));
         } else {
             retValue.setDefaultLocale(null);
@@ -174,12 +185,21 @@ public class ServerSettingsV1Factory extends RESTElementFactory<RESTServerSettin
                 RESTElementCollectionFactory.create(RESTServerUndefinedEntityCollectionV1.class, serverUndefinedEntityV1Factory,
                         entitiesConfig.getUndefinedEntities(), RESTServerEntitiesV1.UNDEFINED_ENTITIES_NAME, dataType, expand, baseUrl));
 
-        // Zanata Servers
-        final Map<String, ZanataServerConfig> zanataServers = applicationConfig.getZanataServers();
-        retValue.setZanataSettings(
-                RESTElementCollectionFactory.create(RESTZanataServerSettingsCollectionV1.class, zanataServerSettingsV1Factory,
-                        new ArrayList<ZanataServerConfig>(zanataServers.values()), RESTServerSettingsV1.ZANATA_SETTINGS_NAME, dataType,
-                        expand, baseUrl));
+        // Locales
+        if (expand != null && expand.contains(RESTServerSettingsV1.LOCALES_NAME)) {
+            final List<Locale> locales = cachedEntityLoader.getLocaleEntities();
+            retValue.setLocales(RESTEntityCollectionFactory.create(RESTLocaleCollectionV1.class, localeFactory, locales,
+                    RESTServerSettingsV1.LOCALES_NAME, dataType, expand, baseUrl, null, entityManager));
+        }
+
+        // Translation Servers
+        if (expand != null && expand.contains(RESTServerSettingsV1.TRANSLATION_SERVERS_NAME)) {
+            final List<TranslationServer> translationServers = cachedEntityLoader.getTranslationServerEntities();
+            retValue.setTranslationServers(
+                    RESTEntityCollectionFactory.create(RESTTranslationServerExtendedCollectionV1.class, translationServerFactory,
+                            translationServers, RESTServerSettingsV1.TRANSLATION_SERVERS_NAME, dataType, expand, baseUrl, null,
+                            entityManager));
+        }
 
         return retValue;
     }
@@ -221,29 +241,75 @@ public class ServerSettingsV1Factory extends RESTElementFactory<RESTServerSettin
             }
         }
 
-        // Zanata Settings
-        if (dataObject.hasParameterSet(RESTServerSettingsV1.ZANATA_SETTINGS_NAME)) {
-            final Map<String, ZanataServerConfig> zanataServers = applicationConfig.getZanataServers();
+        // Locales
+        if (dataObject.hasParameterSet(RESTServerSettingsV1.LOCALES_NAME)
+                && dataObject.getLocales() != null
+                && dataObject.getLocales().getItems() != null) {
+            dataObject.getLocales().removeInvalidChangeItemRequests();
 
-            final RESTZanataServerSettingsCollectionV1 zanataSettings = dataObject.getZanataSettings();
-            zanataSettings.removeInvalidChangeItemRequests();
-            for (final RESTZanataServerSettingsCollectionItemV1 restEntityItem : zanataSettings.getItems()) {
-                final RESTZanataServerSettingsV1 restEntity = restEntityItem.getItem();
+            boolean updated = false;
+            for (final RESTLocaleCollectionItemV1 item : dataObject.getLocales().getItems()) {
+                final RESTLocaleV1 restEntity = item.getItem();
 
-                final ZanataServerConfig zanataServerConfig;
-                if (zanataServers.containsKey(restEntity.getId())) {
-                    zanataServerConfig = zanataServers.get(restEntity.getId());
-                } else {
-                    zanataServerConfig = new ZanataServerConfig(restEntity.getId());
+                if (item.returnIsRemoveItem()) {
+                    throw new BadRequestException("Cannot delete Locales");
+                } else if (item.returnIsAddItem() || item.returnIsUpdateItem()) {
+                    final Locale dbEntity;
+                    if (item.returnIsAddItem()) {
+                        dbEntity = localeFactory.createDBEntity(restEntity);
+                    } else {
+                        dbEntity = entityManager.find(Locale.class, restEntity.getId());
+                    }
+
+                    if (dbEntity == null) {
+                        throw new BadRequestException("No Locale entity was found with the primary key " + restEntity.getId());
+                    }
+
+                    localeFactory.syncBaseDetails(dbEntity, restEntity);
+                    localeFactory.syncAdditionalDetails(dbEntity, restEntity);
+                    entityManager.persist(dbEntity);
+                    updated = true;
                 }
+            }
 
-                if (restEntityItem.returnIsRemoveItem()) {
-                    applicationConfig.removeZanataServer(restEntity.getId());
-                } else if (restEntityItem.returnIsAddItem() || restEntityItem.returnIsUpdateItem()) {
-                    zanataServerSettingsV1Factory.updateObjectFromRESTEntity(zanataServerConfig, restEntity);
+            if (updated) {
+                cachedEntityLoader.invalidateLocaleEntities();
+            }
+        }
 
-                    applicationConfig.addZanataServer(zanataServerConfig);
+        // Translation Settings
+        if (dataObject.hasParameterSet(RESTServerSettingsV1.TRANSLATION_SERVERS_NAME)
+                && dataObject.getTranslationServers() != null
+                && dataObject.getTranslationServers().getItems() != null) {
+            dataObject.getTranslationServers().removeInvalidChangeItemRequests();
+
+            boolean updated = false;
+            for (final RESTTranslationServerExtendedCollectionItemV1 item : dataObject.getTranslationServers().getItems()) {
+                final RESTTranslationServerExtendedV1 restEntity = item.getItem();
+
+                if (item.returnIsRemoveItem()) {
+                    throw new BadRequestException("Cannot delete Translation Servers");
+                } else if (item.returnIsAddItem() || item.returnIsUpdateItem()) {
+                    final TranslationServer dbEntity;
+                    if (item.returnIsAddItem()) {
+                        dbEntity = translationServerFactory.createDBEntity(restEntity);
+                    } else {
+                        dbEntity = entityManager.find(TranslationServer.class, restEntity.getId());
+                    }
+
+                    if (dbEntity == null) {
+                       throw new BadRequestException("No TranslationServer entity was found with the primary key " + restEntity.getId());
+                    }
+
+                    translationServerFactory.syncBaseDetails(dbEntity, restEntity);
+                    translationServerFactory.syncAdditionalDetails(dbEntity, restEntity);
+                    entityManager.persist(dbEntity);
+                    updated = true;
                 }
+            }
+
+            if (updated) {
+                cachedEntityLoader.invalidateTranslationServerEntities();
             }
         }
 
