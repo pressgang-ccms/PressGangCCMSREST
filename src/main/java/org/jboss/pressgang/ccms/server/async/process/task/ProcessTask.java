@@ -44,6 +44,9 @@ public abstract class ProcessTask<T> extends AbstractTask<T> {
 
     @Override
     public final void run() {
+        // Set the system property for jboss logging to use log4j for this thread
+        System.setProperty("org.jboss.logging.provider", "log4j");
+
         // Create the logger
         final String name = getClass().getPackage().getName() + "-" + getId();
         log = LoggerFactory.getLogger(name);
@@ -70,6 +73,9 @@ public abstract class ProcessTask<T> extends AbstractTask<T> {
             logs = writer.toString();
         }
         NDC.remove();
+
+        // Reset the system property for jboss logging
+        System.clearProperty("org.jboss.logging.provider");
     }
 
     public abstract void execute();
@@ -101,7 +107,7 @@ public abstract class ProcessTask<T> extends AbstractTask<T> {
         appender.addFilter(new Filter() {
             @Override
             public int decide(final LoggingEvent event) {
-                if (getId().equals(event.getNDC())) {
+                if (event.getNDC() != null && event.getNDC().startsWith(getId())) {
                     return Filter.ACCEPT;
                 } else {
                     return Filter.DENY;
