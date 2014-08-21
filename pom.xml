@@ -25,7 +25,7 @@
         <log4j.version>1.2.16</log4j.version>
         <slf4j.version>1.6.4</slf4j.version>
         <j2bugzilla.version>1.4</j2bugzilla.version>
-        <cors.filter.version>2.1.1</cors.filter.version>
+        <cors.filter.version>1.7.1</cors.filter.version>
         <htmlcleaner.version>2.2</htmlcleaner.version>
         <lucene.version>3.5.0</lucene.version>
         <jppf.version>4.0.0</jppf.version>
