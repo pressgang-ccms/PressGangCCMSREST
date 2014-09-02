@@ -34,7 +34,6 @@ import org.jboss.pressgang.ccms.contentspec.utils.TranslationUtilities;
 import org.jboss.pressgang.ccms.provider.ContentSpecProvider;
 import org.jboss.pressgang.ccms.provider.DataProviderFactory;
 import org.jboss.pressgang.ccms.provider.RESTProviderFactory;
-import org.jboss.pressgang.ccms.provider.RESTTopicProvider;
 import org.jboss.pressgang.ccms.provider.ServerSettingsProvider;
 import org.jboss.pressgang.ccms.provider.TopicProvider;
 import org.jboss.pressgang.ccms.provider.TranslatedContentSpecProvider;
@@ -86,8 +85,6 @@ public class ZanataPushTask extends ProcessRESTTask<Boolean> {
     @Override
     public void execute() {
         final RESTProviderFactory providerFactory = RESTProviderFactory.create(restServerUrl);
-        // Set topics to expand their translations by default
-        providerFactory.getProvider(RESTTopicProvider.class).setExpandTranslations(true);
         final ContentSpecProvider contentSpecProvider = providerFactory.getProvider(ContentSpecProvider.class);
         final ContentSpecWrapper contentSpecEntity = contentSpecProvider.getContentSpec(contentSpecId);
         final ServerSettingsWrapper serverSettings = providerFactory.getProvider(ServerSettingsProvider.class).getServerSettings();
@@ -252,7 +249,7 @@ public class ZanataPushTask extends ProcessRESTTask<Boolean> {
         }
 
         if (error) {
-            getLogger().error("Pushing content to zanata failed.");
+            getLogger().error("Pushing content to Zanata failed.");
         } else {
             getLogger().info("Content successfully pushed to Zanata for translation.");
         }
@@ -357,7 +354,9 @@ public class ZanataPushTask extends ProcessRESTTask<Boolean> {
                     getLogger().error("\tTopic ID {}, Revision {} failed to be created in Zanata.", topic.getId(), topic.getRevision());
                     error = true;
                 } else if (!translatedTopicExists) {
-                    createPressGangTranslatedTopic(providerFactory, topic, condition, customEntities, translatedCSNode);
+                    if (!createPressGangTranslatedTopic(providerFactory, topic, condition, customEntities, translatedCSNode)) {
+                        error = true;
+                    }
                 }
             } catch (UnauthorizedException e) {
                 getLogger().error("\tTopic ID {}, Revision {} failed to be created in Zanata due to having incorrect privileges.",
@@ -365,7 +364,9 @@ public class ZanataPushTask extends ProcessRESTTask<Boolean> {
                 error = true;
             }
         } else if (!translatedTopicExists) {
-            createPressGangTranslatedTopic(providerFactory, topic, condition, customEntities, translatedCSNode);
+            if (!createPressGangTranslatedTopic(providerFactory, topic, condition, customEntities, translatedCSNode)) {
+                error = true;
+            }
         } else {
             getLogger().warn("\tTopic ID {}, Revision {} already exists - Skipping.", topic.getId(), topic.getRevision());
         }
