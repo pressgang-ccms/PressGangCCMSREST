@@ -46,6 +46,7 @@ public class RESTv1VersionInterceptor implements PreProcessInterceptor, Accepted
     private static final boolean IS_RESTv1_SNAPSHOT = isSnapshotVersion(RESTv1_VERSION);
     private static final int MIN_CSP_MAJOR_VERSION = 1;
     private static final int MIN_CSP_MINOR_VERSION = 9;
+    private static final int MIN_CSP_Z_VERSION = 2;
 
     private static final String REST_VERSION_ERROR_MSG = "The REST Client Implementation is out of date, " +
             "and no longer supported. Please update the REST Client library.";
@@ -126,11 +127,13 @@ public class RESTv1VersionInterceptor implements PreProcessInterceptor, Accepted
 
         final Integer majorVersion = getMajorVersion(version);
         final Integer minorVersion = getMinorVersion(version);
+        final Integer zVersion = getZStreamVersion(version);
         final boolean isSnapshotVersion = isSnapshotVersion(version);
 
-        // Check that the version is 1.6.0 or higher (allowing for snapshots).
-        return (majorVersion != null && majorVersion >= MIN_CSP_MAJOR_VERSION) && (minorVersion == null || (minorVersion >= MIN_CSP_MINOR_VERSION &&
-                !isSnapshotVersion) || minorVersion > MIN_CSP_MINOR_VERSION);
+        // Check that the version is 1.9.2 or higher (allowing for snapshots).
+        return (majorVersion != null && majorVersion >= MIN_CSP_MAJOR_VERSION)
+                && (minorVersion == null || (minorVersion >= MIN_CSP_MINOR_VERSION && !isSnapshotVersion) || minorVersion > MIN_CSP_MINOR_VERSION)
+                && (zVersion == null || (zVersion >= MIN_CSP_Z_VERSION && !isSnapshotVersion) || zVersion > MIN_CSP_Z_VERSION);
     }
 
     protected static Integer getMajorVersion(final String version) {

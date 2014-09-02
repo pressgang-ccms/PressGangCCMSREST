@@ -301,7 +301,7 @@ public class TranslatedTopicV1Factory extends RESTEntityFactory<RESTTranslatedTo
             final CriteriaQuery<TranslatedTopicData> query = builder.createQuery(TranslatedTopicData.class);
             final Root<TranslatedTopicData> root = query.from(TranslatedTopicData.class);
 
-            final Predicate localeMatches = builder.equal(root.get("translationLocale"), entity.getLocale());
+            final Predicate localeMatches = builder.equal(root.get("locale").get("localeId"), entity.getLocale().getId());
             final Predicate topicIdMatches = builder.equal(root.get("translatedTopic").get("topicId"),
                     entity.getTranslatedTopic().getTopicId());
             query.where(builder.and(localeMatches, topicIdMatches));
