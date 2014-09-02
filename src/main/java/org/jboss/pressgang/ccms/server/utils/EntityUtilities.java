@@ -531,7 +531,7 @@ public class EntityUtilities extends org.jboss.pressgang.ccms.filter.utils.Entit
         String query = TranslatedTopicData.SELECT_ALL_QUERY;
         query += " where translatedTopicData.translatedTopic.topicRevision = (Select MAX(B.translatedTopic.topicRevision) FROM " +
                 "TranslatedTopicData B WHERE translatedTopicData.translatedTopic.topicId = B.translatedTopic.topicId AND B" +
-                ".translationLocale = translatedTopicData.translationLocale GROUP BY B.translatedTopic.topicId)";
+                ".locale.localeId = translatedTopicData.locale.localeId GROUP BY B.translatedTopic.topicId)";
         final List<TranslatedTopicData> results = entityManager.createQuery(query).getResultList();
         final List<Integer> retValue = new ArrayList<Integer>();
         for (final TranslatedTopicData topic : results)
@@ -544,7 +544,7 @@ public class EntityUtilities extends org.jboss.pressgang.ccms.filter.utils.Entit
         String query = TranslatedTopicData.SELECT_ALL_QUERY;
         query += " where translatedTopicData.translatedTopic.topicRevision = (Select MAX(B.translatedTopic.topicRevision) FROM " +
                 "TranslatedTopicData B WHERE translatedTopicData.translatedTopic.topicId = B.translatedTopic.topicId AND B" +
-                ".translationLocale = translatedTopicData.translationLocale AND B.translationPercentage >= 100 GROUP BY B.translatedTopic" +
+                ".locale.localeId = translatedTopicData.locale.localeId AND B.translationPercentage >= 100 GROUP BY B.translatedTopic" +
                 ".topicId)";
         final List<TranslatedTopicData> results = entityManager.createQuery(query).getResultList();
         final List<Integer> retValue = new ArrayList<Integer>();

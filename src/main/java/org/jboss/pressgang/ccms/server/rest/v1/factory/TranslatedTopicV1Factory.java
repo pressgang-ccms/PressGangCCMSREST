@@ -296,12 +296,13 @@ public class TranslatedTopicV1Factory extends RESTEntityFactory<RESTTranslatedTo
          * If the additional XML wasn't set and this is a new entity then try and get the previous topic's additional XML. We need to do
          * this otherwise every time one little change is made the additional xml will be lost and have to be re-added.
          */
-        if (!additionalXMLSet && entity.getId() == null && entity.getLocale() != null) {
+        if (!additionalXMLSet && entity.getId() == null && (entity.getLocale() != null || dataObject.getLocale() != null)) {
             final CriteriaBuilder builder = entityManager.getCriteriaBuilder();
             final CriteriaQuery<TranslatedTopicData> query = builder.createQuery(TranslatedTopicData.class);
             final Root<TranslatedTopicData> root = query.from(TranslatedTopicData.class);
 
-            final Predicate localeMatches = builder.equal(root.get("translationLocale"), entity.getLocale());
+            final Integer localeId = entity.getLocale() == null ? dataObject.getLocale().getId() : entity.getLocale().getId();
+            final Predicate localeMatches = builder.equal(root.get("locale").get("localeId"), localeId);
             final Predicate topicIdMatches = builder.equal(root.get("translatedTopic").get("topicId"),
                     entity.getTranslatedTopic().getTopicId());
             query.where(builder.and(localeMatches, topicIdMatches));
