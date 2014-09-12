@@ -28,7 +28,6 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
-import org.jboss.pressgang.ccms.provider.LocaleProvider;
 import org.jboss.pressgang.ccms.provider.RESTContentSpecProvider;
 import org.jboss.pressgang.ccms.provider.RESTProviderFactory;
 import org.jboss.pressgang.ccms.provider.RESTTopicProvider;
@@ -36,9 +35,7 @@ import org.jboss.pressgang.ccms.provider.ServerSettingsProvider;
 import org.jboss.pressgang.ccms.server.utils.ProcessUtilities;
 import org.jboss.pressgang.ccms.services.zanatasync.ZanataSyncService;
 import org.jboss.pressgang.ccms.utils.common.CollectionUtilities;
-import org.jboss.pressgang.ccms.wrapper.LocaleWrapper;
 import org.jboss.pressgang.ccms.wrapper.ServerSettingsWrapper;
-import org.jboss.pressgang.ccms.wrapper.collection.CollectionWrapper;
 import org.jboss.pressgang.ccms.zanata.ETagCache;
 import org.jboss.pressgang.ccms.zanata.ETagInterceptor;
 import org.jboss.pressgang.ccms.zanata.ZanataDetails;
@@ -113,18 +110,10 @@ public class ZanataSyncTask extends ProcessRESTTask<Boolean> {
             ResteasyProviderFactory.getInstance().getClientExecutionInterceptorRegistry().register(interceptor);
         }
 
-        // Load the available locales into the zanata interface
-        final List<LocaleId> localeIds = new ArrayList<LocaleId>();
-        final CollectionWrapper<LocaleWrapper> locales = providerFactory.getProvider(LocaleProvider.class).getLocales();
-        for (final LocaleWrapper locale : locales.getItems()) {
-            // Covert the language into a LocaleId
-            localeIds.add(LocaleId.fromJavaName(locale.getTranslationValue()));
-        }
-
         // Create the sync service and perform the sync
         try {
             final ZanataSyncService syncService = new ZanataSyncService(providerFactory, settings, 0.2, zanataDetails);
-            syncService.syncContentSpecs(ids, localeIds);
+            syncService.syncContentSpecs(ids, locales);
         } catch (UnauthorizedException e) {
             getLogger().error("Unauthorised Request! Please check your Zanata username and api key are correct.");
             setSuccessful(false);
