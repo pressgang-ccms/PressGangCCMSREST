@@ -3515,7 +3515,7 @@ public class RESTv1 extends BaseRESTv1 implements RESTBaseInterfaceV1, RESTInter
         final RESTTextContentSpecV1 textContentSpec = new RESTTextContentSpecV1();
         textContentSpec.explicitSetText(snapshot);
 
-        if (!entity.isTaggedWith(entitiesConfig.getFrozenTagId())) {
+        if (createNewSpec || !entity.isTaggedWith(entitiesConfig.getFrozenTagId())) {
             // Add the Frozen Tag
             final RESTTagCollectionV1 tags = new RESTTagCollectionV1();
             final RESTTagV1 tag = new RESTTagV1();
@@ -3611,7 +3611,7 @@ public class RESTv1 extends BaseRESTv1 implements RESTBaseInterfaceV1, RESTInter
         final RESTTextContentSpecV1 textContentSpec = new RESTTextContentSpecV1();
         textContentSpec.explicitSetText(snapshot);
 
-        if (!entity.isTaggedWith(entitiesConfig.getFrozenTagId())) {
+        if (createNewSpec || !entity.isTaggedWith(entitiesConfig.getFrozenTagId())) {
             // Add the Frozen Tag
             final RESTTagCollectionV1 tags = new RESTTagCollectionV1();
             final RESTTagV1 tag = new RESTTagV1();
