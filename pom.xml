@@ -306,7 +306,7 @@
         <dependency>
             <groupId>org.jboss.pressgang.ccms.services</groupId>
             <artifactId>zanata-sync-service</artifactId>
-            <version>${pressgang.ccms.version}</version>
+            <version>${pressgang.ccms.hotfix.version}</version>
         </dependency>
 
         <!-- WebDAV for JAX-RS -->
